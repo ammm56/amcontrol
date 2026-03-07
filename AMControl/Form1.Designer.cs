@@ -29,13 +29,74 @@ namespace AMControl
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
+            this.btn_gsna = new System.Windows.Forms.Button();
+            this.btn_loadcfg = new System.Windows.Forms.Button();
+            this.btn_conndb = new System.Windows.Forms.Button();
+            this.btn_querydb = new System.Windows.Forms.Button();
+            this.SuspendLayout();
+            // 
+            // btn_gsna
+            // 
+            this.btn_gsna.Location = new System.Drawing.Point(12, 12);
+            this.btn_gsna.Name = "btn_gsna";
+            this.btn_gsna.Size = new System.Drawing.Size(135, 50);
+            this.btn_gsna.TabIndex = 0;
+            this.btn_gsna.Text = "GSNA";
+            this.btn_gsna.UseVisualStyleBackColor = true;
+            this.btn_gsna.Click += new System.EventHandler(this.btn_gsna_Click);
+            // 
+            // btn_loadcfg
+            // 
+            this.btn_loadcfg.Location = new System.Drawing.Point(153, 12);
+            this.btn_loadcfg.Name = "btn_loadcfg";
+            this.btn_loadcfg.Size = new System.Drawing.Size(135, 50);
+            this.btn_loadcfg.TabIndex = 0;
+            this.btn_loadcfg.Text = "载入配置";
+            this.btn_loadcfg.UseVisualStyleBackColor = true;
+            this.btn_loadcfg.Click += new System.EventHandler(this.btn_loadcfg_Click);
+            // 
+            // btn_conndb
+            // 
+            this.btn_conndb.Location = new System.Drawing.Point(294, 12);
+            this.btn_conndb.Name = "btn_conndb";
+            this.btn_conndb.Size = new System.Drawing.Size(135, 50);
+            this.btn_conndb.TabIndex = 0;
+            this.btn_conndb.Text = "连接数据库sqlite";
+            this.btn_conndb.UseVisualStyleBackColor = true;
+            this.btn_conndb.Click += new System.EventHandler(this.btn_conndb_Click);
+            // 
+            // btn_querydb
+            // 
+            this.btn_querydb.Location = new System.Drawing.Point(294, 68);
+            this.btn_querydb.Name = "btn_querydb";
+            this.btn_querydb.Size = new System.Drawing.Size(135, 50);
+            this.btn_querydb.TabIndex = 0;
+            this.btn_querydb.Text = "读取记录";
+            this.btn_querydb.UseVisualStyleBackColor = true;
+            // 
+            // Form1
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.btn_querydb);
+            this.Controls.Add(this.btn_conndb);
+            this.Controls.Add(this.btn_loadcfg);
+            this.Controls.Add(this.btn_gsna);
+            this.Name = "Form1";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Form1";
+            this.Load += new System.EventHandler(this.Form1_Load);
+            this.ResumeLayout(false);
+
         }
 
         #endregion
+
+        private System.Windows.Forms.Button btn_gsna;
+        private System.Windows.Forms.Button btn_loadcfg;
+        private System.Windows.Forms.Button btn_conndb;
+        private System.Windows.Forms.Button btn_querydb;
     }
 }
 

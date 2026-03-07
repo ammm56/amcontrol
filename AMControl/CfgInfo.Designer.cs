@@ -1,0 +1,60 @@
+﻿namespace AMControl
+{
+    partial class CfgInfo
+    {
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            this.lab_cfginfo = new System.Windows.Forms.Label();
+            this.SuspendLayout();
+            // 
+            // lab_cfginfo
+            // 
+            this.lab_cfginfo.Location = new System.Drawing.Point(12, 9);
+            this.lab_cfginfo.Name = "lab_cfginfo";
+            this.lab_cfginfo.Size = new System.Drawing.Size(605, 432);
+            this.lab_cfginfo.TabIndex = 0;
+            this.lab_cfginfo.Text = "配置信息";
+            // 
+            // CfgInfo
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.lab_cfginfo);
+            this.Name = "CfgInfo";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Text = "CfgInfo";
+            this.Load += new System.EventHandler(this.CfgInfo_Load);
+            this.ResumeLayout(false);
+
+        }
+
+        #endregion
+
+        private System.Windows.Forms.Label lab_cfginfo;
+    }
+}

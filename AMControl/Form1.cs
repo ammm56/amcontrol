@@ -16,5 +16,27 @@ namespace AMControl
         {
             InitializeComponent();
         }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btn_gsna_Click(object sender, EventArgs e)
+        {
+            GSNA gsna = new GSNA();
+            gsna.Show();
+        }
+
+        private void btn_loadcfg_Click(object sender, EventArgs e)
+        {
+            CfgInfo cfginfo = new CfgInfo();
+            cfginfo.Show();
+        }
+
+        private void btn_conndb_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

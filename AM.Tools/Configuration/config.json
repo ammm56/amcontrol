@@ -1,0 +1,7 @@
+﻿{
+	"Sqlite": {
+		"Connection": "DataSource=W:\\db\\sqlite\\gsna",
+		"Enable": true
+	}
+
+}
