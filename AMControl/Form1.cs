@@ -1,4 +1,8 @@
-﻿using System;
+﻿using AM.DB.Tables;
+using AM.Model.Common;
+using AM.Model.Entity;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -34,8 +38,10 @@ namespace AMControl
             cfginfo.Show();
         }
 
-        private void btn_conndb_Click(object sender, EventArgs e)
+        private void btn_querydbaxistable_Click(object sender, EventArgs e)
         {
+            AxisTableInfo axisTableInfo = new AxisTableInfo();
+            axisTableInfo.Show();
 
         }
     }

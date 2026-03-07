@@ -31,8 +31,7 @@ namespace AMControl
         {
             this.btn_gsna = new System.Windows.Forms.Button();
             this.btn_loadcfg = new System.Windows.Forms.Button();
-            this.btn_conndb = new System.Windows.Forms.Button();
-            this.btn_querydb = new System.Windows.Forms.Button();
+            this.btn_querydbaxistable = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btn_gsna
@@ -55,32 +54,22 @@ namespace AMControl
             this.btn_loadcfg.UseVisualStyleBackColor = true;
             this.btn_loadcfg.Click += new System.EventHandler(this.btn_loadcfg_Click);
             // 
-            // btn_conndb
+            // btn_querydbaxistable
             // 
-            this.btn_conndb.Location = new System.Drawing.Point(294, 12);
-            this.btn_conndb.Name = "btn_conndb";
-            this.btn_conndb.Size = new System.Drawing.Size(135, 50);
-            this.btn_conndb.TabIndex = 0;
-            this.btn_conndb.Text = "连接数据库sqlite";
-            this.btn_conndb.UseVisualStyleBackColor = true;
-            this.btn_conndb.Click += new System.EventHandler(this.btn_conndb_Click);
-            // 
-            // btn_querydb
-            // 
-            this.btn_querydb.Location = new System.Drawing.Point(294, 68);
-            this.btn_querydb.Name = "btn_querydb";
-            this.btn_querydb.Size = new System.Drawing.Size(135, 50);
-            this.btn_querydb.TabIndex = 0;
-            this.btn_querydb.Text = "读取记录";
-            this.btn_querydb.UseVisualStyleBackColor = true;
+            this.btn_querydbaxistable.Location = new System.Drawing.Point(294, 12);
+            this.btn_querydbaxistable.Name = "btn_querydbaxistable";
+            this.btn_querydbaxistable.Size = new System.Drawing.Size(135, 50);
+            this.btn_querydbaxistable.TabIndex = 0;
+            this.btn_querydbaxistable.Text = "读取轴表记录";
+            this.btn_querydbaxistable.UseVisualStyleBackColor = true;
+            this.btn_querydbaxistable.Click += new System.EventHandler(this.btn_querydbaxistable_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.btn_querydb);
-            this.Controls.Add(this.btn_conndb);
+            this.Controls.Add(this.btn_querydbaxistable);
             this.Controls.Add(this.btn_loadcfg);
             this.Controls.Add(this.btn_gsna);
             this.Name = "Form1";
@@ -95,8 +84,7 @@ namespace AMControl
 
         private System.Windows.Forms.Button btn_gsna;
         private System.Windows.Forms.Button btn_loadcfg;
-        private System.Windows.Forms.Button btn_conndb;
-        private System.Windows.Forms.Button btn_querydb;
+        private System.Windows.Forms.Button btn_querydbaxistable;
     }
 }
 

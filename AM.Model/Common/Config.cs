@@ -57,6 +57,10 @@ namespace AM.Model.Common
         /// 异常信息打印
         /// </summary>
         public bool EXPrint { get; set; } = false;
+        /// <summary>
+        /// 是否启用数据库执行命令记录显示
+        /// </summary>
+        public bool DBLogExec { get; set; } = false;
     }
 
     /// <summary>
