@@ -7,6 +7,19 @@
         mc:Ignorable="d"
         Title="AxisTableInfo" Height="450" Width="800">
     <Grid>
+        <!--<TextBox Text="{Binding message}" 
+         TextWrapping="Wrap" 
+         AcceptsReturn="True" 
+         VerticalScrollBarVisibility="Auto"/>-->
         
+        <DataGrid x:Name="dg_axis" AutoGenerateColumns="False" ItemsSource="{Binding data}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="编号" Binding="{Binding Id}"/>
+                <DataGridTextColumn Header="轴号" Binding="{Binding Axis, StringFormat={}{0}轴}"/>
+                <DataGridTextColumn Header="参数名称" Binding="{Binding ParamName_Cn}"/>
+                <DataGridTextColumn Header="设定值" Binding="{Binding ParamSetVal}"/>
+                <DataGridTextColumn Header="描述" Binding="{Binding Description}" Width="*"/>
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
 </Window>
