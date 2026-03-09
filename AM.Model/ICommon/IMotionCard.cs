@@ -23,8 +23,12 @@ namespace AM.Model.ICommon
 
         // --- 连接与生命周期 ---
         bool Initialize(string configPath);
-        short Connect(short cardId);
-        short Disconnect(); // 通常内部记录 cardId
+        short Connect();
+        short Disconnect();
+
+        // --- 清除状态 ---
+        short ClearStatus(short logicalAxis);
+        short ClearAllAxisStatus();
 
         // --- 轴基础控制 ---
         short Enable(short logicalAxis, bool onORoff);

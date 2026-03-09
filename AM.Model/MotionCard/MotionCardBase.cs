@@ -17,12 +17,6 @@ namespace AM.Model.MotionCard
         // 存储每个轴的转换参数
         protected Dictionary<short, AxisParam> _axisParams = new Dictionary<short, AxisParam>();
 
-        public virtual short Connect(short cardId)
-        {
-            _cardId = cardId;
-            return 0;
-        }
-
         public void SetAxisParam(short axis, AxisParam param) => _axisParams[axis] = param;
 
         // --- 核心单位转换逻辑 ---
@@ -58,7 +52,10 @@ namespace AM.Model.MotionCard
         // 统一封装日志记录、重试机制或异常处理
         protected void Log(string message) => Console.WriteLine($"[{_cardId}] {message}");
         public abstract bool Initialize(string configPath);
+        public abstract short Connect();
         public abstract short Disconnect();
+        public abstract short ClearStatus(short logicalAxis);
+        public abstract short ClearAllAxisStatus();
         public abstract short Enable(short axis, bool onORoff);
         public abstract short Stop(short axis, bool emergency = false);
         public abstract Task<short> HomeAsync(short axis);
@@ -79,5 +76,6 @@ namespace AM.Model.MotionCard
         public abstract double GetEncoderPosition(short axis);
         public abstract double GetPositionMm(short axis);
         public abstract bool IsMoving(short axis);
+        public abstract void LoadAxisConfig(List<AxisConfig> configs);
     }
 }

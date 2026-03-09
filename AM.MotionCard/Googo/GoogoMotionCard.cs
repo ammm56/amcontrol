@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using GTN;
 using AM.Model.MotionCard;
+using AM.Tools;
 
 namespace AM.MotionCard.Googo
 {
@@ -21,7 +22,7 @@ namespace AM.MotionCard.Googo
         /// <summary>
         /// 将通用的配置同步到具体厂家类中
         /// </summary>
-        public void LoadAxisConfig(List<AxisConfig> configs)
+        public override void LoadAxisConfig(List<AxisConfig> configs)
         {
             // 转换成字典，方便 Move(logicalId) 时快速找到 PhysicalCore 和 PhysicalAxis
             _axisMap = configs.ToDictionary(x => x.LogicalId);
@@ -80,13 +81,80 @@ namespace AM.MotionCard.Googo
             return 0;
         }
 
-        // 实现基类的抽象方法（多卡支持：_cardId 在基类 Connect 时已赋值）
-        public override short Connect(short cardId)
+        /// <summary>
+        /// 连接打开控制卡
+        /// 实现基类的抽象方法（多卡支持）
+        /// </summary>
+        /// <returns></returns>
+        public override short Connect()
         {
-            _cardId = cardId;
-            short res = mc.GT_Open(_cardId, 0); // 0 为正常模式
-            if (res != 0) HandleError(res, "固高卡打开失败");
-            return res;
+            _cardId = ConfigSingle.Instance.Config.MotionCardConfig.CardId;
+            short rtn = mc.GTN_Open(ConfigSingle.Instance.Config.MotionCardConfig.CardId, ConfigSingle.Instance.Config.MotionCardConfig.ModeParam);
+            if (rtn != 0)
+            {
+                HandleError(rtn, $"GTN_Open 通道 {_cardId} 失败。请检查驱动安装或插槽。");
+                return rtn;
+            }
+
+            // 按配置数量复位内核
+            for (short core = 1; core <= ConfigSingle.Instance.Config.MotionCardConfig.CoreNumber; core++)
+            {
+                short resetRtn = mc.GTN_Reset(core);
+                if (resetRtn != 0)
+                {
+                    // 核心逻辑：任何一个内核失败，都是致命错误
+                    HandleError(resetRtn, $"GTN_Reset 第 {core} 核复位失败 (总配置 {ConfigSingle.Instance.Config.MotionCardConfig.CoreNumber} 核)");
+
+                    // 失败必须关闭已打开的通道，否则下次无法再次 Open
+                    mc.GTN_Close();
+                    return resetRtn;
+                }
+            }
+
+            return rtn;
+        }
+        /// <summary>
+        /// 清除指定核轴状态
+        /// </summary>
+        /// <param name="logicalAxis"></param>
+        /// <returns></returns>
+        public override short ClearStatus(short logicalAxis)
+        {
+            var cfg = GetLogicalAxisCfg(logicalAxis);
+            if (cfg == null) return -1; // 找不到配置直接退出
+
+            // // 参数 1：内核，参数 2：起始轴，参数 3：清除轴的数量（这里是 1）
+            short rtn = mc.GTN_ClrSts(cfg.PhysicalCore,cfg.PhysicalAxis,1);
+            if (rtn != 0)
+            {
+                HandleError(rtn, $"GTN_ClrSts 第 {cfg.PhysicalCore} 核 {cfg.PhysicalAxis} 轴 清除状态失败。");
+                return rtn;
+            }
+
+            return rtn;
+        }
+        /// <summary>
+        /// 清除指定核心所有轴状态
+        /// </summary>
+        /// <returns></returns>
+        public override short ClearAllAxisStatus()
+        {
+            short lastRtn = 0;
+
+            // 遍历配置文件中定义的所有内核
+            for (short core = 1; core <= ConfigSingle.Instance.Config.MotionCardConfig.CoreNumber; core++)
+            {
+                // 固高的习惯通常是从 1 轴开始，连续清除 N 个轴
+                // 第 3 个参数应为该核支持的最大轴数（通常是 8 或 16），或者配置的轴数
+                short rtn = mc.GTN_ClrSts(core, 1, ConfigSingle.Instance.Config.MotionCardConfig.AxisCountNumber);
+
+                if (rtn != 0)
+                {
+                    HandleError(rtn, $"GTN_ClrSts 第 {core} 核清除全轴状态失败。");
+                    lastRtn = rtn;
+                }
+            }
+            return lastRtn;
         }
 
         public override short Disconnect()
@@ -209,5 +277,6 @@ namespace AM.MotionCard.Googo
         {
             throw new NotImplementedException();
         }
+
     }
 }

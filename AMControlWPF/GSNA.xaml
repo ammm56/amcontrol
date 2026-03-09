@@ -7,15 +7,15 @@
         mc:Ignorable="d"
         Title="GSNA" Height="600" Width="1280">
     <Grid x:Name="grid_a">
-        <Button x:Name="btn_init" Content="初始化" HorizontalAlignment="Left" Margin="21,19,0,0" Height="55" Width="135" FontSize="22" VerticalAlignment="Top"/>
-        <Button x:Name="btn_clearstatus" Content="清除状态" HorizontalAlignment="Left" Margin="21,89,0,0" Height="55" Width="135" FontSize="22" VerticalAlignment="Top" Click="btn_clearstatus_Click"/>
-        <Button x:Name="btn_enable" Content="使能" HorizontalAlignment="Left" Margin="21,159,0,0" Height="55" Width="135" FontSize="22" VerticalAlignment="Top" Click="btn_enable_Click"/>
-        <Button x:Name="btn_pointclearzero" Content="位置清零" HorizontalAlignment="Left" Margin="21,229,0,0" Height="55" Width="135" FontSize="22" VerticalAlignment="Top" Click="btn_pointclearzero_Click"/>
-        <Button x:Name="btn_runstaart" Content="开始运动" HorizontalAlignment="Left" Margin="21,299,0,0" Height="55" Width="135" FontSize="22" VerticalAlignment="Top" Click="btn_runstaart_Click"/>
-        <Button x:Name="btn_runstop" Content="停止运动" HorizontalAlignment="Left" Margin="21,369,0,0" Height="55" Width="135" FontSize="22" VerticalAlignment="Top" Click="btn_runstop_Click"/>
-        <Button Content="Button" HorizontalAlignment="Left" Margin="21,449,0,0" Height="55" Width="135" FontSize="22" VerticalAlignment="Top"/>
-        <Button Content="Button" HorizontalAlignment="Left" Margin="21,519,0,0" Height="55" Width="135" FontSize="22" VerticalAlignment="Top"/>
-        <TextBlock x:Name="tb_statusinfo"  Text="状态信息" HorizontalAlignment="Left" Margin="935,0,0,0" Width="360" FontSize="18" />
+        <Button x:Name="btn_init" Content="1初始化" HorizontalAlignment="Left" Margin="21,19,0,0" Height="55" Width="135" FontSize="22" VerticalAlignment="Top"/>
+        <Button x:Name="btn_connect" Content="2连接卡" HorizontalAlignment="Left" Margin="173,19,0,0" Height="55" Width="135" FontSize="22" VerticalAlignment="Top" Click="btn_connect_Click"/>
+        <Button x:Name="btn_clearstatus" Content="3清除状态" HorizontalAlignment="Left" Margin="21,89,0,0" Height="55" Width="135" FontSize="22" VerticalAlignment="Top" Click="btn_clearstatus_Click"/>
+        <Button x:Name="btn_enable" Content="4使能" HorizontalAlignment="Left" Margin="21,159,0,0" Height="55" Width="135" FontSize="22" VerticalAlignment="Top" Click="btn_enable_Click"/>
+        <Button x:Name="btn_pointclearzero" Content="5位置清零" HorizontalAlignment="Left" Margin="21,229,0,0" Height="55" Width="135" FontSize="22" VerticalAlignment="Top" Click="btn_pointclearzero_Click"/>
+        <Button x:Name="btn_runstaart" Content="6开始运动" HorizontalAlignment="Left" Margin="21,299,0,0" Height="55" Width="135" FontSize="22" VerticalAlignment="Top" Click="btn_runstaart_Click"/>
+        <Button x:Name="btn_runstop" Content="7停止运动" HorizontalAlignment="Left" Margin="21,369,0,0" Height="55" Width="135" FontSize="22" VerticalAlignment="Top" Click="btn_runstop_Click"/>
+        <Button Content="Button" HorizontalAlignment="Left" Margin="173,89,0,0" Height="55" Width="135" FontSize="22" VerticalAlignment="Top"/>
+        <TextBlock x:Name="tb_statusinfo"  Text="状态信息" FontSize="18" VerticalAlignment="Top" Height="161" Margin="0,430,0,0" />
 
 
     </Grid>

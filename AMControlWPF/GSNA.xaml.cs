@@ -44,6 +44,11 @@ namespace AMControlWPF
             this.btn_init.Click += btn_init_Click;
         }
 
+        /// <summary>
+        /// 初始化 实例化卡和设置配置参数
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private async void btn_init_Click(object sender, RoutedEventArgs e)
         {
             // 0. 检查是否已初始化
@@ -61,14 +66,13 @@ namespace AMControlWPF
                 {
                     // 1. 根据配置创建具体的卡 (实现层)
                     Card = new GoogoMotionCard();
-                    // 2. 串联多卡与事件 (串联逻辑)
-                    Card.Connect(1);
+                    
 
                     // 把配置给具体的卡实例
-                    Card.LoadAxisConfig(ConfigSingle.Instance.Config.AxisConfigs);
+                    Card.LoadAxisConfig(ConfigSingle.Instance.Config.MotionCardConfig.AxisConfigs);
 
                     // 绑定轴参数 (单位转换)
-                    foreach (var axisCfg in ConfigSingle.Instance.Config.AxisConfigs)
+                    foreach (var axisCfg in ConfigSingle.Instance.Config.MotionCardConfig.AxisConfigs)
                     {
                         Card.SetAxisParam(axisCfg.AxisId, new AxisParam
                         {
@@ -90,7 +94,7 @@ namespace AMControlWPF
 
                 });
 
-                MessageBox.Show("控制卡初始化成功");
+                MessageBox.Show("控制卡初始化参数配置成功");
             }
             catch (Exception ex)
             {
@@ -102,9 +106,15 @@ namespace AMControlWPF
             }
         }
 
+        private void btn_connect_Click(object sender, RoutedEventArgs e)
+        {
+            // 串联多卡与事件 (串联逻辑)
+            Card.Connect();
+        }
+
         private void btn_clearstatus_Click(object sender, RoutedEventArgs e)
         {
-            
+            Card.ClearAllAxisStatus();
         }
 
         private void btn_enable_Click(object sender, RoutedEventArgs e)
@@ -127,5 +137,6 @@ namespace AMControlWPF
 
         }
 
+        
     }
 }

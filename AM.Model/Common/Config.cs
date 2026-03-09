@@ -32,7 +32,7 @@ namespace AM.Model.Common
         /// </summary>
         public DB Sqlite { get => _sqlite; set => SetProperty(ref _sqlite, value); }
 
-        public List<AxisConfig> AxisConfigs {  get; set; } = new List<AxisConfig>();
+        public MotionCardConfig MotionCardConfig { get; set; } = new MotionCardConfig();
 
         /// <summary>
         /// 运行时配置
