@@ -6,6 +6,7 @@ using AM.Tools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -13,6 +14,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
@@ -42,6 +44,8 @@ namespace AMControlWPF
             //};
 
             this.btn_init.Click += btn_init_Click;
+
+            tb_statusinfo.Text = string.Empty;
         }
 
         /// <summary>
@@ -86,7 +90,8 @@ namespace AMControlWPF
                         Console.WriteLine($"[报警] 卡{id}: {msg}");
                         Application.Current.Dispatcher.Invoke(() => {
                             // 这里弹窗，或者绑定到一个 UI 上的“报警列表”
-                            tb_statusinfo.Text = $"报警: {msg}";
+                            //tb_statusinfo.Text += $"报警: {msg} \n";
+                            tb_statusinfo.AppendText($"[{DateTime.Now:T}] {msg}\r\n");
                         });
                     };
                     // 4. 赋值到全局单例，统一访问
@@ -94,7 +99,7 @@ namespace AMControlWPF
 
                 });
 
-                MessageBox.Show("控制卡初始化参数配置成功");
+                tb_statusinfo.AppendText($"[{DateTime.Now:T}] 控制卡初始化参数配置成功\r\n");
             }
             catch (Exception ex)
             {
@@ -137,6 +142,15 @@ namespace AMControlWPF
 
         }
 
-        
+        private void tb_statusinfo_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            // 只要内容变动，自动聚焦并滚动到末尾
+            tb_statusinfo.ScrollToEnd();
+        }
+
+        private void btn_clearoutinfo_Click(object sender, RoutedEventArgs e)
+        {
+            tb_statusinfo.Text = string.Empty;
+        }
     }
 }

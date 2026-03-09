@@ -15,7 +15,8 @@
         <Button x:Name="btn_runstaart" Content="6开始运动" HorizontalAlignment="Left" Margin="21,299,0,0" Height="55" Width="135" FontSize="22" VerticalAlignment="Top" Click="btn_runstaart_Click"/>
         <Button x:Name="btn_runstop" Content="7停止运动" HorizontalAlignment="Left" Margin="21,369,0,0" Height="55" Width="135" FontSize="22" VerticalAlignment="Top" Click="btn_runstop_Click"/>
         <Button Content="Button" HorizontalAlignment="Left" Margin="173,89,0,0" Height="55" Width="135" FontSize="22" VerticalAlignment="Top"/>
-        <TextBlock x:Name="tb_statusinfo"  Text="状态信息" FontSize="18" VerticalAlignment="Top" Height="161" Margin="0,430,0,0" />
+        <Button x:Name="btn_clearoutinfo" Content="清除输出信息" HorizontalAlignment="Left" Margin="173,369,0,0" Height="55" Width="135" FontSize="22" VerticalAlignment="Top" Click="btn_clearoutinfo_Click"/>
+        <TextBox x:Name="tb_statusinfo"  Text="状态信息" FontSize="18" VerticalAlignment="Top" Height="161" Margin="0,430,0,0" TextChanged="tb_statusinfo_TextChanged" />
 
 
     </Grid>
