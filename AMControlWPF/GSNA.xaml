@@ -18,6 +18,9 @@
         <Button x:Name="btn_clearoutinfo" Content="清除输出信息" HorizontalAlignment="Left" Margin="173,369,0,0" Height="55" Width="135" FontSize="22" VerticalAlignment="Top" Click="btn_clearoutinfo_Click"/>
         <Button x:Name="btn_stopall" Content="急停" HorizontalAlignment="Left" Margin="325,369,0,0" Height="55" Width="135" FontSize="22" VerticalAlignment="Top" Click="btn_stopall_Click" />
 
+        <Button x:Name="btn_jogmoveZmm" Content="Jog正向移动(mm)" HorizontalAlignment="Left" Margin="531,299,0,0" Height="55" Width="192" FontSize="22" VerticalAlignment="Top" MouseUp="btn_jogmoveZmm_MouseUp" MouseDown="btn_jogmoveZmm_MouseDown" />
+        <Button x:Name="btn_jogmoveFmm" Content="Jog负向移动(mm)" HorizontalAlignment="Left" Margin="325,299,0,0" Height="55" Width="192" FontSize="22" VerticalAlignment="Top" MouseUp="btn_jogmoveZmm_MouseUp" MouseDown="btn_jogmoveFmm_MouseDown" />
+
         <TextBox x:Name="tb_statusinfo"  Text="状态信息" FontSize="18" VerticalAlignment="Top" Height="161" Margin="0,430,0,0" TextChanged="tb_statusinfo_TextChanged" />
 
 

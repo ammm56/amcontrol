@@ -68,6 +68,8 @@ namespace AM.Model.ICommon
         // 业务层使用 mm 单位的方法
         short MoveRelativeMm(short logicalAxis, double distanceMm, double velMm);
         short MoveAbsoluteMm(short logicalAxis, double positionMm, double velMm);
+        short JogMoveMm(short logicalAxis, bool direction, double velMm);
+        short JogStop(short logicalAxis);
 
         // --- IO 操作 ---
         short SetDO(short bit, bool status);

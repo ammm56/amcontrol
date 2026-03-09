@@ -166,5 +166,20 @@ namespace AMControlWPF
         {
             Card?.StopAll(true);
         }
+
+        private void btn_jogmoveZmm_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            Card?.JogStop(1);
+        }
+
+        private void btn_jogmoveZmm_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            Card?.JogMoveMm(1, true, 10);
+        }
+
+        private void btn_jogmoveFmm_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            Card?.JogMoveMm(1, false, 10);
+        }
     }
 }

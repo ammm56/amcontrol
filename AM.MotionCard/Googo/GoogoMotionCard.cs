@@ -422,6 +422,47 @@ namespace AM.MotionCard.Googo
             return res;
         }
 
+        public override short JogMoveMm(short logicalAxis, bool direction, double velMm)
+        {
+            var cfg = GetLogicalAxisCfg(logicalAxis);
+            if (cfg == null) return -1;
+
+            short core = cfg.PhysicalCore;
+            short axis = cfg.PhysicalAxis;
+            double K = cfg.K;
+
+            // 1. 设置为 Jog 模式
+            short rtn = mc.GTN_PrfJog(core, axis);
+            if (rtn != 0) return HandleError(rtn, $"轴{logicalAxis} 进入Jog模式失败");
+
+            // 2. 设置 Jog 参数 (Acc/Dec)
+            mc.TJogPrm jogPrm;
+            rtn = mc.GTN_GetJogPrm(core, axis, out jogPrm);
+            if (rtn == 0)
+            {
+                // 这里的单位转换逻辑与 Trap 运动一致
+                jogPrm.acc = (cfg.Acc * K) / 1000000.0;
+                jogPrm.dec = (cfg.Dec * K) / 1000000.0;
+                rtn = mc.GTN_SetJogPrm(core, axis, ref jogPrm);
+            }
+
+            // 3. 设置目标速度 (带方向)
+            double speed = direction ? (velMm * K) / 1000.0 : -(velMm * K) / 1000.0;
+            rtn = mc.GTN_SetVel(core, axis, speed);
+
+            // 4. 触发运动
+            rtn = mc.GTN_Update(core, 1 << (axis - 1));
+
+            if (rtn != 0) HandleError(rtn, $"轴{logicalAxis} 启动Jog失败");
+            return rtn;
+        }
+
+        public override short JogStop(short logicalAxis)
+        {
+            // Jog 停止通常调用通用的平滑停止即可
+            return this.Stop(logicalAxis, isEmergency: false);
+        }
+
         public override short SetDO(short bit, bool status)
         {
             throw new NotImplementedException();
