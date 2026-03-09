@@ -161,5 +161,10 @@ namespace AMControlWPF
                 Card.ConfigAxisHardware(axisCfg);
             }
         }
+
+        private void btn_stopall_Click(object sender, RoutedEventArgs e)
+        {
+            Card?.StopAll(true);
+        }
     }
 }

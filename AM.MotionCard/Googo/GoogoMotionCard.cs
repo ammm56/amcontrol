@@ -281,9 +281,47 @@ namespace AM.MotionCard.Googo
             return res;
         }
 
-        public override short Stop(short logicalAxis, bool emergency = false)
+        /// <summary>
+        /// 停止单个逻辑轴
+        /// </summary>
+        public override short Stop(short logicalAxis, bool isEmergency = false)
         {
-            throw new NotImplementedException();
+            var cfg = GetLogicalAxisCfg(logicalAxis);
+            if (cfg == null) return -1;
+
+            // 固高参数2(mask)：1 << (axis-1) 对应具体轴
+            // 固高参数3(option)：0为平滑停止，1为急停
+            short option = isEmergency ? (short)1 : (short)0;
+            int mask = 1 << (cfg.PhysicalAxis - 1);
+
+            short rtn = mc.GTN_Stop(cfg.PhysicalCore, mask, option);
+
+            if (rtn != 0) HandleError(rtn, $"轴 {logicalAxis} 停止失败");
+            return rtn;
+        }
+        /// <summary>
+        /// 停止所有配置的内核的所有轴
+        /// </summary>
+        public override short StopAll(bool isEmergency = false)
+        {
+            var mConfig = ConfigSingle.Instance.Config.MotionCardConfig;
+            short option = isEmergency ? (short)1 : (short)0;
+            short lastRtn = 0;
+
+            // 遍历所有物理内核
+            for (short core = 1; core <= mConfig.CoreNumber; core++)
+            {
+                // 0xff 表示停止该核前8个轴，0xffff 表示前16个轴
+                // 稳妥起见，可以使用 0xffffffff (全1) 停止所有可能存在的轴
+                short rtn = mc.GTN_Stop(core, -1, option);
+
+                if (rtn != 0)
+                {
+                    HandleError(rtn, $"第 {core} 核全轴停止失败");
+                    lastRtn = rtn;
+                }
+            }
+            return lastRtn;
         }
 
         public override Task<short> HomeAsync(short logicalAxis)

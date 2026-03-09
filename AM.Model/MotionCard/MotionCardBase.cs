@@ -81,5 +81,6 @@ namespace AM.Model.MotionCard
         public abstract short SetZeroPos(short logicalAxis);
         public abstract short SetAllZeroPos();
         public abstract short ConfigAxisHardware(AxisConfig cfg);
+        public abstract short StopAll(bool isEmergency = false);
     }
 }

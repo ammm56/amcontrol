@@ -43,7 +43,18 @@ namespace AM.Model.ICommon
 
         // --- 轴基础控制 ---
         short Enable(short logicalAxis, bool onORoff);
-        short Stop(short logicalAxis, bool emergency = false); // 增加急停选项
+        /// <summary>
+        /// 停止指定逻辑轴
+        /// 急停：直接物理抱死或停止脉冲输出，通常用于安全光幕触发或紧急红色按钮。
+        /// 平滑停止：遵循在 AxisConfig 中设置的 Dec（减速度）。
+        /// </summary>
+        /// <param name="logicalAxis">逻辑轴号</param>
+        /// <param name="isEmergency">是否急停(true:立即急停, false:立刻平停)</param>
+        short Stop(short logicalAxis, bool isEmergency = false);
+        /// <summary>
+        /// 停止控制卡上的所有轴
+        /// </summary>
+        short StopAll(bool isEmergency = false);
         Task<short> HomeAsync(short logicalAxis); // 异步回零
         short Home(short logicalAxis);
 
