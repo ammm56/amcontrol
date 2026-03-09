@@ -52,18 +52,21 @@
   <ItemGroup>
     <Compile Include="Class1.cs" />
     <Compile Include="Common\Config.cs" />
+    <Compile Include="MotionCard\AxisConfig.cs" />
+    <Compile Include="MotionCard\MotionCardBase.cs" />
     <Compile Include="Common\ObservableObject.cs" />
     <Compile Include="Common\Response.cs" />
     <Compile Include="Common\SettingArgsConfig.cs" />
     <Compile Include="DB\MDBaseSet.cs" />
     <Compile Include="DB\MDBInstanceEntityModelArg.cs" />
     <Compile Include="Entity\ConfigAxisArg.cs" />
+    <Compile Include="ICommon\IMotionCard.cs" />
     <Compile Include="Model\MOSInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Structs\AxisParam.cs" />
+    <Compile Include="Structs\AxisStatus.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="ICommon\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Content Include="gts.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

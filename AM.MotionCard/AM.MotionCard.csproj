@@ -43,11 +43,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Class1.cs" />
+    <Compile Include="Googo\GoogoMotionCard.cs" />
     <Compile Include="Googo\gts.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Leisai\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AM.Model\AM.Model.csproj">
+      <Project>{22cf4793-f392-4421-98fd-0f2e07200689}</Project>
+      <Name>AM.Model</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

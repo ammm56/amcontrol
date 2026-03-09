@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using AM.Model.MotionCard;
 
 namespace AM.Model.Common
 {
@@ -30,6 +31,8 @@ namespace AM.Model.Common
         /// // 一行写法：自动判断值是否变化、自动赋值、自动发通知
         /// </summary>
         public DB Sqlite { get => _sqlite; set => SetProperty(ref _sqlite, value); }
+
+        public List<AxisConfig> AxisConfigs {  get; set; } = new List<AxisConfig>();
 
         /// <summary>
         /// 运行时配置

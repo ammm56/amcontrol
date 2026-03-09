@@ -1,9 +1,10 @@
-﻿using System;
+﻿using AM.Model.Common;
+using AM.Model.ICommon;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AM.Model.Common;
 
 namespace AM.Tools
 {
@@ -31,5 +32,10 @@ namespace AM.Tools
             }
         }
         public Config Config;
+
+        /// <summary>
+        /// 主程序具体控制卡实例初始化完成后，挂载到这个单例中，实现公共访问
+        /// </summary>
+        public IMotionCard Card { get; set; }
     }
 }
