@@ -64,5 +64,13 @@
   <ItemGroup>
     <Folder Include="ICommon\" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="gts.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="gt_rn.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
