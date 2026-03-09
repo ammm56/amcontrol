@@ -31,8 +31,44 @@ namespace AM.Model.MotionCard
         public short AxisCountNumber { get; set; } = 4;
 
         /// <summary>
+        /// 使用扩展模块
+        /// </summary>
+        public bool UseExtModule {  get; set; } = false;
+
+        /// <summary>
         /// 该卡下的所有轴配置
         /// </summary>
-        public List<AxisConfig> AxisConfigs { get; set; } = new List<AxisConfig>();
+        public List<AxisConfig> AxisConfigs { get; set; } = new List<AxisConfig>
+        {
+
+            new AxisConfig
+            {
+                AxisId = 1,
+                Name = "1轴",
+                LogicalId = 1,
+                PhysicalCore = 1,
+                PhysicalAxis = 1,
+
+                AlarmEnable = true,
+                AlarmInvert = false,
+
+                PulseMode = 0,
+
+                EncoderExternal = false,
+                EncoderInvert = false,
+
+                LimitHomeInvert = false,
+
+                LimitMode = -1,
+
+                Lead = 5.0,
+                PulsePerRev = 10000,
+
+                Acc = 100,
+                Dec = 100,
+                SmoothTime = 25
+
+            }
+        };
     }
 }
