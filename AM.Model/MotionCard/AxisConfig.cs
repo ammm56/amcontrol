@@ -18,5 +18,9 @@ namespace AM.Model.MotionCard
         // 计算属性：1mm 对应多少脉冲 (Pulse/mm)
         [JsonIgnore]
         public double K => PulsePerRev / Lead;
+
+        public short LogicalId { get; set; }            // 业务层调用的 ID (如: 0, 1, 2)，统一不同卡的轴号
+        public short PhysicalCore { get; set; }         // 固高专用：内核号 (如 1)
+        public short PhysicalAxis { get; set; }         // 固高专用：物理轴号 (如 1)
     }
 }

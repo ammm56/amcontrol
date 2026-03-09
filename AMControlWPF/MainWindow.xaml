@@ -5,12 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AMControlWPF"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="800" WindowStartupLocation="CenterScreen">
     <Grid>
         <TextBox  Text="测试" FontSize="36" x:Name="tb_test1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         <Button x:Name="btn_loadcfg" Content="载入配置" HorizontalAlignment="Left" Margin="31,21,0,0" VerticalAlignment="Top" Height="55" Width="135" FontSize="22" Click="btn_loadcfg_Click"/>
         <Button x:Name="btn_querydbaxistable" Content="读取轴表记录" HorizontalAlignment="Left" Margin="180,21,0,0" VerticalAlignment="Top" Height="55" Width="135" FontSize="22" Click="btn_querydbaxistable_Click" />
         <Button x:Name="btn_randomcfgval" Content="随机修改配置值" HorizontalAlignment="Center" Margin="0,21,0,0" VerticalAlignment="Top" Height="55" Width="136" FontSize="22" Click="btn_randomcfgval_Click" />
+
+        <Button x:Name="btn_gsna" Content="GSNA" HorizontalAlignment="Left" Margin="31,91,0,0" VerticalAlignment="Top" Height="55" Width="135" FontSize="22" Click="btn_gsna_Click" />
+
 
     </Grid>
 </Window>

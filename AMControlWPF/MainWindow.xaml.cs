@@ -89,5 +89,11 @@ namespace AMControlWPF
         {
             ConfigSingle.Instance.Config.Sqlite.Connection = $"测试随机修改配置连接{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
         }
+
+        private void btn_gsna_Click(object sender, RoutedEventArgs e)
+        {
+            GSNA gSNA = new GSNA();
+            gSNA.Show();
+        }
     }
 }

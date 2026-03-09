@@ -63,6 +63,10 @@ namespace AMControlWPF
                     Card = new GoogoMotionCard();
                     // 2. 串联多卡与事件 (串联逻辑)
                     Card.Connect(1);
+
+                    // 把配置给具体的卡实例
+                    Card.LoadAxisConfig(ConfigSingle.Instance.Config.AxisConfigs);
+
                     // 绑定轴参数 (单位转换)
                     foreach (var axisCfg in ConfigSingle.Instance.Config.AxisConfigs)
                     {
@@ -100,12 +104,12 @@ namespace AMControlWPF
 
         private void btn_clearstatus_Click(object sender, RoutedEventArgs e)
         {
-
+            
         }
 
         private void btn_enable_Click(object sender, RoutedEventArgs e)
         {
-
+            ConfigSingle.Instance.Card.Enable(1, true);
         }
 
         private void btn_pointclearzero_Click(object sender, RoutedEventArgs e)

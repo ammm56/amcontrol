@@ -13,6 +13,46 @@ namespace AM.MotionCard.Googo
 {
     public class GoogoMotionCard : MotionCardBase
     {
+        /// <summary>
+        /// Key 是 LogicalId
+        /// 内部维护一张逻辑轴到物理参数的映射表
+        /// </summary>
+        private Dictionary<short, AxisConfig> _axisMap;
+        /// <summary>
+        /// 将通用的配置同步到具体厂家类中
+        /// </summary>
+        public void LoadAxisConfig(List<AxisConfig> configs)
+        {
+            // 转换成字典，方便 Move(logicalId) 时快速找到 PhysicalCore 和 PhysicalAxis
+            _axisMap = configs.ToDictionary(x => x.LogicalId);
+
+            // 同时给基类设置单位转换参数
+            foreach (var cfg in configs)
+            {
+                this.SetAxisParam(cfg.LogicalId, new AxisParam
+                {
+                    Lead = cfg.Lead,
+                    PulsePerRev = cfg.PulsePerRev
+                });
+            }
+        }
+        /// <summary>
+        /// 抽取通用的查找逻辑
+        /// </summary>
+        /// <param name="logicalAxis"></param>
+        /// <returns></returns>
+        private AxisConfig GetLogicalAxisCfg(short logicalAxis)
+        {
+            if (_axisMap != null && _axisMap.TryGetValue(logicalAxis, out var cfg))
+            {
+                return cfg;
+            }
+
+            // 如果找不到，统一报一次错
+            HandleError(-1, $"逻辑轴 {logicalAxis} 未配置或未加载映射表");
+            return null;
+        }
+
         public override bool Initialize(string configPath)
         {
             // 调用固高 GT_Open() 等 API
@@ -21,21 +61,21 @@ namespace AM.MotionCard.Googo
         }
 
         // 获取当前位置 (mm)
-        public override double GetPositionMm(short axis)
+        public override double GetPositionMm(short logicalAxis)
         {
             // 固高 Axis 1 对应的 Profile 通常也是 1
-            short res = mc.GT_GetPos(axis, out int pulsePos);
+            short res = mc.GT_GetPos(_axisMap[logicalAxis].PhysicalAxis, out int pulsePos);
 
             if (res != 0)
             {
-                HandleError(res, $"读取轴 {axis} 位置失败");
+                HandleError(res, $"读取轴 {_axisMap[logicalAxis].PhysicalAxis} 位置失败");
                 return 0;
             }
 
             // 调用基类的转换逻辑：Pulse -> Mm
-            return PulseToMm(axis, pulsePos);
+            return PulseToMm(_axisMap[logicalAxis].PhysicalAxis, pulsePos);
         }
-        protected override short RawMoveAbs(short cardId, short axis, int pulse, int vel)
+        protected override short RawMoveAbs(short cardId, short logicalAxis, int pulse, int vel)
         {
             return 0;
         }
@@ -54,58 +94,69 @@ namespace AM.MotionCard.Googo
             throw new NotImplementedException();
         }
 
-        public override short Enable(short axis, bool onORoff)
+        public override short Enable(short logicalAxis, bool onORoff)
+        {
+            var cfg = GetLogicalAxisCfg(logicalAxis);
+            if (cfg == null) return -1; // 找不到配置直接退出
+
+            // 调用固高 API
+            short res;
+            if (onORoff)
+                res = mc.GT_AxisOn(cfg.PhysicalAxis); // 使用查出来的物理参数
+            else
+                res = mc.GT_AxisOff(cfg.PhysicalAxis);
+
+            if (res != 0) HandleError(res, $"轴 {logicalAxis} 使能失败");
+            return res;
+        }
+
+        public override short Stop(short logicalAxis, bool emergency = false)
         {
             throw new NotImplementedException();
         }
 
-        public override short Stop(short axis, bool emergency = false)
+        public override Task<short> HomeAsync(short logicalAxis)
         {
             throw new NotImplementedException();
         }
 
-        public override Task<short> HomeAsync(short axis)
+        public override short Home(short logicalAxis)
         {
             throw new NotImplementedException();
         }
 
-        public override short Home(short axis)
+        public override short MoveRelative(short logicalAxis, double distance, double velocity, double acc, double dec)
         {
             throw new NotImplementedException();
         }
 
-        public override short MoveRelative(short axis, double distance, double velocity, double acc, double dec)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override short MoveAbsolute(short axis, double position, double velocity, double acc, double dec)
+        public override short MoveAbsolute(short logicalAxis, double position, double velocity, double acc, double dec)
         {
             // 1. 设置规划参数 2. 设置目标位置 3. 启动更新
-            Log($"轴 {axis} 绝对运动至 {position}");
+            Log($"轴 {_axisMap[logicalAxis].PhysicalAxis} 绝对运动至 {position}");
 
             return 0;
         }
 
-        public override short JogMove(short axis, int direction, double velocity)
+        public override short JogMove(short logicalAxis, int direction, double velocity)
         {
             throw new NotImplementedException();
         }
 
-        public override short MoveRelativeMm(short axis, double distanceMm, double velMm)
+        public override short MoveRelativeMm(short logicalAxis, double distanceMm, double velMm)
         {
             throw new NotImplementedException();
         }
 
-        public override short MoveAbsoluteMm(short axis, double positionMm, double velMm)
+        public override short MoveAbsoluteMm(short logicalAxis, double positionMm, double velMm)
         {
-            int pulse = MmToPulse(axis, positionMm);
+            int pulse = MmToPulse(logicalAxis, positionMm);
 
             // 固高逻辑：1. 设置目标位置 2. 更新运动
-            short res = mc.GT_SetPos(axis, pulse);
+            short res = mc.GT_SetPos(logicalAxis, pulse);
             // ... 此处省略 GT_Update 等固高必须的后续指令
 
-            if (res != 0) HandleError(res, $"轴 {axis} 运动指令发送失败");
+            if (res != 0) HandleError(res, $"轴 {logicalAxis} 运动指令发送失败");
             return res;
         }
 
@@ -124,37 +175,37 @@ namespace AM.MotionCard.Googo
             throw new NotImplementedException();
         }
 
-        public override short SetVel(short axis, double vel)
+        public override short SetVel(short logicalAxis, double vel)
         {
             throw new NotImplementedException();
         }
 
-        public override short SetAcc(short axis, double acc)
+        public override short SetAcc(short logicalAxis, double acc)
         {
             throw new NotImplementedException();
         }
 
-        public override short SetDec(short axis, double dec)
+        public override short SetDec(short logicalAxis, double dec)
         {
             throw new NotImplementedException();
         }
 
-        public override AxisStatus GetAxisStatus(short axis)
+        public override AxisStatus GetAxisStatus(short logicalAxis)
         {
             throw new NotImplementedException();
         }
 
-        public override double GetCommandPosition(short axis)
+        public override double GetCommandPosition(short logicalAxis)
         {
             throw new NotImplementedException();
         }
 
-        public override double GetEncoderPosition(short axis)
+        public override double GetEncoderPosition(short logicalAxis)
         {
             throw new NotImplementedException();
         }
 
-        public override bool IsMoving(short axis)
+        public override bool IsMoving(short logicalAxis)
         {
             throw new NotImplementedException();
         }
