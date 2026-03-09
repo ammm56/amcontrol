@@ -29,6 +29,17 @@ namespace AM.Model.ICommon
         // --- 清除状态 ---
         short ClearStatus(short logicalAxis);
         short ClearAllAxisStatus();
+        /// <summary>
+        /// 将指定逻辑轴的位置清零
+        /// </summary>
+        short SetZeroPos(short logicalAxis);
+        /// <summary>
+        /// 将全卡所有轴的位置清零
+        /// </summary>
+        short SetAllZeroPos();
+
+        // --- 手动配置轴硬件、IO ---
+        short ConfigAxisHardware(AxisConfig cfg);
 
         // --- 轴基础控制 ---
         short Enable(short logicalAxis, bool onORoff);

@@ -124,17 +124,17 @@ namespace AMControlWPF
 
         private void btn_enable_Click(object sender, RoutedEventArgs e)
         {
-            ConfigSingle.Instance.Card.Enable(1, true);
+            Card.Enable(1, true);
         }
 
         private void btn_pointclearzero_Click(object sender, RoutedEventArgs e)
         {
-
+            Card.SetZeroPos(1);
         }
 
         private void btn_runstaart_Click(object sender, RoutedEventArgs e)
         {
-
+            Card.MoveRelativeMm(1, 2, 1);
         }
 
         private void btn_runstop_Click(object sender, RoutedEventArgs e)
@@ -151,6 +151,15 @@ namespace AMControlWPF
         private void btn_clearoutinfo_Click(object sender, RoutedEventArgs e)
         {
             tb_statusinfo.Text = string.Empty;
+        }
+
+        private void btn_configaxisarg_Click(object sender, RoutedEventArgs e)
+        {
+            // 5. 初始化所有轴的硬件参数（手动配置替代 cfg 文件）
+            foreach (var axisCfg in ConfigSingle.Instance.Config.MotionCardConfig.AxisConfigs)
+            {
+                Card.ConfigAxisHardware(axisCfg);
+            }
         }
     }
 }

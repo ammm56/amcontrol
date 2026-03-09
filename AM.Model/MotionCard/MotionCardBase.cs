@@ -41,9 +41,10 @@ namespace AM.Model.MotionCard
         }
 
         // 触发错误事件
-        protected void HandleError(short code, string msg)
+        protected short HandleError(short code, string msg)
         {
             if (code != 0) OnError?.Invoke(_cardId, $"Error {code}: {msg}");
+            return code;
         }
 
         // 厂家具体的脉冲接口（由具体厂家实现）
@@ -63,7 +64,7 @@ namespace AM.Model.MotionCard
         public abstract short MoveRelative(short axis, double distance, double velocity, double acc, double dec);
         public abstract short MoveAbsolute(short axis, double position, double velocity, double acc, double dec);
         public abstract short JogMove(short axis, int direction, double velocity);
-        public abstract short MoveRelativeMm(short axis, double distanceMm, double velMm);
+        public abstract short MoveRelativeMm(short logicalAxis, double distanceMm, double velMm);
         public abstract short MoveAbsoluteMm(short axis, double positionMm, double velMm);
         public abstract short SetDO(short bit, bool status);
         public abstract bool GetDI(short bit);
@@ -77,5 +78,8 @@ namespace AM.Model.MotionCard
         public abstract double GetPositionMm(short axis);
         public abstract bool IsMoving(short axis);
         public abstract void LoadAxisConfig(List<AxisConfig> configs);
+        public abstract short SetZeroPos(short logicalAxis);
+        public abstract short SetAllZeroPos();
+        public abstract short ConfigAxisHardware(AxisConfig cfg);
     }
 }
