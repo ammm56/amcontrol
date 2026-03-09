@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="Class1.cs" />
     <Compile Include="Common\Config.cs" />
+    <Compile Include="Common\ObservableObject.cs" />
     <Compile Include="Common\Response.cs" />
     <Compile Include="Common\SettingArgsConfig.cs" />
     <Compile Include="DB\MDBaseSet.cs" />
@@ -59,6 +60,9 @@
     <Compile Include="Entity\ConfigAxisArg.cs" />
     <Compile Include="Model\MOSInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="ICommon\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

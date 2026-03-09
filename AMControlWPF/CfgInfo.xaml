@@ -7,7 +7,16 @@
         mc:Ignorable="d"
         Title="CfgInfo" Height="450" Width="800">
     <Grid>
-        <TextBox x:Name="tb_cfginfo" Text="TextBox"/>
+        <StackPanel DataContext="{Binding Sqlite}">
+            <TextBox x:Name="tb_cfginfo" Text="{Binding Connection,Mode=OneWay}" VerticalAlignment="Top"/>
+            
+            <!-- 这里的 Binding 直接写属性名即可 -->
+            <TextBlock Text="连接字符串:"/>
+            <TextBox Text="{Binding Connection, Mode=TwoWay}"/>
+
+            <TextBlock Text="启用:"/>
+            <TextBox Text="{Binding Enabled, Mode=TwoWay}"/>
+        </StackPanel>
 
     </Grid>
 </Window>

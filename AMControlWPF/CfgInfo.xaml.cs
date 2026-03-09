@@ -32,8 +32,13 @@ namespace AMControlWPF
 
         private void CfgInfo_Loaded(object sender, RoutedEventArgs e)
         {
+            /// winform事件驱动直接辅助方式
             string cfgstr = JsonConvert.SerializeObject(ConfigSingle.Instance.Config, Newtonsoft.Json.Formatting.Indented);
-            tb_cfginfo.Text = cfgstr;
+            //tb_cfginfo.Text = cfgstr;
+
+            /// wpf数据驱动显示方式
+            this.DataContext = ConfigSingle.Instance.Config;
+
         }
     }
 }

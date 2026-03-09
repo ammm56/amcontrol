@@ -11,12 +11,25 @@ namespace AM.Model.Common
     /// <summary>
     /// 配置
     /// </summary>
-    public class Config
+    public class Config:ObservableObject
     {
 
         public Setting Setting { get; set; } = new Setting();
 
-        public DB Sqlite { get; set; }
+        
+        private DB _sqlite;
+        /// <summary>
+        /// 传统语言层面写法
+        /// </summary>
+        //public DB Sqlite
+        //{
+        //    get => _sqlite;
+        //    set { _sqlite = value; RaisePropertyChanged(); }
+        //}
+        /// <summary>
+        /// // 一行写法：自动判断值是否变化、自动赋值、自动发通知
+        /// </summary>
+        public DB Sqlite { get => _sqlite; set => SetProperty(ref _sqlite, value); }
 
         /// <summary>
         /// 运行时配置
@@ -66,10 +79,13 @@ namespace AM.Model.Common
     /// <summary>
     /// 数据库连接
     /// </summary>
-    public class DB
+    public class DB:ObservableObject
     {
-        public string Connection { get; set; }
-        public bool Enabled { get; set; }
+        private string _connection;
+        public string Connection { get => _connection;set=>SetProperty(ref _connection, value);  }
+
+        private bool _enabled;
+        public bool Enabled { get => _enabled; set => SetProperty(ref _enabled, value); }
     }
 
     /// <summary>

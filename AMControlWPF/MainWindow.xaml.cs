@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AM.Tools;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -82,6 +83,11 @@ namespace AMControlWPF
         {
             AxisTableInfo axisTableInfo = new AxisTableInfo();
             axisTableInfo.Show();
+        }
+
+        private void btn_randomcfgval_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigSingle.Instance.Config.Sqlite.Connection = $"测试随机修改配置连接{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
         }
     }
 }
