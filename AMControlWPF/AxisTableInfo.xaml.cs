@@ -33,13 +33,29 @@ namespace AMControlWPF
 
         private void AxisTableInfo_Loaded(object sender, RoutedEventArgs e)
         {
-            DBResponse<List<ConfigAxisArg>> res = new DBResponse<List<ConfigAxisArg>>
+            DBResponse<ConfigAxisArg> res = new DBResponse<ConfigAxisArg>
             {
-                data = new DBTable<ConfigAxisArg>().Query()
+                data = new DBTable<ConfigAxisArg>().Query(),
+                status = true
             };
+            if(res.data.Count > 0 ) res.item = res.data[0];
+
             res.message = JsonConvert.SerializeObject(res.data, Newtonsoft.Json.Formatting.Indented);
 
             this.DataContext = res;
+
+        }
+
+        private void dg_axis_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // 1. da_axis.SelectedItem 获得选中项
+            // 2. 这个监听选择事件
+            if(e.AddedItems.Count > 0)
+            {
+                var item = e.AddedItems[0] as ConfigAxisArg;
+
+            }
+            // 3. 数据绑定 模型中新增一个选择项
 
         }
     }

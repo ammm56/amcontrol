@@ -95,5 +95,11 @@ namespace AMControlWPF
             GSNA gSNA = new GSNA();
             gSNA.Show();
         }
+
+        private void btn_handya_Click(object sender, RoutedEventArgs e)
+        {
+            HandyWindowA handyWindowA = new HandyWindowA();
+            handyWindowA.Show();
+        }
     }
 }
