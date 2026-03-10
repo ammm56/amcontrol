@@ -71,19 +71,9 @@ namespace AMControlWPF
                     // 1. 根据配置创建具体的卡 (实现层)
                     Card = new GoogoMotionCard();
                     
-
                     // 把配置给具体的卡实例
                     Card.LoadAxisConfig(ConfigSingle.Instance.Config.MotionCardConfig.AxisConfigs);
 
-                    // 绑定轴参数 (单位转换)
-                    foreach (var axisCfg in ConfigSingle.Instance.Config.MotionCardConfig.AxisConfigs)
-                    {
-                        Card.SetAxisParam(axisCfg.AxisId, new AxisParam
-                        {
-                            Lead = axisCfg.Lead,
-                            PulsePerRev = axisCfg.PulsePerRev
-                        });
-                    }
                     // 3. 订阅全局错误 (UI反馈)
                     Card.OnError += (id, msg) => {
                         // 这里调用通知 UI 的逻辑

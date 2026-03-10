@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -65,12 +66,24 @@ namespace AM.Model.MotionCard
         // --- 单位换算 ---
         public double Lead { get; set; } = 5.0;            // 导程 5mm
         public int PulsePerRev { get; set; } = 10000;      // 脉冲数/圈 10000
+        public double GearRatio { get; set; } = 1.0;       // 减速比 1:1
+        /// <summary>
+        /// 公式：(电机单圈脉冲 * 减速比) / 导程
+        /// 脉冲/mm 系数 计算属性：1mm 对应多少脉冲 (Pulse/mm)
+        /// </summary>
         [JsonIgnore]
-        public double K => PulsePerRev / Lead;             // 脉冲/mm 系数 计算属性：1mm 对应多少脉冲 (Pulse/mm)
+        public double K => (PulsePerRev * GearRatio) / Lead;
 
         // --- 梯形波参数 ---
-        private double _acc = 100.0;                        // 默认给个合理的起步值
+        private double _acc = 0.1;                        // 默认给个合理的起步值
         /// <summary>
+        /// 加速度 (Pulse/ms^2) 
+        /// Motion Feeling(运动体感)   Acc Suggestion(Pulse/ms²)  Equivalent mm/s² () Application Scenario(适用场景)
+        /// Very Soft(非常柔和)            0.1 ~ 0.5	            50 ~ 250	        Heavy load, high inertia(重负载、大惯性)
+        /// Standard Industrial(标准工业)  1.0 ~ 3.0	            500 ~ 1500	        General assembly, dispensing (普通组装、点胶机)
+        /// High-Speed Rhythm(高速节拍)    4.0 ~ 6.0	            2000 ~ 3000	        Vision sorting, mounter (视觉分选、贴片机)
+        /// Performance Limit(性能极限)    10.0+	                5000+	            Linear motor, light belt(直线电机、轻载皮带)
+        /// 
         /// 加速度 (mm/s^2)，带范围校验 [0.1, 1000]
         /// 机构类型            推荐加速度     极值(慎用) 备注
         /// 普通滚珠丝杠        500 ~ 1500	    3000	  取决于负载重量和电机扭矩。
@@ -81,18 +94,18 @@ namespace AM.Model.MotionCard
         public double Acc
         {
             get => _acc;
-            set => SetProperty(ref _acc, value.LimitTo(0.1, 1000.0));
+            set => SetProperty(ref _acc, value.LimitTo(0.001, 1.0));
         }
-        private double _dec = 100.0;
+        private double _dec = 0.1;
         /// <summary>
-        /// 减速度 (mm/s^2)
+        /// 减速度 (Pulse/ms^2)
         /// 最小值 10 (保证能动)，最大值 1000 (安全上限)
         /// double validated = value < 10.0 ? 10.0 : (value > 1000.0 ? 1000.0 : value);
         /// </summary>
         public double Dec
         {
             get => _dec;
-            set => SetProperty(ref _dec, value.LimitTo(0.1, 1000.0));
+            set => SetProperty(ref _dec, value.LimitTo(0.001, 1.0));
         }
         private short _smoothTime = 25;
         /// <summary>

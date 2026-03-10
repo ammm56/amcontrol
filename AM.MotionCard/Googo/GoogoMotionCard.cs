@@ -5,6 +5,7 @@ using AM.Tools;
 using GTN;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -15,45 +16,6 @@ namespace AM.MotionCard.Googo
 {
     public class GoogoMotionCard : MotionCardBase
     {
-        /// <summary>
-        /// Key 是 LogicalId
-        /// 内部维护一张逻辑轴到物理参数的映射表
-        /// </summary>
-        private Dictionary<short, AxisConfig> _axisMap;
-        /// <summary>
-        /// 将通用的配置同步到具体厂家类中
-        /// </summary>
-        public override void LoadAxisConfig(List<AxisConfig> configs)
-        {
-            // 转换成字典，方便 Move(logicalId) 时快速找到 PhysicalCore 和 PhysicalAxis
-            _axisMap = configs.ToDictionary(x => x.LogicalId);
-
-            // 同时给基类设置单位转换参数
-            foreach (var cfg in configs)
-            {
-                this.SetAxisParam(cfg.LogicalId, new AxisParam
-                {
-                    Lead = cfg.Lead,
-                    PulsePerRev = cfg.PulsePerRev
-                });
-            }
-        }
-        /// <summary>
-        /// 抽取通用的查找逻辑
-        /// </summary>
-        /// <param name="logicalAxis"></param>
-        /// <returns></returns>
-        private AxisConfig GetLogicalAxisCfg(short logicalAxis)
-        {
-            if (_axisMap != null && _axisMap.TryGetValue(logicalAxis, out var cfg))
-            {
-                return cfg;
-            }
-
-            // 如果找不到，统一报一次错
-            HandleError(-1, $"逻辑轴 {logicalAxis} 未配置或未加载映射表");
-            return null;
-        }
 
         public override bool Initialize(string configPath)
         {
@@ -76,10 +38,6 @@ namespace AM.MotionCard.Googo
 
             // 调用基类的转换逻辑：Pulse -> Mm
             return PulseToMm(_axisMap[logicalAxis].PhysicalAxis, pulsePos);
-        }
-        protected override short RawMoveAbs(short cardId, short logicalAxis, int pulse, int vel)
-        {
-            return 0;
         }
 
         /// <summary>
@@ -334,9 +292,57 @@ namespace AM.MotionCard.Googo
             throw new NotImplementedException();
         }
 
-        public override short MoveRelative(short logicalAxis, double distance, double velocity, double acc, double dec)
+        /// <summary>
+        /// 点位运动 相对位移（单位: 脉冲）
+        /// </summary>
+        /// <param name="logicalAxis">逻辑轴 映射核 轴</param>
+        /// <param name="pulseDistance">相对位移脉冲数</param>
+        /// <param name="velocity">脉冲 电机 1 秒转 1 圈（假设 10000 脉冲），传参就是 10.0</param>
+        /// <param name="acc">加速度 脉冲（默认使用配置参数）</param>
+        /// <param name="dec">减速带 脉冲（默认使用配置参数）</param>
+        /// <returns></returns>
+        public override short MoveRelative(short logicalAxis, double pulseDistance, double velocity, double acc, double dec)
         {
-            throw new NotImplementedException();
+            // 1. 获取轴配置映射 (用于找到物理 Core 和 Axis)
+            var cfg = GetLogicalAxisCfg(logicalAxis);
+            if (cfg == null) return -1;
+
+            short core = cfg.PhysicalCore;
+            short axis = cfg.PhysicalAxis;
+
+            // 2. 设置为点位运动模式 (Trap)
+            short rtn = mc.GTN_PrfTrap(core, axis);
+            if (rtn != 0) return HandleError(rtn, $"轴{logicalAxis} 模式切换失败");
+
+            // 3. 设置点位运动曲线参数 (Acc/Dec/SmoothTime)
+            mc.TTrapPrm trap;
+            rtn = mc.GTN_GetTrapPrm(core, axis, out trap);
+            if (rtn == 0)
+            {
+                // 直接赋值，不涉及任何 K 值换算
+                trap.acc = acc > 0 ? acc : cfg.Acc;
+                trap.dec = dec > 0 ? dec : cfg.Dec;
+                trap.smoothTime = cfg.SmoothTime;
+                rtn = mc.GTN_SetTrapPrm(core, axis, ref trap);
+            }
+
+            // 4. 设置目标速度 (单位: Pulse/ms)
+            rtn = mc.GTN_SetVel(core, axis, velocity);
+
+            // 5. 获取当前规划位置并计算目标位置 (单位: Pulse)
+            uint clock;
+            rtn = mc.GTN_GetPrfPos(core, axis, out double currentPrf, 1, out clock);
+            int targetPos = (int)(currentPrf + pulseDistance);
+
+            // 6. 设置目标位置
+            rtn = mc.GTN_SetPos(core, axis, targetPos);
+
+            // 7. 启动运动 (Update 掩码)
+            // 1 << (axis-1) 确保只更新当前轴
+            rtn = mc.GTN_Update(core, 1 << (axis - 1));
+
+            if (rtn != 0) HandleError(rtn, $"轴{logicalAxis} 指令下发失败");
+            return rtn;
         }
 
         public override short MoveAbsolute(short logicalAxis, double position, double velocity, double acc, double dec)
@@ -353,14 +359,14 @@ namespace AM.MotionCard.Googo
         }
 
         /// <summary>
-        /// 相对位移运动 (单位: mm)
+        /// 相对位移运动 (输入单位: mm, mm/s)
         /// </summary>
-        /// <param name="logicalAxis">业务层逻辑轴号</param>
-        /// <param name="distanceMm">移动距离 (mm)</param>
-        /// <param name="velMm">运动速度 (mm/s)</param>
+        /// <param name="logicalAxis">逻辑轴号</param>
+        /// <param name="distanceMm">相对移动距离 (mm)</param>
+        /// <param name="velMm">运行速度 (mm/s)</param>
         public override short MoveRelativeMm(short logicalAxis, double distanceMm, double velMm)
         {
-            // 1. 获取该逻辑轴的完整配置映射
+            // 1. 获取轴配置映射
             var cfg = GetLogicalAxisCfg(logicalAxis);
             if (cfg == null) return -1;
 
@@ -368,45 +374,43 @@ namespace AM.MotionCard.Googo
             short axis = cfg.PhysicalAxis;
             double K = cfg.K; // 脉冲/mm 系数
 
-            // 2. 设置为点位运动模式 (Trap)
+            // 2. 模式切换：设置为点位运动模式 (Trap)
             short rtn = mc.GTN_PrfTrap(core, axis);
-            if (rtn != 0)
-            {
-                HandleError(rtn, $"轴{logicalAxis} 设置运动模式失败");
-                return rtn;
-            }
+            if (rtn != 0) return HandleError(rtn, $"轴{logicalAxis} 模式切换失败");
 
-            // 3. 设置点位运动参数 (直接从 AxisConfig 读取)
+            // 3. 设置运动曲线参数 (Acc/Dec/SmoothTime)
+            // 注意：配置里存的就是 Pulse/ms²，直接使用，无需换算
             mc.TTrapPrm trap;
             rtn = mc.GTN_GetTrapPrm(core, axis, out trap);
             if (rtn == 0)
             {
-                // 转换 Acc/Dec 单位：mm/s^2 -> Pulse/ms^2 (注意固高API单位通常是脉冲/ms^2)
-                // 固高公式参考：pulse/ms^2 = (mm/s^2 * K) / 1,000,000
-                trap.acc = (cfg.Acc * K) / 1000000.0;
-                trap.dec = (cfg.Dec * K) / 1000000.0;
+                trap.acc = cfg.Acc;
+                trap.dec = cfg.Dec;
                 trap.smoothTime = cfg.SmoothTime;
                 rtn = mc.GTN_SetTrapPrm(core, axis, ref trap);
             }
 
-            // 4. 设置速度 (mm/s -> pulse/ms)
-            // 固高速度单位通常是 pulse/ms
-            double vel_pulse = (velMm * K) / 1000.0;
-            rtn = mc.GTN_SetVel(core, axis, vel_pulse);
+            // 4. 设置目标速度 (mm/s -> Pulse/ms)
+            // 固高 API 单位是 Pulse/ms，所以除以 1000
+            double velPulsePerMs = (velMm * K) / 1000.0;
+            rtn = mc.GTN_SetVel(core, axis, velPulsePerMs);
 
-            // 5. 计算目标脉冲位置 (当前规划位置 + 增量)
+            // 5. 获取当前规划位置并计算目标位置 (单位: Pulse)
             uint clock;
             rtn = mc.GTN_GetPrfPos(core, axis, out double currentPrfPulse, 1, out clock);
-            int targetPulse = (int)(currentPrfPulse + (distanceMm * K));
+
+            // 计算相对位移的脉冲数
+            int deltaPulse = (int)(distanceMm * K);
+            int targetPulse = (int)(currentPrfPulse + deltaPulse);
 
             // 6. 设置目标位置
             rtn = mc.GTN_SetPos(core, axis, targetPulse);
 
-            // 7. 触发运动 (Update)
-            // 第二个参数是掩码：第 1 轴对应 1, 第 2 轴对应 2, 第 3 轴对应 4...
+            // 7. 启动运动 (Update 掩码)
+            // 1 << (axis - 1) 是固高操作单轴的固定逻辑
             rtn = mc.GTN_Update(core, 1 << (axis - 1));
 
-            if (rtn != 0) HandleError(rtn, $"轴{logicalAxis} 启动相对运动失败");
+            if (rtn != 0) HandleError(rtn, $"轴{logicalAxis} 启动毫米相对运动失败");
             return rtn;
         }
 

@@ -16,8 +16,6 @@ namespace AM.Model.ICommon
     {
         // 事件通知：卡号, 错误信息
         event Action<short, string> OnError;
-        // 配置轴参数（用于单位转换）
-        void SetAxisParam(short logicalAxis, AxisParam param);
         // 把配置给具体的卡实例
         void LoadAxisConfig(List<AxisConfig> configs);
 
