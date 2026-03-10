@@ -181,5 +181,10 @@ namespace AMControlWPF
         {
             Card?.JogMoveMm(1, false, 10);
         }
+
+        private void btn_init_Click_1(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

@@ -44,10 +44,10 @@ namespace AM.Model.MotionCard
             new AxisConfig
             {
                 AxisId = 1,
-                Name = "1轴",
-                LogicalId = 1,
+                Name = "14轴",
+                LogicalId = 114,
                 PhysicalCore = 1,
-                PhysicalAxis = 1,
+                PhysicalAxis = 14,
 
                 AlarmEnable = true,
                 AlarmInvert = false,
