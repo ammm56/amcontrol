@@ -21,11 +21,18 @@ namespace AMControlWPF
     /// </summary>
     public partial class MainWindow : Window
     {
+        // 页面缓存：防止重复创建对象
+        private readonly Dictionary<string, Page> _pageCache = new Dictionary<string, Page>();
+
         public MainWindow()
         {
             InitializeComponent();
 
             this.Loaded += MainWindow_Loaded;
+
+
+            // 默认加载第一个页面
+            NavigateToPage("Home");
 
         }
 
@@ -36,7 +43,37 @@ namespace AMControlWPF
 
             HandyWindowA handyWindowA = new HandyWindowA();
             handyWindowA.Show();
+
+            TestView.HandyWindowB handyWindowB = new TestView.HandyWindowB();
+            handyWindowB.Show();
         }
 
+        private void SideMenu_SelectionChanged(object sender, HandyControl.Data.FunctionEventArgs<object> e)
+        {
+            var item = e.Info as HandyControl.Controls.SideMenuItem;
+            if(item?.Tag == null) return;
+
+            // 获取 Tag 并跳转页面
+            NavigateToPage(item.Tag.ToString());
+        }
+
+        private void NavigateToPage(string tag)
+        {
+            if (!_pageCache.ContainsKey(tag))
+            {
+                // 根据 Tag 实例化不同的页面
+                switch (tag)
+                {
+                    case "Home": _pageCache[tag] = new Views.Home(); break;
+                    case "ConfigArgs": _pageCache[tag] = new Views.ConfigArgs(); break;
+                    case "Axis": _pageCache[tag] = new Views.AxisControl(); break;
+                    case "ConfigIO": _pageCache[tag] = new Views.ConfigIO(); break;
+                    default: return;
+                }
+            }
+
+            // 切换 Frame 的内容
+            MainFrame.Content = _pageCache[tag];
+        }
     }
 }
