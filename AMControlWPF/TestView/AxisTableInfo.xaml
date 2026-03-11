@@ -95,26 +95,26 @@
         </DataGrid>
 
         <!-- 1. 在界面合适位置定义抽屉 -->
-        <!--<hc:Drawer x:Name="DrawerConfig" 
+        <hc:Drawer x:Name="DrawerConfig" 
            IsOpen="{Binding IsDrawerOpen}" 
            Dock="Right" 
            ShowMask="True"
            Width="300">
-            --><!-- 设置抽屉滑出后的宽度 --><!--
+            <!-- 设置抽屉滑出后的宽度 -->
 
             <Border Background="{DynamicResource RegionBrush}" Padding="20">
                 <StackPanel>
                     <TextBlock Text="轴参数详情" Style="{StaticResource TextBlockTitleBold}"/>
                     <hc:Divider Margin="0,10"/>
 
-                    --><!-- 绑定你之前 DataGrid 选中的那个 item --><!--
+                    <!-- 绑定你之前 DataGrid 选中的那个 item -->
                     <hc:TextBox hc:TitleElement.Title="当前轴名" Text="{Binding item.Name}" IsReadOnly="True"/>
                     <hc:TextBox hc:TitleElement.Title="当前位置" Text="{Binding item.CurrentPos}" Margin="0,10"/>
 
                     <Button Content="关闭抽屉" Margin="0,20"/>
                 </StackPanel>
             </Border>
-        </hc:Drawer>-->
+        </hc:Drawer>
         
     </Grid>
 </Window>

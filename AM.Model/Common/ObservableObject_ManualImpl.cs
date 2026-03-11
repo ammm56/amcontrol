@@ -1,17 +1,25 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace AM.Model.Common
 {
     /// <summary>
     /// 继承属性更改通知接口，模型继承调用属性更改通知
+    /// 
+    /// 功能	            手动实现	                                        CommunityToolkit.Mvvm 实现
+    /// 基类继承 public class MyModel : ObservableObject            public partial class MyModel : ObservableObject
+    /// 属性通知    RaisePropertyChanged("Name")	                    OnPropertyChanged(nameof(Name))
+    /// 手动赋值    SetProperty(ref _field, value)	                    SetProperty(ref _field, value) (语法完全一样)
+    /// 全自动赋值   无 (需手写整个 Property)	                        [ObservableProperty] (只需写字段)
     /// </summary>
-    public class ObservableObject : INotifyPropertyChanged
+    public class ObservableObject_ManualImpl : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 

@@ -10,18 +10,13 @@ namespace AM.Model.Common
     /// 返回信息
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class Response<T> : ObservableObject
+    public class Response<T>
     {
         /// <summary>
         /// 数据项
         /// 选择的单项数据
         /// </summary>
-        private T _item;
-        public T item
-        {
-            get => _item;
-            set => SetProperty(ref _item, value); // 使用 SetProperty 触发通知
-        }
+        public T item { get; set; }
 
         /// <summary>
         /// 数据集

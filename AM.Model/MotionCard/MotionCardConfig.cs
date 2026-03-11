@@ -41,34 +41,34 @@ namespace AM.Model.MotionCard
         public List<AxisConfig> AxisConfigs { get; set; } = new List<AxisConfig>
         {
 
-            new AxisConfig
-            {
-                AxisId = 1,
-                Name = "14轴",
-                LogicalId = 114,
-                PhysicalCore = 1,
-                PhysicalAxis = 14,
+            //new AxisConfig
+            //{
+            //    AxisId = 1,
+            //    Name = "14轴",
+            //    LogicalId = 114,
+            //    PhysicalCore = 1,
+            //    PhysicalAxis = 14,
 
-                AlarmEnable = true,
-                AlarmInvert = false,
+            //    AlarmEnable = true,
+            //    AlarmInvert = false,
 
-                PulseMode = 0,
+            //    PulseMode = 0,
 
-                EncoderExternal = false,
-                EncoderInvert = false,
+            //    EncoderExternal = false,
+            //    EncoderInvert = false,
 
-                LimitHomeInvert = false,
+            //    LimitHomeInvert = false,
 
-                LimitMode = -1,
+            //    LimitMode = -1,
 
-                Lead = 5.0,
-                PulsePerRev = 10000,
+            //    Lead = 5.0,
+            //    PulsePerRev = 10000,
 
-                Acc = 100,
-                Dec = 100,
-                SmoothTime = 25
+            //    Acc = 100,
+            //    Dec = 100,
+            //    SmoothTime = 25
 
-            }
+            //}
         };
     }
 }

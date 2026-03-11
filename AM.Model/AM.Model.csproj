@@ -54,7 +54,7 @@
     <Compile Include="Common\Config.cs" />
     <Compile Include="MotionCard\AxisConfig.cs" />
     <Compile Include="MotionCard\MotionCardBase.cs" />
-    <Compile Include="Common\ObservableObject.cs" />
+    <Compile Include="Common\ObservableObject_ManualImpl.cs" />
     <Compile Include="Common\Response.cs" />
     <Compile Include="Common\SettingArgsConfig.cs" />
     <Compile Include="DB\MDBaseSet.cs" />
@@ -68,13 +68,5 @@
     <Compile Include="Structs\AxisStatus.cs" />
   </ItemGroup>
   <ItemGroup />
-  <ItemGroup>
-    <Content Include="gts.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="gt_rn.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

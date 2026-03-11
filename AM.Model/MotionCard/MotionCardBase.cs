@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace AM.Model.MotionCard
 {
-    public abstract class MotionCardBase : ObservableObject, IMotionCard
+    public abstract class MotionCardBase : IMotionCard
     {
         // --- 字段 ---
         protected short _cardId;
@@ -29,11 +29,16 @@ namespace AM.Model.MotionCard
         public virtual void LoadAxisConfig(List<AxisConfig> configs)
         {
             // 转换成字典，方便 Move(logicalId) 时快速找到 PhysicalCore 和 PhysicalAxis
+            if (configs == null) return;
             _axisMap.Clear();
+
+            // 使用局部变量构建好再替换，保证线程安全
+            var tempMap = new Dictionary<short, AxisConfig>();
             foreach (var cfg in configs)
             {
-                _axisMap[cfg.LogicalId] = cfg;
+                tempMap[cfg.LogicalId] = cfg;
             }
+            _axisMap = tempMap;
         }
 
         /// <summary>
@@ -41,9 +46,11 @@ namespace AM.Model.MotionCard
         /// </summary>
         protected AxisConfig GetLogicalAxisCfg(short logicalId)
         {
+            // 使用 TryGetValue 是安全的
             if (_axisMap.TryGetValue(logicalId, out var cfg)) return cfg;
 
-            HandleError(-1, $"未找到逻辑轴 {logicalId} 的硬件映射配置");
+            // 这里只记录一次日志，不抛出异常，让上层业务决定是否崩溃
+            HandleError(-1, $"逻辑轴 {logicalId} 映射未找到");
             return null;
         }
 
@@ -70,13 +77,21 @@ namespace AM.Model.MotionCard
             var cfg = GetLogicalAxisCfg(logicalId);
             if (cfg == null)
             {
-                throw new InvalidOperationException($"[致命错误] 毫米到脉冲转换，尝试操作未配置的逻辑轴: {logicalId}");
+                HandleError(-1, $"[致命错误] 毫米到脉冲转换，尝试操作未配置的逻辑轴: {logicalId}");
+                // 拦截，不执行转换
+                return 0;
+            }
+            // 物理参数合法性校验
+            if (cfg.K <= 0)
+            {
+                HandleError(-2, $"轴 {logicalId} 的K值非法({cfg.K})，请检查导程或脉冲数设置");
+                return 0;
             }
             // 增加数据溢出保护：防止计算出的脉冲数超过 int 范围
             double pulseCalc = mm * cfg.K;
             if (pulseCalc > int.MaxValue || pulseCalc < int.MinValue)
             {
-                HandleError(-2, $"轴 {logicalId} 目标脉冲数溢出，请检查行程或 K 值。");
+                HandleError(-3, $"轴 {logicalId} 目标脉冲溢出({pulseCalc}，请检查行程或 K 值。");
                 return 0; // 返回 0 脉冲，防止飞车
             }
             return (int)pulseCalc;
