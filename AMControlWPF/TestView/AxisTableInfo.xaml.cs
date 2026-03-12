@@ -1,4 +1,4 @@
-﻿using AM.DB.Tables;
+﻿using AM.DBService.Tables;
 using AM.Model.Common;
 using AM.Model.Entity;
 using Newtonsoft.Json;

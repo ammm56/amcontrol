@@ -8,7 +8,7 @@ using System.Runtime.Remoting.Contexts;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AM.DB.DBase
+namespace AM.DBService.DBase
 {
     public class DBCommon<T> : DBContext, IDBBaseCURD<T> where T : class, new()
     {

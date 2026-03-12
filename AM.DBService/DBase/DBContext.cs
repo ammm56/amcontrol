@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AM.DB.DBase
+namespace AM.DBService.DBase
 {
     public class DBContext : IDBContext
     {

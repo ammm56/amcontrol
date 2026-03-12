@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AM.DB
+namespace AM.DBService
 {
     public class Class1
     {
