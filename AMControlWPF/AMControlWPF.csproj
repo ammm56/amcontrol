@@ -93,7 +93,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="MessageBus\MessageBusWPF.cs" />
     <Compile Include="TestView\AxisInfoView.xaml.cs">
       <DependentUpon>AxisInfoView.xaml</DependentUpon>
     </Compile>
@@ -204,6 +203,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AM.App\AM.App.csproj">
+      <Project>{58d771b4-94d2-4fbb-9960-962dd599bd05}</Project>
+      <Name>AM.App</Name>
+    </ProjectReference>
     <ProjectReference Include="..\AM.Core\AM.Core.csproj">
       <Project>{7b305eb1-7403-4c0c-82d4-c871b4c2d877}</Project>
       <Name>AM.Core</Name>

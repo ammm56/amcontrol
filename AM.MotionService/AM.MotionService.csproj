@@ -43,7 +43,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
     <Compile Include="Googo\GoogoMotionCard.cs" />
     <Compile Include="Googo\gts.cs" />
     <Compile Include="Googo\GtsApi.cs" />

@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AM.MotionService", "AM.Moti
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AM.Core", "AM.Core\AM.Core.csproj", "{7B305EB1-7403-4C0C-82D4-C871B4C2D877}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AM.App", "AM.App\AM.App.csproj", "{58D771B4-94D2-4FBB-9960-962DD599BD05}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{7B305EB1-7403-4C0C-82D4-C871B4C2D877}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7B305EB1-7403-4C0C-82D4-C871B4C2D877}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7B305EB1-7403-4C0C-82D4-C871B4C2D877}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58D771B4-94D2-4FBB-9960-962DD599BD05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58D771B4-94D2-4FBB-9960-962DD599BD05}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58D771B4-94D2-4FBB-9960-962DD599BD05}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58D771B4-94D2-4FBB-9960-962DD599BD05}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

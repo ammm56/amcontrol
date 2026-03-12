@@ -53,7 +53,6 @@
     <Compile Include="Alarm\AlarmCode.cs" />
     <Compile Include="Alarm\AlarmInfo.cs" />
     <Compile Include="Alarm\AlarmLevel.cs" />
-    <Compile Include="Class1.cs" />
     <Compile Include="Common\Config.cs" />
     <Compile Include="Interfaces\DB\IConfigAxisArgService.cs" />
     <Compile Include="MotionCard\AxisConfig.cs" />

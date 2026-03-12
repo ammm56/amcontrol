@@ -1,10 +1,11 @@
-﻿using AM.Core.Context;
+﻿using AM.App.Bootstrap;
+using AM.Core.Context;
 using AM.Core.Logging;
 using AM.Core.Messaging;
 using AM.Model.Common;
 using AM.Tools;
 using AM.Tools.Logging;
-using AMControlWPF.MessageBus;
+using AM.Tools.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -31,16 +32,8 @@ namespace AMControlWPF
             base.OnStartup(e);
             Console.WriteLine("1.OnStartup被触发");
 
-            // 全局单例-配置上下文初始化
-            var result = Tools.ReadConfig<Config>("config.json");
-            Config config = result.Item1 ? result.Item2 : new Config();
-            ConfigContext.Instance.Initialize(config);
-
-            // 全局单例-系统上下文初始化
-            IAMLogger logger = new NLogLogger("System");
-            IMessageBus msgbus = new MessageBusWPF();
-            SystemContext.Instance.Initialize(logger, msgbus);
-
+            // 调用系统、服务、配置、日志等的初始化
+            AppBootstrap.Initialize();
 
         }
 

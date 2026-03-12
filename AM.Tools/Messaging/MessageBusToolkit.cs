@@ -5,11 +5,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Interop;
 
-namespace AMControlWPF.MessageBus
+namespace AM.Tools.Messaging
 {
-    internal class MessageBusWPF : IMessageBus
+    public class MessageBusToolkit : IMessageBus
     {
         public void Publish(SystemMessage message)
         {
