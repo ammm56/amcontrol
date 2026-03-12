@@ -2,6 +2,8 @@
 using AM.Core.Logging;
 using AM.Core.Messaging;
 using AM.Model.Common;
+using AM.MotionService;
+using AM.MotionService.Factory;
 using AM.Tools;
 using AM.Tools.Logging;
 using AM.Tools.Messaging;
@@ -39,10 +41,9 @@ namespace AM.App.Bootstrap
 
         private static void InitializeMachine()
         {
-            //var motion = MotionCardFactory.Create(
-            //    ConfigContext.Instance.Config.MotionCardConfig);
+            var motion = MotionCardFactory.Create(ConfigContext.Instance.Config.MotionCardConfig);
 
-            //MachineContext.Instance.MotionCard = motion;
+            MachineContext.Instance.MotionCard = motion;
         }
     }
 

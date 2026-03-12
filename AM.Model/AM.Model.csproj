@@ -63,7 +63,7 @@
     <Compile Include="DB\MDBaseSet.cs" />
     <Compile Include="DB\MDBInstanceEntityModelArg.cs" />
     <Compile Include="Entity\ConfigAxisArg.cs" />
-    <Compile Include="Interfaces\IMotionCard.cs" />
+    <Compile Include="Interfaces\MotionCard\IMotionCardService.cs" />
     <Compile Include="Model\MOSInfo.cs" />
     <Compile Include="MotionCard\MotionCardConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

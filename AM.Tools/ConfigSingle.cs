@@ -1,5 +1,6 @@
 ﻿using AM.Model.Common;
 using AM.Model.Interfaces;
+using AM.Model.Interfaces.MotionCard;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,6 +37,6 @@ namespace AM.Tools
         /// <summary>
         /// 主程序具体控制卡实例初始化完成后，挂载到这个单例中，实现公共访问
         /// </summary>
-        public IMotionCard Card { get; set; }
+        public IMotionCardService Card { get; set; }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using AM.Model.Common;
 using AM.Model.Interfaces;
+using AM.Model.Interfaces.MotionCard;
 using AM.Model.Structs;
 using System;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace AM.Model.MotionCard
 {
-    public abstract class MotionCardBase : IMotionCard
+    public abstract class MotionCardBase : IMotionCardService
     {
         // --- 字段 ---
         protected short _cardId;

@@ -1,5 +1,6 @@
 ﻿using AM.Model.Common;
 using AM.Model.Interfaces;
+using AM.Model.Interfaces.MotionCard;
 using AM.Model.Structs;
 using AM.MotionCard.Googo;
 using AM.Tools;
@@ -26,7 +27,7 @@ namespace AMControlWPF
     /// </summary>
     public partial class GSNA : Window
     {
-        public static IMotionCard Card { get; private set;  }
+        public static IMotionCardService Card { get; private set;  }
 
         public GSNA()
         {
@@ -69,7 +70,7 @@ namespace AMControlWPF
                 await Task.Run(() =>
                 {
                     // 1. 根据配置创建具体的卡 (实现层)
-                    Card = new GoogoMotionCard();
+                    Card = new GoogoMotionCardService();
                     
                     // 把配置给具体的卡实例
                     Card.LoadAxisConfig(ConfigSingle.Instance.Config.MotionCardConfig.AxisConfigs);

@@ -6,8 +6,35 @@ using System.Threading.Tasks;
 
 namespace AM.Model.MotionCard
 {
+    /// <summary>
+    /// 运动控制卡类型枚举
+    /// </summary>
+    public enum MotionCardType
+    {
+        /// <summary>
+        /// 固高
+        /// </summary>
+        GOOGO = 10,
+        /// <summary>
+        /// 雷赛
+        /// </summary>
+        LEISAI = 20,
+        /// <summary>
+        /// 虚拟卡
+        /// </summary>
+        VIRTUAL = 90,
+        /// <summary>
+        /// 其它
+        /// </summary>
+        Other = 99
+    }
     public class MotionCardConfig
     {
+        /// <summary>
+        /// 运动控制卡类型
+        /// </summary>
+        public MotionCardType CardType { get; set; } = MotionCardType.GOOGO;
+
         /// <summary>
         /// 硬件通信通道（通常对应电脑插槽里的物理卡索引，从 0 开始）
         /// 对应 GTN_Open 的 channel

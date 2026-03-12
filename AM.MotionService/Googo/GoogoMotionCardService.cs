@@ -14,17 +14,21 @@ using System.Threading.Tasks;
 
 namespace AM.MotionCard.Googo
 {
-    public class GoogoMotionCard : MotionCardBase
+    public class GoogoMotionCardService : MotionCardBase
     {
-        /// <summary>
-        /// 常用命令的封装接口，便于测试和未来替换底层实现
-        /// </summary>
-        private readonly IGtsApi _gtsApi;
+        private readonly MotionCardConfig _config;
 
-        public GoogoMotionCard()
+        public GoogoMotionCardService() : base()
         {
-            _gtsApi = new GtsApi();
+            // 默认构造函数，使用全局配置单例
+            _config = ConfigSingle.Instance.Config.MotionCardConfig;
         }
+
+        public GoogoMotionCardService(MotionCardConfig config)
+        {
+            _config = config;
+        }
+
         public override bool Initialize(string configPath)
         {
             // 调用固高 GT_Open() 等 API

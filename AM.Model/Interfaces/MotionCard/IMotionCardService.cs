@@ -6,13 +6,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AM.Model.Interfaces
+namespace AM.Model.Interfaces.MotionCard
 {
     /// <summary>
     /// 控制卡标准接口
     /// 所有控制卡的共性操作：初始化、点动（Jog）、绝对/相对运动、停止、状态读取。
     /// </summary>
-    public interface IMotionCard
+    public interface IMotionCardService
     {
         // 事件通知：卡号, 错误信息
         event Action<short, string> OnError;

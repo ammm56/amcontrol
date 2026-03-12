@@ -43,14 +43,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Googo\GoogoMotionCard.cs" />
+    <Compile Include="Googo\GoogoMotionCardService.cs" />
     <Compile Include="Googo\gts.cs" />
     <Compile Include="Googo\GtsApi.cs" />
+    <Compile Include="Leisai\LeisaiMotionCardService.cs" />
+    <Compile Include="Factory\MotionCardFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Virtual\VirtualMotionCardService.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Leisai\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\AM.Model\AM.Model.csproj">
       <Project>{22cf4793-f392-4421-98fd-0f2e07200689}</Project>
