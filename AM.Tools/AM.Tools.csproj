@@ -37,6 +37,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Libs\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="NLog">
+      <HintPath>..\Libs\NLog.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -49,11 +52,17 @@
   <ItemGroup>
     <Compile Include="Class1.cs" />
     <Compile Include="ConfigSingle.cs" />
+    <Compile Include="Logging\LoggerFactory.cs" />
+    <Compile Include="Logging\NLogLogger.cs" />
     <Compile Include="OSInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tools.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AM.Core\AM.Core.csproj">
+      <Project>{7b305eb1-7403-4c0c-82d4-c871b4c2d877}</Project>
+      <Name>AM.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\AM.Model\AM.Model.csproj">
       <Project>{22cf4793-f392-4421-98fd-0f2e07200689}</Project>
       <Name>AM.Model</Name>
@@ -63,6 +72,10 @@
     <None Include="Configuration\config.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Configuration\nlog.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Utils\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
