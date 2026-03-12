@@ -32,5 +32,7 @@
         <Button x:Name="btn_handya" Content="HandyA" Style="{StaticResource ButtonPrimary}" hc:BorderElement.CornerRadius="5" HorizontalAlignment="Left" Margin="180,91,0,0" VerticalAlignment="Top" Height="55" Width="135" FontSize="22" Click="btn_handya_Click" />
 
 
+        <Button x:Name="btn_axisconfigview" Content="轴表视图模型" Style="{StaticResource ButtonPrimary}" hc:BorderElement.CornerRadius="5" HorizontalAlignment="Left" Margin="332,91,0,0" VerticalAlignment="Top" Height="55" Width="174" FontSize="22" Click="btn_axisconfigview_Click" />
+
     </Grid>
 </Window>

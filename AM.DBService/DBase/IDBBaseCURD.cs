@@ -9,8 +9,8 @@ namespace AM.DBService.DBase
     public interface IDBBaseCURD<T>
     {
         bool Add(T obj);
-        bool Del();
-        List<T> Edit();
-        List<T> Query();
+        bool Delete(T obj);
+        bool Edit(T obj);
+        List<T> QueryAll();
     }
 }

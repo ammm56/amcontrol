@@ -34,28 +34,59 @@ namespace AM.DBService.DBase
             }
             catch (Exception ex)
             {
-                Tools.Tools.Print($"DBCommon Add EX {ex.Message}");
+                Tools.Tools.Print($"Add<{typeof(T).Name}> failed {ex.Message}");
                 return false;
             }
         }
 
-        public bool Del()
+        public bool Delete(T obj)
         {
-            throw new NotImplementedException();
+            try
+            {
+                _sqlSugarClient.Ado.BeginTran();
+                _sqlSugarClient.Deleteable(obj).ExecuteCommand();
+                _sqlSugarClient.Ado.CommitTran();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Tools.Tools.Print($"Delete<{typeof(T).Name}> failed {ex.Message}");
+                return false;
+            }
         }
 
-        public List<T> Edit()
+        public bool Edit(T obj)
         {
-            throw new NotImplementedException();
+            try
+            {
+                _sqlSugarClient.Ado.BeginTran();
+                _sqlSugarClient.Updateable(obj).ExecuteCommand();
+                _sqlSugarClient.Ado.CommitTran();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Tools.Tools.Print($"Update<{typeof(T).Name}> failed {ex.Message}");
+                return false;
+            }
         }
+
 
         /// <summary>
         /// 查询所有
         /// </summary>
         /// <returns></returns>
-        public List<T> Query()
+        public List<T> QueryAll()
         {
-            return _sqlSugarClient.Queryable<T>().ToList();
+            try
+            {
+                return _sqlSugarClient.Queryable<T>().ToList();
+            }
+            catch (Exception ex)
+            {
+                Tools.Tools.Print($"QueryAll<{typeof(T).Name}> failed {ex.Message}");
+                return new List<T>();
+            }
         }
     }
 }

@@ -1,5 +1,5 @@
 ﻿using AM.Model.Common;
-using AM.Model.ICommon;
+using AM.Model.Interfaces;
 using AM.Model.Structs;
 using AM.MotionCard.Googo;
 using AM.Tools;

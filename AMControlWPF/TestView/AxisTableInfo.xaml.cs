@@ -35,7 +35,7 @@ namespace AMControlWPF
         {
             DBResponse<ConfigAxisArg> res = new DBResponse<ConfigAxisArg>
             {
-                data = new DBTable<ConfigAxisArg>().Query(),
+                data = new DBTable<ConfigAxisArg>().QueryAll(),
                 status = true
             };
             if(res.data.Count > 0 ) res.item = res.data[0];

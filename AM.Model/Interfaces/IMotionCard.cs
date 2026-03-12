@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AM.Model.ICommon
+namespace AM.Model.Interfaces
 {
     /// <summary>
     /// 控制卡标准接口

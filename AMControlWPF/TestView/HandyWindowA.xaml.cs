@@ -1,4 +1,5 @@
 ﻿using AM.Tools;
+using AMControlWPF.TestView;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -99,7 +100,11 @@ namespace AMControlWPF
             handyWindowA.Show();
         }
 
-        
+        private void btn_axisconfigview_Click(object sender, RoutedEventArgs e)
+        {
+            AxisInfoView axisInfoView = new AxisInfoView();
+            axisInfoView.Show();
+        }
     }
 
 
