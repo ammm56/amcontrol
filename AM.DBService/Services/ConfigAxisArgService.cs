@@ -1,4 +1,5 @@
-﻿using AM.Core.Logging;
+﻿using AM.Core.Alarm;
+using AM.Core.Logging;
 using AM.Core.Messaging;
 using AM.DBService.DBase;
 using AM.Model.Entity;
@@ -13,6 +14,8 @@ namespace AM.DBService.Services
 {
     public class ConfigAxisArgService : IConfigAxisArgService
     {
+        private readonly AlarmManager _alarmManager;
+
         private readonly IMessageBus _msgbus;
 
         private readonly IAMLogger _logger;

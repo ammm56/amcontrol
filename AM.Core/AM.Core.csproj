@@ -42,6 +42,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Alarm\AlarmManager.cs" />
+    <Compile Include="Context\ConfigContext.cs" />
+    <Compile Include="Context\MachineContext.cs" />
+    <Compile Include="Context\SystemContext.cs" />
     <Compile Include="Logging\IAMLogger.cs" />
     <Compile Include="Messaging\IMessageBus.cs" />
     <Compile Include="Messaging\SystemMessage.cs" />
@@ -50,6 +54,15 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Interfaces\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AM.Model\AM.Model.csproj">
+      <Project>{22cf4793-f392-4421-98fd-0f2e07200689}</Project>
+      <Name>AM.Model</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
