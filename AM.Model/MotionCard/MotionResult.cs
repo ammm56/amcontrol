@@ -1,33 +1,46 @@
+using AM.Model.Common;
+
 namespace AM.Model.MotionCard
 {
     /// <summary>
-    /// 统一执行结果模型
+    /// 运动控制统一结果
     /// </summary>
-    public sealed class MotionResult
+    public class MotionResult : Result
     {
-        public short Code { get; }
-        public string Message { get; }
-        public bool IsSuccess { get { return Code == (short)MotionErrorCode.Success; } }
-
-        public MotionResult(short code, string message)
-        {
-            Code = code;
-            Message = message ?? string.Empty;
-        }
-
         public static MotionResult Ok(string message = "OK")
         {
-            return new MotionResult((short)MotionErrorCode.Success, message);
+            return new MotionResult
+            {
+                Success = true,
+                Code = (short)MotionErrorCode.Success,
+                Message = message,
+                Source = ResultSource.Motion,
+                Time = System.DateTime.Now
+            };
         }
 
         public static MotionResult Fail(MotionErrorCode code, string message)
         {
-            return new MotionResult((short)code, message);
+            return new MotionResult
+            {
+                Success = false,
+                Code = (short)code,
+                Message = message,
+                Source = ResultSource.Motion,
+                Time = System.DateTime.Now
+            };
         }
 
         public static MotionResult Fail(short code, string message)
         {
-            return new MotionResult(code, message);
+            return new MotionResult
+            {
+                Success = false,
+                Code = code,
+                Message = message,
+                Source = ResultSource.Motion,
+                Time = System.DateTime.Now
+            };
         }
     }
 }

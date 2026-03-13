@@ -61,11 +61,13 @@ namespace AM.ViewModel.ViewModels.Config
         {
             try
             {
-                var list = await Task.Run(() => _configAxisArgService.QueryAll());
+                var result = await Task.Run(() => _configAxisArgService.QueryAll());
+                if (!result.Success) return;
+
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     AxisParams.Clear();
-                    foreach (var item in list)
+                    foreach (var item in result.Items)
                     {
                         AxisParams.Add(item);
                     }
@@ -86,21 +88,24 @@ namespace AM.ViewModel.ViewModels.Config
 
             try
             {
-                bool success = await Task.Run(() => _configAxisArgService.Save(param));
-                if (!success) return;
+                var result = await Task.Run(() => _configAxisArgService.Save(param));
+                if (!result.Success) return;
 
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    ConfigAxisArg existing = AxisParams.FirstOrDefault(a => a.Axis == param.Axis && a.ParamName == param.ParamName && a.ParamName_Cn == param.ParamName_Cn);
+                    var existing = AxisParams.FirstOrDefault(a =>
+                        a.Axis == param.Axis &&
+                        a.ParamName == param.ParamName &&
+                        a.ParamName_Cn == param.ParamName_Cn);
+
                     if (existing != null)
                     {
-                        // 更新集合中已存在的项
+                        // 更新集合中的现有项
                         var index = AxisParams.IndexOf(existing);
                         AxisParams[index] = param;
                     }
                     else
                     {
-                        // 新增项
                         AxisParams.Add(param);
                     }
                 });
@@ -120,8 +125,9 @@ namespace AM.ViewModel.ViewModels.Config
 
             try
             {
-                bool success = await Task.Run(() => _configAxisArgService.Delete(param.Axis,param.ParamName,param.ParamName_Cn));
-                if (!success) return;
+                var result = await Task.Run(() => _configAxisArgService.Delete(param.Axis, param.ParamName, param.ParamName_Cn));
+
+                if (!result.Success) return;
 
                 Application.Current.Dispatcher.Invoke(() =>
                 {

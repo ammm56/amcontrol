@@ -33,14 +33,14 @@ namespace AMControlWPF
 
         private void AxisTableInfo_Loaded(object sender, RoutedEventArgs e)
         {
-            DBResponse<ConfigAxisArg> res = new DBResponse<ConfigAxisArg>
+            Result<ConfigAxisArg> res = new Result<ConfigAxisArg>
             {
-                data = new DBTable<ConfigAxisArg>().QueryAll(),
-                status = true
+                Items = new DBTable<ConfigAxisArg>().QueryAll(),
+                Success = true
             };
-            if(res.data.Count > 0 ) res.item = res.data[0];
+            if(res.Items.Count > 0 ) res.Item = res.Items[0];
 
-            res.message = JsonConvert.SerializeObject(res.data, Newtonsoft.Json.Formatting.Indented);
+            res.Message = JsonConvert.SerializeObject(res.Item, Newtonsoft.Json.Formatting.Indented);
 
             this.DataContext = res;
 

@@ -54,6 +54,8 @@
     <Compile Include="Alarm\AlarmInfo.cs" />
     <Compile Include="Alarm\AlarmLevel.cs" />
     <Compile Include="Common\Config.cs" />
+    <Compile Include="Common\DbErrorCode.cs" />
+    <Compile Include="Common\ResultSource.cs" />
     <Compile Include="Interfaces\DB\IConfigAxisArgService.cs" />
     <Compile Include="Interfaces\MotionCard\IMotionAxisControl.cs" />
     <Compile Include="Interfaces\MotionCard\IMotionAxisMaintenance.cs" />
@@ -66,7 +68,7 @@
     <Compile Include="Interfaces\MotionCard\IMotionDigitalIO.cs" />
     <Compile Include="MotionCard\AxisConfig.cs" />
     <Compile Include="Common\ObservableObject_ManualImpl.cs" />
-    <Compile Include="Common\Response.cs" />
+    <Compile Include="Common\Result.cs" />
     <Compile Include="Common\SettingArgsConfig.cs" />
     <Compile Include="DB\MDBaseSet.cs" />
     <Compile Include="DB\MDBInstanceEntityModelArg.cs" />
