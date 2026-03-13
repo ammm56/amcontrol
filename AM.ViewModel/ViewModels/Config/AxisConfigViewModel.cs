@@ -44,10 +44,10 @@ namespace AM.ViewModel.ViewModels.Config
             set { if (_model.Name != value) { _model.Name = value; OnPropertyChanged(nameof(Name)); } }
         }
 
-        public short LogicalId
+        public short LogicalAxis
         {
-            get => _model.LogicalId;
-            set { if (_model.LogicalId != value) { _model.LogicalId = value; OnPropertyChanged(nameof(LogicalId)); } }
+            get => _model.LogicalAxis;
+            set { if (_model.LogicalAxis != value) { _model.LogicalAxis = value; OnPropertyChanged(nameof(LogicalAxis)); } }
         }
 
         public short PhysicalCore

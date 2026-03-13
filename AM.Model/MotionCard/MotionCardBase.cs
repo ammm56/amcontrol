@@ -1,11 +1,7 @@
-﻿using AM.Model.Common;
-using AM.Model.Interfaces;
-using AM.Model.Interfaces.MotionCard;
+﻿using AM.Model.Interfaces.MotionCard;
 using AM.Model.Structs;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace AM.Model.MotionCard
@@ -14,13 +10,18 @@ namespace AM.Model.MotionCard
     {
         // --- 字段 ---
         protected short _cardId;
+        private readonly object _axisMapLock = new object();
 
         // --- 事件通知 ---
         public event Action<short, string> OnError;
 
         /// <summary>
-        /// 逻辑轴映射表：Key 是 LogicalId，Value 是完整的轴配置（含物理核、轴、单位系数）
-        /// 内部维护一张逻辑轴到物理参数的映射表
+        /// 最近一次执行结果（用于上层诊断）
+        /// </summary>
+        protected MotionResult LastResult { get; private set; } = MotionResult.Ok();
+
+        /// <summary>
+        /// 逻辑轴映射表：Key 是 LogicalAxis，Value 是完整的轴配置（含物理核、轴、单位系数）
         /// </summary>
         protected Dictionary<short, AxisConfig> _axisMap = new Dictionary<short, AxisConfig>();
 
@@ -29,106 +30,133 @@ namespace AM.Model.MotionCard
         /// </summary>
         public virtual void LoadAxisConfig(List<AxisConfig> configs)
         {
-            // 转换成字典，方便 Move(logicalId) 时快速找到 PhysicalCore 和 PhysicalAxis
-            if (configs == null) return;
-            _axisMap.Clear();
+            if (configs == null)
+            {
+                Fail(MotionErrorCode.InvalidAxisConfig, "LoadAxisConfig 入参为空");
+                return;
+            }
 
-            // 使用局部变量构建好再替换，保证线程安全
             var tempMap = new Dictionary<short, AxisConfig>();
             foreach (var cfg in configs)
             {
-                tempMap[cfg.LogicalId] = cfg;
+                tempMap[cfg.LogicalAxis] = cfg;
             }
-            _axisMap = tempMap;
+
+            lock (_axisMapLock)
+            {
+                _axisMap = tempMap;
+            }
+
+            Ok("轴映射加载完成");
         }
 
         /// <summary>
         /// 安全获取逻辑轴配置，若找不到则触发报警
         /// </summary>
-        protected AxisConfig GetLogicalAxisCfg(short logicalId)
+        protected AxisConfig GetLogicalAxisCfg(short logicalAxis)
         {
-            // 使用 TryGetValue 是安全的
-            if (_axisMap.TryGetValue(logicalId, out var cfg)) return cfg;
+            AxisConfig cfg;
+            lock (_axisMapLock)
+            {
+                if (_axisMap.TryGetValue(logicalAxis, out cfg))
+                    return cfg;
+            }
 
-            // 这里只记录一次日志，不抛出异常，让上层业务决定是否崩溃
-            HandleError(-1, $"逻辑轴 {logicalId} 映射未找到");
+            Fail(MotionErrorCode.AxisMapNotFound, "逻辑轴 " + logicalAxis + " 映射未找到");
             return null;
         }
 
         /// <summary>
-        /// 统一错误处理分发
+        /// 统一成功结果写入
+        /// </summary>
+        protected short Ok(string message = "OK")
+        {
+            LastResult = MotionResult.Ok(message);
+            return (short)MotionErrorCode.Success;
+        }
+
+        /// <summary>
+        /// 统一失败结果写入并分发报警
+        /// </summary>
+        protected short Fail(MotionErrorCode code, string message)
+        {
+            var shortCode = (short)code;
+            LastResult = MotionResult.Fail(shortCode, message);
+
+            if (shortCode != 0)
+                OnError?.Invoke(_cardId, message);
+
+            return shortCode;
+        }
+
+        /// <summary>
+        /// 兼容厂家 SDK 返回码（保留）
         /// </summary>
         protected short HandleError(short code, string message)
         {
-            if (code != 0) OnError?.Invoke(_cardId, message);
+            LastResult = code == 0 ? MotionResult.Ok(message) : MotionResult.Fail(code, message);
+
+            if (code != 0)
+                OnError?.Invoke(_cardId, message);
+
             return code;
         }
 
-        // --- 统一单位转换 (直接引用 AxisConfig 的 K 值) ---
         /// <summary>
-        /// 使用配置的 K 值进行毫米到脉冲的转换，并增加数据溢出保护
-        /// K值的计算方式为：K = (PulsePerRev * GearRatio) / Lead
+        /// 使用配置的 K 值进行毫米到脉冲转换，并增加溢出保护
         /// </summary>
-        /// <param name="logicalId"></param>
-        /// <param name="mm"></param>
-        /// <returns></returns>
-        /// <exception cref="InvalidOperationException"></exception>
-        protected int MmToPulse(short logicalId, double mm)
+        protected int MmToPulse(short logicalAxis, double mm)
         {
-            var cfg = GetLogicalAxisCfg(logicalId);
+            var cfg = GetLogicalAxisCfg(logicalAxis);
             if (cfg == null)
             {
-                HandleError(-1, $"[致命错误] 毫米到脉冲转换，尝试操作未配置的逻辑轴: {logicalId}");
-                // 拦截，不执行转换
+                Fail(MotionErrorCode.AxisMapNotFound, "[致命错误] 毫米到脉冲转换，尝试操作未配置的逻辑轴: " + logicalAxis);
                 return 0;
             }
-            // 物理参数合法性校验
+
             if (cfg.K <= 0)
             {
-                HandleError(-2, $"轴 {logicalId} 的K值非法({cfg.K})，请检查导程或脉冲数设置");
+                Fail(MotionErrorCode.InvalidK, "轴 " + logicalAxis + " 的K值非法(" + cfg.K + ")，请检查导程或脉冲数设置");
                 return 0;
             }
-            // 增加数据溢出保护：防止计算出的脉冲数超过 int 范围
-            double pulseCalc = mm * cfg.K;
+
+            var pulseCalc = mm * cfg.K;
             if (pulseCalc > int.MaxValue || pulseCalc < int.MinValue)
             {
-                HandleError(-3, $"轴 {logicalId} 目标脉冲溢出({pulseCalc}，请检查行程或 K 值。");
-                return 0; // 返回 0 脉冲，防止飞车
+                Fail(MotionErrorCode.PulseOverflow, "轴 " + logicalAxis + " 目标脉冲溢出(" + pulseCalc + ")，请检查行程或 K 值");
+                return 0;
             }
-            return (int)pulseCalc;
+
+            return Convert.ToInt32(Math.Round(pulseCalc, MidpointRounding.AwayFromZero));
         }
+
         /// <summary>
-        /// 使用配置的 K 值进行脉冲到毫米的转换，并增加数据有效性检查
-        /// K值的计算方式为：K = (PulsePerRev * GearRatio) / Lead
+        /// 使用配置的 K 值进行脉冲到毫米转换，并增加有效性检查
         /// </summary>
-        /// <param name="logicalId"></param>
-        /// <param name="pulse"></param>
-        /// <returns></returns>
-        protected double PulseToMm(short logicalId, double pulse)
+        protected double PulseToMm(short logicalAxis, double pulse)
         {
-            var cfg = GetLogicalAxisCfg(logicalId);
+            var cfg = GetLogicalAxisCfg(logicalAxis);
             if (cfg == null)
             {
-                // 记录错误但不崩溃，返回非数字 (NaN) 让 UI 显示为空或异常
-                HandleError(-3, $"[数据错误] 脉冲到毫米转化，尝试换算未配置逻辑轴 {logicalId} 的坐标");
+                Fail(MotionErrorCode.AxisMapNotFound, "[数据错误] 脉冲到毫米转换，尝试换算未配置逻辑轴 " + logicalAxis + " 的坐标");
                 return double.NaN;
             }
-            // K 值是否合法（防止除以 0）
-            // 如果 Lead 设为 0，K 会变成无穷大或 0
+
             if (Math.Abs(cfg.K) < 0.000001)
             {
-                HandleError(-4, $"[参数错误] 脉冲到毫米转化，轴 {logicalId} 的脉冲当量(K)为0，无法换算坐标");
+                Fail(MotionErrorCode.InvalidK, "[参数错误] 脉冲到毫米转换，轴 " + logicalAxis + " 的脉冲当量(K)为0，无法换算坐标");
                 return double.NaN;
             }
+
             return pulse / cfg.K;
         }
 
         // --- 抽象运动接口 (由厂家类实现具体协议) ---
-        public abstract short Enable(short logicalId, bool onOff);
-        public abstract short Stop(short logicalId, bool isEmergency = false);
-        public abstract short MoveRelative(short logicalId, double pulse, double velocity, double acc, double dec);
-        public abstract short MoveRelativeMm(short logicalId, double distanceMm, double velMm);
-        public abstract short SetZeroPos(short logicalId);
+        public abstract short Enable(short logicalAxis, bool onOff);
+        public abstract short Stop(short logicalAxis, bool isEmergency = false);
+        public abstract short MoveRelative(short logicalAxis, double pulse, double velocity, double acc, double dec);
+        public abstract short MoveRelativeMm(short logicalAxis, double distanceMm, double velMm);
+        public abstract short SetZeroPos(short logicalAxis);
         public abstract bool Initialize(string configPath);
         public abstract short Connect();
         public abstract short Disconnect();
@@ -153,14 +181,12 @@ namespace AM.Model.MotionCard
         public abstract AxisStatus GetAxisStatus(short logicalAxis);
         public abstract double GetCommandPosition(short logicalAxis);
         public abstract double GetEncoderPosition(short logicalAxis);
+        public abstract double GetCommandPositionMm(short logicalAxis);
+        public abstract double GetEncoderPositionMm(short logicalAxis);
 
         // --- 状态查询 ---
-        public abstract bool IsMoving(short logicalId);
-        public abstract double GetPositionMm(short logicalId);
+        public abstract bool IsMoving(short logicalAxis);
 
-
-        // 统一封装日志记录、重试机制或异常处理
-        protected void Log(string message) => Console.WriteLine($"[{_cardId}] {message}");
-        
+        protected void Log(string message) => Console.WriteLine("[" + _cardId + "] " + message);
     }
 }

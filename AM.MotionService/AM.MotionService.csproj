@@ -45,7 +45,6 @@
   <ItemGroup>
     <Compile Include="Googo\GoogoMotionCardService.cs" />
     <Compile Include="Googo\gts.cs" />
-    <Compile Include="Googo\GtsApi.cs" />
     <Compile Include="Leisai\LeisaiMotionCardService.cs" />
     <Compile Include="Factory\MotionCardFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

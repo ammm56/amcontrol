@@ -57,6 +57,11 @@ namespace AM.MotionService.Virtual
             throw new NotImplementedException();
         }
 
+        public override double GetCommandPositionMm(short logicalAxis)
+        {
+            throw new NotImplementedException();
+        }
+
         public override bool GetDI(short bit)
         {
             throw new NotImplementedException();
@@ -72,7 +77,7 @@ namespace AM.MotionService.Virtual
             throw new NotImplementedException();
         }
 
-        public override double GetPositionMm(short logicalId)
+        public override double GetEncoderPositionMm(short logicalAxis)
         {
             throw new NotImplementedException();
         }

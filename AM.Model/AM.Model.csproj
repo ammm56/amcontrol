@@ -55,6 +55,15 @@
     <Compile Include="Alarm\AlarmLevel.cs" />
     <Compile Include="Common\Config.cs" />
     <Compile Include="Interfaces\DB\IConfigAxisArgService.cs" />
+    <Compile Include="Interfaces\MotionCard\IMotionAxisControl.cs" />
+    <Compile Include="Interfaces\MotionCard\IMotionAxisMaintenance.cs" />
+    <Compile Include="Interfaces\MotionCard\IMotionAxisMotion.cs" />
+    <Compile Include="Interfaces\MotionCard\IMotionAxisParameter.cs" />
+    <Compile Include="Interfaces\MotionCard\IMotionAxisState.cs" />
+    <Compile Include="Interfaces\MotionCard\IMotionCardConfiguration.cs" />
+    <Compile Include="Interfaces\MotionCard\IMotionCardConnection.cs" />
+    <Compile Include="Interfaces\MotionCard\IMotionCardDiagnostics.cs" />
+    <Compile Include="Interfaces\MotionCard\IMotionDigitalIO.cs" />
     <Compile Include="MotionCard\AxisConfig.cs" />
     <Compile Include="MotionCard\MotionCardBase.cs" />
     <Compile Include="Common\ObservableObject_ManualImpl.cs" />
@@ -66,6 +75,8 @@
     <Compile Include="Interfaces\MotionCard\IMotionCardService.cs" />
     <Compile Include="Model\MOSInfo.cs" />
     <Compile Include="MotionCard\MotionCardConfig.cs" />
+    <Compile Include="MotionCard\MotionErrorCode.cs" />
+    <Compile Include="MotionCard\MotionResult.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Structs\AxisParam.cs" />
     <Compile Include="Structs\AxisStatus.cs" />

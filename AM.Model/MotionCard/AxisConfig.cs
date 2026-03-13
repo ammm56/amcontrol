@@ -45,7 +45,8 @@ namespace AM.Model.MotionCard
     public partial class AxisConfig
     {
         /// <summary>
-        /// 轴ID
+        /// 轴ID (如 1)，对应硬件层的轴编号，通常从 1 开始
+        /// 数据库记录中的唯一轴编号
         /// </summary>
         public short AxisId { get; set; }
 
@@ -55,9 +56,9 @@ namespace AM.Model.MotionCard
         public string Name { get; set; }
 
         /// <summary>
-        /// 业务层调用的 ID (如: 0, 1, 2)，统一不同卡的轴号
+        /// 业务层调用的 轴编号 (如: 11, 12, 21)，统一不同卡的轴号
         /// </summary>
-        public short LogicalId { get; set; }
+        public short LogicalAxis { get; set; }
 
         /// <summary>
         /// 固高专用：内核号 (如 1)
