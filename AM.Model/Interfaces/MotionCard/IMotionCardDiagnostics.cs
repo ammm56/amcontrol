@@ -1,3 +1,4 @@
+using AM.Model.Common;
 using AM.Model.MotionCard;
 using System;
 
@@ -14,7 +15,7 @@ namespace AM.Model.Interfaces.MotionCard
         /// </summary>
         //event Action<short, string> OnError;
 
-        MotionResult LastResult { get; }
+        Result LastResult { get; }
 
     }
 }

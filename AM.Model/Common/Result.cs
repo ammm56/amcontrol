@@ -37,14 +37,14 @@ namespace AM.Model.Common
         /// </summary>
         public DateTime Time { get; set; } = DateTime.Now;
 
-        public Result()
+        protected Result()
         {
             Time = DateTime.Now;
             Message = string.Empty;
             Source = ResultSource.Unknown;
         }
 
-        public Result(bool success, int code, string message, ResultSource source)
+        protected Result(bool success, int code, string message, ResultSource source)
         {
             Success = success;
             Code = code;
@@ -76,11 +76,11 @@ namespace AM.Model.Common
         public T Item { get; set; }
 
         /// <summary>
-        /// 数据集
+        /// 数据集：允许外部读，不允许随意写
         /// </summary>
-        public List<T> Items { get; set; } = new List<T>();
+        public IReadOnlyList<T> Items { get; protected set; } = new List<T>();
 
-        public Result(): base()
+        protected Result(): base()
         {
             Items = new List<T>();
         }

@@ -1,12 +1,11 @@
 ﻿using AM.Core.Context;
 using AM.Core.Messaging;
+using AM.Model.Common;
 using AM.Model.Interfaces.MotionCard;
 using AM.Model.MotionCard;
 using AM.Model.Structs;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace AM.MotionService.Base
@@ -22,7 +21,7 @@ namespace AM.MotionService.Base
         /// <summary>
         /// 最近一次执行结果（用于上层诊断/UI）
         /// </summary>
-        public MotionResult LastResult { get; private set; } = MotionResult.Ok();
+        public Result LastResult { get; private set; } = Result.Ok("OK", ResultSource.Motion);
 
         /// <summary>
         /// 逻辑轴映射表：Key 是 LogicalAxis，Value 是完整的轴配置（含物理核、轴、单位系数）
@@ -30,6 +29,7 @@ namespace AM.MotionService.Base
         protected Dictionary<short, AxisConfig> _axisMap = new Dictionary<short, AxisConfig>();
 
         #region 消息总线
+
         protected IMessageBus MessageBus
         {
             get { return SystemContext.Instance.MessageBus; }
@@ -44,29 +44,33 @@ namespace AM.MotionService.Base
         }
 
         /// <summary>
-        /// 统一成功结果写入
+        /// 非泛型成功结果：供命令方法与内部辅助方法使用
         /// </summary>
-        protected MotionResult Ok(string message = "OK")
+        protected Result Ok(string message = "OK")
         {
-            LastResult = MotionResult.Ok(message);
+            LastResult = Result.Ok(message, ResultSource.Motion);
             PublishMessage(SystemMessageType.Status, message);
             return LastResult;
         }
+
         /// <summary>
-        /// 统一失败结果写入并分发报警
+        /// 非泛型失败结果：供命令方法与内部辅助方法使用
         /// </summary>
-        protected MotionResult Fail(MotionErrorCode code, string message)
+        protected Result Fail(MotionErrorCode code, string message)
         {
-            LastResult = MotionResult.Fail(code, message);
+            LastResult = Result.Fail((short)code, message, ResultSource.Motion);
             PublishMessage(SystemMessageType.Error, message, ((short)code).ToString());
             return LastResult;
         }
+
         /// <summary>
-        /// 兼容厂家 SDK 返回码（保留）
+        /// 非泛型 SDK 错误处理：供命令方法与内部辅助方法使用
         /// </summary>
-        protected MotionResult HandleError(short code, string message)
+        protected Result HandleError(short code, string message)
         {
-            LastResult = code == 0? MotionResult.Ok(message): MotionResult.Fail(code, message);
+            LastResult = code == 0
+                ? Result.Ok(message, ResultSource.Motion)
+                : Result.Fail(code, message, ResultSource.Motion);
 
             if (code == 0)
                 PublishMessage(SystemMessageType.Status, message);
@@ -76,9 +80,49 @@ namespace AM.MotionService.Base
             return LastResult;
         }
 
+        /// <summary>
+        /// 泛型成功结果：供查询方法使用
+        /// </summary>
+        protected Result<T> Ok<T>(T item, string message = "OK")
+        {
+            LastResult = Result.Ok(message, ResultSource.Motion);
+            PublishMessage(SystemMessageType.Status, message);
+            return Result<T>.OkItem(item, message, ResultSource.Motion);
+        }
+
+        /// <summary>
+        /// 泛型失败结果：供查询方法使用
+        /// </summary>
+        protected Result<T> Fail<T>(MotionErrorCode code, string message)
+        {
+            LastResult = Result.Fail((short)code, message, ResultSource.Motion);
+            PublishMessage(SystemMessageType.Error, message, ((short)code).ToString());
+            return Result<T>.Fail((short)code, message, ResultSource.Motion);
+        }
+
+        /// <summary>
+        /// 泛型 SDK 错误处理：供查询方法使用
+        /// </summary>
+        protected Result<T> HandleError<T>(short code, string message)
+        {
+            LastResult = code == 0
+                ? Result.Ok(message, ResultSource.Motion)
+                : Result.Fail(code, message, ResultSource.Motion);
+
+            if (code == 0)
+                PublishMessage(SystemMessageType.Status, message);
+            else
+                PublishMessage(SystemMessageType.Error, message, code.ToString());
+
+            return code == 0
+                ? Result<T>.OkItem(default(T), message, ResultSource.Motion)
+                : Result<T>.Fail(code, message, ResultSource.Motion);
+        }
+
         #endregion
 
         #region 轴配置管理
+
         /// <summary>
         /// 加载并初始化轴配置映射表
         /// </summary>
@@ -176,39 +220,37 @@ namespace AM.MotionService.Base
         #endregion
 
         // --- 抽象运动接口 (由厂家类实现具体协议) ---
-        public abstract MotionResult Enable(short logicalAxis, bool onOff);
-        public abstract MotionResult Stop(short logicalAxis, bool isEmergency = false);
-        public abstract MotionResult MoveRelative(short logicalAxis, double pulse, double velocity, double acc, double dec);
-        public abstract MotionResult MoveRelativeMm(short logicalAxis, double distanceMm, double velMm);
-        public abstract MotionResult SetZeroPos(short logicalAxis);
-        public abstract MotionResult Initialize(string configPath);
-        public abstract MotionResult Connect();
-        public abstract MotionResult Disconnect();
-        public abstract MotionResult ClearStatus(short logicalAxis);
-        public abstract MotionResult ClearAllAxisStatus();
-        public abstract MotionResult SetAllZeroPos();
-        public abstract MotionResult ConfigAxisHardware(AxisConfig cfg);
-        public abstract MotionResult StopAll(bool isEmergency = false);
-        public abstract Task<MotionResult> HomeAsync(short logicalAxis);
-        public abstract MotionResult Home(short logicalAxis);
-        public abstract MotionResult MoveAbsolute(short logicalAxis, double position, double velocity, double acc, double dec);
-        public abstract MotionResult JogMove(short logicalAxis, int direction, double velocity);
-        public abstract MotionResult MoveAbsoluteMm(short logicalAxis, double positionMm, double velMm);
-        public abstract MotionResult JogMoveMm(short logicalAxis, bool direction, double velMm);
-        public abstract MotionResult JogStop(short logicalAxis);
-        public abstract MotionResult SetDO(short bit, bool status);
-        public abstract bool GetDI(short bit);
-        public abstract bool GetDO(short bit);
-        public abstract MotionResult SetVel(short logicalAxis, double vel);
-        public abstract MotionResult SetAcc(short logicalAxis, double acc);
-        public abstract MotionResult SetDec(short logicalAxis, double dec);
-        public abstract AxisStatus GetAxisStatus(short logicalAxis);
-        public abstract double GetCommandPosition(short logicalAxis);
-        public abstract double GetEncoderPosition(short logicalAxis);
-        public abstract double GetCommandPositionMm(short logicalAxis);
-        public abstract double GetEncoderPositionMm(short logicalAxis);
-        public abstract bool IsMoving(short logicalAxis);
-
-        protected void Log(string message) => Console.WriteLine("[" + _cardId + "] " + message);
+        public abstract Result Enable(short logicalAxis, bool onOff);
+        public abstract Result Stop(short logicalAxis, bool isEmergency = false);
+        public abstract Result MoveRelative(short logicalAxis, double pulse, double velocity, double acc, double dec);
+        public abstract Result MoveRelativeMm(short logicalAxis, double distanceMm, double velMm);
+        public abstract Result SetZeroPos(short logicalAxis);
+        public abstract Result Initialize(string configPath);
+        public abstract Result Connect();
+        public abstract Result Disconnect();
+        public abstract Result ClearStatus(short logicalAxis);
+        public abstract Result ClearAllAxisStatus();
+        public abstract Result SetAllZeroPos();
+        public abstract Result ConfigAxisHardware(AxisConfig cfg);
+        public abstract Result StopAll(bool isEmergency = false);
+        public abstract Task<Result> HomeAsync(short logicalAxis);
+        public abstract Result Home(short logicalAxis);
+        public abstract Result MoveAbsolute(short logicalAxis, double position, double velocity, double acc, double dec);
+        public abstract Result JogMove(short logicalAxis, int direction, double velocity);
+        public abstract Result MoveAbsoluteMm(short logicalAxis, double positionMm, double velMm);
+        public abstract Result JogMoveMm(short logicalAxis, bool direction, double velMm);
+        public abstract Result JogStop(short logicalAxis);
+        public abstract Result SetDO(short bit, bool status);
+        public abstract Result<bool> GetDI(short bit);
+        public abstract Result<bool> GetDO(short bit);
+        public abstract Result SetVel(short logicalAxis, double vel);
+        public abstract Result SetAcc(short logicalAxis, double acc);
+        public abstract Result SetDec(short logicalAxis, double dec);
+        public abstract Result<AxisStatus> GetAxisStatus(short logicalAxis);
+        public abstract Result<double> GetCommandPosition(short logicalAxis);
+        public abstract Result<double> GetEncoderPosition(short logicalAxis);
+        public abstract Result<double> GetCommandPositionMm(short logicalAxis);
+        public abstract Result<double> GetEncoderPositionMm(short logicalAxis);
+        public abstract Result<bool> IsMoving(short logicalAxis);
     }
 }

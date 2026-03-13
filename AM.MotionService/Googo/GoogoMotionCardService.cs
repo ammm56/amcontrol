@@ -27,7 +27,7 @@ namespace AM.MotionCard.Googo
         {
         }
 
-        public override MotionResult Initialize(string configPath)
+        public override Result Initialize(string configPath)
         {
             // 启动阶段仅做连通性预检查，正式连接由 Connect 负责
             short res = mc.GTN_Open(CurrentConfig.CardId, CurrentConfig.ModeParam);
@@ -44,7 +44,7 @@ namespace AM.MotionCard.Googo
         /// 实现基类的抽象方法（多卡支持）
         /// </summary>
         /// <returns></returns>
-        public override MotionResult Connect()
+        public override Result Connect()
         {
             _cardId = CurrentConfig.CardId;
 
@@ -90,7 +90,7 @@ namespace AM.MotionCard.Googo
         /// </summary>
         /// <param name="logicalAxis"></param>
         /// <returns></returns>
-        public override MotionResult ClearStatus(short logicalAxis)
+        public override Result ClearStatus(short logicalAxis)
         {
             var cfg = GetLogicalAxisCfg(logicalAxis);
             if (cfg == null) return LastResult; // 找不到配置直接退出
@@ -108,7 +108,7 @@ namespace AM.MotionCard.Googo
         /// 清除指定核心所有轴状态
         /// </summary>
         /// <returns></returns>
-        public override MotionResult ClearAllAxisStatus()
+        public override Result ClearAllAxisStatus()
         {
             // 遍历配置文件中定义的所有内核
             for (short core = 1; core <= CurrentConfig.CoreNumber; core++)
@@ -129,7 +129,7 @@ namespace AM.MotionCard.Googo
         /// 规划位置（Command Position）和实际位置（Actual Position/Encoder）同时清零
         /// 禁止运动中清除，清除后检查限位
         /// </summary>
-        public override MotionResult SetZeroPos(short logicalAxis)
+        public override Result SetZeroPos(short logicalAxis)
         {
             var cfg = GetLogicalAxisCfg(logicalAxis);
             if (cfg == null) return LastResult;
@@ -148,7 +148,7 @@ namespace AM.MotionCard.Googo
         /// 根据配置清除所有内核的所有轴位置
         /// 规划位置（Command Position）和实际位置（Actual Position/Encoder）同时清零
         /// </summary>
-        public override MotionResult SetAllZeroPos()
+        public override Result SetAllZeroPos()
         {
             // 遍历配置文件中定义的所有物理内核
             for (short core = 1; core <= CurrentConfig.CoreNumber; core++)
@@ -164,7 +164,7 @@ namespace AM.MotionCard.Googo
             return Ok("全轴位置清零成功");
         }
 
-        public override MotionResult ConfigAxisHardware(AxisConfig cfg)
+        public override Result ConfigAxisHardware(AxisConfig cfg)
         {
             short core = cfg.PhysicalCore;
             short axis = cfg.PhysicalAxis;
@@ -217,14 +217,14 @@ namespace AM.MotionCard.Googo
             return Ok($"轴硬件参数配置成功，核{core} 轴{axis}");
         }
 
-        public override MotionResult Disconnect()
+        public override Result Disconnect()
         {
             short rtn = mc.GTN_Close();
             if (rtn != 0) return HandleError(rtn, "GTN_Close 失败");
             return Ok("控制卡已断开");
         }
 
-        public override MotionResult Enable(short logicalAxis, bool onOff)
+        public override Result Enable(short logicalAxis, bool onOff)
         {
             var cfg = GetLogicalAxisCfg(logicalAxis);
             if (cfg == null) return LastResult;
@@ -234,13 +234,15 @@ namespace AM.MotionCard.Googo
                 : mc.GTN_AxisOff(cfg.PhysicalCore, cfg.PhysicalAxis);
 
             if (rtn != 0) return HandleError(rtn, "轴 " + logicalAxis + " 使能切换失败");
+
+            cfg.IsServoOn = onOff;
             return Ok("轴使能状态切换成功");
         }
 
         /// <summary>
         /// 停止单个逻辑轴
         /// </summary>
-        public override MotionResult Stop(short logicalAxis, bool isEmergency = false)
+        public override Result Stop(short logicalAxis, bool isEmergency = false)
         {
             var cfg = GetLogicalAxisCfg(logicalAxis);
             if (cfg == null) return LastResult;
@@ -261,7 +263,7 @@ namespace AM.MotionCard.Googo
         /// <summary>
         /// 停止所有配置的内核的所有轴
         /// </summary>
-        public override MotionResult StopAll(bool isEmergency = false)
+        public override Result StopAll(bool isEmergency = false)
         {
             short option = isEmergency ? (short)1 : (short)0;
             // 遍历所有物理内核
@@ -279,15 +281,55 @@ namespace AM.MotionCard.Googo
             return Ok("全轴停止成功");
         }
 
-        public override Task<MotionResult> HomeAsync(short logicalAxis)
+        #region 回零
+        public override Task<Result> HomeAsync(short logicalAxis)
         {
-            return Task.FromResult(Home(logicalAxis));
+            return Task.Run(() => Home(logicalAxis));
         }
 
-        public override MotionResult Home(short logicalAxis)
+        public override Result Home(short logicalAxis)
         {
-            return Fail(MotionErrorCode.NotImplemented, $"轴 {logicalAxis} 回零功能未实现");
+            var cfg = GetLogicalAxisCfg(logicalAxis);
+            if (cfg == null) return LastResult;
+
+            if (cfg.StandardHomeMode <= 0)
+            {
+                return Fail(MotionErrorCode.HomeConfigInvalid, "轴 " + logicalAxis + " 回零模式未配置");
+            }
+
+            if (cfg.HomeHighSpeed <= 0 || cfg.HomeLowSpeed <= 0)
+            {
+                return Fail(MotionErrorCode.HomeConfigInvalid, "轴 " + logicalAxis + " 回零速度配置无效");
+            }
+
+            if (cfg.HomeTimeoutMs <= 0)
+            {
+                return Fail(MotionErrorCode.HomeConfigInvalid, "轴 " + logicalAxis + " 回零超时配置无效");
+            }
+
+            mc.TStandardHomePrm prm = new mc.TStandardHomePrm
+            {
+                mode = cfg.StandardHomeMode,
+                highSpeed = cfg.HomeHighSpeed,
+                lowSpeed = cfg.HomeLowSpeed,
+                acc = cfg.Acc,
+                offset = cfg.HomeOffset,
+                check = cfg.HomeCheck ? (short)1 : (short)0,
+                autoZeroPos = cfg.HomeAutoZeroPos ? (short)1 : (short)0,
+                motorStopDelay = 0,
+                //pad1 = new short[3]
+            };
+
+            short rtn = mc.GTN_ExecuteStandardHome(cfg.PhysicalCore, cfg.PhysicalAxis, ref prm);
+            if (rtn != 0)
+            {
+                return HandleError(rtn, "轴 " + logicalAxis + " 启动标准回零失败");
+            }
+
+            return WaitStandardHomeDone(cfg);
         }
+
+        #endregion
 
         #region 相对运动实现（Trap模式）
         /// <summary>
@@ -296,7 +338,7 @@ namespace AM.MotionCard.Googo
         /// <param name="logicalAxis">逻辑轴号</param>
         /// <param name="distanceMm">相对移动距离 (mm)</param>
         /// <param name="velMm">运行速度 (mm/s)</param>
-        public override MotionResult MoveRelativeMm(short logicalAxis, double distanceMm, double velMm)
+        public override Result MoveRelativeMm(short logicalAxis, double distanceMm, double velMm)
         {
             var cfg = GetLogicalAxisCfg(logicalAxis);
             if (cfg == null) return LastResult;
@@ -317,7 +359,7 @@ namespace AM.MotionCard.Googo
         /// <param name="acc">加速度 脉冲（默认使用配置参数）</param>
         /// <param name="dec">减速带 脉冲（默认使用配置参数）</param>
         /// <returns></returns>
-        public override MotionResult MoveRelative(short logicalAxis, double pulseDistance, double velocity, double acc, double dec)
+        public override Result MoveRelative(short logicalAxis, double pulseDistance, double velocity, double acc, double dec)
         {
             // 1. 获取轴配置映射 (用于找到物理 Core 和 Axis)
             var cfg = GetLogicalAxisCfg(logicalAxis);
@@ -373,7 +415,7 @@ namespace AM.MotionCard.Googo
         /// <param name="logicalAxis">逻辑轴号</param>
         /// <param name="positionMm">绝对位移位置 (mm)</param>
         /// <param name="velMm">运行速度 (mm/s)</param>
-        public override MotionResult MoveAbsoluteMm(short logicalAxis, double positionMm, double velMm)
+        public override Result MoveAbsoluteMm(short logicalAxis, double positionMm, double velMm)
         {
             var cfg = GetLogicalAxisCfg(logicalAxis);
             if (cfg == null) return LastResult;
@@ -394,7 +436,7 @@ namespace AM.MotionCard.Googo
         /// <param name="acc">加速度 脉冲（默认使用配置参数）</param>
         /// <param name="dec">减速带 脉冲（默认使用配置参数）</param>
         /// <returns></returns>
-        public override MotionResult MoveAbsolute(short logicalAxis, double targetPulse, double velocity, double acc, double dec)
+        public override Result MoveAbsolute(short logicalAxis, double targetPulse, double velocity, double acc, double dec)
         {
             var cfg = GetLogicalAxisCfg(logicalAxis);
             if (cfg == null) return LastResult;
@@ -432,7 +474,7 @@ namespace AM.MotionCard.Googo
 
         #endregion
 
-        public override MotionResult JogMove(short logicalAxis, int direction, double velocity)
+        public override Result JogMove(short logicalAxis, int direction, double velocity)
         {
             var cfg = GetLogicalAxisCfg(logicalAxis);
             if (cfg == null) return LastResult;
@@ -468,7 +510,7 @@ namespace AM.MotionCard.Googo
             return Ok($"轴{logicalAxis} Jog启动成功");
         }
 
-        public override MotionResult JogMoveMm(short logicalAxis, bool direction, double velMm)
+        public override Result JogMoveMm(short logicalAxis, bool direction, double velMm)
         {
             var cfg = GetLogicalAxisCfg(logicalAxis);
             if (cfg == null) return LastResult;
@@ -504,29 +546,113 @@ namespace AM.MotionCard.Googo
             return Ok($"轴{logicalAxis} Jog启动成功");
         }
 
-        public override MotionResult JogStop(short logicalAxis)
+        public override Result JogStop(short logicalAxis)
         {
             return Stop(logicalAxis, false);
         }
 
-        public override MotionResult SetDO(short bit, bool status)
+        #region 数字输入/输出接口
+
+        public override Result SetDO(short bit, bool status)
         {
-            return Fail(MotionErrorCode.NotImplemented, $"DO 输出未实现，Bit={bit}");
+            var map = GetDOBitMap(bit);
+            if (map == null)
+            {
+                return Fail(MotionErrorCode.IoMapNotFound, "DO 映射未找到，Bit=" + bit);
+            }
+
+            short value = status ? (short)1 : (short)0;
+            short rtn;
+
+            if (map.IsExtModule)
+            {
+                rtn = mc.GTN_SetExtDoBit(map.Core, map.HardwareBit, value);
+                if (rtn != 0)
+                {
+                    return HandleError(rtn, "扩展DO输出失败，Bit=" + bit);
+                }
+
+                return Ok("扩展DO输出成功，Bit=" + bit + " Value=" + value);
+            }
+
+            rtn = mc.GTN_SetDoBit(map.Core, mc.MC_GPO, map.HardwareBit, value);
+            if (rtn != 0)
+            {
+                return HandleError(rtn, "板载DO输出失败，Bit=" + bit);
+            }
+
+            return Ok("板载DO输出成功，Bit=" + bit + " Value=" + value);
         }
 
-        public override bool GetDI(short bit)
+        public override Result<bool> GetDI(short bit)
         {
-            HandleError((short)MotionErrorCode.NotImplemented, $"DI 读取未实现，Bit={bit}");
-            return false;
+            var map = GetDIBitMap(bit);
+            if (map == null)
+            {
+                return Fail<bool>(MotionErrorCode.IoMapNotFound, "DI 映射未找到，Bit=" + bit);
+            }
+
+            short rtn;
+
+            if (map.IsExtModule)
+            {
+                short extValue;
+                rtn = mc.GTN_GetExtDiBit(map.Core, map.HardwareBit, out extValue);
+                if (rtn != 0)
+                {
+                    return HandleError<bool>(rtn, "读取扩展DI失败，Bit=" + bit);
+                }
+
+                return Ok(extValue != 0, "读取扩展DI成功，Bit=" + bit);
+            }
+
+            short value;
+            rtn = mc.GTN_GetDiBit(map.Core, mc.MC_GPI, map.HardwareBit, out value);
+            if (rtn != 0)
+            {
+                return HandleError<bool>(rtn, "读取板载DI失败，Bit=" + bit);
+            }
+
+            return Ok(value != 0, "读取板载DI成功，Bit=" + bit);
         }
 
-        public override bool GetDO(short bit)
+        public override Result<bool> GetDO(short bit)
         {
-            HandleError((short)MotionErrorCode.NotImplemented, $"DO 读取未实现，Bit={bit}");
-            return false;
+            var map = GetDOBitMap(bit);
+            if (map == null)
+            {
+                return Fail<bool>(MotionErrorCode.IoMapNotFound, "DO 映射未找到，Bit=" + bit);
+            }
+
+            short rtn;
+
+            if (map.IsExtModule)
+            {
+                short extValue;
+                rtn = mc.GTN_GetExtDoBit(map.Core, map.HardwareBit, out extValue);
+                if (rtn != 0)
+                {
+                    return HandleError<bool>(rtn, "读取扩展DO失败，Bit=" + bit);
+                }
+
+                return Ok(extValue != 0, "读取扩展DO成功，Bit=" + bit);
+            }
+
+            int doValue;
+            rtn = mc.GTN_GetDo(map.Core, mc.MC_GPO, out doValue);
+            if (rtn != 0)
+            {
+                return HandleError<bool>(rtn, "读取板载DO失败，Bit=" + bit);
+            }
+
+            int mask = 1 << (map.HardwareBit - 1);
+            bool value2 = (doValue & mask) != 0;
+            return Ok(value2, "读取板载DO成功，Bit=" + bit);
         }
 
-        public override MotionResult SetVel(short logicalAxis, double vel)
+        #endregion
+
+        public override Result SetVel(short logicalAxis, double vel)
         {
             var cfg = GetLogicalAxisCfg(logicalAxis);
             if (cfg == null) return LastResult;
@@ -537,7 +663,7 @@ namespace AM.MotionCard.Googo
             return Ok($"轴{logicalAxis} 设置速度成功");
         }
 
-        public override MotionResult SetAcc(short logicalAxis, double acc)
+        public override Result SetAcc(short logicalAxis, double acc)
         {
             var cfg = GetLogicalAxisCfg(logicalAxis);
             if (cfg == null) return LastResult;
@@ -556,7 +682,7 @@ namespace AM.MotionCard.Googo
             return Ok($"轴{logicalAxis} 设置加速度成功");
         }
 
-        public override MotionResult SetDec(short logicalAxis, double dec)
+        public override Result SetDec(short logicalAxis, double dec)
         {
             var cfg = GetLogicalAxisCfg(logicalAxis);
             if (cfg == null) return LastResult;
@@ -575,118 +701,229 @@ namespace AM.MotionCard.Googo
             return Ok($"轴{logicalAxis} 设置减速度成功");
         }
 
-        public override AxisStatus GetAxisStatus(short logicalAxis)
+        public override Result<AxisStatus> GetAxisStatus(short logicalAxis)
         {
             var cfg = GetLogicalAxisCfg(logicalAxis);
-            if (cfg == null) return default(AxisStatus);
+            if (cfg == null)
+                return Fail<AxisStatus>(MotionErrorCode.AxisMapNotFound, "逻辑轴 " + logicalAxis + " 映射未找到");
 
-            var result = new AxisStatus();
+            uint clock;
+            int rawStatus;
+            short rtn = mc.GTN_GetStsEx(cfg.PhysicalCore, cfg.PhysicalAxis, out rawStatus, 1, out clock);
+            if (rtn != 0)
+            {
+                return HandleError<AxisStatus>(rtn, "读取轴" + logicalAxis + "状态字失败");
+            }
 
             short posLimit;
             short negLimit;
-            short rtn = mc.GTN_GetLimitStatus(cfg.PhysicalCore, cfg.PhysicalAxis, out posLimit, out negLimit);
+            rtn = mc.GTN_GetLimitStatus(cfg.PhysicalCore, cfg.PhysicalAxis, out posLimit, out negLimit);
             if (rtn != 0)
             {
-                HandleError(rtn, $"读取轴{logicalAxis}限位状态失败");
-                return result;
+                return HandleError<AxisStatus>(rtn, "读取轴" + logicalAxis + "限位状态失败");
             }
 
-            result.PositiveLimit = posLimit != 0;
-            result.NegativeLimit = negLimit != 0;
-            result.IsDone = !IsMoving(logicalAxis);
+            var alarmResult = ReadAxisSignal(cfg, mc.MC_ALARM, "报警");
+            if (!alarmResult.Success) return Result<AxisStatus>.Fail(alarmResult.Code, alarmResult.Message, ResultSource.Motion);
 
-            // 其余状态位后续再结合固高状态字细化
-            result.IsEnabled = false;
-            result.IsAlarm = false;
-            result.IsAtHome = false;
+            var homeResult = ReadAxisSignal(cfg, mc.MC_HOME, "原点");
+            if (!homeResult.Success) return Result<AxisStatus>.Fail(homeResult.Code, homeResult.Message, ResultSource.Motion);
 
-            return result;
+            var movingResult = IsMoving(logicalAxis);
+            if (!movingResult.Success) return Result<AxisStatus>.Fail(movingResult.Code, movingResult.Message, ResultSource.Motion);
+
+            var status = new AxisStatus
+            {
+                IsEnabled = cfg.IsServoOn,
+                IsAlarm = alarmResult.Item,
+                IsAtHome = homeResult.Item,
+                PositiveLimit = posLimit != 0,
+                NegativeLimit = negLimit != 0,
+                IsDone = !movingResult.Item
+            };
+
+            return Ok(status, "读取轴" + logicalAxis + "状态成功");
         }
 
-        #region 获得规划/实际位置（脉冲/mm）
-        /// <summary>
-        /// 获得规划位置（毫米）- 基于 GTN_GetAxisPrfPos 获取脉冲后转换为毫米
-        /// </summary>
-        /// <param name="logicalId"></param>
-        /// <returns></returns>
-        public override double GetCommandPositionMm(short logicalAxis)
-        {
-            var pulse = GetCommandPosition(logicalAxis);
-            if (double.IsNaN(pulse)) return double.NaN;
-            return PulseToMm(logicalAxis, pulse);
-        }
-        /// <summary>
-        /// 获取规划位置（脉冲）- 使用 GTN_GetAxisPrfPos
-        /// </summary>
-        /// <param name="logicalAxis"></param>
-        /// <returns></returns>
-        public override double GetCommandPosition(short logicalAxis)
+        public override Result<double> GetCommandPosition(short logicalAxis)
         {
             var cfg = GetLogicalAxisCfg(logicalAxis);
-            if (cfg == null) return double.NaN;
+            if (cfg == null) return Fail<double>(MotionErrorCode.AxisMapNotFound, $"逻辑轴 {logicalAxis} 映射未找到");
 
             uint clock;
             double prfPulse;
             short rtn = mc.GTN_GetAxisPrfPos(cfg.PhysicalCore, cfg.PhysicalAxis, out prfPulse, 1, out clock);
             if (rtn != 0)
             {
-                HandleError(rtn, $"读取轴{logicalAxis}规划位置失败");
-                return double.NaN;
+                return HandleError<double>(rtn, $"读取轴{logicalAxis}规划位置失败");
             }
 
-            return prfPulse;
+            return Ok(prfPulse, $"读取轴{logicalAxis}规划位置成功");
         }
-        /// <summary>
-        /// 获得实际位置（毫米）- 基于 GTN_GetAxisEncPos 获取脉冲后转换为毫米
-        /// </summary>
-        /// <param name="logicalId"></param>
-        /// <returns></returns>
-        public override double GetEncoderPositionMm(short logicalAxis)
-        {
-            var pulse = GetEncoderPosition(logicalAxis);
-            if (double.IsNaN(pulse)) return double.NaN;
-            return PulseToMm(logicalAxis, pulse);
-        }
-        /// <summary>
-        /// 获取实际编码器位置（脉冲）- 使用 GTN_GetAxisEncPos
-        /// </summary>
-        /// <param name="logicalAxis"></param>
-        /// <returns></returns>
-        public override double GetEncoderPosition(short logicalAxis)
+
+        public override Result<double> GetEncoderPosition(short logicalAxis)
         {
             var cfg = GetLogicalAxisCfg(logicalAxis);
-            if (cfg == null) return double.NaN;
+            if (cfg == null) return Fail<double>(MotionErrorCode.AxisMapNotFound, $"逻辑轴 {logicalAxis} 映射未找到");
 
             uint clock;
             double encPulse;
             short rtn = mc.GTN_GetAxisEncPos(cfg.PhysicalCore, cfg.PhysicalAxis, out encPulse, 1, out clock);
             if (rtn != 0)
             {
-                HandleError(rtn, $"读取轴{logicalAxis}编码器位置失败");
-                return double.NaN;
+                return HandleError<double>(rtn, $"读取轴{logicalAxis}编码器位置失败");
             }
 
-            return encPulse;
+            return Ok(encPulse, $"读取轴{logicalAxis}编码器位置成功");
         }
 
-        #endregion
+        public override Result<double> GetCommandPositionMm(short logicalAxis)
+        {
+            var pulseResult = GetCommandPosition(logicalAxis);
+            if (!pulseResult.Success)
+            {
+                return Result<double>.Fail(pulseResult.Code, pulseResult.Message, ResultSource.Motion);
+            }
 
-        public override bool IsMoving(short logicalAxis)
+            double mm = PulseToMm(logicalAxis, pulseResult.Item);
+            if (double.IsNaN(mm))
+            {
+                return Result<double>.Fail(LastResult.Code, LastResult.Message, ResultSource.Motion);
+            }
+
+            return Ok(mm, $"读取轴{logicalAxis}规划位置(mm)成功");
+        }
+
+        public override Result<double> GetEncoderPositionMm(short logicalAxis)
+        {
+            var pulseResult = GetEncoderPosition(logicalAxis);
+            if (!pulseResult.Success)
+            {
+                return Result<double>.Fail(pulseResult.Code, pulseResult.Message, ResultSource.Motion);
+            }
+
+            double mm = PulseToMm(logicalAxis, pulseResult.Item);
+            if (double.IsNaN(mm))
+            {
+                return Result<double>.Fail(LastResult.Code, LastResult.Message, ResultSource.Motion);
+            }
+
+            return Ok(mm, $"读取轴{logicalAxis}编码器位置(mm)成功");
+        }
+
+        public override Result<bool> IsMoving(short logicalAxis)
         {
             var cfg = GetLogicalAxisCfg(logicalAxis);
-            if (cfg == null) return false;
+            if (cfg == null) return Fail<bool>(MotionErrorCode.AxisMapNotFound, $"逻辑轴 {logicalAxis} 映射未找到");
 
             uint clock;
             double vel;
             short rtn = mc.GTN_GetPrfVel(cfg.PhysicalCore, cfg.PhysicalAxis, out vel, 1, out clock);
             if (rtn != 0)
             {
-                HandleError(rtn, $"读取轴{logicalAxis}速度失败");
-                return false;
+                return HandleError<bool>(rtn, $"读取轴{logicalAxis}速度失败");
             }
 
-            return Math.Abs(vel) > 0.0001;
+            return Ok(Math.Abs(vel) > 0.0001, $"读取轴{logicalAxis}运动状态成功");
         }
+
+        #region 私有方法
+
+        private short GetIoCore()
+        {
+            return 1;
+        }
+
+        private bool IsExtIoBit(short bit)
+        {
+            return CurrentConfig.UseExtModule && bit > 16;
+        }
+
+        private Result WaitStandardHomeDone(AxisConfig cfg)
+        {
+            var start = DateTime.Now;
+
+            while ((DateTime.Now - start).TotalMilliseconds < cfg.HomeTimeoutMs)
+            {
+                mc.TStandardHomeStatus status;
+                short rtn = mc.GTN_GetStandardHomeStatus(cfg.PhysicalCore, cfg.PhysicalAxis, out status);
+                if (rtn != 0)
+                {
+                    return HandleError(rtn, "轴 " + cfg.LogicalAxis + " 读取回零状态失败");
+                }
+
+                if (status.run == 0)
+                {
+                    if (status.error != mc.STANDARD_HOME_ERROR_NONE)
+                    {
+                        return Fail(MotionErrorCode.HomeFailed,
+                            "轴 " + cfg.LogicalAxis + " 回零失败，Stage=" + status.stage + " Error=" + status.error);
+                    }
+
+                    if (status.stage == mc.STANDARD_HOME_STAGE_END)
+                    {
+                        return Ok("轴 " + cfg.LogicalAxis + " 回零成功");
+                    }
+
+                    return Fail(MotionErrorCode.HomeFailed,
+                        "轴 " + cfg.LogicalAxis + " 回零结束但未到完成阶段，Stage=" + status.stage);
+                }
+
+                Thread.Sleep(50);
+            }
+
+            Stop(cfg.LogicalAxis, true);
+            return Fail(MotionErrorCode.HomeTimeout, "轴 " + cfg.LogicalAxis + " 回零超时");
+        }
+
+        private Result<bool> ReadAxisSignal(AxisConfig cfg, short signalType, string signalName)
+        {
+            short value;
+            short rtn = mc.GTN_GetDiBit(cfg.PhysicalCore, signalType, cfg.PhysicalAxis, out value);
+            if (rtn != 0)
+            {
+                return HandleError<bool>(rtn, "读取轴" + cfg.LogicalAxis + signalName + "信号失败");
+            }
+
+            return Ok(value != 0, "读取轴" + cfg.LogicalAxis + signalName + "信号成功");
+        }
+
+        private MotionIoBitMap GetDIBitMap(short logicalBit)
+        {
+            return GetIoBitMap(CurrentConfig.DIBitMaps, logicalBit);
+        }
+
+        private MotionIoBitMap GetDOBitMap(short logicalBit)
+        {
+            return GetIoBitMap(CurrentConfig.DOBitMaps, logicalBit);
+        }
+
+        private MotionIoBitMap GetIoBitMap(List<MotionIoBitMap> maps, short logicalBit)
+        {
+            if (logicalBit <= 0)
+            {
+                return null;
+            }
+
+            if (maps != null && maps.Count > 0)
+            {
+                return maps.FirstOrDefault(p => p.LogicalBit == logicalBit);
+            }
+
+            // 兼容旧逻辑：未配置映射时仍按 1~16 板载，17+ 扩展处理
+            return new MotionIoBitMap
+            {
+                LogicalBit = logicalBit,
+                Name = "IO" + logicalBit,
+                Core = GetIoCore(),
+                IsExtModule = IsExtIoBit(logicalBit),
+                HardwareBit = (short)(IsExtIoBit(logicalBit) ? logicalBit - 16 : logicalBit)
+            };
+        }
+
+
+
+        #endregion
 
     }
 }

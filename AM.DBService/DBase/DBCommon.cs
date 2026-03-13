@@ -1,12 +1,8 @@
-﻿using AM.Model.DB;
-using AM.Tools;
+﻿using AM.Model.Common;
+using AM.Model.DB;
 using SqlSugar;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Remoting.Contexts;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AM.DBService.DBase
 {
@@ -18,74 +14,65 @@ namespace AM.DBService.DBase
         {
             _sqlSugarClient = GetClient(new MDBaseSet { DBType = "Sqlite" });
         }
-        /// <summary>
-        /// 单个添加
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <returns></returns>
-        public bool Add(T obj)
+
+        public Result Add(T obj)
         {
             try
             {
                 _sqlSugarClient.Ado.BeginTran();
                 _sqlSugarClient.Insertable(obj).ExecuteCommand();
                 _sqlSugarClient.Ado.CommitTran();
-                return true;
+                return Result.Ok($"Add<{typeof(T).Name}> success", ResultSource.Database);
             }
             catch (Exception ex)
             {
-                Tools.Tools.Print($"Add<{typeof(T).Name}> failed {ex.Message}");
-                return false;
+                _sqlSugarClient.Ado.RollbackTran();
+                return Result.Fail(-1, $"Add<{typeof(T).Name}> failed {ex.Message}", ResultSource.Database);
             }
         }
 
-        public bool Delete(T obj)
+        public Result Delete(T obj)
         {
             try
             {
                 _sqlSugarClient.Ado.BeginTran();
                 _sqlSugarClient.Deleteable(obj).ExecuteCommand();
                 _sqlSugarClient.Ado.CommitTran();
-                return true;
+                return Result.Ok($"Delete<{typeof(T).Name}> success", ResultSource.Database);
             }
             catch (Exception ex)
             {
-                Tools.Tools.Print($"Delete<{typeof(T).Name}> failed {ex.Message}");
-                return false;
+                _sqlSugarClient.Ado.RollbackTran();
+                return Result.Fail(-1, $"Delete<{typeof(T).Name}> failed {ex.Message}", ResultSource.Database);
             }
         }
 
-        public bool Edit(T obj)
+        public Result Edit(T obj)
         {
             try
             {
                 _sqlSugarClient.Ado.BeginTran();
                 _sqlSugarClient.Updateable(obj).ExecuteCommand();
                 _sqlSugarClient.Ado.CommitTran();
-                return true;
+                return Result.Ok($"Edit<{typeof(T).Name}> success", ResultSource.Database);
             }
             catch (Exception ex)
             {
-                Tools.Tools.Print($"Update<{typeof(T).Name}> failed {ex.Message}");
-                return false;
+                _sqlSugarClient.Ado.RollbackTran();
+                return Result.Fail(-1, $"Edit<{typeof(T).Name}> failed {ex.Message}", ResultSource.Database);
             }
         }
 
-
-        /// <summary>
-        /// 查询所有
-        /// </summary>
-        /// <returns></returns>
-        public List<T> QueryAll()
+        public Result<T> QueryAll()
         {
             try
             {
-                return _sqlSugarClient.Queryable<T>().ToList();
+                List<T> list = _sqlSugarClient.Queryable<T>().ToList();
+                return Result<T>.OkList(list, $"QueryAll<{typeof(T).Name}> success", ResultSource.Database);
             }
             catch (Exception ex)
             {
-                Tools.Tools.Print($"QueryAll<{typeof(T).Name}> failed {ex.Message}");
-                return new List<T>();
+                return Result<T>.Fail(-1, $"QueryAll<{typeof(T).Name}> failed {ex.Message}", ResultSource.Database);
             }
         }
     }

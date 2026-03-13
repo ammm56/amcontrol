@@ -1,4 +1,5 @@
-﻿using AM.DBService.Tables;
+﻿using AM.DBService.Services;
+using AM.DBService.Tables;
 using AM.Model.Common;
 using AM.Model.Entity;
 using Newtonsoft.Json;
@@ -33,14 +34,22 @@ namespace AMControlWPF
 
         private void AxisTableInfo_Loaded(object sender, RoutedEventArgs e)
         {
-            Result<ConfigAxisArg> res = new Result<ConfigAxisArg>
-            {
-                Items = new DBTable<ConfigAxisArg>().QueryAll(),
-                Success = true
-            };
-            if(res.Items.Count > 0 ) res.Item = res.Items[0];
+            //Result<ConfigAxisArg> res = new Result<ConfigAxisArg>
+            //{
+            //    Items = new DBTable<ConfigAxisArg>().QueryAll(),
+            //    Success = true
+            //};
+            //if(res.Items.Count > 0 ) res.Item = res.Items[0];
 
-            res.Message = JsonConvert.SerializeObject(res.Item, Newtonsoft.Json.Formatting.Indented);
+            var configAxisArgService = new ConfigAxisArgService();
+            var res = configAxisArgService.QueryAll();
+
+            if (res.Items.Count > 0)
+            {
+                res.Item = res.Items[0];
+            }
+
+            res.Message = JsonConvert.SerializeObject(res.Items, Newtonsoft.Json.Formatting.Indented);
 
             this.DataContext = res;
 
@@ -48,11 +57,19 @@ namespace AMControlWPF
 
         private void dg_axis_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            var res = this.DataContext as Result<ConfigAxisArg>;
+            if (res == null) return;
+
             // 1. da_axis.SelectedItem 获得选中项
             // 2. 这个监听选择事件
-            if(e.AddedItems.Count > 0)
+            if (e.AddedItems.Count > 0)
             {
                 var item = e.AddedItems[0] as ConfigAxisArg;
+                if (item != null)
+                {
+                    res.Item = item;
+                    res.Message = JsonConvert.SerializeObject(item, Newtonsoft.Json.Formatting.Indented);
+                }
 
             }
             // 3. 数据绑定 模型中新增一个选择项

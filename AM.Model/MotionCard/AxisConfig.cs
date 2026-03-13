@@ -161,6 +161,50 @@ namespace AM.Model.MotionCard
             set => value.LimitTo((short)0, (short)256);
         }
 
+
+
+
+
+        /// <summary>
+        /// 固高标准回零模式，取值 1~36，具体由配置决定
+        /// </summary>
+        public short StandardHomeMode { get; set; } = 1;
+
+        /// <summary>
+        /// 搜索 Home 高速，单位 pulse/ms
+        /// </summary>
+        public double HomeHighSpeed { get; set; } = 1.0;
+
+        /// <summary>
+        /// 搜索 Index / 精定位低速，单位 pulse/ms
+        /// </summary>
+        public double HomeLowSpeed { get; set; } = 0.2;
+
+        /// <summary>
+        /// 回零偏移，单位 pulse
+        /// </summary>
+        public int HomeOffset { get; set; } = 0;
+
+        /// <summary>
+        /// 是否启用标准回零自检
+        /// </summary>
+        public bool HomeCheck { get; set; } = true;
+
+        /// <summary>
+        /// 回零完成后是否自动清零
+        /// </summary>
+        public bool HomeAutoZeroPos { get; set; } = true;
+
+        /// <summary>
+        /// 回零超时，单位 ms
+        /// </summary>
+        public int HomeTimeoutMs { get; set; } = 60000;
+
+
+
+
+
+
         /// <summary>
         /// 使能状态 (运行时)，不存入JSON
         /// </summary>

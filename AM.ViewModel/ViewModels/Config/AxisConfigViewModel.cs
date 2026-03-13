@@ -113,7 +113,7 @@ namespace AM.ViewModel.ViewModels.Config
                 {
                     _model.Lead = value;
                     OnPropertyChanged(nameof(Lead));
-                    OnPropertyChanged(nameof(K)); // 通知关联的计算属性刷新
+                    OnPropertyChanged(nameof(K));// 通知关联的计算属性刷新
                 }
             }
         }
@@ -150,7 +150,6 @@ namespace AM.ViewModel.ViewModels.Config
         /// 脉冲系数 (只读，由 Model 计算)
         /// </summary>
         public double K => _model.K;
-
         /// <summary>
         /// 手写属性或使用 [ObservableProperty] 包装逻辑
         /// </summary>
@@ -200,18 +199,112 @@ namespace AM.ViewModel.ViewModels.Config
             }
         }
 
+        /// <summary>
+        /// config中添加到视图
+        /// </summary>
+        public short StandardHomeMode
+        {
+            get => _model.StandardHomeMode;
+            set
+            {
+                if (_model.StandardHomeMode != value)
+                {
+                    _model.StandardHomeMode = value;
+                    OnPropertyChanged(nameof(StandardHomeMode));
+                }
+            }
+        }
+
+        public double HomeHighSpeed
+        {
+            get => _model.HomeHighSpeed;
+            set
+            {
+                if (_model.HomeHighSpeed != value)
+                {
+                    _model.HomeHighSpeed = value;
+                    OnPropertyChanged(nameof(HomeHighSpeed));
+                }
+            }
+        }
+
+        public double HomeLowSpeed
+        {
+            get => _model.HomeLowSpeed;
+            set
+            {
+                if (_model.HomeLowSpeed != value)
+                {
+                    _model.HomeLowSpeed = value;
+                    OnPropertyChanged(nameof(HomeLowSpeed));
+                }
+            }
+        }
+
+        public int HomeOffset
+        {
+            get => _model.HomeOffset;
+            set
+            {
+                if (_model.HomeOffset != value)
+                {
+                    _model.HomeOffset = value;
+                    OnPropertyChanged(nameof(HomeOffset));
+                }
+            }
+        }
+
+        public bool HomeCheck
+        {
+            get => _model.HomeCheck;
+            set
+            {
+                if (_model.HomeCheck != value)
+                {
+                    _model.HomeCheck = value;
+                    OnPropertyChanged(nameof(HomeCheck));
+                }
+            }
+        }
+
+        public bool HomeAutoZeroPos
+        {
+            get => _model.HomeAutoZeroPos;
+            set
+            {
+                if (_model.HomeAutoZeroPos != value)
+                {
+                    _model.HomeAutoZeroPos = value;
+                    OnPropertyChanged(nameof(HomeAutoZeroPos));
+                }
+            }
+        }
+
+        public int HomeTimeoutMs
+        {
+            get => _model.HomeTimeoutMs;
+            set
+            {
+                int validated = value < 1000 ? 1000 : value;
+                if (_model.HomeTimeoutMs != validated)
+                {
+                    _model.HomeTimeoutMs = validated;
+                    OnPropertyChanged(nameof(HomeTimeoutMs));
+                }
+            }
+        }
+
         public bool IsServoOn
         {
             get => _model.IsServoOn;
             set { if (_model.IsServoOn != value) { _model.IsServoOn = value; OnPropertyChanged(nameof(IsServoOn)); } }
         }
 
-
         private bool _isSelected;
+
         /// <summary>
         /// UI 状态，不在 AM.Model 中
         /// </summary>
         public bool IsSelected { get => _isSelected; set => SetProperty(ref _isSelected, value); }
-
     }
 }

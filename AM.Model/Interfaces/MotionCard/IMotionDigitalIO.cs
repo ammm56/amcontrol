@@ -1,3 +1,4 @@
+using AM.Model.Common;
 using AM.Model.MotionCard;
 
 namespace AM.Model.Interfaces.MotionCard
@@ -7,8 +8,8 @@ namespace AM.Model.Interfaces.MotionCard
     /// </summary>
     public interface IMotionDigitalIO
     {
-        MotionResult SetDO(short bit, bool status);
-        bool GetDI(short bit);
-        bool GetDO(short bit);
+        Result SetDO(short bit, bool status);
+        Result<bool> GetDI(short bit);
+        Result<bool> GetDO(short bit);
     }
 }

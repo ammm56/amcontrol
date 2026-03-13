@@ -1,3 +1,4 @@
+using AM.Model.Common;
 using AM.Model.Structs;
 
 namespace AM.Model.Interfaces.MotionCard
@@ -7,16 +8,16 @@ namespace AM.Model.Interfaces.MotionCard
     /// </summary>
     public interface IMotionAxisState
     {
-        AxisStatus GetAxisStatus(short logicalAxis);
+        Result<AxisStatus> GetAxisStatus(short logicalAxis);
 
         // 脉冲位置
-        double GetCommandPosition(short logicalAxis);
-        double GetEncoderPosition(short logicalAxis);
+        Result<double> GetCommandPosition(short logicalAxis);
+        Result<double> GetEncoderPosition(short logicalAxis);
 
         // 毫米位置（与脉冲方法一一对应）
-        double GetCommandPositionMm(short logicalAxis);
-        double GetEncoderPositionMm(short logicalAxis);
+        Result<double> GetCommandPositionMm(short logicalAxis);
+        Result<double> GetEncoderPositionMm(short logicalAxis);
 
-        bool IsMoving(short logicalAxis);
+        Result<bool> IsMoving(short logicalAxis);
     }
 }

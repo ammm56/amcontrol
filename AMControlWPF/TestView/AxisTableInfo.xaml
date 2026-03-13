@@ -24,8 +24,8 @@
         </DataGrid>-->
 
         <DataGrid x:Name="dg_axis" 
-          ItemsSource="{Binding data}" 
-          SelectedItem="{Binding item, Mode=TwoWay}"
+          ItemsSource="{Binding Items}" 
+          SelectedItem="{Binding Item, Mode=TwoWay}"
           AutoGenerateColumns="False"
           HeadersVisibility="All" 
           RowHeaderWidth="50"

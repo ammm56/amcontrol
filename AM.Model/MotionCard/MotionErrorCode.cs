@@ -15,6 +15,11 @@ namespace AM.Model.MotionCard
         // 配置/映射
         AxisMapNotFound = -1001,
         InvalidAxisConfig = -1002,
+        InvalidIoBit = -1003,
+        IoMapNotFound = -1004,
+        HomeConfigInvalid = -1005,
+        HomeFailed = -1006,
+        HomeTimeout = -1007,
 
         // 单位换算
         InvalidK = -1101,

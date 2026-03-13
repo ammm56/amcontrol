@@ -63,6 +63,17 @@ namespace AM.Model.MotionCard
         public bool UseExtModule {  get; set; } = false;
 
         /// <summary>
+        /// 板载/扩展 DI 映射
+        /// </summary>
+        public List<MotionIoBitMap> DIBitMaps { get; set; } = new List<MotionIoBitMap>();
+
+        /// <summary>
+        /// 板载/扩展 DO 映射
+        /// </summary>
+        public List<MotionIoBitMap> DOBitMaps { get; set; } = new List<MotionIoBitMap>();
+
+
+        /// <summary>
         /// 该卡下的所有轴配置
         /// </summary>
         public List<AxisConfig> AxisConfigs { get; set; } = new List<AxisConfig>

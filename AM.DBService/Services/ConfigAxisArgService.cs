@@ -35,8 +35,8 @@ namespace AM.DBService.Services
         {
             try
             {
-                var list = _db.QueryAll();
-                return Result<ConfigAxisArg>.OkList(list,"轴参数查询成功",ResultSource.Database);
+                var result = _db.QueryAll();
+                return Result<ConfigAxisArg>.OkList(result.Items.ToList(),"轴参数查询成功",ResultSource.Database);
             }
             catch (Exception ex)
             {
@@ -54,7 +54,14 @@ namespace AM.DBService.Services
                     return Result<ConfigAxisArg>.Fail((int)DbErrorCode.InvalidArgument,"轴号参数无效",ResultSource.Database);
                 }
 
-                var item = _db.QueryAll().FirstOrDefault(a => a.Axis == axis);
+                var queryResult = _db.QueryAll();
+                if (!queryResult.Success)
+                {
+                    PublishWarning("QueryByAxis(" + axis + ") query failed: " + queryResult.Message, DbErrorCode.QueryFailed);
+                    return Result<ConfigAxisArg>.Fail(queryResult.Code, "按轴查询失败", ResultSource.Database);
+                }
+
+                var item = queryResult.Items.FirstOrDefault(a => a.Axis == axis);
                 if (item == null)
                 {
                     PublishWarning("QueryByAxis(" + axis + ") not found", DbErrorCode.NotFound);
@@ -79,12 +86,12 @@ namespace AM.DBService.Services
                     return Result.Fail((int)DbErrorCode.InvalidArgument,"保存参数不能为空",ResultSource.Database);
                 }
 
-                bool success = param.Id > 0 ? _db.Edit(param) : _db.Add(param);
+                var result = param.Id > 0 ? _db.Edit(param) : _db.Add(param);
 
-                if (!success)
+                if (!result.Success)
                 {
                     PublishError("Save(" + param.Axis + " 轴 " + param.ParamName + ") failed", null, DbErrorCode.SaveFailed);
-                    return Result.Fail((int)DbErrorCode.SaveFailed,"轴参数保存失败",ResultSource.Database);
+                    return Result.Fail(result.Code, "轴参数保存失败", ResultSource.Database);
                 }
 
                 PublishStatus("Save(" + param.Axis + " 轴 " + param.ParamName + ") success");
@@ -109,7 +116,14 @@ namespace AM.DBService.Services
                     return Result.Fail((int)DbErrorCode.InvalidArgument,"删除参数无效",ResultSource.Database);
                 }
 
-                var item = _db.QueryAll().FirstOrDefault(a =>
+                var queryResult = _db.QueryAll();
+                if (!queryResult.Success)
+                {
+                    PublishWarning("Delete(" + axis + " 轴 " + paramname + ") query failed: " + queryResult.Message, DbErrorCode.QueryFailed);
+                    return Result.Fail(queryResult.Code, "删除查询失败", ResultSource.Database);
+                }
+
+                var item = queryResult.Items.FirstOrDefault(a =>
                     a.Axis == axis &&
                     a.ParamName == paramname &&
                     a.ParamName_Cn == paramname_cn);
@@ -117,11 +131,11 @@ namespace AM.DBService.Services
                 if (item == null)
                 {
                     PublishWarning("Delete(" + axis + " 轴 " + paramname + ") target not found", DbErrorCode.NotFound);
-                    return Result.Fail((int)DbErrorCode.NotFound,"删除目标不存在",ResultSource.Database);
+                    return Result.Fail((int)DbErrorCode.NotFound, "删除目标不存在", ResultSource.Database);
                 }
 
-                bool success = _db.Delete(item);
-                if (!success)
+                var result = _db.Delete(item);
+                if (!result.Success)
                 {
                     PublishError("Delete(" + axis + " 轴 " + paramname + ") failed", null, DbErrorCode.DeleteFailed);
                     return Result.Fail((int)DbErrorCode.DeleteFailed,"轴参数删除失败",ResultSource.Database);
