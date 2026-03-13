@@ -65,7 +65,6 @@
     <Compile Include="Interfaces\MotionCard\IMotionCardDiagnostics.cs" />
     <Compile Include="Interfaces\MotionCard\IMotionDigitalIO.cs" />
     <Compile Include="MotionCard\AxisConfig.cs" />
-    <Compile Include="MotionCard\MotionCardBase.cs" />
     <Compile Include="Common\ObservableObject_ManualImpl.cs" />
     <Compile Include="Common\Response.cs" />
     <Compile Include="Common\SettingArgsConfig.cs" />

@@ -9,5 +9,8 @@ namespace AM.Core.Messaging
     public interface IMessageBus
     {
         void Publish(SystemMessage message);
+
+        void Subscribe(object recipient, Action<SystemMessage> handler);
+        void Unsubscribe(object recipient);
     }
 }

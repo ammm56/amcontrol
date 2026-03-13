@@ -1,3 +1,5 @@
+using AM.Model.MotionCard;
+
 namespace AM.Model.Interfaces.MotionCard
 {
     /// <summary>
@@ -5,8 +7,8 @@ namespace AM.Model.Interfaces.MotionCard
     /// </summary>
     public interface IMotionAxisParameter
     {
-        short SetVel(short logicalAxis, double vel);
-        short SetAcc(short logicalAxis, double acc);
-        short SetDec(short logicalAxis, double dec);
+        MotionResult SetVel(short logicalAxis, double vel);
+        MotionResult SetAcc(short logicalAxis, double acc);
+        MotionResult SetDec(short logicalAxis, double dec);
     }
 }

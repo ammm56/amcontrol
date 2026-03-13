@@ -1,5 +1,4 @@
 using AM.Model.MotionCard;
-using AM.Model.Structs;
 
 namespace AM.Model.Interfaces.MotionCard
 {
@@ -8,10 +7,10 @@ namespace AM.Model.Interfaces.MotionCard
     /// </summary>
     public interface IMotionAxisMaintenance
     {
-        short ClearStatus(short logicalAxis);
-        short ClearAllAxisStatus();
-        short SetZeroPos(short logicalAxis);
-        short SetAllZeroPos();
-        short ConfigAxisHardware(AxisConfig cfg);
+        MotionResult ClearStatus(short logicalAxis);
+        MotionResult ClearAllAxisStatus();
+        MotionResult SetZeroPos(short logicalAxis);
+        MotionResult SetAllZeroPos();
+        MotionResult ConfigAxisHardware(AxisConfig cfg);
     }
 }

@@ -1,3 +1,5 @@
+using AM.Model.MotionCard;
+
 namespace AM.Model.Interfaces.MotionCard
 {
     /// <summary>
@@ -5,8 +7,8 @@ namespace AM.Model.Interfaces.MotionCard
     /// </summary>
     public interface IMotionCardConnection
     {
-        bool Initialize(string configPath);
-        short Connect();
-        short Disconnect();
+        MotionResult Initialize(string configPath);
+        MotionResult Connect();
+        MotionResult Disconnect();
     }
 }

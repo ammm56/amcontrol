@@ -14,5 +14,19 @@ namespace AM.Tools.Messaging
         {
             WeakReferenceMessenger.Default.Send(message);
         }
+
+        public void Subscribe(object recipient, Action<SystemMessage> handler)
+        {
+            WeakReferenceMessenger.Default.Register<SystemMessage>(recipient, (r, m) =>
+            {
+                handler(m);
+            });
+        }
+
+        public void Unsubscribe(object recipient)
+        {
+            WeakReferenceMessenger.Default.UnregisterAll(recipient);
+        }
+
     }
 }

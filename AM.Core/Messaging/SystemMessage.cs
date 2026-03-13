@@ -26,11 +26,38 @@ namespace AM.Core.Messaging
 
         public DateTime Time { get; }
 
-        public SystemMessage(string msg, SystemMessageType type)
+        /// <summary>
+        /// 消息来源，例如 MotionCard / DB / PLC / Vision
+        /// </summary>
+        public string Source { get; }
+
+        /// <summary>
+        /// 业务或设备错误码，允许为空
+        /// </summary>
+        public string Code { get; }
+
+        /// <summary>
+        /// 控制卡编号，非控制卡消息可为空
+        /// </summary>
+        public short? CardId { get; }
+
+        /// <summary>
+        /// 兼容旧调用方式，默认 Source/Code/CardId 为空
+        /// 默认调用只有类型和消息内容，适用于大多数场景
+        /// </summary>
+        public SystemMessage(string msg, SystemMessageType type): this(msg, type, null, null, null)
         {
-            Message = msg;
+        }
+
+        public SystemMessage(string msg,SystemMessageType type,string source,string code,short? cardId)
+        {
+            Message = msg ?? string.Empty;
             Type = type;
+            Source = source;
+            Code = code;
+            CardId = cardId;
             Time = DateTime.Now;
         }
+
     }
 }

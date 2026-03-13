@@ -1,3 +1,4 @@
+using AM.Model.MotionCard;
 using System.Threading.Tasks;
 
 namespace AM.Model.Interfaces.MotionCard
@@ -7,10 +8,10 @@ namespace AM.Model.Interfaces.MotionCard
     /// </summary>
     public interface IMotionAxisControl
     {
-        short Enable(short logicalAxis, bool onORoff);
-        short Stop(short logicalAxis, bool isEmergency = false);
-        short StopAll(bool isEmergency = false);
-        Task<short> HomeAsync(short logicalAxis);
-        short Home(short logicalAxis);
+        MotionResult Enable(short logicalAxis, bool onOff);
+        MotionResult Stop(short logicalAxis, bool isEmergency = false);
+        MotionResult StopAll(bool isEmergency = false);
+        Task<MotionResult> HomeAsync(short logicalAxis);
+        MotionResult Home(short logicalAxis);
     }
 }

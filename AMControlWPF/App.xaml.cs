@@ -51,7 +51,14 @@ namespace AMControlWPF
 
         protected override void OnExit(ExitEventArgs e)
         {
-            base.OnExit(e);
+            try
+            {
+                MachineContext.Instance.MotionCard?.Disconnect();
+            }
+            finally
+            {
+                base.OnExit(e);
+            }
             Console.WriteLine("4.OnExit被触发");
         }
     }

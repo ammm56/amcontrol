@@ -1,3 +1,5 @@
+using AM.Model.MotionCard;
+
 namespace AM.Model.Interfaces.MotionCard
 {
     /// <summary>
@@ -5,7 +7,7 @@ namespace AM.Model.Interfaces.MotionCard
     /// </summary>
     public interface IMotionDigitalIO
     {
-        short SetDO(short bit, bool status);
+        MotionResult SetDO(short bit, bool status);
         bool GetDI(short bit);
         bool GetDO(short bit);
     }

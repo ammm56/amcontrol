@@ -1,9 +1,10 @@
-﻿using AM.Model.Common;
+﻿using AM.Core.Context;
+using AM.Core.Messaging;
+using AM.Model.Common;
 using AM.Model.Interfaces;
 using AM.Model.Interfaces.MotionCard;
 using AM.Model.Structs;
 using AM.MotionCard.Googo;
-using AM.Core.Context;
 using AM.Tools;
 using System;
 using System.Collections.Generic;
@@ -37,7 +38,6 @@ namespace AMControlWPF
         {
             InitializeComponent();
 
-
             this.Loaded += GSNA_Loaded;
             this.Closed += GSNA_Closed;
             this.btn_init.Click += btn_init_Click;
@@ -47,20 +47,20 @@ namespace AMControlWPF
 
         private void GSNA_Loaded(object sender, RoutedEventArgs e)
         {
-            // 订阅全局错误 (UI反馈)
-            MotionCard.OnError += MotionCard_OnError;
+            // 订阅消息 (UI反馈)
+            SystemContext.Instance.MessageBus.Subscribe(this, OnSystemMessage);
             tb_statusinfo.AppendText($"[{DateTime.Now:T}] 控制卡初始化参数配置成功\r\n");
         }
         private void GSNA_Closed(object sender, EventArgs e)
         {
-            MotionCard.OnError -= MotionCard_OnError;
+            SystemContext.Instance.MessageBus.Unsubscribe(this);
         }
-        private void MotionCard_OnError(short id, string msg)
+        private void OnSystemMessage(SystemMessage m)
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
                 // 这里弹窗，或者绑定到一个 UI 上的“报警列表”
-                tb_statusinfo.AppendText($"[{DateTime.Now:T}] {msg}\r\n");
+                tb_statusinfo.AppendText($"[{m.Time:T}] [{m.Type}] {m.Message}\r\n");
             });
         }
 

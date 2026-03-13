@@ -2,6 +2,7 @@
 using AM.Model.Common;
 using AM.Model.MotionCard;
 using AM.Model.Structs;
+using AM.MotionService.Base;
 using AM.Tools;
 using GTN;
 using System;
@@ -26,18 +27,16 @@ namespace AM.MotionCard.Googo
         {
         }
 
-        public override bool Initialize(string configPath)
+        public override MotionResult Initialize(string configPath)
         {
             // 启动阶段仅做连通性预检查，正式连接由 Connect 负责
             short res = mc.GTN_Open(CurrentConfig.CardId, CurrentConfig.ModeParam);
             if (res != 0)
             {
-                HandleError(res, "Initialize: GTN_Open 失败");
-                return false;
+                return HandleError(res, "Initialize: GTN_Open 失败");
             }
-
             mc.GTN_Close();
-            return true;
+            return Ok("控制卡连通性预检查成功");
         }
 
         /// <summary>
@@ -45,7 +44,7 @@ namespace AM.MotionCard.Googo
         /// 实现基类的抽象方法（多卡支持）
         /// </summary>
         /// <returns></returns>
-        public override short Connect()
+        public override MotionResult Connect()
         {
             _cardId = CurrentConfig.CardId;
 
@@ -67,12 +66,9 @@ namespace AM.MotionCard.Googo
                 short resetRtn = mc.GTN_Reset(core);
                 if (resetRtn != 0)
                 {
-                    // 核心逻辑：任何一个内核失败，都是致命错误
-                    HandleError(resetRtn, $"GTN_Reset 第 {core} 核复位失败 (总配置 {ConfigContext.Instance.Config.MotionCardConfig.CoreNumber} 核)");
-
                     // 失败必须关闭已打开的通道，否则下次无法再次 Open
                     mc.GTN_Close();
-                    return resetRtn;
+                    return HandleError(resetRtn, $"GTN_Reset 第 {core} 核复位失败 (总配置 {CurrentConfig.CoreNumber} 核)");
                 }
             }
 
@@ -81,53 +77,51 @@ namespace AM.MotionCard.Googo
             {
                 Thread.Sleep(200);
                 rtn = mc.GTN_ExtModuleInit(1, 1); // 默认地址1
-                if (rtn != 0) return HandleError(rtn, "GTN_ExtModuleInit 扩展卡启动失败");
+                if (rtn != 0)
+                {
+                    return HandleError(rtn, "GTN_ExtModuleInit 扩展卡启动失败");
+                }
             }
 
-            return rtn;
+            return Ok("控制卡连接成功");
         }
         /// <summary>
         /// 清除指定核轴状态
         /// </summary>
         /// <param name="logicalAxis"></param>
         /// <returns></returns>
-        public override short ClearStatus(short logicalAxis)
+        public override MotionResult ClearStatus(short logicalAxis)
         {
             var cfg = GetLogicalAxisCfg(logicalAxis);
-            if (cfg == null) return -1; // 找不到配置直接退出
+            if (cfg == null) return LastResult; // 找不到配置直接退出
 
             // // 参数 1：内核，参数 2：起始轴，参数 3：清除轴的数量（这里是 1）
-            short rtn = mc.GTN_ClrSts(cfg.PhysicalCore,cfg.PhysicalAxis,1);
+            short rtn = mc.GTN_ClrSts(cfg.PhysicalCore, cfg.PhysicalAxis, 1);
             if (rtn != 0)
             {
-                HandleError(rtn, $"GTN_ClrSts 第 {cfg.PhysicalCore} 核 {cfg.PhysicalAxis} 轴 清除状态失败。");
-                return rtn;
+                return HandleError(rtn, $"GTN_ClrSts 第 {cfg.PhysicalCore} 核 {cfg.PhysicalAxis} 轴 清除状态失败。");
             }
 
-            return rtn;
+            return Ok($"逻辑轴 {logicalAxis} 清除状态成功");
         }
         /// <summary>
         /// 清除指定核心所有轴状态
         /// </summary>
         /// <returns></returns>
-        public override short ClearAllAxisStatus()
+        public override MotionResult ClearAllAxisStatus()
         {
-            short lastRtn = 0;
-
             // 遍历配置文件中定义的所有内核
-            for (short core = 1; core <= ConfigContext.Instance.Config.MotionCardConfig.CoreNumber; core++)
+            for (short core = 1; core <= CurrentConfig.CoreNumber; core++)
             {
                 // 固高的习惯通常是从 1 轴开始，连续清除 N 个轴
                 // 第 3 个参数应为该核支持的最大轴数（通常是 8 或 16），或者配置的轴数
-                short rtn = mc.GTN_ClrSts(core, 1, ConfigContext.Instance.Config.MotionCardConfig.AxisCountNumber);
-
+                short rtn = mc.GTN_ClrSts(core, 1, CurrentConfig.AxisCountNumber);
                 if (rtn != 0)
                 {
-                    HandleError(rtn, $"GTN_ClrSts 第 {core} 核清除全轴状态失败。");
-                    lastRtn = rtn;
+                    return HandleError(rtn, $"GTN_ClrSts 第 {core} 核清除全轴状态失败。");
                 }
             }
-            return lastRtn;
+            return Ok("全轴状态清除成功");
         }
 
         /// <summary>
@@ -135,101 +129,107 @@ namespace AM.MotionCard.Googo
         /// 规划位置（Command Position）和实际位置（Actual Position/Encoder）同时清零
         /// 禁止运动中清除，清除后检查限位
         /// </summary>
-        public override short SetZeroPos(short logicalAxis)
+        public override MotionResult SetZeroPos(short logicalAxis)
         {
             var cfg = GetLogicalAxisCfg(logicalAxis);
-            if (cfg == null) return -1;
+            if (cfg == null) return LastResult;
 
             // 参数：内核, 起始物理轴, 轴数(1)
             short rtn = mc.GTN_ZeroPos(cfg.PhysicalCore, cfg.PhysicalAxis, 1);
-
             if (rtn != 0)
             {
-                HandleError(rtn, $"逻辑轴 {logicalAxis} (核{cfg.PhysicalCore} 轴{cfg.PhysicalAxis}) 位置清零失败");
+                return HandleError(rtn, $"逻辑轴 {logicalAxis} (核{cfg.PhysicalCore} 轴{cfg.PhysicalAxis}) 位置清零失败");
             }
-            return rtn;
+
+            return Ok($"逻辑轴 {logicalAxis} 位置清零成功");
         }
 
         /// <summary>
         /// 根据配置清除所有内核的所有轴位置
         /// 规划位置（Command Position）和实际位置（Actual Position/Encoder）同时清零
         /// </summary>
-        public override short SetAllZeroPos()
+        public override MotionResult SetAllZeroPos()
         {
-            var mConfig = ConfigContext.Instance.Config.MotionCardConfig;
-            short lastRtn = 0;
-
             // 遍历配置文件中定义的所有物理内核
-            for (short core = 1; core <= mConfig.CoreNumber; core++)
+            for (short core = 1; core <= CurrentConfig.CoreNumber; core++)
             {
                 // 固高指令：从该核的 1 轴开始，清除该核配置的所有轴
                 // 第 3 个参数建议使用该核实际物理轴数
-                short rtn = mc.GTN_ZeroPos(core, 1, mConfig.AxisCountNumber);
-
+                short rtn = mc.GTN_ZeroPos(core, 1, CurrentConfig.AxisCountNumber);
                 if (rtn != 0)
                 {
-                    HandleError(rtn, $"第 {core} 核位置全清失败");
-                    lastRtn = rtn;
+                    return HandleError(rtn, $"第 {core} 核位置全清失败");
                 }
             }
-            return lastRtn;
+            return Ok("全轴位置清零成功");
         }
 
-        public override short ConfigAxisHardware(AxisConfig cfg)
+        public override MotionResult ConfigAxisHardware(AxisConfig cfg)
         {
             short core = cfg.PhysicalCore;
             short axis = cfg.PhysicalAxis;
+            short rtn = 0;
 
             // 1. 关闭使能
-            mc.GTN_AxisOff(core, axis);
+            rtn = mc.GTN_AxisOff(core, axis);
+            if (rtn != 0) return HandleError(rtn, $"轴硬件配置前关闭使能失败，核{core} 轴{axis}");
 
             // 2. 报警信号设置
             if (cfg.AlarmEnable)
             {
-                mc.GTN_AlarmOn(core, axis);
-                mc.GTN_SetSense(core, mc.MC_ALARM, axis, cfg.AlarmInvert ? (short)1 : (short)0);
+                rtn = mc.GTN_AlarmOn(core, axis);
+                if (rtn != 0) return HandleError(rtn, $"报警使能配置失败，核{core} 轴{axis}");
+
+                rtn = mc.GTN_SetSense(core, mc.MC_ALARM, axis, cfg.AlarmInvert ? (short)1 : (short)0);
+                if (rtn != 0) return HandleError(rtn, $"报警极性配置失败，核{core} 轴{axis}");
             }
             else
             {
-                mc.GTN_AlarmOff(core, axis);
+                rtn = mc.GTN_AlarmOff(core, axis);
+                if (rtn != 0) return HandleError(rtn, $"报警关闭配置失败，核{core} 轴{axis}");
             }
 
             // 3. 脉冲模式 (0: Step/Dir, 1: CW/CCW)
-            if (cfg.PulseMode == 0) mc.GTN_StepDir(core, axis);
-            else mc.GTN_StepPulse(core, axis);
+            rtn = cfg.PulseMode == 0 ? mc.GTN_StepDir(core, axis) : mc.GTN_StepPulse(core, axis);
+            if (rtn != 0) return HandleError(rtn, $"脉冲模式配置失败，核{core} 轴{axis}");
+
 
             // 4. 编码器设置
-            if (cfg.EncoderExternal) mc.GTN_EncOn(core, axis);
-            else mc.GTN_EncOff(core, axis);
-
-            mc.GTN_SetSense(core, mc.MC_ENCODER, axis, cfg.EncoderInvert ? (short)1 : (short)0);
+            rtn = cfg.EncoderExternal ? mc.GTN_EncOn(core, axis) : mc.GTN_EncOff(core, axis);
+            if (rtn != 0) return HandleError(rtn, $"扩展编码器配置失败，核{core} 轴{axis}");
+            
+            rtn = mc.GTN_SetSense(core, mc.MC_ENCODER, axis, cfg.EncoderInvert ? (short)1 : (short)0);
+            if (rtn != 0) return HandleError(rtn, $"编码器极性配置失败，核{core} 轴{axis}");
 
             // 5. 限位与原点极性 (0: 正逻辑, 1: 负逻辑)
             short sense = cfg.LimitHomeInvert ? (short)1 : (short)0;
-            mc.GTN_SetSense(core, mc.MC_LIMIT_POSITIVE, axis, sense);
-            mc.GTN_SetSense(core, mc.MC_LIMIT_NEGATIVE, axis, sense);
-            mc.GTN_SetSense(core, mc.MC_HOME, axis, sense);
+            rtn = mc.GTN_SetSense(core, mc.MC_LIMIT_POSITIVE, axis, sense);
+            if (rtn != 0) return HandleError(rtn, $"正限位极性配置失败，核{core} 轴{axis}");
+            rtn = mc.GTN_SetSense(core, mc.MC_LIMIT_NEGATIVE, axis, sense);
+            if (rtn != 0) return HandleError(rtn, $"负限位极性配置失败，核{core} 轴{axis}");
+            rtn = mc.GTN_SetSense(core, mc.MC_HOME, axis, sense);
+            if (rtn != 0) return HandleError(rtn, $"原点极性配置失败，核{core} 轴{axis}");
 
             // 6. 限位有效性设置 (0:正, 1:负, -1:双向, 10:关闭)
-            if (cfg.LimitMode == 10) mc.GTN_LmtsOff(core, axis, -1);
-            else mc.GTN_LmtsOn(core, axis, cfg.LimitMode);
+            rtn = cfg.LimitMode == 10 ? mc.GTN_LmtsOff(core, axis, -1) : mc.GTN_LmtsOn(core, axis, cfg.LimitMode);
+            if (rtn != 0) return HandleError(rtn, $"限位模式配置失败，核{core} 轴{axis}");
 
-            return 1;
+            return Ok($"轴硬件参数配置成功，核{core} 轴{axis}");
         }
 
-        public override short Disconnect()
+        public override MotionResult Disconnect()
         {
             short rtn = mc.GTN_Close();
             if (rtn != 0) return HandleError(rtn, "GTN_Close 失败");
             return Ok("控制卡已断开");
         }
 
-        public override short Enable(short logicalAxis, bool onORoff)
+        public override MotionResult Enable(short logicalAxis, bool onOff)
         {
             var cfg = GetLogicalAxisCfg(logicalAxis);
-            if (cfg == null) return (short)MotionErrorCode.AxisMapNotFound;
+            if (cfg == null) return LastResult;
 
-            short rtn = onORoff
+            short rtn = onOff
                 ? mc.GTN_AxisOn(cfg.PhysicalCore, cfg.PhysicalAxis)
                 : mc.GTN_AxisOff(cfg.PhysicalCore, cfg.PhysicalAxis);
 
@@ -240,10 +240,10 @@ namespace AM.MotionCard.Googo
         /// <summary>
         /// 停止单个逻辑轴
         /// </summary>
-        public override short Stop(short logicalAxis, bool isEmergency = false)
+        public override MotionResult Stop(short logicalAxis, bool isEmergency = false)
         {
             var cfg = GetLogicalAxisCfg(logicalAxis);
-            if (cfg == null) return -1;
+            if (cfg == null) return LastResult;
 
             // 固高参数2(mask)：1 << (axis-1) 对应具体轴
             // 固高参数3(option)：0为平滑停止，1为急停
@@ -251,43 +251,42 @@ namespace AM.MotionCard.Googo
             int mask = 1 << (cfg.PhysicalAxis - 1);
 
             short rtn = mc.GTN_Stop(cfg.PhysicalCore, mask, option);
+            if (rtn != 0)
+            {
+                return HandleError(rtn, $"轴 {logicalAxis} 停止失败");
+            }
 
-            if (rtn != 0) HandleError(rtn, $"轴 {logicalAxis} 停止失败");
-            return rtn;
+            return Ok($"轴 {logicalAxis} 停止成功");
         }
         /// <summary>
         /// 停止所有配置的内核的所有轴
         /// </summary>
-        public override short StopAll(bool isEmergency = false)
+        public override MotionResult StopAll(bool isEmergency = false)
         {
-            var mConfig = ConfigContext.Instance.Config.MotionCardConfig;
             short option = isEmergency ? (short)1 : (short)0;
-            short lastRtn = 0;
-
             // 遍历所有物理内核
-            for (short core = 1; core <= mConfig.CoreNumber; core++)
+            for (short core = 1; core <= CurrentConfig.CoreNumber; core++)
             {
                 // 0xff 表示停止该核前8个轴，0xffff 表示前16个轴
                 // 稳妥起见，可以使用 0xffffffff (全1) 停止所有可能存在的轴
                 short rtn = mc.GTN_Stop(core, -1, option);
-
                 if (rtn != 0)
                 {
-                    HandleError(rtn, $"第 {core} 核全轴停止失败");
-                    lastRtn = rtn;
+                    return HandleError(rtn, $"第 {core} 核全轴停止失败");
                 }
             }
-            return lastRtn;
+
+            return Ok("全轴停止成功");
         }
 
-        public override Task<short> HomeAsync(short logicalAxis)
+        public override Task<MotionResult> HomeAsync(short logicalAxis)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(Home(logicalAxis));
         }
 
-        public override short Home(short logicalAxis)
+        public override MotionResult Home(short logicalAxis)
         {
-            throw new NotImplementedException();
+            return Fail(MotionErrorCode.NotImplemented, $"轴 {logicalAxis} 回零功能未实现");
         }
 
         #region 相对运动实现（Trap模式）
@@ -297,10 +296,10 @@ namespace AM.MotionCard.Googo
         /// <param name="logicalAxis">逻辑轴号</param>
         /// <param name="distanceMm">相对移动距离 (mm)</param>
         /// <param name="velMm">运行速度 (mm/s)</param>
-        public override short MoveRelativeMm(short logicalAxis, double distanceMm, double velMm)
+        public override MotionResult MoveRelativeMm(short logicalAxis, double distanceMm, double velMm)
         {
             var cfg = GetLogicalAxisCfg(logicalAxis);
-            if (cfg == null) return (short)MotionErrorCode.AxisMapNotFound;
+            if (cfg == null) return LastResult;
 
             // mm -> pulse, mm/s -> pulse/ms
             int deltaPulse = MmToPulse(logicalAxis, distanceMm);
@@ -318,11 +317,11 @@ namespace AM.MotionCard.Googo
         /// <param name="acc">加速度 脉冲（默认使用配置参数）</param>
         /// <param name="dec">减速带 脉冲（默认使用配置参数）</param>
         /// <returns></returns>
-        public override short MoveRelative(short logicalAxis, double pulseDistance, double velocity, double acc, double dec)
+        public override MotionResult MoveRelative(short logicalAxis, double pulseDistance, double velocity, double acc, double dec)
         {
             // 1. 获取轴配置映射 (用于找到物理 Core 和 Axis)
             var cfg = GetLogicalAxisCfg(logicalAxis);
-            if (cfg == null) return (short)MotionErrorCode.AxisMapNotFound;
+            if (cfg == null) return LastResult;
             short core = cfg.PhysicalCore;
             short axis = cfg.PhysicalAxis;
 
@@ -374,10 +373,10 @@ namespace AM.MotionCard.Googo
         /// <param name="logicalAxis">逻辑轴号</param>
         /// <param name="positionMm">绝对位移位置 (mm)</param>
         /// <param name="velMm">运行速度 (mm/s)</param>
-        public override short MoveAbsoluteMm(short logicalAxis, double positionMm, double velMm)
+        public override MotionResult MoveAbsoluteMm(short logicalAxis, double positionMm, double velMm)
         {
             var cfg = GetLogicalAxisCfg(logicalAxis);
-            if (cfg == null) return (short)MotionErrorCode.AxisMapNotFound;
+            if (cfg == null) return LastResult;
 
             // mm -> pulse, mm/s -> pulse/ms
             int targetPulse = MmToPulse(logicalAxis, positionMm);
@@ -395,10 +394,10 @@ namespace AM.MotionCard.Googo
         /// <param name="acc">加速度 脉冲（默认使用配置参数）</param>
         /// <param name="dec">减速带 脉冲（默认使用配置参数）</param>
         /// <returns></returns>
-        public override short MoveAbsolute(short logicalAxis, double targetPulse, double velocity, double acc, double dec)
+        public override MotionResult MoveAbsolute(short logicalAxis, double targetPulse, double velocity, double acc, double dec)
         {
             var cfg = GetLogicalAxisCfg(logicalAxis);
-            if (cfg == null) return (short)MotionErrorCode.AxisMapNotFound;
+            if (cfg == null) return LastResult;
 
             short core = cfg.PhysicalCore;
             short axis = cfg.PhysicalAxis;
@@ -429,19 +428,50 @@ namespace AM.MotionCard.Googo
 
             return Ok($"轴{logicalAxis} 绝对运动下发成功");
         }
-        
+
 
         #endregion
 
-        public override short JogMove(short logicalAxis, int direction, double velocity)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override short JogMoveMm(short logicalAxis, bool direction, double velMm)
+        public override MotionResult JogMove(short logicalAxis, int direction, double velocity)
         {
             var cfg = GetLogicalAxisCfg(logicalAxis);
-            if (cfg == null) return -1;
+            if (cfg == null) return LastResult;
+
+            if (direction == 0)
+            {
+                return JogStop(logicalAxis);
+            }
+
+            short core = cfg.PhysicalCore;
+            short axis = cfg.PhysicalAxis;
+
+            short rtn = mc.GTN_PrfJog(core, axis);
+            if (rtn != 0) return HandleError(rtn, $"轴{logicalAxis} 进入Jog模式失败");
+
+            mc.TJogPrm jogPrm;
+            rtn = mc.GTN_GetJogPrm(core, axis, out jogPrm);
+            if (rtn != 0) return HandleError(rtn, $"轴{logicalAxis} 读取Jog参数失败");
+
+            jogPrm.acc = cfg.Acc;
+            jogPrm.dec = cfg.Dec;
+
+            rtn = mc.GTN_SetJogPrm(core, axis, ref jogPrm);
+            if (rtn != 0) return HandleError(rtn, $"轴{logicalAxis} 设置Jog参数失败");
+
+            double speed = direction > 0 ? Math.Abs(velocity) : -Math.Abs(velocity);
+            rtn = mc.GTN_SetVel(core, axis, speed);
+            if (rtn != 0) return HandleError(rtn, $"轴{logicalAxis} 设置Jog速度失败");
+
+            rtn = mc.GTN_Update(core, 1 << (axis - 1));
+            if (rtn != 0) return HandleError(rtn, $"轴{logicalAxis} 启动Jog失败");
+
+            return Ok($"轴{logicalAxis} Jog启动成功");
+        }
+
+        public override MotionResult JogMoveMm(short logicalAxis, bool direction, double velMm)
+        {
+            var cfg = GetLogicalAxisCfg(logicalAxis);
+            if (cfg == null) return LastResult;
 
             short core = cfg.PhysicalCore;
             short axis = cfg.PhysicalAxis;
@@ -454,64 +484,123 @@ namespace AM.MotionCard.Googo
             // 2. 设置 Jog 参数 (Acc/Dec)
             mc.TJogPrm jogPrm;
             rtn = mc.GTN_GetJogPrm(core, axis, out jogPrm);
-            if (rtn == 0)
-            {
-                // 这里的单位转换逻辑与 Trap 运动一致
-                jogPrm.acc = (cfg.Acc * K) / 1000000.0;
-                jogPrm.dec = (cfg.Dec * K) / 1000000.0;
-                rtn = mc.GTN_SetJogPrm(core, axis, ref jogPrm);
-            }
+            if (rtn != 0) return HandleError(rtn, $"轴{logicalAxis} 读取Jog参数失败");
+
+            // 这里的单位转换逻辑与 Trap 运动一致
+            jogPrm.acc = (cfg.Acc * K) / 1000000.0;
+            jogPrm.dec = (cfg.Dec * K) / 1000000.0;
+            rtn = mc.GTN_SetJogPrm(core, axis, ref jogPrm);
+            if (rtn != 0) return HandleError(rtn, $"轴{logicalAxis} 设置Jog参数失败");
 
             // 3. 设置目标速度 (带方向)
             double speed = direction ? (velMm * K) / 1000.0 : -(velMm * K) / 1000.0;
             rtn = mc.GTN_SetVel(core, axis, speed);
+            if (rtn != 0) return HandleError(rtn, $"轴{logicalAxis} 设置Jog速度失败");
 
             // 4. 触发运动
             rtn = mc.GTN_Update(core, 1 << (axis - 1));
+            if (rtn != 0) return HandleError(rtn, $"轴{logicalAxis} 启动Jog失败");
 
-            if (rtn != 0) HandleError(rtn, $"轴{logicalAxis} 启动Jog失败");
-            return rtn;
+            return Ok($"轴{logicalAxis} Jog启动成功");
         }
 
-        public override short JogStop(short logicalAxis)
+        public override MotionResult JogStop(short logicalAxis)
         {
-            // Jog 停止通常调用通用的平滑停止即可
-            return this.Stop(logicalAxis, isEmergency: false);
+            return Stop(logicalAxis, false);
         }
 
-        public override short SetDO(short bit, bool status)
+        public override MotionResult SetDO(short bit, bool status)
         {
-            throw new NotImplementedException();
+            return Fail(MotionErrorCode.NotImplemented, $"DO 输出未实现，Bit={bit}");
         }
 
         public override bool GetDI(short bit)
         {
-            throw new NotImplementedException();
+            HandleError((short)MotionErrorCode.NotImplemented, $"DI 读取未实现，Bit={bit}");
+            return false;
         }
 
         public override bool GetDO(short bit)
         {
-            throw new NotImplementedException();
+            HandleError((short)MotionErrorCode.NotImplemented, $"DO 读取未实现，Bit={bit}");
+            return false;
         }
 
-        public override short SetVel(short logicalAxis, double vel)
+        public override MotionResult SetVel(short logicalAxis, double vel)
         {
-            throw new NotImplementedException();
+            var cfg = GetLogicalAxisCfg(logicalAxis);
+            if (cfg == null) return LastResult;
+
+            short rtn = mc.GTN_SetVel(cfg.PhysicalCore, cfg.PhysicalAxis, vel);
+            if (rtn != 0) return HandleError(rtn, $"轴{logicalAxis} 设置速度失败");
+
+            return Ok($"轴{logicalAxis} 设置速度成功");
         }
 
-        public override short SetAcc(short logicalAxis, double acc)
+        public override MotionResult SetAcc(short logicalAxis, double acc)
         {
-            throw new NotImplementedException();
+            var cfg = GetLogicalAxisCfg(logicalAxis);
+            if (cfg == null) return LastResult;
+
+            short rtn = mc.GTN_PrfTrap(cfg.PhysicalCore, cfg.PhysicalAxis);
+            if (rtn != 0) return HandleError(rtn, $"轴{logicalAxis} 切换Trap模式失败");
+
+            mc.TTrapPrm trap;
+            rtn = mc.GTN_GetTrapPrm(cfg.PhysicalCore, cfg.PhysicalAxis, out trap);
+            if (rtn != 0) return HandleError(rtn, $"轴{logicalAxis} 读取Trap参数失败");
+
+            trap.acc = acc;
+            rtn = mc.GTN_SetTrapPrm(cfg.PhysicalCore, cfg.PhysicalAxis, ref trap);
+            if (rtn != 0) return HandleError(rtn, $"轴{logicalAxis} 设置加速度失败");
+
+            return Ok($"轴{logicalAxis} 设置加速度成功");
         }
 
-        public override short SetDec(short logicalAxis, double dec)
+        public override MotionResult SetDec(short logicalAxis, double dec)
         {
-            throw new NotImplementedException();
+            var cfg = GetLogicalAxisCfg(logicalAxis);
+            if (cfg == null) return LastResult;
+
+            short rtn = mc.GTN_PrfTrap(cfg.PhysicalCore, cfg.PhysicalAxis);
+            if (rtn != 0) return HandleError(rtn, $"轴{logicalAxis} 切换Trap模式失败");
+
+            mc.TTrapPrm trap;
+            rtn = mc.GTN_GetTrapPrm(cfg.PhysicalCore, cfg.PhysicalAxis, out trap);
+            if (rtn != 0) return HandleError(rtn, $"轴{logicalAxis} 读取Trap参数失败");
+
+            trap.dec = dec;
+            rtn = mc.GTN_SetTrapPrm(cfg.PhysicalCore, cfg.PhysicalAxis, ref trap);
+            if (rtn != 0) return HandleError(rtn, $"轴{logicalAxis} 设置减速度失败");
+
+            return Ok($"轴{logicalAxis} 设置减速度成功");
         }
 
         public override AxisStatus GetAxisStatus(short logicalAxis)
         {
-            throw new NotImplementedException();
+            var cfg = GetLogicalAxisCfg(logicalAxis);
+            if (cfg == null) return default(AxisStatus);
+
+            var result = new AxisStatus();
+
+            short posLimit;
+            short negLimit;
+            short rtn = mc.GTN_GetLimitStatus(cfg.PhysicalCore, cfg.PhysicalAxis, out posLimit, out negLimit);
+            if (rtn != 0)
+            {
+                HandleError(rtn, $"读取轴{logicalAxis}限位状态失败");
+                return result;
+            }
+
+            result.PositiveLimit = posLimit != 0;
+            result.NegativeLimit = negLimit != 0;
+            result.IsDone = !IsMoving(logicalAxis);
+
+            // 其余状态位后续再结合固高状态字细化
+            result.IsEnabled = false;
+            result.IsAlarm = false;
+            result.IsAtHome = false;
+
+            return result;
         }
 
         #region 获得规划/实际位置（脉冲/mm）
