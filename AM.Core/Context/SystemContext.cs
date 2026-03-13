@@ -21,9 +21,7 @@ namespace AM.Core.Context
 
         public AlarmManager AlarmManager { get; private set; }
 
-        public void Initialize(
-            IAMLogger logger,
-            IMessageBus bus)
+        public void Initialize(IAMLogger logger,IMessageBus bus)
         {
             Logger = logger;
 

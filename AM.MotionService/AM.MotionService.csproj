@@ -52,6 +52,10 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <ProjectReference Include="..\AM.Core\AM.Core.csproj">
+      <Project>{7B305EB1-7403-4C0C-82D4-C871B4C2D877}</Project>
+      <Name>AM.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\AM.Model\AM.Model.csproj">
       <Project>{22cf4793-f392-4421-98fd-0f2e07200689}</Project>
       <Name>AM.Model</Name>

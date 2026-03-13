@@ -1,4 +1,7 @@
-﻿using System;
+﻿using AM.Core.Context;
+using AM.Model.Common;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,8 +9,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
-using AM.Model.Common;
-using Newtonsoft.Json;
 
 namespace AM.Tools
 {
@@ -53,7 +54,7 @@ namespace AM.Tools
         /// <param name="inline"></param>
         public static void Print(string info, bool inline = false)
         {
-            if (ConfigSingle.Instance.Config.Setting.CommonInfoPrint && ConfigSingle.Instance.Config.Setting.ConsolePrint)
+            if (ConfigContext.Instance.Config.Setting.CommonInfoPrint && ConfigContext.Instance.Config.Setting.ConsolePrint)
             {
                 if (!inline) Console.WriteLine($"[Console]{NowCommon()} {info}");
                 else Console.Write(info);
@@ -66,7 +67,7 @@ namespace AM.Tools
         /// <param name="inline"></param>
         public static void PrintDebug(string info, bool inline = false)
         {
-            if (ConfigSingle.Instance.Config.Setting.DebugInfoPrint && ConfigSingle.Instance.Config.Setting.ConsolePrint)
+            if (ConfigContext.Instance.Config.Setting.DebugInfoPrint && ConfigContext.Instance.Config.Setting.ConsolePrint)
             {
                 if (!inline) Console.WriteLine($"[Debug]{NowCommon()} {info}");
                 else Console.Write(info);
@@ -79,7 +80,7 @@ namespace AM.Tools
         /// <param name="inline"></param>
         public static void PrintController(string info, bool inline = false)
         {
-            if (ConfigSingle.Instance.Config.Setting.ControllerInfoPrint && ConfigSingle.Instance.Config.Setting.ConsolePrint)
+            if (ConfigContext.Instance.Config.Setting.ControllerInfoPrint && ConfigContext.Instance.Config.Setting.ConsolePrint)
             {
                 if (!inline) Console.WriteLine($"[Controller]{NowCommon()} {info}");
                 else Console.Write(info);
@@ -92,7 +93,7 @@ namespace AM.Tools
         /// <param name="inline"></param>
         public static void PrintDB(string info, bool inline = false)
         {
-            if (ConfigSingle.Instance.Config.Setting.DBPrint && ConfigSingle.Instance.Config.Setting.ConsolePrint)
+            if (ConfigContext.Instance.Config.Setting.DBPrint && ConfigContext.Instance.Config.Setting.ConsolePrint)
             {
                 if (!inline) Console.WriteLine($"[DB]{NowCommon()} {info}");
                 else Console.Write(info);
@@ -105,7 +106,7 @@ namespace AM.Tools
         /// <param name="info"></param>
         public static void PrintEX(string info, bool inline = false)
         {
-            if (ConfigSingle.Instance.Config.Setting.EXPrint && ConfigSingle.Instance.Config.Setting.ConsolePrint)
+            if (ConfigContext.Instance.Config.Setting.EXPrint && ConfigContext.Instance.Config.Setting.ConsolePrint)
             {
                 if (!inline)
                     Console.WriteLine($"[EX][{NowCommon()}] {info}");

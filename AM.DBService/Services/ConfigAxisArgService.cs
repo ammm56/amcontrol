@@ -1,4 +1,5 @@
 ﻿using AM.Core.Alarm;
+using AM.Core.Context;
 using AM.Core.Logging;
 using AM.Core.Messaging;
 using AM.DBService.DBase;
@@ -14,19 +15,20 @@ namespace AM.DBService.Services
 {
     public class ConfigAxisArgService : IConfigAxisArgService
     {
-        private readonly AlarmManager _alarmManager;
-
         private readonly IMessageBus _msgbus;
-
         private readonly IAMLogger _logger;
-
+        private readonly AlarmManager _alarmManager;
         private readonly DBCommon<ConfigAxisArg> _db;
 
-        public ConfigAxisArgService(IMessageBus bus, IAMLogger logger)
+        public ConfigAxisArgService(): this(SystemContext.Instance.MessageBus, SystemContext.Instance.Logger, SystemContext.Instance.AlarmManager)
         {
-            _msgbus = bus;
-            _logger = logger;
+        }
 
+        public ConfigAxisArgService(IMessageBus msgbus, IAMLogger logger, AlarmManager alarmManager)
+        {
+            _msgbus = msgbus;
+            _logger = logger;
+            _alarmManager = alarmManager;
             _db = new DBCommon<ConfigAxisArg>();
         }
 

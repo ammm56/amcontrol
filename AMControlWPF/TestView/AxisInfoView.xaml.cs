@@ -34,7 +34,7 @@ namespace AMControlWPF.TestView
             this.Loaded += AxisInfoView_Loaded;
 
             // 创建 Service 实例（或通过依赖注入容器获取）
-            var axisService = new ConfigAxisArgService(new MessageBusToolkit(),new NLogLogger("nglog")); // 实现 IConfigAxisArgService
+            var axisService = new ConfigAxisArgService(); // 实现 IConfigAxisArgService
 
             // 注入 ViewModel
             this.DataContext = new ConfigAxisArgViewModel(axisService);

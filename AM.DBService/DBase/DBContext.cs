@@ -1,4 +1,5 @@
-﻿using AM.Model.DB;
+﻿using AM.Core.Context;
+using AM.Model.DB;
 using AM.Tools;
 using SqlSugar;
 using System;
@@ -19,8 +20,8 @@ namespace AM.DBService.DBase
 
         public DBContext()
         {
-            _conStr = ConfigSingle.Instance.Config.Sqlite.Connection;
-            _conMySQLStr = ConfigSingle.Instance.Config.Sqlite.Connection;
+            _conStr = ConfigContext.Instance.Config.Sqlite.Connection;
+            _conMySQLStr = ConfigContext.Instance.Config.Sqlite.Connection;
         }
 
         public SqlSugarClient GetClient(MDBaseSet mDBaseSet)
@@ -49,7 +50,7 @@ namespace AM.DBService.DBase
                 InitKeyType = InitKeyType.Attribute
             });
 
-            if (ConfigSingle.Instance.Config.Setting.DBLogExec)
+            if (ConfigContext.Instance.Config.Setting.DBLogExec)
             {
                 _sqlSugarClient.Aop.OnLogExecuting = (sql, pars) =>
                 {

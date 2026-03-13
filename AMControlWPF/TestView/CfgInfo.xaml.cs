@@ -1,4 +1,5 @@
-﻿using AM.Tools;
+﻿using AM.Core.Context;
+using AM.Tools;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -33,11 +34,11 @@ namespace AMControlWPF
         private void CfgInfo_Loaded(object sender, RoutedEventArgs e)
         {
             /// winform事件驱动直接辅助方式
-            string cfgstr = JsonConvert.SerializeObject(ConfigSingle.Instance.Config, Newtonsoft.Json.Formatting.Indented);
+            string cfgstr = JsonConvert.SerializeObject(ConfigContext.Instance.Config, Newtonsoft.Json.Formatting.Indented);
             //tb_cfginfo.Text = cfgstr;
 
             /// wpf数据驱动显示方式
-            this.DataContext = ConfigSingle.Instance.Config;
+            this.DataContext = ConfigContext.Instance.Config;
 
         }
     }

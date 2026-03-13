@@ -1,4 +1,5 @@
-﻿using AM.Model.Common;
+﻿using AM.Core.Context;
+using AM.Model.Common;
 using AM.Model.MotionCard;
 using AM.Model.Structs;
 using AM.Tools;
@@ -16,23 +17,19 @@ namespace AM.MotionCard.Googo
 {
     public class GoogoMotionCardService : MotionCardBase
     {
-        private readonly MotionCardConfig _config;
-
-        public GoogoMotionCardService() : base()
+        private MotionCardConfig CurrentConfig
         {
-            // 默认构造函数，使用全局配置单例
-            _config = ConfigSingle.Instance.Config.MotionCardConfig;
+            get { return ConfigContext.Instance.Config.MotionCardConfig; }
         }
 
         public GoogoMotionCardService(MotionCardConfig config)
         {
-            _config = config;
         }
 
         public override bool Initialize(string configPath)
         {
             // 启动阶段仅做连通性预检查，正式连接由 Connect 负责
-            short res = mc.GTN_Open(_config.CardId, _config.ModeParam);
+            short res = mc.GTN_Open(CurrentConfig.CardId, CurrentConfig.ModeParam);
             if (res != 0)
             {
                 HandleError(res, "Initialize: GTN_Open 失败");
@@ -50,29 +47,28 @@ namespace AM.MotionCard.Googo
         /// <returns></returns>
         public override short Connect()
         {
-            var cfg = ConfigSingle.Instance.Config.MotionCardConfig;
-            _cardId = cfg.CardId;
+            _cardId = CurrentConfig.CardId;
 
             // 1. 强制关闭并清理旧连接（固高习惯：先关再开）
             mc.GTN_Close();
             Thread.Sleep(300);
 
             // 2. 打开控制卡
-            short rtn = mc.GTN_Open(_cardId, cfg.ModeParam);
+            short rtn = mc.GTN_Open(_cardId, CurrentConfig.ModeParam);
             if (rtn != 0)
             {
                 return HandleError(rtn, $"GTN_Open 通道 {_cardId} 失败。请检查驱动安装或插槽。");
             }
 
             // 3. 按配置数量循环复位内核
-            for (short core = 1; core <= cfg.CoreNumber; core++)
+            for (short core = 1; core <= CurrentConfig.CoreNumber; core++)
             {
                 Thread.Sleep(200);
                 short resetRtn = mc.GTN_Reset(core);
                 if (resetRtn != 0)
                 {
                     // 核心逻辑：任何一个内核失败，都是致命错误
-                    HandleError(resetRtn, $"GTN_Reset 第 {core} 核复位失败 (总配置 {ConfigSingle.Instance.Config.MotionCardConfig.CoreNumber} 核)");
+                    HandleError(resetRtn, $"GTN_Reset 第 {core} 核复位失败 (总配置 {ConfigContext.Instance.Config.MotionCardConfig.CoreNumber} 核)");
 
                     // 失败必须关闭已打开的通道，否则下次无法再次 Open
                     mc.GTN_Close();
@@ -81,7 +77,7 @@ namespace AM.MotionCard.Googo
             }
 
             // 4. 扩展模块初始化 (如果配置开启)
-            if (cfg.UseExtModule)
+            if (CurrentConfig.UseExtModule)
             {
                 Thread.Sleep(200);
                 rtn = mc.GTN_ExtModuleInit(1, 1); // 默认地址1
@@ -119,11 +115,11 @@ namespace AM.MotionCard.Googo
             short lastRtn = 0;
 
             // 遍历配置文件中定义的所有内核
-            for (short core = 1; core <= ConfigSingle.Instance.Config.MotionCardConfig.CoreNumber; core++)
+            for (short core = 1; core <= ConfigContext.Instance.Config.MotionCardConfig.CoreNumber; core++)
             {
                 // 固高的习惯通常是从 1 轴开始，连续清除 N 个轴
                 // 第 3 个参数应为该核支持的最大轴数（通常是 8 或 16），或者配置的轴数
-                short rtn = mc.GTN_ClrSts(core, 1, ConfigSingle.Instance.Config.MotionCardConfig.AxisCountNumber);
+                short rtn = mc.GTN_ClrSts(core, 1, ConfigContext.Instance.Config.MotionCardConfig.AxisCountNumber);
 
                 if (rtn != 0)
                 {
@@ -160,7 +156,7 @@ namespace AM.MotionCard.Googo
         /// </summary>
         public override short SetAllZeroPos()
         {
-            var mConfig = ConfigSingle.Instance.Config.MotionCardConfig;
+            var mConfig = ConfigContext.Instance.Config.MotionCardConfig;
             short lastRtn = 0;
 
             // 遍历配置文件中定义的所有物理内核
@@ -264,7 +260,7 @@ namespace AM.MotionCard.Googo
         /// </summary>
         public override short StopAll(bool isEmergency = false)
         {
-            var mConfig = ConfigSingle.Instance.Config.MotionCardConfig;
+            var mConfig = ConfigContext.Instance.Config.MotionCardConfig;
             short option = isEmergency ? (short)1 : (short)0;
             short lastRtn = 0;
 

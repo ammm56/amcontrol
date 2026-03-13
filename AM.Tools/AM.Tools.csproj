@@ -80,7 +80,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConfigSingle.cs" />
     <Compile Include="Logging\LoggerFactory.cs" />
     <Compile Include="Logging\NLogLogger.cs" />
     <Compile Include="Messaging\MessageBusToolkit.cs" />

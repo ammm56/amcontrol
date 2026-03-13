@@ -41,7 +41,10 @@ namespace AM.App.Bootstrap
 
         private static void InitializeMachine()
         {
-            var motion = MotionCardFactory.Create(ConfigContext.Instance.Config.MotionCardConfig);
+            var motionCfg = ConfigContext.Instance.Config.MotionCardConfig;
+            var motion = MotionCardFactory.Create(motionCfg);
+            // 启动阶段统一加载轴映射配置
+            motion.LoadAxisConfig(motionCfg.AxisConfigs);
 
             MachineContext.Instance.MotionCard = motion;
         }

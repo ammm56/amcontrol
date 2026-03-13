@@ -1,4 +1,5 @@
-﻿using AM.Model.Model;
+﻿using AM.Core.Context;
+using AM.Model.Model;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -40,7 +41,7 @@ namespace AM.Tools
                     Version = Environment.Version.ToString()
                 };
 
-                ConfigSingle.Instance.Config.RuntimeConfig.OSInfo = m_OSInfo;
+                ConfigContext.Instance.Config.RuntimeConfig.OSInfo = m_OSInfo;
             }
             catch (Exception ex)
             {
