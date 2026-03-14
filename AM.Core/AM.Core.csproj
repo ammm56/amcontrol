@@ -43,6 +43,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Alarm\AlarmManager.cs" />
+    <Compile Include="Alarm\IAlarmRecord.cs" />
+    <Compile Include="Alarm\NullAlarmRecordService.cs" />
     <Compile Include="Base\ServiceBase.cs" />
     <Compile Include="Context\ConfigContext.cs" />
     <Compile Include="Context\MachineContext.cs" />

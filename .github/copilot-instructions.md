@@ -8,6 +8,7 @@
 - 运动控制对象应通过 MachineContext 作为全局唯一入口直接访问，避免各窗口持有私有副本导致急停/唯一控制失效。
 - 运动控制接口从现在开始统一使用结果容器替代裸 short 返回值；同时结果需承载日志、报警与 UI 状态展示所需信息。
 - 全项目统一使用单一 `Result/Result<T>` 返回模型，而不是按领域拆分 `MotionResult`、`PlcResult`、`VisualResult` 等多个结果类型。
+- 报警持久化命名采用 IAlarmRecord、AlarmRecordService、AlarmRecord，并保持当前解决方案的全局基础设施注入架构；数据库实体统一使用 SqlSugar 标注风格；UI 消息与报警应优先走统一链路而不是各窗口各自定义监听实现。
 
 ## 服务层设计
 - 服务层统一采用“构造注入依赖 + 封装消息发布/日志通知”的风格，避免在各方法中重复直接调用 IMessageBus 和 IAMLogger。

@@ -9,6 +9,21 @@ namespace AM.Core.Logging
     public interface IAMLogger
     {
         /// <summary>
+        /// 日志系统是否已完成初始化。
+        /// </summary>
+        bool IsInitialized { get; }
+
+        /// <summary>
+        /// 当前日志配置文件路径。
+        /// </summary>
+        string ConfigFilePath { get; }
+
+        /// <summary>
+        /// 当前日志文件实际写入路径。
+        /// </summary>
+        string CurrentLogFilePath { get; }
+
+        /// <summary>
         /// 输出信息级日志。
         /// </summary>
         /// <param name="message">日志内容。</param>
@@ -38,5 +53,15 @@ namespace AM.Core.Logging
         /// <param name="ex">异常对象。</param>
         /// <param name="message">日志内容。</param>
         void Error(Exception ex, string message);
+
+        /// <summary>
+        /// 立即刷新日志缓冲区。
+        /// </summary>
+        void Flush();
+
+        /// <summary>
+        /// 关闭日志系统并释放资源。
+        /// </summary>
+        void Shutdown();
     }
 }

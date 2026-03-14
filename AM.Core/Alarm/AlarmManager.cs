@@ -1,6 +1,8 @@
 ﻿using AM.Core.Logging;
 using AM.Core.Messaging;
 using AM.Model.Alarm;
+using AM.Model.Entity;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -26,6 +28,11 @@ namespace AM.Core.Alarm
         private readonly IAMLogger _logger;
 
         /// <summary>
+        /// 报警记录持久化器。
+        /// </summary>
+        private readonly IAlarmRecord _alarmrecord;
+
+        /// <summary>
         /// 当前报警集合。
         /// 保存所有曾产生过的报警，是否清除由 <see cref="AlarmInfo.IsCleared"/> 标识。
         /// </summary>
@@ -36,10 +43,12 @@ namespace AM.Core.Alarm
         /// </summary>
         /// <param name="bus">消息总线。</param>
         /// <param name="logger">日志记录器。</param>
-        public AlarmManager(IMessageBus bus, IAMLogger logger)
+        /// <param name="alarmrecord">报警持久化器。</param>
+        public AlarmManager(IMessageBus bus, IAMLogger logger, IAlarmRecord alarmrecord = null)
         {
             _bus = bus;
             _logger = logger;
+            _alarmrecord = alarmrecord;
         }
 
         /// <summary>
@@ -76,6 +85,15 @@ namespace AM.Core.Alarm
 
             _logger?.Warn("Alarm " + code + " " + finalMessage);
 
+            try
+            {
+                _alarmrecord?.SaveRaised(code, level, finalMessage, finalSource, cardId, alarm.Time);
+            }
+            catch (Exception ex)
+            {
+                _logger?.Error(ex, "Alarm record save raised failed");
+            }
+
             _bus?.Publish(new SystemMessage(
                 finalMessage,
                 SystemMessageType.Alarm,
@@ -89,9 +107,10 @@ namespace AM.Core.Alarm
         /// <summary>
         /// 清除指定报警代码的所有未清除报警。
         /// </summary>
-        /// <param name="code">报警代码。</param>
         public void ClearAlarm(AlarmCode code)
         {
+            var hasCleared = false;
+
             lock (_alarms)
             {
                 foreach (var alarm in _alarms)
@@ -99,8 +118,21 @@ namespace AM.Core.Alarm
                     if (alarm.Code == code && !alarm.IsCleared)
                     {
                         alarm.IsCleared = true;
+                        hasCleared = true;
                     }
                 }
+            }
+
+            if (!hasCleared)
+                return;
+
+            try
+            {
+                _alarmrecord?.SaveCleared(code, DateTime.Now);
+            }
+            catch (Exception ex)
+            {
+                _logger?.Error(ex, "Alarm record save cleared failed");
             }
         }
 

@@ -3,6 +3,7 @@ using AM.Core.Context;
 using AM.Core.Logging;
 using AM.Core.Messaging;
 using AM.Core.Reporter;
+using AM.DBService.Services;
 using AM.Model.Common;
 using AM.Model.Interfaces.MotionCard;
 using AM.Model.MotionCard;
@@ -33,8 +34,11 @@ namespace AM.App.Bootstrap
             // 2. 构造系统基础设施
             IAMLogger logger = new NLogLogger("System");
             IMessageBus messageBus = new MessageBusToolkit();
-            AlarmManager alarmManager = new AlarmManager(messageBus, logger);
             IErrorCatalog errorCatalog = new JsonErrorCatalog();
+            // 数据库未启用 先不记录报警
+            IAlarmRecord alarmRecord = new NullAlarmRecordService();
+            //IAlarmRecord alarmRecord = new AlarmRecordService();
+            AlarmManager alarmManager = new AlarmManager(messageBus, logger, alarmRecord);
             IAppReporter reporter = new AppReporter(messageBus, logger, alarmManager, errorCatalog);
 
             // 3. 初始化系统上下文
