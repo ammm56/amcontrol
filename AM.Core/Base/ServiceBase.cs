@@ -11,7 +11,7 @@ using System.Linq;
 namespace AM.Core.Base
 {
     /// <summary>
-    /// 统一处理结果、日志记录、消息发布和报警的服务基类，供具体业务服务继承使用，简化代码并确保一致的行为。
+    /// 统一处理结果Result / Result<T> 生成、日志、消息通知、报警、try/catch 统一包装的服务基类，供具体业务服务继承使用，简化代码并确保一致的行为。
     /// </summary>
     public abstract class ServiceBase
     {

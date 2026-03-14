@@ -9,6 +9,11 @@ using System.Threading.Tasks;
 
 namespace AM.Core.Alarm
 {
+    /// <summary>
+    /// 报警管理器，负责管理系统中的报警信息，包括报警的产生、清除和查询等功能。
+    /// 职责：维护“当前激活报警”、支持确认/清除、代表设备或流程级异常状态
+    /// 特点：是状态、不是单纯一条消息、伴随日志和消息
+    /// </summary>
     public class AlarmManager
     {
         private readonly IMessageBus _bus;

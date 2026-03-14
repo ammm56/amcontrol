@@ -1,6 +1,7 @@
 ﻿using AM.Core.Alarm;
 using AM.Core.Logging;
 using AM.Core.Messaging;
+using AM.Core.Reporter;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,14 +21,14 @@ namespace AM.Core.Context
         public IMessageBus MessageBus { get; private set; }
 
         public AlarmManager AlarmManager { get; private set; }
+        public IAppReporter Reporter { get; private set; }
 
         public void Initialize(IAMLogger logger,IMessageBus bus)
         {
             Logger = logger;
-
             MessageBus = bus;
-
             AlarmManager = new AlarmManager(bus, logger);
+            Reporter = new AppReporter(bus, logger, AlarmManager);
         }
     }
 }
