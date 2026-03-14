@@ -1,4 +1,5 @@
 ﻿using AM.Model.Interfaces.MotionCard;
+using System.Collections.Generic;
 
 namespace AM.Core.Context
 {
@@ -21,9 +22,34 @@ namespace AM.Core.Context
         }
 
         /// <summary>
-        /// 全局唯一运动控制卡服务实例。
+        /// 按卡号保存运动控制卡服务。
+        /// Key: CardId
         /// </summary>
-        public IMotionCardService MotionCard { get; set; }
+        public IDictionary<short, IMotionCardService> MotionCards { get; } = new Dictionary<short, IMotionCardService>();
+
+        /// <summary>
+        /// 逻辑轴到所属控制卡服务的映射。
+        /// Key: LogicalAxis
+        /// </summary>
+        public IDictionary<short, IMotionCardService> AxisMotionCards { get; } = new Dictionary<short, IMotionCardService>();
+
+        /// <summary>
+        /// 逻辑 DI 位到所属控制卡服务的映射。
+        /// Key: LogicalBit
+        /// </summary>
+        public IDictionary<short, IMotionCardService> DICards { get; } = new Dictionary<short, IMotionCardService>();
+
+        /// <summary>
+        /// 逻辑 DO 位到所属控制卡服务的映射。
+        /// Key: LogicalBit
+        /// </summary>
+        public IDictionary<short, IMotionCardService> DOCards { get; } = new Dictionary<short, IMotionCardService>();
+
+        /// <summary>
+        /// 全局统一运动控制入口。
+        /// 上层应优先通过该入口访问运动控制，而不是直接持有某张卡实例。
+        /// </summary>
+        public IMotionCardService MotionHub { get; set; }
 
         /// <summary>
         /// 预留 PLC 服务对象。

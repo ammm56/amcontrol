@@ -12,87 +12,172 @@
 		"Connection": "DataSource=W:\\db\\sqlite\\gsna",
 		"Enable": true
 	},
-	"MotionCardConfig": {
-		"CardType": 10,
-		"CardId": 0,
-		"ModeParam": 0,
-		"CoreNumber": 2,
-		"AxisCountNumber": 4,
-		"UseExtModule": false,
-		"DIBitMaps": [
-			{
-				"LogicalBit": 1,
-				"Name": "启动按钮",
-				"Core": 1,
-				"IsExtModule": false,
-				"HardwareBit": 1
-			},
-			{
-				"LogicalBit": 2,
-				"Name": "停止按钮",
-				"Core": 1,
-				"IsExtModule": false,
-				"HardwareBit": 2
-			},
-			{
-				"LogicalBit": 17,
-				"Name": "扩展原点传感器",
-				"Core": 1,
-				"IsExtModule": true,
-				"HardwareBit": 1
-			}
-		],
-		"DOBitMaps": [
-			{
-				"LogicalBit": 1,
-				"Name": "红灯",
-				"Core": 1,
-				"IsExtModule": false,
-				"HardwareBit": 1
-			},
-			{
-				"LogicalBit": 2,
-				"Name": "绿灯",
-				"Core": 1,
-				"IsExtModule": false,
-				"HardwareBit": 2
-			},
-			{
-				"LogicalBit": 17,
-				"Name": "扩展气缸电磁阀",
-				"Core": 1,
-				"IsExtModule": true,
-				"HardwareBit": 1
-			}
-		],
-		"AxisConfigs": [
-			{
-				"AxisId": 1,
-				"Name": "14轴",
-				"LogicalAxis": 114,
-				"PhysicalCore": 1,
-				"PhysicalAxis": 14,
-				"AlarmEnable": true,
-				"AlarmInvert": false,
-				"PulseMode": 0,
-				"EncoderExternal": false,
-				"EncoderInvert": false,
-				"LimitHomeInvert": false,
-				"LimitMode": -1,
-				"Lead": 5.0,
-				"PulsePerRev": 10000,
-				"GearRatio": 1.0,
-				"Acc": 0.1,
-				"Dec": 0.1,
-				"SmoothTime": 25,
-				"StandardHomeMode": 1,
-				"HomeHighSpeed": 1.0,
-				"HomeLowSpeed": 0.2,
-				"HomeOffset": 0,
-				"HomeCheck": true,
-				"HomeAutoZeroPos": true,
-				"HomeTimeoutMs": 60000
-			}
-		]
-	}
+	"MotionCardsConfig": [
+		{
+			"CardType": 10,
+			"CardId": 0,
+			"ModeParam": 5,
+			"CoreNumber": 2,
+			"AxisCountNumber": 4,
+			"UseExtModule": false,
+			"DIBitMaps": [
+				{
+					"LogicalBit": 1,
+					"Name": "启动按钮",
+					"Core": 1,
+					"IsExtModule": false,
+					"HardwareBit": 1
+				},
+				{
+					"LogicalBit": 2,
+					"Name": "停止按钮",
+					"Core": 1,
+					"IsExtModule": false,
+					"HardwareBit": 2
+				},
+				{
+					"LogicalBit": 17,
+					"Name": "扩展原点传感器",
+					"Core": 1,
+					"IsExtModule": true,
+					"HardwareBit": 1
+				}
+			],
+			"DOBitMaps": [
+				{
+					"LogicalBit": 1,
+					"Name": "红灯",
+					"Core": 1,
+					"IsExtModule": false,
+					"HardwareBit": 1
+				},
+				{
+					"LogicalBit": 2,
+					"Name": "绿灯",
+					"Core": 1,
+					"IsExtModule": false,
+					"HardwareBit": 2
+				},
+				{
+					"LogicalBit": 17,
+					"Name": "扩展气缸电磁阀",
+					"Core": 1,
+					"IsExtModule": true,
+					"HardwareBit": 1
+				}
+			],
+			"AxisConfigs": [
+				{
+					"AxisId": 1,
+					"Name": "14轴",
+					"LogicalAxis": 114,
+					"PhysicalCore": 1,
+					"PhysicalAxis": 14,
+					"AlarmEnable": true,
+					"AlarmInvert": false,
+					"PulseMode": 0,
+					"EncoderExternal": false,
+					"EncoderInvert": false,
+					"LimitHomeInvert": false,
+					"LimitMode": -1,
+					"Lead": 5.0,
+					"PulsePerRev": 10000,
+					"GearRatio": 1.0,
+					"Acc": 0.1,
+					"Dec": 0.1,
+					"SmoothTime": 25,
+					"StandardHomeMode": 1,
+					"HomeHighSpeed": 1.0,
+					"HomeLowSpeed": 0.2,
+					"HomeOffset": 0,
+					"HomeCheck": true,
+					"HomeAutoZeroPos": true,
+					"HomeTimeoutMs": 60000
+				}
+			]
+		},
+		{
+			"CardType": 10,
+			"CardId": 1,
+			"ModeParam": 1,
+			"CoreNumber": 2,
+			"AxisCountNumber": 4,
+			"UseExtModule": false,
+			"DIBitMaps": [
+				{
+					"LogicalBit": 1,
+					"Name": "启动按钮",
+					"Core": 1,
+					"IsExtModule": false,
+					"HardwareBit": 1
+				},
+				{
+					"LogicalBit": 2,
+					"Name": "停止按钮",
+					"Core": 1,
+					"IsExtModule": false,
+					"HardwareBit": 2
+				},
+				{
+					"LogicalBit": 17,
+					"Name": "扩展原点传感器",
+					"Core": 1,
+					"IsExtModule": true,
+					"HardwareBit": 1
+				}
+			],
+			"DOBitMaps": [
+				{
+					"LogicalBit": 1,
+					"Name": "红灯",
+					"Core": 1,
+					"IsExtModule": false,
+					"HardwareBit": 1
+				},
+				{
+					"LogicalBit": 2,
+					"Name": "绿灯",
+					"Core": 1,
+					"IsExtModule": false,
+					"HardwareBit": 2
+				},
+				{
+					"LogicalBit": 17,
+					"Name": "扩展气缸电磁阀",
+					"Core": 1,
+					"IsExtModule": true,
+					"HardwareBit": 1
+				}
+			],
+			"AxisConfigs": [
+				{
+					"AxisId": 1,
+					"Name": "1轴",
+					"LogicalAxis": 11,
+					"PhysicalCore": 1,
+					"PhysicalAxis": 1,
+					"AlarmEnable": true,
+					"AlarmInvert": false,
+					"PulseMode": 0,
+					"EncoderExternal": false,
+					"EncoderInvert": false,
+					"LimitHomeInvert": false,
+					"LimitMode": -1,
+					"Lead": 5.0,
+					"PulsePerRev": 10000,
+					"GearRatio": 1.0,
+					"Acc": 0.1,
+					"Dec": 0.1,
+					"SmoothTime": 25,
+					"StandardHomeMode": 1,
+					"HomeHighSpeed": 1.0,
+					"HomeLowSpeed": 0.2,
+					"HomeOffset": 0,
+					"HomeCheck": true,
+					"HomeAutoZeroPos": true,
+					"HomeTimeoutMs": 60000
+				}
+			]
+		}
+	]
 }

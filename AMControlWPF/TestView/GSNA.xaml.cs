@@ -29,11 +29,6 @@ namespace AMControlWPF
     /// </summary>
     public partial class GSNA : Window
     {
-        private IMotionCardService MotionCard
-        {
-            get { return MachineContext.Instance.MotionCard; }
-        }
-
         public GSNA()
         {
             InitializeComponent();
@@ -77,27 +72,27 @@ namespace AMControlWPF
         private void btn_connect_Click(object sender, RoutedEventArgs e)
         {
             // 串联多卡与事件 (串联逻辑)
-            MotionCard.Connect();
+            MachineContext.Instance.MotionCards[1].Connect();
         }
 
         private void btn_clearstatus_Click(object sender, RoutedEventArgs e)
         {
-            MotionCard.ClearAllAxisStatus();
+            MachineContext.Instance.MotionCards[1].ClearAllAxisStatus();
         }
 
         private void btn_enable_Click(object sender, RoutedEventArgs e)
         {
-            MotionCard.Enable(114, true);
+            MachineContext.Instance.MotionCards[1].Enable(114, true);
         }
 
         private void btn_pointclearzero_Click(object sender, RoutedEventArgs e)
         {
-            MotionCard.SetZeroPos(1);
+            MachineContext.Instance.MotionCards[1].SetZeroPos(1);
         }
 
         private void btn_runstaart_Click(object sender, RoutedEventArgs e)
         {
-            MotionCard.MoveRelativeMm(1, 2, 1);
+            MachineContext.Instance.MotionCards[1].MoveRelativeMm(1, 2, 1);
         }
 
         private void btn_runstop_Click(object sender, RoutedEventArgs e)
@@ -119,30 +114,30 @@ namespace AMControlWPF
         private void btn_configaxisarg_Click(object sender, RoutedEventArgs e)
         {
             // 5. 初始化所有轴的硬件参数（手动配置替代 cfg 文件）
-            foreach (var axisCfg in ConfigContext.Instance.Config.MotionCardConfig.AxisConfigs)
+            foreach (var axisCfg in ConfigContext.Instance.Config.MotionCardsConfig[1].AxisConfigs)
             {
-                MotionCard.ConfigAxisHardware(axisCfg);
+                MachineContext.Instance.MotionCards[1].ConfigAxisHardware(axisCfg);
             }
         }
 
         private void btn_stopall_Click(object sender, RoutedEventArgs e)
         {
-            MotionCard?.StopAll(true);
+            MachineContext.Instance.MotionCards[1]?.StopAll(true);
         }
 
         private void btn_jogmoveZmm_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            MotionCard?.JogStop(1);
+            MachineContext.Instance.MotionCards[1]?.JogStop(1);
         }
 
         private void btn_jogmoveZmm_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            MotionCard?.JogMoveMm(1, true, 10);
+            MachineContext.Instance.MotionCards[1]?.JogMoveMm(1, true, 10);
         }
 
         private void btn_jogmoveFmm_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            MotionCard?.JogMoveMm(1, false, 10);
+            MachineContext.Instance.MotionCards[1]?.JogMoveMm(1, false, 10);
         }
 
         private void btn_init_Click_1(object sender, RoutedEventArgs e)

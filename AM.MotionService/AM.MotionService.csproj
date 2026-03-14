@@ -46,6 +46,7 @@
     <Compile Include="Base\MotionCardBase.cs" />
     <Compile Include="Googo\GoogoMotionCardService.cs" />
     <Compile Include="Googo\gts.cs" />
+    <Compile Include="Hub\MotionServiceHub.cs" />
     <Compile Include="Leisai\LeisaiMotionCardService.cs" />
     <Compile Include="Factory\MotionCardFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

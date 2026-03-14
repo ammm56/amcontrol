@@ -18,12 +18,6 @@ namespace AM.Core.Base
         protected readonly IAppReporter _reporter;
 
         /// <summary>
-        /// 最近一次执行结果。
-        /// 用于上层诊断与界面展示。
-        /// </summary>
-        public Result LastResult { get; protected set; }
-
-        /// <summary>
         /// 默认消息来源。
         /// 子类可重写。
         /// </summary>
@@ -65,7 +59,6 @@ namespace AM.Core.Base
         protected ServiceBase(IAppReporter reporter)
         {
             _reporter = reporter;
-            LastResult = Result.Ok("OK", ResultSource.Unknown);
         }
 
         /// <summary>
@@ -73,9 +66,8 @@ namespace AM.Core.Base
         /// </summary>
         protected Result Ok(string message = "OK")
         {
-            LastResult = Result.Ok(message, DefaultResultSource);
             _reporter?.Info(MessageSourceName, message, null, MessageCardId);
-            return LastResult;
+            return Result.Ok(message, DefaultResultSource);
         }
 
         /// <summary>
@@ -83,7 +75,6 @@ namespace AM.Core.Base
         /// </summary>
         protected Result<T> Ok<T>(T item, string message = "OK")
         {
-            LastResult = Result.Ok(message, DefaultResultSource);
             _reporter?.Info(MessageSourceName, message, null, MessageCardId);
             return Result<T>.OkItem(item, message, DefaultResultSource);
         }
@@ -93,7 +84,6 @@ namespace AM.Core.Base
         /// </summary>
         protected Result<T> OkList<T>(IEnumerable<T> items, string message = "OK")
         {
-            LastResult = Result.Ok(message, DefaultResultSource);
             _reporter?.Info(MessageSourceName, message, null, MessageCardId);
             return Result<T>.OkList(items, message, DefaultResultSource);
         }
@@ -103,9 +93,8 @@ namespace AM.Core.Base
         /// </summary>
         protected Result Warn(int code, string message)
         {
-            LastResult = Result.Fail(code, message, DefaultResultSource);
             _reporter?.Warn(MessageSourceName, message, code, MessageCardId);
-            return LastResult;
+            return Result.Fail(code, message, DefaultResultSource);
         }
 
         /// <summary>
@@ -113,7 +102,6 @@ namespace AM.Core.Base
         /// </summary>
         protected Result<T> Warn<T>(int code, string message)
         {
-            LastResult = Result.Fail(code, message, DefaultResultSource);
             _reporter?.Warn(MessageSourceName, message, code, MessageCardId);
             return Result<T>.Fail(code, message, DefaultResultSource);
         }
@@ -123,14 +111,12 @@ namespace AM.Core.Base
         /// </summary>
         protected Result Fail(int code, string message, Exception ex = null)
         {
-            LastResult = Result.Fail(code, message, DefaultResultSource);
-
             if (ex == null)
                 _reporter?.Error(MessageSourceName, message, code, MessageCardId);
             else
                 _reporter?.Error(MessageSourceName, ex, message, code, MessageCardId);
 
-            return LastResult;
+            return Result.Fail(code, message, DefaultResultSource);
         }
 
         /// <summary>
@@ -138,8 +124,6 @@ namespace AM.Core.Base
         /// </summary>
         protected Result<T> Fail<T>(int code, string message, Exception ex = null)
         {
-            LastResult = Result.Fail(code, message, DefaultResultSource);
-
             if (ex == null)
                 _reporter?.Error(MessageSourceName, message, code, MessageCardId);
             else

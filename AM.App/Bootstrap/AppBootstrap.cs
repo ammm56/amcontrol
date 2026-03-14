@@ -4,7 +4,10 @@ using AM.Core.Logging;
 using AM.Core.Messaging;
 using AM.Core.Reporter;
 using AM.Model.Common;
+using AM.Model.Interfaces.MotionCard;
+using AM.Model.MotionCard;
 using AM.MotionService.Factory;
+using AM.MotionService.Hub;
 using AM.Tools.Logging;
 using AM.Tools.Messaging;
 using AM.Tools.Reporter;
@@ -46,13 +49,110 @@ namespace AM.App.Bootstrap
         /// </summary>
         private static void InitializeMachine()
         {
-            var motionCfg = ConfigContext.Instance.Config.MotionCardConfig;
-            var motion = MotionCardFactory.Create(motionCfg);
+            var machine = MachineContext.Instance;
+            machine.MotionCards.Clear();
+            machine.AxisMotionCards.Clear();
+            machine.DICards.Clear();
+            machine.DOCards.Clear();
 
-            // 启动阶段统一加载轴映射配置
+            var cardConfigs = ConfigContext.Instance.Config.MotionCardsConfig;
+            if (cardConfigs == null || cardConfigs.Count == 0)
+            {
+                SystemContext.Instance.Reporter?.Warn("AppBootstrap", "未配置任何运动控制卡");
+                machine.MotionHub = new MotionServiceHub();
+                return;
+            }
+
+            foreach (var motionCfg in cardConfigs)
+            {
+                RegisterMotionCard(machine, motionCfg);
+            }
+
+            machine.MotionHub = new MotionServiceHub();
+        }
+
+        /// <summary>
+        /// 注册单张运动控制卡及其轴、DI、DO 映射。
+        /// </summary>
+        private static void RegisterMotionCard(MachineContext machine, MotionCardConfig motionCfg)
+        {
+            if (motionCfg == null)
+            {
+                SystemContext.Instance.Reporter?.Warn("AppBootstrap", "存在空的运动控制卡配置，已跳过");
+                return;
+            }
+
+            if (machine.MotionCards.ContainsKey(motionCfg.CardId))
+            {
+                SystemContext.Instance.Reporter?.Error("AppBootstrap", "控制卡 CardId 重复: " + motionCfg.CardId);
+                return;
+            }
+
+            IMotionCardService motion = MotionCardFactory.Create(motionCfg);
             motion.LoadAxisConfig(motionCfg.AxisConfigs);
 
-            MachineContext.Instance.MotionCard = motion;
+            machine.MotionCards[motionCfg.CardId] = motion;
+
+            RegisterAxisMappings(machine, motion, motionCfg);
+            RegisterDIMappings(machine, motion, motionCfg);
+            RegisterDOMappings(machine, motion, motionCfg);
+        }
+
+        /// <summary>
+        /// 注册逻辑轴映射。
+        /// </summary>
+        private static void RegisterAxisMappings(MachineContext machine, IMotionCardService motion, MotionCardConfig motionCfg)
+        {
+            if (motionCfg.AxisConfigs == null) return;
+
+            foreach (var axisCfg in motionCfg.AxisConfigs)
+            {
+                if (machine.AxisMotionCards.ContainsKey(axisCfg.LogicalAxis))
+                {
+                    SystemContext.Instance.Reporter?.Error("AppBootstrap", "逻辑轴重复映射: " + axisCfg.LogicalAxis);
+                    continue;
+                }
+
+                machine.AxisMotionCards[axisCfg.LogicalAxis] = motion;
+            }
+        }
+
+        /// <summary>
+        /// 注册逻辑 DI 映射。
+        /// </summary>
+        private static void RegisterDIMappings(MachineContext machine, IMotionCardService motion, MotionCardConfig motionCfg)
+        {
+            if (motionCfg.DIBitMaps == null) return;
+
+            foreach (var di in motionCfg.DIBitMaps)
+            {
+                if (machine.DICards.ContainsKey(di.LogicalBit))
+                {
+                    SystemContext.Instance.Reporter?.Error("AppBootstrap", "逻辑DI重复映射: " + di.LogicalBit);
+                    continue;
+                }
+
+                machine.DICards[di.LogicalBit] = motion;
+            }
+        }
+
+        /// <summary>
+        /// 注册逻辑 DO 映射。
+        /// </summary>
+        private static void RegisterDOMappings(MachineContext machine, IMotionCardService motion, MotionCardConfig motionCfg)
+        {
+            if (motionCfg.DOBitMaps == null) return;
+
+            foreach (var dob in motionCfg.DOBitMaps)
+            {
+                if (machine.DOCards.ContainsKey(dob.LogicalBit))
+                {
+                    SystemContext.Instance.Reporter?.Error("AppBootstrap", "逻辑DO重复映射: " + dob.LogicalBit);
+                    continue;
+                }
+
+                machine.DOCards[dob.LogicalBit] = motion;
+            }
         }
     }
 }

@@ -15,7 +15,6 @@ namespace AM.Model.Interfaces.MotionCard
         /// </summary>
         //event Action<short, string> OnError;
 
-        Result LastResult { get; }
 
     }
 }

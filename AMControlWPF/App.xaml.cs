@@ -53,7 +53,7 @@ namespace AMControlWPF
         {
             try
             {
-                MachineContext.Instance.MotionCard?.Disconnect();
+                
             }
             finally
             {

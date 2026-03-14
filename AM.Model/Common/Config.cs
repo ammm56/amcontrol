@@ -19,7 +19,7 @@ namespace AM.Model.Common
 
         public DB Sqlite { get; set; } = new DB();
 
-        public MotionCardConfig MotionCardConfig { get; set; } = new MotionCardConfig();
+        public List<MotionCardConfig> MotionCardsConfig { get; set; } = new List<MotionCardConfig> { };
 
         /// <summary>
         /// 运行时配置

@@ -1,16 +1,11 @@
-﻿using AM.Core.Context;
-using AM.Model.Common;
+﻿using AM.Model.Common;
 using AM.Model.MotionCard;
 using AM.Model.Structs;
 using AM.MotionService.Base;
-using AM.Tools;
 using GTN;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,13 +13,19 @@ namespace AM.MotionCard.Googo
 {
     public class GoogoMotionCardService : MotionCardBase
     {
+        private readonly MotionCardConfig _config;
+
         private MotionCardConfig CurrentConfig
         {
-            get { return ConfigContext.Instance.Config.MotionCardConfig; }
+            get { return _config; }
         }
 
         public GoogoMotionCardService(MotionCardConfig config)
         {
+            if (config == null)
+                throw new ArgumentNullException(nameof(config));
+
+            _config = config;
         }
 
         public override Result Initialize(string configPath)
@@ -92,11 +93,14 @@ namespace AM.MotionCard.Googo
         /// <returns></returns>
         public override Result ClearStatus(short logicalAxis)
         {
-            var cfg = GetLogicalAxisCfg(logicalAxis);
-            if (cfg == null) return LastResult; // 找不到配置直接退出
+            var cfgResult = GetLogicalAxisCfgResult(logicalAxis);
+            if (!cfgResult.Success)
+                return Result.Fail(cfgResult.Code, cfgResult.Message, ResultSource.Motion);
+            var cfg = cfgResult.Item;
+            short core = cfg.PhysicalCore;
+            short axis = cfg.PhysicalAxis;
 
-            // // 参数 1：内核，参数 2：起始轴，参数 3：清除轴的数量（这里是 1）
-            short rtn = mc.GTN_ClrSts(cfg.PhysicalCore, cfg.PhysicalAxis, 1);
+            short rtn = mc.GTN_ClrSts(core, axis, 1);
             if (rtn != 0)
             {
                 return HandleError(rtn, $"GTN_ClrSts 第 {cfg.PhysicalCore} 核 {cfg.PhysicalAxis} 轴 清除状态失败。");
@@ -131,14 +135,17 @@ namespace AM.MotionCard.Googo
         /// </summary>
         public override Result SetZeroPos(short logicalAxis)
         {
-            var cfg = GetLogicalAxisCfg(logicalAxis);
-            if (cfg == null) return LastResult;
+            var cfgResult = GetLogicalAxisCfgResult(logicalAxis);
+            if (!cfgResult.Success)
+                return Result.Fail(cfgResult.Code, cfgResult.Message, ResultSource.Motion);
+            var cfg = cfgResult.Item;
+            short core = cfg.PhysicalCore;
+            short axis = cfg.PhysicalAxis;
 
-            // 参数：内核, 起始物理轴, 轴数(1)
-            short rtn = mc.GTN_ZeroPos(cfg.PhysicalCore, cfg.PhysicalAxis, 1);
+            short rtn = mc.GTN_ZeroPos(core, axis, 1);
             if (rtn != 0)
             {
-                return HandleError(rtn, $"逻辑轴 {logicalAxis} (核{cfg.PhysicalCore} 轴{cfg.PhysicalAxis}) 位置清零失败");
+                return HandleError(rtn, $"逻辑轴 {logicalAxis} (核{core} 轴{axis}) 位置清零失败");
             }
 
             return Ok($"逻辑轴 {logicalAxis} 位置清零成功");
@@ -226,12 +233,16 @@ namespace AM.MotionCard.Googo
 
         public override Result Enable(short logicalAxis, bool onOff)
         {
-            var cfg = GetLogicalAxisCfg(logicalAxis);
-            if (cfg == null) return LastResult;
+            var cfgResult = GetLogicalAxisCfgResult(logicalAxis);
+            if (!cfgResult.Success)
+                return Result.Fail(cfgResult.Code, cfgResult.Message, ResultSource.Motion);
+            var cfg = cfgResult.Item;
+            short core = cfg.PhysicalCore;
+            short axis = cfg.PhysicalAxis;
 
             short rtn = onOff
-                ? mc.GTN_AxisOn(cfg.PhysicalCore, cfg.PhysicalAxis)
-                : mc.GTN_AxisOff(cfg.PhysicalCore, cfg.PhysicalAxis);
+                ? mc.GTN_AxisOn(core, axis)
+                : mc.GTN_AxisOff(core, axis);
 
             if (rtn != 0) return HandleError(rtn, "轴 " + logicalAxis + " 使能切换失败");
 
@@ -244,15 +255,17 @@ namespace AM.MotionCard.Googo
         /// </summary>
         public override Result Stop(short logicalAxis, bool isEmergency = false)
         {
-            var cfg = GetLogicalAxisCfg(logicalAxis);
-            if (cfg == null) return LastResult;
+            var cfgResult = GetLogicalAxisCfgResult(logicalAxis);
+            if (!cfgResult.Success)
+                return Result.Fail(cfgResult.Code, cfgResult.Message, ResultSource.Motion);
+            var cfg = cfgResult.Item;
+            short core = cfg.PhysicalCore;
+            short axis = cfg.PhysicalAxis;
 
-            // 固高参数2(mask)：1 << (axis-1) 对应具体轴
-            // 固高参数3(option)：0为平滑停止，1为急停
             short option = isEmergency ? (short)1 : (short)0;
-            int mask = 1 << (cfg.PhysicalAxis - 1);
+            int mask = 1 << (axis - 1);
 
-            short rtn = mc.GTN_Stop(cfg.PhysicalCore, mask, option);
+            short rtn = mc.GTN_Stop(core, mask, option);
             if (rtn != 0)
             {
                 return HandleError(rtn, $"轴 {logicalAxis} 停止失败");
@@ -289,8 +302,12 @@ namespace AM.MotionCard.Googo
 
         public override Result Home(short logicalAxis)
         {
-            var cfg = GetLogicalAxisCfg(logicalAxis);
-            if (cfg == null) return LastResult;
+            var cfgResult = GetLogicalAxisCfgResult(logicalAxis);
+            if (!cfgResult.Success)
+                return Result.Fail(cfgResult.Code, cfgResult.Message, ResultSource.Motion);
+            var cfg = cfgResult.Item;
+            short core = cfg.PhysicalCore;
+            short axis = cfg.PhysicalAxis;
 
             if (cfg.StandardHomeMode <= 0)
             {
@@ -316,8 +333,7 @@ namespace AM.MotionCard.Googo
                 offset = cfg.HomeOffset,
                 check = cfg.HomeCheck ? (short)1 : (short)0,
                 autoZeroPos = cfg.HomeAutoZeroPos ? (short)1 : (short)0,
-                motorStopDelay = 0,
-                //pad1 = new short[3]
+                motorStopDelay = 0
             };
 
             short rtn = mc.GTN_ExecuteStandardHome(cfg.PhysicalCore, cfg.PhysicalAxis, ref prm);
@@ -340,14 +356,20 @@ namespace AM.MotionCard.Googo
         /// <param name="velMm">运行速度 (mm/s)</param>
         public override Result MoveRelativeMm(short logicalAxis, double distanceMm, double velMm)
         {
-            var cfg = GetLogicalAxisCfg(logicalAxis);
-            if (cfg == null) return LastResult;
+            var cfgResult = GetLogicalAxisCfgResult(logicalAxis);
+            if (!cfgResult.Success)
+                return Result.Fail(cfgResult.Code, cfgResult.Message, ResultSource.Motion);
+            var cfg = cfgResult.Item;
+            short core = cfg.PhysicalCore;
+            short axis = cfg.PhysicalAxis;
 
-            // mm -> pulse, mm/s -> pulse/ms
-            int deltaPulse = MmToPulse(logicalAxis, distanceMm);
+            var pulseResult = MmToPulseResult(logicalAxis, distanceMm);
+            if (!pulseResult.Success)
+                return Result.Fail(pulseResult.Code, pulseResult.Message, ResultSource.Motion);
+
             double velPulsePerMs = (velMm * cfg.K) / 1000.0;
 
-            return MoveRelative(logicalAxis, deltaPulse, velPulsePerMs, cfg.Acc, cfg.Dec);
+            return MoveRelative(logicalAxis, pulseResult.Item, velPulsePerMs, cfg.Acc, cfg.Dec);
         }
 
         /// <summary>
@@ -362,10 +384,12 @@ namespace AM.MotionCard.Googo
         public override Result MoveRelative(short logicalAxis, double pulseDistance, double velocity, double acc, double dec)
         {
             // 1. 获取轴配置映射 (用于找到物理 Core 和 Axis)
-            var cfg = GetLogicalAxisCfg(logicalAxis);
-            if (cfg == null) return LastResult;
-            short core = cfg.PhysicalCore;
-            short axis = cfg.PhysicalAxis;
+            var cfgResult = GetLogicalAxisCfgResult(logicalAxis);
+            if (!cfgResult.Success)
+                return Result.Fail(cfgResult.Code, cfgResult.Message, ResultSource.Motion);
+            var cfg = cfgResult.Item;
+            short core = cfgResult.Item.PhysicalCore;
+            short axis = cfgResult.Item.PhysicalAxis;
 
             // 2. 设置为点位运动模式 (Trap)
             short rtn = mc.GTN_PrfTrap(core, axis);
@@ -395,7 +419,10 @@ namespace AM.MotionCard.Googo
 
             // 6. 设置目标位置
             rtn = mc.GTN_SetPos(core, axis, targetPos);
-            if (rtn != 0) return HandleError(rtn, $"轴{logicalAxis} 设置目标位置失败");
+            if (rtn != 0)
+            {
+                return HandleError(rtn, $"轴{logicalAxis} 设置目标位置失败");
+            }
 
             // 7. 启动运动 (Update 掩码)
             // 1 << (axis-1) 确保只更新当前轴
@@ -417,14 +444,20 @@ namespace AM.MotionCard.Googo
         /// <param name="velMm">运行速度 (mm/s)</param>
         public override Result MoveAbsoluteMm(short logicalAxis, double positionMm, double velMm)
         {
-            var cfg = GetLogicalAxisCfg(logicalAxis);
-            if (cfg == null) return LastResult;
+            var cfgResult = GetLogicalAxisCfgResult(logicalAxis);
+            if (!cfgResult.Success)
+                return Result.Fail(cfgResult.Code, cfgResult.Message, ResultSource.Motion);
+            var cfg = cfgResult.Item;
+            short core = cfg.PhysicalCore;
+            short axis = cfg.PhysicalAxis;
 
-            // mm -> pulse, mm/s -> pulse/ms
-            int targetPulse = MmToPulse(logicalAxis, positionMm);
+            var pulseResult = MmToPulseResult(logicalAxis, positionMm);
+            if (!pulseResult.Success)
+                return Result.Fail(pulseResult.Code, pulseResult.Message, ResultSource.Motion);
+
             double velPulsePerMs = (velMm * cfg.K) / 1000.0;
 
-            return MoveAbsolute(logicalAxis, targetPulse, velPulsePerMs, cfg.Acc, cfg.Dec);
+            return MoveAbsolute(logicalAxis, pulseResult.Item, velPulsePerMs, cfg.Acc, cfg.Dec);
         }
 
         /// <summary>
@@ -438,11 +471,12 @@ namespace AM.MotionCard.Googo
         /// <returns></returns>
         public override Result MoveAbsolute(short logicalAxis, double targetPulse, double velocity, double acc, double dec)
         {
-            var cfg = GetLogicalAxisCfg(logicalAxis);
-            if (cfg == null) return LastResult;
-
-            short core = cfg.PhysicalCore;
-            short axis = cfg.PhysicalAxis;
+            var cfgResult = GetLogicalAxisCfgResult(logicalAxis);
+            if (!cfgResult.Success)
+                return Result.Fail(cfgResult.Code, cfgResult.Message, ResultSource.Motion);
+            var cfg = cfgResult.Item;
+            short core = cfgResult.Item.PhysicalCore;
+            short axis = cfgResult.Item.PhysicalAxis;
 
             short rtn = mc.GTN_PrfTrap(core, axis);
             if (rtn != 0) return HandleError(rtn, $"轴{logicalAxis} 模式切换失败");
@@ -476,16 +510,17 @@ namespace AM.MotionCard.Googo
 
         public override Result JogMove(short logicalAxis, int direction, double velocity)
         {
-            var cfg = GetLogicalAxisCfg(logicalAxis);
-            if (cfg == null) return LastResult;
+            var cfgResult = GetLogicalAxisCfgResult(logicalAxis);
+            if (!cfgResult.Success)
+                return Result.Fail(cfgResult.Code, cfgResult.Message, ResultSource.Motion);
+            var cfg = cfgResult.Item;
+            short core = cfgResult.Item.PhysicalCore;
+            short axis = cfgResult.Item.PhysicalAxis;
 
             if (direction == 0)
             {
                 return JogStop(logicalAxis);
             }
-
-            short core = cfg.PhysicalCore;
-            short axis = cfg.PhysicalAxis;
 
             short rtn = mc.GTN_PrfJog(core, axis);
             if (rtn != 0) return HandleError(rtn, $"轴{logicalAxis} 进入Jog模式失败");
@@ -512,12 +547,13 @@ namespace AM.MotionCard.Googo
 
         public override Result JogMoveMm(short logicalAxis, bool direction, double velMm)
         {
-            var cfg = GetLogicalAxisCfg(logicalAxis);
-            if (cfg == null) return LastResult;
-
-            short core = cfg.PhysicalCore;
-            short axis = cfg.PhysicalAxis;
-            double K = cfg.K;
+            var cfgResult = GetLogicalAxisCfgResult(logicalAxis);
+            if (!cfgResult.Success)
+                return Result.Fail(cfgResult.Code, cfgResult.Message, ResultSource.Motion);
+            var cfg = cfgResult.Item;
+            short core = cfgResult.Item.PhysicalCore;
+            short axis = cfgResult.Item.PhysicalAxis;
+            double K = cfgResult.Item.K;
 
             // 1. 设置为 Jog 模式
             short rtn = mc.GTN_PrfJog(core, axis);
@@ -654,10 +690,14 @@ namespace AM.MotionCard.Googo
 
         public override Result SetVel(short logicalAxis, double vel)
         {
-            var cfg = GetLogicalAxisCfg(logicalAxis);
-            if (cfg == null) return LastResult;
+            var cfgResult = GetLogicalAxisCfgResult(logicalAxis);
+            if (!cfgResult.Success)
+                return Result.Fail(cfgResult.Code, cfgResult.Message, ResultSource.Motion);
+            var cfg = cfgResult.Item;
+            short core = cfgResult.Item.PhysicalCore;
+            short axis = cfgResult.Item.PhysicalAxis;
 
-            short rtn = mc.GTN_SetVel(cfg.PhysicalCore, cfg.PhysicalAxis, vel);
+            short rtn = mc.GTN_SetVel(core, axis, vel);
             if (rtn != 0) return HandleError(rtn, $"轴{logicalAxis} 设置速度失败");
 
             return Ok($"轴{logicalAxis} 设置速度成功");
@@ -665,18 +705,22 @@ namespace AM.MotionCard.Googo
 
         public override Result SetAcc(short logicalAxis, double acc)
         {
-            var cfg = GetLogicalAxisCfg(logicalAxis);
-            if (cfg == null) return LastResult;
+            var cfgResult = GetLogicalAxisCfgResult(logicalAxis);
+            if (!cfgResult.Success)
+                return Result.Fail(cfgResult.Code, cfgResult.Message, ResultSource.Motion);
+            var cfg = cfgResult.Item;
+            short core = cfgResult.Item.PhysicalCore;
+            short axis = cfgResult.Item.PhysicalAxis;
 
-            short rtn = mc.GTN_PrfTrap(cfg.PhysicalCore, cfg.PhysicalAxis);
+            short rtn = mc.GTN_PrfTrap(core, axis);
             if (rtn != 0) return HandleError(rtn, $"轴{logicalAxis} 切换Trap模式失败");
 
             mc.TTrapPrm trap;
-            rtn = mc.GTN_GetTrapPrm(cfg.PhysicalCore, cfg.PhysicalAxis, out trap);
+            rtn = mc.GTN_GetTrapPrm(core, axis, out trap);
             if (rtn != 0) return HandleError(rtn, $"轴{logicalAxis} 读取Trap参数失败");
 
             trap.acc = acc;
-            rtn = mc.GTN_SetTrapPrm(cfg.PhysicalCore, cfg.PhysicalAxis, ref trap);
+            rtn = mc.GTN_SetTrapPrm(core, axis, ref trap);
             if (rtn != 0) return HandleError(rtn, $"轴{logicalAxis} 设置加速度失败");
 
             return Ok($"轴{logicalAxis} 设置加速度成功");
@@ -684,18 +728,22 @@ namespace AM.MotionCard.Googo
 
         public override Result SetDec(short logicalAxis, double dec)
         {
-            var cfg = GetLogicalAxisCfg(logicalAxis);
-            if (cfg == null) return LastResult;
+            var cfgResult = GetLogicalAxisCfgResult(logicalAxis);
+            if (!cfgResult.Success)
+                return Result.Fail(cfgResult.Code, cfgResult.Message, ResultSource.Motion);
+            var cfg = cfgResult.Item;
+            short core = cfgResult.Item.PhysicalCore;
+            short axis = cfgResult.Item.PhysicalAxis;
 
-            short rtn = mc.GTN_PrfTrap(cfg.PhysicalCore, cfg.PhysicalAxis);
+            short rtn = mc.GTN_PrfTrap(core, axis);
             if (rtn != 0) return HandleError(rtn, $"轴{logicalAxis} 切换Trap模式失败");
 
             mc.TTrapPrm trap;
-            rtn = mc.GTN_GetTrapPrm(cfg.PhysicalCore, cfg.PhysicalAxis, out trap);
+            rtn = mc.GTN_GetTrapPrm(core, axis, out trap);
             if (rtn != 0) return HandleError(rtn, $"轴{logicalAxis} 读取Trap参数失败");
 
             trap.dec = dec;
-            rtn = mc.GTN_SetTrapPrm(cfg.PhysicalCore, cfg.PhysicalAxis, ref trap);
+            rtn = mc.GTN_SetTrapPrm(core, axis, ref trap);
             if (rtn != 0) return HandleError(rtn, $"轴{logicalAxis} 设置减速度失败");
 
             return Ok($"轴{logicalAxis} 设置减速度成功");
@@ -703,13 +751,16 @@ namespace AM.MotionCard.Googo
 
         public override Result<AxisStatus> GetAxisStatus(short logicalAxis)
         {
-            var cfg = GetLogicalAxisCfg(logicalAxis);
-            if (cfg == null)
+            var cfgResult = GetLogicalAxisCfgResult(logicalAxis);
+            if (!cfgResult.Success)
                 return Fail<AxisStatus>(MotionErrorCode.AxisMapNotFound, "逻辑轴 " + logicalAxis + " 映射未找到");
+            var cfg = cfgResult.Item;
+            short core = cfgResult.Item.PhysicalCore;
+            short axis = cfgResult.Item.PhysicalAxis;
 
             uint clock;
             int rawStatus;
-            short rtn = mc.GTN_GetStsEx(cfg.PhysicalCore, cfg.PhysicalAxis, out rawStatus, 1, out clock);
+            short rtn = mc.GTN_GetStsEx(core, axis, out rawStatus, 1, out clock);
             if (rtn != 0)
             {
                 return HandleError<AxisStatus>(rtn, "读取轴" + logicalAxis + "状态字失败");
@@ -717,7 +768,7 @@ namespace AM.MotionCard.Googo
 
             short posLimit;
             short negLimit;
-            rtn = mc.GTN_GetLimitStatus(cfg.PhysicalCore, cfg.PhysicalAxis, out posLimit, out negLimit);
+            rtn = mc.GTN_GetLimitStatus(core, axis, out posLimit, out negLimit);
             if (rtn != 0)
             {
                 return HandleError<AxisStatus>(rtn, "读取轴" + logicalAxis + "限位状态失败");
@@ -747,12 +798,16 @@ namespace AM.MotionCard.Googo
 
         public override Result<double> GetCommandPosition(short logicalAxis)
         {
-            var cfg = GetLogicalAxisCfg(logicalAxis);
-            if (cfg == null) return Fail<double>(MotionErrorCode.AxisMapNotFound, $"逻辑轴 {logicalAxis} 映射未找到");
+            var cfgResult = GetLogicalAxisCfgResult(logicalAxis);
+            if (!cfgResult.Success)
+                return Fail<double>(MotionErrorCode.AxisMapNotFound, $"逻辑轴 {logicalAxis} 映射未找到");
+            var cfg = cfgResult.Item;
+            short core = cfgResult.Item.PhysicalCore;
+            short axis = cfgResult.Item.PhysicalAxis;
 
             uint clock;
             double prfPulse;
-            short rtn = mc.GTN_GetAxisPrfPos(cfg.PhysicalCore, cfg.PhysicalAxis, out prfPulse, 1, out clock);
+            short rtn = mc.GTN_GetAxisPrfPos(core, axis, out prfPulse, 1, out clock);
             if (rtn != 0)
             {
                 return HandleError<double>(rtn, $"读取轴{logicalAxis}规划位置失败");
@@ -763,12 +818,16 @@ namespace AM.MotionCard.Googo
 
         public override Result<double> GetEncoderPosition(short logicalAxis)
         {
-            var cfg = GetLogicalAxisCfg(logicalAxis);
-            if (cfg == null) return Fail<double>(MotionErrorCode.AxisMapNotFound, $"逻辑轴 {logicalAxis} 映射未找到");
+            var cfgResult = GetLogicalAxisCfgResult(logicalAxis);
+            if (!cfgResult.Success)
+                return Fail<double>(MotionErrorCode.AxisMapNotFound, $"逻辑轴 {logicalAxis} 映射未找到");
+            var cfg = cfgResult.Item;
+            short core = cfgResult.Item.PhysicalCore;
+            short axis = cfgResult.Item.PhysicalAxis;
 
             uint clock;
             double encPulse;
-            short rtn = mc.GTN_GetAxisEncPos(cfg.PhysicalCore, cfg.PhysicalAxis, out encPulse, 1, out clock);
+            short rtn = mc.GTN_GetAxisEncPos(core, axis, out encPulse, 1, out clock);
             if (rtn != 0)
             {
                 return HandleError<double>(rtn, $"读取轴{logicalAxis}编码器位置失败");
@@ -785,13 +844,13 @@ namespace AM.MotionCard.Googo
                 return Result<double>.Fail(pulseResult.Code, pulseResult.Message, ResultSource.Motion);
             }
 
-            double mm = PulseToMm(logicalAxis, pulseResult.Item);
-            if (double.IsNaN(mm))
+            var mmResult = PulseToMmResult(logicalAxis, pulseResult.Item);
+            if (!mmResult.Success)
             {
-                return Result<double>.Fail(LastResult.Code, LastResult.Message, ResultSource.Motion);
+                return Result<double>.Fail(mmResult.Code, mmResult.Message, ResultSource.Motion);
             }
 
-            return Ok(mm, $"读取轴{logicalAxis}规划位置(mm)成功");
+            return Ok(mmResult.Item, $"读取轴{logicalAxis}规划位置(mm)成功");
         }
 
         public override Result<double> GetEncoderPositionMm(short logicalAxis)
@@ -802,23 +861,27 @@ namespace AM.MotionCard.Googo
                 return Result<double>.Fail(pulseResult.Code, pulseResult.Message, ResultSource.Motion);
             }
 
-            double mm = PulseToMm(logicalAxis, pulseResult.Item);
-            if (double.IsNaN(mm))
+            var mmResult = PulseToMmResult(logicalAxis, pulseResult.Item);
+            if (!mmResult.Success)
             {
-                return Result<double>.Fail(LastResult.Code, LastResult.Message, ResultSource.Motion);
+                return Result<double>.Fail(mmResult.Code, mmResult.Message, ResultSource.Motion);
             }
 
-            return Ok(mm, $"读取轴{logicalAxis}编码器位置(mm)成功");
+            return Ok(mmResult.Item, $"读取轴{logicalAxis}编码器位置(mm)成功");
         }
 
         public override Result<bool> IsMoving(short logicalAxis)
         {
-            var cfg = GetLogicalAxisCfg(logicalAxis);
-            if (cfg == null) return Fail<bool>(MotionErrorCode.AxisMapNotFound, $"逻辑轴 {logicalAxis} 映射未找到");
+            var cfgResult = GetLogicalAxisCfgResult(logicalAxis);
+            if (!cfgResult.Success)
+                return Fail<bool>(MotionErrorCode.AxisMapNotFound, $"逻辑轴 {logicalAxis} 映射未找到");
+            var cfg = cfgResult.Item;
+            short core = cfgResult.Item.PhysicalCore;
+            short axis = cfgResult.Item.PhysicalAxis;
 
             uint clock;
             double vel;
-            short rtn = mc.GTN_GetPrfVel(cfg.PhysicalCore, cfg.PhysicalAxis, out vel, 1, out clock);
+            short rtn = mc.GTN_GetPrfVel(core, axis, out vel, 1, out clock);
             if (rtn != 0)
             {
                 return HandleError<bool>(rtn, $"读取轴{logicalAxis}速度失败");
@@ -920,8 +983,6 @@ namespace AM.MotionCard.Googo
                 HardwareBit = (short)(IsExtIoBit(logicalBit) ? logicalBit - 16 : logicalBit)
             };
         }
-
-
 
         #endregion
 

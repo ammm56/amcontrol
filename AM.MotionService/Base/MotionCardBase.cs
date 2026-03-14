@@ -11,14 +11,14 @@ namespace AM.MotionService.Base
 {
     /// <summary>
     /// 运动控制卡抽象基类，提供公共功能实现（如轴配置管理、单位转换等），并定义抽象运动接口由具体厂家类实现。
-    /// 消息通知、日志、结果处理、报警在ServiceBase中统一处理
     /// </summary>
     public abstract class MotionCardBase : ServiceBase, IMotionCardService
     {
         protected short _cardId;
         private readonly object _axisMapLock = new object();
+
         /// <summary>
-        /// 逻辑轴映射表：Key 是 LogicalAxis，Value 是完整的轴配置（含物理核、轴、单位系数）
+        /// 逻辑轴映射表：Key 是 LogicalAxis，Value 是完整的轴配置。
         /// </summary>
         protected Dictionary<short, AxisConfig> _axisMap = new Dictionary<short, AxisConfig>();
 
@@ -49,15 +49,11 @@ namespace AM.MotionService.Base
 
         #region 轴配置管理
 
-        /// <summary>
-        /// 加载并初始化轴配置映射表
-        /// </summary>
-        public virtual void LoadAxisConfig(List<AxisConfig> configs)
+        public virtual Result LoadAxisConfigResult(List<AxisConfig> configs)
         {
             if (configs == null)
             {
-                Fail(MotionErrorCode.InvalidAxisConfig, "LoadAxisConfig 入参为空");
-                return;
+                return Fail(MotionErrorCode.InvalidAxisConfig, "LoadAxisConfig 入参为空");
             }
 
             var tempMap = new Dictionary<short, AxisConfig>();
@@ -71,81 +67,73 @@ namespace AM.MotionService.Base
                 _axisMap = tempMap;
             }
 
-            Ok("轴映射加载完成");
+            return Ok("轴映射加载完成");
         }
 
-        /// <summary>
-        /// 安全获取逻辑轴配置，若找不到则触发报警
-        /// </summary>
-        protected AxisConfig GetLogicalAxisCfg(short logicalAxis)
+        public virtual void LoadAxisConfig(List<AxisConfig> configs)
+        {
+            LoadAxisConfigResult(configs);
+        }
+
+        protected Result<AxisConfig> GetLogicalAxisCfgResult(short logicalAxis)
         {
             AxisConfig cfg;
             lock (_axisMapLock)
             {
                 if (_axisMap.TryGetValue(logicalAxis, out cfg))
-                    return cfg;
+                    return Ok(cfg, "逻辑轴映射获取成功");
             }
 
-            Fail(MotionErrorCode.AxisMapNotFound, "逻辑轴 " + logicalAxis + " 映射未找到");
-            return null;
+            return Fail<AxisConfig>(MotionErrorCode.AxisMapNotFound, "逻辑轴 " + logicalAxis + " 映射未找到");
         }
 
         #endregion
 
         #region 脉冲/毫米单位转换
 
-        /// <summary>
-        /// 使用配置的 K 值进行毫米到脉冲转换，并增加溢出保护
-        /// </summary>
-        protected int MmToPulse(short logicalAxis, double mm)
+        protected Result<int> MmToPulseResult(short logicalAxis, double mm)
         {
-            var cfg = GetLogicalAxisCfg(logicalAxis);
-            if (cfg == null)
+            var cfgResult = GetLogicalAxisCfgResult(logicalAxis);
+            if (!cfgResult.Success)
             {
-                Fail(MotionErrorCode.AxisMapNotFound, "[致命错误] 毫米到脉冲转换，尝试操作未配置的逻辑轴: " + logicalAxis);
-                return 0;
+                return Result<int>.Fail(cfgResult.Code, cfgResult.Message, ResultSource.Motion);
             }
 
+            var cfg = cfgResult.Item;
             if (cfg.K <= 0)
             {
-                Fail(MotionErrorCode.InvalidK, "轴 " + logicalAxis + " 的K值非法(" + cfg.K + ")，请检查导程或脉冲数设置");
-                return 0;
+                return Fail<int>(MotionErrorCode.InvalidK, "轴 " + logicalAxis + " 的K值非法(" + cfg.K + ")，请检查导程或脉冲数设置");
             }
 
             var pulseCalc = mm * cfg.K;
             if (pulseCalc > int.MaxValue || pulseCalc < int.MinValue)
             {
-                Fail(MotionErrorCode.PulseOverflow, "轴 " + logicalAxis + " 目标脉冲溢出(" + pulseCalc + ")，请检查行程或 K 值");
-                return 0;
+                return Fail<int>(MotionErrorCode.PulseOverflow, "轴 " + logicalAxis + " 目标脉冲溢出(" + pulseCalc + ")，请检查行程或 K 值");
             }
 
-            return Convert.ToInt32(Math.Round(pulseCalc, MidpointRounding.AwayFromZero));
+            var pulse = Convert.ToInt32(Math.Round(pulseCalc, MidpointRounding.AwayFromZero));
+            return Ok(pulse, "毫米转脉冲成功");
         }
 
-        /// <summary>
-        /// 使用配置的 K 值进行脉冲到毫米转换，并增加有效性检查
-        /// </summary>
-        protected double PulseToMm(short logicalAxis, double pulse)
+        protected Result<double> PulseToMmResult(short logicalAxis, double pulse)
         {
-            var cfg = GetLogicalAxisCfg(logicalAxis);
-            if (cfg == null)
+            var cfgResult = GetLogicalAxisCfgResult(logicalAxis);
+            if (!cfgResult.Success)
             {
-                Fail(MotionErrorCode.AxisMapNotFound, "[数据错误] 脉冲到毫米转换，尝试换算未配置逻辑轴 " + logicalAxis + " 的坐标");
-                return double.NaN;
+                return Result<double>.Fail(cfgResult.Code, cfgResult.Message, ResultSource.Motion);
             }
 
+            var cfg = cfgResult.Item;
             if (Math.Abs(cfg.K) < 0.000001)
             {
-                Fail(MotionErrorCode.InvalidK, "[参数错误] 脉冲到毫米转换，轴 " + logicalAxis + " 的脉冲当量(K)为0，无法换算坐标");
-                return double.NaN;
+                return Fail<double>(MotionErrorCode.InvalidK, "轴 " + logicalAxis + " 的脉冲当量(K)为0，无法换算坐标");
             }
 
-            return pulse / cfg.K;
+            return Ok(pulse / cfg.K, "脉冲转毫米成功");
         }
 
         #endregion
 
-        // --- 抽象运动接口 (由厂家类实现具体协议) ---
         public abstract Result Enable(short logicalAxis, bool onOff);
         public abstract Result Stop(short logicalAxis, bool isEmergency = false);
         public abstract Result MoveRelative(short logicalAxis, double pulse, double velocity, double acc, double dec);

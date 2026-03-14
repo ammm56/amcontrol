@@ -36,6 +36,12 @@ namespace AM.Model.MotionCard
         public MotionCardType CardType { get; set; } = MotionCardType.GOOGO;
 
         /// <summary>
+        /// 控制卡名称，主要用于区分不同的控制卡实例
+        /// </summary>
+
+        public string Name { get; set; } = "MotionCard-0";
+
+        /// <summary>
         /// 硬件通信通道（通常对应电脑插槽里的物理卡索引，从 0 开始）
         /// 对应 GTN_Open 的 channel
         /// </summary>
