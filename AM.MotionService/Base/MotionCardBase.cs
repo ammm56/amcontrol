@@ -1,4 +1,5 @@
-﻿using AM.Core.Context;
+﻿using AM.Core.Base;
+using AM.Core.Context;
 using AM.Core.Messaging;
 using AM.Model.Common;
 using AM.Model.Interfaces.MotionCard;
@@ -11,115 +12,42 @@ using System.Threading.Tasks;
 namespace AM.MotionService.Base
 {
     /// <summary>
-    /// 运动控制卡抽象基类，提供公共功能实现（如轴配置管理、单位转换、结果处理、消息发布等），并定义抽象运动接口由具体厂家类实现。
+    /// 运动控制卡抽象基类，提供公共功能实现（如轴配置管理、单位转换等），并定义抽象运动接口由具体厂家类实现。
+    /// 消息通知、日志、结果处理、报警在ServiceBase中统一处理
     /// </summary>
-    public abstract class MotionCardBase : IMotionCardService
+    public abstract class MotionCardBase : ServiceBase, IMotionCardService
     {
         protected short _cardId;
         private readonly object _axisMapLock = new object();
-
-        /// <summary>
-        /// 最近一次执行结果（用于上层诊断/UI）
-        /// </summary>
-        public Result LastResult { get; private set; } = Result.Ok("OK", ResultSource.Motion);
-
         /// <summary>
         /// 逻辑轴映射表：Key 是 LogicalAxis，Value 是完整的轴配置（含物理核、轴、单位系数）
         /// </summary>
         protected Dictionary<short, AxisConfig> _axisMap = new Dictionary<short, AxisConfig>();
 
-        #region 消息总线
-
-        protected IMessageBus MessageBus
+        protected override string MessageSourceName
         {
-            get { return SystemContext.Instance.MessageBus; }
+            get { return "MotionCard"; }
         }
 
-        protected void PublishMessage(SystemMessageType type, string message, string code = null)
+        protected override ResultSource DefaultResultSource
         {
-            var bus = MessageBus;
-            if (bus == null) return;
-
-            bus.Publish(new SystemMessage(message, type, "MotionCard", code, _cardId));
+            get { return ResultSource.Motion; }
         }
 
-        /// <summary>
-        /// 非泛型成功结果：供命令方法与内部辅助方法使用
-        /// </summary>
-        protected Result Ok(string message = "OK")
+        protected override short? MessageCardId
         {
-            LastResult = Result.Ok(message, ResultSource.Motion);
-            PublishMessage(SystemMessageType.Status, message);
-            return LastResult;
+            get { return _cardId; }
         }
 
-        /// <summary>
-        /// 非泛型失败结果：供命令方法与内部辅助方法使用
-        /// </summary>
         protected Result Fail(MotionErrorCode code, string message)
         {
-            LastResult = Result.Fail((short)code, message, ResultSource.Motion);
-            PublishMessage(SystemMessageType.Error, message, ((short)code).ToString());
-            return LastResult;
+            return base.Fail((short)code, message);
         }
 
-        /// <summary>
-        /// 非泛型 SDK 错误处理：供命令方法与内部辅助方法使用
-        /// </summary>
-        protected Result HandleError(short code, string message)
-        {
-            LastResult = code == 0
-                ? Result.Ok(message, ResultSource.Motion)
-                : Result.Fail(code, message, ResultSource.Motion);
-
-            if (code == 0)
-                PublishMessage(SystemMessageType.Status, message);
-            else
-                PublishMessage(SystemMessageType.Error, message, code.ToString());
-
-            return LastResult;
-        }
-
-        /// <summary>
-        /// 泛型成功结果：供查询方法使用
-        /// </summary>
-        protected Result<T> Ok<T>(T item, string message = "OK")
-        {
-            LastResult = Result.Ok(message, ResultSource.Motion);
-            PublishMessage(SystemMessageType.Status, message);
-            return Result<T>.OkItem(item, message, ResultSource.Motion);
-        }
-
-        /// <summary>
-        /// 泛型失败结果：供查询方法使用
-        /// </summary>
         protected Result<T> Fail<T>(MotionErrorCode code, string message)
         {
-            LastResult = Result.Fail((short)code, message, ResultSource.Motion);
-            PublishMessage(SystemMessageType.Error, message, ((short)code).ToString());
-            return Result<T>.Fail((short)code, message, ResultSource.Motion);
+            return base.Fail<T>((short)code, message);
         }
-
-        /// <summary>
-        /// 泛型 SDK 错误处理：供查询方法使用
-        /// </summary>
-        protected Result<T> HandleError<T>(short code, string message)
-        {
-            LastResult = code == 0
-                ? Result.Ok(message, ResultSource.Motion)
-                : Result.Fail(code, message, ResultSource.Motion);
-
-            if (code == 0)
-                PublishMessage(SystemMessageType.Status, message);
-            else
-                PublishMessage(SystemMessageType.Error, message, code.ToString());
-
-            return code == 0
-                ? Result<T>.OkItem(default(T), message, ResultSource.Motion)
-                : Result<T>.Fail(code, message, ResultSource.Motion);
-        }
-
-        #endregion
 
         #region 轴配置管理
 
