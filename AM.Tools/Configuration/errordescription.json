@@ -1,0 +1,82 @@
+﻿[
+    {
+        "Code": -1001,
+        "Name": "AxisMapNotFound",
+        "Message": "逻辑轴映射未找到",
+        "Description": "调用了未配置的逻辑轴，通常是配置文件或初始化顺序有误。",
+        "Source": "Motion",
+        "Suggestion": "检查 MotionCardConfig.AxisConfigs 是否已正确加载。"
+    },
+    {
+        "Code": -1002,
+        "Name": "InvalidAxisConfig",
+        "Message": "轴配置无效",
+        "Description": "轴配置中的关键参数缺失或不合法。",
+        "Source": "Motion",
+        "Suggestion": "检查 PhysicalCore、PhysicalAxis、Lead、PulsePerRev 等字段。"
+    },
+    {
+        "Code": -1101,
+        "Name": "InvalidK",
+        "Message": "脉冲当量无效",
+        "Description": "K 值为 0 或非法，无法进行脉冲/毫米换算。",
+        "Source": "Motion",
+        "Suggestion": "检查 Lead、PulsePerRev、GearRatio 是否有效。"
+    },
+    {
+        "Code": -1102,
+        "Name": "PulseOverflow",
+        "Message": "脉冲值溢出",
+        "Description": "换算后的脉冲值超出 Int32 范围。",
+        "Source": "Motion",
+        "Suggestion": "检查目标位移是否过大，或 K 值是否异常。"
+    },
+    {
+        "Code": -1998,
+        "Name": "NotImplemented",
+        "Message": "功能未实现",
+        "Description": "当前调用的方法尚未完成实现。",
+        "Source": "System",
+        "Suggestion": "检查当前模块是否已完成对应功能开发。"
+    },
+    {
+        "Code": -1999,
+        "Name": "Unknown",
+        "Message": "未知错误",
+        "Description": "未识别的错误码。",
+        "Source": "System",
+        "Suggestion": "查看日志并补充 errorcatalog.json 映射。"
+    },
+    {
+        "Code": -2001,
+        "Name": "DbQueryFailed",
+        "Message": "数据库查询失败",
+        "Description": "执行数据库查询时发生异常。",
+        "Source": "Database",
+        "Suggestion": "检查数据库连接、表结构和 SqlSugar 配置。"
+    },
+    {
+        "Code": -2002,
+        "Name": "DbSaveFailed",
+        "Message": "数据库保存失败",
+        "Description": "执行数据库写入时发生异常或返回失败。",
+        "Source": "Database",
+        "Suggestion": "检查表结构、主键、自增列和事务状态。"
+    },
+    {
+        "Code": -2003,
+        "Name": "DbDeleteFailed",
+        "Message": "数据库删除失败",
+        "Description": "删除记录时发生异常或目标不可删除。",
+        "Source": "Database",
+        "Suggestion": "检查删除条件是否正确，及外键/依赖关系。"
+    },
+    {
+        "Code": -2004,
+        "Name": "InvalidArgument",
+        "Message": "输入参数无效",
+        "Description": "业务层传入参数为空、越界或不符合约束。",
+        "Source": "System",
+        "Suggestion": "检查调用参数完整性与范围。"
+    }
+]

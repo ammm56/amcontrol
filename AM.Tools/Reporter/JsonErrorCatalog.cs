@@ -10,7 +10,7 @@ using System.Text;
 namespace AM.Tools.Reporter
 {
     /// <summary>
-    /// 基于 Configuration/errorcatalog.json 的错误目录实现
+    /// 基于 Configuration/errordescription.json 的错误目录实现
     /// </summary>
     public class JsonErrorCatalog : IErrorCatalog
     {
@@ -18,8 +18,7 @@ namespace AM.Tools.Reporter
         private readonly object _lockObj = new object();
         private Dictionary<int, ErrorDescriptor> _map = new Dictionary<int, ErrorDescriptor>();
 
-        public JsonErrorCatalog()
-            : this(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configuration", "errorcatalog.json"))
+        public JsonErrorCatalog() : this(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configuration", "errordescription.json"))
         {
         }
 
@@ -42,7 +41,7 @@ namespace AM.Tools.Reporter
                 Message = "未知错误",
                 Description = "未在错误目录中找到对应错误码说明。",
                 Source = "System",
-                Suggestion = "请补充 errorcatalog.json 或检查错误码来源。"
+                Suggestion = "请补充 errordescription.json 或检查错误码来源。"
             };
         }
 
