@@ -3,6 +3,7 @@ using AM.Core.Base;
 using AM.Core.Context;
 using AM.Core.Logging;
 using AM.Core.Messaging;
+using AM.Core.Reporter;
 using AM.DBService.DBase;
 using AM.Model.Common;
 using AM.Model.Entity;
@@ -26,7 +27,15 @@ namespace AM.DBService.Services
             get { return ResultSource.Database; }
         }
 
-        public ConfigAxisArgService()
+        public ConfigAxisArgService(): this(
+            SystemContext.Instance.MessageBus,
+            SystemContext.Instance.Logger,
+            SystemContext.Instance.AlarmManager,
+            SystemContext.Instance.Reporter)
+        {
+        }
+
+        public ConfigAxisArgService(IMessageBus msgbus, IAMLogger logger, AlarmManager alarmManager, IAppReporter reporter): base(msgbus, logger, alarmManager, reporter)
         {
             _db = new DBCommon<ConfigAxisArg>();
         }
@@ -36,12 +45,16 @@ namespace AM.DBService.Services
             try
             {
                 var result = _db.QueryAll();
-                return Result<ConfigAxisArg>.OkList(result.Items.ToList(),"轴参数查询成功",ResultSource.Database);
+                if (!result.Success)
+                {
+                    return Fail<ConfigAxisArg>(result.Code, "轴参数查询失败");
+                }
+
+                return OkList(result.Items, "轴参数查询成功");
             }
             catch (Exception ex)
             {
-                PublishError("QueryAll<ConfigAxisArg> failed", ex, DbErrorCode.QueryFailed);
-                return Result<ConfigAxisArg>.Fail((int)DbErrorCode.QueryFailed,"轴参数查询失败",ResultSource.Database);
+                return HandleException<ConfigAxisArg>(ex, (int)DbErrorCode.QueryFailed, "轴参数查询失败");
             }
         }
 
@@ -51,29 +64,26 @@ namespace AM.DBService.Services
             {
                 if (axis <= 0)
                 {
-                    return Result<ConfigAxisArg>.Fail((int)DbErrorCode.InvalidArgument,"轴号参数无效",ResultSource.Database);
+                    return Fail<ConfigAxisArg>((int)DbErrorCode.InvalidArgument, "轴号参数无效");
                 }
 
                 var queryResult = _db.QueryAll();
                 if (!queryResult.Success)
                 {
-                    PublishWarning("QueryByAxis(" + axis + ") query failed: " + queryResult.Message, DbErrorCode.QueryFailed);
-                    return Result<ConfigAxisArg>.Fail(queryResult.Code, "按轴查询失败", ResultSource.Database);
+                    return Fail<ConfigAxisArg>(queryResult.Code, "按轴查询失败");
                 }
 
                 var item = queryResult.Items.FirstOrDefault(a => a.Axis == axis);
                 if (item == null)
                 {
-                    PublishWarning("QueryByAxis(" + axis + ") not found", DbErrorCode.NotFound);
-                    return Result<ConfigAxisArg>.Fail((int)DbErrorCode.NotFound,"未找到对应轴参数",ResultSource.Database);
+                    return Warn<ConfigAxisArg>((int)DbErrorCode.NotFound, "未找到对应轴参数");
                 }
 
-                return Result<ConfigAxisArg>.OkItem(item,"轴参数查询成功",ResultSource.Database);
+                return Ok(item, "轴参数查询成功");
             }
             catch (Exception ex)
             {
-                PublishError("QueryByAxis(" + axis + ") failed", ex, DbErrorCode.QueryFailed);
-                return Result<ConfigAxisArg>.Fail((int)DbErrorCode.QueryFailed,"按轴查询失败",ResultSource.Database);
+                return HandleException<ConfigAxisArg>(ex, (int)DbErrorCode.QueryFailed, "按轴查询失败");
             }
         }
 
@@ -83,27 +93,20 @@ namespace AM.DBService.Services
             {
                 if (param == null)
                 {
-                    return Result.Fail((int)DbErrorCode.InvalidArgument,"保存参数不能为空",ResultSource.Database);
+                    return Fail((int)DbErrorCode.InvalidArgument, "保存参数不能为空");
                 }
 
                 var result = param.Id > 0 ? _db.Edit(param) : _db.Add(param);
-
                 if (!result.Success)
                 {
-                    PublishError("Save(" + param.Axis + " 轴 " + param.ParamName + ") failed", null, DbErrorCode.SaveFailed);
-                    return Result.Fail(result.Code, "轴参数保存失败", ResultSource.Database);
+                    return Fail(result.Code, "轴参数保存失败");
                 }
 
-                PublishStatus("Save(" + param.Axis + " 轴 " + param.ParamName + ") success");
-                return Result.Ok("轴参数保存成功", ResultSource.Database);
+                return Ok("轴参数保存成功");
             }
             catch (Exception ex)
             {
-                var axisText = param == null ? "null" : param.Axis.ToString();
-                var nameText = param == null ? "null" : param.ParamName;
-                PublishError("Save(" + axisText + " 轴 " + nameText + ") failed", ex, DbErrorCode.SaveFailed);
-
-                return Result.Fail((int)DbErrorCode.SaveFailed,"轴参数保存异常",ResultSource.Database);
+                return HandleException(ex, (int)DbErrorCode.SaveFailed, "轴参数保存异常");
             }
         }
 
@@ -113,14 +116,13 @@ namespace AM.DBService.Services
             {
                 if (axis <= 0 || string.IsNullOrWhiteSpace(paramname) || string.IsNullOrWhiteSpace(paramname_cn))
                 {
-                    return Result.Fail((int)DbErrorCode.InvalidArgument,"删除参数无效",ResultSource.Database);
+                    return Fail((int)DbErrorCode.InvalidArgument, "删除参数无效");
                 }
 
                 var queryResult = _db.QueryAll();
                 if (!queryResult.Success)
                 {
-                    PublishWarning("Delete(" + axis + " 轴 " + paramname + ") query failed: " + queryResult.Message, DbErrorCode.QueryFailed);
-                    return Result.Fail(queryResult.Code, "删除查询失败", ResultSource.Database);
+                    return Fail(queryResult.Code, "删除查询失败");
                 }
 
                 var item = queryResult.Items.FirstOrDefault(a =>
@@ -130,62 +132,21 @@ namespace AM.DBService.Services
 
                 if (item == null)
                 {
-                    PublishWarning("Delete(" + axis + " 轴 " + paramname + ") target not found", DbErrorCode.NotFound);
-                    return Result.Fail((int)DbErrorCode.NotFound, "删除目标不存在", ResultSource.Database);
+                    return Warn((int)DbErrorCode.NotFound, "删除目标不存在");
                 }
 
                 var result = _db.Delete(item);
                 if (!result.Success)
                 {
-                    PublishError("Delete(" + axis + " 轴 " + paramname + ") failed", null, DbErrorCode.DeleteFailed);
-                    return Result.Fail((int)DbErrorCode.DeleteFailed,"轴参数删除失败",ResultSource.Database);
+                    return Fail(result.Code, "轴参数删除失败");
                 }
 
-                PublishStatus("Delete(" + axis + " 轴 " + paramname + ") success");
-                return Result.Ok("轴参数删除成功", ResultSource.Database);
+                return Ok("轴参数删除成功");
             }
             catch (Exception ex)
             {
-                PublishError("Delete(" + axis + " 轴 " + paramname + ") failed", ex, DbErrorCode.DeleteFailed);
-                return Result.Fail((int)DbErrorCode.DeleteFailed,"轴参数删除异常",ResultSource.Database);
+                return HandleException(ex, (int)DbErrorCode.DeleteFailed, "轴参数删除异常");
             }
-        }
-
-        private void PublishStatus(string message)
-        {
-            _logger.Info(message);
-            _messageBus.Publish(new SystemMessage(
-                message,
-                SystemMessageType.Status,
-                "DB",
-                ((int)DbErrorCode.Success).ToString(),
-                null));
-        }
-
-        private void PublishWarning(string message, DbErrorCode code)
-        {
-            _logger.Warn(message);
-            _messageBus.Publish(new SystemMessage(
-                message,
-                SystemMessageType.Warning,
-                "DB",
-                ((int)code).ToString(),
-                null));
-        }
-
-        private void PublishError(string message, Exception ex, DbErrorCode code)
-        {
-            if (ex == null)
-                _logger.Error(message);
-            else
-                _logger.Error(ex, message);
-
-            _messageBus.Publish(new SystemMessage(
-                message,
-                SystemMessageType.Error,
-                "DB",
-                ((int)code).ToString(),
-                null));
         }
     }
 }

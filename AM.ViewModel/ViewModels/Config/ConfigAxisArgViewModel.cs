@@ -1,4 +1,6 @@
-﻿using AM.Model.Entity;
+﻿using AM.Core.Context;
+using AM.Core.Reporter;
+using AM.Model.Entity;
 using AM.Model.Interfaces.DB;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -15,10 +17,12 @@ namespace AM.ViewModel.ViewModels.Config
     public class ConfigAxisArgViewModel : ObservableObject
     {
         private readonly IConfigAxisArgService _configAxisArgService;
+        private readonly IAppReporter _reporter;
 
         public ConfigAxisArgViewModel(IConfigAxisArgService axisService)
         {
             _configAxisArgService = axisService ?? throw new ArgumentNullException(nameof(axisService));
+            _reporter = SystemContext.Instance.Reporter;
 
             AxisParams = new ObservableCollection<ConfigAxisArg>();
             LoadCommand = new AsyncRelayCommand(LoadAxisParamsAsync);
@@ -62,7 +66,11 @@ namespace AM.ViewModel.ViewModels.Config
             try
             {
                 var result = await Task.Run(() => _configAxisArgService.QueryAll());
-                if (!result.Success) return;
+                if (!result.Success)
+                {
+                    _reporter?.Warn("ConfigAxisArgViewModel", result.Message, result.Code);
+                    return;
+                }
 
                 Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -75,7 +83,7 @@ namespace AM.ViewModel.ViewModels.Config
             }
             catch (Exception ex)
             {
-                //Logger.Error(ex, "LoadAxisParamsAsync failed");
+                _reporter?.Error("ConfigAxisArgViewModel", ex, "LoadAxisParamsAsync failed");
             }
         }
 
@@ -89,7 +97,11 @@ namespace AM.ViewModel.ViewModels.Config
             try
             {
                 var result = await Task.Run(() => _configAxisArgService.Save(param));
-                if (!result.Success) return;
+                if (!result.Success)
+                {
+                    _reporter?.Warn("ConfigAxisArgViewModel", result.Message, result.Code);
+                    return;
+                }
 
                 Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -100,7 +112,6 @@ namespace AM.ViewModel.ViewModels.Config
 
                     if (existing != null)
                     {
-                        // 更新集合中的现有项
                         var index = AxisParams.IndexOf(existing);
                         AxisParams[index] = param;
                     }
@@ -112,7 +123,7 @@ namespace AM.ViewModel.ViewModels.Config
             }
             catch (Exception ex)
             {
-                //Logger.Error(ex, $"SaveAxisParamAsync failed for Axis={param.Axis}");
+                _reporter?.Error("ConfigAxisArgViewModel", ex, "SaveAxisParamAsync failed");
             }
         }
 
@@ -126,8 +137,11 @@ namespace AM.ViewModel.ViewModels.Config
             try
             {
                 var result = await Task.Run(() => _configAxisArgService.Delete(param.Axis, param.ParamName, param.ParamName_Cn));
-
-                if (!result.Success) return;
+                if (!result.Success)
+                {
+                    _reporter?.Warn("ConfigAxisArgViewModel", result.Message, result.Code);
+                    return;
+                }
 
                 Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -140,7 +154,7 @@ namespace AM.ViewModel.ViewModels.Config
             }
             catch (Exception ex)
             {
-                //Logger.Error(ex, $"DeleteAxisParamAsync failed for Axis={param.Axis}");
+                _reporter?.Error("ConfigAxisArgViewModel", ex, "DeleteAxisParamAsync failed");
             }
         }
 

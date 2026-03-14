@@ -1,6 +1,4 @@
 ﻿using AM.Core.Base;
-using AM.Core.Context;
-using AM.Core.Messaging;
 using AM.Model.Common;
 using AM.Model.Interfaces.MotionCard;
 using AM.Model.MotionCard;
@@ -41,12 +39,12 @@ namespace AM.MotionService.Base
 
         protected Result Fail(MotionErrorCode code, string message)
         {
-            return base.Fail((short)code, message);
+            return base.Fail((int)code, message);
         }
 
         protected Result<T> Fail<T>(MotionErrorCode code, string message)
         {
-            return base.Fail<T>((short)code, message);
+            return base.Fail<T>((int)code, message);
         }
 
         #region 轴配置管理

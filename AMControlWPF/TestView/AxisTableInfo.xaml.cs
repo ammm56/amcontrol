@@ -1,21 +1,12 @@
 ﻿using AM.DBService.Services;
-using AM.DBService.Tables;
-using AM.Model.Common;
 using AM.Model.Entity;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace AMControlWPF
 {
@@ -24,56 +15,98 @@ namespace AMControlWPF
     /// </summary>
     public partial class AxisTableInfo : Window
     {
+        private readonly AxisTableInfoState _state = new AxisTableInfoState();
+
         public AxisTableInfo()
         {
             InitializeComponent();
-
-            this.Loaded += AxisTableInfo_Loaded;
-
+            DataContext = _state;
+            Loaded += AxisTableInfo_Loaded;
         }
 
         private void AxisTableInfo_Loaded(object sender, RoutedEventArgs e)
         {
-            //Result<ConfigAxisArg> res = new Result<ConfigAxisArg>
-            //{
-            //    Items = new DBTable<ConfigAxisArg>().QueryAll(),
-            //    Success = true
-            //};
-            //if(res.Items.Count > 0 ) res.Item = res.Items[0];
-
             var configAxisArgService = new ConfigAxisArgService();
-            var res = configAxisArgService.QueryAll();
+            var result = configAxisArgService.QueryAll();
 
-            if (res.Items.Count > 0)
+            _state.Items.Clear();
+
+            if (!result.Success)
             {
-                res.Item = res.Items[0];
+                _state.Message = result.Message;
+                return;
             }
 
-            res.Message = JsonConvert.SerializeObject(res.Items, Newtonsoft.Json.Formatting.Indented);
+            foreach (var item in result.Items)
+            {
+                _state.Items.Add(item);
+            }
 
-            this.DataContext = res;
-
+            if (_state.Items.Count > 0)
+            {
+                _state.SelectedItem = _state.Items[0];
+                _state.Message = JsonConvert.SerializeObject(_state.SelectedItem, Newtonsoft.Json.Formatting.Indented);
+            }
+            else
+            {
+                _state.Message = "暂无轴参数数据";
+            }
         }
 
         private void dg_axis_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var res = this.DataContext as Result<ConfigAxisArg>;
-            if (res == null) return;
+            if (e.AddedItems.Count <= 0) return;
 
-            // 1. da_axis.SelectedItem 获得选中项
-            // 2. 这个监听选择事件
-            if (e.AddedItems.Count > 0)
+            var item = e.AddedItems[0] as ConfigAxisArg;
+            if (item == null) return;
+
+            _state.SelectedItem = item;
+            _state.Message = JsonConvert.SerializeObject(item, Newtonsoft.Json.Formatting.Indented);
+        }
+
+        private class AxisTableInfoState : INotifyPropertyChanged
+        {
+            private ConfigAxisArg _selectedItem;
+            private string _message;
+
+            public ObservableCollection<ConfigAxisArg> Items { get; } = new ObservableCollection<ConfigAxisArg>();
+
+            public ConfigAxisArg SelectedItem
             {
-                var item = e.AddedItems[0] as ConfigAxisArg;
-                if (item != null)
+                get { return _selectedItem; }
+                set
                 {
-                    res.Item = item;
-                    res.Message = JsonConvert.SerializeObject(item, Newtonsoft.Json.Formatting.Indented);
+                    if (!Equals(_selectedItem, value))
+                    {
+                        _selectedItem = value;
+                        OnPropertyChanged();
+                    }
                 }
-
             }
-            // 3. 数据绑定 模型中新增一个选择项
 
+            public string Message
+            {
+                get { return _message; }
+                set
+                {
+                    if (_message != value)
+                    {
+                        _message = value;
+                        OnPropertyChanged();
+                    }
+                }
+            }
+
+            public event PropertyChangedEventHandler PropertyChanged;
+
+            private void OnPropertyChanged([CallerMemberName] string propertyName = null)
+            {
+                var handler = PropertyChanged;
+                if (handler != null)
+                {
+                    handler(this, new PropertyChangedEventArgs(propertyName));
+                }
+            }
         }
     }
 }

@@ -55,6 +55,7 @@
     <Compile Include="Alarm\AlarmLevel.cs" />
     <Compile Include="Common\Config.cs" />
     <Compile Include="Common\DbErrorCode.cs" />
+    <Compile Include="Common\ErrorDescriptor.cs" />
     <Compile Include="Common\ResultSource.cs" />
     <Compile Include="Interfaces\DB\IConfigAxisArgService.cs" />
     <Compile Include="Interfaces\MotionCard\IMotionAxisControl.cs" />

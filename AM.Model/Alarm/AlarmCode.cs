@@ -20,6 +20,8 @@ namespace AM.Model.Alarm
 
         CameraGrabFailed = 3002,
 
-        DatabaseError = 4001
+        DatabaseError = 4001,
+
+        Unknown = 9999
     }
 }

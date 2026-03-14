@@ -12,3 +12,4 @@
 ## 服务层设计
 - 服务层统一采用“构造注入依赖 + 封装消息发布/日志通知”的风格，避免在各方法中重复直接调用 IMessageBus 和 IAMLogger。
 - 用户希望统一抽取跨服务的日志、消息通知和警报处理到公共 ServiceBase，而不是在各 Service 中重复实现，以明确代码层级、简化框架并提升模块化。
+- 在 AM.Core.Reporter 中引入 IAppReporter/AppReporter，并继续统一修改 ServiceBase、ViewModel、Tools 等非服务类的日志、消息通知与报警处理，同时完善错误码和错误描述映射设计，减少强制类型转换。

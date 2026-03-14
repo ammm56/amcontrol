@@ -117,6 +117,26 @@ namespace AM.Model.Common
             };
         }
 
+        /// <summary>
+        /// 简化了调用者的代码，不需要先将 IEnumerable 转成 List 就能直接使用
+        /// </summary>
+        /// <param name="items"></param>
+        /// <param name="message"></param>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        public static Result<T> OkList(IEnumerable<T> items, string message = "OK", ResultSource source = ResultSource.Unknown)
+        {
+            return new Result<T>
+            {
+                Success = true,
+                Code = 0,
+                Message = message ?? string.Empty,
+                Source = source,
+                Time = DateTime.Now,
+                Items = items == null ? new List<T>() : items.ToList()
+            };
+        }
+
         public static Result<T> Fail(int code, string message, ResultSource source = ResultSource.Unknown)
         {
             return new Result<T>

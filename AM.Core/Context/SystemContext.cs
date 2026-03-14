@@ -21,14 +21,18 @@ namespace AM.Core.Context
         public IMessageBus MessageBus { get; private set; }
 
         public AlarmManager AlarmManager { get; private set; }
+
+        public IErrorCatalog ErrorCatalog { get; private set; }
+
         public IAppReporter Reporter { get; private set; }
 
-        public void Initialize(IAMLogger logger,IMessageBus bus)
+        public void Initialize(IAMLogger logger,IMessageBus bus,IErrorCatalog errorCatalog,IAppReporter reporter)
         {
             Logger = logger;
             MessageBus = bus;
+            ErrorCatalog = errorCatalog;
             AlarmManager = new AlarmManager(bus, logger);
-            Reporter = new AppReporter(bus, logger, AlarmManager);
+            Reporter = reporter;
         }
     }
 }

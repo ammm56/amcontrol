@@ -54,6 +54,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reporter\AppReporter.cs" />
     <Compile Include="Reporter\IAppReporter.cs" />
+    <Compile Include="Reporter\IErrorCatalog.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Interfaces\" />

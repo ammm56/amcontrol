@@ -15,6 +15,14 @@ namespace AM.Tools
     /// </summary>
     public class OSInfo
     {
+        private static void ReportError(string message, Exception ex = null, string code = null)
+        {
+            if (ex == null)
+                SystemContext.Instance.Reporter?.Error("Tools", message, code);
+            else
+                SystemContext.Instance.Reporter?.Error("Tools", ex, message, code);
+        }
+
         /// <summary>
         /// 获得系统信息
         /// </summary>
@@ -45,7 +53,7 @@ namespace AM.Tools
             }
             catch (Exception ex)
             {
-                Tools.PrintEX($"OSInfo GetOSInfo EX {ex.Message}");
+                ReportError("OSInfo GetOSInfo failed", ex);
             }
 
         }

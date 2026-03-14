@@ -1,12 +1,15 @@
-﻿using AM.Core.Context;
+﻿using AM.Core.Alarm;
+using AM.Core.Context;
 using AM.Core.Logging;
 using AM.Core.Messaging;
+using AM.Core.Reporter;
 using AM.Model.Common;
 using AM.MotionService;
 using AM.MotionService.Factory;
 using AM.Tools;
 using AM.Tools.Logging;
 using AM.Tools.Messaging;
+using AM.Tools.Reporter;
 using AM.ViewModel;
 using System;
 using System.Collections.Generic;
@@ -33,7 +36,13 @@ namespace AM.App.Bootstrap
             // 全局单例-系统上下文初始化
             IAMLogger logger = new NLogLogger("System");
             IMessageBus msgbus = new MessageBusToolkit();
-            SystemContext.Instance.Initialize(logger, msgbus);
+
+            // 先构造 AlarmManager，再构造 Reporter
+            AlarmManager alarmManager = new AlarmManager(msgbus, logger);
+            IErrorCatalog errorCatalog = new JsonErrorCatalog();
+            IAppReporter reporter = new AppReporter(msgbus, logger, alarmManager, errorCatalog);
+
+            SystemContext.Instance.Initialize(logger, msgbus, errorCatalog, reporter);
 
             // 初始化硬件
             InitializeMachine();

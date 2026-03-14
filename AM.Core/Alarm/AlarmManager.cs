@@ -27,9 +27,7 @@ namespace AM.Core.Alarm
             _logger = logger;
         }
 
-        public void RaiseAlarm(AlarmCode code,
-                               AlarmLevel level,
-                               string message)
+        public void RaiseAlarm(AlarmCode code, AlarmLevel level, string message)
         {
             var alarm = new AlarmInfo(code, level, message);
 
@@ -40,9 +38,7 @@ namespace AM.Core.Alarm
 
             _logger.Warn($"Alarm {code} {message}");
 
-            _bus.Publish(new SystemMessage(
-                message,
-                SystemMessageType.Alarm));
+            _bus.Publish(new SystemMessage(message,SystemMessageType.Alarm));
         }
 
         public void ClearAlarm(AlarmCode code)
@@ -63,9 +59,7 @@ namespace AM.Core.Alarm
         {
             lock (_alarms)
             {
-                return _alarms
-                    .Where(a => !a.IsCleared)
-                    .ToList();
+                return _alarms.Where(a => !a.IsCleared).ToList();
             }
         }
     }

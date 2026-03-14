@@ -18,6 +18,24 @@ namespace AM.Tools
     /// </summary>
     public class Tools
     {
+        private static void ReportInfo(string message, string code = null)
+        {
+            SystemContext.Instance.Reporter?.Info("Tools", message, code);
+        }
+
+        private static void ReportWarn(string message, string code = null)
+        {
+            SystemContext.Instance.Reporter?.Warn("Tools", message, code);
+        }
+
+        private static void ReportError(string message, Exception ex = null, string code = null)
+        {
+            if (ex == null)
+                SystemContext.Instance.Reporter?.Error("Tools", message, code);
+            else
+                SystemContext.Instance.Reporter?.Error("Tools", ex, message, code);
+        }
+
         public static string Guid(int len = 12)
         {
             string res = System.Guid.NewGuid().ToString().Replace("-", "").Substring(0, len);
@@ -44,78 +62,6 @@ namespace AM.Tools
             return res;
         }
 
-        #region 控制台打印
-
-        /// <summary>
-        /// 普通信息打印
-        /// 普通信息、调试信息、报警信息、错误信息、致命错误信息
-        /// </summary>
-        /// <param name="info"></param>
-        /// <param name="inline"></param>
-        public static void Print(string info, bool inline = false)
-        {
-            if (ConfigContext.Instance.Config.Setting.CommonInfoPrint && ConfigContext.Instance.Config.Setting.ConsolePrint)
-            {
-                if (!inline) Console.WriteLine($"[Console]{NowCommon()} {info}");
-                else Console.Write(info);
-            }
-        }
-        /// <summary>
-        /// 调试信息打印
-        /// </summary>
-        /// <param name="info"></param>
-        /// <param name="inline"></param>
-        public static void PrintDebug(string info, bool inline = false)
-        {
-            if (ConfigContext.Instance.Config.Setting.DebugInfoPrint && ConfigContext.Instance.Config.Setting.ConsolePrint)
-            {
-                if (!inline) Console.WriteLine($"[Debug]{NowCommon()} {info}");
-                else Console.Write(info);
-            }
-        }
-        /// <summary>
-        /// 控制器信息打印
-        /// </summary>
-        /// <param name="info"></param>
-        /// <param name="inline"></param>
-        public static void PrintController(string info, bool inline = false)
-        {
-            if (ConfigContext.Instance.Config.Setting.ControllerInfoPrint && ConfigContext.Instance.Config.Setting.ConsolePrint)
-            {
-                if (!inline) Console.WriteLine($"[Controller]{NowCommon()} {info}");
-                else Console.Write(info);
-            }
-        }
-        /// <summary>
-        /// 数据库操作信息打印
-        /// </summary>
-        /// <param name="info"></param>
-        /// <param name="inline"></param>
-        public static void PrintDB(string info, bool inline = false)
-        {
-            if (ConfigContext.Instance.Config.Setting.DBPrint && ConfigContext.Instance.Config.Setting.ConsolePrint)
-            {
-                if (!inline) Console.WriteLine($"[DB]{NowCommon()} {info}");
-                else Console.Write(info);
-            }
-        }
-        /// <summary>
-        /// Console writeline
-        /// 异常控制台信息打印
-        /// </summary>
-        /// <param name="info"></param>
-        public static void PrintEX(string info, bool inline = false)
-        {
-            if (ConfigContext.Instance.Config.Setting.EXPrint && ConfigContext.Instance.Config.Setting.ConsolePrint)
-            {
-                if (!inline)
-                    Console.WriteLine($"[EX][{NowCommon()}] {info}");
-                else
-                    Console.Write(info);
-            }
-        }
-
-        #endregion
 
         /// <summary>
         /// 读取配置文件
@@ -153,10 +99,12 @@ namespace AM.Tools
                     {
                         string json = File.ReadAllText(filePathBak, Encoding.UTF8);
                         config = JsonConvert.DeserializeObject<T>(json);
+                        ReportWarn("主配置不存在，已回退到备份配置：" + configname);
                     }
                     else
                     {
                         // 如果主文件和备份都不存在，返回失败
+                        ReportWarn("配置文件不存在：" + configname);
                         return (false, default(T));
                     }
                 }
@@ -165,7 +113,7 @@ namespace AM.Tools
             }
             catch (Exception ex)
             {
-                Tools.Print($"Tools ReadConfig EX: {ex.Message}");
+                ReportError("ReadConfig failed: " + configname, ex);
                 return (false, default(T));
             }
         }
@@ -209,10 +157,12 @@ namespace AM.Tools
                 // WriteAllText 会自动创建文件、写入 UTF-8 并在完成后关闭连接
                 File.WriteAllText(filePath, jsonContent, Encoding.UTF8);
 
+                ReportInfo("SaveSettingArgsConfig success");
                 return (true, "OK");
             }
             catch (Exception ex)
             {
+                ReportError("SaveSettingArgsConfig failed", ex);
                 return (false, $"Tools SaveSettingArgsConfig ex: {ex.Message}");
             }
         }

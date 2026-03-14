@@ -2,6 +2,7 @@ using AM.Core.Alarm;
 using AM.Core.Context;
 using AM.Core.Logging;
 using AM.Core.Messaging;
+using AM.Core.Reporter;
 using AM.Model.Alarm;
 using AM.Model.Common;
 using System;
@@ -18,6 +19,7 @@ namespace AM.Core.Base
         protected readonly IMessageBus _messageBus;
         protected readonly IAMLogger _logger;
         protected readonly AlarmManager _alarmManager;
+        protected readonly IAppReporter _reporter;
 
         /// <summary>
         /// 最近一次执行结果（用于上层诊断/UI）
@@ -39,15 +41,16 @@ namespace AM.Core.Base
             get { return null; }
         }
 
-        protected ServiceBase() : this(SystemContext.Instance.MessageBus, SystemContext.Instance.Logger, SystemContext.Instance.AlarmManager)
+        protected ServiceBase(): this(SystemContext.Instance.MessageBus,SystemContext.Instance.Logger,SystemContext.Instance.AlarmManager,SystemContext.Instance.Reporter)
         {
         }
 
-        protected ServiceBase(IMessageBus messageBus, IAMLogger logger, AlarmManager alarmManager)
+        protected ServiceBase(IMessageBus messageBus, IAMLogger logger, AlarmManager alarmManager, IAppReporter reporter)
         {
             _messageBus = messageBus;
             _logger = logger;
             _alarmManager = alarmManager;
+            _reporter = reporter;
             LastResult = Result.Ok("OK", DefaultResultSource);
         }
 
@@ -71,8 +74,7 @@ namespace AM.Core.Base
         protected Result Ok(string message = "OK")
         {
             LastResult = Result.Ok(message, DefaultResultSource);
-            _logger?.Info(message);
-            PublishMessage(SystemMessageType.Status, message);
+            _reporter?.Info(MessageSourceName, message, null, MessageCardId);
             return LastResult;
         }
 
@@ -86,32 +88,28 @@ namespace AM.Core.Base
         protected Result<T> Ok<T>(T item, string message = "OK")
         {
             LastResult = Result.Ok(message, DefaultResultSource);
-            _logger?.Info(message);
-            PublishMessage(SystemMessageType.Status, message);
+            _reporter?.Info(MessageSourceName, message, null, MessageCardId);
             return Result<T>.OkItem(item, message, DefaultResultSource);
         }
 
         protected Result<T> OkList<T>(IEnumerable<T> items, string message = "OK")
         {
             LastResult = Result.Ok(message, DefaultResultSource);
-            _logger?.Info(message);
-            PublishMessage(SystemMessageType.Status, message);
-            return Result<T>.OkList(items == null ? new List<T>() : items.ToList(), message, DefaultResultSource);
+            _reporter?.Info(MessageSourceName, message, null, MessageCardId);
+            return Result<T>.OkList(items, message, DefaultResultSource);
         }
 
         protected Result Warn(int code, string message)
         {
             LastResult = Result.Fail(code, message, DefaultResultSource);
-            _logger?.Warn(message);
-            PublishMessage(SystemMessageType.Warning, message, code.ToString());
+            _reporter?.Warn(MessageSourceName, message, code.ToString(), MessageCardId);
             return LastResult;
         }
 
         protected Result<T> Warn<T>(int code, string message)
         {
             LastResult = Result.Fail(code, message, DefaultResultSource);
-            _logger?.Warn(message);
-            PublishMessage(SystemMessageType.Warning, message, code.ToString());
+            _reporter?.Warn(MessageSourceName, message, code.ToString(), MessageCardId);
             return Result<T>.Fail(code, message, DefaultResultSource);
         }
 
@@ -127,11 +125,10 @@ namespace AM.Core.Base
             LastResult = Result.Fail(code, message, DefaultResultSource);
 
             if (ex == null)
-                _logger?.Error(message);
+                _reporter?.Error(MessageSourceName, message, code.ToString(), MessageCardId);
             else
-                _logger?.Error(ex, message);
+                _reporter?.Error(MessageSourceName, ex, message, code.ToString(), MessageCardId);
 
-            PublishMessage(SystemMessageType.Error, message, code.ToString());
             return LastResult;
         }
 
@@ -148,11 +145,10 @@ namespace AM.Core.Base
             LastResult = Result.Fail(code, message, DefaultResultSource);
 
             if (ex == null)
-                _logger?.Error(message);
+                _reporter?.Error(MessageSourceName, message, code.ToString(), MessageCardId);
             else
-                _logger?.Error(ex, message);
+                _reporter?.Error(MessageSourceName, ex, message, code.ToString(), MessageCardId);
 
-            PublishMessage(SystemMessageType.Error, message, code.ToString());
             return Result<T>.Fail(code, message, DefaultResultSource);
         }
 
@@ -164,9 +160,7 @@ namespace AM.Core.Base
         /// <returns></returns>
         protected Result HandleError(short code, string message)
         {
-            if (code == 0) return Ok(message);
-
-            return Fail(code, message);
+            return code == 0 ? Ok(message) : Fail(code, message);
         }
 
         /// <summary>
@@ -178,9 +172,7 @@ namespace AM.Core.Base
         /// <returns></returns>
         protected Result<T> HandleError<T>(short code, string message)
         {
-            if (code == 0) return Ok(default(T), message);
-
-            return Fail<T>(code, message);
+            return code == 0 ? Ok(default(T), message) : Fail<T>(code, message);
         }
 
         protected Result HandleException(Exception ex, int code, string message)
@@ -195,7 +187,7 @@ namespace AM.Core.Base
 
         protected void RaiseAlarm(AlarmCode code, AlarmLevel level, string message)
         {
-            _alarmManager?.RaiseAlarm(code, level, message);
+            _reporter?.Alarm(MessageSourceName, code, level, message, MessageCardId);
         }
     }
 }
