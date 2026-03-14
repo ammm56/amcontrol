@@ -13,33 +13,54 @@ using System.Linq;
 
 namespace AM.DBService.Services
 {
+    /// <summary>
+    /// 轴参数配置服务。
+    /// 负责轴参数的查询、保存、删除等业务操作。
+    /// </summary>
     public class ConfigAxisArgService : ServiceBase, IConfigAxisArgService
     {
+        /// <summary>
+        /// 通用数据库访问对象。
+        /// </summary>
         private readonly DBCommon<ConfigAxisArg> _db;
 
+        /// <summary>
+        /// 消息来源名称。
+        /// </summary>
         protected override string MessageSourceName
         {
             get { return "DB"; }
         }
 
+        /// <summary>
+        /// 默认结果来源。
+        /// </summary>
         protected override ResultSource DefaultResultSource
         {
             get { return ResultSource.Database; }
         }
 
-        public ConfigAxisArgService(): this(
-            SystemContext.Instance.MessageBus,
-            SystemContext.Instance.Logger,
-            SystemContext.Instance.AlarmManager,
-            SystemContext.Instance.Reporter)
+        /// <summary>
+        /// 使用全局系统上下文中的统一报告器初始化服务。
+        /// </summary>
+        public ConfigAxisArgService(): this(SystemContext.Instance.Reporter)
         {
         }
 
-        public ConfigAxisArgService(IMessageBus msgbus, IAMLogger logger, AlarmManager alarmManager, IAppReporter reporter): base(msgbus, logger, alarmManager, reporter)
+        /// <summary>
+        /// 使用指定统一报告器初始化服务。
+        /// </summary>
+        /// <param name="reporter">统一报告器。</param>
+        public ConfigAxisArgService(IAppReporter reporter): base(reporter)
         {
             _db = new DBCommon<ConfigAxisArg>();
         }
 
+
+        /// <summary>
+        /// 查询全部轴参数。
+        /// </summary>
+        /// <returns>带轴参数集合的统一结果对象。</returns>
         public Result<ConfigAxisArg> QueryAll()
         {
             try
@@ -58,6 +79,11 @@ namespace AM.DBService.Services
             }
         }
 
+        /// <summary>
+        /// 按轴号查询参数。
+        /// </summary>
+        /// <param name="axis">轴号。</param>
+        /// <returns>带单项轴参数的统一结果对象。</returns>
         public Result<ConfigAxisArg> QueryByAxis(int axis)
         {
             try
@@ -87,6 +113,11 @@ namespace AM.DBService.Services
             }
         }
 
+        /// <summary>
+        /// 保存轴参数。
+        /// </summary>
+        /// <param name="param">待保存参数。</param>
+        /// <returns>统一结果对象。</returns>
         public Result Save(ConfigAxisArg param)
         {
             try
@@ -110,6 +141,13 @@ namespace AM.DBService.Services
             }
         }
 
+        /// <summary>
+        /// 删除轴参数。
+        /// </summary>
+        /// <param name="axis">轴号。</param>
+        /// <param name="paramname">参数英文名称。</param>
+        /// <param name="paramname_cn">参数中文名称。</param>
+        /// <returns>统一结果对象。</returns>
         public Result Delete(int axis, string paramname, string paramname_cn)
         {
             try

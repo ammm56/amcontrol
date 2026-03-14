@@ -1,22 +1,42 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AM.Core.Logging
 {
     /// <summary>
-    /// 日志记录器接口
-    /// 职责：持久化记录、排障、审计
-    /// 特点：面向开发/运维、不一定直接给用户
+    /// 日志记录器接口。
+    /// 负责统一日志输出，供系统基础设施和业务层调用。
     /// </summary>
     public interface IAMLogger
     {
+        /// <summary>
+        /// 输出信息级日志。
+        /// </summary>
+        /// <param name="message">日志内容。</param>
         void Info(string message);
+
+        /// <summary>
+        /// 输出调试级日志。
+        /// </summary>
+        /// <param name="message">日志内容。</param>
         void Debug(string message);
+
+        /// <summary>
+        /// 输出警告级日志。
+        /// </summary>
+        /// <param name="message">日志内容。</param>
         void Warn(string message);
+
+        /// <summary>
+        /// 输出错误级日志。
+        /// </summary>
+        /// <param name="message">日志内容。</param>
         void Error(string message);
+
+        /// <summary>
+        /// 输出异常级错误日志。
+        /// </summary>
+        /// <param name="ex">异常对象。</param>
+        /// <param name="message">日志内容。</param>
         void Error(Exception ex, string message);
     }
 }
