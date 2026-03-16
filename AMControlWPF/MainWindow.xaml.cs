@@ -1,4 +1,6 @@
-﻿using HandyControl.Controls;
+﻿using AMControlWPF.UserControl.Main;
+using HandyControl.Controls;
+using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
@@ -18,7 +20,15 @@ namespace AMControlWPF
             InitializeComponent();
 
             Loaded += MainWindow_Loaded;
-            LangAndThemeControl.NavigateRequested += LangAndThemeControl_NavigateRequested;
+        }
+
+        protected override void OnContentRendered(EventArgs e)
+        {
+            base.OnContentRendered(e);
+
+            var nc = new NonClientAreaContent();
+            nc.NavigateRequested += LangAndThemeControl_NavigateRequested;
+            this.NonClientAreaContent = nc;
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)

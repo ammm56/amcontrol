@@ -22,7 +22,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0"
+        <!--<Border Grid.Row="0"
             Padding="10,6"
             Background="{DynamicResource RegionBrush}"
             BorderBrush="{DynamicResource BorderBrush}"
@@ -34,13 +34,10 @@
                        FontWeight="SemiBold"
                        Foreground="{DynamicResource PrimaryTextBrush}"
                        Text="AM运动控制" />
-                <!--<TextBlock Style="{StaticResource AppTitleTextBlockStyle}" Text="AM运动控制"/>-->
-
-                <main:LangAndTheme x:Name="LangAndThemeControl"
-                               DockPanel.Dock="Right"
-                               HorizontalAlignment="Right" />
+                --><!--<TextBlock Style="{StaticResource AppTitleTextBlockStyle}" Text="AM运动控制"/>-->
+                <!--<main:LangAndTheme x:Name="LangAndThemeControl" DockPanel.Dock="Right" HorizontalAlignment="Right" />--><!--
             </DockPanel>
-        </Border>
+        </Border>-->
 
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>

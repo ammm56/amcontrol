@@ -1,0 +1,62 @@
+﻿<UserControl x:Class="AMControlWPF.UserControl.Main.NonClientAreaContent"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:main="clr-namespace:AMControlWPF.UserControl.Main"
+             xmlns:hc="https://handyorg.github.io/handycontrol"
+             mc:Ignorable="d"
+             Height="36" MinWidth="320">
+    <Border Background="Transparent"
+            Padding="6,0"
+            MouseLeftButtonDown="Root_MouseLeftButtonDown">
+        <DockPanel LastChildFill="True" HorizontalAlignment="Stretch" VerticalAlignment="Center">
+
+            <!-- 左侧：靠近窗口 icon 的导航（放 Icon 或小按钮） -->
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Stretch">
+                <Menu Margin="10,0,0,0" Background="Transparent">
+                    <MenuItem Height="29" Header="{DynamicResource RepositoryText}">
+                        <MenuItem Command="hc:ControlCommands.OpenLink" CommandParameter="https://github.com/ammm56/amcontrol" Header="GitHub" />
+                    </MenuItem>
+
+                    <MenuItem Height="29" Header="{DynamicResource AboutText}">
+                        <MenuItem Header="{DynamicResource ContributorsText}" Click="ContributorsMenuItem_OnClick" />
+                    </MenuItem>
+
+                    <MenuItem Height="29" Header="{DynamicResource RecommendationText}">
+                        <MenuItem Header="{DynamicResource ProjectText}" Click="ProjectsMenuItem_OnClick" />
+                    </MenuItem>
+                </Menu>
+
+                <Border Margin="10,0,0,0" Padding="10,4" VerticalAlignment="Center" CornerRadius="2" Background="{DynamicResource SecondaryRegionBrush}">
+                    <TextBlock VerticalAlignment="Center" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Text="{Binding VersionInfo}" />
+                </Border>
+            </StackPanel>
+            <!--<StackPanel DockPanel.Dock="Left"
+                        Orientation="Horizontal"
+                        VerticalAlignment="Center"
+                        Margin="6,0,12,0">
+                --><!-- 示例导航图标按钮（可替换为 Path 或 Image） --><!--
+                <Button Style="{StaticResource AppToolButtonStyle}" Tag="Home" Click="NavButton_Click" ToolTip="首页">
+                    <TextBlock Text="🏠" FontSize="14" />
+                </Button>
+                <Button Style="{StaticResource AppToolButtonStyle}" Tag="ConfigArgs" Click="NavButton_Click" ToolTip="参数配置" Margin="6,0,0,0">
+                    <TextBlock Text="⚙" FontSize="14" />
+                </Button>
+                --><!-- 可继续添加图标按钮 --><!--
+            </StackPanel>-->
+
+            <!-- 中间占位（可放标题或留空） -->
+            <StackPanel DockPanel.Dock="Left" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <!-- 如果希望在标题栏中显示应用名，可放在这里 -->
+                <!--<TextBlock Text="AM运动控制" Foreground="{DynamicResource PrimaryTextBrush}" FontWeight="SemiBold" />-->
+            </StackPanel>
+
+            <!-- 右侧：语言/主题控制，紧贴窗口控制按钮 -->
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,6,0">
+                <main:LangAndTheme x:Name="LangAndThemeControl" VerticalAlignment="Center" />
+            </StackPanel>
+
+        </DockPanel>
+    </Border>
+</UserControl>

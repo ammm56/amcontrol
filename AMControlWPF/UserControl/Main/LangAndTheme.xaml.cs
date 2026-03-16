@@ -13,12 +13,9 @@ namespace AMControlWPF.UserControl.Main
     {
         public event Action<string> NavigateRequested;
 
-        public string VersionInfo { get; }
-
         public LangAndTheme()
         {
             InitializeComponent();
-            VersionInfo = $"v{Assembly.GetExecutingAssembly().GetName().Version}";
             DataContext = this;
         }
 
