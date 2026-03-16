@@ -1,18 +1,7 @@
-﻿using AM.Tools;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace AMControlWPF
 {
@@ -21,32 +10,34 @@ namespace AMControlWPF
     /// </summary>
     public partial class MainWindow : Window
     {
-        // 页面缓存：防止重复创建对象
         private readonly Dictionary<string, Page> _pageCache = new Dictionary<string, Page>();
 
         public MainWindow()
         {
             InitializeComponent();
 
-            this.Loaded += MainWindow_Loaded;
-
-
-            // 默认加载第一个页面
-            //NavigateToPage("Home");
-
+            Loaded += MainWindow_Loaded;
+            LangAndThemeControl.NavigateRequested += LangAndThemeControl_NavigateRequested;
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            ;
+            NavigateToPage("Home");
+        }
+
+        private void LangAndThemeControl_NavigateRequested(string tag)
+        {
+            NavigateToPage(tag);
         }
 
         private void SideMenu_SelectionChanged(object sender, HandyControl.Data.FunctionEventArgs<object> e)
         {
             var item = e.Info as HandyControl.Controls.SideMenuItem;
-            if(item?.Tag == null) return;
+            if (item?.Tag == null)
+            {
+                return;
+            }
 
-            // 获取 Tag 并跳转页面
             NavigateToPage(item.Tag.ToString());
         }
 
@@ -54,12 +45,53 @@ namespace AMControlWPF
         {
             if (!_pageCache.ContainsKey(tag))
             {
-                // 根据 Tag 实例化不同的页面
-                
+                _pageCache[tag] = CreatePage(tag);
             }
 
-            // 切换 Frame 的内容
             MainFrame.Content = _pageCache[tag];
+        }
+
+        private Page CreatePage(string tag)
+        {
+            switch (tag)
+            {
+                case "Home":
+                    return CreatePlaceholderPage("首页");
+                case "ConfigArgs":
+                    return CreatePlaceholderPage("参数配置");
+                case "Axis":
+                    return CreatePlaceholderPage("轴控制");
+                case "ConfigIO":
+                    return CreatePlaceholderPage("IO 配置");
+                case "Logs":
+                    return CreatePlaceholderPage("报警日志");
+                case "Contributors":
+                    return CreatePlaceholderPage("贡献者");
+                case "Projects":
+                    return CreatePlaceholderPage("项目");
+                default:
+                    return CreatePlaceholderPage("未定义页面: " + tag);
+            }
+        }
+
+        private Page CreatePlaceholderPage(string title)
+        {
+            return new Page
+            {
+                Content = new Border
+                {
+                    Padding = new Thickness(24),
+                    Child = new TextBlock
+                    {
+                        Text = title,
+                        FontSize = 24,
+                        FontWeight = FontWeights.SemiBold,
+                        Foreground = Brushes.DimGray,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        HorizontalAlignment = HorizontalAlignment.Center
+                    }
+                }
+            };
         }
     }
 }

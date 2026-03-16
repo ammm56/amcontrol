@@ -36,6 +36,17 @@ namespace AM.Model.Common
     public class Setting
     {
         /// <summary>
+        /// 当前语言
+        /// </summary>
+        public string Language { get; set; } = "zh-CN";
+
+        /// <summary>
+        /// 当前主题
+        /// HandyControl 皮肤资源名：SkinDefault / SkinDark
+        /// </summary>
+        public string Theme { get; set; } = "SkinDefault";
+
+        /// <summary>
         /// 是否启用控制台打印
         /// 控制台所有的打印输出
         /// </summary>

@@ -6,6 +6,7 @@ using AM.Model.Common;
 using AM.Tools;
 using AM.Tools.Logging;
 using AM.Tools.Messaging;
+using AMControlWPF.Tools.Helper;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -34,6 +35,8 @@ namespace AMControlWPF
 
             // 调用系统、服务、配置、日志等的初始化
             AppBootstrap.Initialize();
+
+            LangThemeHelper.ApplyFromConfig();
 
         }
 

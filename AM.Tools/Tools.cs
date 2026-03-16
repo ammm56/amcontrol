@@ -167,7 +167,50 @@ namespace AM.Tools
             }
         }
 
-        
+        /// <summary>
+        /// 保存配置
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="configname"></param>
+        /// <param name="config"></param>
+        /// <returns></returns>
+        public static (bool, string) SaveConfig<T>(string configname, T config)
+        {
+            try
+            {
+                string configDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configuration");
+                string filePath = Path.Combine(configDir, configname);
+
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(configname);
+                string filePathBak = Path.Combine(configDir, fileNameWithoutExt + "_bak.json");
+
+                if (!Directory.Exists(configDir))
+                {
+                    Directory.CreateDirectory(configDir);
+                }
+
+                if (File.Exists(filePath))
+                {
+                    if (File.Exists(filePathBak))
+                    {
+                        File.Delete(filePathBak);
+                    }
+
+                    File.Move(filePath, filePathBak);
+                }
+
+                string jsonContent = JsonConvert.SerializeObject(config, Newtonsoft.Json.Formatting.Indented);
+                File.WriteAllText(filePath, jsonContent, Encoding.UTF8);
+
+                ReportInfo("SaveConfig success: " + configname);
+                return (true, "OK");
+            }
+            catch (Exception ex)
+            {
+                ReportError("SaveConfig failed: " + configname, ex);
+                return (false, $"Tools SaveConfig ex: {ex.Message}");
+            }
+        }
     }
 
     

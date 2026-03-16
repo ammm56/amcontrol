@@ -5,56 +5,111 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AMControlWPF"
+        xmlns:main="clr-namespace:AMControlWPF.UserControl.Main"
         mc:Ignorable="d"
-        Title="AM运动控制" Height="512" Width="640" WindowStartupLocation="CenterScreen">
+        Title="AM运动控制"
+        Height="512"
+        Width="640"
+        WindowStartupLocation="CenterScreen">
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
-            <!-- 菜单自动宽度 -->
-            <ColumnDefinition Width="*"/>
-            <!-- 页面填充剩余空间 -->
-        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-        <!-- 左侧导航菜单 -->
-        <hc:SideMenu x:Name="SideMenuNav" Grid.Column="0" 
-                     SelectionChanged="SideMenu_SelectionChanged"
-                     MinWidth="220" Background="{DynamicResource RegionBrush}">
+        <Border Grid.Row="0"
+                Padding="10,6"
+                Background="{DynamicResource RegionBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="0,0,0,1">
+            <DockPanel LastChildFill="True">
+                <TextBlock DockPanel.Dock="Left"
+                           VerticalAlignment="Center"
+                           FontSize="16"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource PrimaryTextBrush}"
+                           Text="AM运动控制" />
 
-            <hc:SideMenuItem Header="首页" Tag="Home">
-                <hc:SideMenuItem.Icon>
-                    <Path Style="{StaticResource SearchPathStyle}" Fill="{DynamicResource PrimaryBrush}" Width="22" Height="22"  VerticalAlignment="Top" HorizontalAlignment="Left"  />
-                </hc:SideMenuItem.Icon>
-            </hc:SideMenuItem>
+                <main:LangAndTheme x:Name="LangAndThemeControl"
+                                   DockPanel.Dock="Right"
+                                   HorizontalAlignment="Right" />
+            </DockPanel>
+        </Border>
 
-            <hc:SideMenuItem Header="参数配置" Tag="ConfigArgs">
-                <hc:SideMenuItem.Icon>
-                    <Path Style="{StaticResource SearchPathStyle}" Fill="{DynamicResource PrimaryBrush}" Width="22" Height="22"  VerticalAlignment="Top" HorizontalAlignment="Left"  />
-                </hc:SideMenuItem.Icon>
-            </hc:SideMenuItem>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-            <hc:SideMenuItem Header="轴控制" Tag="Axis">
-                <hc:SideMenuItem.Icon>
-                    <Path Style="{StaticResource SearchPathStyle}" Fill="{DynamicResource PrimaryBrush}" Width="22" Height="22"  VerticalAlignment="Top" HorizontalAlignment="Left"  />
-                </hc:SideMenuItem.Icon>
-            </hc:SideMenuItem>
+            <!-- 左侧导航菜单 -->
+            <hc:SideMenu x:Name="SideMenuNav"
+                         Grid.Column="0"
+                         SelectionChanged="SideMenu_SelectionChanged"
+                         MinWidth="220"
+                         Background="{DynamicResource RegionBrush}">
 
-            <hc:SideMenuItem Header="IO 配置" Tag="ConfigIO">
-                <hc:SideMenuItem.Icon>
-                    <Path Style="{StaticResource SearchPathStyle}" Fill="{DynamicResource PrimaryBrush}" Width="22" Height="22"  VerticalAlignment="Top" HorizontalAlignment="Left"  />
-                </hc:SideMenuItem.Icon>
-            </hc:SideMenuItem>
+                <hc:SideMenuItem Header="首页" Tag="Home">
+                    <hc:SideMenuItem.Icon>
+                        <Path Style="{StaticResource SearchPathStyle}"
+                              Fill="{DynamicResource PrimaryBrush}"
+                              Width="22"
+                              Height="22"
+                              VerticalAlignment="Top"
+                              HorizontalAlignment="Left" />
+                    </hc:SideMenuItem.Icon>
+                </hc:SideMenuItem>
 
-            <hc:SideMenuItem Header="报警日志" Tag="Logs">
-                <hc:SideMenuItem.Icon>
-                    <Path Style="{StaticResource ClosePathStyle}" Fill="{DynamicResource DangerBrush}" Width="22" Height="22"  VerticalAlignment="Top" HorizontalAlignment="Left"  />
-                </hc:SideMenuItem.Icon>
-            </hc:SideMenuItem>
-        </hc:SideMenu>
+                <hc:SideMenuItem Header="参数配置" Tag="ConfigArgs">
+                    <hc:SideMenuItem.Icon>
+                        <Path Style="{StaticResource SearchPathStyle}"
+                              Fill="{DynamicResource PrimaryBrush}"
+                              Width="22"
+                              Height="22"
+                              VerticalAlignment="Top"
+                              HorizontalAlignment="Left" />
+                    </hc:SideMenuItem.Icon>
+                </hc:SideMenuItem>
 
-        <!-- 右侧内容展示区 -->
-        <Grid Grid.Column="1" Margin="10">
-            <!-- Frame 负责加载不同的页面 -->
-            <Frame x:Name="MainFrame" NavigationUIVisibility="Hidden"/>
+                <hc:SideMenuItem Header="轴控制" Tag="Axis">
+                    <hc:SideMenuItem.Icon>
+                        <Path Style="{StaticResource SearchPathStyle}"
+                              Fill="{DynamicResource PrimaryBrush}"
+                              Width="22"
+                              Height="22"
+                              VerticalAlignment="Top"
+                              HorizontalAlignment="Left" />
+                    </hc:SideMenuItem.Icon>
+                </hc:SideMenuItem>
+
+                <hc:SideMenuItem Header="IO 配置" Tag="ConfigIO">
+                    <hc:SideMenuItem.Icon>
+                        <Path Style="{StaticResource SearchPathStyle}"
+                              Fill="{DynamicResource PrimaryBrush}"
+                              Width="22"
+                              Height="22"
+                              VerticalAlignment="Top"
+                              HorizontalAlignment="Left" />
+                    </hc:SideMenuItem.Icon>
+                </hc:SideMenuItem>
+
+                <hc:SideMenuItem Header="报警日志" Tag="Logs">
+                    <hc:SideMenuItem.Icon>
+                        <Path Style="{StaticResource ClosePathStyle}"
+                              Fill="{DynamicResource DangerBrush}"
+                              Width="22"
+                              Height="22"
+                              VerticalAlignment="Top"
+                              HorizontalAlignment="Left" />
+                    </hc:SideMenuItem.Icon>
+                </hc:SideMenuItem>
+            </hc:SideMenu>
+
+            <!-- 右侧内容展示区 -->
+            <Grid Grid.Column="1" Margin="10">
+                <!-- Frame 负责加载不同的页面 -->
+                <Frame x:Name="MainFrame" NavigationUIVisibility="Hidden"/>
+            </Grid>
         </Grid>
     </Grid>
 </Window>

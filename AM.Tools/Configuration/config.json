@@ -1,5 +1,7 @@
 ﻿{
 	"Setting": {
+		"Language": "en-US",
+		"Theme": "SkinDefault",
 		"ConsolePrint": false,
 		"CommonInfoPrint": false,
 		"DebugInfoPrint": false,

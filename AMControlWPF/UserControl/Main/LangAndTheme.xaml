@@ -1,0 +1,93 @@
+﻿<UserControl x:Class="AMControlWPF.UserControl.Main.LangAndTheme"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:hc="https://handyorg.github.io/handycontrol"
+             mc:Ignorable="d"
+             Height="29">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Stretch">
+            <Menu Margin="10,0,0,0" Background="Transparent">
+                <MenuItem Height="29" Header="{DynamicResource RepositoryText}">
+                    <MenuItem Command="hc:ControlCommands.OpenLink"
+                              CommandParameter="https://github.com/ammm56/amcontrol"
+                              Header="GitHub" />
+                </MenuItem>
+
+                <MenuItem Height="29" Header="{DynamicResource AboutText}">
+                    <MenuItem Header="{DynamicResource ContributorsText}"
+                              Click="ContributorsMenuItem_OnClick" />
+                </MenuItem>
+
+                <MenuItem Height="29" Header="{DynamicResource RecommendationText}">
+                    <MenuItem Header="{DynamicResource ProjectText}"
+                              Click="ProjectsMenuItem_OnClick" />
+                </MenuItem>
+            </Menu>
+
+            <Border Margin="10,0,0,0"
+                    Padding="10,4"
+                    VerticalAlignment="Center"
+                    CornerRadius="2"
+                    Background="{DynamicResource SecondaryRegionBrush}">
+                <TextBlock VerticalAlignment="Center"
+                           FontWeight="Bold"
+                           Foreground="{DynamicResource PrimaryTextBrush}"
+                           Text="{Binding VersionInfo}" />
+            </Border>
+        </StackPanel>
+
+        <Button x:Name="ButtonConfig"
+                Grid.Column="1"
+                Click="ButtonConfig_OnClick"
+                Content="{DynamicResource SettingsText}" />
+
+        <Popup x:Name="PopupConfig"
+               Grid.Column="1"
+               AllowsTransparency="True"
+               Placement="Bottom"
+               PlacementTarget="{Binding ElementName=ButtonConfig}"
+               StaysOpen="False"
+               VerticalOffset="8">
+            <Border Margin="8"
+                    Padding="12"
+                    Background="{DynamicResource SecondaryRegionBrush}"
+                    CornerRadius="4"
+                    Effect="{StaticResource EffectShadow2}">
+                <StackPanel Orientation="Horizontal">
+                    <StackPanel Margin="0,0,16,0">
+                        <TextBlock Margin="0,0,0,8"
+                                   FontWeight="SemiBold"
+                                   Text="{DynamicResource LanguageText}" />
+                        <Button Tag="zh-CN"
+                                Click="LanguageButton_OnClick"
+                                Content="中文" />
+                        <Button Tag="en-US"
+                                Click="LanguageButton_OnClick"
+                                Content="EN" />
+                    </StackPanel>
+
+                    <Separator Margin="0,0,16,0" Width="1" />
+
+                    <StackPanel>
+                        <TextBlock Margin="0,0,0,8"
+                                   FontWeight="SemiBold"
+                                   Text="{DynamicResource ThemeText}" />
+                        <Button Tag="SkinDefault"
+                                Click="ThemeButton_OnClick"
+                                Content="{DynamicResource LightText}" />
+                        <Button Tag="SkinDark"
+                                Click="ThemeButton_OnClick"
+                                Content="{DynamicResource DarkText}" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Popup>
+    </Grid>
+</UserControl>
