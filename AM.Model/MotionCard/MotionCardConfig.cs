@@ -87,31 +87,61 @@ namespace AM.Model.MotionCard
 
             new AxisConfig
             {
-                AxisId = 1,
-                Name = "14轴",
+                AxisId = 14,
+                Name = "水平X轴",
                 LogicalAxis = 114,
                 PhysicalCore = 1,
                 PhysicalAxis = 14,
 
-                AlarmEnable = true,
+                AlarmEnabled = true,
                 AlarmInvert = false,
-
+                EnableInvert = false,
                 PulseMode = 0,
-
+                DefaultMoveMode = 1,
                 EncoderExternal = false,
                 EncoderInvert = false,
-
                 LimitHomeInvert = false,
-
                 LimitMode = -1,
+                TriggerEdge = 1,
 
                 Lead = 5.0,
                 PulsePerRev = 10000,
+                GearRatio = 1.0,
 
-                Acc = 100,
-                Dec = 100,
-                SmoothTime = 25
+                DefaultVelocity = 5.0,
+                JogVelocity = 2.0,
+                Acc = 0.5,
+                Dec = 0.5,
+                SmoothTime = 25,
+                HomeDeceleration = 0.5,
+                NormalStopDeceleration = 0.5,
+                EmergencyStopDeceleration = 2.0,
 
+                StandardHomeMode = 1,
+                ResetDirection = 1,
+                HomeSearchVelocity = 1.0,
+                IndexSearchVelocity = 0.2,
+                HomeOffset = 0,
+                HomeMaxDistance = 0,
+                IndexMaxDistance = 0,
+                EscapeStep = 1000,
+                IndexSearchDirection = 1,
+                HomeCheck = true,
+                HomeUseHomeSignal = true,
+                HomeUseIndexSignal = true,
+                HomeUseLimitSignal = false,
+                HomeAutoZeroPos = true,
+                HomeTimeoutMs = 60000,
+
+                SoftLimitEnabled = true,
+                SoftLimitPositive = 500000,
+                SoftLimitNegative = -500000,
+
+                EnableDelayMs = 50,
+                DisableDelayMs = 50,
+
+                EStopId = 0,
+                StopId = 0
             }
         };
     }

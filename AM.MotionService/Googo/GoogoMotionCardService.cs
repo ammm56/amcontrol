@@ -182,7 +182,7 @@ namespace AM.MotionCard.Googo
             if (rtn != 0) return HandleError(rtn, $"轴硬件配置前关闭使能失败，核{core} 轴{axis}");
 
             // 2. 报警信号设置
-            if (cfg.AlarmEnable)
+            if (cfg.AlarmEnabled)
             {
                 rtn = mc.GTN_AlarmOn(core, axis);
                 if (rtn != 0) return HandleError(rtn, $"报警使能配置失败，核{core} 轴{axis}");
@@ -314,7 +314,7 @@ namespace AM.MotionCard.Googo
                 return Fail(MotionErrorCode.HomeConfigInvalid, "轴 " + logicalAxis + " 回零模式未配置");
             }
 
-            if (cfg.HomeHighSpeed <= 0 || cfg.HomeLowSpeed <= 0)
+            if (cfg.HomeSearchVelocity <= 0 || cfg.IndexSearchVelocity <= 0)
             {
                 return Fail(MotionErrorCode.HomeConfigInvalid, "轴 " + logicalAxis + " 回零速度配置无效");
             }
@@ -327,8 +327,8 @@ namespace AM.MotionCard.Googo
             mc.TStandardHomePrm prm = new mc.TStandardHomePrm
             {
                 mode = cfg.StandardHomeMode,
-                highSpeed = cfg.HomeHighSpeed,
-                lowSpeed = cfg.HomeLowSpeed,
+                highSpeed = cfg.HomeSearchVelocity,
+                lowSpeed = cfg.IndexSearchVelocity,
                 acc = cfg.Acc,
                 offset = cfg.HomeOffset,
                 check = cfg.HomeCheck ? (short)1 : (short)0,

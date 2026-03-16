@@ -62,10 +62,10 @@ namespace AM.ViewModel.ViewModels.Config
             set { if (_model.PhysicalAxis != value) { _model.PhysicalAxis = value; OnPropertyChanged(nameof(PhysicalAxis)); } }
         }
 
-        public bool AlarmEnable
+        public bool AlarmEnabled
         {
-            get => _model.AlarmEnable;
-            set { if (_model.AlarmEnable != value) { _model.AlarmEnable = value; OnPropertyChanged(nameof(AlarmEnable)); } }
+            get => _model.AlarmEnabled;
+            set { if (_model.AlarmEnabled != value) { _model.AlarmEnabled = value; OnPropertyChanged(nameof(AlarmEnabled)); } }
         }
 
         public bool AlarmInvert
@@ -215,28 +215,28 @@ namespace AM.ViewModel.ViewModels.Config
             }
         }
 
-        public double HomeHighSpeed
+        public double HomeSearchVelocity
         {
-            get => _model.HomeHighSpeed;
+            get => _model.HomeSearchVelocity;
             set
             {
-                if (_model.HomeHighSpeed != value)
+                if (_model.HomeSearchVelocity != value)
                 {
-                    _model.HomeHighSpeed = value;
-                    OnPropertyChanged(nameof(HomeHighSpeed));
+                    _model.HomeSearchVelocity = value;
+                    OnPropertyChanged(nameof(HomeSearchVelocity));
                 }
             }
         }
 
-        public double HomeLowSpeed
+        public double IndexSearchVelocity
         {
-            get => _model.HomeLowSpeed;
+            get => _model.IndexSearchVelocity;
             set
             {
-                if (_model.HomeLowSpeed != value)
+                if (_model.IndexSearchVelocity != value)
                 {
-                    _model.HomeLowSpeed = value;
-                    OnPropertyChanged(nameof(HomeLowSpeed));
+                    _model.IndexSearchVelocity = value;
+                    OnPropertyChanged(nameof(IndexSearchVelocity));
                 }
             }
         }
