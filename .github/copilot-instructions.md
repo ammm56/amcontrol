@@ -10,6 +10,7 @@
 - 全项目统一使用单一 `Result/Result<T>` 返回模型，而不是按领域拆分 `MotionResult`、`PlcResult`、`VisualResult` 等多个结果类型。
 - 报警持久化命名采用 IAlarmRecord、AlarmRecordService、AlarmRecord，并保持当前解决方案的全局基础设施注入架构；数据库实体统一使用 SqlSugar 标注风格；UI 消息与报警应优先走统一链路而不是各窗口各自定义监听实现。
 - AxisConfig 采用强类型、统一且更清晰的业务命名，属性命名作为数据库轴参数名称标准，补齐软件限位、默认速度、回零流程兼容、多卡使能时序、急停/平停联动等参数。
+- 用户选择 ConfigAxisArg 长期方案 A：数值统一 REAL + 类型标记，并希望通过服务实现将数据库参数覆盖到 MotionCardConfig.AxisConfigs。
 
 ## 服务层设计
 - 服务层统一采用“构造注入依赖 + 封装消息发布/日志通知”的风格，避免在各方法中重复直接调用 IMessageBus 和 IAMLogger。

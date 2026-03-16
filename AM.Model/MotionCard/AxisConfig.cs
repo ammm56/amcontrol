@@ -282,7 +282,7 @@ namespace AM.Model.MotionCard
         /// <summary>
         /// 原点偏移量，单位 pulse。
         /// </summary>
-        public int HomeOffset { get; set; }
+        public int HomeOffset { get; set; } = 1000;
 
         /// <summary>
         /// HOME 最大搜索距离，单位 pulse。

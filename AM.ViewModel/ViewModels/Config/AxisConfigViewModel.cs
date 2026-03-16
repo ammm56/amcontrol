@@ -1,23 +1,16 @@
-﻿using AM.Model;
-using AM.Model.MotionCard;
+﻿using AM.Model.MotionCard;
 using CommunityToolkit.Mvvm.ComponentModel;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AM.ViewModel.ViewModels.Config
 {
     /// <summary>
-    /// 轴参数包装器 
-    /// 把 纯净模型 (AM.Model.AxisConfig) 变成 UI 使用的模型
-    /// 使用 partial 是为了配合 Source Generator。.net framework不使用，手动定义。
+    /// 轴参数包装器。
+    /// 把纯净模型 AxisConfig 转成 UI 使用模型。
     /// </summary>
     public partial class AxisConfigViewModel : ObservableObject
     {
         /// <summary>
-        /// 内部持有纯净的数据模型
+        /// 内部模型。
         /// </summary>
         private readonly AxisConfig _model;
 
@@ -27,100 +20,225 @@ namespace AM.ViewModel.ViewModels.Config
         }
 
         /// <summary>
-        /// 暴露 Model 给驱动层使用（如果需要同步修改）
+        /// 返回内部模型。
         /// </summary>
-        /// <returns></returns>
-        public AxisConfig GetModel() => _model;
+        public AxisConfig GetModel()
+        {
+            return _model;
+        }
 
         public short AxisId
         {
-            get => _model.AxisId;
-            set { if (_model.AxisId != value) { _model.AxisId = value; OnPropertyChanged(nameof(AxisId)); } }
+            get { return _model.AxisId; }
+            set
+            {
+                if (_model.AxisId != value)
+                {
+                    _model.AxisId = value;
+                    OnPropertyChanged(nameof(AxisId));
+                }
+            }
         }
 
         public string Name
         {
-            get => _model.Name;
-            set { if (_model.Name != value) { _model.Name = value; OnPropertyChanged(nameof(Name)); } }
+            get { return _model.Name; }
+            set
+            {
+                if (_model.Name != value)
+                {
+                    _model.Name = value;
+                    OnPropertyChanged(nameof(Name));
+                }
+            }
         }
 
         public short LogicalAxis
         {
-            get => _model.LogicalAxis;
-            set { if (_model.LogicalAxis != value) { _model.LogicalAxis = value; OnPropertyChanged(nameof(LogicalAxis)); } }
+            get { return _model.LogicalAxis; }
+            set
+            {
+                if (_model.LogicalAxis != value)
+                {
+                    _model.LogicalAxis = value;
+                    OnPropertyChanged(nameof(LogicalAxis));
+                }
+            }
         }
 
         public short PhysicalCore
         {
-            get => _model.PhysicalCore;
-            set { if (_model.PhysicalCore != value) { _model.PhysicalCore = value; OnPropertyChanged(nameof(PhysicalCore)); } }
+            get { return _model.PhysicalCore; }
+            set
+            {
+                if (_model.PhysicalCore != value)
+                {
+                    _model.PhysicalCore = value;
+                    OnPropertyChanged(nameof(PhysicalCore));
+                }
+            }
         }
 
         public short PhysicalAxis
         {
-            get => _model.PhysicalAxis;
-            set { if (_model.PhysicalAxis != value) { _model.PhysicalAxis = value; OnPropertyChanged(nameof(PhysicalAxis)); } }
+            get { return _model.PhysicalAxis; }
+            set
+            {
+                if (_model.PhysicalAxis != value)
+                {
+                    _model.PhysicalAxis = value;
+                    OnPropertyChanged(nameof(PhysicalAxis));
+                }
+            }
         }
 
         public bool AlarmEnabled
         {
-            get => _model.AlarmEnabled;
-            set { if (_model.AlarmEnabled != value) { _model.AlarmEnabled = value; OnPropertyChanged(nameof(AlarmEnabled)); } }
+            get { return _model.AlarmEnabled; }
+            set
+            {
+                if (_model.AlarmEnabled != value)
+                {
+                    _model.AlarmEnabled = value;
+                    OnPropertyChanged(nameof(AlarmEnabled));
+                }
+            }
         }
 
         public bool AlarmInvert
         {
-            get => _model.AlarmInvert;
-            set { if (_model.AlarmInvert != value) { _model.AlarmInvert = value; OnPropertyChanged(nameof(AlarmInvert)); } }
+            get { return _model.AlarmInvert; }
+            set
+            {
+                if (_model.AlarmInvert != value)
+                {
+                    _model.AlarmInvert = value;
+                    OnPropertyChanged(nameof(AlarmInvert));
+                }
+            }
+        }
+
+        public bool EnableInvert
+        {
+            get { return _model.EnableInvert; }
+            set
+            {
+                if (_model.EnableInvert != value)
+                {
+                    _model.EnableInvert = value;
+                    OnPropertyChanged(nameof(EnableInvert));
+                }
+            }
         }
 
         public short PulseMode
         {
-            get => _model.PulseMode;
-            set { if (_model.PulseMode != value) { _model.PulseMode = value; OnPropertyChanged(nameof(PulseMode)); } }
+            get { return _model.PulseMode; }
+            set
+            {
+                if (_model.PulseMode != value)
+                {
+                    _model.PulseMode = value;
+                    OnPropertyChanged(nameof(PulseMode));
+                }
+            }
+        }
+
+        public short DefaultMoveMode
+        {
+            get { return _model.DefaultMoveMode; }
+            set
+            {
+                if (_model.DefaultMoveMode != value)
+                {
+                    _model.DefaultMoveMode = value;
+                    OnPropertyChanged(nameof(DefaultMoveMode));
+                }
+            }
         }
 
         public bool EncoderExternal
         {
-            get => _model.EncoderExternal;
-            set { if (_model.EncoderExternal != value) { _model.EncoderExternal = value; OnPropertyChanged(nameof(EncoderExternal)); } }
+            get { return _model.EncoderExternal; }
+            set
+            {
+                if (_model.EncoderExternal != value)
+                {
+                    _model.EncoderExternal = value;
+                    OnPropertyChanged(nameof(EncoderExternal));
+                }
+            }
         }
 
         public bool EncoderInvert
         {
-            get => _model.EncoderInvert;
-            set { if (_model.EncoderInvert != value) { _model.EncoderInvert = value; OnPropertyChanged(nameof(EncoderInvert)); } }
+            get { return _model.EncoderInvert; }
+            set
+            {
+                if (_model.EncoderInvert != value)
+                {
+                    _model.EncoderInvert = value;
+                    OnPropertyChanged(nameof(EncoderInvert));
+                }
+            }
         }
 
         public bool LimitHomeInvert
         {
-            get => _model.LimitHomeInvert;
-            set { if (_model.LimitHomeInvert != value) { _model.LimitHomeInvert = value; OnPropertyChanged(nameof(LimitHomeInvert)); } }
+            get { return _model.LimitHomeInvert; }
+            set
+            {
+                if (_model.LimitHomeInvert != value)
+                {
+                    _model.LimitHomeInvert = value;
+                    OnPropertyChanged(nameof(LimitHomeInvert));
+                }
+            }
         }
 
         public short LimitMode
         {
-            get => _model.LimitMode;
-            set { if (_model.LimitMode != value) { _model.LimitMode = value; OnPropertyChanged(nameof(LimitMode)); } }
+            get { return _model.LimitMode; }
+            set
+            {
+                if (_model.LimitMode != value)
+                {
+                    _model.LimitMode = value;
+                    OnPropertyChanged(nameof(LimitMode));
+                }
+            }
+        }
+
+        public short TriggerEdge
+        {
+            get { return _model.TriggerEdge; }
+            set
+            {
+                if (_model.TriggerEdge != value)
+                {
+                    _model.TriggerEdge = value;
+                    OnPropertyChanged(nameof(TriggerEdge));
+                }
+            }
         }
 
         public double Lead
         {
-            get => _model.Lead;
+            get { return _model.Lead; }
             set
             {
                 if (_model.Lead != value)
                 {
                     _model.Lead = value;
                     OnPropertyChanged(nameof(Lead));
-                    OnPropertyChanged(nameof(K));// 通知关联的计算属性刷新
+                    OnPropertyChanged(nameof(K));
                 }
             }
         }
 
         public int PulsePerRev
         {
-            get => _model.PulsePerRev;
+            get { return _model.PulsePerRev; }
             set
             {
                 if (_model.PulsePerRev != value)
@@ -134,7 +252,7 @@ namespace AM.ViewModel.ViewModels.Config
 
         public double GearRatio
         {
-            get => _model.GearRatio;
+            get { return _model.GearRatio; }
             set
             {
                 if (_model.GearRatio != value)
@@ -147,25 +265,50 @@ namespace AM.ViewModel.ViewModels.Config
         }
 
         /// <summary>
-        /// 脉冲系数 (只读，由 Model 计算)
+        /// 脉冲当量。
         /// </summary>
-        public double K => _model.K;
-        /// <summary>
-        /// 手写属性或使用 [ObservableProperty] 包装逻辑
-        /// </summary>
-        public double Acc
+        public double K
         {
-            get => _model.Acc;
+            get { return _model.K; }
+        }
+
+        public double DefaultVelocity
+        {
+            get { return _model.DefaultVelocity; }
             set
             {
-                // 1. 先进行范围校验（ViewModel 也要校验）
-                double validated = value.LimitTo(0.001, 1.0);
-                // 2. 检查值是否真的改变了
+                double validated = value.LimitTo(0.001, 200.0);
+                if (_model.DefaultVelocity != validated)
+                {
+                    _model.DefaultVelocity = validated;
+                    OnPropertyChanged(nameof(DefaultVelocity));
+                }
+            }
+        }
+
+        public double JogVelocity
+        {
+            get { return _model.JogVelocity; }
+            set
+            {
+                double validated = value.LimitTo(0.001, 100.0);
+                if (_model.JogVelocity != validated)
+                {
+                    _model.JogVelocity = validated;
+                    OnPropertyChanged(nameof(JogVelocity));
+                }
+            }
+        }
+
+        public double Acc
+        {
+            get { return _model.Acc; }
+            set
+            {
+                double validated = value.LimitTo(0.001, 20.0);
                 if (_model.Acc != validated)
                 {
-                    // 3. 直接修改 Model 的私有字段或属性
                     _model.Acc = validated;
-                    // 4. 手动触发属性变更通知，让 UI 刷新
                     OnPropertyChanged(nameof(Acc));
                 }
             }
@@ -173,10 +316,10 @@ namespace AM.ViewModel.ViewModels.Config
 
         public double Dec
         {
-            get => _model.Dec;
+            get { return _model.Dec; }
             set
             {
-                double validated = value.LimitTo(0.001, 1.0);
+                double validated = value.LimitTo(0.001, 20.0);
                 if (_model.Dec != validated)
                 {
                     _model.Dec = validated;
@@ -187,7 +330,7 @@ namespace AM.ViewModel.ViewModels.Config
 
         public short SmoothTime
         {
-            get => _model.SmoothTime;
+            get { return _model.SmoothTime; }
             set
             {
                 short validated = value.LimitTo((short)0, (short)256);
@@ -199,12 +342,51 @@ namespace AM.ViewModel.ViewModels.Config
             }
         }
 
-        /// <summary>
-        /// config中添加到视图
-        /// </summary>
+        public double HomeDeceleration
+        {
+            get { return _model.HomeDeceleration; }
+            set
+            {
+                double validated = value.LimitTo(0.001, 20.0);
+                if (_model.HomeDeceleration != validated)
+                {
+                    _model.HomeDeceleration = validated;
+                    OnPropertyChanged(nameof(HomeDeceleration));
+                }
+            }
+        }
+
+        public double NormalStopDeceleration
+        {
+            get { return _model.NormalStopDeceleration; }
+            set
+            {
+                double validated = value.LimitTo(0.001, 20.0);
+                if (_model.NormalStopDeceleration != validated)
+                {
+                    _model.NormalStopDeceleration = validated;
+                    OnPropertyChanged(nameof(NormalStopDeceleration));
+                }
+            }
+        }
+
+        public double EmergencyStopDeceleration
+        {
+            get { return _model.EmergencyStopDeceleration; }
+            set
+            {
+                double validated = value.LimitTo(0.001, 20.0);
+                if (_model.EmergencyStopDeceleration != validated)
+                {
+                    _model.EmergencyStopDeceleration = validated;
+                    OnPropertyChanged(nameof(EmergencyStopDeceleration));
+                }
+            }
+        }
+
         public short StandardHomeMode
         {
-            get => _model.StandardHomeMode;
+            get { return _model.StandardHomeMode; }
             set
             {
                 if (_model.StandardHomeMode != value)
@@ -215,14 +397,28 @@ namespace AM.ViewModel.ViewModels.Config
             }
         }
 
-        public double HomeSearchVelocity
+        public short ResetDirection
         {
-            get => _model.HomeSearchVelocity;
+            get { return _model.ResetDirection; }
             set
             {
-                if (_model.HomeSearchVelocity != value)
+                if (_model.ResetDirection != value)
                 {
-                    _model.HomeSearchVelocity = value;
+                    _model.ResetDirection = value;
+                    OnPropertyChanged(nameof(ResetDirection));
+                }
+            }
+        }
+
+        public double HomeSearchVelocity
+        {
+            get { return _model.HomeSearchVelocity; }
+            set
+            {
+                double validated = value.LimitTo(0.001, 50.0);
+                if (_model.HomeSearchVelocity != validated)
+                {
+                    _model.HomeSearchVelocity = validated;
                     OnPropertyChanged(nameof(HomeSearchVelocity));
                 }
             }
@@ -230,12 +426,13 @@ namespace AM.ViewModel.ViewModels.Config
 
         public double IndexSearchVelocity
         {
-            get => _model.IndexSearchVelocity;
+            get { return _model.IndexSearchVelocity; }
             set
             {
-                if (_model.IndexSearchVelocity != value)
+                double validated = value.LimitTo(0.001, 20.0);
+                if (_model.IndexSearchVelocity != validated)
                 {
-                    _model.IndexSearchVelocity = value;
+                    _model.IndexSearchVelocity = validated;
                     OnPropertyChanged(nameof(IndexSearchVelocity));
                 }
             }
@@ -243,7 +440,7 @@ namespace AM.ViewModel.ViewModels.Config
 
         public int HomeOffset
         {
-            get => _model.HomeOffset;
+            get { return _model.HomeOffset; }
             set
             {
                 if (_model.HomeOffset != value)
@@ -254,9 +451,61 @@ namespace AM.ViewModel.ViewModels.Config
             }
         }
 
+        public int HomeMaxDistance
+        {
+            get { return _model.HomeMaxDistance; }
+            set
+            {
+                if (_model.HomeMaxDistance != value)
+                {
+                    _model.HomeMaxDistance = value;
+                    OnPropertyChanged(nameof(HomeMaxDistance));
+                }
+            }
+        }
+
+        public int IndexMaxDistance
+        {
+            get { return _model.IndexMaxDistance; }
+            set
+            {
+                if (_model.IndexMaxDistance != value)
+                {
+                    _model.IndexMaxDistance = value;
+                    OnPropertyChanged(nameof(IndexMaxDistance));
+                }
+            }
+        }
+
+        public int EscapeStep
+        {
+            get { return _model.EscapeStep; }
+            set
+            {
+                if (_model.EscapeStep != value)
+                {
+                    _model.EscapeStep = value;
+                    OnPropertyChanged(nameof(EscapeStep));
+                }
+            }
+        }
+
+        public short IndexSearchDirection
+        {
+            get { return _model.IndexSearchDirection; }
+            set
+            {
+                if (_model.IndexSearchDirection != value)
+                {
+                    _model.IndexSearchDirection = value;
+                    OnPropertyChanged(nameof(IndexSearchDirection));
+                }
+            }
+        }
+
         public bool HomeCheck
         {
-            get => _model.HomeCheck;
+            get { return _model.HomeCheck; }
             set
             {
                 if (_model.HomeCheck != value)
@@ -267,9 +516,48 @@ namespace AM.ViewModel.ViewModels.Config
             }
         }
 
+        public bool HomeUseHomeSignal
+        {
+            get { return _model.HomeUseHomeSignal; }
+            set
+            {
+                if (_model.HomeUseHomeSignal != value)
+                {
+                    _model.HomeUseHomeSignal = value;
+                    OnPropertyChanged(nameof(HomeUseHomeSignal));
+                }
+            }
+        }
+
+        public bool HomeUseIndexSignal
+        {
+            get { return _model.HomeUseIndexSignal; }
+            set
+            {
+                if (_model.HomeUseIndexSignal != value)
+                {
+                    _model.HomeUseIndexSignal = value;
+                    OnPropertyChanged(nameof(HomeUseIndexSignal));
+                }
+            }
+        }
+
+        public bool HomeUseLimitSignal
+        {
+            get { return _model.HomeUseLimitSignal; }
+            set
+            {
+                if (_model.HomeUseLimitSignal != value)
+                {
+                    _model.HomeUseLimitSignal = value;
+                    OnPropertyChanged(nameof(HomeUseLimitSignal));
+                }
+            }
+        }
+
         public bool HomeAutoZeroPos
         {
-            get => _model.HomeAutoZeroPos;
+            get { return _model.HomeAutoZeroPos; }
             set
             {
                 if (_model.HomeAutoZeroPos != value)
@@ -282,7 +570,7 @@ namespace AM.ViewModel.ViewModels.Config
 
         public int HomeTimeoutMs
         {
-            get => _model.HomeTimeoutMs;
+            get { return _model.HomeTimeoutMs; }
             set
             {
                 int validated = value < 1000 ? 1000 : value;
@@ -294,17 +582,119 @@ namespace AM.ViewModel.ViewModels.Config
             }
         }
 
+        public bool SoftLimitEnabled
+        {
+            get { return _model.SoftLimitEnabled; }
+            set
+            {
+                if (_model.SoftLimitEnabled != value)
+                {
+                    _model.SoftLimitEnabled = value;
+                    OnPropertyChanged(nameof(SoftLimitEnabled));
+                }
+            }
+        }
+
+        public double SoftLimitPositive
+        {
+            get { return _model.SoftLimitPositive; }
+            set
+            {
+                if (_model.SoftLimitPositive != value)
+                {
+                    _model.SoftLimitPositive = value;
+                    OnPropertyChanged(nameof(SoftLimitPositive));
+                }
+            }
+        }
+
+        public double SoftLimitNegative
+        {
+            get { return _model.SoftLimitNegative; }
+            set
+            {
+                if (_model.SoftLimitNegative != value)
+                {
+                    _model.SoftLimitNegative = value;
+                    OnPropertyChanged(nameof(SoftLimitNegative));
+                }
+            }
+        }
+
+        public int EnableDelayMs
+        {
+            get { return _model.EnableDelayMs; }
+            set
+            {
+                if (_model.EnableDelayMs != value)
+                {
+                    _model.EnableDelayMs = value;
+                    OnPropertyChanged(nameof(EnableDelayMs));
+                }
+            }
+        }
+
+        public int DisableDelayMs
+        {
+            get { return _model.DisableDelayMs; }
+            set
+            {
+                if (_model.DisableDelayMs != value)
+                {
+                    _model.DisableDelayMs = value;
+                    OnPropertyChanged(nameof(DisableDelayMs));
+                }
+            }
+        }
+
+        public int EStopId
+        {
+            get { return _model.EStopId; }
+            set
+            {
+                if (_model.EStopId != value)
+                {
+                    _model.EStopId = value;
+                    OnPropertyChanged(nameof(EStopId));
+                }
+            }
+        }
+
+        public int StopId
+        {
+            get { return _model.StopId; }
+            set
+            {
+                if (_model.StopId != value)
+                {
+                    _model.StopId = value;
+                    OnPropertyChanged(nameof(StopId));
+                }
+            }
+        }
+
         public bool IsServoOn
         {
-            get => _model.IsServoOn;
-            set { if (_model.IsServoOn != value) { _model.IsServoOn = value; OnPropertyChanged(nameof(IsServoOn)); } }
+            get { return _model.IsServoOn; }
+            set
+            {
+                if (_model.IsServoOn != value)
+                {
+                    _model.IsServoOn = value;
+                    OnPropertyChanged(nameof(IsServoOn));
+                }
+            }
         }
 
         private bool _isSelected;
 
         /// <summary>
-        /// UI 状态，不在 AM.Model 中
+        /// UI 状态，不在模型中。
         /// </summary>
-        public bool IsSelected { get => _isSelected; set => SetProperty(ref _isSelected, value); }
+        public bool IsSelected
+        {
+            get { return _isSelected; }
+            set { SetProperty(ref _isSelected, value); }
+        }
     }
 }

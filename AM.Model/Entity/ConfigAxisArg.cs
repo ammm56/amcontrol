@@ -1,121 +1,139 @@
 ﻿using SqlSugar;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AM.Model.Entity
 {
     /// <summary>
-    /// 轴参数配置实体类
+    /// 轴参数配置实体类。
+    /// 采用数值统一 REAL + 类型标记的长期方案。
     /// </summary>
     [SugarTable("configaxisarg")]
     public partial class ConfigAxisArg
     {
+        /// <summary>
+        /// 初始化默认值。
+        /// </summary>
         public ConfigAxisArg()
         {
-            // 设置默认值
-            this.ParamSetVal = 0;
-            this.ParamDefaultVal = 0;
-            this.ParamMaxVal = 0;
-            this.ParamMinVal = 0;
-            this.ParamStatus1 = 0;
-            this.ParamStatus2 = 0;
-            this.ParamStatus3 = 0;
+            ParamValueType = "Double";
+            ParamSetVal = 0D;
+            ParamDefaultVal = 0D;
+            ParamMaxVal = 0D;
+            ParamMinVal = 0D;
+            ParamStatus1 = 0;
+            ParamStatus2 = 0;
+            ParamStatus3 = 0;
         }
 
         /// <summary>
-        /// Desc: 自增主键 ID
-        /// </summary>           
+        /// 自增主键 ID。
+        /// </summary>
         [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]
         public int Id { get; set; }
 
         /// <summary>
-        /// Desc: 轴编号
-        /// </summary>           
+        /// 轴编号。
+        /// 建议统一使用 AxisConfig.LogicalAxis。
+        /// </summary>
         public int Axis { get; set; }
 
         /// <summary>
-        /// Desc: 参数英文名称
-        /// </summary>           
+        /// 参数名称。
+        /// 建议统一使用 AxisConfig 属性名。
+        /// </summary>
         public string ParamName { get; set; }
 
         /// <summary>
-        /// Desc: 参数中文名称
-        /// </summary>           
+        /// 参数中文名称。
+        /// </summary>
         public string ParamName_Cn { get; set; }
 
         /// <summary>
-        /// Desc: 参数当前设置值
-        /// </summary>           
-        public int ParamSetVal { get; set; }
+        /// 参数值类型。
+        /// 建议取值：Bool / Int16 / Int32 / Double / Enum。
+        /// </summary>
+        public string ParamValueType { get; set; }
 
         /// <summary>
-        /// Desc: 参数默认值
-        /// </summary>           
-        public int ParamDefaultVal { get; set; }
+        /// 参数当前设置值。
+        /// </summary>
+        public double ParamSetVal { get; set; }
 
         /// <summary>
-        /// Desc: 参数最大值
-        /// </summary>           
-        public int ParamMaxVal { get; set; }
+        /// 参数默认值。
+        /// </summary>
+        public double ParamDefaultVal { get; set; }
 
         /// <summary>
-        /// Desc: 参数最小值
-        /// </summary>           
-        public int ParamMinVal { get; set; }
+        /// 参数最大值。
+        /// </summary>
+        public double ParamMaxVal { get; set; }
 
         /// <summary>
-        /// Desc: 参数状态1 (布尔开关或状态码)
-        /// </summary>           
+        /// 参数最小值。
+        /// </summary>
+        public double ParamMinVal { get; set; }
+
+        /// <summary>
+        /// 参数状态1。
+        /// </summary>
         public int ParamStatus1 { get; set; }
 
         /// <summary>
-        /// Desc: 参数状态2
-        /// </summary>           
+        /// 参数状态2。
+        /// </summary>
         public int ParamStatus2 { get; set; }
 
         /// <summary>
-        /// Desc: 参数状态3
-        /// </summary>           
+        /// 参数状态3。
+        /// </summary>
         public int ParamStatus3 { get; set; }
 
         /// <summary>
-        /// Desc: 描述
-        /// </summary>           
+        /// 描述。
+        /// </summary>
         [SugarColumn(IsNullable = true)]
         public string Description { get; set; }
 
         /// <summary>
-        /// Desc: 备注
-        /// </summary>           
+        /// 备注。
+        /// </summary>
         [SugarColumn(IsNullable = true)]
         public string Remark { get; set; }
 
         /// <summary>
-        /// Desc: 轴中文名称
-        /// </summary>           
+        /// 轴中文名称。
+        /// </summary>
         [SugarColumn(IsNullable = true)]
         public string Axis_Cn { get; set; }
 
         /// <summary>
-        /// Desc: 保留字段1-5
-        /// </summary>           
+        /// 保留字段1。
+        /// </summary>
         [SugarColumn(IsNullable = true)]
         public string Reserve1 { get; set; }
 
+        /// <summary>
+        /// 保留字段2。
+        /// </summary>
         [SugarColumn(IsNullable = true)]
         public string Reserve2 { get; set; }
 
+        /// <summary>
+        /// 保留字段3。
+        /// </summary>
         [SugarColumn(IsNullable = true)]
         public string Reserve3 { get; set; }
 
+        /// <summary>
+        /// 保留字段4。
+        /// </summary>
         [SugarColumn(IsNullable = true)]
         public string Reserve4 { get; set; }
 
+        /// <summary>
+        /// 保留字段5。
+        /// </summary>
         [SugarColumn(IsNullable = true)]
         public string Reserve5 { get; set; }
     }
-
 }

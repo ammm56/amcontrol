@@ -35,17 +35,48 @@ namespace AM.App.Bootstrap
             IAMLogger logger = new NLogLogger("System");
             IMessageBus messageBus = new MessageBusToolkit();
             IErrorCatalog errorCatalog = new JsonErrorCatalog();
-            // 数据库未启用 先不记录报警
+
+            // 数据库未启用时先不记录报警
             IAlarmRecord alarmRecord = new NullAlarmRecordService();
-            //IAlarmRecord alarmRecord = new AlarmRecordService();
+            // IAlarmRecord alarmRecord = new AlarmRecordService();
+
             AlarmManager alarmManager = new AlarmManager(messageBus, logger, alarmRecord);
             IAppReporter reporter = new AppReporter(messageBus, logger, alarmManager, errorCatalog);
 
             // 3. 初始化系统上下文
             SystemContext.Instance.Initialize(logger, messageBus, alarmManager, errorCatalog, reporter);
 
-            // 4. 初始化硬件
+            // 4. 用数据库参数覆盖配置文件中的轴参数
+            ApplyAxisConfigOverlay(config);
+
+            // 5. 初始化硬件
             InitializeMachine();
+        }
+
+        /// <summary>
+        /// 使用数据库参数覆盖配置文件中的轴配置。
+        /// </summary>
+        private static void ApplyAxisConfigOverlay(Config config)
+        {
+            if (config == null || config.MotionCardsConfig == null || config.MotionCardsConfig.Count == 0)
+            {
+                SystemContext.Instance.Reporter?.Warn("AppBootstrap", "未找到可覆盖的运动控制卡轴配置");
+                return;
+            }
+
+            var axisConfigOverlayService = new AxisConfigOverlayService();
+            var overlayResult = axisConfigOverlayService.ApplyToMotionCards(config.MotionCardsConfig);
+
+            if (!overlayResult.Success)
+            {
+                SystemContext.Instance.Reporter?.Error(
+                    "AppBootstrap",
+                    "数据库轴参数覆盖失败，将继续使用 config.json 中的轴参数配置",
+                    overlayResult.Code);
+                return;
+            }
+
+            SystemContext.Instance.Reporter?.Info("AppBootstrap", "数据库轴参数覆盖成功");
         }
 
         /// <summary>
