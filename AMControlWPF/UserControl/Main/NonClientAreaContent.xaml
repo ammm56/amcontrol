@@ -32,23 +32,10 @@
                     <TextBlock VerticalAlignment="Center" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Text="{Binding VersionInfo}" />
                 </Border>
             </StackPanel>
-            <!--<StackPanel DockPanel.Dock="Left"
-                        Orientation="Horizontal"
-                        VerticalAlignment="Center"
-                        Margin="6,0,12,0">
-                --><!-- 示例导航图标按钮（可替换为 Path 或 Image） --><!--
-                <Button Style="{StaticResource AppToolButtonStyle}" Tag="Home" Click="NavButton_Click" ToolTip="首页">
-                    <TextBlock Text="🏠" FontSize="14" />
-                </Button>
-                <Button Style="{StaticResource AppToolButtonStyle}" Tag="ConfigArgs" Click="NavButton_Click" ToolTip="参数配置" Margin="6,0,0,0">
-                    <TextBlock Text="⚙" FontSize="14" />
-                </Button>
-                --><!-- 可继续添加图标按钮 --><!--
-            </StackPanel>-->
 
             <!-- 中间占位（可放标题或留空） -->
             <StackPanel DockPanel.Dock="Left" VerticalAlignment="Center" HorizontalAlignment="Center">
-                <!-- 如果希望在标题栏中显示应用名，可放在这里 -->
+                <!-- 如果在标题栏中显示应用名，可放在这里 -->
                 <!--<TextBlock Text="AM运动控制" Foreground="{DynamicResource PrimaryTextBrush}" FontWeight="SemiBold" />-->
             </StackPanel>
 

@@ -46,14 +46,5 @@ namespace AMControlWPF.UserControl.Main
             PopupConfig.IsOpen = false;
         }
 
-        private void ContributorsMenuItem_OnClick(object sender, RoutedEventArgs e)
-        {
-            NavigateRequested?.Invoke("Contributors");
-        }
-
-        private void ProjectsMenuItem_OnClick(object sender, RoutedEventArgs e)
-        {
-            NavigateRequested?.Invoke("Projects");
-        }
     }
 }
