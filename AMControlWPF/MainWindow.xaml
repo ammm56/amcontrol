@@ -29,6 +29,7 @@
                            FontWeight="SemiBold"
                            Foreground="{DynamicResource PrimaryTextBrush}"
                            Text="AM运动控制" />
+                <!--<TextBlock Style="{StaticResource AppTitleTextBlockStyle}" Text="AM运动控制"/>-->
 
                 <main:LangAndTheme x:Name="LangAndThemeControl"
                                    DockPanel.Dock="Right"
