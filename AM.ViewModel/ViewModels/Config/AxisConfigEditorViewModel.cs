@@ -1,30 +1,16 @@
 ﻿using AM.Model.MotionCard;
-using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace AM.ViewModel.ViewModels.Config
 {
     /// <summary>
-    /// 轴参数包装器。
-    /// 把纯净模型 AxisConfig 转成 UI 使用模型。
+    /// 轴强类型配置编辑 ViewModel。
+    /// 面向普通操作人员和工艺配置页面，编辑当前有效的 AxisConfig。
     /// </summary>
-    public partial class AxisConfigViewModel : ObservableObject
+    public class AxisConfigEditorViewModel : ConfigEditorViewModelBase<AxisConfig>
     {
-        /// <summary>
-        /// 内部模型。
-        /// </summary>
-        private readonly AxisConfig _model;
-
-        public AxisConfigViewModel(AxisConfig model)
+        public AxisConfigEditorViewModel(AxisConfig model)
+            : base(model)
         {
-            _model = model;
-        }
-
-        /// <summary>
-        /// 返回内部模型。
-        /// </summary>
-        public AxisConfig GetModel()
-        {
-            return _model;
         }
 
         public short AxisId
@@ -264,9 +250,6 @@ namespace AM.ViewModel.ViewModels.Config
             }
         }
 
-        /// <summary>
-        /// 脉冲当量。
-        /// </summary>
         public double K
         {
             get { return _model.K; }

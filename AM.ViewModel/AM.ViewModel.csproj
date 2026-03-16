@@ -79,8 +79,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ViewModels\Config\AxisConfigViewModel.cs" />
+    <Compile Include="ViewModels\Config\AxisConfigEditorPageViewModel.cs" />
+    <Compile Include="ViewModels\Config\AxisConfigEditorViewModel.cs" />
     <Compile Include="ViewModels\Config\ConfigAxisArgViewModel.cs" />
+    <Compile Include="ViewModels\Config\ConfigEditorViewModelBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Base\" />
