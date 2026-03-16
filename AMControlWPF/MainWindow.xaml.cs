@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using HandyControl.Controls;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -8,7 +9,7 @@ namespace AMControlWPF
     /// <summary>
     /// MainWindow.xaml 的交互逻辑
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : GlowWindow
     {
         private readonly Dictionary<string, Page> _pageCache = new Dictionary<string, Page>();
 

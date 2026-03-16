@@ -215,5 +215,8 @@
     <Folder Include="UserControl\Basic\" />
     <Folder Include="UserControl\Controls\" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Img\logo.ico" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
