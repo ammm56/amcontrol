@@ -13,6 +13,8 @@
 - AxisConfig 采用强类型、统一且更清晰的业务命名，属性命名作为数据库轴参数名称标准，补齐软件限位、默认速度、回零流程兼容、多卡使能时序、急停/平停联动等参数。
 - 用户选择 ConfigAxisArg 长期方案 A：数值统一 REAL + 类型标记，并希望通过服务实现将数据库参数覆盖到 MotionCardConfig.AxisConfigs。
 - 保留 `ConfigAxisArgViewModel` 这一命名，因为它直接对应数据库表并表达直接操作数据库；同时对运行时配置类采用统一的、更通用的命名体系，而不是过窄地使用 `AxisRuntimeConfigViewModel`。
+- 对于启动阶段已完成初始化并保证有效的全局对象（如 ConfigContext），不再重复做空判断与封装检查；避免重复定义保存逻辑。
+- WPF 主题层面继续复用 HandyControl 原生 Theme/Skin，通过项目自定义资源字典追加样式，不复制整套主题。WPF 辅助类如 LangThemeHelper 保持最小实现：直接基于已初始化的 ConfigContext 读写配置，不做重复校验。
 
 ## 服务层设计
 - 服务层统一采用“构造注入依赖 + 封装消息发布/日志通知”的风格，避免在各方法中重复直接调用 IMessageBus 和 IAMLogger。

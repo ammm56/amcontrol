@@ -21,7 +21,10 @@
                     </ResourceDictionary.MergedDictionaries>
                 </ResourceDictionary>
 
-                <!-- 2: 语言资源 -->
+                <!-- 2: 项目自定义主题 -->
+                <ResourceDictionary Source="Resources/Themes/Theme.xaml"/>
+
+                <!-- 3: 语言资源 -->
                 <ResourceDictionary Source="Resources/Languages/Lang.zh-CN.xaml"/>
 
             </ResourceDictionary.MergedDictionaries>
