@@ -93,44 +93,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="TestView\AxisInfoView.xaml.cs">
-      <DependentUpon>AxisInfoView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="TestView\HandyWindowB.xaml.cs">
-      <DependentUpon>HandyWindowB.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\AxisControl.xaml.cs">
-      <DependentUpon>AxisControl.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\ConfigArgs.xaml.cs">
-      <DependentUpon>ConfigArgs.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\ConfigIO.xaml.cs">
-      <DependentUpon>ConfigIO.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Home.xaml.cs">
-      <DependentUpon>Home.xaml</DependentUpon>
-    </Compile>
-    <Page Include="TestView\AxisInfoView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="TestView\AxisTableInfo.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="TestView\CfgInfo.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="TestView\GSNA.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="TestView\HandyWindowA.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -139,42 +101,10 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="TestView\AxisTableInfo.xaml.cs">
-      <DependentUpon>AxisTableInfo.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="TestView\CfgInfo.xaml.cs">
-      <DependentUpon>CfgInfo.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="TestView\GSNA.xaml.cs">
-      <DependentUpon>GSNA.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="TestView\HandyWindowA.xaml.cs">
-      <DependentUpon>HandyWindowA.xaml</DependentUpon>
-    </Compile>
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="TestView\HandyWindowB.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\AxisControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\ConfigArgs.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\ConfigIO.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Home.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">

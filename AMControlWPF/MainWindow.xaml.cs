@@ -32,20 +32,13 @@ namespace AMControlWPF
 
 
             // 默认加载第一个页面
-            NavigateToPage("Home");
+            //NavigateToPage("Home");
 
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            
-
-
-            HandyWindowA handyWindowA = new HandyWindowA();
-            handyWindowA.Show();
-
-            TestView.HandyWindowB handyWindowB = new TestView.HandyWindowB();
-            handyWindowB.Show();
+            ;
         }
 
         private void SideMenu_SelectionChanged(object sender, HandyControl.Data.FunctionEventArgs<object> e)
@@ -62,14 +55,7 @@ namespace AMControlWPF
             if (!_pageCache.ContainsKey(tag))
             {
                 // 根据 Tag 实例化不同的页面
-                switch (tag)
-                {
-                    case "Home": _pageCache[tag] = new Views.Home(); break;
-                    case "ConfigArgs": _pageCache[tag] = new Views.ConfigArgs(); break;
-                    case "Axis": _pageCache[tag] = new Views.AxisControl(); break;
-                    case "ConfigIO": _pageCache[tag] = new Views.ConfigIO(); break;
-                    default: return;
-                }
+                
             }
 
             // 切换 Frame 的内容

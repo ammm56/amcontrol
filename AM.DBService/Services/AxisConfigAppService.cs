@@ -21,33 +21,21 @@ namespace AM.DBService.Services
         private readonly IConfigAxisArgService _configAxisArgService;
         private readonly IAxisConfigOverlayService _axisConfigOverlayService;
 
-        /// <summary>
-        /// 消息来源名称。
-        /// </summary>
         protected override string MessageSourceName
         {
             get { return "AxisConfigApp"; }
         }
 
-        /// <summary>
-        /// 默认结果来源。
-        /// </summary>
         protected override ResultSource DefaultResultSource
         {
             get { return ResultSource.Database; }
         }
 
-        /// <summary>
-        /// 使用全局上下文初始化。
-        /// </summary>
         public AxisConfigAppService()
             : this(new ConfigAxisArgService(), new AxisConfigOverlayService(), SystemContext.Instance.Reporter)
         {
         }
 
-        /// <summary>
-        /// 使用指定依赖初始化。
-        /// </summary>
         public AxisConfigAppService(
             IConfigAxisArgService configAxisArgService,
             IAxisConfigOverlayService axisConfigOverlayService,
@@ -60,6 +48,7 @@ namespace AM.DBService.Services
 
         /// <summary>
         /// 查询当前所有运行时轴配置。
+        /// 数据来源：ConfigContext。
         /// </summary>
         public Result<AxisConfig> QueryAll()
         {
@@ -79,6 +68,7 @@ namespace AM.DBService.Services
 
         /// <summary>
         /// 按逻辑轴查询当前运行时轴配置。
+        /// 数据来源：ConfigContext。
         /// </summary>
         public Result<AxisConfig> QueryByLogicalAxis(short logicalAxis)
         {
@@ -93,7 +83,8 @@ namespace AM.DBService.Services
         }
 
         /// <summary>
-        /// 保存指定轴的运行时配置，并同步到数据库和运行时上下文。
+        /// 保存指定轴的运行时配置，并同步到数据库和运行中的控制卡。
+        /// 数据源以 ConfigContext 为准，不在保存后再从数据库回灌。
         /// </summary>
         public Result Save(AxisConfig axisConfig)
         {
@@ -104,16 +95,15 @@ namespace AM.DBService.Services
             if (target == null)
                 return Fail((int)DbErrorCode.NotFound, "未找到要保存的逻辑轴配置");
 
+            // 1. 先回写到运行时配置上下文
             CopyEditableFields(axisConfig, target);
 
+            // 2. 再持久化到数据库
             var persistResult = PersistAxisConfigToDatabase(target);
             if (!persistResult.Success)
                 return persistResult;
 
-            var overlayResult = _axisConfigOverlayService.ApplyToMotionCards(ConfigContext.Instance.Config.MotionCardsConfig);
-            if (!overlayResult.Success)
-                return Fail(overlayResult.Code, "数据库参数覆盖运行配置失败");
-
+            // 3. 最后同步到已创建的控制卡实例
             ReloadMachineAxisConfigs();
 
             return Ok("运行时轴配置保存成功");
@@ -121,6 +111,7 @@ namespace AM.DBService.Services
 
         /// <summary>
         /// 从数据库重新覆盖当前运行时轴配置。
+        /// 该操作用于工程师参数页修改后手动重载。
         /// </summary>
         public Result ReloadFromDatabase()
         {
@@ -242,7 +233,7 @@ namespace AM.DBService.Services
         }
 
         /// <summary>
-        /// 重新将配置加载到已创建的控制卡服务。
+        /// 将当前 ConfigContext 中的轴配置重新加载到已创建的控制卡实例。
         /// </summary>
         private static void ReloadMachineAxisConfigs()
         {
