@@ -18,101 +18,148 @@
                Width="1200">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="30" />
         </Grid.RowDefinitions>
 
-        <!--<Border Grid.Row="0"
-            Padding="10,6"
-            Background="{DynamicResource RegionBrush}"
-            BorderBrush="{DynamicResource BorderBrush}"
-            BorderThickness="0,0,0,1">
-            <DockPanel LastChildFill="True">
-                <TextBlock DockPanel.Dock="Left"
-                       VerticalAlignment="Center"
-                       FontSize="16"
-                       FontWeight="SemiBold"
-                       Foreground="{DynamicResource PrimaryTextBrush}"
-                       Text="AM运动控制" />
-                --><!--<TextBlock Style="{StaticResource AppTitleTextBlockStyle}" Text="AM运动控制"/>-->
-                <!--<main:LangAndTheme x:Name="LangAndThemeControl" DockPanel.Dock="Right" HorizontalAlignment="Right" />--><!--
-            </DockPanel>
-        </Border>-->
-
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="88" />
+                <ColumnDefinition Width="260" />
+                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <!-- 左侧导航菜单 -->
-            <hc:SideMenu x:Name="SideMenuNav"
-                     Grid.Column="0"
-                     SelectionChanged="SideMenu_SelectionChanged"
-                     MinWidth="220"
-                     Background="{DynamicResource RegionBrush}">
+            <!-- 一级导航 -->
+            <Border Grid.Column="0"
+                Background="{DynamicResource SecondaryRegionBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="0,0,1,0">
+                <ListBox x:Name="PrimaryNavList"
+                     SelectionChanged="PrimaryNavList_SelectionChanged"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     HorizontalContentAlignment="Stretch"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Border Margin="8,6"
+                                Padding="8,10"
+                                CornerRadius="6"
+                                Background="Transparent">
+                                <TextBlock Text="{Binding DisplayName}"
+                                       TextWrapping="Wrap"
+                                       TextAlignment="Center"
+                                       Foreground="{DynamicResource PrimaryTextBrush}" />
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Border>
 
-                <hc:SideMenuItem Header="首页" Tag="Home">
-                    <hc:SideMenuItem.Icon>
-                        <Path Style="{StaticResource SearchPathStyle}"
-                          Fill="{DynamicResource PrimaryBrush}"
-                          Width="22"
-                          Height="22"
-                          VerticalAlignment="Top"
-                          HorizontalAlignment="Left" />
-                    </hc:SideMenuItem.Icon>
-                </hc:SideMenuItem>
+            <!-- 二级导航 -->
+            <Border Grid.Column="1"
+                Background="{DynamicResource RegionBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="0,0,1,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="52" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
 
-                <hc:SideMenuItem Header="参数配置" Tag="ConfigArgs">
-                    <hc:SideMenuItem.Icon>
-                        <Path Style="{StaticResource SearchPathStyle}"
-                          Fill="{DynamicResource PrimaryBrush}"
-                          Width="22"
-                          Height="22"
-                          VerticalAlignment="Top"
-                          HorizontalAlignment="Left" />
-                    </hc:SideMenuItem.Icon>
-                </hc:SideMenuItem>
+                    <Border Grid.Row="0"
+                        Padding="16,0"
+                        BorderBrush="{DynamicResource BorderBrush}"
+                        BorderThickness="0,0,0,1"
+                        Background="{DynamicResource SecondaryRegionBrush}">
+                        <TextBlock x:Name="TextBlockPrimaryTitle"
+                               VerticalAlignment="Center"
+                               FontSize="16"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               Text="首页" />
+                    </Border>
 
-                <hc:SideMenuItem Header="轴控制" Tag="Axis">
-                    <hc:SideMenuItem.Icon>
-                        <Path Style="{StaticResource SearchPathStyle}"
-                          Fill="{DynamicResource PrimaryBrush}"
-                          Width="22"
-                          Height="22"
-                          VerticalAlignment="Top"
-                          HorizontalAlignment="Left" />
-                    </hc:SideMenuItem.Icon>
-                </hc:SideMenuItem>
+                    <ListBox x:Name="SecondaryNavList"
+                         Grid.Row="1"
+                         SelectionChanged="SecondaryNavList_SelectionChanged"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         HorizontalContentAlignment="Stretch">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border Margin="10,6"
+                                    Padding="12,10"
+                                    CornerRadius="6"
+                                    Background="Transparent">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding DisplayName}"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource PrimaryTextBrush}" />
+                                        <TextBlock Margin="0,4,0,0"
+                                               FontSize="12"
+                                               Opacity="0.75"
+                                               Foreground="{DynamicResource PrimaryTextBrush}"
+                                               Text="{Binding Description}" />
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </Border>
 
-                <hc:SideMenuItem Header="IO 配置" Tag="ConfigIO">
-                    <hc:SideMenuItem.Icon>
-                        <Path Style="{StaticResource SearchPathStyle}"
-                          Fill="{DynamicResource PrimaryBrush}"
-                          Width="22"
-                          Height="22"
-                          VerticalAlignment="Top"
-                          HorizontalAlignment="Left" />
-                    </hc:SideMenuItem.Icon>
-                </hc:SideMenuItem>
-
-                <hc:SideMenuItem Header="报警日志" Tag="Logs">
-                    <hc:SideMenuItem.Icon>
-                        <Path Style="{StaticResource ClosePathStyle}"
-                          Fill="{DynamicResource DangerBrush}"
-                          Width="22"
-                          Height="22"
-                          VerticalAlignment="Top"
-                          HorizontalAlignment="Left" />
-                    </hc:SideMenuItem.Icon>
-                </hc:SideMenuItem>
-            </hc:SideMenu>
-
-            <!-- 右侧内容展示区 -->
-            <Grid Grid.Column="1" Margin="10">
-                <!-- Frame 负责加载不同的页面 -->
-                <Frame x:Name="MainFrame" NavigationUIVisibility="Hidden"/>
+            <!-- 右侧工作区 -->
+            <Grid Grid.Column="2" Background="{DynamicResource RegionBrush}">
+                <Frame x:Name="MainFrame"
+                   NavigationUIVisibility="Hidden"
+                   Background="Transparent" />
             </Grid>
         </Grid>
+
+        <!-- 全局状态栏 -->
+        <Border Grid.Row="1"
+            Padding="12,0"
+            Background="{DynamicResource SecondaryRegionBrush}"
+            BorderBrush="{DynamicResource BorderBrush}"
+            BorderThickness="0,1,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0"
+                       VerticalAlignment="Center"
+                       Foreground="{DynamicResource PrimaryTextBrush}"
+                       Text="系统就绪" />
+
+                <TextBlock Grid.Column="1"
+                       Margin="0,0,16,0"
+                       VerticalAlignment="Center"
+                       Foreground="{DynamicResource PrimaryTextBrush}"
+                       Text="Motion: 已连接" />
+
+                <TextBlock Grid.Column="2"
+                       Margin="0,0,16,0"
+                       VerticalAlignment="Center"
+                       Foreground="{DynamicResource PrimaryTextBrush}"
+                       Text="PLC: 已连接" />
+
+                <TextBlock Grid.Column="3"
+                       Margin="0,0,16,0"
+                       VerticalAlignment="Center"
+                       Foreground="{DynamicResource PrimaryTextBrush}"
+                       Text="Camera: 已连接" />
+
+                <TextBlock Grid.Column="4"
+                       VerticalAlignment="Center"
+                       Foreground="{DynamicResource DangerBrush}"
+                       Text="报警: 0" />
+            </Grid>
+        </Border>
     </Grid>
 </hc:GlowWindow>

@@ -1,0 +1,201 @@
+﻿<Page x:Class="AMControlWPF.Pages.Template.WorkAreaTemplatePage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:local="clr-namespace:AMControlWPF.Pages.Template"
+      mc:Ignorable="d"
+      Background="Transparent">
+
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="52" />
+            <RowDefinition Height="44" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="30" />
+        </Grid.RowDefinitions>
+
+        <!-- 工具栏 -->
+        <Border Grid.Row="0"
+                Padding="12,0"
+                CornerRadius="6"
+                Background="{DynamicResource SecondaryRegionBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1">
+            <DockPanel LastChildFill="False">
+                <StackPanel Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            DockPanel.Dock="Left">
+                    <TextBlock VerticalAlignment="Center"
+                               FontSize="16"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               Text="轴控制" />
+                    <TextBlock Margin="10,0,0,0"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               Opacity="0.7"
+                               Text="当前模块说明文字" />
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            DockPanel.Dock="Right">
+                    <Button MinWidth="80" Margin="0,0,8,0" Content="刷新" />
+                    <Button MinWidth="80" Margin="0,0,8,0" Content="保存" />
+                    <Button MinWidth="80" Content="导出" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- 页签区 -->
+        <Border Grid.Row="1"
+                Margin="0,8,0,8"
+                Padding="8,6"
+                CornerRadius="6"
+                Background="{DynamicResource RegionBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1">
+            <TabControl Background="Transparent" BorderThickness="0">
+                <TabItem Header="监视" />
+                <TabItem Header="操作" />
+                <TabItem Header="参数" />
+                <TabItem Header="日志" />
+            </TabControl>
+        </Border>
+
+        <!-- 主体区 -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="260" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="320" />
+            </Grid.ColumnDefinitions>
+
+            <!-- 左：对象列表 -->
+            <Border Grid.Column="0"
+                    Margin="0,0,8,0"
+                    Padding="10"
+                    CornerRadius="6"
+                    Background="{DynamicResource RegionBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock FontWeight="SemiBold"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               Text="对象列表" />
+
+                    <ListBox Grid.Row="1" Margin="0,8,0,0">
+                        <ListBoxItem Content="对象 1" />
+                        <ListBoxItem Content="对象 2" />
+                        <ListBoxItem Content="对象 3" />
+                    </ListBox>
+                </Grid>
+            </Border>
+
+            <!-- 中：主工作区 -->
+            <Border Grid.Column="1"
+                    Margin="0,0,8,0"
+                    Padding="10"
+                    CornerRadius="6"
+                    Background="{DynamicResource RegionBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock FontWeight="SemiBold"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               Text="主工作区" />
+
+                    <Grid Grid.Row="1" Margin="0,8,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="2*" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <Border Grid.Row="0"
+                                Margin="0,0,0,8"
+                                Background="{DynamicResource SecondaryRegionBrush}"
+                                CornerRadius="4">
+                            <TextBlock HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                       Text="监控图 / 表格 / 配置表单区域" />
+                        </Border>
+
+                        <Border Grid.Row="1"
+                                Background="{DynamicResource SecondaryRegionBrush}"
+                                CornerRadius="4">
+                            <TextBlock HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                       Text="底部明细 / 日志 / 结果区域" />
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- 右：属性与状态 -->
+            <Border Grid.Column="2"
+                    Padding="10"
+                    CornerRadius="6"
+                    Background="{DynamicResource RegionBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock FontWeight="SemiBold"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               Text="属性 / 状态" />
+
+                    <StackPanel Grid.Row="1" Margin="0,8,0,0">
+                        <TextBlock Margin="0,0,0,8"
+                                   Foreground="{DynamicResource PrimaryTextBrush}"
+                                   Text="当前对象：Axis-01" />
+                        <TextBlock Margin="0,0,0,8"
+                                   Foreground="{DynamicResource PrimaryTextBrush}"
+                                   Text="状态：Ready" />
+                        <TextBlock Margin="0,0,0,8"
+                                   Foreground="{DynamicResource PrimaryTextBrush}"
+                                   Text="位置：123.456" />
+                        <TextBlock Foreground="{DynamicResource PrimaryTextBrush}"
+                                   Text="报警：无" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- 底部页内状态栏 -->
+        <Border Grid.Row="3"
+                Margin="0,8,0,0"
+                Padding="12,0"
+                CornerRadius="6"
+                Background="{DynamicResource SecondaryRegionBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Left"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource PrimaryTextBrush}"
+                           Text="最后刷新：2026-03-17 22:00:00" />
+                <TextBlock DockPanel.Dock="Right"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource PrimaryTextBrush}"
+                           Text="选中对象：Axis-01" />
+            </DockPanel>
+        </Border>
+    </Grid>
+</Page>
