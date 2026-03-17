@@ -1,4 +1,5 @@
-﻿using AMControlWPF.Pages.Motion;
+﻿using AMControlWPF.Pages.IO;
+using AMControlWPF.Pages.Motion;
 using AMControlWPF.UserControl.Main;
 using HandyControl.Controls;
 using System;
@@ -176,9 +177,9 @@ namespace AMControlWPF
                 case "Motion.Alarm":
                     return CreatePlaceholderPage("运动 / 运动报警");
                 case "IO.DI":
-                    return CreatePlaceholderPage("IO / DI 监视");
+                    return new IOMonitorPage();
                 case "IO.DO":
-                    return CreatePlaceholderPage("IO / DO 监视");
+                    return new IOMonitorPage();
                 case "IO.Debug":
                     return CreatePlaceholderPage("IO / IO 调试");
                 case "Vision.Monitor":
