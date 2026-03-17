@@ -28,6 +28,7 @@
                     Effect="{StaticResource EffectShadow2}">
                 <StackPanel Orientation="Horizontal">
                     <StackPanel Margin="0,0,16,0">
+                        <TextBlock Margin="0,0,0,8" FontWeight="SemiBold" Text="{DynamicResource LanguageText}" HorizontalAlignment="Center" />
                         <hc:UniformSpacingPanel  Orientation="Vertical" Margin="10" Spacing="10" ChildWrapping="Wrap" MaxHeight="134">
                             <Button Tag="zh-cn" Button.Click="LanguageButton_OnClick" Style="{StaticResource ButtonCustom}">
                                 <Image Width="32" Source="/Resources/Img/Flag/cn.png"/>
@@ -36,29 +37,20 @@
                                 <Image Width="32" Source="/Resources/Img/Flag/en.png"/>
                             </Button>
                         </hc:UniformSpacingPanel>
-                        <!--<TextBlock Margin="0,0,0,8"
-                                   FontWeight="SemiBold"
-                                   Text="{DynamicResource LanguageText}" />
-                        <Button Tag="zh-CN"
-                                Click="LanguageButton_OnClick"
-                                Content="中文" />
-                        <Button Tag="en-US"
-                                Click="LanguageButton_OnClick"
-                                Content="EN" />-->
                     </StackPanel>
 
                     <Separator Margin="0,0,16,0" Width="1" />
 
                     <StackPanel>
-                        <TextBlock Margin="0,0,0,8"
-                                   FontWeight="SemiBold"
-                                   Text="{DynamicResource ThemeText}" />
-                        <Button Tag="SkinDefault"
-                                Click="ThemeButton_OnClick"
-                                Content="{DynamicResource LightText}" />
-                        <Button Tag="SkinDark"
-                                Click="ThemeButton_OnClick"
-                                Content="{DynamicResource DarkText}" />
+                        <TextBlock Margin="0,0,0,8" FontWeight="SemiBold" Text="{DynamicResource ThemeText}" HorizontalAlignment="Center" />
+                        <hc:UniformSpacingPanel  Orientation="Vertical" Margin="10" Spacing="10" ChildWrapping="Wrap" MaxHeight="134">
+                            <Button Tag="SkinDefault" Button.Click="ThemeButton_OnClick" Style="{StaticResource ButtonCustom}">
+                                <Border Background="White" Width="32" Height="21" CornerRadius="2" BorderThickness="1" BorderBrush="{DynamicResource BorderBrush}"/>
+                            </Button>
+                            <Button Tag="SkinDark" Button.Click="ThemeButton_OnClick" Style="{StaticResource ButtonCustom}">
+                                <Border Background="Black" Width="32" Height="21" CornerRadius="2" BorderThickness="1" BorderBrush="{DynamicResource BorderBrush}"/>
+                            </Button>
+                        </hc:UniformSpacingPanel>
                     </StackPanel>
                 </StackPanel>
             </Border>
