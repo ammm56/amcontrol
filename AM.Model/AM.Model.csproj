@@ -58,6 +58,10 @@
     <Compile Include="Common\ErrorDescriptor.cs" />
     <Compile Include="Common\ResultSource.cs" />
     <Compile Include="Entity\AlarmRecord.cs" />
+    <Compile Include="Entity\Auth\SysLoginLog.cs" />
+    <Compile Include="Entity\Auth\SysRole.cs" />
+    <Compile Include="Entity\Auth\SysUser.cs" />
+    <Compile Include="Entity\Auth\SysUserRole.cs" />
     <Compile Include="Interfaces\DB\IAxisConfigOverlayService.cs" />
     <Compile Include="Interfaces\DB\IConfigAxisArgService.cs" />
     <Compile Include="MotionCard\AxisConfig.cs" />

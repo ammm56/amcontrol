@@ -49,6 +49,7 @@
     <Compile Include="Context\ConfigContext.cs" />
     <Compile Include="Context\MachineContext.cs" />
     <Compile Include="Context\SystemContext.cs" />
+    <Compile Include="Context\UserContext.cs" />
     <Compile Include="Logging\IAMLogger.cs" />
     <Compile Include="Messaging\IMessageBus.cs" />
     <Compile Include="Messaging\SystemMessage.cs" />

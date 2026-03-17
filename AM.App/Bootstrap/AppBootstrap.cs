@@ -4,6 +4,7 @@ using AM.Core.Logging;
 using AM.Core.Messaging;
 using AM.Core.Reporter;
 using AM.DBService.Services;
+using AM.DBService.Services.Auth;
 using AM.Model.Common;
 using AM.Model.Interfaces.MotionCard;
 using AM.Model.MotionCard;
@@ -46,10 +47,14 @@ namespace AM.App.Bootstrap
             // 3. 初始化系统上下文
             SystemContext.Instance.Initialize(logger, messageBus, alarmManager, errorCatalog, reporter);
 
-            // 4. 用数据库参数覆盖配置文件中的轴参数
+            // 4. 初始化认证相关表与默认管理员
+            var authSeedService = new AuthSeedService(reporter);
+            authSeedService.EnsureSeedData();
+
+            // 5. 用数据库参数覆盖配置文件中的轴参数
             ApplyAxisConfigOverlay(config);
 
-            // 5. 初始化硬件
+            // 6. 初始化硬件
             InitializeMachine();
         }
 

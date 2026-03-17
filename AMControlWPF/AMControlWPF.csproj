@@ -100,6 +100,9 @@
     <Compile Include="UserControls\Main\NonClientAreaContent.xaml.cs">
       <DependentUpon>NonClientAreaContent.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Auth\LoginView.xaml.cs">
+      <DependentUpon>LoginView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\IO\DIMonitorView.xaml.cs">
       <DependentUpon>DIMonitorView.xaml</DependentUpon>
     </Compile>
@@ -170,6 +173,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UserControls\Main\NonClientAreaContent.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Auth\LoginView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

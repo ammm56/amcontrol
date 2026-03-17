@@ -1,10 +1,12 @@
-﻿using AMControlWPF.Views.IO;
+﻿using AM.Core.Context;
+using AMControlWPF.UserControls.Main;
+using AMControlWPF.Views.IO;
 using AMControlWPF.Views.Motion;
 using AMControlWPF.Views.Template;
-using AMControlWPF.UserControls.Main;
 using HandyControl.Controls;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -17,8 +19,10 @@ namespace AMControlWPF
     public partial class MainWindow : GlowWindow
     {
         private readonly Dictionary<string, UserControl> _pageCache = new Dictionary<string, UserControl>();
-        private readonly List<PrimaryNavItem> _primaryNavItems = new List<PrimaryNavItem>();
-        private readonly Dictionary<string, List<SecondaryNavItem>> _secondaryNavMap = new Dictionary<string, List<SecondaryNavItem>>();
+        private readonly List<PrimaryNavItem> _allPrimaryNavItems = new List<PrimaryNavItem>();
+        private readonly Dictionary<string, List<SecondaryNavItem>> _allSecondaryNavMap = new Dictionary<string, List<SecondaryNavItem>>();
+        private readonly List<PrimaryNavItem> _visiblePrimaryNavItems = new List<PrimaryNavItem>();
+        private readonly Dictionary<string, List<SecondaryNavItem>> _visibleSecondaryNavMap = new Dictionary<string, List<SecondaryNavItem>>();
 
         public MainWindow()
         {
@@ -39,90 +43,162 @@ namespace AMControlWPF
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            PrimaryNavList.ItemsSource = _primaryNavItems;
-            PrimaryNavList.SelectedIndex = 0;
+            ApplyNavigationByUser();
+
+            PrimaryNavList.ItemsSource = _visiblePrimaryNavItems;
+
+            if (_visiblePrimaryNavItems.Count > 0)
+            {
+                PrimaryNavList.SelectedIndex = 0;
+            }
+            else
+            {
+                TextBlockPrimaryTitle.Text = "无可用模块";
+                TextBlockWorkAreaTitle.Text = "无可用模块";
+                TextBlockWorkAreaDescription.Text = "当前用户没有可访问的页面";
+            }
         }
 
         private void InitializeNavigation()
         {
-            _primaryNavItems.Add(new PrimaryNavItem("Home", "首页"));
-            _primaryNavItems.Add(new PrimaryNavItem("Production", "生产"));
-            _primaryNavItems.Add(new PrimaryNavItem("Motion", "运动"));
-            _primaryNavItems.Add(new PrimaryNavItem("IO", "IO"));
-            _primaryNavItems.Add(new PrimaryNavItem("Vision", "视觉"));
-            _primaryNavItems.Add(new PrimaryNavItem("PLC", "PLC"));
-            _primaryNavItems.Add(new PrimaryNavItem("Config", "配置"));
-            _primaryNavItems.Add(new PrimaryNavItem("Engineer", "工程"));
-            _primaryNavItems.Add(new PrimaryNavItem("AlarmLog", "报警与日志"));
+            _allPrimaryNavItems.Add(new PrimaryNavItem("Home", "首页"));
+            _allPrimaryNavItems.Add(new PrimaryNavItem("Production", "生产"));
+            _allPrimaryNavItems.Add(new PrimaryNavItem("Motion", "运动"));
+            _allPrimaryNavItems.Add(new PrimaryNavItem("IO", "IO"));
+            _allPrimaryNavItems.Add(new PrimaryNavItem("Vision", "视觉"));
+            _allPrimaryNavItems.Add(new PrimaryNavItem("PLC", "PLC"));
+            _allPrimaryNavItems.Add(new PrimaryNavItem("Config", "配置"));
+            _allPrimaryNavItems.Add(new PrimaryNavItem("Engineer", "工程"));
+            _allPrimaryNavItems.Add(new PrimaryNavItem("AlarmLog", "报警与日志"));
 
-            _secondaryNavMap["Home"] = new List<SecondaryNavItem>
+            _allSecondaryNavMap["Home"] = new List<SecondaryNavItem>
             {
                 new SecondaryNavItem("Home.Overview", "总览看板", "设备总览、生产摘要、快捷入口"),
                 new SecondaryNavItem("Home.Status", "设备状态", "运动、PLC、相机、IO 总状态")
             };
 
-            _secondaryNavMap["Production"] = new List<SecondaryNavItem>
+            _allSecondaryNavMap["Production"] = new List<SecondaryNavItem>
             {
-                new SecondaryNavItem("Production.Data", "生产数据", "产量、节拍、良率、工单"),
-                new SecondaryNavItem("Production.Report", "班次统计", "班次与日报汇总")
+                new SecondaryNavItem("Production.Data", "生产数据", "产量、节拍、良率、工单", "Operator", "Engineer", "Am"),
+                new SecondaryNavItem("Production.Report", "班次统计", "班次与日报汇总", "Engineer", "Am")
             };
 
-            _secondaryNavMap["Motion"] = new List<SecondaryNavItem>
+            _allSecondaryNavMap["Motion"] = new List<SecondaryNavItem>
             {
-                new SecondaryNavItem("Motion.Axis", "轴控制", "当前选中轴的控制、状态、位置与动作记录"),
-                new SecondaryNavItem("Motion.Status", "位置监视", "多轴位置、速度、状态总览"),
-                new SecondaryNavItem("Motion.Alarm", "运动报警", "轴报警记录、处理与复位")
+                new SecondaryNavItem("Motion.Axis", "轴控制", "当前选中轴的控制、状态、位置与动作记录", "Operator", "Engineer", "Am"),
+                new SecondaryNavItem("Motion.Status", "位置监视", "多轴位置、速度、状态总览", "Operator", "Engineer", "Am"),
+                new SecondaryNavItem("Motion.Alarm", "运动报警", "轴报警记录、处理与复位", "Operator", "Engineer", "Am")
             };
 
-            _secondaryNavMap["IO"] = new List<SecondaryNavItem>
+            _allSecondaryNavMap["IO"] = new List<SecondaryNavItem>
             {
-                new SecondaryNavItem("IO.DI", "DI 监视", "输入点状态、筛选与点位详情"),
-                new SecondaryNavItem("IO.DO", "DO 监视", "输出点状态、操作与点位详情"),
-                new SecondaryNavItem("IO.Debug", "IO 调试", "IO 调试记录与联动测试")
+                new SecondaryNavItem("IO.DI", "DI 监视", "输入点状态、条件判断与点位详情", "Operator", "Engineer", "Am"),
+                new SecondaryNavItem("IO.DO", "DO 监视", "输出点状态、输出控制与联动对象", "Operator", "Engineer", "Am"),
+                new SecondaryNavItem("IO.Debug", "IO 调试", "IO 调试记录与联动测试", "Engineer", "Am")
             };
 
-            _secondaryNavMap["Vision"] = new List<SecondaryNavItem>
+            _allSecondaryNavMap["Vision"] = new List<SecondaryNavItem>
             {
-                new SecondaryNavItem("Vision.Monitor", "相机监视", "实时画面与触发结果"),
-                new SecondaryNavItem("Vision.Config", "相机配置", "相机参数与任务参数")
+                new SecondaryNavItem("Vision.Monitor", "相机监视", "实时画面与触发结果", "Engineer", "Am"),
+                new SecondaryNavItem("Vision.Config", "相机配置", "相机参数与任务参数", "Engineer", "Am")
             };
 
-            _secondaryNavMap["PLC"] = new List<SecondaryNavItem>
+            _allSecondaryNavMap["PLC"] = new List<SecondaryNavItem>
             {
-                new SecondaryNavItem("PLC.Config", "PLC 配置", "连接参数与站号配置"),
-                new SecondaryNavItem("PLC.Monitor", "点位监视", "寄存器、位变量监视"),
-                new SecondaryNavItem("PLC.Debug", "通讯状态", "通讯诊断与报文状态")
+                new SecondaryNavItem("PLC.Config", "PLC 配置", "连接参数与站号配置", "Engineer", "Am"),
+                new SecondaryNavItem("PLC.Monitor", "点位监视", "寄存器、位变量监视", "Engineer", "Am"),
+                new SecondaryNavItem("PLC.Debug", "通讯状态", "通讯诊断与报文状态", "Engineer", "Am")
             };
 
-            _secondaryNavMap["Config"] = new List<SecondaryNavItem>
+            _allSecondaryNavMap["Config"] = new List<SecondaryNavItem>
             {
-                new SecondaryNavItem("Config.Axis", "轴配置编辑", "运行配置层编辑"),
-                new SecondaryNavItem("Config.Card", "控制卡配置编辑", "卡参数与映射"),
-                new SecondaryNavItem("Config.Camera", "相机配置编辑", "相机与任务配置"),
-                new SecondaryNavItem("Config.Plc", "PLC 配置编辑", "PLC 业务配置"),
-                new SecondaryNavItem("Config.Runtime", "运行配置编辑", "系统运行参数")
+                new SecondaryNavItem("Config.Axis", "轴配置编辑", "运行配置层编辑", "Am"),
+                new SecondaryNavItem("Config.Card", "控制卡配置编辑", "卡参数与映射", "Am"),
+                new SecondaryNavItem("Config.Camera", "相机配置编辑", "相机与任务配置", "Am"),
+                new SecondaryNavItem("Config.Plc", "PLC 配置编辑", "PLC 业务配置", "Am"),
+                new SecondaryNavItem("Config.Runtime", "运行配置编辑", "系统运行参数", "Am")
             };
 
-            _secondaryNavMap["Engineer"] = new List<SecondaryNavItem>
+            _allSecondaryNavMap["Engineer"] = new List<SecondaryNavItem>
             {
-                new SecondaryNavItem("Engineer.RawAxis", "原始轴参数", "控制卡原始参数"),
-                new SecondaryNavItem("Engineer.RawPlc", "原始 PLC 参数", "PLC 原始参数"),
-                new SecondaryNavItem("Engineer.RawCamera", "原始相机参数", "视觉原始参数"),
-                new SecondaryNavItem("Engineer.Diagnostic", "设备诊断", "运行诊断与状态检查"),
-                new SecondaryNavItem("Engineer.Debug", "Motion/IO 调试", "联机调试与测试页")
+                new SecondaryNavItem("Engineer.RawAxis", "原始轴参数", "控制卡原始参数", "Engineer", "Am"),
+                new SecondaryNavItem("Engineer.RawPlc", "原始 PLC 参数", "PLC 原始参数", "Engineer", "Am"),
+                new SecondaryNavItem("Engineer.RawCamera", "原始相机参数", "视觉原始参数", "Engineer", "Am"),
+                new SecondaryNavItem("Engineer.Diagnostic", "设备诊断", "运行诊断与状态检查", "Engineer", "Am"),
+                new SecondaryNavItem("Engineer.Debug", "Motion/IO 调试", "联机调试与测试页", "Engineer", "Am")
             };
 
-            _secondaryNavMap["AlarmLog"] = new List<SecondaryNavItem>
+            _allSecondaryNavMap["AlarmLog"] = new List<SecondaryNavItem>
             {
-                new SecondaryNavItem("AlarmLog.Current", "当前报警", "当前活动报警"),
-                new SecondaryNavItem("AlarmLog.History", "报警历史", "历史报警查询"),
-                new SecondaryNavItem("AlarmLog.RunLog", "运行日志", "系统运行日志")
+                new SecondaryNavItem("AlarmLog.Current", "当前报警", "当前活动报警", "Operator", "Engineer", "Am"),
+                new SecondaryNavItem("AlarmLog.History", "报警历史", "历史报警查询", "Engineer", "Am"),
+                new SecondaryNavItem("AlarmLog.RunLog", "运行日志", "系统运行日志", "Engineer", "Am")
             };
+        }
+
+        private void ApplyNavigationByUser()
+        {
+            _visiblePrimaryNavItems.Clear();
+            _visibleSecondaryNavMap.Clear();
+
+            foreach (var primary in _allPrimaryNavItems)
+            {
+                List<SecondaryNavItem> secondaryItems;
+                if (!_allSecondaryNavMap.TryGetValue(primary.Key, out secondaryItems))
+                {
+                    continue;
+                }
+
+                var visibleItems = secondaryItems
+                    .Where(CanAccess)
+                    .ToList();
+
+                if (visibleItems.Count == 0)
+                {
+                    continue;
+                }
+
+                _visiblePrimaryNavItems.Add(primary);
+                _visibleSecondaryNavMap[primary.Key] = visibleItems;
+            }
+        }
+
+        private bool CanAccess(SecondaryNavItem item)
+        {
+            if (item == null)
+            {
+                return false;
+            }
+
+            if (UserContext.Instance.IsAdmin)
+            {
+                return true;
+            }
+
+            if (item.AllowedRoles.Count == 0)
+            {
+                return true;
+            }
+
+            return item.AllowedRoles.Any(UserContext.Instance.HasRole);
         }
 
         private void NonClientArea_NavigateRequested(string tag)
         {
-            NavigateToPage(tag);
+            var navItem = _visibleSecondaryNavMap.Values
+                .SelectMany(x => x)
+                .FirstOrDefault(x => string.Equals(x.Key, tag, StringComparison.OrdinalIgnoreCase));
+
+            if (navItem == null)
+            {
+                TextBlockWorkAreaTitle.Text = "扩展页面";
+                TextBlockWorkAreaDescription.Text = tag;
+                MainFrame.Content = CreatePlaceholderPage("扩展页面 / " + tag);
+                return;
+            }
+
+            UpdateWorkAreaHeader(navItem.DisplayName, navItem.Description);
+            NavigateToPage(navItem.Key);
         }
 
         private void PrimaryNavList_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -134,8 +210,16 @@ namespace AMControlWPF
             }
 
             TextBlockPrimaryTitle.Text = item.DisplayName;
-            SecondaryNavList.ItemsSource = _secondaryNavMap[item.Key];
-            SecondaryNavList.SelectedIndex = 0;
+
+            List<SecondaryNavItem> items;
+            if (!_visibleSecondaryNavMap.TryGetValue(item.Key, out items))
+            {
+                SecondaryNavList.ItemsSource = null;
+                return;
+            }
+
+            SecondaryNavList.ItemsSource = items;
+            SecondaryNavList.SelectedIndex = items.Count > 0 ? 0 : -1;
         }
 
         private void SecondaryNavList_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -267,11 +351,12 @@ namespace AMControlWPF
 
         private sealed class SecondaryNavItem
         {
-            public SecondaryNavItem(string key, string displayName, string description)
+            public SecondaryNavItem(string key, string displayName, string description, params string[] allowedRoles)
             {
                 Key = key;
                 DisplayName = displayName;
                 Description = description;
+                AllowedRoles = allowedRoles == null ? new List<string>() : allowedRoles.ToList();
             }
 
             public string Key { get; private set; }
@@ -279,6 +364,8 @@ namespace AMControlWPF
             public string DisplayName { get; private set; }
 
             public string Description { get; private set; }
+
+            public List<string> AllowedRoles { get; private set; }
         }
     }
 }

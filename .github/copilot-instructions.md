@@ -17,8 +17,13 @@
 - WPF 主题层面继续复用 HandyControl 原生 Theme/Skin，通过项目自定义资源字典追加样式，不复制整套主题。WPF 辅助类如 LangThemeHelper 保持最小实现：直接基于已初始化的 ConfigContext 读写配置，不做重复校验。
 - 主界面导航采用左侧两级固定可见布局：一级导航与二级导航同时显示，不使用垂直折叠展开；右侧区域显示当前二级页面的完整工作区，而不是同时堆叠多个二级页面。设备控制页优先单页并列展示关键控制与状态信息，尽量减少隐藏页面。
 - 将可复用的 WPF 界面样式（如导航 ListBoxItem 样式）下沉到 `Resources/Themes/Styles/Style.xaml` 统一管理，在页面中通过静态资源简洁调用，减少在 `MainWindow.xaml` 中内联定义。
+- ViewModel 属性不使用 CommunityToolkit.Mvvm 的源生成器特性（如 [ObservableProperty]），而采用手动定义字段和属性的传统方式。
 
 ## 服务层设计
 - 服务层统一采用“构造注入依赖 + 封装消息发布/日志通知”的风格，避免在各方法中重复直接调用 IMessageBus 和 IAMLogger。
 - 用户希望统一抽取跨服务的日志、消息通知和警报处理到公共 ServiceBase，而不是在各 Service 中重复实现，以明确代码层级、简化框架并提升模块化。
 - 在 AM.Core.Reporter 中引入 IAppReporter/AppReporter，并继续统一修改 ServiceBase、ViewModel、Tools 等非服务类的日志、消息通知与报警处理，同时完善错误码和错误描述映射设计，减少强制类型转换。
+
+## 用户认证
+- 默认管理员账户登录名改为 `am`，初始密码为 `am123`。
+- 角色编码改为 `Operator`（操作员）、`Engineer`（工程师）、`Am`（管理员）。

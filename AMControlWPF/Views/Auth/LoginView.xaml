@@ -1,0 +1,160 @@
+﻿<hc:GlowWindow x:Class="AMControlWPF.Views.Auth.LoginView"
+               xmlns:hc="https://handyorg.github.io/handycontrol"
+               xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+               xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+               xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+               xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+               xmlns:local="clr-namespace:AMControlWPF.Views.Auth"
+               mc:Ignorable="d"
+               Title="用户登录"
+               Width="880"
+               Height="520"
+               ResizeMode="NoResize"
+               ShowNonClientArea="False"
+               WindowStartupLocation="CenterScreen"
+               Background="{DynamicResource RegionBrush}">
+
+    <Grid>
+        <Rectangle Fill="{StaticResource ShellTextureBrush}" />
+
+        <Grid Margin="24">
+            <Border CornerRadius="16"
+                    Background="{DynamicResource RegionBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    Effect="{StaticResource EffectShadow4}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1.15*" />
+                        <ColumnDefinition Width="1" />
+                        <ColumnDefinition Width="0.95*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- 左侧说明区 -->
+                    <Border Grid.Column="0"
+                            CornerRadius="16,0,0,16"
+                            Background="{DynamicResource SecondaryRegionBrush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="0,0,1,0">
+                        <Grid Margin="28">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock FontSize="30"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource PrimaryBrush}"
+                                           Text="AM运动控制" />
+                                <TextBlock Margin="0,12,0,0"
+                                           FontSize="15"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Opacity="0.82"
+                                           Text="设备控制 · 用户登录 · 权限访问" />
+
+                                <Border Margin="0,28,0,0"
+                                        Padding="16"
+                                        CornerRadius="10"
+                                        Background="{DynamicResource RegionBrush}">
+                                    <StackPanel>
+                                        <TextBlock FontSize="14"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource PrimaryTextBrush}"
+                                                   Text="登录后将根据用户角色显示不同工作区" />
+                                        <TextBlock Margin="0,10,0,0"
+                                                   Foreground="{DynamicResource PrimaryTextBrush}"
+                                                   Text="• 操作员：生产、运动、IO、报警日志" />
+                                        <TextBlock Margin="0,6,0,0"
+                                                   Foreground="{DynamicResource PrimaryTextBrush}"
+                                                   Text="• 工程师：增加视觉、PLC、工程调试" />
+                                        <TextBlock Margin="0,6,0,0"
+                                                   Foreground="{DynamicResource PrimaryTextBrush}"
+                                                   Text="• 管理员：增加配置与系统管理能力" />
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+
+                            <TextBlock Grid.Row="1"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                       Opacity="0.65"
+                                       Text="请使用有效账户登录系统" />
+                        </Grid>
+                    </Border>
+
+                    <!-- 右侧登录区 -->
+                    <Grid Grid.Column="2" Margin="36,28">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="18" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="12" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="12" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="18" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="18" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0"
+                                   FontSize="24"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource PrimaryTextBrush}"
+                                   Text="登录" />
+
+                        <TextBlock Grid.Row="2"
+                                   Margin="0,0,0,6"
+                                   Foreground="{DynamicResource PrimaryTextBrush}"
+                                   Text="登录名" />
+                        <TextBox Grid.Row="3"
+                                 Height="36"
+                                 VerticalContentAlignment="Center"
+                                 Text="{Binding LoginName, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <TextBlock Grid.Row="5"
+                                   Margin="0,0,0,6"
+                                   Foreground="{DynamicResource PrimaryTextBrush}"
+                                   Text="密码" />
+                        <PasswordBox Grid.Row="6"
+                                     Height="36"
+                                     VerticalContentAlignment="Center"
+                                     PasswordChanged="PasswordBox_OnPasswordChanged" />
+
+                        <TextBlock Grid.Row="8"
+                                   MinHeight="22"
+                                   Foreground="{DynamicResource DangerBrush}"
+                                   Text="{Binding ErrorMessage}" />
+
+                        <Grid Grid.Row="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="8" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <Button Grid.Column="0"
+                                    Height="36"
+                                    Command="{Binding CancelCommand}"
+                                    Content="取消" />
+
+                            <Button Grid.Column="2"
+                                    Height="36"
+                                    Command="{Binding LoginCommand}"
+                                    Content="登录" />
+                        </Grid>
+
+                        <TextBlock Grid.Row="12"
+                                   Foreground="{DynamicResource PrimaryTextBrush}"
+                                   Opacity="0.7"
+                                   Text="{Binding StatusText}" />
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</hc:GlowWindow>

@@ -7,6 +7,7 @@ using AM.Tools;
 using AM.Tools.Logging;
 using AM.Tools.Messaging;
 using AMControlWPF.Tools.Helper;
+using AMControlWPF.Views.Auth;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -38,6 +39,19 @@ namespace AMControlWPF
 
             LangThemeHelper.ApplyFromConfig();
 
+            // 登录窗口是模态的，必须在主窗口显示之前处理登录逻辑
+            ShutdownMode = ShutdownMode.OnExplicitShutdown;
+            var loginView = new LoginView();
+            var loginResult = loginView.ShowDialog();
+            if (loginResult != true || !UserContext.Instance.IsLoggedIn)
+            {
+                Shutdown();
+                return;
+            }
+            var mainWindow = new MainWindow();
+            MainWindow = mainWindow;
+            ShutdownMode = ShutdownMode.OnMainWindowClose;
+            mainWindow.Show();
         }
 
         protected override void OnActivated(EventArgs e)
