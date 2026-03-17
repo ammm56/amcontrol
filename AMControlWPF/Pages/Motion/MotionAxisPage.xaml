@@ -1,0 +1,428 @@
+﻿<Page x:Class="AMControlWPF.Pages.Motion.MotionAxisPage"
+      xmlns:hc="https://handyorg.github.io/handycontrol"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:AMControlWPF.Pages.Motion"
+      mc:Ignorable="d" 
+      Background="Transparent"
+      Title="MotionAxisPage">
+
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="56" />
+            <RowDefinition Height="48" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="32" />
+        </Grid.RowDefinitions>
+
+        <!-- 顶部工具栏 -->
+        <Border Grid.Row="0"
+            Padding="12,0"
+            CornerRadius="8"
+            Background="{DynamicResource SecondaryRegionBrush}"
+            BorderBrush="{DynamicResource BorderBrush}"
+            BorderThickness="1">
+            <DockPanel LastChildFill="False">
+                <StackPanel Orientation="Horizontal"
+                        VerticalAlignment="Center"
+                        DockPanel.Dock="Left">
+                    <Path Width="18"
+                      Height="18"
+                      Margin="0,0,8,0"
+                      Stretch="Uniform"
+                      Fill="{DynamicResource PrimaryBrush}"
+                      Data="{StaticResource ConfigGeometry}" />
+                    <TextBlock VerticalAlignment="Center"
+                           FontSize="16"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource PrimaryTextBrush}"
+                           Text="轴控制" />
+                    <TextBlock Margin="10,0,0,0"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource PrimaryTextBrush}"
+                           Opacity="0.7"
+                           Text="手动控制、回零、位置监视与报警状态" />
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal"
+                        VerticalAlignment="Center"
+                        DockPanel.Dock="Right">
+                    <Button MinWidth="80" Margin="0,0,8,0" Content="刷新" />
+                    <Button MinWidth="80" Margin="0,0,8,0" Content="使能" />
+                    <Button MinWidth="80" Margin="0,0,8,0" Content="停止" />
+                    <Button MinWidth="80" Content="回零" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- 页签栏 -->
+        <Border Grid.Row="1"
+            Margin="0,8,0,8"
+            Padding="8,6"
+            CornerRadius="8"
+            Background="{DynamicResource RegionBrush}"
+            BorderBrush="{DynamicResource BorderBrush}"
+            BorderThickness="1">
+            <TabControl x:Name="TabControlAxis"
+                    Background="Transparent"
+                    BorderThickness="0">
+                <TabItem Header="监视" />
+                <TabItem Header="操作" />
+                <TabItem Header="参数" />
+                <TabItem Header="报警" />
+            </TabControl>
+        </Border>
+
+        <!-- 主体工作区 -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="260" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="320" />
+            </Grid.ColumnDefinitions>
+
+            <!-- 左侧轴列表 -->
+            <Border Grid.Column="0"
+                Margin="0,0,8,0"
+                Padding="10"
+                CornerRadius="8"
+                Background="{DynamicResource RegionBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="8" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock FontSize="14"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource PrimaryTextBrush}"
+                           Text="轴列表" />
+
+                    <ListBox x:Name="ListBoxAxis"
+                         Grid.Row="2"
+                         SelectedIndex="0">
+                        <ListBoxItem Content="Axis-01 传动X轴" />
+                        <ListBoxItem Content="Axis-02 传动Y轴" />
+                        <ListBoxItem Content="Axis-03 压装Z轴" />
+                        <ListBoxItem Content="Axis-04 搬运R轴" />
+                    </ListBox>
+                </Grid>
+            </Border>
+
+            <!-- 中间主工作区 -->
+            <Grid Grid.Column="1" Margin="0,0,8,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="2*" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!-- 上：状态与操作 -->
+                <Border Grid.Row="0"
+                    Padding="12"
+                    CornerRadius="8"
+                    Background="{DynamicResource RegionBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="10" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="12" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               Text="当前轴概览" />
+
+                        <UniformGrid Grid.Row="2" Columns="4">
+                            <Border Margin="0,0,8,0"
+                                Padding="10"
+                                Background="{DynamicResource SecondaryRegionBrush}"
+                                CornerRadius="6">
+                                <StackPanel>
+                                    <TextBlock Opacity="0.7"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="规划位置(mm)" />
+                                    <TextBlock FontSize="18"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="123.456" />
+                                </StackPanel>
+                            </Border>
+
+                            <Border Margin="0,0,8,0"
+                                Padding="10"
+                                Background="{DynamicResource SecondaryRegionBrush}"
+                                CornerRadius="6">
+                                <StackPanel>
+                                    <TextBlock Opacity="0.7"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="编码器位置(mm)" />
+                                    <TextBlock FontSize="18"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="123.441" />
+                                </StackPanel>
+                            </Border>
+
+                            <Border Margin="0,0,8,0"
+                                Padding="10"
+                                Background="{DynamicResource SecondaryRegionBrush}"
+                                CornerRadius="6">
+                                <StackPanel>
+                                    <TextBlock Opacity="0.7"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="速度(mm/s)" />
+                                    <TextBlock FontSize="18"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="25.000" />
+                                </StackPanel>
+                            </Border>
+
+                            <Border Padding="10"
+                                Background="{DynamicResource SecondaryRegionBrush}"
+                                CornerRadius="6">
+                                <StackPanel>
+                                    <TextBlock Opacity="0.7"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="状态" />
+                                    <TextBlock FontSize="18"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource SuccessBrush}"
+                                           Text="Ready" />
+                                </StackPanel>
+                            </Border>
+                        </UniformGrid>
+
+                        <Grid Grid.Row="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="320" />
+                            </Grid.ColumnDefinitions>
+
+                            <Border Grid.Column="0"
+                                Margin="0,0,8,0"
+                                Padding="12"
+                                Background="{DynamicResource SecondaryRegionBrush}"
+                                CornerRadius="6">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="12" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="12" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock FontWeight="SemiBold"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="手动操作" />
+
+                                    <UniformGrid Grid.Row="2" Columns="4">
+                                        <Button Margin="0,0,8,0" Content="点动 -" />
+                                        <Button Margin="0,0,8,0" Content="点动 +" />
+                                        <Button Margin="0,0,8,0" Content="连续 -" />
+                                        <Button Content="连续 +" />
+                                    </UniformGrid>
+
+                                    <UniformGrid Grid.Row="4" Columns="3">
+                                        <Button Margin="0,0,8,0" Content="复位" />
+                                        <Button Margin="0,0,8,0" Content="回零" />
+                                        <Button Content="急停" />
+                                    </UniformGrid>
+                                </Grid>
+                            </Border>
+
+                            <Border Grid.Column="1"
+                                Padding="12"
+                                Background="{DynamicResource SecondaryRegionBrush}"
+                                CornerRadius="6">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="12" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="8" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="8" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock FontWeight="SemiBold"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="定位输入" />
+
+                                    <TextBlock Grid.Row="2"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="目标位置(mm)" />
+                                    <TextBox Grid.Row="4"
+                                         Height="30"
+                                         Text="100.000" />
+
+                                    <Button Grid.Row="6"
+                                        Height="32"
+                                        Content="执行定位" />
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <!-- 下：日志与反馈 -->
+                <Border Grid.Row="1"
+                    Margin="0,8,0,0"
+                    Padding="12"
+                    CornerRadius="8"
+                    Background="{DynamicResource RegionBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="8" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               Text="动作记录" />
+
+                        <DataGrid Grid.Row="2"
+                              AutoGenerateColumns="False"
+                              HeadersVisibility="Column"
+                              CanUserAddRows="False"
+                              IsReadOnly="True">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="时间" Width="180" Binding="{Binding}" />
+                                <DataGridTextColumn Header="级别" Width="90" Binding="{Binding}" />
+                                <DataGridTextColumn Header="内容" Width="*" Binding="{Binding}" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- 右侧状态面板 -->
+            <Border Grid.Column="2"
+                Padding="12"
+                CornerRadius="8"
+                Background="{DynamicResource RegionBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="8" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock FontSize="14"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource PrimaryTextBrush}"
+                           Text="轴状态与信号" />
+
+                    <StackPanel Grid.Row="2">
+                        <Border Margin="0,0,0,8"
+                            Padding="10"
+                            Background="{DynamicResource SecondaryRegionBrush}"
+                            CornerRadius="6">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" Text="Servo On" />
+                                <TextBlock Grid.Column="1" Foreground="{DynamicResource SuccessBrush}" Text="ON" />
+                            </Grid>
+                        </Border>
+
+                        <Border Margin="0,0,0,8"
+                            Padding="10"
+                            Background="{DynamicResource SecondaryRegionBrush}"
+                            CornerRadius="6">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" Text="Alarm" />
+                                <TextBlock Grid.Column="1" Foreground="{DynamicResource DangerBrush}" Text="OFF" />
+                            </Grid>
+                        </Border>
+
+                        <Border Margin="0,0,0,8"
+                            Padding="10"
+                            Background="{DynamicResource SecondaryRegionBrush}"
+                            CornerRadius="6">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" Text="正限位" />
+                                <TextBlock Grid.Column="1" Foreground="{DynamicResource PrimaryTextBrush}" Text="OFF" />
+                            </Grid>
+                        </Border>
+
+                        <Border Margin="0,0,0,8"
+                            Padding="10"
+                            Background="{DynamicResource SecondaryRegionBrush}"
+                            CornerRadius="6">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" Text="负限位" />
+                                <TextBlock Grid.Column="1" Foreground="{DynamicResource PrimaryTextBrush}" Text="OFF" />
+                            </Grid>
+                        </Border>
+
+                        <Border Padding="10"
+                            Background="{DynamicResource SecondaryRegionBrush}"
+                            CornerRadius="6">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" Text="原点信号" />
+                                <TextBlock Grid.Column="1" Foreground="{DynamicResource PrimaryTextBrush}" Text="ON" />
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- 页内状态栏 -->
+        <Border Grid.Row="3"
+            Margin="0,8,0,0"
+            Padding="12,0"
+            CornerRadius="8"
+            Background="{DynamicResource SecondaryRegionBrush}"
+            BorderBrush="{DynamicResource BorderBrush}"
+            BorderThickness="1">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Left"
+                       VerticalAlignment="Center"
+                       Foreground="{DynamicResource PrimaryTextBrush}"
+                       Text="最后刷新：2026-03-17 22:30:00" />
+                <TextBlock DockPanel.Dock="Right"
+                       VerticalAlignment="Center"
+                       Foreground="{DynamicResource PrimaryTextBrush}"
+                       Text="当前轴：Axis-01 传动X轴" />
+            </DockPanel>
+        </Border>
+    </Grid>
+</Page>

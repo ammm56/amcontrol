@@ -1,4 +1,5 @@
-﻿using AMControlWPF.UserControl.Main;
+﻿using AMControlWPF.Pages.Motion;
+using AMControlWPF.UserControl.Main;
 using HandyControl.Controls;
 using System;
 using System.Collections.Generic;
@@ -121,6 +122,7 @@ namespace AMControlWPF
         {
             NavigateToPage(tag);
         }
+
         private void PrimaryNavList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var item = PrimaryNavList.SelectedItem as PrimaryNavItem;
@@ -168,7 +170,7 @@ namespace AMControlWPF
                 case "Production.Report":
                     return CreatePlaceholderPage("生产 / 班次统计");
                 case "Motion.Axis":
-                    return CreatePlaceholderPage("运动 / 轴控制");
+                    return new MotionAxisPage();
                 case "Motion.Status":
                     return CreatePlaceholderPage("运动 / 位置监视");
                 case "Motion.Alarm":

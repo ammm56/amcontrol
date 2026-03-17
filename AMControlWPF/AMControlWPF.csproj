@@ -93,6 +93,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Pages\Motion\MotionAxisPage.xaml.cs">
+      <DependentUpon>MotionAxisPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pages\Template\WorkAreaTemplatePage.xaml.cs">
       <DependentUpon>WorkAreaTemplatePage.xaml</DependentUpon>
     </Compile>
@@ -115,6 +118,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Pages\Motion\MotionAxisPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Pages\Template\WorkAreaTemplatePage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
