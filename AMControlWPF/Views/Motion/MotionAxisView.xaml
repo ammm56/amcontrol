@@ -77,7 +77,9 @@
                                Text="轴列表" />
 
                     <ListBox x:Name="ListBoxAxis"
+                             ItemContainerStyle="{StaticResource ViewNavItemStyle}"
                              Grid.Row="2"
+                             BorderThickness="0"
                              SelectedIndex="0">
                         <ListBoxItem Content="Axis-01 传动X轴" />
                         <ListBoxItem Content="Axis-02 传动Y轴" />
@@ -101,7 +103,7 @@
                     </Grid.RowDefinitions>
 
                     <!-- 顶部指标 -->
-                    <WrapPanel Grid.Row="2">
+                    <WrapPanel Grid.Row="0">
                         <Border Width="160"
                                 Margin="0,0,8,8"
                                 Padding="10"
@@ -419,10 +421,20 @@
                                            Text="轴动作记录" />
 
                                 <DataGrid Grid.Row="2"
+                                          hc:DataGridAttach.CanUnselectAllWithBlankArea="True"
                                           AutoGenerateColumns="False"
                                           HeadersVisibility="Column"
                                           CanUserAddRows="False"
-                                          IsReadOnly="True">
+                                          CanUserDeleteRows="False"
+                                          IsReadOnly="True"
+                                          Background="Transparent"
+                                          BorderThickness="0"
+                                          RowHeaderWidth="0"
+                                          GridLinesVisibility="None"
+                                          HorizontalGridLinesBrush="Transparent"
+                                          VerticalGridLinesBrush="Transparent"
+                                          SelectionUnit="FullRow"
+                                          Margin="0">       
                                     <DataGrid.Columns>
                                         <DataGridTextColumn Header="时间" Width="180" Binding="{Binding}" />
                                         <DataGridTextColumn Header="级别" Width="90" Binding="{Binding}" />
