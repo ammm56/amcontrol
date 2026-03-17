@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace AMControlWPF.Pages.IO
+namespace AMControlWPF.Views.IO
 {
     /// <summary>
     /// IOMonitorPage.xaml 的交互逻辑

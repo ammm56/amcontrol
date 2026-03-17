@@ -93,21 +93,21 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Pages\IO\IOMonitorPage.xaml.cs">
-      <DependentUpon>IOMonitorPage.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Pages\Motion\MotionAxisPage.xaml.cs">
-      <DependentUpon>MotionAxisPage.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Pages\Template\WorkAreaTemplatePage.xaml.cs">
-      <DependentUpon>WorkAreaTemplatePage.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Tools\Helper\LangThemeHelper.cs" />
     <Compile Include="UserControls\Main\LangAndTheme.xaml.cs">
       <DependentUpon>LangAndTheme.xaml</DependentUpon>
     </Compile>
     <Compile Include="UserControls\Main\NonClientAreaContent.xaml.cs">
       <DependentUpon>NonClientAreaContent.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\IO\IOMonitorPage.xaml.cs">
+      <DependentUpon>IOMonitorPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Motion\MotionAxisPage.xaml.cs">
+      <DependentUpon>MotionAxisPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Template\WorkAreaTemplatePage.xaml.cs">
+      <DependentUpon>WorkAreaTemplatePage.xaml</DependentUpon>
     </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -121,18 +121,6 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Pages\IO\IOMonitorPage.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Pages\Motion\MotionAxisPage.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Pages\Template\WorkAreaTemplatePage.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Resources\Languages\Lang.en-US.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -179,6 +167,18 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UserControls\Main\NonClientAreaContent.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\IO\IOMonitorPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Motion\MotionAxisPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Template\WorkAreaTemplatePage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

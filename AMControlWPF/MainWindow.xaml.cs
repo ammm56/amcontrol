@@ -1,6 +1,6 @@
-﻿using AMControlWPF.Pages.IO;
-using AMControlWPF.Pages.Motion;
-using AMControlWPF.Pages.Template;
+﻿using AMControlWPF.Views.IO;
+using AMControlWPF.Views.Motion;
+using AMControlWPF.Views.Template;
 using AMControlWPF.UserControls.Main;
 using HandyControl.Controls;
 using System;
