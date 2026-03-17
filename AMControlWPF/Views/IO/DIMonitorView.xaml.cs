@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace AMControlWPF.Views.IO
 {
     /// <summary>
-    /// IOMonitorView.xaml 的交互逻辑
+    /// DIMonitorView.xaml 的交互逻辑
     /// </summary>
-    public partial class IOMonitorView : UserControl
+    public partial class DIMonitorView : UserControl
     {
-        public IOMonitorView()
+        public DIMonitorView()
         {
             InitializeComponent();
         }

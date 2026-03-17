@@ -100,8 +100,11 @@
     <Compile Include="UserControls\Main\NonClientAreaContent.xaml.cs">
       <DependentUpon>NonClientAreaContent.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\IO\IOMonitorView.xaml.cs">
-      <DependentUpon>IOMonitorView.xaml</DependentUpon>
+    <Compile Include="Views\IO\DIMonitorView.xaml.cs">
+      <DependentUpon>DIMonitorView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\IO\DOMonitorView.xaml.cs">
+      <DependentUpon>DOMonitorView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Motion\MotionAxisView.xaml.cs">
       <DependentUpon>MotionAxisView.xaml</DependentUpon>
@@ -170,7 +173,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\IO\IOMonitorView.xaml">
+    <Page Include="Views\IO\DIMonitorView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\IO\DOMonitorView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

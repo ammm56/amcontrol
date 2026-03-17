@@ -185,9 +185,9 @@ namespace AMControlWPF
                 case "Motion.Alarm":
                     return CreatePlaceholderPage("运动 / 运动报警");
                 case "IO.DI":
-                    return new IOMonitorView();
+                    return new DIMonitorView();
                 case "IO.DO":
-                    return new IOMonitorView();
+                    return new DOMonitorView();
                 case "IO.Debug":
                     return CreatePlaceholderPage("IO / IO 调试");
                 case "Vision.Monitor":

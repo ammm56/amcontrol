@@ -100,35 +100,6 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
-                    <!-- 当前轴标题 -->
-                    <!--<Border Grid.Row="0"
-                            Padding="12,10"
-                            CornerRadius="8"
-                            Background="{DynamicResource RegionBrush}"
-                            BorderBrush="{DynamicResource BorderBrush}"
-                            BorderThickness="1">
-                        <DockPanel LastChildFill="False">
-                            <StackPanel Orientation="Horizontal"
-                                        DockPanel.Dock="Left"
-                                        VerticalAlignment="Center">
-                                <TextBlock FontSize="14"
-                                           FontWeight="SemiBold"
-                                           Foreground="{DynamicResource PrimaryTextBrush}"
-                                           Text="当前轴：" />
-                                <TextBlock FontSize="14"
-                                           FontWeight="SemiBold"
-                                           Foreground="{DynamicResource PrimaryBrush}"
-                                           Text="Axis-01 传动X轴" />
-                            </StackPanel>
-
-                            <TextBlock DockPanel.Dock="Right"
-                                       VerticalAlignment="Center"
-                                       Foreground="{DynamicResource PrimaryTextBrush}"
-                                       Opacity="0.75"
-                                       Text="模式：手动 / 状态：Ready" />
-                        </DockPanel>
-                    </Border>-->
-
                     <!-- 顶部指标 -->
                     <WrapPanel Grid.Row="2">
                         <Border Width="160"
@@ -445,7 +416,7 @@
                                 <TextBlock FontSize="14"
                                            FontWeight="SemiBold"
                                            Foreground="{DynamicResource PrimaryTextBrush}"
-                                           Text="动作记录" />
+                                           Text="轴动作记录" />
 
                                 <DataGrid Grid.Row="2"
                                           AutoGenerateColumns="False"

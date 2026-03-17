@@ -1,0 +1,327 @@
+﻿<UserControl x:Class="AMControlWPF.Views.IO.DIMonitorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:AMControlWPF.Views.IO"
+             mc:Ignorable="d"
+             Background="Transparent">
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="32" />
+        </Grid.RowDefinitions>
+
+        <!-- 顶部工具栏 -->
+        <Border Grid.Row="0"
+                Padding="12,10"
+                CornerRadius="8"
+                Background="{DynamicResource SecondaryRegionBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1">
+            <DockPanel LastChildFill="True">
+                <TextBlock DockPanel.Dock="Left"
+                           VerticalAlignment="Center"
+                           FontSize="14"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource PrimaryTextBrush}"
+                           Text="输入点筛选与监视" />
+
+                <WrapPanel HorizontalAlignment="Right"
+                           VerticalAlignment="Center"
+                           DockPanel.Dock="Right">
+                    <TextBox Width="150"
+                             Height="30"
+                             Margin="0,0,8,6"
+                             VerticalContentAlignment="Center"
+                             Text="搜索输入点..." />
+                    <Button MinWidth="72" Margin="0,0,8,6" Content="刷新" />
+                    <Button MinWidth="72" Margin="0,0,0,6" Content="导出" />
+                </WrapPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- 主体区 -->
+        <Grid Grid.Row="1" Margin="0,8,0,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="180" />
+                <ColumnDefinition Width="8" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- 左侧分组 -->
+            <Border Grid.Column="0"
+                    Padding="10"
+                    CornerRadius="8"
+                    Background="{DynamicResource RegionBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="8" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               Text="输入分组" />
+
+                    <ListBox Grid.Row="2"
+                             SelectedIndex="0">
+                        <ListBoxItem Content="全部输入" />
+                        <ListBoxItem Content="启动/停止按钮" />
+                        <ListBoxItem Content="安全信号" />
+                        <ListBoxItem Content="气缸到位" />
+                        <ListBoxItem Content="视觉触发" />
+                        <ListBoxItem Content="PLC 联动" />
+                    </ListBox>
+                </Grid>
+            </Border>
+
+            <!-- 右侧工作台 -->
+            <ScrollViewer Grid.Column="2"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="8" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="8" />
+                        <RowDefinition Height="220" />
+                    </Grid.RowDefinitions>
+
+                    <!-- 顶部统计 -->
+                    <WrapPanel Grid.Row="0">
+                        <Border Width="160"
+                                Margin="0,0,8,8"
+                                Padding="10"
+                                CornerRadius="6"
+                                Background="{DynamicResource SecondaryRegionBrush}">
+                            <StackPanel>
+                                <TextBlock Opacity="0.7"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="输入总数" />
+                                <TextBlock FontSize="18"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="64" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border Width="160"
+                                Margin="0,0,8,8"
+                                Padding="10"
+                                CornerRadius="6"
+                                Background="{DynamicResource SecondaryRegionBrush}">
+                            <StackPanel>
+                                <TextBlock Opacity="0.7"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="当前激活输入" />
+                                <TextBlock FontSize="18"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource SuccessBrush}"
+                                           Text="5" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border Width="160"
+                                Margin="0,0,8,8"
+                                Padding="10"
+                                CornerRadius="6"
+                                Background="{DynamicResource SecondaryRegionBrush}">
+                            <StackPanel>
+                                <TextBlock Opacity="0.7"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="通讯状态" />
+                                <TextBlock FontSize="18"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource SuccessBrush}"
+                                           Text="OK" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border Width="160"
+                                Margin="0,0,8,8"
+                                Padding="10"
+                                CornerRadius="6"
+                                Background="{DynamicResource SecondaryRegionBrush}">
+                            <StackPanel>
+                                <TextBlock Opacity="0.7"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="当前点位" />
+                                <TextBlock FontSize="18"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource PrimaryBrush}"
+                                           Text="DI-001" />
+                            </StackPanel>
+                        </Border>
+                    </WrapPanel>
+
+                    <!-- 主监视区 -->
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="8" />
+                            <ColumnDefinition Width="240" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0"
+                                Padding="12"
+                                CornerRadius="8"
+                                Background="{DynamicResource SecondaryRegionBrush}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="8" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+
+                                <TextBlock FontSize="14"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="输入点监视" />
+
+                                <DataGrid Grid.Row="2"
+                                          AutoGenerateColumns="False"
+                                          HeadersVisibility="Column"
+                                          CanUserAddRows="False"
+                                          IsReadOnly="True"
+                                          SelectionMode="Single">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="逻辑点位" Width="90" Binding="{Binding}" />
+                                        <DataGridTextColumn Header="名称" Width="180" Binding="{Binding}" />
+                                        <DataGridTextColumn Header="分组" Width="100" Binding="{Binding}" />
+                                        <DataGridTextColumn Header="卡号" Width="70" Binding="{Binding}" />
+                                        <DataGridTextColumn Header="通道" Width="70" Binding="{Binding}" />
+                                        <DataGridTextColumn Header="状态" Width="80" Binding="{Binding}" />
+                                        <DataGridTextColumn Header="最后触发" Width="*" Binding="{Binding}" />
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </Grid>
+                        </Border>
+
+                        <Border Grid.Column="2"
+                                Padding="12"
+                                CornerRadius="8"
+                                Background="{DynamicResource SecondaryRegionBrush}">
+                            <StackPanel>
+                                <TextBlock FontSize="14"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="点位详情" />
+
+                                <Border Margin="0,12,0,8"
+                                        Padding="10"
+                                        CornerRadius="6"
+                                        Background="{DynamicResource RegionBrush}">
+                                    <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" Text="当前点位：DI-001" />
+                                </Border>
+
+                                <Border Margin="0,0,0,8"
+                                        Padding="10"
+                                        CornerRadius="6"
+                                        Background="{DynamicResource RegionBrush}">
+                                    <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" Text="名称：启动按钮" />
+                                </Border>
+
+                                <Border Margin="0,0,0,8"
+                                        Padding="10"
+                                        CornerRadius="6"
+                                        Background="{DynamicResource RegionBrush}">
+                                    <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" Text="类型：数字输入" />
+                                </Border>
+
+                                <Border Margin="0,0,0,8"
+                                        Padding="10"
+                                        CornerRadius="6"
+                                        Background="{DynamicResource RegionBrush}">
+                                    <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" Text="作用：启动流程判断" />
+                                </Border>
+
+                                <Border Margin="0,0,0,8"
+                                        Padding="10"
+                                        CornerRadius="6"
+                                        Background="{DynamicResource RegionBrush}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" Text="当前状态" />
+                                        <TextBlock Grid.Column="1"
+                                                   Foreground="{DynamicResource SuccessBrush}"
+                                                   FontWeight="SemiBold"
+                                                   Text="ON" />
+                                    </Grid>
+                                </Border>
+
+                                <Border Padding="10"
+                                        CornerRadius="6"
+                                        Background="{DynamicResource RegionBrush}">
+                                    <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" Text="最后触发：22:35:18.256" />
+                                </Border>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <!-- 底部变化记录 -->
+                    <Border Grid.Row="4"
+                            Padding="12"
+                            CornerRadius="8"
+                            Background="{DynamicResource SecondaryRegionBrush}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="8" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock FontSize="14"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                       Text="输入变化记录" />
+
+                            <DataGrid Grid.Row="2"
+                                      AutoGenerateColumns="False"
+                                      HeadersVisibility="Column"
+                                      CanUserAddRows="False"
+                                      IsReadOnly="True">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="时间" Width="180" Binding="{Binding}" />
+                                    <DataGridTextColumn Header="点位" Width="100" Binding="{Binding}" />
+                                    <DataGridTextColumn Header="变化" Width="100" Binding="{Binding}" />
+                                    <DataGridTextColumn Header="来源" Width="100" Binding="{Binding}" />
+                                    <DataGridTextColumn Header="说明" Width="*" Binding="{Binding}" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </ScrollViewer>
+        </Grid>
+
+        <!-- 页内状态栏 -->
+        <Border Grid.Row="2"
+                Padding="12,0"
+                CornerRadius="8"
+                Background="{DynamicResource SecondaryRegionBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Left"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource PrimaryTextBrush}"
+                           Text="最后刷新：2026-03-17 22:35:18" />
+                <TextBlock DockPanel.Dock="Right"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource PrimaryTextBrush}"
+                           Text="当前输入分组：启动/停止按钮" />
+            </DockPanel>
+        </Border>
+    </Grid>
+</UserControl>
