@@ -172,15 +172,15 @@ namespace AMControlWPF
                 case "Production.Report":
                     return CreatePlaceholderPage("生产 / 班次统计");
                 case "Motion.Axis":
-                    return new MotionAxisPage();
+                    return new MotionAxisView();
                 case "Motion.Status":
                     return CreatePlaceholderPage("运动 / 位置监视");
                 case "Motion.Alarm":
                     return CreatePlaceholderPage("运动 / 运动报警");
                 case "IO.DI":
-                    return new IOMonitorPage();
+                    return new IOMonitorView();
                 case "IO.DO":
-                    return new IOMonitorPage();
+                    return new IOMonitorView();
                 case "IO.Debug":
                     return CreatePlaceholderPage("IO / IO 调试");
                 case "Vision.Monitor":

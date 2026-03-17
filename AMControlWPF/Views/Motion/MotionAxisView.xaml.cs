@@ -13,14 +13,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace AMControlWPF.Views.Template
+namespace AMControlWPF.Views.Motion
 {
     /// <summary>
-    /// WorkAreaTemplatePage.xaml 的交互逻辑
+    /// MotionAxisView.xaml 的交互逻辑
     /// </summary>
-    public partial class WorkAreaTemplatePage : UserControl
+    public partial class MotionAxisView : UserControl
     {
-        public WorkAreaTemplatePage()
+        public MotionAxisView()
         {
             InitializeComponent();
         }

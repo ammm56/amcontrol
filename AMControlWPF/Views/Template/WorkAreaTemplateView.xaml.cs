@@ -13,14 +13,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace AMControlWPF.Views.IO
+namespace AMControlWPF.Views.Template
 {
     /// <summary>
-    /// IOMonitorPage.xaml 的交互逻辑
+    /// WorkAreaTemplateView.xaml 的交互逻辑
     /// </summary>
-    public partial class IOMonitorPage : UserControl
+    public partial class WorkAreaTemplateView : UserControl
     {
-        public IOMonitorPage()
+        public WorkAreaTemplateView()
         {
             InitializeComponent();
         }

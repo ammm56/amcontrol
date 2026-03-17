@@ -13,14 +13,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace AMControlWPF.Views.Motion
+namespace AMControlWPF.Views.IO
 {
     /// <summary>
-    /// MotionAxisPage.xaml 的交互逻辑
+    /// IOMonitorView.xaml 的交互逻辑
     /// </summary>
-    public partial class MotionAxisPage : UserControl
+    public partial class IOMonitorView : UserControl
     {
-        public MotionAxisPage()
+        public IOMonitorView()
         {
             InitializeComponent();
         }

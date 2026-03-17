@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="AMControlWPF.Views.Motion.MotionAxisPage"
+﻿<UserControl x:Class="AMControlWPF.Views.Motion.MotionAxisView"
              xmlns:hc="https://handyorg.github.io/handycontrol"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"

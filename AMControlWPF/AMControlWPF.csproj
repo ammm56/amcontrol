@@ -100,14 +100,14 @@
     <Compile Include="UserControls\Main\NonClientAreaContent.xaml.cs">
       <DependentUpon>NonClientAreaContent.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\IO\IOMonitorPage.xaml.cs">
-      <DependentUpon>IOMonitorPage.xaml</DependentUpon>
+    <Compile Include="Views\IO\IOMonitorView.xaml.cs">
+      <DependentUpon>IOMonitorView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\Motion\MotionAxisPage.xaml.cs">
-      <DependentUpon>MotionAxisPage.xaml</DependentUpon>
+    <Compile Include="Views\Motion\MotionAxisView.xaml.cs">
+      <DependentUpon>MotionAxisView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\Template\WorkAreaTemplatePage.xaml.cs">
-      <DependentUpon>WorkAreaTemplatePage.xaml</DependentUpon>
+    <Compile Include="Views\Template\WorkAreaTemplateView.xaml.cs">
+      <DependentUpon>WorkAreaTemplateView.xaml</DependentUpon>
     </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -170,15 +170,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\IO\IOMonitorPage.xaml">
+    <Page Include="Views\IO\IOMonitorView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\Motion\MotionAxisPage.xaml">
+    <Page Include="Views\Motion\MotionAxisView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\Template\WorkAreaTemplatePage.xaml">
+    <Page Include="Views\Template\WorkAreaTemplateView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
