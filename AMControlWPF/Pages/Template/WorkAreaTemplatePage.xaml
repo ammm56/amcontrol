@@ -1,4 +1,4 @@
-﻿<Page x:Class="AMControlWPF.Pages.Template.WorkAreaTemplatePage"
+﻿<UserControl x:Class="AMControlWPF.Pages.Template.WorkAreaTemplatePage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -198,4 +198,4 @@
             </DockPanel>
         </Border>
     </Grid>
-</Page>
+</UserControl>

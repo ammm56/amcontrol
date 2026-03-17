@@ -1,16 +1,26 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
 
-namespace AMControlWPF.UserControl.Main
+namespace AMControlWPF.UserControls.Main
 {
     /// <summary>
     /// NonClientAreaContent.xaml 的交互逻辑
     /// 放到 GlowWindow 非客户区的内容（承载 LangAndTheme）
     /// </summary>
-    public partial class NonClientAreaContent
+    public partial class NonClientAreaContent: UserControl
     {
         // 向外抛出导航请求
         public event Action<string> NavigateRequested;

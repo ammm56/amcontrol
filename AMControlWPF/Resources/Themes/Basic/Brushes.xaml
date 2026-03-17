@@ -6,4 +6,31 @@
         <ResourceDictionary Source="Geometries.xaml"/>
     </ResourceDictionary.MergedDictionaries>
 
+    <DrawingBrush x:Key="ShellTextureBrush"
+                  TileMode="Tile"
+                  Viewport="0,0,72,72"
+                  ViewportUnits="Absolute"
+                  Viewbox="0,0,72,72"
+                  ViewboxUnits="Absolute"
+                  Stretch="Fill">
+        <DrawingBrush.Drawing>
+            <DrawingGroup>
+                <GeometryDrawing Brush="#0CFFFFFF"
+                                 Geometry="M0,0 L72,0 72,72 0,72 Z" />
+                <GeometryDrawing Brush="#12000000"
+                                 Geometry="M0,0 L72,0 72,1 0,1 Z" />
+                <GeometryDrawing Brush="#12000000"
+                                 Geometry="M0,0 L1,0 1,72 0,72 Z" />
+                <GeometryDrawing Brush="#0A000000"
+                                 Geometry="M36,0 L37,0 37,72 36,72 Z" />
+                <GeometryDrawing Brush="#0A000000"
+                                 Geometry="M0,36 L72,36 72,37 0,37 Z" />
+                <GeometryDrawing Brush="#08FFFFFF"
+                                 Geometry="M0,18 L72,18 72,19 0,19 Z" />
+                <GeometryDrawing Brush="#08FFFFFF"
+                                 Geometry="M18,0 L19,0 19,72 18,72 Z" />
+            </DrawingGroup>
+        </DrawingBrush.Drawing>
+    </DrawingBrush>
+
 </ResourceDictionary>

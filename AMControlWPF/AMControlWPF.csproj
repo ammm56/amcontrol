@@ -103,10 +103,10 @@
       <DependentUpon>WorkAreaTemplatePage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Tools\Helper\LangThemeHelper.cs" />
-    <Compile Include="UserControl\Main\LangAndTheme.xaml.cs">
+    <Compile Include="UserControls\Main\LangAndTheme.xaml.cs">
       <DependentUpon>LangAndTheme.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UserControl\Main\NonClientAreaContent.xaml.cs">
+    <Compile Include="UserControls\Main\NonClientAreaContent.xaml.cs">
       <DependentUpon>NonClientAreaContent.xaml</DependentUpon>
     </Compile>
     <Page Include="MainWindow.xaml">
@@ -174,11 +174,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UserControl\Main\LangAndTheme.xaml">
+    <Page Include="UserControls\Main\LangAndTheme.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UserControl\Main\NonClientAreaContent.xaml">
+    <Page Include="UserControls\Main\NonClientAreaContent.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -240,8 +240,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="UserControl\Basic\" />
-    <Folder Include="UserControl\Controls\" />
+    <Folder Include="UserControls\Basic\" />
+    <Folder Include="UserControls\Controls\" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Img\logo.ico" />

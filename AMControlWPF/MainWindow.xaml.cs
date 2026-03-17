@@ -1,6 +1,7 @@
 ﻿using AMControlWPF.Pages.IO;
 using AMControlWPF.Pages.Motion;
-using AMControlWPF.UserControl.Main;
+using AMControlWPF.Pages.Template;
+using AMControlWPF.UserControls.Main;
 using HandyControl.Controls;
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,7 @@ namespace AMControlWPF
     /// </summary>
     public partial class MainWindow : GlowWindow
     {
-        private readonly Dictionary<string, Page> _pageCache = new Dictionary<string, Page>();
+        private readonly Dictionary<string, UserControl> _pageCache = new Dictionary<string, UserControl>();
         private readonly List<PrimaryNavItem> _primaryNavItems = new List<PrimaryNavItem>();
         private readonly Dictionary<string, List<SecondaryNavItem>> _secondaryNavMap = new Dictionary<string, List<SecondaryNavItem>>();
 
@@ -158,7 +159,7 @@ namespace AMControlWPF
             MainFrame.Content = _pageCache[tag];
         }
 
-        private Page CreatePage(string tag)
+        private UserControl CreatePage(string tag)
         {
             switch (tag)
             {
@@ -223,9 +224,9 @@ namespace AMControlWPF
             }
         }
 
-        private Page CreatePlaceholderPage(string title)
+        private UserControl CreatePlaceholderPage(string title)
         {
-            return new Page
+            return new UserControl
             {
                 Background = Brushes.Transparent,
                 Content = new Border

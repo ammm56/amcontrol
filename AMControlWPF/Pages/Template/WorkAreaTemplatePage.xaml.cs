@@ -18,7 +18,7 @@ namespace AMControlWPF.Pages.Template
     /// <summary>
     /// WorkAreaTemplatePage.xaml 的交互逻辑
     /// </summary>
-    public partial class WorkAreaTemplatePage : Page
+    public partial class WorkAreaTemplatePage : UserControl
     {
         public WorkAreaTemplatePage()
         {

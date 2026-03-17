@@ -18,7 +18,7 @@ namespace AMControlWPF.Pages.Motion
     /// <summary>
     /// MotionAxisPage.xaml 的交互逻辑
     /// </summary>
-    public partial class MotionAxisPage : Page
+    public partial class MotionAxisPage : UserControl
     {
         public MotionAxisPage()
         {

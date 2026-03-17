@@ -18,7 +18,7 @@ namespace AMControlWPF.Pages.IO
     /// <summary>
     /// IOMonitorPage.xaml 的交互逻辑
     /// </summary>
-    public partial class IOMonitorPage : Page
+    public partial class IOMonitorPage : UserControl
     {
         public IOMonitorPage()
         {
