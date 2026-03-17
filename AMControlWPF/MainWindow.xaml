@@ -186,11 +186,11 @@
 
                 <!-- 工作区模块 -->
                 <Border Grid.Column="2"
-                        CornerRadius="16"
-                        Background="{DynamicResource RegionBrush}"
-                        BorderBrush="{DynamicResource BorderBrush}"
-                        BorderThickness="1"
-                        Effect="{StaticResource EffectShadow4}">
+        CornerRadius="16"
+        Background="{DynamicResource RegionBrush}"
+        BorderBrush="{DynamicResource BorderBrush}"
+        BorderThickness="1"
+        Effect="{StaticResource EffectShadow4}">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="44" />
@@ -204,23 +204,25 @@
                                 BorderBrush="{DynamicResource BorderBrush}"
                                 BorderThickness="0,0,0,1">
                             <DockPanel LastChildFill="False">
-                                <TextBlock DockPanel.Dock="Left"
-                                           VerticalAlignment="Center"
-                                           FontSize="15"
-                                           FontWeight="SemiBold"
-                                           Foreground="{DynamicResource PrimaryTextBrush}"
-                                           Text="工作区" />
-                                <TextBlock DockPanel.Dock="Right"
-                                           VerticalAlignment="Center"
-                                           Foreground="{DynamicResource PrimaryTextBrush}"
-                                           Opacity="0.7"
-                                           Text="当前模块页面内容" />
+                                <TextBlock x:Name="TextBlockWorkAreaTitle"
+                           DockPanel.Dock="Left"
+                           VerticalAlignment="Center"
+                           FontSize="15"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource PrimaryTextBrush}"
+                           Text="首页" />
+                                <TextBlock x:Name="TextBlockWorkAreaDescription"
+                           DockPanel.Dock="Right"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource PrimaryTextBrush}"
+                           Opacity="0.7"
+                           Text="设备总览、生产摘要、快捷入口" />
                             </DockPanel>
                         </Border>
 
                         <Grid Grid.Row="1" Margin="10">
                             <hc:TransitioningContentControl x:Name="MainFrame"
-                                                            Background="Transparent" />
+                                            Background="Transparent" />
                         </Grid>
                     </Grid>
                 </Border>

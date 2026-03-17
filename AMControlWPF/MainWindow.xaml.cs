@@ -69,16 +69,16 @@ namespace AMControlWPF
 
             _secondaryNavMap["Motion"] = new List<SecondaryNavItem>
             {
-                new SecondaryNavItem("Motion.Axis", "轴控制", "手动控制、回零、点动"),
-                new SecondaryNavItem("Motion.Status", "位置监视", "规划位置、编码器位置、状态"),
-                new SecondaryNavItem("Motion.Alarm", "运动报警", "轴报警与复位")
+                new SecondaryNavItem("Motion.Axis", "轴控制", "当前选中轴的控制、状态、位置与动作记录"),
+                new SecondaryNavItem("Motion.Status", "位置监视", "多轴位置、速度、状态总览"),
+                new SecondaryNavItem("Motion.Alarm", "运动报警", "轴报警记录、处理与复位")
             };
 
             _secondaryNavMap["IO"] = new List<SecondaryNavItem>
             {
-                new SecondaryNavItem("IO.DI", "DI 监视", "输入点状态与筛选"),
-                new SecondaryNavItem("IO.DO", "DO 监视", "输出点状态与操作"),
-                new SecondaryNavItem("IO.Debug", "IO 调试", "工程调试与联动测试")
+                new SecondaryNavItem("IO.DI", "DI 监视", "输入点状态、筛选与点位详情"),
+                new SecondaryNavItem("IO.DO", "DO 监视", "输出点状态、操作与点位详情"),
+                new SecondaryNavItem("IO.Debug", "IO 调试", "IO 调试记录与联动测试")
             };
 
             _secondaryNavMap["Vision"] = new List<SecondaryNavItem>
@@ -146,7 +146,14 @@ namespace AMControlWPF
                 return;
             }
 
+            UpdateWorkAreaHeader(item.DisplayName, item.Description);
             NavigateToPage(item.Key);
+        }
+
+        private void UpdateWorkAreaHeader(string title, string description)
+        {
+            TextBlockWorkAreaTitle.Text = title;
+            TextBlockWorkAreaDescription.Text = description;
         }
 
         private void NavigateToPage(string tag)
