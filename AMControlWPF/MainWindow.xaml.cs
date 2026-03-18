@@ -354,7 +354,7 @@ namespace AMControlWPF
                 case "System.User":
                     return new UserManagementView();
                 case "System.LoginLog":
-                    return CreatePlaceholderPage("系统 / 登录日志");
+                    return new LoginLogView();
                 default:
                     return CreatePlaceholderPage("未定义页面: " + tag);
             }

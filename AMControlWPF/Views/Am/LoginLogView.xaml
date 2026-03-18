@@ -1,0 +1,317 @@
+﻿<UserControl x:Class="AMControlWPF.Views.Am.LoginLogView"
+             xmlns:hc="https://handyorg.github.io/handycontrol"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:AMControlWPF.Views.Am"
+             mc:Ignorable="d"
+             Background="Transparent">
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="32" />
+        </Grid.RowDefinitions>
+
+        <!-- 顶部工具栏 -->
+        <Border Grid.Row="0"
+                Padding="12,10"
+                CornerRadius="8"
+                Background="{DynamicResource SecondaryRegionBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1">
+            <DockPanel LastChildFill="True">
+                <TextBlock DockPanel.Dock="Left"
+                           VerticalAlignment="Center"
+                           FontSize="14"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource PrimaryTextBrush}"
+                           Text="登录日志" />
+
+                <WrapPanel HorizontalAlignment="Right"
+                           VerticalAlignment="Center"
+                           DockPanel.Dock="Right">
+                    <TextBox Width="160"
+                             Height="30"
+                             Margin="0,0,8,6"
+                             VerticalContentAlignment="Center"
+                             Text="搜索登录名..." />
+                    <DatePicker Width="130"
+                                Height="30"
+                                Margin="0,0,8,6" />
+                    <DatePicker Width="130"
+                                Height="30"
+                                Margin="0,0,8,6" />
+                    <Button MinWidth="72" Margin="0,0,8,6" Content="查询" />
+                    <Button MinWidth="72" Margin="0,0,8,6" Content="刷新" />
+                    <Button MinWidth="72" Margin="0,0,0,6" Content="导出" />
+                </WrapPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- 主体区 -->
+        <Grid Grid.Row="1" Margin="0,8,0,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="180" />
+                <ColumnDefinition Width="8" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- 左侧筛选 -->
+            <Border Grid.Column="0"
+                    Padding="10"
+                    CornerRadius="8"
+                    Background="{DynamicResource RegionBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="8" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               Text="日志筛选" />
+
+                    <ListBox Grid.Row="2"
+                             SelectedIndex="0"
+                             ItemContainerStyle="{StaticResource ViewNavItemStyle}"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             HorizontalContentAlignment="Stretch">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}"
+                                           FontWeight="SemiBold"
+                                           Foreground="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=Foreground}" />
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+
+                        <sys:String xmlns:sys="clr-namespace:System;assembly=mscorlib">全部日志</sys:String>
+                        <sys:String xmlns:sys="clr-namespace:System;assembly=mscorlib">登录成功</sys:String>
+                        <sys:String xmlns:sys="clr-namespace:System;assembly=mscorlib">登录失败</sys:String>
+                        <sys:String xmlns:sys="clr-namespace:System;assembly=mscorlib">今日日志</sys:String>
+                        <sys:String xmlns:sys="clr-namespace:System;assembly=mscorlib">当前用户</sys:String>
+                    </ListBox>
+                </Grid>
+            </Border>
+
+            <!-- 右侧工作区 -->
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="8" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!-- 顶部统计 -->
+                <WrapPanel Grid.Row="0">
+                    <Border Width="160"
+                            Margin="0,0,8,8"
+                            Padding="10"
+                            CornerRadius="6"
+                            Background="{DynamicResource SecondaryRegionBrush}">
+                        <StackPanel>
+                            <TextBlock Opacity="0.7"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                       Text="日志总数" />
+                            <TextBlock FontSize="18"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                       Text="256" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Width="160"
+                            Margin="0,0,8,8"
+                            Padding="10"
+                            CornerRadius="6"
+                            Background="{DynamicResource SecondaryRegionBrush}">
+                        <StackPanel>
+                            <TextBlock Opacity="0.7"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                       Text="登录成功" />
+                            <TextBlock FontSize="18"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource SuccessBrush}"
+                                       Text="220" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Width="160"
+                            Margin="0,0,8,8"
+                            Padding="10"
+                            CornerRadius="6"
+                            Background="{DynamicResource SecondaryRegionBrush}">
+                        <StackPanel>
+                            <TextBlock Opacity="0.7"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                       Text="登录失败" />
+                            <TextBlock FontSize="18"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource DangerBrush}"
+                                       Text="36" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Width="180"
+                            Margin="0,0,8,8"
+                            Padding="10"
+                            CornerRadius="6"
+                            Background="{DynamicResource SecondaryRegionBrush}">
+                        <StackPanel>
+                            <TextBlock Opacity="0.7"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                       Text="当前筛选" />
+                            <TextBlock FontSize="18"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource PrimaryBrush}"
+                                       Text="全部日志" />
+                        </StackPanel>
+                    </Border>
+                </WrapPanel>
+
+                <!-- 主区 -->
+                <Grid Grid.Row="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="8" />
+                        <ColumnDefinition Width="280" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- 日志列表 -->
+                    <Border Grid.Column="0"
+                            Padding="12"
+                            CornerRadius="8"
+                            Background="{DynamicResource SecondaryRegionBrush}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="8" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock FontSize="14"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                       Text="登录日志列表" />
+
+                            <DataGrid Grid.Row="2"
+                                      hc:DataGridAttach.CanUnselectAllWithBlankArea="True"
+                                      AutoGenerateColumns="False"
+                                      HeadersVisibility="Column"
+                                      CanUserAddRows="False"
+                                      CanUserDeleteRows="False"
+                                      IsReadOnly="True"
+                                      SelectionMode="Single"
+                                      SelectionUnit="FullRow"
+                                      Background="Transparent"
+                                      BorderThickness="0"
+                                      RowHeaderWidth="0"
+                                      GridLinesVisibility="None"
+                                      HorizontalGridLinesBrush="Transparent"
+                                      VerticalGridLinesBrush="Transparent">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="时间" Width="160" Binding="{Binding}" />
+                                    <DataGridTextColumn Header="登录名" Width="100" Binding="{Binding}" />
+                                    <DataGridTextColumn Header="结果" Width="90" Binding="{Binding}" />
+                                    <DataGridTextColumn Header="客户端" Width="120" Binding="{Binding}" />
+                                    <DataGridTextColumn Header="说明" Width="*" Binding="{Binding}" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
+                    </Border>
+
+                    <!-- 右侧详情 -->
+                    <Border Grid.Column="2"
+                            Padding="12"
+                            CornerRadius="8"
+                            Background="{DynamicResource SecondaryRegionBrush}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="12" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="8" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="8" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="8" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="8" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock FontSize="14"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                       Text="日志详情" />
+
+                            <Border Grid.Row="2"
+                                    Padding="10"
+                                    CornerRadius="6"
+                                    Background="{DynamicResource RegionBrush}">
+                                <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" Text="登录名：am" />
+                            </Border>
+
+                            <Border Grid.Row="4"
+                                    Padding="10"
+                                    CornerRadius="6"
+                                    Background="{DynamicResource RegionBrush}">
+                                <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" Text="结果：登录成功" />
+                            </Border>
+
+                            <Border Grid.Row="6"
+                                    Padding="10"
+                                    CornerRadius="6"
+                                    Background="{DynamicResource RegionBrush}">
+                                <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" Text="登录时间：2026-03-18 09:26:30" />
+                            </Border>
+
+                            <Border Grid.Row="8"
+                                    Padding="10"
+                                    CornerRadius="6"
+                                    Background="{DynamicResource RegionBrush}">
+                                <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" Text="客户端：AM-PC-01" />
+                            </Border>
+
+                            <Border Grid.Row="10"
+                                    Padding="10"
+                                    CornerRadius="6"
+                                    Background="{DynamicResource RegionBrush}">
+                                <TextBlock TextWrapping="Wrap"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="说明：管理员账户正常登录系统。" />
+                            </Border>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Grid>
+
+        <!-- 页内状态栏 -->
+        <Border Grid.Row="2"
+                Padding="12,0"
+                CornerRadius="8"
+                Background="{DynamicResource SecondaryRegionBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Left"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource PrimaryTextBrush}"
+                           Text="当前模块：登录日志" />
+                <TextBlock DockPanel.Dock="Right"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource PrimaryTextBrush}"
+                           Text="当前角色：管理员" />
+            </DockPanel>
+        </Border>
+    </Grid>
+</UserControl>
