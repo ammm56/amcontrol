@@ -3,6 +3,7 @@ using HandyControl.Controls;
 using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace AMControlWPF.Views.Auth
 {
@@ -43,6 +44,24 @@ namespace AMControlWPF.Views.Auth
         {
             _viewModel.CloseRequested -= ViewModel_CloseRequested;
             base.OnClosed(e);
+        }
+
+        private void LoginView_OnKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                DialogResult = false;
+                Close();
+                return;
+            }
+
+            if (e.Key == Key.Enter)
+            {
+                if (_viewModel.LoginCommand.CanExecute(null))
+                {
+                    _viewModel.LoginCommand.Execute(null);
+                }
+            }
         }
     }
 }

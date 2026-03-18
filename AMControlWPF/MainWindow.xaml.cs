@@ -387,50 +387,22 @@ namespace AMControlWPF
         private void ButtonSwitchUser_OnClick(object sender, RoutedEventArgs e)
         {
             PopupUserMenu.IsOpen = false;
-            ShowLoginAndReopenMainWindow();
+            ShowLoginForSwitchUser();
         }
 
         private void ButtonChangePassword_OnClick(object sender, RoutedEventArgs e)
         {
             PopupUserMenu.IsOpen = false;
-            TextBlockWorkAreaTitle.Text = "修改密码";
-            TextBlockWorkAreaDescription.Text = "当前登录用户密码修改";
-            MainFrame.Content = CreatePlaceholderPage("用户 / 修改密码");
-        }
-
-        private void ButtonManageUsers_OnClick(object sender, RoutedEventArgs e)
-        {
-            PopupUserMenu.IsOpen = false;
-            NavigateToByTag("System.User");
+            ShowChangePasswordDialog();
         }
 
         private void ButtonLogout_OnClick(object sender, RoutedEventArgs e)
         {
             PopupUserMenu.IsOpen = false;
-            UserContext.Instance.SignOut();
-            ShowLoginAndReopenMainWindow();
+            LogoutAndReturnToLogin();
         }
 
-        private void NavigateToByTag(string tag)
-        {
-            var navItem = _visibleSecondaryNavMap.Values
-                .SelectMany(x => x)
-                .FirstOrDefault(x => string.Equals(x.Key, tag, StringComparison.OrdinalIgnoreCase));
-
-            if (navItem == null)
-            {
-                TextBlockWorkAreaTitle.Text = "扩展页面";
-                TextBlockWorkAreaDescription.Text = tag;
-                MainFrame.Content = CreatePlaceholderPage("扩展页面 / " + tag);
-                return;
-            }
-
-            TextBlockWorkAreaTitle.Text = navItem.DisplayName;
-            TextBlockWorkAreaDescription.Text = navItem.Description;
-            NavigateToPage(navItem.Key);
-        }
-
-        private void ShowLoginAndReopenMainWindow()
+        private void ShowLoginForSwitchUser()
         {
             Application.Current.ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
@@ -447,7 +419,39 @@ namespace AMControlWPF
                 return;
             }
 
+            Application.Current.ShutdownMode = ShutdownMode.OnMainWindowClose;
+        }
+
+        private void LogoutAndReturnToLogin()
+        {
+            UserContext.Instance.SignOut();
+
+            Application.Current.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+
+            var loginView = new LoginView();
+            var loginResult = loginView.ShowDialog();
+
+            if (loginResult == true && UserContext.Instance.IsLoggedIn)
+            {
+                var newMainWindow = new MainWindow();
+                Application.Current.MainWindow = newMainWindow;
+                Application.Current.ShutdownMode = ShutdownMode.OnMainWindowClose;
+                newMainWindow.Show();
+                Close();
+                return;
+            }
+
             Application.Current.Shutdown();
+        }
+
+        private void ShowChangePasswordDialog()
+        {
+            var dialog = new ChangePasswordDialog
+            {
+                Owner = this
+            };
+
+            dialog.ShowDialog();
         }
 
         private sealed class PrimaryNavItem

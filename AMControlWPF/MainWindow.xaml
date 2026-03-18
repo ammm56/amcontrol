@@ -74,15 +74,9 @@
                                     BorderThickness="0"
                                     Padding="0"
                                     Cursor="Hand">
-                                <Border Padding="6,6"
-                                        CornerRadius="10"
-                                        Background="{DynamicResource SecondaryRegionBrush}"
-                                        BorderBrush="{DynamicResource BorderBrush}"
-                                        BorderThickness="1">
-                                    <StackPanel HorizontalAlignment="Center">
-                                        <hc:Gravatar x:Name="GravatarCurrentUser"  Width="50" Height="50" Style="{StaticResource BaseStyle}" Id="am" />
-                                    </StackPanel>
-                                </Border>
+                                <StackPanel HorizontalAlignment="Center">
+                                    <hc:Gravatar x:Name="GravatarCurrentUser" Width="56" Height="56" Style="{StaticResource GravatarBaseStyle}" Id="am" />
+                                </StackPanel>
                             </Button>
 
                             <Popup x:Name="PopupUserMenu"

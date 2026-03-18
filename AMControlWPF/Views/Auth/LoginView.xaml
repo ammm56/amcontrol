@@ -12,6 +12,7 @@
                ResizeMode="NoResize"
                ShowNonClientArea="False"
                WindowStartupLocation="CenterScreen"
+               KeyDown="LoginView_OnKeyDown"
                Background="{DynamicResource RegionBrush}">
 
     <Grid>
@@ -138,14 +139,16 @@
                             </Grid.ColumnDefinitions>
 
                             <Button Grid.Column="0"
+                                    Width="136"
                                     Height="36"
                                     Command="{Binding CancelCommand}"
-                                    Content="取消" />
+                                    Content="取消" HorizontalAlignment="Left" />
 
                             <Button Grid.Column="2"
+                                    Width="136"
                                     Height="36"
                                     Command="{Binding LoginCommand}"
-                                    Content="登录" />
+                                    Content="登录" HorizontalAlignment="Right" />
                         </Grid>
 
                         <TextBlock Grid.Row="12"
