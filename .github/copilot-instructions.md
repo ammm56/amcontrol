@@ -18,6 +18,7 @@
 - 主界面导航采用左侧两级固定可见布局：一级导航与二级导航同时显示，不使用垂直折叠展开；右侧区域显示当前二级页面的完整工作区，而不是同时堆叠多个二级页面。设备控制页优先单页并列展示关键控制与状态信息，尽量减少隐藏页面。
 - 将可复用的 WPF 界面样式（如导航 ListBoxItem 样式）下沉到 `Resources/Themes/Styles/Style.xaml` 统一管理，在页面中通过静态资源简洁调用，减少在 `MainWindow.xaml` 中内联定义。
 - ViewModel 属性不使用 CommunityToolkit.Mvvm 的源生成器特性（如 [ObservableProperty]），而采用手动定义字段和属性的传统方式。
+- 操作员可查看 Vision/PLC/IO/Motion 监视信息，限制写入、动作参数修改、工程调试和正式配置类权限。
 
 ## 服务层设计
 - 服务层统一采用“构造注入依赖 + 封装消息发布/日志通知”的风格，避免在各方法中重复直接调用 IMessageBus 和 IAMLogger。

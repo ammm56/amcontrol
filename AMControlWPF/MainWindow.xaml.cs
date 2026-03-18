@@ -1,5 +1,6 @@
 ﻿using AM.Core.Context;
 using AMControlWPF.UserControls.Main;
+using AMControlWPF.Views.Auth;
 using AMControlWPF.Views.IO;
 using AMControlWPF.Views.Motion;
 using AMControlWPF.Views.Template;
@@ -44,6 +45,7 @@ namespace AMControlWPF
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             ApplyNavigationByUser();
+            InitializeCurrentUserCard();
 
             PrimaryNavList.ItemsSource = _visiblePrimaryNavItems;
 
@@ -59,6 +61,47 @@ namespace AMControlWPF
             }
         }
 
+        private void InitializeCurrentUserCard()
+        {
+            var userName = string.IsNullOrWhiteSpace(UserContext.Instance.UserName)
+                ? UserContext.Instance.LoginName
+                : UserContext.Instance.UserName;
+
+            var roleName = GetCurrentRoleDisplayName();
+
+            TextBlockCurrentUserName.Text = string.IsNullOrWhiteSpace(userName) ? "未登录" : userName;
+            TextBlockCurrentUserRole.Text = roleName;
+            TextBlockPopupUserTitle.Text = TextBlockCurrentUserName.Text + " / " + roleName;
+
+            GravatarCurrentUser.Id = string.IsNullOrWhiteSpace(UserContext.Instance.LoginName)
+                ? "guest"
+                : UserContext.Instance.LoginName;
+
+            ButtonManageUsers.Visibility = UserContext.Instance.IsAdmin
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+        }
+
+        private string GetCurrentRoleDisplayName()
+        {
+            if (UserContext.Instance.IsAdmin || UserContext.Instance.HasRole("Am"))
+            {
+                return "管理员";
+            }
+
+            if (UserContext.Instance.HasRole("Engineer"))
+            {
+                return "工程师";
+            }
+
+            if (UserContext.Instance.HasRole("Operator"))
+            {
+                return "操作员";
+            }
+
+            return "用户";
+        }
+
         private void InitializeNavigation()
         {
             _allPrimaryNavItems.Add(new PrimaryNavItem("Home", "首页"));
@@ -70,6 +113,7 @@ namespace AMControlWPF
             _allPrimaryNavItems.Add(new PrimaryNavItem("Config", "配置"));
             _allPrimaryNavItems.Add(new PrimaryNavItem("Engineer", "工程"));
             _allPrimaryNavItems.Add(new PrimaryNavItem("AlarmLog", "报警与日志"));
+            _allPrimaryNavItems.Add(new PrimaryNavItem("System", "系统"));
 
             _allSecondaryNavMap["Home"] = new List<SecondaryNavItem>
             {
@@ -99,24 +143,22 @@ namespace AMControlWPF
 
             _allSecondaryNavMap["Vision"] = new List<SecondaryNavItem>
             {
-                new SecondaryNavItem("Vision.Monitor", "相机监视", "实时画面与触发结果", "Engineer", "Am"),
-                new SecondaryNavItem("Vision.Config", "相机配置", "相机参数与任务参数", "Engineer", "Am")
+                new SecondaryNavItem("Vision.Monitor", "相机监视", "实时画面与触发结果", "Operator", "Engineer", "Am")
             };
 
             _allSecondaryNavMap["PLC"] = new List<SecondaryNavItem>
             {
-                new SecondaryNavItem("PLC.Config", "PLC 配置", "连接参数与站号配置", "Engineer", "Am"),
-                new SecondaryNavItem("PLC.Monitor", "点位监视", "寄存器、位变量监视", "Engineer", "Am"),
-                new SecondaryNavItem("PLC.Debug", "通讯状态", "通讯诊断与报文状态", "Engineer", "Am")
+                new SecondaryNavItem("PLC.Monitor", "点位监视", "寄存器、位变量监视", "Operator", "Engineer", "Am"),
+                new SecondaryNavItem("PLC.Debug", "通讯状态", "通讯诊断与报文状态", "Operator", "Engineer", "Am")
             };
 
             _allSecondaryNavMap["Config"] = new List<SecondaryNavItem>
             {
-                new SecondaryNavItem("Config.Axis", "轴配置编辑", "运行配置层编辑", "Am"),
-                new SecondaryNavItem("Config.Card", "控制卡配置编辑", "卡参数与映射", "Am"),
-                new SecondaryNavItem("Config.Camera", "相机配置编辑", "相机与任务配置", "Am"),
-                new SecondaryNavItem("Config.Plc", "PLC 配置编辑", "PLC 业务配置", "Am"),
-                new SecondaryNavItem("Config.Runtime", "运行配置编辑", "系统运行参数", "Am")
+                new SecondaryNavItem("Config.Axis", "轴配置编辑", "运行配置层编辑", "Engineer", "Am"),
+                new SecondaryNavItem("Config.Card", "控制卡配置编辑", "卡参数与映射", "Engineer", "Am"),
+                new SecondaryNavItem("Config.Camera", "相机配置编辑", "相机与任务配置", "Engineer", "Am"),
+                new SecondaryNavItem("Config.Plc", "PLC 配置编辑", "PLC 业务配置", "Engineer", "Am"),
+                new SecondaryNavItem("Config.Runtime", "运行配置编辑", "系统运行参数", "Engineer", "Am")
             };
 
             _allSecondaryNavMap["Engineer"] = new List<SecondaryNavItem>
@@ -133,6 +175,12 @@ namespace AMControlWPF
                 new SecondaryNavItem("AlarmLog.Current", "当前报警", "当前活动报警", "Operator", "Engineer", "Am"),
                 new SecondaryNavItem("AlarmLog.History", "报警历史", "历史报警查询", "Engineer", "Am"),
                 new SecondaryNavItem("AlarmLog.RunLog", "运行日志", "系统运行日志", "Engineer", "Am")
+            };
+
+            _allSecondaryNavMap["System"] = new List<SecondaryNavItem>
+            {
+                new SecondaryNavItem("System.User", "用户管理", "用户、角色、密码重置与启停管理", "Am"),
+                new SecondaryNavItem("System.LoginLog", "登录日志", "用户登录历史与登录结果记录", "Am")
             };
         }
 
@@ -276,10 +324,6 @@ namespace AMControlWPF
                     return CreatePlaceholderPage("IO / IO 调试");
                 case "Vision.Monitor":
                     return CreatePlaceholderPage("视觉 / 相机监视");
-                case "Vision.Config":
-                    return CreatePlaceholderPage("视觉 / 相机配置");
-                case "PLC.Config":
-                    return CreatePlaceholderPage("PLC / PLC 配置");
                 case "PLC.Monitor":
                     return CreatePlaceholderPage("PLC / 点位监视");
                 case "PLC.Debug":
@@ -310,6 +354,10 @@ namespace AMControlWPF
                     return CreatePlaceholderPage("报警与日志 / 报警历史");
                 case "AlarmLog.RunLog":
                     return CreatePlaceholderPage("报警与日志 / 运行日志");
+                case "System.User":
+                    return CreatePlaceholderPage("系统 / 用户管理");
+                case "System.LoginLog":
+                    return CreatePlaceholderPage("系统 / 登录日志");
                 default:
                     return CreatePlaceholderPage("未定义页面: " + tag);
             }
@@ -334,6 +382,77 @@ namespace AMControlWPF
                     }
                 }
             };
+        }
+
+        private void ButtonUserCard_OnClick(object sender, RoutedEventArgs e)
+        {
+            PopupUserMenu.IsOpen = !PopupUserMenu.IsOpen;
+        }
+
+        private void ButtonSwitchUser_OnClick(object sender, RoutedEventArgs e)
+        {
+            PopupUserMenu.IsOpen = false;
+            ShowLoginAndReopenMainWindow();
+        }
+
+        private void ButtonChangePassword_OnClick(object sender, RoutedEventArgs e)
+        {
+            PopupUserMenu.IsOpen = false;
+            TextBlockWorkAreaTitle.Text = "修改密码";
+            TextBlockWorkAreaDescription.Text = "当前登录用户密码修改";
+            MainFrame.Content = CreatePlaceholderPage("用户 / 修改密码");
+        }
+
+        private void ButtonManageUsers_OnClick(object sender, RoutedEventArgs e)
+        {
+            PopupUserMenu.IsOpen = false;
+            NavigateToByTag("System.User");
+        }
+
+        private void ButtonLogout_OnClick(object sender, RoutedEventArgs e)
+        {
+            PopupUserMenu.IsOpen = false;
+            UserContext.Instance.SignOut();
+            ShowLoginAndReopenMainWindow();
+        }
+
+        private void NavigateToByTag(string tag)
+        {
+            var navItem = _visibleSecondaryNavMap.Values
+                .SelectMany(x => x)
+                .FirstOrDefault(x => string.Equals(x.Key, tag, StringComparison.OrdinalIgnoreCase));
+
+            if (navItem == null)
+            {
+                TextBlockWorkAreaTitle.Text = "扩展页面";
+                TextBlockWorkAreaDescription.Text = tag;
+                MainFrame.Content = CreatePlaceholderPage("扩展页面 / " + tag);
+                return;
+            }
+
+            TextBlockWorkAreaTitle.Text = navItem.DisplayName;
+            TextBlockWorkAreaDescription.Text = navItem.Description;
+            NavigateToPage(navItem.Key);
+        }
+
+        private void ShowLoginAndReopenMainWindow()
+        {
+            Application.Current.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+
+            var loginView = new LoginView();
+            var loginResult = loginView.ShowDialog();
+
+            if (loginResult == true && UserContext.Instance.IsLoggedIn)
+            {
+                var newMainWindow = new MainWindow();
+                Application.Current.MainWindow = newMainWindow;
+                Application.Current.ShutdownMode = ShutdownMode.OnMainWindowClose;
+                newMainWindow.Show();
+                Close();
+                return;
+            }
+
+            Application.Current.Shutdown();
         }
 
         private sealed class PrimaryNavItem
