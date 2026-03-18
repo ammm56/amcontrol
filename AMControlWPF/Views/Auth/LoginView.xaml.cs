@@ -21,6 +21,9 @@ namespace AMControlWPF.Views.Auth
             _viewModel = new LoginViewModel();
             _viewModel.CloseRequested += ViewModel_CloseRequested;
             DataContext = _viewModel;
+
+            _viewModel.LoginName = "am";
+            _viewModel.Password = "am123";
         }
 
         private void PasswordBox_OnPasswordChanged(object sender, RoutedEventArgs e)

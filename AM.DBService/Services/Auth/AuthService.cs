@@ -241,9 +241,9 @@ namespace AM.DBService.Services.Auth
                 return Result.Fail(-23, "初始密码不能为空", ResultSource.Unknown);
             }
 
-            if (password.Length < 6)
+            if (password.Length < 1)
             {
-                return Result.Fail(-24, "初始密码长度不能少于 6 位", ResultSource.Unknown);
+                return Result.Fail(-24, "初始密码长度不能少于 1 位", ResultSource.Unknown);
             }
 
             var userQuery = _userDb.QueryAll();
@@ -438,9 +438,9 @@ namespace AM.DBService.Services.Auth
                 return Result.Fail(-41, "新密码不能为空", ResultSource.Unknown);
             }
 
-            if (newPassword.Length < 6)
+            if (newPassword.Length < 1)
             {
-                return Result.Fail(-42, "新密码长度不能少于 6 位", ResultSource.Unknown);
+                return Result.Fail(-42, "新密码长度不能少于 1 位", ResultSource.Unknown);
             }
 
             var userQuery = _userDb.QueryAll();
@@ -506,9 +506,9 @@ namespace AM.DBService.Services.Auth
                 return Result.Fail(-14, "两次输入的新密码不一致", ResultSource.Unknown);
             }
 
-            if (newPassword.Length < 6)
+            if (newPassword.Length < 1)
             {
-                return Result.Fail(-15, "新密码长度不能少于 6 位", ResultSource.Unknown);
+                return Result.Fail(-15, "新密码长度不能少于 1 位", ResultSource.Unknown);
             }
 
             var loginName = UserContext.Instance.LoginName;
@@ -554,6 +554,48 @@ namespace AM.DBService.Services.Auth
 
             _reporter?.Info("AuthService", "当前用户修改密码成功");
             return Result.Ok("密码修改成功", ResultSource.Unknown);
+        }
+
+        /// <summary>
+        /// 设置用户启用状态。
+        /// </summary>
+        public Result SetUserEnabled(int userId, bool isEnabled)
+        {
+            if (userId <= 0)
+            {
+                return Result.Fail(-50, "用户标识无效", ResultSource.Unknown);
+            }
+
+            var userQuery = _userDb.QueryAll();
+            if (!userQuery.Success)
+            {
+                _reporter?.Error("AuthService", "设置启用状态时查询用户失败", userQuery.Code);
+                return Result.Fail(userQuery.Code, "查询用户失败", ResultSource.Database);
+            }
+
+            var user = userQuery.Items.FirstOrDefault(u => u.Id == userId);
+            if (user == null)
+            {
+                return Result.Fail(-51, "用户不存在", ResultSource.Unknown);
+            }
+
+            user.IsEnabled = isEnabled;
+
+            if (!isEnabled)
+            {
+                user.FailedLoginCount = 0;
+                user.LockoutEndTime = null;
+            }
+
+            var editResult = _userDb.Edit(user);
+            if (!editResult.Success)
+            {
+                _reporter?.Error("AuthService", "设置用户启用状态失败", editResult.Code);
+                return Result.Fail(editResult.Code, "设置用户启用状态失败", ResultSource.Database);
+            }
+
+            _reporter?.Info("AuthService", (isEnabled ? "启用用户成功：" : "禁用用户成功：") + user.LoginName);
+            return Result.Ok(isEnabled ? "用户已启用" : "用户已禁用", ResultSource.Database);
         }
 
         /// <summary>

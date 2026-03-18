@@ -22,6 +22,7 @@ namespace AMControlWPF.Views.Am
 
             DataContext = _viewModel;
             Loaded += UserManagementView_Loaded;
+
         }
 
         private async void UserManagementView_Loaded(object sender, RoutedEventArgs e)
@@ -80,33 +81,19 @@ namespace AMControlWPF.Views.Am
                 return;
             }
 
-            var updateResult = _authService.UpdateUser(
+            var result = _authService.UpdateUser(
                 dialog.EditingUserId,
                 dialog.UserName,
                 dialog.RoleCode,
                 dialog.IsEnabledUser,
                 dialog.Remark);
 
-            if (!updateResult.Success)
+            MessageBox.Show(result.Message, "编辑用户", MessageBoxButton.OK,
+                result.Success ? MessageBoxImage.Information : MessageBoxImage.Warning);
+
+            if (!result.Success)
             {
-                MessageBox.Show(updateResult.Message, "编辑用户", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
-            }
-
-            if (dialog.ResetPassword)
-            {
-                var resetResult = _authService.ResetUserPassword(dialog.EditingUserId, dialog.Password);
-                MessageBox.Show(resetResult.Message, "编辑用户", MessageBoxButton.OK,
-                    resetResult.Success ? MessageBoxImage.Information : MessageBoxImage.Warning);
-
-                if (!resetResult.Success)
-                {
-                    return;
-                }
-            }
-            else
-            {
-                MessageBox.Show(updateResult.Message, "编辑用户", MessageBoxButton.OK, MessageBoxImage.Information);
             }
 
             await _viewModel.LoadAsync();
@@ -121,7 +108,7 @@ namespace AMControlWPF.Views.Am
                 return;
             }
 
-            var dialog = new UserEditDialog(selectedUser)
+            var dialog = new ResetUserPasswordDialog(selectedUser)
             {
                 Owner = Window.GetWindow(this)
             };
@@ -131,14 +118,31 @@ namespace AMControlWPF.Views.Am
                 return;
             }
 
-            if (!dialog.ResetPassword)
+            var result = _authService.ResetUserPassword(selectedUser.Id, dialog.NewPassword);
+            MessageBox.Show(result.Message, "重置密码", MessageBoxButton.OK,
+                result.Success ? MessageBoxImage.Information : MessageBoxImage.Warning);
+
+            if (!result.Success)
             {
-                MessageBox.Show("请勾选“保存时重置密码”，并输入新密码。", "重置密码", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
-            var result = _authService.ResetUserPassword(selectedUser.Id, dialog.Password);
-            MessageBox.Show(result.Message, "重置密码", MessageBoxButton.OK,
+            await _viewModel.LoadAsync();
+        }
+
+        private async void ButtonToggleEnabled_OnClick(object sender, RoutedEventArgs e)
+        {
+            var selectedUser = _viewModel.SelectedUser;
+            if (selectedUser == null)
+            {
+                MessageBox.Show("请先选择一个用户。", "启用/禁用", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var enableTarget = !selectedUser.IsEnabled;
+            var result = _authService.SetUserEnabled(selectedUser.Id, enableTarget);
+
+            MessageBox.Show(result.Message, "启用/禁用", MessageBoxButton.OK,
                 result.Success ? MessageBoxImage.Information : MessageBoxImage.Warning);
 
             if (!result.Success)
