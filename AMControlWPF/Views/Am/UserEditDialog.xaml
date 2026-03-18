@@ -8,7 +8,7 @@
                mc:Ignorable="d"
                Title="用户编辑"
                Width="560"
-               Height="520"
+               Height="600"
                ResizeMode="NoResize"
                ShowNonClientArea="False"
                WindowStartupLocation="CenterOwner"
@@ -41,7 +41,7 @@
                         <RowDefinition Height="12" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
-                        <RowDefinition Height="12" />
+                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
@@ -133,14 +133,16 @@
                         </Grid.ColumnDefinitions>
 
                         <Button Grid.Column="0"
+                                Width="186"
                                 Height="36"
                                 Click="ButtonCancel_OnClick"
-                                Content="取消" />
+                                Content="取消" HorizontalAlignment="Left"  />
 
                         <Button Grid.Column="2"
+                                Width="186"
                                 Height="36"
                                 Click="ButtonSubmit_OnClick"
-                                Content="保存" />
+                                Content="保存" HorizontalAlignment="Right" />
                     </Grid>
                 </Grid>
             </Border>

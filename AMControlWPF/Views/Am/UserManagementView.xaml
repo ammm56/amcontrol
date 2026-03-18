@@ -42,7 +42,7 @@
                              VerticalContentAlignment="Center"
                              Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
                     <Button MinWidth="72" Margin="0,0,8,6" Command="{Binding RefreshCommand}" Content="刷新" />
-                    <Button MinWidth="72" Margin="0,0,8,6" Content="新增用户" />
+                    <Button MinWidth="72" Margin="0,0,8,6" Click="ButtonAddUser_OnClick" Content="新增用户" />
                     <Button MinWidth="72" Margin="0,0,0,6" Content="导出" />
                 </WrapPanel>
             </DockPanel>
@@ -310,8 +310,8 @@
                             </Border>
 
                             <WrapPanel Grid.Row="12">
-                                <Button MinWidth="100" Margin="0,0,8,8" Content="编辑用户" />
-                                <Button MinWidth="100" Margin="0,0,8,8" Content="重置密码" />
+                                <Button MinWidth="100" Margin="0,0,8,8" Click="ButtonEditUser_OnClick" Content="编辑用户" />
+                                <Button MinWidth="100" Margin="0,0,8,8" Click="ButtonResetPassword_OnClick" Content="重置密码" />
                                 <Button MinWidth="100" Margin="0,0,8,8" Content="启用/禁用" />
                                 <Button MinWidth="100" Margin="0,0,8,8" Content="分配权限" />
                             </WrapPanel>

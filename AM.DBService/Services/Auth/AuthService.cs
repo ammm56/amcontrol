@@ -217,6 +217,266 @@ namespace AM.DBService.Services.Auth
         }
 
         /// <summary>
+        /// 新增用户。
+        /// </summary>
+        public Result CreateUser(string loginName, string userName, string roleCode, string password, bool isEnabled, string remark)
+        {
+            if (string.IsNullOrWhiteSpace(loginName))
+            {
+                return Result.Fail(-20, "登录名不能为空", ResultSource.Unknown);
+            }
+
+            if (string.IsNullOrWhiteSpace(userName))
+            {
+                return Result.Fail(-21, "用户名不能为空", ResultSource.Unknown);
+            }
+
+            if (string.IsNullOrWhiteSpace(roleCode))
+            {
+                return Result.Fail(-22, "角色不能为空", ResultSource.Unknown);
+            }
+
+            if (string.IsNullOrWhiteSpace(password))
+            {
+                return Result.Fail(-23, "初始密码不能为空", ResultSource.Unknown);
+            }
+
+            if (password.Length < 6)
+            {
+                return Result.Fail(-24, "初始密码长度不能少于 6 位", ResultSource.Unknown);
+            }
+
+            var userQuery = _userDb.QueryAll();
+            if (!userQuery.Success)
+            {
+                _reporter?.Error("AuthService", "新增用户时查询用户失败", userQuery.Code);
+                return Result.Fail(userQuery.Code, "查询用户失败", ResultSource.Database);
+            }
+
+            var exists = userQuery.Items.Any(u => string.Equals(u.LoginName, loginName, StringComparison.OrdinalIgnoreCase));
+            if (exists)
+            {
+                return Result.Fail(-25, "登录名已存在", ResultSource.Unknown);
+            }
+
+            var roleQuery = _roleDb.QueryAll();
+            if (!roleQuery.Success)
+            {
+                _reporter?.Error("AuthService", "新增用户时查询角色失败", roleQuery.Code);
+                return Result.Fail(roleQuery.Code, "查询角色失败", ResultSource.Database);
+            }
+
+            var role = roleQuery.Items.FirstOrDefault(r => string.Equals(r.RoleCode, roleCode, StringComparison.OrdinalIgnoreCase));
+            if (role == null)
+            {
+                return Result.Fail(-26, "角色不存在", ResultSource.Unknown);
+            }
+
+            string salt;
+            string hash;
+            CreatePasswordHash(password, out salt, out hash);
+
+            var user = new SysUser
+            {
+                LoginName = loginName.Trim(),
+                UserName = userName.Trim(),
+                PasswordSalt = salt,
+                PasswordHash = hash,
+                IsEnabled = isEnabled,
+                IsAdmin = string.Equals(roleCode, "Am", StringComparison.OrdinalIgnoreCase),
+                FailedLoginCount = 0,
+                LockoutEndTime = null,
+                LastLoginTime = null,
+                Remark = string.IsNullOrWhiteSpace(remark) ? null : remark.Trim(),
+                CreateTime = DateTime.Now
+            };
+
+            var addUserResult = _userDb.Add(user);
+            if (!addUserResult.Success)
+            {
+                _reporter?.Error("AuthService", "新增用户保存失败", addUserResult.Code);
+                return Result.Fail(addUserResult.Code, "新增用户保存失败", ResultSource.Database);
+            }
+
+            var reloadUserQuery = _userDb.QueryAll();
+            if (!reloadUserQuery.Success)
+            {
+                _reporter?.Error("AuthService", "新增用户后重新查询失败", reloadUserQuery.Code);
+                return Result.Fail(reloadUserQuery.Code, "新增成功，但重新查询用户失败", ResultSource.Database);
+            }
+
+            var savedUser = reloadUserQuery.Items
+                .FirstOrDefault(u => string.Equals(u.LoginName, loginName, StringComparison.OrdinalIgnoreCase));
+
+            if (savedUser == null)
+            {
+                return Result.Fail(-27, "新增成功，但无法获取用户主键", ResultSource.Database);
+            }
+
+            var addUserRoleResult = _userRoleDb.Add(new SysUserRole
+            {
+                UserId = savedUser.Id,
+                RoleId = role.Id,
+                CreateTime = DateTime.Now
+            });
+
+            if (!addUserRoleResult.Success)
+            {
+                _reporter?.Error("AuthService", "新增用户角色关联失败", addUserRoleResult.Code);
+                return Result.Fail(addUserRoleResult.Code, "新增用户成功，但角色关联保存失败", ResultSource.Database);
+            }
+
+            _reporter?.Info("AuthService", "新增用户成功：" + loginName);
+            return Result.Ok("新增用户成功", ResultSource.Database);
+        }
+
+        /// <summary>
+        /// 更新用户基本信息。
+        /// </summary>
+        public Result UpdateUser(int userId, string userName, string roleCode, bool isEnabled, string remark)
+        {
+            if (userId <= 0)
+            {
+                return Result.Fail(-30, "用户标识无效", ResultSource.Unknown);
+            }
+
+            if (string.IsNullOrWhiteSpace(userName))
+            {
+                return Result.Fail(-31, "用户名不能为空", ResultSource.Unknown);
+            }
+
+            if (string.IsNullOrWhiteSpace(roleCode))
+            {
+                return Result.Fail(-32, "角色不能为空", ResultSource.Unknown);
+            }
+
+            var userQuery = _userDb.QueryAll();
+            if (!userQuery.Success)
+            {
+                _reporter?.Error("AuthService", "编辑用户时查询用户失败", userQuery.Code);
+                return Result.Fail(userQuery.Code, "查询用户失败", ResultSource.Database);
+            }
+
+            var user = userQuery.Items.FirstOrDefault(u => u.Id == userId);
+            if (user == null)
+            {
+                return Result.Fail(-33, "用户不存在", ResultSource.Unknown);
+            }
+
+            var roleQuery = _roleDb.QueryAll();
+            if (!roleQuery.Success)
+            {
+                _reporter?.Error("AuthService", "编辑用户时查询角色失败", roleQuery.Code);
+                return Result.Fail(roleQuery.Code, "查询角色失败", ResultSource.Database);
+            }
+
+            var role = roleQuery.Items.FirstOrDefault(r => string.Equals(r.RoleCode, roleCode, StringComparison.OrdinalIgnoreCase));
+            if (role == null)
+            {
+                return Result.Fail(-34, "角色不存在", ResultSource.Unknown);
+            }
+
+            user.UserName = userName.Trim();
+            user.IsEnabled = isEnabled;
+            user.IsAdmin = string.Equals(roleCode, "Am", StringComparison.OrdinalIgnoreCase);
+            user.Remark = string.IsNullOrWhiteSpace(remark) ? null : remark.Trim();
+
+            var editUserResult = _userDb.Edit(user);
+            if (!editUserResult.Success)
+            {
+                _reporter?.Error("AuthService", "编辑用户保存失败", editUserResult.Code);
+                return Result.Fail(editUserResult.Code, "编辑用户保存失败", ResultSource.Database);
+            }
+
+            var userRoleQuery = _userRoleDb.QueryAll();
+            if (!userRoleQuery.Success)
+            {
+                _reporter?.Error("AuthService", "编辑用户时查询用户角色关联失败", userRoleQuery.Code);
+                return Result.Fail(userRoleQuery.Code, "查询用户角色关联失败", ResultSource.Database);
+            }
+
+            var userRole = userRoleQuery.Items.FirstOrDefault(x => x.UserId == userId);
+            Result saveUserRoleResult;
+
+            if (userRole == null)
+            {
+                saveUserRoleResult = _userRoleDb.Add(new SysUserRole
+                {
+                    UserId = userId,
+                    RoleId = role.Id,
+                    CreateTime = DateTime.Now
+                });
+            }
+            else
+            {
+                userRole.RoleId = role.Id;
+                saveUserRoleResult = _userRoleDb.Edit(userRole);
+            }
+
+            if (!saveUserRoleResult.Success)
+            {
+                _reporter?.Error("AuthService", "编辑用户角色关联保存失败", saveUserRoleResult.Code);
+                return Result.Fail(saveUserRoleResult.Code, "编辑用户成功，但角色关联保存失败", ResultSource.Database);
+            }
+
+            _reporter?.Info("AuthService", "编辑用户成功：" + user.LoginName);
+            return Result.Ok("编辑用户成功", ResultSource.Database);
+        }
+
+        /// <summary>
+        /// 管理员重置指定用户密码。
+        /// </summary>
+        public Result ResetUserPassword(int userId, string newPassword)
+        {
+            if (userId <= 0)
+            {
+                return Result.Fail(-40, "用户标识无效", ResultSource.Unknown);
+            }
+
+            if (string.IsNullOrWhiteSpace(newPassword))
+            {
+                return Result.Fail(-41, "新密码不能为空", ResultSource.Unknown);
+            }
+
+            if (newPassword.Length < 6)
+            {
+                return Result.Fail(-42, "新密码长度不能少于 6 位", ResultSource.Unknown);
+            }
+
+            var userQuery = _userDb.QueryAll();
+            if (!userQuery.Success)
+            {
+                _reporter?.Error("AuthService", "重置密码时查询用户失败", userQuery.Code);
+                return Result.Fail(userQuery.Code, "查询用户失败", ResultSource.Database);
+            }
+
+            var user = userQuery.Items.FirstOrDefault(u => u.Id == userId);
+            if (user == null)
+            {
+                return Result.Fail(-43, "用户不存在", ResultSource.Unknown);
+            }
+
+            string salt;
+            string hash;
+            CreatePasswordHash(newPassword, out salt, out hash);
+
+            user.PasswordSalt = salt;
+            user.PasswordHash = hash;
+            user.FailedLoginCount = 0;
+            user.LockoutEndTime = null;
+
+            var editResult = _userDb.Edit(user);
+            if (!editResult.Success)
+            {
+                _reporter?.Error("AuthService", "重置密码保存失败", editResult.Code);
+                return Result.Fail(editResult.Code, "重置密码保存失败", ResultSource.Database);
+            }
+
+            _reporter?.Info("AuthService", "重置用户密码成功：" + user.LoginName);
+            return Result.Ok("重置密码成功", ResultSource.Database);
+        }
+
+        /// <summary>
         /// 修改当前登录用户的密码。
         /// </summary>
         public Result ChangeCurrentUserPassword(string oldPassword, string newPassword, string confirmPassword)
