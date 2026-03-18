@@ -82,35 +82,56 @@
                             <Popup x:Name="PopupUserMenu"
                                    PlacementTarget="{Binding ElementName=ButtonUserCard}"
                                    Placement="Top"
-                                   VerticalOffset="-6"
+                                   VerticalOffset="-8"
                                    StaysOpen="False"
                                    AllowsTransparency="True"
                                    PopupAnimation="Fade">
-                                <Border Width="188"
-                                        Padding="8"
-                                        CornerRadius="10"
-                                        Background="{DynamicResource RegionBrush}"
-                                        BorderBrush="{DynamicResource BorderBrush}"
-                                        BorderThickness="1"
-                                        Effect="{StaticResource EffectShadow4}">
+                                <Border Style="{StaticResource UserPopupCardBorderStyle}">
                                     <StackPanel>
-                                        <TextBlock x:Name="TextBlockPopupUserTitle"
-                                                   Margin="8,6,8,10"
-                                                   FontWeight="SemiBold"
-                                                   Foreground="{DynamicResource PrimaryTextBrush}"
-                                                   Text="当前用户 / 角色" />
+                                        <Grid Margin="2,2,2,10">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="10" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
 
-                                        <Button Margin="0,0,0,6"
-                                                Click="ButtonSwitchUser_OnClick"
-                                                Content="切换用户" />
+                                            <hc:Gravatar Width="40"
+                                                     Height="40"
+                                                     Style="{StaticResource GravatarBaseStyle}"
+                                                     Id="{Binding ElementName=GravatarCurrentUser, Path=Id}" />
 
-                                        <Button Margin="0,0,0,6"
-                                                Click="ButtonChangePassword_OnClick"
-                                                Content="修改密码" />
-                                        
-                                        <Button Margin="0,0,0,0"
-                                                Click="ButtonLogout_OnClick"
-                                                Content="退出登录" />
+                                            <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                                <TextBlock x:Name="TextBlockPopupUserName"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                                       Text="当前用户" />
+                                                <TextBlock x:Name="TextBlockPopupUserRole"
+                                                       Margin="0,4,0,0"
+                                                       FontSize="12"
+                                                       Opacity="0.75"
+                                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                                       Text="角色" />
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <Border Height="1"
+                                                        Margin="0,0,0,10"
+                                                        Background="{DynamicResource BorderBrush}" />
+
+                                        <Button Style="{StaticResource UserPopupActionButtonStyle}"
+                                                        Click="ButtonSwitchUser_OnClick"
+                                                        Content="切换用户" />
+
+                                        <Button Style="{StaticResource UserPopupActionButtonStyle}"
+                                                        Click="ButtonChangePassword_OnClick"
+                                                        Content="修改密码" />
+
+                                        <Button Margin="0"
+                                                        Height="34"
+                                                        Padding="12,0"
+                                                        HorizontalContentAlignment="Left"
+                                                        Click="ButtonLogout_OnClick"
+                                                        Content="退出登录" />
                                     </StackPanel>
                                 </Border>
                             </Popup>
@@ -198,7 +219,7 @@
                                            FontSize="15"
                                            FontWeight="SemiBold"
                                            Foreground="{DynamicResource PrimaryTextBrush}"
-                                           Text="首页" /> 
+                                           Text="首页" />
                                 <TextBlock x:Name="TextBlockWorkAreaDescription"
                                            DockPanel.Dock="Right"
                                            VerticalAlignment="Center"

@@ -68,9 +68,10 @@ namespace AMControlWPF
                 : UserContext.Instance.UserName;
 
             var roleName = GetCurrentRoleDisplayName();
-
             var user = string.IsNullOrWhiteSpace(userName) ? "未登录" : userName;
-            TextBlockPopupUserTitle.Text = $"{user}/{roleName}";
+
+            TextBlockPopupUserName.Text = user;
+            TextBlockPopupUserRole.Text = roleName;
 
             GravatarCurrentUser.Id = string.IsNullOrWhiteSpace(UserContext.Instance.LoginName)
                 ? "guest"
