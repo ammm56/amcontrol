@@ -15,6 +15,10 @@ namespace AMControlWPF.Views.Am
 
             IsEditMode = false;
             TextBlockTitle.Text = "新增用户";
+            TextBlockPasswordLabel.Visibility = Visibility.Visible;
+            PasswordBoxPassword.Visibility = Visibility.Visible;
+
+            Height = 620;
         }
 
         public UserEditDialog(UserSummary user) : this()
@@ -32,10 +36,19 @@ namespace AMControlWPF.Views.Am
             TextBoxUserName.Text = user.UserName;
             TextBoxRemark.Text = user.Remark;
             CheckBoxIsEnabled.IsChecked = user.IsEnabled;
-            CheckBoxResetPassword.IsChecked = false;
 
             SetRole(user.RoleCode);
             TextBoxLoginName.IsEnabled = false;
+
+            TextBlockPasswordLabel.Visibility = Visibility.Collapsed;
+            PasswordBoxPassword.Visibility = Visibility.Collapsed;
+
+            PasswordTopSpacingRow.Height = new GridLength(0);
+            PasswordLabelRow.Height = new GridLength(0);
+            PasswordInputRow.Height = new GridLength(0);
+            PasswordBottomSpacingRow.Height = new GridLength(0);
+
+            Height = 560;
         }
 
         public bool IsEditMode { get; private set; }
@@ -68,17 +81,12 @@ namespace AMControlWPF.Views.Am
 
         public string Password
         {
-            get { return PasswordBoxPassword.Password == null ? string.Empty : PasswordBoxPassword.Password.Trim(); }
+            get { return PasswordBoxPassword.Password == null ? string.Empty : PasswordBoxPassword.Password; }
         }
 
         public bool IsEnabledUser
         {
             get { return CheckBoxIsEnabled.IsChecked == true; }
-        }
-
-        public bool ResetPassword
-        {
-            get { return CheckBoxResetPassword.IsChecked == true; }
         }
 
         public string Remark
@@ -137,12 +145,6 @@ namespace AMControlWPF.Views.Am
             if (!IsEditMode && string.IsNullOrWhiteSpace(Password))
             {
                 TextBlockMessage.Text = "新增用户时必须输入初始密码";
-                return;
-            }
-
-            if (IsEditMode && ResetPassword && string.IsNullOrWhiteSpace(Password))
-            {
-                TextBlockMessage.Text = "勾选重置密码后必须输入新密码";
                 return;
             }
 

@@ -11,7 +11,6 @@ namespace AM.DBService.Services.Auth
 {
     /// <summary>
     /// 认证种子初始化服务。
-    /// 负责认证相关表建表、默认角色和默认管理员初始化。
     /// </summary>
     public class AuthSeedService
     {
@@ -28,9 +27,6 @@ namespace AM.DBService.Services.Auth
             _dbContext = new DBContext();
         }
 
-        /// <summary>
-        /// 确保认证相关表和默认数据存在。
-        /// </summary>
         public void EnsureSeedData()
         {
             try
@@ -40,6 +36,7 @@ namespace AM.DBService.Services.Auth
                 EnsureTables(db);
                 EnsureRoles(db);
                 EnsureDefaultAdmin(db);
+                EnsurePagePermissions(db);
             }
             catch (Exception ex)
             {
@@ -53,9 +50,11 @@ namespace AM.DBService.Services.Auth
                 typeof(SysUser),
                 typeof(SysRole),
                 typeof(SysUserRole),
-                typeof(SysLoginLog));
+                typeof(SysLoginLog),
+                typeof(SysPagePermission),
+                typeof(SysUserPagePermission));
 
-            _reporter?.Info("AuthSeed", "认证表初始化完成");
+            _reporter?.Info("AuthSeed", "认证与权限表初始化完成");
         }
 
         private void EnsureRoles(SqlSugarClient db)
@@ -67,9 +66,7 @@ namespace AM.DBService.Services.Auth
 
         private void EnsureRole(SqlSugarClient db, string roleCode, string roleName)
         {
-            var exists = db.Queryable<SysRole>()
-                .Any(r => r.RoleCode == roleCode);
-
+            var exists = db.Queryable<SysRole>().Any(r => r.RoleCode == roleCode);
             if (exists)
             {
                 return;
@@ -88,8 +85,7 @@ namespace AM.DBService.Services.Auth
 
         private void EnsureDefaultAdmin(SqlSugarClient db)
         {
-            var adminUser = db.Queryable<SysUser>()
-                .First(u => u.LoginName == "am");
+            var adminUser = db.Queryable<SysUser>().First(u => u.LoginName == "am");
 
             if (adminUser == null)
             {
@@ -105,6 +101,7 @@ namespace AM.DBService.Services.Auth
                     PasswordHash = hash,
                     IsEnabled = true,
                     IsAdmin = true,
+                    UseCustomPagePermission = false,
                     FailedLoginCount = 0,
                     LockoutEndTime = null,
                     LastLoginTime = null,
@@ -114,9 +111,7 @@ namespace AM.DBService.Services.Auth
 
                 db.Insertable(user).ExecuteCommand();
 
-                adminUser = db.Queryable<SysUser>()
-                    .First(u => u.LoginName == "am");
-
+                adminUser = db.Queryable<SysUser>().First(u => u.LoginName == "am");
                 _reporter?.Warn("AuthSeed", "已初始化默认管理员：am / am123");
             }
 
@@ -130,9 +125,7 @@ namespace AM.DBService.Services.Auth
                 return;
             }
 
-            var adminRole = db.Queryable<SysRole>()
-                .First(r => r.RoleCode == "Am");
-
+            var adminRole = db.Queryable<SysRole>().First(r => r.RoleCode == "Am");
             if (adminRole == null)
             {
                 _reporter?.Error("AuthSeed", "默认管理员角色不存在");
@@ -155,6 +148,23 @@ namespace AM.DBService.Services.Auth
             }).ExecuteCommand();
 
             _reporter?.Info("AuthSeed", "默认管理员角色绑定完成");
+        }
+
+        private void EnsurePagePermissions(SqlSugarClient db)
+        {
+            var exists = db.Queryable<SysPagePermission>().Any();
+            if (exists)
+            {
+                return;
+            }
+
+            var defaults = AuthPermissionCatalog.CreateDefaultPagePermissions();
+            foreach (var item in defaults)
+            {
+                db.Insertable(item).ExecuteCommand();
+            }
+
+            _reporter?.Info("AuthSeed", "默认页面权限目录初始化完成");
         }
     }
 }

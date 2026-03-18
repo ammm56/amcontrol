@@ -12,6 +12,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using AM.Model.Auth;
 
 namespace AMControlWPF
 {
@@ -113,72 +114,73 @@ namespace AMControlWPF
             _allPrimaryNavItems.Add(new PrimaryNavItem("System", "系统"));
 
             _allSecondaryNavMap["Home"] = new List<SecondaryNavItem>
-            {
-                new SecondaryNavItem("Home.Overview", "总览看板", "设备总览、生产摘要、快捷入口"),
-                new SecondaryNavItem("Home.Status", "设备状态", "运动、PLC、相机、IO 总状态")
-            };
+                {
+                    new SecondaryNavItem("Home.Overview", "总览看板", "设备总览、生产摘要、快捷入口"),
+                    new SecondaryNavItem("Home.Status", "设备状态", "运动、PLC、相机、IO 总状态")
+                };
 
             _allSecondaryNavMap["Production"] = new List<SecondaryNavItem>
-            {
-                new SecondaryNavItem("Production.Data", "生产数据", "产量、节拍、良率、工单", "Operator", "Engineer", "Am"),
-                new SecondaryNavItem("Production.Report", "班次统计", "班次与日报汇总", "Engineer", "Am")
-            };
+                {
+                    new SecondaryNavItem("Production.Data", "生产数据", "产量、节拍、良率、工单", "Operator", "Engineer", "Am"),
+                    new SecondaryNavItem("Production.Report", "班次统计", "班次与日报汇总", "Engineer", "Am")
+                };
 
             _allSecondaryNavMap["Motion"] = new List<SecondaryNavItem>
-            {
-                new SecondaryNavItem("Motion.Axis", "轴控制", "当前选中轴的控制、状态、位置与动作记录", "Operator", "Engineer", "Am"),
-                new SecondaryNavItem("Motion.Status", "位置监视", "多轴位置、速度、状态总览", "Operator", "Engineer", "Am"),
-                new SecondaryNavItem("Motion.Alarm", "运动报警", "轴报警记录、处理与复位", "Operator", "Engineer", "Am")
-            };
+                {
+                    new SecondaryNavItem("Motion.Axis", "轴控制", "当前选中轴的控制、状态、位置与动作记录", "Operator", "Engineer", "Am"),
+                    new SecondaryNavItem("Motion.Status", "位置监视", "多轴位置、速度、状态总览", "Operator", "Engineer", "Am"),
+                    new SecondaryNavItem("Motion.Alarm", "运动报警", "轴报警记录、处理与复位", "Operator", "Engineer", "Am")
+                };
 
             _allSecondaryNavMap["IO"] = new List<SecondaryNavItem>
-            {
-                new SecondaryNavItem("IO.DI", "DI 监视", "输入点状态、条件判断与点位详情", "Operator", "Engineer", "Am"),
-                new SecondaryNavItem("IO.DO", "DO 监视", "输出点状态、输出控制与联动对象", "Operator", "Engineer", "Am"),
-                new SecondaryNavItem("IO.Debug", "IO 调试", "IO 调试记录与联动测试", "Engineer", "Am")
-            };
+                {
+                    new SecondaryNavItem("IO.DI", "DI 监视", "输入点状态、条件判断与点位详情", "Operator", "Engineer", "Am"),
+                    new SecondaryNavItem("IO.DO", "DO 监视", "输出点状态、输出控制与联动对象", "Operator", "Engineer", "Am"),
+                    new SecondaryNavItem("IO.Debug", "IO 调试", "IO 调试记录与联动测试", "Engineer", "Am")
+                };
 
             _allSecondaryNavMap["Vision"] = new List<SecondaryNavItem>
-            {
-                new SecondaryNavItem("Vision.Monitor", "相机监视", "实时画面与触发结果", "Operator", "Engineer", "Am")
-            };
+                {
+                    new SecondaryNavItem("Vision.Monitor", "相机监视", "实时画面与触发结果", "Operator", "Engineer", "Am")
+                };
 
             _allSecondaryNavMap["PLC"] = new List<SecondaryNavItem>
-            {
-                new SecondaryNavItem("PLC.Monitor", "点位监视", "寄存器、位变量监视", "Operator", "Engineer", "Am"),
-                new SecondaryNavItem("PLC.Debug", "通讯状态", "通讯诊断与报文状态", "Operator", "Engineer", "Am")
-            };
+                {
+                    new SecondaryNavItem("PLC.Monitor", "点位监视", "寄存器、位变量监视", "Operator", "Engineer", "Am"),
+                    new SecondaryNavItem("PLC.Debug", "通讯状态", "通讯诊断与报文状态", "Operator", "Engineer", "Am")
+                };
 
             _allSecondaryNavMap["Config"] = new List<SecondaryNavItem>
-            {
-                new SecondaryNavItem("Config.Axis", "轴配置编辑", "运行配置层编辑", "Engineer", "Am"),
-                new SecondaryNavItem("Config.Card", "控制卡配置编辑", "卡参数与映射", "Engineer", "Am"),
-                new SecondaryNavItem("Config.Camera", "相机配置编辑", "相机与任务配置", "Engineer", "Am"),
-                new SecondaryNavItem("Config.Plc", "PLC 配置编辑", "PLC 业务配置", "Engineer", "Am"),
-                new SecondaryNavItem("Config.Runtime", "运行配置编辑", "系统运行参数", "Engineer", "Am")
-            };
+                {
+                    new SecondaryNavItem("Config.Axis", "轴配置编辑", "运行配置层编辑", "Engineer", "Am"),
+                    new SecondaryNavItem("Config.Card", "控制卡配置编辑", "卡参数与映射", "Engineer", "Am"),
+                    new SecondaryNavItem("Config.Camera", "相机配置编辑", "相机与任务配置", "Engineer", "Am"),
+                    new SecondaryNavItem("Config.Plc", "PLC 配置编辑", "PLC 业务配置", "Engineer", "Am"),
+                    new SecondaryNavItem("Config.Runtime", "运行配置编辑", "系统运行参数", "Engineer", "Am")
+                };
 
             _allSecondaryNavMap["Engineer"] = new List<SecondaryNavItem>
-            {
-                new SecondaryNavItem("Engineer.RawAxis", "原始轴参数", "控制卡原始参数", "Engineer", "Am"),
-                new SecondaryNavItem("Engineer.RawPlc", "原始 PLC 参数", "PLC 原始参数", "Engineer", "Am"),
-                new SecondaryNavItem("Engineer.RawCamera", "原始相机参数", "视觉原始参数", "Engineer", "Am"),
-                new SecondaryNavItem("Engineer.Diagnostic", "设备诊断", "运行诊断与状态检查", "Engineer", "Am"),
-                new SecondaryNavItem("Engineer.Debug", "Motion/IO 调试", "联机调试与测试页", "Engineer", "Am")
-            };
+                {
+                    new SecondaryNavItem("Engineer.RawAxis", "原始轴参数", "控制卡原始参数", "Engineer", "Am"),
+                    new SecondaryNavItem("Engineer.RawPlc", "原始 PLC 参数", "PLC 原始参数", "Engineer", "Am"),
+                    new SecondaryNavItem("Engineer.RawCamera", "原始相机参数", "视觉原始参数", "Engineer", "Am"),
+                    new SecondaryNavItem("Engineer.Diagnostic", "设备诊断", "运行诊断与状态检查", "Engineer", "Am"),
+                    new SecondaryNavItem("Engineer.Debug", "Motion/IO 调试", "联机调试与测试页", "Engineer", "Am")
+                };
 
             _allSecondaryNavMap["AlarmLog"] = new List<SecondaryNavItem>
-            {
-                new SecondaryNavItem("AlarmLog.Current", "当前报警", "当前活动报警", "Operator", "Engineer", "Am"),
-                new SecondaryNavItem("AlarmLog.History", "报警历史", "历史报警查询", "Engineer", "Am"),
-                new SecondaryNavItem("AlarmLog.RunLog", "运行日志", "系统运行日志", "Engineer", "Am")
-            };
+                {
+                    new SecondaryNavItem("AlarmLog.Current", "当前报警", "当前活动报警", "Operator", "Engineer", "Am"),
+                    new SecondaryNavItem("AlarmLog.History", "报警历史", "历史报警查询", "Engineer", "Am"),
+                    new SecondaryNavItem("AlarmLog.RunLog", "运行日志", "系统运行日志", "Engineer", "Am")
+                };
 
             _allSecondaryNavMap["System"] = new List<SecondaryNavItem>
-            {
-                new SecondaryNavItem("System.User", "用户管理", "用户、角色、密码重置与启停管理", "Am"),
-                new SecondaryNavItem("System.LoginLog", "登录日志", "用户登录历史与登录结果记录", "Am")
-            };
+                {
+                    new SecondaryNavItem("System.User", "用户管理", "用户、角色、密码重置与启停管理", "Am"),
+                    new SecondaryNavItem("System.Permission", "权限分配", "用户页面权限配置与说明", "Am"),
+                    new SecondaryNavItem("System.LoginLog", "登录日志", "用户登录历史与登录结果记录", "Am")
+                };
         }
 
         private void ApplyNavigationByUser()
@@ -215,17 +217,7 @@ namespace AMControlWPF
                 return false;
             }
 
-            if (UserContext.Instance.IsAdmin)
-            {
-                return true;
-            }
-
-            if (item.AllowedRoles.Count == 0)
-            {
-                return true;
-            }
-
-            return item.AllowedRoles.Any(UserContext.Instance.HasRole);
+            return UserContext.Instance.HasPagePermission(item.Key);
         }
 
         private void NonClientArea_NavigateRequested(string tag)
@@ -352,7 +344,11 @@ namespace AMControlWPF
                 case "AlarmLog.RunLog":
                     return CreatePlaceholderPage("报警与日志 / 运行日志");
                 case "System.User":
-                    return new UserManagementView();
+                    var userManagementView = new UserManagementView();
+                    return userManagementView;
+                case "System.Permission":
+                    var permissionView = new UserPermissionView();
+                    return permissionView;
                 case "System.LoginLog":
                     return new LoginLogView();
                 default:

@@ -57,6 +57,7 @@
     <Compile Include="Mappers\AxisConfigMapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\AlarmRecordService.cs" />
+    <Compile Include="Services\Auth\AuthPermissionCatalog.cs" />
     <Compile Include="Services\Auth\AuthSeedService.cs" />
     <Compile Include="Services\Auth\AuthService.cs" />
     <Compile Include="Services\AxisConfigOverlayService.cs" />

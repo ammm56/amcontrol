@@ -1,0 +1,280 @@
+﻿<UserControl x:Class="AMControlWPF.Views.Am.UserPermissionView"
+             xmlns:hc="https://handyorg.github.io/handycontrol"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             Background="Transparent">
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="8" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0"
+                Padding="12,10"
+                CornerRadius="8"
+                Background="{DynamicResource SecondaryRegionBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Left"
+                           VerticalAlignment="Center"
+                           FontSize="14"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource PrimaryTextBrush}"
+                           Text="页面权限分配" />
+
+                <WrapPanel DockPanel.Dock="Right"
+                           HorizontalAlignment="Right">
+                    <Button MinWidth="90"
+                            Margin="0,0,8,0"
+                            Click="ButtonSelectAll_OnClick"
+                            Content="当前模块全选" />
+                    <Button MinWidth="90"
+                            Margin="0,0,8,0"
+                            Click="ButtonClearAll_OnClick"
+                            Content="当前模块清空" />
+                    <Button MinWidth="72"
+                            Margin="0,0,8,0"
+                            Click="ButtonRefresh_OnClick"
+                            Content="刷新" />
+                    <Button MinWidth="72"
+                            Click="ButtonSave_OnClick"
+                            Content="保存" />
+                </WrapPanel>
+            </DockPanel>
+        </Border>
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="240" />
+                <ColumnDefinition Width="8" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="8" />
+                <ColumnDefinition Width="300" />
+            </Grid.ColumnDefinitions>
+
+            <!-- 左侧：用户选择 -->
+            <Border Grid.Column="0"
+                    Padding="12"
+                    CornerRadius="8"
+                    Background="{DynamicResource SecondaryRegionBrush}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="8" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="8" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               Text="用户选择" />
+
+                    <TextBox x:Name="TextBoxUserSearch"
+                             Grid.Row="2"
+                             Height="32"
+                             VerticalContentAlignment="Center"
+                             TextChanged="TextBoxUserSearch_OnTextChanged" />
+
+                    <ListBox x:Name="ListBoxUsers"
+                             Grid.Row="4"
+                             SelectionChanged="ListBoxUsers_SelectionChanged"
+                             ItemContainerStyle="{StaticResource ViewNavItemStyle}"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             HorizontalContentAlignment="Stretch">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,2">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="10" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <hc:Gravatar Width="34"
+                                                 Height="34"
+                                                 Style="{StaticResource GravatarBaseStyle}"
+                                                 Id="{Binding AvatarId, TargetNullValue=guest, FallbackValue=guest}" />
+
+                                    <StackPanel Grid.Column="2"
+                                                VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding LoginName}"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=Foreground}" />
+                                        <TextBlock Margin="0,4,0,0"
+                                                   FontSize="12"
+                                                   Opacity="0.75"
+                                                   Foreground="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=Foreground}"
+                                                   Text="{Binding RoleDisplayName}" />
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </Border>
+
+            <!-- 中间：页面权限 -->
+            <Border Grid.Column="2"
+                    Padding="12"
+                    CornerRadius="8"
+                    Background="{DynamicResource SecondaryRegionBrush}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="8" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="8" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <DockPanel Grid.Row="0">
+                        <StackPanel DockPanel.Dock="Left"
+                                    Orientation="Horizontal"
+                                    VerticalAlignment="Center">
+                            <TextBlock VerticalAlignment="Center"
+                                       FontSize="14"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                       Text="页面权限" />
+                            <TextBlock x:Name="TextBlockSelectedUser"
+                                       Margin="12,0,0,0"
+                                       VerticalAlignment="Center"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                       Opacity="0.75"
+                                       Text="未选择用户" />
+                        </StackPanel>
+                    </DockPanel>
+
+                    <ComboBox x:Name="ComboBoxModules"
+                              Grid.Row="2"
+                              Height="32"
+                              DisplayMemberPath="DisplayName"
+                              SelectionChanged="ComboBoxModules_SelectionChanged" />
+
+                    <ListBox x:Name="ListBoxPermissions"
+                             Grid.Row="4"
+                             SelectionChanged="ListBoxPermissions_SelectionChanged"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             HorizontalContentAlignment="Stretch">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border Margin="0,0,0,8"
+                                        Padding="10"
+                                        CornerRadius="8"
+                                        Background="{DynamicResource RegionBrush}"
+                                        BorderBrush="{DynamicResource BorderBrush}"
+                                        BorderThickness="1">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="10" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <CheckBox IsChecked="{Binding IsChecked, Mode=TwoWay}"
+                                                  VerticalAlignment="Top" />
+
+                                        <StackPanel Grid.Column="2">
+                                            <TextBlock Text="{Binding DisplayName}"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource PrimaryTextBrush}" />
+                                            <TextBlock Margin="0,4,0,0"
+                                                       FontSize="12"
+                                                       Opacity="0.75"
+                                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                                       Text="{Binding Description}" />
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </Border>
+
+            <!-- 右侧：详情 -->
+            <Border Grid.Column="4"
+                    Padding="12"
+                    CornerRadius="8"
+                    Background="{DynamicResource SecondaryRegionBrush}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="12" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="8" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="8" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="8" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="8" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               Text="权限详情" />
+
+                    <Border Grid.Row="2"
+                            Padding="10"
+                            CornerRadius="6"
+                            Background="{DynamicResource RegionBrush}">
+                        <TextBlock x:Name="TextBlockPermissionName"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource PrimaryTextBrush}"
+                                   Text="-" />
+                    </Border>
+
+                    <Border Grid.Row="4"
+                            Padding="10"
+                            CornerRadius="6"
+                            Background="{DynamicResource RegionBrush}">
+                        <TextBlock x:Name="TextBlockPermissionKey"
+                                   Foreground="{DynamicResource PrimaryTextBrush}"
+                                   Text="页面键值：-" />
+                    </Border>
+
+                    <Border Grid.Row="6"
+                            Padding="10"
+                            CornerRadius="6"
+                            Background="{DynamicResource RegionBrush}">
+                        <TextBlock x:Name="TextBlockPermissionRoles"
+                                   Foreground="{DynamicResource PrimaryTextBrush}"
+                                   Text="建议角色：-" />
+                    </Border>
+
+                    <Border Grid.Row="8"
+                            Padding="10"
+                            CornerRadius="6"
+                            Background="{DynamicResource RegionBrush}">
+                        <TextBlock x:Name="TextBlockPermissionRisk"
+                                   Foreground="{DynamicResource PrimaryTextBrush}"
+                                   Text="风险级别：-" />
+                    </Border>
+
+                    <Border Grid.Row="10"
+                            Padding="10"
+                            CornerRadius="6"
+                            Background="{DynamicResource RegionBrush}">
+                        <TextBlock x:Name="TextBlockPermissionDescription"
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource PrimaryTextBrush}"
+                                   Text="请选择一个页面权限以查看说明。" />
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

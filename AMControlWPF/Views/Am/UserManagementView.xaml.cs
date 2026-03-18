@@ -1,5 +1,7 @@
 ﻿using AM.DBService.Services.Auth;
+using AM.Model.Auth;
 using AM.ViewModel.ViewModels.Am;
+using System;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -22,8 +24,9 @@ namespace AMControlWPF.Views.Am
 
             DataContext = _viewModel;
             Loaded += UserManagementView_Loaded;
-
         }
+
+        public event Action<UserSummary> PermissionRequested;
 
         private async void UserManagementView_Loaded(object sender, RoutedEventArgs e)
         {
@@ -151,6 +154,18 @@ namespace AMControlWPF.Views.Am
             }
 
             await _viewModel.LoadAsync();
+        }
+
+        private void ButtonAssignPermission_OnClick(object sender, RoutedEventArgs e)
+        {
+            var selectedUser = _viewModel.SelectedUser;
+            if (selectedUser == null)
+            {
+                MessageBox.Show("请先选择一个用户。", "分配权限", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            PermissionRequested?.Invoke(selectedUser);
         }
     }
 }

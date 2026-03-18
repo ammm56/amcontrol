@@ -4,7 +4,6 @@
                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-               xmlns:local="clr-namespace:AMControlWPF.Views.Am"
                mc:Ignorable="d"
                Title="用户编辑"
                Width="560"
@@ -35,12 +34,10 @@
                         <RowDefinition Height="12" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
-                        <RowDefinition Height="12" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="12" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
+                        <RowDefinition x:Name="PasswordTopSpacingRow" Height="12" />
+                        <RowDefinition x:Name="PasswordLabelRow" Height="Auto" />
+                        <RowDefinition x:Name="PasswordInputRow" Height="Auto" />
+                        <RowDefinition x:Name="PasswordBottomSpacingRow" Height="12" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
@@ -85,47 +82,41 @@
                         <ComboBoxItem Content="管理员" Tag="Am" />
                     </ComboBox>
 
-                    <TextBlock Grid.Row="11"
+                    <TextBlock x:Name="TextBlockPasswordLabel"
+                               Grid.Row="11"
                                Margin="0,0,0,6"
                                Foreground="{DynamicResource PrimaryTextBrush}"
-                               Text="初始密码 / 重置密码" />
+                               Text="初始密码" />
                     <PasswordBox x:Name="PasswordBoxPassword"
                                  Grid.Row="12"
                                  Height="36"
                                  VerticalContentAlignment="Center" />
 
-                    <StackPanel Grid.Row="14"
-                                Orientation="Horizontal"
-                                VerticalAlignment="Center">
-                        <CheckBox x:Name="CheckBoxIsEnabled"
-                                  IsChecked="True"
-                                  VerticalAlignment="Center"
-                                  Content="启用账户" />
-                        <CheckBox x:Name="CheckBoxResetPassword"
-                                  Margin="20,0,0,0"
-                                  VerticalAlignment="Center"
-                                  Content="保存时重置密码" />
-                    </StackPanel>
+                    <CheckBox x:Name="CheckBoxIsEnabled"
+                              Grid.Row="14"
+                              IsChecked="True"
+                              VerticalAlignment="Center"
+                              Content="启用账户" />
 
-                    <TextBlock Grid.Row="16"
-                               Margin="0,0,0,6"
+                    <TextBlock Grid.Row="15"
+                               Margin="0,12,0,6"
                                Foreground="{DynamicResource PrimaryTextBrush}"
                                Text="备注" />
                     <TextBox x:Name="TextBoxRemark"
-                             Grid.Row="17"
+                             Grid.Row="16"
                              Height="72"
                              AcceptsReturn="True"
                              TextWrapping="Wrap"
                              VerticalScrollBarVisibility="Auto" />
 
                     <TextBlock x:Name="TextBlockMessage"
-                               Grid.Row="18"
+                               Grid.Row="17"
                                MinHeight="22"
                                Margin="0,8,0,0"
                                Foreground="{DynamicResource DangerBrush}"
                                TextWrapping="Wrap" />
 
-                    <Grid Grid.Row="19" Margin="0,12,0,0">
+                    <Grid Grid.Row="18" Margin="0,12,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="8" />
@@ -136,13 +127,15 @@
                                 Width="186"
                                 Height="36"
                                 Click="ButtonCancel_OnClick"
-                                Content="取消" HorizontalAlignment="Left"  />
+                                Content="取消"
+                                HorizontalAlignment="Left" />
 
                         <Button Grid.Column="2"
                                 Width="186"
                                 Height="36"
                                 Click="ButtonSubmit_OnClick"
-                                Content="保存" HorizontalAlignment="Right" />
+                                Content="保存"
+                                HorizontalAlignment="Right" />
                     </Grid>
                 </Grid>
             </Border>

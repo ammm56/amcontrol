@@ -21,6 +21,7 @@ namespace AM.Core.Context
         private UserContext()
         {
             CurrentRoles = new List<SysRole>();
+            CurrentPageKeys = new List<string>();
         }
 
         /// <summary>
@@ -32,6 +33,11 @@ namespace AM.Core.Context
         /// 当前用户角色集合。
         /// </summary>
         public IReadOnlyList<SysRole> CurrentRoles { get; private set; }
+
+        /// <summary>
+        /// 当前用户页面权限标识集合。
+        /// </summary>
+        public IReadOnlyList<string> CurrentPageKeys { get; private set; }
 
         /// <summary>
         /// 是否已登录。
@@ -66,12 +72,26 @@ namespace AM.Core.Context
         }
 
         /// <summary>
+        /// 是否使用自定义页面权限。
+        /// </summary>
+        public bool UseCustomPagePermission
+        {
+            get { return CurrentUser != null && CurrentUser.UseCustomPagePermission; }
+        }
+
+        /// <summary>
         /// 登录写入上下文。
         /// </summary>
-        public void SignIn(SysUser user, IEnumerable<SysRole> roles)
+        public void SignIn(SysUser user, IEnumerable<SysRole> roles, IEnumerable<string> pageKeys)
         {
             CurrentUser = user;
             CurrentRoles = roles == null ? new List<SysRole>() : roles.ToList();
+            CurrentPageKeys = pageKeys == null
+                ? new List<string>()
+                : pageKeys
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
         }
 
         /// <summary>
@@ -81,6 +101,7 @@ namespace AM.Core.Context
         {
             CurrentUser = null;
             CurrentRoles = new List<SysRole>();
+            CurrentPageKeys = new List<string>();
         }
 
         /// <summary>
@@ -94,6 +115,19 @@ namespace AM.Core.Context
             }
 
             return CurrentRoles.Any(r => string.Equals(r.RoleCode, roleCode, StringComparison.OrdinalIgnoreCase));
+        }
+
+        /// <summary>
+        /// 是否拥有指定页面权限。
+        /// </summary>
+        public bool HasPagePermission(string pageKey)
+        {
+            if (string.IsNullOrWhiteSpace(pageKey) || CurrentPageKeys == null)
+            {
+                return false;
+            }
+
+            return CurrentPageKeys.Any(x => string.Equals(x, pageKey, StringComparison.OrdinalIgnoreCase));
         }
     }
 }

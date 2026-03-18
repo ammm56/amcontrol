@@ -46,6 +46,13 @@ namespace AM.Model.Entity.Auth
         public bool IsAdmin { get; set; }
 
         /// <summary>
+        /// 是否启用自定义页面权限。
+        /// False：按角色默认权限。
+        /// True：按 sys_user_page_permission 作为最终页面权限。
+        /// </summary>
+        public bool UseCustomPagePermission { get; set; }
+
+        /// <summary>
         /// 连续登录失败次数。
         /// </summary>
         public int FailedLoginCount { get; set; }

@@ -13,7 +13,6 @@ namespace AM.DBService.Services.Auth
 {
     /// <summary>
     /// 认证服务。
-    /// 第一版采用 用户/角色/用户角色 模型完成登录闭环。
     /// </summary>
     public class AuthService
     {
@@ -24,6 +23,8 @@ namespace AM.DBService.Services.Auth
         private readonly DBCommon<SysRole> _roleDb;
         private readonly DBCommon<SysUserRole> _userRoleDb;
         private readonly DBCommon<SysLoginLog> _loginLogDb;
+        private readonly DBCommon<SysPagePermission> _pagePermissionDb;
+        private readonly DBCommon<SysUserPagePermission> _userPagePermissionDb;
         private readonly IAppReporter _reporter;
 
         public AuthService() : this(SystemContext.Instance.Reporter)
@@ -36,12 +37,11 @@ namespace AM.DBService.Services.Auth
             _roleDb = new DBCommon<SysRole>();
             _userRoleDb = new DBCommon<SysUserRole>();
             _loginLogDb = new DBCommon<SysLoginLog>();
+            _pagePermissionDb = new DBCommon<SysPagePermission>();
+            _userPagePermissionDb = new DBCommon<SysUserPagePermission>();
             _reporter = reporter;
         }
 
-        /// <summary>
-        /// 登录。
-        /// </summary>
         public Result<SysUser> Login(string loginName, string password, string clientInfo = null)
         {
             if (string.IsNullOrWhiteSpace(loginName))
@@ -92,6 +92,13 @@ namespace AM.DBService.Services.Auth
                 return Result<SysUser>.Fail(rolesResult.Code, "查询角色失败", ResultSource.Database);
             }
 
+            var permissionResult = GetUserPagePermissions(user.Id);
+            if (!permissionResult.Success)
+            {
+                SaveLoginLog(user.Id, loginName, false, "查询页面权限失败", clientInfo);
+                return Result<SysUser>.Fail(permissionResult.Code, "查询页面权限失败", ResultSource.Database);
+            }
+
             user.LastLoginTime = DateTime.Now;
             var editResult = _userDb.Edit(user);
             if (!editResult.Success)
@@ -99,7 +106,7 @@ namespace AM.DBService.Services.Auth
                 _reporter?.Warn("AuthService", "更新最后登录时间失败", editResult.Code);
             }
 
-            UserContext.Instance.SignIn(user, rolesResult.Items);
+            UserContext.Instance.SignIn(user, rolesResult.Items, permissionResult.Items);
 
             SaveLoginLog(user.Id, loginName, true, "登录成功", clientInfo);
             _reporter?.Info("AuthService", "登录成功");
@@ -107,9 +114,6 @@ namespace AM.DBService.Services.Auth
             return Result<SysUser>.OkItem(user, "登录成功", ResultSource.Unknown);
         }
 
-        /// <summary>
-        /// 退出登录。
-        /// </summary>
         public Result Logout()
         {
             var loginName = UserContext.Instance.LoginName;
@@ -118,9 +122,6 @@ namespace AM.DBService.Services.Auth
             return Result.Ok("退出成功", ResultSource.Unknown);
         }
 
-        /// <summary>
-        /// 获取指定用户角色。
-        /// </summary>
         public Result<SysRole> GetRolesByUserId(int userId)
         {
             var userRoleQuery = _userRoleDb.QueryAll();
@@ -150,10 +151,180 @@ namespace AM.DBService.Services.Auth
             return Result<SysRole>.OkList(roles, "查询角色成功", ResultSource.Database);
         }
 
+        public Result<SysPagePermission> GetPagePermissions()
+        {
+            var queryResult = _pagePermissionDb.QueryAll();
+            if (!queryResult.Success)
+            {
+                _reporter?.Error("AuthService", "查询页面权限目录失败", queryResult.Code);
+                return Result<SysPagePermission>.Fail(queryResult.Code, "查询页面权限目录失败", ResultSource.Database);
+            }
+
+            var list = queryResult.Items
+                .Where(x => x.IsEnabled)
+                .OrderBy(x => x.ModuleKey)
+                .ThenBy(x => x.SortOrder)
+                .ThenBy(x => x.DisplayName)
+                .ToList();
+
+            return Result<SysPagePermission>.OkList(list, "查询页面权限目录成功", ResultSource.Database);
+        }
+
         /// <summary>
-        /// 获得用户列表，用户管理页用。
+        /// 获取用户最终有效页面权限。
+        /// UseCustomPagePermission=False 时，按角色默认权限生成。
+        /// UseCustomPagePermission=True 时，按用户自定义页面权限读取。
         /// </summary>
-        /// <returns></returns>
+        public Result<string> GetUserPagePermissions(int userId)
+        {
+            if (userId <= 0)
+            {
+                return Result<string>.Fail(-60, "用户标识无效", ResultSource.Unknown);
+            }
+
+            var userQuery = _userDb.QueryAll();
+            if (!userQuery.Success)
+            {
+                _reporter?.Error("AuthService", "查询用户失败", userQuery.Code);
+                return Result<string>.Fail(userQuery.Code, "查询用户失败", ResultSource.Database);
+            }
+
+            var user = userQuery.Items.FirstOrDefault(x => x.Id == userId);
+            if (user == null)
+            {
+                return Result<string>.Fail(-61, "用户不存在", ResultSource.Unknown);
+            }
+
+            var pagePermissionResult = GetPagePermissions();
+            if (!pagePermissionResult.Success)
+            {
+                return Result<string>.Fail(pagePermissionResult.Code, pagePermissionResult.Message, pagePermissionResult.Source);
+            }
+
+            if (!user.UseCustomPagePermission)
+            {
+                var rolesResult = GetRolesByUserId(userId);
+                if (!rolesResult.Success)
+                {
+                    return Result<string>.Fail(rolesResult.Code, rolesResult.Message, rolesResult.Source);
+                }
+
+                var roleCodes = new HashSet<string>(
+                    rolesResult.Items.Select(x => x.RoleCode),
+                    StringComparer.OrdinalIgnoreCase);
+
+                var defaultKeys = pagePermissionResult.Items
+                    .Where(x => MatchAnyRole(x.DefaultRoleCodes, roleCodes))
+                    .Select(x => x.PageKey)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                return Result<string>.OkList(defaultKeys, "查询用户默认页面权限成功", ResultSource.Database);
+            }
+
+            var userPermissionQuery = _userPagePermissionDb.QueryAll();
+            if (!userPermissionQuery.Success)
+            {
+                _reporter?.Error("AuthService", "查询用户自定义页面权限失败", userPermissionQuery.Code);
+                return Result<string>.Fail(userPermissionQuery.Code, "查询用户自定义页面权限失败", ResultSource.Database);
+            }
+
+            var validKeys = new HashSet<string>(
+                pagePermissionResult.Items.Select(x => x.PageKey),
+                StringComparer.OrdinalIgnoreCase);
+
+            var customKeys = userPermissionQuery.Items
+                .Where(x => x.UserId == userId && !string.IsNullOrWhiteSpace(x.PageKey))
+                .Select(x => x.PageKey)
+                .Where(validKeys.Contains)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            return Result<string>.OkList(customKeys, "查询用户自定义页面权限成功", ResultSource.Database);
+        }
+
+        public Result SaveUserPagePermissions(int userId, IEnumerable<string> pageKeys)
+        {
+            if (userId <= 0)
+            {
+                return Result.Fail(-62, "用户标识无效", ResultSource.Unknown);
+            }
+
+            var userQuery = _userDb.QueryAll();
+            if (!userQuery.Success)
+            {
+                _reporter?.Error("AuthService", "保存权限时查询用户失败", userQuery.Code);
+                return Result.Fail(userQuery.Code, "查询用户失败", ResultSource.Database);
+            }
+
+            var user = userQuery.Items.FirstOrDefault(x => x.Id == userId);
+            if (user == null)
+            {
+                return Result.Fail(-63, "用户不存在", ResultSource.Unknown);
+            }
+
+            var pagePermissionResult = GetPagePermissions();
+            if (!pagePermissionResult.Success)
+            {
+                return Result.Fail(pagePermissionResult.Code, pagePermissionResult.Message, pagePermissionResult.Source);
+            }
+
+            var validPageKeys = new HashSet<string>(
+                pagePermissionResult.Items.Select(x => x.PageKey),
+                StringComparer.OrdinalIgnoreCase);
+
+            var targetPageKeys = (pageKeys ?? new string[0])
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .Where(validPageKeys.Contains)
+                .ToList();
+
+            var oldQuery = _userPagePermissionDb.QueryAll();
+            if (!oldQuery.Success)
+            {
+                _reporter?.Error("AuthService", "查询旧用户页面权限失败", oldQuery.Code);
+                return Result.Fail(oldQuery.Code, "查询旧用户页面权限失败", ResultSource.Database);
+            }
+
+            var oldItems = oldQuery.Items.Where(x => x.UserId == userId).ToList();
+            foreach (var item in oldItems)
+            {
+                var deleteResult = _userPagePermissionDb.Delete(item);
+                if (!deleteResult.Success)
+                {
+                    _reporter?.Error("AuthService", "删除旧页面权限失败", deleteResult.Code);
+                    return Result.Fail(deleteResult.Code, "删除旧页面权限失败", ResultSource.Database);
+                }
+            }
+
+            foreach (var pageKey in targetPageKeys)
+            {
+                var addResult = _userPagePermissionDb.Add(new SysUserPagePermission
+                {
+                    UserId = userId,
+                    PageKey = pageKey,
+                    CreateTime = DateTime.Now
+                });
+
+                if (!addResult.Success)
+                {
+                    _reporter?.Error("AuthService", "保存页面权限失败", addResult.Code);
+                    return Result.Fail(addResult.Code, "保存页面权限失败", ResultSource.Database);
+                }
+            }
+
+            user.UseCustomPagePermission = true;
+            var editUserResult = _userDb.Edit(user);
+            if (!editUserResult.Success)
+            {
+                _reporter?.Error("AuthService", "更新用户权限模式失败", editUserResult.Code);
+                return Result.Fail(editUserResult.Code, "更新用户权限模式失败", ResultSource.Database);
+            }
+
+            _reporter?.Info("AuthService", "保存用户页面权限成功：" + user.LoginName);
+            return Result.Ok("保存页面权限成功", ResultSource.Database);
+        }
+
         public Result<UserSummary> GetUserSummaries()
         {
             var userQuery = _userDb.QueryAll();
@@ -241,11 +412,6 @@ namespace AM.DBService.Services.Auth
                 return Result.Fail(-23, "初始密码不能为空", ResultSource.Unknown);
             }
 
-            if (password.Length < 1)
-            {
-                return Result.Fail(-24, "初始密码长度不能少于 1 位", ResultSource.Unknown);
-            }
-
             var userQuery = _userDb.QueryAll();
             if (!userQuery.Success)
             {
@@ -284,6 +450,7 @@ namespace AM.DBService.Services.Auth
                 PasswordHash = hash,
                 IsEnabled = isEnabled,
                 IsAdmin = string.Equals(roleCode, "Am", StringComparison.OrdinalIgnoreCase),
+                UseCustomPagePermission = false,
                 FailedLoginCount = 0,
                 LockoutEndTime = null,
                 LastLoginTime = null,
@@ -438,11 +605,6 @@ namespace AM.DBService.Services.Auth
                 return Result.Fail(-41, "新密码不能为空", ResultSource.Unknown);
             }
 
-            if (newPassword.Length < 1)
-            {
-                return Result.Fail(-42, "新密码长度不能少于 1 位", ResultSource.Unknown);
-            }
-
             var userQuery = _userDb.QueryAll();
             if (!userQuery.Success)
             {
@@ -477,8 +639,61 @@ namespace AM.DBService.Services.Auth
         }
 
         /// <summary>
-        /// 修改当前登录用户的密码。
+        /// 设置用户启用状态。
         /// </summary>
+        public Result SetUserEnabled(int userId, bool isEnabled)
+        {
+            if (userId <= 0)
+            {
+                return Result.Fail(-50, "用户标识无效", ResultSource.Unknown);
+            }
+
+            var userQuery = _userDb.QueryAll();
+            if (!userQuery.Success)
+            {
+                _reporter?.Error("AuthService", "设置启用状态时查询用户失败", userQuery.Code);
+                return Result.Fail(userQuery.Code, "查询用户失败", ResultSource.Database);
+            }
+
+            var user = userQuery.Items.FirstOrDefault(u => u.Id == userId);
+            if (user == null)
+            {
+                return Result.Fail(-51, "用户不存在", ResultSource.Unknown);
+            }
+
+            user.IsEnabled = isEnabled;
+
+            if (!isEnabled)
+            {
+                user.FailedLoginCount = 0;
+                user.LockoutEndTime = null;
+            }
+
+            var editResult = _userDb.Edit(user);
+            if (!editResult.Success)
+            {
+                _reporter?.Error("AuthService", "设置用户启用状态失败", editResult.Code);
+                return Result.Fail(editResult.Code, "设置用户启用状态失败", ResultSource.Database);
+            }
+
+            _reporter?.Info("AuthService", (isEnabled ? "启用用户成功：" : "禁用用户成功：") + user.LoginName);
+            return Result.Ok(isEnabled ? "用户已启用" : "用户已禁用", ResultSource.Database);
+        }
+
+        private static bool MatchAnyRole(string defaultRoleCodes, HashSet<string> roleCodes)
+        {
+            if (string.IsNullOrWhiteSpace(defaultRoleCodes) || roleCodes == null || roleCodes.Count == 0)
+            {
+                return false;
+            }
+
+            var parts = defaultRoleCodes
+                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(x => x.Trim());
+
+            return parts.Any(roleCodes.Contains);
+        }
+
         public Result ChangeCurrentUserPassword(string oldPassword, string newPassword, string confirmPassword)
         {
             if (!UserContext.Instance.IsLoggedIn || UserContext.Instance.CurrentUser == null)
@@ -504,11 +719,6 @@ namespace AM.DBService.Services.Auth
             if (!string.Equals(newPassword, confirmPassword, StringComparison.Ordinal))
             {
                 return Result.Fail(-14, "两次输入的新密码不一致", ResultSource.Unknown);
-            }
-
-            if (newPassword.Length < 1)
-            {
-                return Result.Fail(-15, "新密码长度不能少于 1 位", ResultSource.Unknown);
             }
 
             var loginName = UserContext.Instance.LoginName;
@@ -556,52 +766,6 @@ namespace AM.DBService.Services.Auth
             return Result.Ok("密码修改成功", ResultSource.Unknown);
         }
 
-        /// <summary>
-        /// 设置用户启用状态。
-        /// </summary>
-        public Result SetUserEnabled(int userId, bool isEnabled)
-        {
-            if (userId <= 0)
-            {
-                return Result.Fail(-50, "用户标识无效", ResultSource.Unknown);
-            }
-
-            var userQuery = _userDb.QueryAll();
-            if (!userQuery.Success)
-            {
-                _reporter?.Error("AuthService", "设置启用状态时查询用户失败", userQuery.Code);
-                return Result.Fail(userQuery.Code, "查询用户失败", ResultSource.Database);
-            }
-
-            var user = userQuery.Items.FirstOrDefault(u => u.Id == userId);
-            if (user == null)
-            {
-                return Result.Fail(-51, "用户不存在", ResultSource.Unknown);
-            }
-
-            user.IsEnabled = isEnabled;
-
-            if (!isEnabled)
-            {
-                user.FailedLoginCount = 0;
-                user.LockoutEndTime = null;
-            }
-
-            var editResult = _userDb.Edit(user);
-            if (!editResult.Success)
-            {
-                _reporter?.Error("AuthService", "设置用户启用状态失败", editResult.Code);
-                return Result.Fail(editResult.Code, "设置用户启用状态失败", ResultSource.Database);
-            }
-
-            _reporter?.Info("AuthService", (isEnabled ? "启用用户成功：" : "禁用用户成功：") + user.LoginName);
-            return Result.Ok(isEnabled ? "用户已启用" : "用户已禁用", ResultSource.Database);
-        }
-
-        /// <summary>
-        /// 创建密码哈希。
-        /// 用于初始化管理员账号或新增用户。
-        /// </summary>
         public static void CreatePasswordHash(string password, out string salt, out string hash)
         {
             if (password == null)

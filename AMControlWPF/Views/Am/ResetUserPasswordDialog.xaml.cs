@@ -63,12 +63,6 @@ namespace AMControlWPF.Views.Am
                 return;
             }
 
-            if (_newPassword.Length < 1)
-            {
-                TextBlockMessage.Text = "新密码长度不能少于 1 位";
-                return;
-            }
-
             if (_newPassword != _confirmPassword)
             {
                 TextBlockMessage.Text = "两次输入的新密码不一致";

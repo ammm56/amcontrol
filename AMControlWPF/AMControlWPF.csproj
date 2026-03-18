@@ -112,6 +112,9 @@
     <Compile Include="Views\Am\UserManagementView.xaml.cs">
       <DependentUpon>UserManagementView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Am\UserPermissionView.xaml.cs">
+      <DependentUpon>UserPermissionView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Auth\ChangePasswordDialog.xaml.cs">
       <DependentUpon>ChangePasswordDialog.xaml</DependentUpon>
     </Compile>
@@ -204,6 +207,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Am\UserManagementView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Am\UserPermissionView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
