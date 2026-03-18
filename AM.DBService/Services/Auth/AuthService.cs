@@ -1,6 +1,7 @@
 using AM.Core.Context;
 using AM.Core.Reporter;
 using AM.DBService.DBase;
+using AM.Model.Auth;
 using AM.Model.Common;
 using AM.Model.Entity.Auth;
 using System;
@@ -147,6 +148,72 @@ namespace AM.DBService.Services.Auth
                 .ToList();
 
             return Result<SysRole>.OkList(roles, "查询角色成功", ResultSource.Database);
+        }
+
+        /// <summary>
+        /// 获得用户列表，用户管理页用。
+        /// </summary>
+        /// <returns></returns>
+        public Result<UserSummary> GetUserSummaries()
+        {
+            var userQuery = _userDb.QueryAll();
+            if (!userQuery.Success)
+            {
+                _reporter?.Error("AuthService", "查询用户列表失败", userQuery.Code);
+                return Result<UserSummary>.Fail(userQuery.Code, "查询用户列表失败", ResultSource.Database);
+            }
+
+            var roleQuery = _roleDb.QueryAll();
+            if (!roleQuery.Success)
+            {
+                _reporter?.Error("AuthService", "查询角色列表失败", roleQuery.Code);
+                return Result<UserSummary>.Fail(roleQuery.Code, "查询角色列表失败", ResultSource.Database);
+            }
+
+            var userRoleQuery = _userRoleDb.QueryAll();
+            if (!userRoleQuery.Success)
+            {
+                _reporter?.Error("AuthService", "查询用户角色关联失败", userRoleQuery.Code);
+                return Result<UserSummary>.Fail(userRoleQuery.Code, "查询用户角色关联失败", ResultSource.Database);
+            }
+
+            var roleMap = roleQuery.Items.ToDictionary(x => x.Id, x => x);
+            var userRoleMap = userRoleQuery.Items
+                .GroupBy(x => x.UserId)
+                .ToDictionary(x => x.Key, x => x.FirstOrDefault());
+
+            var list = userQuery.Items
+                .Select(user =>
+                {
+                    SysUserRole userRole;
+                    SysRole role = null;
+
+                    if (userRoleMap.TryGetValue(user.Id, out userRole) && userRole != null)
+                    {
+                        SysRole tempRole;
+                        if (roleMap.TryGetValue(userRole.RoleId, out tempRole))
+                        {
+                            role = tempRole;
+                        }
+                    }
+
+                    return new UserSummary
+                    {
+                        Id = user.Id,
+                        LoginName = user.LoginName,
+                        UserName = user.UserName,
+                        RoleCode = role == null ? string.Empty : role.RoleCode,
+                        RoleName = role == null ? string.Empty : role.RoleName,
+                        IsEnabled = user.IsEnabled,
+                        LastLoginTime = user.LastLoginTime,
+                        Remark = user.Remark
+                    };
+                })
+                .OrderByDescending(x => x.IsEnabled)
+                .ThenBy(x => x.LoginName)
+                .ToList();
+
+            return Result<UserSummary>.OkList(list, "查询用户摘要成功", ResultSource.Database);
         }
 
         /// <summary>

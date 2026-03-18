@@ -202,7 +202,6 @@
                                        Text="登录日志列表" />
 
                             <DataGrid Grid.Row="2"
-                                      hc:DataGridAttach.CanUnselectAllWithBlankArea="True"
                                       AutoGenerateColumns="False"
                                       HeadersVisibility="Column"
                                       CanUserAddRows="False"

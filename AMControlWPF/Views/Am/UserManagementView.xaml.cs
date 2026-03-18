@@ -1,17 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AM.ViewModel.ViewModels.Am;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace AMControlWPF.Views.Am
 {
@@ -20,9 +9,22 @@ namespace AMControlWPF.Views.Am
     /// </summary>
     public partial class UserManagementView : UserControl
     {
+        private readonly UserManagementViewModel _viewModel;
+
         public UserManagementView()
         {
             InitializeComponent();
+
+            _viewModel = new UserManagementViewModel();
+            DataContext = _viewModel;
+
+            Loaded += UserManagementView_Loaded;
+        }
+
+        private async void UserManagementView_Loaded(object sender, RoutedEventArgs e)
+        {
+            Loaded -= UserManagementView_Loaded;
+            await _viewModel.LoadAsync();
         }
     }
 }

@@ -191,7 +191,6 @@
                                            Text="输入点监视" />
 
                                 <DataGrid Grid.Row="2"
-                                          hc:DataGridAttach.CanUnselectAllWithBlankArea="True"
                                           AutoGenerateColumns="False"
                                           HeadersVisibility="Column"
                                           CanUserAddRows="False"
@@ -300,7 +299,6 @@
                                        Text="输入变化记录" />
 
                             <DataGrid Grid.Row="2"
-                                      hc:DataGridAttach.CanUnselectAllWithBlankArea="True"
                                       AutoGenerateColumns="False"
                                       HeadersVisibility="Column"
                                       CanUserAddRows="False"

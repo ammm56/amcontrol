@@ -40,8 +40,8 @@
                              Height="30"
                              Margin="0,0,8,6"
                              VerticalContentAlignment="Center"
-                             Text="搜索用户..." />
-                    <Button MinWidth="72" Margin="0,0,8,6" Content="刷新" />
+                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+                    <Button MinWidth="72" Margin="0,0,8,6" Command="{Binding RefreshCommand}" Content="刷新" />
                     <Button MinWidth="72" Margin="0,0,8,6" Content="新增用户" />
                     <Button MinWidth="72" Margin="0,0,0,6" Content="导出" />
                 </WrapPanel>
@@ -76,7 +76,8 @@
                                Text="用户分组" />
 
                     <ListBox Grid.Row="2"
-                             SelectedIndex="0"
+                             ItemsSource="{Binding UserGroups}"
+                             SelectedItem="{Binding SelectedGroup, Mode=TwoWay}"
                              ItemContainerStyle="{StaticResource ViewNavItemStyle}"
                              Background="Transparent"
                              BorderThickness="0"
@@ -88,12 +89,6 @@
                                            Foreground="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=Foreground}" />
                             </DataTemplate>
                         </ListBox.ItemTemplate>
-
-                        <sys:String xmlns:sys="clr-namespace:System;assembly=mscorlib">全部用户</sys:String>
-                        <sys:String xmlns:sys="clr-namespace:System;assembly=mscorlib">管理员</sys:String>
-                        <sys:String xmlns:sys="clr-namespace:System;assembly=mscorlib">工程师</sys:String>
-                        <sys:String xmlns:sys="clr-namespace:System;assembly=mscorlib">操作员</sys:String>
-                        <sys:String xmlns:sys="clr-namespace:System;assembly=mscorlib">已禁用用户</sys:String>
                     </ListBox>
                 </Grid>
             </Border>
@@ -120,7 +115,7 @@
                             <TextBlock FontSize="18"
                                        FontWeight="SemiBold"
                                        Foreground="{DynamicResource PrimaryTextBrush}"
-                                       Text="12" />
+                                       Text="{Binding TotalUserCount}" />
                         </StackPanel>
                     </Border>
 
@@ -136,7 +131,7 @@
                             <TextBlock FontSize="18"
                                        FontWeight="SemiBold"
                                        Foreground="{DynamicResource SuccessBrush}"
-                                       Text="10" />
+                                       Text="{Binding EnabledUserCount}" />
                         </StackPanel>
                     </Border>
 
@@ -152,7 +147,7 @@
                             <TextBlock FontSize="18"
                                        FontWeight="SemiBold"
                                        Foreground="{DynamicResource DangerBrush}"
-                                       Text="2" />
+                                       Text="{Binding DisabledUserCount}" />
                         </StackPanel>
                     </Border>
 
@@ -168,7 +163,7 @@
                             <TextBlock FontSize="18"
                                        FontWeight="SemiBold"
                                        Foreground="{DynamicResource PrimaryBrush}"
-                                       Text="am" />
+                                       Text="{Binding SelectedUser.LoginName}" />
                         </StackPanel>
                     </Border>
                 </WrapPanel>
@@ -199,7 +194,6 @@
                                        Text="用户列表" />
 
                             <DataGrid Grid.Row="2"
-                                      hc:DataGridAttach.CanUnselectAllWithBlankArea="True"
                                       AutoGenerateColumns="False"
                                       HeadersVisibility="Column"
                                       CanUserAddRows="False"
@@ -212,13 +206,15 @@
                                       RowHeaderWidth="0"
                                       GridLinesVisibility="None"
                                       HorizontalGridLinesBrush="Transparent"
-                                      VerticalGridLinesBrush="Transparent">
+                                      VerticalGridLinesBrush="Transparent"
+                                      ItemsSource="{Binding Users}"
+                                      SelectedItem="{Binding SelectedUser, Mode=TwoWay}">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="登录名" Width="100" Binding="{Binding}" />
-                                    <DataGridTextColumn Header="用户名" Width="120" Binding="{Binding}" />
-                                    <DataGridTextColumn Header="角色" Width="100" Binding="{Binding}" />
-                                    <DataGridTextColumn Header="状态" Width="80" Binding="{Binding}" />
-                                    <DataGridTextColumn Header="最后登录" Width="*" Binding="{Binding}" />
+                                    <DataGridTextColumn Header="登录名" Width="100" Binding="{Binding LoginName}" />
+                                    <DataGridTextColumn Header="用户名" Width="120" Binding="{Binding DisplayName}" />
+                                    <DataGridTextColumn Header="角色" Width="100" Binding="{Binding RoleDisplayName}" />
+                                    <DataGridTextColumn Header="状态" Width="80" Binding="{Binding StateText}" />
+                                    <DataGridTextColumn Header="最后登录" Width="*" Binding="{Binding LastLoginTimeText}" />
                                 </DataGrid.Columns>
                             </DataGrid>
                         </Grid>
@@ -265,18 +261,18 @@
                                     <hc:Gravatar Width="42"
                                                  Height="42"
                                                  Style="{StaticResource GravatarBaseStyle}"
-                                                 Id="am" />
+                                                 Id="{Binding SelectedUser.AvatarId, TargetNullValue=guest, FallbackValue=guest}" />
 
                                     <StackPanel Grid.Column="2"
                                                 VerticalAlignment="Center">
                                         <TextBlock FontWeight="SemiBold"
                                                    Foreground="{DynamicResource PrimaryTextBrush}"
-                                                   Text="am" />
+                                                   Text="{Binding SelectedUser.LoginName, TargetNullValue=-, FallbackValue=-}" />
                                         <TextBlock Margin="0,4,0,0"
                                                    FontSize="12"
                                                    Opacity="0.75"
                                                    Foreground="{DynamicResource PrimaryTextBrush}"
-                                                   Text="系统管理员" />
+                                                   Text="{Binding SelectedUser.DisplayName, TargetNullValue=-, FallbackValue=-}" />
                                     </StackPanel>
                                 </Grid>
                             </Border>
@@ -285,28 +281,32 @@
                                     Padding="10"
                                     CornerRadius="6"
                                     Background="{DynamicResource RegionBrush}">
-                                <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" Text="角色：管理员" />
+                                <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" 
+                                           Text="{Binding SelectedUser.RoleDisplayName, TargetNullValue=未分配, FallbackValue=未分配, StringFormat=角色：{0}}" />
                             </Border>
 
                             <Border Grid.Row="6"
                                     Padding="10"
                                     CornerRadius="6"
                                     Background="{DynamicResource RegionBrush}">
-                                <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" Text="状态：已启用" />
+                                <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" 
+                                           Text="{Binding SelectedUser.StateText, TargetNullValue=-, FallbackValue=-, StringFormat=状态：{0}}" />
                             </Border>
 
                             <Border Grid.Row="8"
                                     Padding="10"
                                     CornerRadius="6"
                                     Background="{DynamicResource RegionBrush}">
-                                <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" Text="最后登录：2026-03-18 09:20:15" />
+                                <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" 
+                                           Text="{Binding SelectedUser.LastLoginTimeText, TargetNullValue=-, FallbackValue=-, StringFormat=最后登录：{0}}" />
                             </Border>
 
                             <Border Grid.Row="10"
                                     Padding="10"
                                     CornerRadius="6"
                                     Background="{DynamicResource RegionBrush}">
-                                <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" Text="备注：系统初始化管理员账户" />
+                                <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" 
+                                           Text="{Binding SelectedUser.Remark, TargetNullValue=-, FallbackValue=-, StringFormat=备注：{0}}" />
                             </Border>
 
                             <WrapPanel Grid.Row="12">

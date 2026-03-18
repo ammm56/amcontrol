@@ -421,7 +421,6 @@
                                            Text="轴动作记录" />
 
                                 <DataGrid Grid.Row="2"
-                                          hc:DataGridAttach.CanUnselectAllWithBlankArea="True"
                                           AutoGenerateColumns="False"
                                           HeadersVisibility="Column"
                                           CanUserAddRows="False"

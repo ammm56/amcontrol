@@ -53,6 +53,7 @@
     <Compile Include="Alarm\AlarmCode.cs" />
     <Compile Include="Alarm\AlarmInfo.cs" />
     <Compile Include="Alarm\AlarmLevel.cs" />
+    <Compile Include="Auth\UserSummary.cs" />
     <Compile Include="Common\Config.cs" />
     <Compile Include="Common\DbErrorCode.cs" />
     <Compile Include="Common\ErrorDescriptor.cs" />
