@@ -3,6 +3,7 @@ using AMControlWPF.UserControls.Main;
 using AMControlWPF.Views.Auth;
 using AMControlWPF.Views.IO;
 using AMControlWPF.Views.Motion;
+using AMControlWPF.Views.Am;
 using AMControlWPF.Views.Template;
 using HandyControl.Controls;
 using System;
@@ -351,7 +352,7 @@ namespace AMControlWPF
                 case "AlarmLog.RunLog":
                     return CreatePlaceholderPage("报警与日志 / 运行日志");
                 case "System.User":
-                    return CreatePlaceholderPage("系统 / 用户管理");
+                    return new UserManagementView();
                 case "System.LoginLog":
                     return CreatePlaceholderPage("系统 / 登录日志");
                 default:
