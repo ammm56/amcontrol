@@ -103,7 +103,7 @@
     </Style>
 
     <Style x:Key="UserPopupCardBorderStyle" TargetType="Border">
-        <Setter Property="Width" Value="220" />
+        <Setter Property="Width" Value="228" />
         <Setter Property="Padding" Value="10" />
         <Setter Property="CornerRadius" Value="12" />
         <Setter Property="Background" Value="{DynamicResource RegionBrush}" />
@@ -115,10 +115,13 @@
     <Style x:Key="UserPopupActionButtonStyle"
        TargetType="Button"
        BasedOn="{StaticResource {x:Type Button}}">
-        <Setter Property="Height" Value="34" />
-        <Setter Property="Margin" Value="0,0,0,6" />
+        <Setter Property="Height" Value="38" />
+        <Setter Property="Margin" Value="0,0,0,8" />
         <Setter Property="Padding" Value="12,0" />
-        <Setter Property="HorizontalContentAlignment" Value="Left" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="Background" Value="{DynamicResource SecondaryRegionBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
     </Style>
 
 </ResourceDictionary>
