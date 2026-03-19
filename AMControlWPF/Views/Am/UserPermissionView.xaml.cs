@@ -244,22 +244,7 @@ namespace AMControlWPF.Views.Am
                 return;
             }
 
-            if (UserContext.Instance.IsLoggedIn &&
-                UserContext.Instance.CurrentUser != null &&
-                UserContext.Instance.CurrentUser.Id == _targetUser.Id)
-            {
-                var permissionResult = _authService.GetUserPagePermissions(_targetUser.Id);
-                if (permissionResult.Success)
-                {
-                    UserContext.Instance.RefreshPagePermissions(permissionResult.Items, true);
-
-                    var mainWindow = Window.GetWindow(this) as MainWindow;
-                    if (mainWindow != null)
-                    {
-                        mainWindow.RefreshNavigationByCurrentUser();
-                    }
-                }
-            }
+            RefreshCurrentUserPermissionContext(true);
 
             HandyControl.Controls.MessageBox.Show(result.Message, "权限分配", MessageBoxButton.OK, MessageBoxImage.Information);
         }
@@ -328,6 +313,52 @@ namespace AMControlWPF.Views.Am
             }
 
             TextBlockSelectedUser.Text = "当前用户：" + user.LoginName + " / " + user.RoleDisplayName;
+        }
+
+        private void ButtonRestoreDefault_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (_targetUser == null)
+            {
+                HandyControl.Controls.MessageBox.Show("请先选择一个用户。", "权限分配", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var result = _authService.RestoreDefaultPagePermissions(_targetUser.Id);
+            if (!result.Success)
+            {
+                HandyControl.Controls.MessageBox.Show(result.Message, "权限分配", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            LoadUserPermissions();
+            RefreshCurrentUserPermissionContext(false);
+
+            HandyControl.Controls.MessageBox.Show(result.Message, "权限分配", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void RefreshCurrentUserPermissionContext(bool useCustomPagePermission)
+        {
+            if (!UserContext.Instance.IsLoggedIn ||
+                UserContext.Instance.CurrentUser == null ||
+                _targetUser == null ||
+                UserContext.Instance.CurrentUser.Id != _targetUser.Id)
+            {
+                return;
+            }
+
+            var permissionResult = _authService.GetUserPagePermissions(_targetUser.Id);
+            if (!permissionResult.Success)
+            {
+                return;
+            }
+
+            UserContext.Instance.RefreshPagePermissions(permissionResult.Items, useCustomPagePermission);
+
+            var mainWindow = Window.GetWindow(this) as MainWindow;
+            if (mainWindow != null)
+            {
+                mainWindow.RefreshNavigationByCurrentUser();
+            }
         }
 
         private void ClearPermissionDetail()

@@ -4,6 +4,7 @@ using AM.DBService.DBase;
 using AM.Model.Auth;
 using AM.Model.Common;
 using AM.Model.Entity.Auth;
+using SqlSugar;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -791,21 +792,52 @@ namespace AM.DBService.Services.Auth
                 pageSize = 100;
             }
 
-            var queryResult = _loginLogDb.QueryAll();
-            if (!queryResult.Success)
+            try
             {
-                _reporter?.Error("AuthService", "查询登录日志失败", queryResult.Code);
-                return Result<LoginLogSummary>.Fail(queryResult.Code, "查询登录日志失败", ResultSource.Database);
-            }
+                totalCount = BuildLoginLogQuery(loginNameKeyword, isSuccess, startDate, endDate).Count();
+                successCount = BuildLoginLogQuery(loginNameKeyword, isSuccess, startDate, endDate)
+                    .Where(x => x.IsSuccess)
+                    .Count();
+                failedCount = BuildLoginLogQuery(loginNameKeyword, isSuccess, startDate, endDate)
+                    .Where(x => !x.IsSuccess)
+                    .Count();
 
-            IEnumerable<SysLoginLog> query = queryResult.Items;
+                var pageItems = BuildLoginLogQuery(loginNameKeyword, isSuccess, startDate, endDate)
+                    .OrderBy(x => x.LoginTime, OrderByType.Desc)
+                    .ToPageList(pageIndex, pageSize)
+                    .Select(x => new LoginLogSummary
+                    {
+                        Id = x.Id,
+                        UserId = x.UserId,
+                        LoginName = x.LoginName,
+                        IsSuccess = x.IsSuccess,
+                        Message = x.Message,
+                        LoginTime = x.LoginTime,
+                        ClientInfo = x.ClientInfo
+                    })
+                    .ToList();
+
+                return Result<LoginLogSummary>.OkList(pageItems, "查询登录日志成功", ResultSource.Database);
+            }
+            catch (Exception ex)
+            {
+                _reporter?.Error("AuthService", ex, "查询登录日志失败");
+                return Result<LoginLogSummary>.Fail(-70, "查询登录日志失败", ResultSource.Database);
+            }
+        }
+
+        private ISugarQueryable<SysLoginLog> BuildLoginLogQuery(
+            string loginNameKeyword,
+            bool? isSuccess,
+            DateTime? startDate,
+            DateTime? endDate)
+        {
+            var query = _loginLogDb._sqlSugarClient.Queryable<SysLoginLog>();
 
             if (!string.IsNullOrWhiteSpace(loginNameKeyword))
             {
-                var keyword = loginNameKeyword.Trim().ToLowerInvariant();
-                query = query.Where(x =>
-                    !string.IsNullOrWhiteSpace(x.LoginName) &&
-                    x.LoginName.ToLowerInvariant().Contains(keyword));
+                var keyword = loginNameKeyword.Trim();
+                query = query.Where(x => x.LoginName.Contains(keyword));
             }
 
             if (isSuccess.HasValue)
@@ -825,30 +857,51 @@ namespace AM.DBService.Services.Auth
                 query = query.Where(x => x.LoginTime < end);
             }
 
-            var filteredList = query
-                .OrderByDescending(x => x.LoginTime)
-                .ToList();
+            return query;
+        }
 
-            totalCount = filteredList.Count;
-            successCount = filteredList.Count(x => x.IsSuccess);
-            failedCount = filteredList.Count(x => !x.IsSuccess);
+        public Result RestoreDefaultPagePermissions(int userId)
+        {
+            if (userId <= 0)
+            {
+                return Result.Fail(-71, "用户标识无效", ResultSource.Unknown);
+            }
 
-            var pageItems = filteredList
-                .Skip((pageIndex - 1) * pageSize)
-                .Take(pageSize)
-                .Select(x => new LoginLogSummary
+            var userQuery = _userDb.QueryAll();
+            if (!userQuery.Success)
+            {
+                _reporter?.Error("AuthService", "恢复默认权限时查询用户失败", userQuery.Code);
+                return Result.Fail(userQuery.Code, "查询用户失败", ResultSource.Database);
+            }
+
+            var user = userQuery.Items.FirstOrDefault(x => x.Id == userId);
+            if (user == null)
+            {
+                return Result.Fail(-72, "用户不存在", ResultSource.Unknown);
+            }
+
+            try
+            {
+                _userPagePermissionDb._sqlSugarClient.Deleteable<SysUserPagePermission>()
+                    .Where(x => x.UserId == userId)
+                    .ExecuteCommand();
+
+                user.UseCustomPagePermission = false;
+                var editResult = _userDb.Edit(user);
+                if (!editResult.Success)
                 {
-                    Id = x.Id,
-                    UserId = x.UserId,
-                    LoginName = x.LoginName,
-                    IsSuccess = x.IsSuccess,
-                    Message = x.Message,
-                    LoginTime = x.LoginTime,
-                    ClientInfo = x.ClientInfo
-                })
-                .ToList();
+                    _reporter?.Error("AuthService", "更新用户权限模式失败", editResult.Code);
+                    return Result.Fail(editResult.Code, "更新用户权限模式失败", ResultSource.Database);
+                }
 
-            return Result<LoginLogSummary>.OkList(pageItems, "查询登录日志成功", ResultSource.Database);
+                _reporter?.Info("AuthService", "恢复默认页面权限成功：" + user.LoginName);
+                return Result.Ok("已恢复角色默认页面权限", ResultSource.Database);
+            }
+            catch (Exception ex)
+            {
+                _reporter?.Error("AuthService", ex, "恢复默认页面权限失败");
+                return Result.Fail(-73, "恢复默认页面权限失败", ResultSource.Database);
+            }
         }
 
         public static void CreatePasswordHash(string password, out string salt, out string hash)

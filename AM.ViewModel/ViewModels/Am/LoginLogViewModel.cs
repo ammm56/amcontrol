@@ -26,6 +26,8 @@ namespace AM.ViewModel.ViewModels.Am
         private int _pageIndex;
         private int _totalPages;
         private bool _isLoading;
+        private int _selectedPageSize;
+        private string _jumpPageText;
 
         public LoginLogViewModel()
         {
@@ -33,27 +35,39 @@ namespace AM.ViewModel.ViewModels.Am
 
             Logs = new ObservableCollection<LoginLogSummary>();
             Filters = new ObservableCollection<string>();
+            PageSizes = new ObservableCollection<int>();
 
             Filters.Add("全部日志");
             Filters.Add("登录成功");
             Filters.Add("登录失败");
             Filters.Add("今日日志");
 
+            PageSizes.Add(5);
+            PageSizes.Add(10);
+            PageSizes.Add(50);
+            PageSizes.Add(100);
+            PageSizes.Add(200);
+            PageSizes.Add(500);
+
             _selectedFilter = "全部日志";
             _searchText = string.Empty;
             _pageIndex = 1;
             _totalPages = 1;
-            PageSize = 100;
+            _selectedPageSize = 100;
+            _jumpPageText = "1";
 
             RefreshCommand = new AsyncRelayCommand(RefreshAsync);
             QueryCommand = new AsyncRelayCommand(QueryAsync);
             PrevPageCommand = new AsyncRelayCommand(PrevPageAsync, CanPrevPage);
             NextPageCommand = new AsyncRelayCommand(NextPageAsync, CanNextPage);
+            GoPageCommand = new AsyncRelayCommand(GoPageAsync);
         }
 
         public ObservableCollection<LoginLogSummary> Logs { get; private set; }
 
         public ObservableCollection<string> Filters { get; private set; }
+
+        public ObservableCollection<int> PageSizes { get; private set; }
 
         public IAsyncRelayCommand RefreshCommand { get; private set; }
 
@@ -63,7 +77,7 @@ namespace AM.ViewModel.ViewModels.Am
 
         public IAsyncRelayCommand NextPageCommand { get; private set; }
 
-        public int PageSize { get; private set; }
+        public IAsyncRelayCommand GoPageCommand { get; private set; }
 
         public string SearchText
         {
@@ -141,6 +155,7 @@ namespace AM.ViewModel.ViewModels.Am
             {
                 if (SetProperty(ref _pageIndex, value))
                 {
+                    JumpPageText = value.ToString();
                     UpdatePagingCommandState();
                 }
             }
@@ -156,6 +171,25 @@ namespace AM.ViewModel.ViewModels.Am
                     UpdatePagingCommandState();
                 }
             }
+        }
+
+        public int SelectedPageSize
+        {
+            get { return _selectedPageSize; }
+            set
+            {
+                if (SetProperty(ref _selectedPageSize, value))
+                {
+                    PageIndex = 1;
+                    _ = LoadAsync();
+                }
+            }
+        }
+
+        public string JumpPageText
+        {
+            get { return _jumpPageText; }
+            set { SetProperty(ref _jumpPageText, value); }
         }
 
         public async Task LoadAsync()
@@ -188,6 +222,8 @@ namespace AM.ViewModel.ViewModels.Am
                         break;
                 }
 
+                var requestedPageIndex = PageIndex <= 0 ? 1 : PageIndex;
+
                 int totalCount = 0;
                 int successCount = 0;
                 int failedCount = 0;
@@ -197,8 +233,8 @@ namespace AM.ViewModel.ViewModels.Am
                     isSuccess,
                     startDate,
                     endDate,
-                    PageIndex,
-                    PageSize,
+                    requestedPageIndex,
+                    SelectedPageSize,
                     out totalCount,
                     out successCount,
                     out failedCount));
@@ -217,13 +253,34 @@ namespace AM.ViewModel.ViewModels.Am
                 TotalCount = totalCount;
                 SuccessCount = successCount;
                 FailedCount = failedCount;
-                TotalPages = totalCount <= 0 ? 1 : (int)Math.Ceiling(totalCount / (double)PageSize);
+                TotalPages = totalCount <= 0 ? 1 : (int)Math.Ceiling(totalCount / (double)SelectedPageSize);
 
-                if (PageIndex > TotalPages)
+                if (requestedPageIndex > TotalPages)
                 {
-                    PageIndex = TotalPages;
-                    await LoadAsync();
-                    return;
+                    requestedPageIndex = TotalPages;
+                    PageIndex = requestedPageIndex;
+
+                    result = await Task.Run(() => _authService.GetLoginLogSummaries(
+                        SearchText,
+                        isSuccess,
+                        startDate,
+                        endDate,
+                        requestedPageIndex,
+                        SelectedPageSize,
+                        out totalCount,
+                        out successCount,
+                        out failedCount));
+
+                    if (!result.Success)
+                    {
+                        Logs.Clear();
+                        SelectedLog = null;
+                        return;
+                    }
+                }
+                else if (requestedPageIndex != PageIndex)
+                {
+                    PageIndex = requestedPageIndex;
                 }
 
                 Logs.Clear();
@@ -272,6 +329,28 @@ namespace AM.ViewModel.ViewModels.Am
             }
 
             PageIndex++;
+            await LoadAsync();
+        }
+
+        private async Task GoPageAsync()
+        {
+            int page;
+            if (!int.TryParse(JumpPageText, out page))
+            {
+                page = 1;
+            }
+
+            if (page <= 0)
+            {
+                page = 1;
+            }
+
+            if (page > TotalPages)
+            {
+                page = TotalPages;
+            }
+
+            PageIndex = page <= 0 ? 1 : page;
             await LoadAsync();
         }
 

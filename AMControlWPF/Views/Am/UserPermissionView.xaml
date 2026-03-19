@@ -151,6 +151,10 @@
                         <Button MinWidth="72" Margin="0,0,8,0"
                                 Click="ButtonRefresh_OnClick"
                                 Content="刷新" />
+                        <Button MinWidth="72"
+                                Margin="0,0,8,0"
+                                Click="ButtonRestoreDefault_OnClick"
+                                Content="恢复默认权限" />
                         <Button MinWidth="72" Margin="0,0,0,0"
                                 Click="ButtonSave_OnClick"
                                 Content="保存" />
