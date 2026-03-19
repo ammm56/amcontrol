@@ -18,7 +18,7 @@ namespace AMControlWPF.Views.Am
             TextBlockPasswordLabel.Visibility = Visibility.Visible;
             PasswordBoxPassword.Visibility = Visibility.Visible;
 
-            Height = 620;
+            Height = 630;
         }
 
         public UserEditDialog(UserSummary user) : this()
@@ -48,7 +48,7 @@ namespace AMControlWPF.Views.Am
             PasswordInputRow.Height = new GridLength(0);
             PasswordBottomSpacingRow.Height = new GridLength(0);
 
-            Height = 560;
+            Height = 550;
         }
 
         public bool IsEditMode { get; private set; }
