@@ -7,6 +7,62 @@
              mc:Ignorable="d"
              Background="Transparent">
 
+    <UserControl.Resources>
+        <Style x:Key="PermissionChipItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Margin" Value="0,0,6,6" />
+            <Setter Property="Padding" Value="10,5" />
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="BorderRoot"
+                                Padding="{TemplateBinding Padding}"
+                                CornerRadius="6"
+                                Background="{DynamicResource RegionBrush}"
+                                BorderBrush="{DynamicResource BorderBrush}"
+                                BorderThickness="1">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="BorderRoot" Property="Background" Value="{DynamicResource SecondaryRegionBrush}" />
+                                <Setter Property="Cursor" Value="Hand" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="BorderRoot" Property="Background" Value="{DynamicResource SecondaryRegionBrush}" />
+                                <Setter Property="FontWeight" Value="SemiBold" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="PermissionToolbarButtonStyle"
+               TargetType="Button"
+               BasedOn="{StaticResource UserPopupActionButtonStyle}">
+            <Setter Property="Height" Value="34" />
+            <Setter Property="Margin" Value="0,0,8,0" />
+            <Setter Property="Padding" Value="12,0" />
+            <Setter Property="MinWidth" Value="72" />
+        </Style>
+
+        <Style x:Key="PermissionTileListBoxItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Margin" Value="0,0,12,12" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <ContentPresenter />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
     <Grid Margin="10">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="250" />
@@ -18,11 +74,13 @@
         <Border Grid.Column="0"
                 Padding="12"
                 CornerRadius="8"
-                Background="{DynamicResource SecondaryRegionBrush}"
+                Background="{DynamicResource RegionBrush}"
                 BorderBrush="{DynamicResource BorderBrush}"
                 BorderThickness="1">
             <Grid>
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="8" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="8" />
                     <RowDefinition Height="Auto" />
@@ -41,8 +99,29 @@
                          VerticalContentAlignment="Center"
                          TextChanged="TextBoxUserSearch_OnTextChanged" />
 
-                <ListBox x:Name="ListBoxUsers"
+                <ListBox x:Name="ListBoxRoleFilters"
                          Grid.Row="4"
+                         SelectionChanged="ListBoxRoleFilters_SelectionChanged"
+                         ItemContainerStyle="{StaticResource PermissionChipItemStyle}"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel />
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding DisplayName}"
+                                       Foreground="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=Foreground}" />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <ListBox x:Name="ListBoxUsers"
+                         Grid.Row="6"
                          SelectionChanged="ListBoxUsers_SelectionChanged"
                          ItemContainerStyle="{StaticResource ViewNavItemStyle}"
                          Background="Transparent"
@@ -118,19 +197,18 @@
 
                     <WrapPanel DockPanel.Dock="Right"
                                HorizontalAlignment="Right">
-                        <Button MinWidth="90"
-                                Margin="0,0,8,0"
+                        <Button Margin="0,0,8,0"
+                                MinWidth="72"
                                 Click="ButtonSelectAll_OnClick"
-                                Content="当前模块全选" />
-                        <Button MinWidth="90"
-                                Margin="0,0,8,0"
+                                Content="全选" />
+                        <Button Margin="0,0,8,0"
+                                MinWidth="72"
                                 Click="ButtonClearAll_OnClick"
-                                Content="当前模块清空" />
-                        <Button MinWidth="72"
-                                Margin="0,0,8,0"
+                                Content="清空" />
+                        <Button MinWidth="72" Margin="0,0,8,0"
                                 Click="ButtonRefresh_OnClick"
                                 Content="刷新" />
-                        <Button MinWidth="72"
+                        <Button MinWidth="72" Margin="0,0,0,0"
                                 Click="ButtonSave_OnClick"
                                 Content="保存" />
                     </WrapPanel>
@@ -146,6 +224,7 @@
                     BorderThickness="1">
                 <ListBox x:Name="ModuleNavList"
                          SelectionChanged="ModuleNavList_SelectionChanged"
+                         ItemContainerStyle="{StaticResource PermissionChipItemStyle}"
                          Background="Transparent"
                          BorderThickness="0"
                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
@@ -155,40 +234,6 @@
                             <WrapPanel />
                         </ItemsPanelTemplate>
                     </ListBox.ItemsPanel>
-
-                    <ListBox.ItemContainerStyle>
-                        <Style TargetType="ListBoxItem">
-                            <Setter Property="Margin" Value="0,0,8,8" />
-                            <Setter Property="Padding" Value="12,6" />
-                            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="ListBoxItem">
-                                        <Border x:Name="BorderRoot"
-                                                Padding="{TemplateBinding Padding}"
-                                                CornerRadius="16"
-                                                Background="{DynamicResource RegionBrush}"
-                                                BorderBrush="{DynamicResource BorderBrush}"
-                                                BorderThickness="1">
-                                            <ContentPresenter HorizontalAlignment="Center"
-                                                              VerticalAlignment="Center" />
-                                        </Border>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="BorderRoot" Property="BorderBrush" Value="{DynamicResource InfoBrush}" />
-                                                <Setter Property="Cursor" Value="Hand" />
-                                            </Trigger>
-                                            <Trigger Property="IsSelected" Value="True">
-                                                <Setter TargetName="BorderRoot" Property="Background" Value="{DynamicResource PrimaryBrush}" />
-                                                <Setter TargetName="BorderRoot" Property="BorderBrush" Value="{DynamicResource PrimaryBrush}" />
-                                                <Setter Property="Foreground" Value="White" />
-                                            </Trigger>
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </ListBox.ItemContainerStyle>
 
                     <ListBox.ItemTemplate>
                         <DataTemplate>
@@ -223,6 +268,7 @@
                                   VerticalScrollBarVisibility="Auto">
                         <ListBox x:Name="ListBoxPermissions"
                                  SelectionChanged="ListBoxPermissions_SelectionChanged"
+                                 ItemContainerStyle="{StaticResource PermissionTileListBoxItemStyle}"
                                  Background="Transparent"
                                  BorderThickness="0"
                                  HorizontalContentAlignment="Stretch"
@@ -233,35 +279,22 @@
                                 </ItemsPanelTemplate>
                             </ListBox.ItemsPanel>
 
-                            <ListBox.ItemContainerStyle>
-                                <Style TargetType="ListBoxItem">
-                                    <Setter Property="Margin" Value="0,0,12,12" />
-                                    <Setter Property="Padding" Value="0" />
-                                    <Setter Property="Background" Value="Transparent" />
-                                    <Setter Property="BorderThickness" Value="0" />
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="ListBoxItem">
-                                                <ContentPresenter />
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                            </ListBox.ItemContainerStyle>
-
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <Border Width="220"
-                                            Height="128"
+                                    <Border x:Name="TileRoot"
+                                            Width="220"
+                                            Height="168"
                                             Padding="12"
-                                            CornerRadius="10"
+                                            CornerRadius="8"
                                             Background="{DynamicResource RegionBrush}"
                                             BorderBrush="{DynamicResource BorderBrush}"
-                                            BorderThickness="1">
+                                            BorderThickness="1"
+                                            Effect="{StaticResource EffectShadow1}">
                                         <Grid>
                                             <Grid.RowDefinitions>
                                                 <RowDefinition Height="Auto" />
                                                 <RowDefinition Height="*" />
+                                                <RowDefinition Height="Auto" />
                                                 <RowDefinition Height="Auto" />
                                             </Grid.RowDefinitions>
 
@@ -270,7 +303,8 @@
                                                            FontSize="14"
                                                            FontWeight="SemiBold"
                                                            Foreground="{DynamicResource PrimaryTextBrush}" />
-                                                <CheckBox DockPanel.Dock="Right"
+                                                <CheckBox x:Name="TileCheckBox"
+                                                          DockPanel.Dock="Right"
                                                           Margin="8,0,0,0"
                                                           IsChecked="{Binding IsChecked, Mode=TwoWay}" />
                                             </DockPanel>
@@ -283,17 +317,58 @@
                                                        Foreground="{DynamicResource PrimaryTextBrush}"
                                                        Text="{Binding Description}" />
 
-                                            <Border Grid.Row="2"
+                                            <TextBlock Grid.Row="2"
+                                                       Margin="0,8,0,0"
+                                                       FontSize="11"
+                                                       Opacity="0.75"
+                                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                                       Text="{Binding RecommendedRoles, StringFormat=建议角色：{0}}" />
+
+                                            <Border x:Name="RiskBadge"
+                                                    Grid.Row="3"
+                                                    Margin="0,8,0,0"
                                                     HorizontalAlignment="Left"
                                                     Padding="8,3"
-                                                    CornerRadius="12"
+                                                    CornerRadius="6"
                                                     Background="{DynamicResource SecondaryRegionBrush}">
-                                                <TextBlock Foreground="{DynamicResource PrimaryTextBrush}"
+                                                <TextBlock x:Name="RiskBadgeText"
+                                                           Foreground="{DynamicResource PrimaryTextBrush}"
                                                            FontSize="11"
                                                            Text="{Binding RiskLevel, StringFormat=风险：{0}}" />
                                             </Border>
                                         </Grid>
                                     </Border>
+
+                                    <DataTemplate.Triggers>
+                                        <Trigger SourceName="TileRoot" Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="TileRoot" Property="Background" Value="{DynamicResource SecondaryRegionBrush}" />
+                                            <Setter TargetName="TileRoot" Property="Effect" Value="{StaticResource EffectShadow4}" />
+                                        </Trigger>
+
+                                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=IsSelected}" Value="True">
+                                            <Setter TargetName="TileRoot" Property="Background" Value="{DynamicResource SecondaryRegionBrush}" />
+                                        </DataTrigger>
+
+                                        <Trigger SourceName="TileCheckBox" Property="IsChecked" Value="True">
+                                            <Setter TargetName="TileRoot" Property="Background" Value="{DynamicResource SecondaryRegionBrush}" />
+                                            <Setter TargetName="TileRoot" Property="Effect" Value="{StaticResource EffectShadow4}" />
+                                        </Trigger>
+
+                                        <DataTrigger Binding="{Binding RiskLevel}" Value="高">
+                                            <Setter TargetName="RiskBadge" Property="Background" Value="{DynamicResource DangerBrush}" />
+                                            <Setter TargetName="RiskBadgeText" Property="Foreground" Value="White" />
+                                        </DataTrigger>
+
+                                        <DataTrigger Binding="{Binding RiskLevel}" Value="中">
+                                            <Setter TargetName="RiskBadge" Property="Background" Value="{DynamicResource WarningBrush}" />
+                                            <Setter TargetName="RiskBadgeText" Property="Foreground" Value="White" />
+                                        </DataTrigger>
+
+                                        <DataTrigger Binding="{Binding RiskLevel}" Value="低">
+                                            <Setter TargetName="RiskBadge" Property="Background" Value="{DynamicResource SuccessBrush}" />
+                                            <Setter TargetName="RiskBadgeText" Property="Foreground" Value="White" />
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
@@ -301,7 +376,7 @@
                 </Grid>
             </Border>
 
-            <!-- 底部简化详情 -->
+            <!-- 底部：仅保留详情说明 -->
             <Border Grid.Row="6"
                     Padding="12"
                     CornerRadius="8"
@@ -309,33 +384,18 @@
                     BorderBrush="{DynamicResource BorderBrush}"
                     BorderThickness="1">
                 <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="220" />
-                        <ColumnDefinition Width="8" />
-                        <ColumnDefinition Width="180" />
-                        <ColumnDefinition Width="8" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="8" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
 
-                    <Border Grid.Column="0"
-                            Padding="10"
-                            CornerRadius="6"
-                            Background="{DynamicResource RegionBrush}">
-                        <TextBlock x:Name="TextBlockPermissionRoles"
-                                   Foreground="{DynamicResource PrimaryTextBrush}"
-                                   Text="建议角色：-" />
-                    </Border>
+                    <TextBlock FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               Text="权限说明" />
 
-                    <Border Grid.Column="2"
-                            Padding="10"
-                            CornerRadius="6"
-                            Background="{DynamicResource RegionBrush}">
-                        <TextBlock x:Name="TextBlockPermissionRisk"
-                                   Foreground="{DynamicResource PrimaryTextBrush}"
-                                   Text="风险级别：-" />
-                    </Border>
-
-                    <Border Grid.Column="4"
+                    <Border Grid.Row="2"
                             Padding="10"
                             CornerRadius="6"
                             Background="{DynamicResource RegionBrush}">

@@ -14,8 +14,8 @@
                Background="{DynamicResource RegionBrush}"
                Title="AM运动控制"
                Icon="/Resources/Img/logo.ico"
-               Height="1024"
-               Width="1280">
+               Height="800"
+               Width="1200">
     <Grid>
         <Rectangle Fill="{StaticResource ShellTextureBrush}" />
 

@@ -15,6 +15,7 @@ namespace AMControlWPF.Views.Am
     {
         private readonly AuthService _authService;
         private readonly List<UserSummary> _allUsers;
+        private readonly List<RoleFilterItem> _roleFilters;
         private readonly List<PermissionModuleItem> _modules;
         private readonly List<PermissionDisplayItem> _allPermissions;
         private UserSummary _targetUser;
@@ -25,6 +26,7 @@ namespace AMControlWPF.Views.Am
 
             _authService = new AuthService();
             _allUsers = new List<UserSummary>();
+            _roleFilters = new List<RoleFilterItem>();
             _modules = new List<PermissionModuleItem>();
             _allPermissions = new List<PermissionDisplayItem>();
 
@@ -76,15 +78,76 @@ namespace AMControlWPF.Views.Am
                 .Select(x => new PermissionModuleItem(x.Key, x.First().ModuleName))
                 .OrderBy(x => x.DisplayName));
 
-            ListBoxUsers.ItemsSource = _allUsers;
+            _roleFilters.Clear();
+            _roleFilters.Add(new RoleFilterItem(string.Empty, "全部用户"));
+            _roleFilters.Add(new RoleFilterItem("Am", "管理员"));
+            _roleFilters.Add(new RoleFilterItem("Engineer", "工程师"));
+            _roleFilters.Add(new RoleFilterItem("Operator", "操作员"));
+
+            ListBoxRoleFilters.ItemsSource = _roleFilters;
             ModuleNavList.ItemsSource = _modules;
+
+            if (_roleFilters.Count > 0)
+            {
+                ListBoxRoleFilters.SelectedIndex = 0;
+            }
 
             if (_modules.Count > 0)
             {
                 ModuleNavList.SelectedIndex = 0;
             }
 
-            if (_allUsers.Count > 0)
+            ApplyUserFilter();
+        }
+
+        private void TextBoxUserSearch_OnTextChanged(object sender, TextChangedEventArgs e)
+        {
+            ApplyUserFilter();
+        }
+
+        private void ListBoxRoleFilters_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ApplyUserFilter();
+        }
+
+        private void ApplyUserFilter()
+        {
+            var keyword = TextBoxUserSearch.Text == null
+                ? string.Empty
+                : TextBoxUserSearch.Text.Trim().ToLowerInvariant();
+
+            var selectedRoleFilter = ListBoxRoleFilters.SelectedItem as RoleFilterItem;
+            var selectedUserId = _targetUser == null ? 0 : _targetUser.Id;
+
+            IEnumerable<UserSummary> query = _allUsers;
+
+            if (selectedRoleFilter != null && !string.IsNullOrWhiteSpace(selectedRoleFilter.RoleCode))
+            {
+                query = query.Where(x => string.Equals(x.RoleCode, selectedRoleFilter.RoleCode, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                query = query.Where(x =>
+                    (!string.IsNullOrWhiteSpace(x.LoginName) && x.LoginName.ToLowerInvariant().Contains(keyword)) ||
+                    (!string.IsNullOrWhiteSpace(x.UserName) && x.UserName.ToLowerInvariant().Contains(keyword)) ||
+                    (!string.IsNullOrWhiteSpace(x.RoleName) && x.RoleName.ToLowerInvariant().Contains(keyword)));
+            }
+
+            var list = query.ToList();
+            ListBoxUsers.ItemsSource = list;
+
+            if (selectedUserId > 0)
+            {
+                var currentUser = list.FirstOrDefault(x => x.Id == selectedUserId);
+                if (currentUser != null)
+                {
+                    ListBoxUsers.SelectedItem = currentUser;
+                    return;
+                }
+            }
+
+            if (list.Count > 0)
             {
                 ListBoxUsers.SelectedIndex = 0;
             }
@@ -93,24 +156,8 @@ namespace AMControlWPF.Views.Am
                 _targetUser = null;
                 UpdateSelectedUserDisplay(null);
                 ClearPermissionDetail();
+                ListBoxPermissions.ItemsSource = null;
             }
-        }
-
-        private void TextBoxUserSearch_OnTextChanged(object sender, TextChangedEventArgs e)
-        {
-            var keyword = TextBoxUserSearch.Text == null
-                ? string.Empty
-                : TextBoxUserSearch.Text.Trim().ToLowerInvariant();
-
-            var list = string.IsNullOrWhiteSpace(keyword)
-                ? _allUsers
-                : _allUsers.Where(x =>
-                        (!string.IsNullOrWhiteSpace(x.LoginName) && x.LoginName.ToLowerInvariant().Contains(keyword)) ||
-                        (!string.IsNullOrWhiteSpace(x.UserName) && x.UserName.ToLowerInvariant().Contains(keyword)) ||
-                        (!string.IsNullOrWhiteSpace(x.RoleName) && x.RoleName.ToLowerInvariant().Contains(keyword)))
-                    .ToList();
-
-            ListBoxUsers.ItemsSource = list;
         }
 
         private void ListBoxUsers_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -134,8 +181,6 @@ namespace AMControlWPF.Views.Am
                 return;
             }
 
-            TextBlockPermissionRoles.Text = "建议角色：" + (string.IsNullOrWhiteSpace(item.RecommendedRoles) ? "-" : item.RecommendedRoles);
-            TextBlockPermissionRisk.Text = "风险级别：" + (string.IsNullOrWhiteSpace(item.RiskLevel) ? "-" : item.RiskLevel);
             TextBlockPermissionDescription.Text = string.IsNullOrWhiteSpace(item.Description)
                 ? "暂无说明。"
                 : item.Description;
@@ -264,9 +309,20 @@ namespace AMControlWPF.Views.Am
 
         private void ClearPermissionDetail()
         {
-            TextBlockPermissionRoles.Text = "建议角色：-";
-            TextBlockPermissionRisk.Text = "风险级别：-";
             TextBlockPermissionDescription.Text = "请选择一个权限磁贴查看说明。";
+        }
+
+        private sealed class RoleFilterItem
+        {
+            public RoleFilterItem(string roleCode, string displayName)
+            {
+                RoleCode = roleCode;
+                DisplayName = displayName;
+            }
+
+            public string RoleCode { get; private set; }
+
+            public string DisplayName { get; private set; }
         }
 
         private sealed class PermissionModuleItem

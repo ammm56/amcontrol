@@ -35,11 +35,11 @@
                            DockPanel.Dock="Right">
                     <TextBox Width="150"
                              Height="30"
-                             Margin="0,0,8,6"
+                             Margin="0,0,8,0"
                              VerticalContentAlignment="Center"
                              Text="搜索输入点..." />
-                    <Button MinWidth="72" Margin="0,0,8,6" Content="刷新" />
-                    <Button MinWidth="72" Margin="0,0,0,6" Content="导出" />
+                    <Button MinWidth="72" Margin="0,0,8,0" Content="刷新" />
+                    <Button MinWidth="72" Margin="0,0,0,0" Content="导出" />
                 </WrapPanel>
             </DockPanel>
         </Border>

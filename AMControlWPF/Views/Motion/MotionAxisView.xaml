@@ -41,10 +41,10 @@
                 <WrapPanel HorizontalAlignment="Right"
                    VerticalAlignment="Center"
                    DockPanel.Dock="Right">
-                    <Button MinWidth="72" Margin="0,0,8,6" Content="刷新" />
-                    <Button MinWidth="72" Margin="0,0,8,6" Content="使能" />
-                    <Button MinWidth="72" Margin="0,0,8,6" Content="停止" />
-                    <Button MinWidth="72" Margin="0,0,0,6" Content="回零" />
+                    <Button MinWidth="72" Margin="0,0,8,0" Content="刷新" />
+                    <Button MinWidth="72" Margin="0,0,8,0" Content="使能" />
+                    <Button MinWidth="72" Margin="0,0,8,0" Content="停止" />
+                    <Button MinWidth="72" Margin="0,0,0,0" Content="回零" />
                 </WrapPanel>
             </DockPanel>
         </Border>

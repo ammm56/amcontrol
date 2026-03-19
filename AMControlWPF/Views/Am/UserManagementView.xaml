@@ -38,12 +38,12 @@
                            DockPanel.Dock="Right">
                     <TextBox Width="160"
                              Height="30"
-                             Margin="0,0,8,6"
+                             Margin="0,0,8,0"
                              VerticalContentAlignment="Center"
                              Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
-                    <Button MinWidth="72" Margin="0,0,8,6" Command="{Binding RefreshCommand}" Content="刷新" />
-                    <Button MinWidth="72" Margin="0,0,8,6" Click="ButtonAddUser_OnClick" Content="新增用户" />
-                    <Button MinWidth="72" Margin="0,0,0,6" Content="导出" />
+                    <Button MinWidth="72" Margin="0,0,8,0" Command="{Binding RefreshCommand}" Content="刷新" />
+                    <Button MinWidth="72" Margin="0,0,8,0" Click="ButtonAddUser_OnClick" Content="新增用户" />
+                    <Button MinWidth="72" Margin="0,0,0,0" Content="导出" />
                 </WrapPanel>
             </DockPanel>
         </Border>
