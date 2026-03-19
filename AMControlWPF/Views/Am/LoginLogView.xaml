@@ -173,7 +173,7 @@
                                     <DataGridTextColumn Header="时间" Width="160" Binding="{Binding LoginTimeText}" />
                                     <DataGridTextColumn Header="登录名" Width="100" Binding="{Binding LoginName}" />
                                     <DataGridTextColumn Header="结果" Width="90" Binding="{Binding ResultText}" />
-                                    <DataGridTextColumn Header="客户端" Width="120" Binding="{Binding ClientInfoText}" />
+                                    <DataGridTextColumn Header="程序版本" Width="120" Binding="{Binding AppVersionText}" />
                                     <DataGridTextColumn Header="说明" Width="*" Binding="{Binding MessageText}" />
                                 </DataGrid.Columns>
                             </DataGrid>
@@ -222,7 +222,7 @@
 
                             <Border Grid.Row="8" Padding="10" CornerRadius="6" Background="{DynamicResource RegionBrush}">
                                 <TextBlock Foreground="{DynamicResource PrimaryTextBrush}"
-                                           Text="{Binding SelectedLog.ClientInfoText, TargetNullValue=-, FallbackValue=-, StringFormat=客户端：{0}}" />
+                                           Text="{Binding SelectedLog.AppVersionText, TargetNullValue=-, FallbackValue=-, StringFormat=程序版本：{0}}" />
                             </Border>
 
                             <Border Grid.Row="10" Padding="10" CornerRadius="6" Background="{DynamicResource RegionBrush}">

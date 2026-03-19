@@ -44,9 +44,9 @@ namespace AM.Model.Entity.Auth
         public DateTime LoginTime { get; set; }
 
         /// <summary>
-        /// 客户端信息。
+        /// 程序版本信息。
         /// </summary>
         [SugarColumn(IsNullable = true)]
-        public string ClientInfo { get; set; }
+        public string AppVersion { get; set; }
     }
 }

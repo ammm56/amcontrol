@@ -8,6 +8,7 @@ using SqlSugar;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Security.Cryptography;
 
 namespace AM.DBService.Services.Auth
@@ -813,7 +814,7 @@ namespace AM.DBService.Services.Auth
                         IsSuccess = x.IsSuccess,
                         Message = x.Message,
                         LoginTime = x.LoginTime,
-                        ClientInfo = x.ClientInfo
+                        AppVersion = x.AppVersion
                     })
                     .ToList();
 
@@ -963,13 +964,32 @@ namespace AM.DBService.Services.Auth
                 IsSuccess = isSuccess,
                 Message = message ?? string.Empty,
                 LoginTime = DateTime.Now,
-                ClientInfo = clientInfo
+                AppVersion = GetApplicationVersion()
             };
 
             var result = _loginLogDb.Add(entity);
             if (!result.Success)
             {
                 _reporter?.Warn("AuthService", "登录日志写入失败", result.Code);
+            }
+        }
+
+        private static string GetApplicationVersion()
+        {
+            try
+            {
+                var assembly = Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
+                var version = assembly.GetName().Version;
+                if (version == null)
+                {
+                    return "-";
+                }
+
+                return version.ToString();
+            }
+            catch
+            {
+                return "-";
             }
         }
     }

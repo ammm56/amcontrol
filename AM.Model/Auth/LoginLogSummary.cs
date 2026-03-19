@@ -19,7 +19,7 @@ namespace AM.Model.Auth
 
         public DateTime LoginTime { get; set; }
 
-        public string ClientInfo { get; set; }
+        public string AppVersion { get; set; }
 
         public string ResultText
         {
@@ -31,9 +31,9 @@ namespace AM.Model.Auth
             get { return LoginTime.ToString("yyyy-MM-dd HH:mm:ss"); }
         }
 
-        public string ClientInfoText
+        public string AppVersionText
         {
-            get { return string.IsNullOrWhiteSpace(ClientInfo) ? "-" : ClientInfo; }
+            get { return string.IsNullOrWhiteSpace(AppVersion) ? "-" : AppVersion; }
         }
 
         public string MessageText

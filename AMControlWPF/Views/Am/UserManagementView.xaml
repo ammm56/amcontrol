@@ -42,8 +42,7 @@
                              VerticalContentAlignment="Center"
                              Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
                     <Button MinWidth="72" Margin="0,0,8,0" Command="{Binding RefreshCommand}" Content="刷新" />
-                    <Button MinWidth="72" Margin="0,0,8,0" Click="ButtonAddUser_OnClick" Content="新增用户" />
-                    <Button MinWidth="72" Margin="0,0,0,0" Content="导出" />
+                    <Button MinWidth="72" Margin="0,0,0,0" Click="ButtonAddUser_OnClick" Content="新增用户" />
                 </WrapPanel>
             </DockPanel>
         </Border>
