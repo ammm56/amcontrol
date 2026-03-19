@@ -348,7 +348,17 @@
                                                 <RowDefinition Height="Auto" />
                                                 <RowDefinition Height="8" />
                                                 <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="8" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="8" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="8" />
+                                                <RowDefinition Height="Auto" />
                                             </Grid.RowDefinitions>
+
+                                            <TextBlock FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                                       Text="报警详情" />
 
                                             <TextBlock FontWeight="SemiBold"
                                                        Foreground="{DynamicResource PrimaryTextBrush}"
@@ -364,10 +374,26 @@
                                                        Foreground="{DynamicResource PrimaryTextBrush}"
                                                        Text="报警等级：-" />
 
-                                            <TextBlock x:Name="TextBlockAlarmDetailTime"
+                                            <TextBlock x:Name="TextBlockAlarmDetailSource"
                                                        Grid.Row="6"
                                                        Foreground="{DynamicResource PrimaryTextBrush}"
+                                                       Text="报警来源：-" />
+
+                                            <TextBlock x:Name="TextBlockAlarmDetailCardId"
+                                                       Grid.Row="8"
+                                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                                       Text="控制卡号：-" />
+
+                                            <TextBlock x:Name="TextBlockAlarmDetailTime"
+                                                       Grid.Row="10"
+                                                       Foreground="{DynamicResource PrimaryTextBrush}"
                                                        Text="报警时间：-" />
+
+                                            <TextBlock x:Name="TextBlockAlarmDetailSuggestion"
+                                                       Grid.Row="12"
+                                                       TextWrapping="Wrap"
+                                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                                       Text="处理建议：-" />
                                         </Grid>
                                     </Border>
                                 </Grid>

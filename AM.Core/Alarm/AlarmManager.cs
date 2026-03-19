@@ -60,7 +60,7 @@ namespace AM.Core.Alarm
         /// <param name="message">报警消息。</param>
         public void RaiseAlarm(AlarmCode code, AlarmLevel level, string message)
         {
-            RaiseAlarm(code, level, message, "Alarm", null);
+            RaiseAlarm(code, level, message, "Alarm", null, null, null);
         }
 
         /// <summary>
@@ -73,17 +73,39 @@ namespace AM.Core.Alarm
         /// <param name="cardId">控制卡编号，非控制卡来源可为空。</param>
         public void RaiseAlarm(AlarmCode code, AlarmLevel level, string message, string source, short? cardId)
         {
+            RaiseAlarm(code, level, message, source, cardId, null, null);
+        }
+
+        /// <summary>
+        /// 触发报警
+        /// </summary>
+        /// <param name="code"></param>
+        /// <param name="level"></param>
+        /// <param name="message"></param>
+        /// <param name="source"></param>
+        /// <param name="cardId"></param>
+        /// <param name="description"></param>
+        /// <param name="suggestion"></param>
+        public void RaiseAlarm(AlarmCode code,AlarmLevel level,string message,string source,short? cardId,string description,string suggestion)
+        {
             var finalMessage = string.IsNullOrWhiteSpace(message) ? "未提供报警消息" : message;
             var finalSource = string.IsNullOrWhiteSpace(source) ? "Alarm" : source;
 
-            var alarm = new AlarmInfo(code, level, finalMessage);
+            var alarm = new AlarmInfo(
+                code,
+                level,
+                finalMessage,
+                finalSource,
+                cardId,
+                description,
+                suggestion);
 
             lock (_alarms)
             {
                 _alarms.Add(alarm);
             }
 
-            _logger?.Warn("Alarm " + code + " " + finalMessage);
+            _logger?.Warn("Alarm " + code + " " + finalSource + " " + finalMessage);
 
             try
             {
@@ -99,8 +121,8 @@ namespace AM.Core.Alarm
                 SystemMessageType.Alarm,
                 finalSource,
                 ((int)code).ToString(),
-                null,
-                null,
+                description,
+                suggestion,
                 cardId));
         }
 
@@ -124,11 +146,52 @@ namespace AM.Core.Alarm
             }
 
             if (!hasCleared)
+            {
                 return;
+            }
 
             try
             {
                 _alarmrecord?.SaveCleared(code, DateTime.Now);
+            }
+            catch (Exception ex)
+            {
+                _logger?.Error(ex, "Alarm record save cleared failed");
+            }
+        }
+
+        public void ClearAlarm(AlarmInfo target)
+        {
+            if (target == null)
+            {
+                return;
+            }
+
+            var hasCleared = false;
+
+            lock (_alarms)
+            {
+                var alarm = _alarms.FirstOrDefault(x =>
+                    !x.IsCleared &&
+                    x.Code == target.Code &&
+                    x.Time == target.Time &&
+                    string.Equals(x.Message, target.Message, StringComparison.Ordinal));
+
+                if (alarm != null)
+                {
+                    alarm.IsCleared = true;
+                    hasCleared = true;
+                }
+            }
+
+            if (!hasCleared)
+            {
+                return;
+            }
+
+            try
+            {
+                _alarmrecord?.SaveCleared(target.Code, DateTime.Now);
             }
             catch (Exception ex)
             {

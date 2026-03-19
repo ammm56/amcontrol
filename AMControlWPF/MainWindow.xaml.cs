@@ -162,7 +162,11 @@ namespace AMControlWPF
                     CodeText = alarm.Code.ToString(),
                     LevelText = alarm.Level.ToString(),
                     Message = alarm.Message,
-                    Time = alarm.Time
+                    Time = alarm.Time,
+                    Source = alarm.Source,
+                    CardId = alarm.CardId,
+                    Description = alarm.Description,
+                    Suggestion = alarm.Suggestion
                 });
             }
 
@@ -227,13 +231,19 @@ namespace AMControlWPF
             {
                 TextBlockAlarmDetailCode.Text = "报警代码：-";
                 TextBlockAlarmDetailLevel.Text = "报警等级：-";
+                TextBlockAlarmDetailSource.Text = "报警来源：-";
+                TextBlockAlarmDetailCardId.Text = "控制卡号：-";
                 TextBlockAlarmDetailTime.Text = "报警时间：-";
+                TextBlockAlarmDetailSuggestion.Text = "处理建议：-";
                 return;
             }
 
             TextBlockAlarmDetailCode.Text = "报警代码：" + item.CodeText;
             TextBlockAlarmDetailLevel.Text = "报警等级：" + item.LevelText;
+            TextBlockAlarmDetailSource.Text = "报警来源：" + (string.IsNullOrWhiteSpace(item.Source) ? "-" : item.Source);
+            TextBlockAlarmDetailCardId.Text = "控制卡号：" + (item.CardId.HasValue ? item.CardId.Value.ToString() : "-");
             TextBlockAlarmDetailTime.Text = "报警时间：" + item.Time.ToString("yyyy-MM-dd HH:mm:ss");
+            TextBlockAlarmDetailSuggestion.Text = "处理建议：" + (string.IsNullOrWhiteSpace(item.Suggestion) ? "-" : item.Suggestion);
         }
 
         private Brush FindBrush(string key, Brush fallback)
@@ -711,9 +721,21 @@ namespace AMControlWPF
 
             public DateTime Time { get; set; }
 
+            public string Source { get; set; }
+
+            public short? CardId { get; set; }
+
+            public string Description { get; set; }
+
+            public string Suggestion { get; set; }
+
             public string SummaryText
             {
-                get { return LevelText + " · " + Time.ToString("HH:mm:ss"); }
+                get
+                {
+                    var source = string.IsNullOrWhiteSpace(Source) ? "-" : Source;
+                    return LevelText + " · " + source + " · " + Time.ToString("HH:mm:ss");
+                }
             }
         }
     }

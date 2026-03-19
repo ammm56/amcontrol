@@ -161,21 +161,32 @@ namespace AM.Core.Reporter
         /// </summary>
         public void Alarm(string source, AlarmCode code, AlarmLevel level, string message, short? cardId = null)
         {
+            var codeText = ((int)code).ToString();
+            var descriptor = Resolve(codeText);
+            var finalMessage = MergeMessage(message, descriptor);
+
             // AlarmManager 负责报警状态维护与消息发布，这里不重复发布第二次 Alarm 消息。
             if (_alarmManager != null)
             {
-                _alarmManager.RaiseAlarm(code, level, message, source, cardId);
+                _alarmManager.RaiseAlarm(
+                    code,
+                    level,
+                    finalMessage,
+                    source,
+                    cardId,
+                    descriptor == null ? null : descriptor.Description,
+                    descriptor == null ? null : descriptor.Suggestion);
                 return;
             }
 
-            _logger?.Warn("[ALARM][" + source + "] " + message);
+            _logger?.Warn("[ALARM][" + source + "] " + finalMessage);
             _messageBus?.Publish(new SystemMessage(
-                message,
+                finalMessage,
                 SystemMessageType.Alarm,
                 source,
-                ((int)code).ToString(),
-                null,
-                null,
+                codeText,
+                descriptor == null ? null : descriptor.Description,
+                descriptor == null ? null : descriptor.Suggestion,
                 cardId));
         }
 
