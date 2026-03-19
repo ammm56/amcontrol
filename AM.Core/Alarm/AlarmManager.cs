@@ -16,6 +16,11 @@ namespace AM.Core.Alarm
     public class AlarmManager
     {
         /// <summary>
+        /// 统一状态变更事件
+        /// </summary>
+        public event Action AlarmStateChanged;
+
+        /// <summary>
         /// 消息总线。
         /// 用于向 UI 和其他模块广播报警消息。
         /// </summary>
@@ -49,6 +54,15 @@ namespace AM.Core.Alarm
             _bus = bus;
             _logger = logger;
             _alarmrecord = alarmrecord;
+        }
+
+        private void NotifyAlarmStateChanged()
+        {
+            var handler = AlarmStateChanged;
+            if (handler != null)
+            {
+                handler();
+            }
         }
 
         /// <summary>
@@ -124,6 +138,8 @@ namespace AM.Core.Alarm
                 description,
                 suggestion,
                 cardId));
+
+            NotifyAlarmStateChanged();
         }
 
         /// <summary>
@@ -153,6 +169,7 @@ namespace AM.Core.Alarm
             try
             {
                 _alarmrecord?.SaveCleared(code, DateTime.Now);
+                NotifyAlarmStateChanged();
             }
             catch (Exception ex)
             {
@@ -192,6 +209,7 @@ namespace AM.Core.Alarm
             try
             {
                 _alarmrecord?.SaveCleared(target.Code, DateTime.Now);
+                NotifyAlarmStateChanged();
             }
             catch (Exception ex)
             {

@@ -19,399 +19,281 @@
     <Grid>
         <Rectangle Fill="{StaticResource ShellTextureBrush}" />
 
-        <Grid Margin="16,16,16,12">
+        <Grid x:Name="MainLayoutHost" Margin="16,16,16,12" RenderTransformOrigin="0.5,0.5">
+            <Grid.CacheMode>
+                <BitmapCache />
+            </Grid.CacheMode>
+
+            <Grid.RenderTransform>
+                <ScaleTransform x:Name="MainLayoutScaleTransform"
+                        ScaleX="1"
+                        ScaleY="1" />
+            </Grid.RenderTransform>
+
             <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
-                <RowDefinition Height="40" />
+                <RowDefinition x:Name="MainContentRow" Height="*" />
+                <RowDefinition x:Name="MainStatusRow" Height="40" />
             </Grid.RowDefinitions>
 
-            <Grid Grid.Row="0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="96" />
-                    <ColumnDefinition Width="260" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="PrimaryNavColumn" Width="96" />
+                <ColumnDefinition x:Name="SecondaryNavColumn" Width="260" />
+                <ColumnDefinition x:Name="WorkAreaColumn" Width="*" />
+            </Grid.ColumnDefinitions>
 
-                <!-- 一级导航模块 -->
-                <Border Grid.Column="0"
-                        Margin="0,0,12,0"
-                        Padding="8,12"
-                        CornerRadius="14"
-                        Background="{DynamicResource RegionBrush}"
-                        BorderBrush="{DynamicResource BorderBrush}"
-                        BorderThickness="1"
-                        Effect="{StaticResource EffectShadow2}">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
+            <!-- 一级导航模块 -->
+            <Border Grid.Row="0"
+            Grid.Column="0"
+            Margin="0,0,12,0"
+            Padding="8,12"
+            CornerRadius="14"
+            Background="{DynamicResource RegionBrush}"
+            BorderBrush="{DynamicResource BorderBrush}"
+            BorderThickness="1"
+            Effect="{StaticResource EffectShadow2}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
 
-                        <ListBox x:Name="PrimaryNavList"
-                                 Grid.Row="0"
-                                 SelectionChanged="PrimaryNavList_SelectionChanged"
-                                 ItemContainerStyle="{StaticResource PrimaryNavItemStyle}"
-                                 Background="Transparent"
-                                 BorderThickness="0"
-                                 HorizontalContentAlignment="Stretch"
-                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding DisplayName}"
-                                               TextWrapping="Wrap"
-                                               TextAlignment="Center"
-                                               Foreground="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=Foreground}" />
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
+                    <ListBox x:Name="PrimaryNavList"
+                     Grid.Row="0"
+                     SelectionChanged="PrimaryNavList_SelectionChanged"
+                     ItemContainerStyle="{StaticResource PrimaryNavItemStyle}"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     HorizontalContentAlignment="Stretch"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding DisplayName}"
+                                   TextWrapping="Wrap"
+                                   TextAlignment="Center"
+                                   Foreground="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=Foreground}" />
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
 
-                        <!-- 一级导航模块 底部的用户卡片 -->
-                        <Grid Grid.Row="1" Margin="0,8,0,0">
-                            <Button x:Name="ButtonUserCard"
-                                    Width="60" Height="60" 
-                                    Click="ButtonUserCard_OnClick"
-                                    Background="Transparent"
-                                    BorderThickness="0"
-                                    Padding="0"
-                                    Cursor="Hand">
-                                <StackPanel HorizontalAlignment="Center">
-                                    <hc:Gravatar x:Name="GravatarCurrentUser" Width="56" Height="56" Style="{StaticResource GravatarBaseStyle}" Id="am" />
-                                </StackPanel>
-                            </Button>
+                    <!-- 一级导航模块 底部的用户卡片 -->
+                    <Grid Grid.Row="1" Margin="0,8,0,0">
+                        <Button x:Name="ButtonUserCard"
+                        Width="60"
+                        Height="60"
+                        Click="ButtonUserCard_OnClick"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Padding="0"
+                        Cursor="Hand">
+                            <StackPanel HorizontalAlignment="Center">
+                                <hc:Gravatar x:Name="GravatarCurrentUser"
+                                     Width="56"
+                                     Height="56"
+                                     Style="{StaticResource GravatarBaseStyle}"
+                                     Id="am" />
+                            </StackPanel>
+                        </Button>
 
-                            <Popup x:Name="PopupUserMenu"
-                                   PlacementTarget="{Binding ElementName=ButtonUserCard}"
-                                   Placement="Top"
-                                   VerticalOffset="-10"
-                                   StaysOpen="False"
-                                   AllowsTransparency="True"
-                                   PopupAnimation="Fade">
-                                <Border Style="{StaticResource UserPopupCardBorderStyle}">
-                                    <StackPanel>
-                                        <Border Margin="0,0,0,0"
-                                                Padding="10"
-                                                CornerRadius="10"
-                                                Background="{DynamicResource SecondaryRegionBrush}">
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto" />
-                                                    <ColumnDefinition Width="10" />
-                                                    <ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
-
-                                                <hc:Gravatar Width="42"
-                                                         Height="42"
-                                                         Style="{StaticResource GravatarBaseStyle}"
-                                                         Id="{Binding ElementName=GravatarCurrentUser, Path=Id}" />
-
-                                                <StackPanel Grid.Column="2" VerticalAlignment="Center">
-                                                    <TextBlock x:Name="TextBlockPopupUserName"
-                                                           FontWeight="SemiBold"
-                                                           Foreground="{DynamicResource PrimaryTextBrush}"
-                                                           Text="当前用户" />
-                                                    <TextBlock x:Name="TextBlockPopupUserRole"
-                                                           Margin="0,4,0,0"
-                                                           FontSize="12"
-                                                           Opacity="0.75"
-                                                           Foreground="{DynamicResource PrimaryTextBrush}"
-                                                           Text="角色" />
-                                                </StackPanel>
-                                            </Grid>
-                                        </Border>
-
+                        <Popup x:Name="PopupUserMenu"
+                       PlacementTarget="{Binding ElementName=ButtonUserCard}"
+                       Placement="Top"
+                       VerticalOffset="-10"
+                       StaysOpen="False"
+                       AllowsTransparency="True"
+                       PopupAnimation="Fade">
+                            <Border Style="{StaticResource UserPopupCardBorderStyle}">
+                                <StackPanel>
+                                    <Border Margin="0,0,0,0"
+                                    Padding="10"
+                                    CornerRadius="10"
+                                    Background="{DynamicResource SecondaryRegionBrush}">
                                         <Grid>
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="Auto" />
-                                                <RowDefinition Height="18" />
-                                                <RowDefinition Height="*" />
-                                            </Grid.RowDefinitions>
-
-                                        </Grid>
-                                        <Grid Grid.Row="0" VerticalAlignment="Top">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="8" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="10" />
                                                 <ColumnDefinition Width="*" />
                                             </Grid.ColumnDefinitions>
 
-                                            <Button Grid.Column="0" HorizontalAlignment="Stretch" Style="{StaticResource UserPopupActionButtonStyle}" Click="ButtonSwitchUser_OnClick"
-                                                    Content="切换用户" />
+                                            <hc:Gravatar Width="42"
+                                                 Height="42"
+                                                 Style="{StaticResource GravatarBaseStyle}"
+                                                 Id="{Binding ElementName=GravatarCurrentUser, Path=Id}" />
 
-                                            <Button Grid.Column="2" HorizontalAlignment="Stretch" Style="{StaticResource UserPopupActionButtonStyle}" Click="ButtonChangePassword_OnClick"
-                                                    Content="修改密码" />
-                                        </Grid>
-
-                                        <Grid Grid.Row="2" VerticalAlignment="Top">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="8" />
-                                                <ColumnDefinition Width="*" />
-                                            </Grid.ColumnDefinitions>
-
-                                            <Button Grid.Column="0" HorizontalAlignment="Stretch" 
-                                                    Style="{StaticResource UserPopupActionButtonStyle}" Click="ButtonLogout_OnClick"
-                                                    Content="退出登录" />
-                                        </Grid>
-                                    </StackPanel>
-                                </Border>
-                            </Popup>
-                        </Grid>
-                    </Grid>
-                </Border>
-
-                <!-- 二级导航模块 -->
-                <Border Grid.Column="1"
-                        Margin="0,0,12,0"
-                        CornerRadius="14"
-                        Background="{DynamicResource RegionBrush}"
-                        BorderBrush="{DynamicResource BorderBrush}"
-                        BorderThickness="1"
-                        Effect="{StaticResource EffectShadow2}">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="56" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
-
-                        <Border Grid.Row="0"
-                                Padding="18,0"
-                                CornerRadius="14,14,0,0"
-                                Background="{DynamicResource SecondaryRegionBrush}"
-                                BorderBrush="{DynamicResource BorderBrush}"
-                                BorderThickness="0,0,0,1">
-                            <TextBlock x:Name="TextBlockPrimaryTitle"
-                                       VerticalAlignment="Center"
-                                       FontSize="16"
-                                       FontWeight="SemiBold"
-                                       Foreground="{DynamicResource PrimaryTextBrush}"
-                                       Text="首页" />
-                        </Border>
-
-                        <ListBox x:Name="SecondaryNavList"
-                                 Grid.Row="1"
-                                 Margin="8,8,8,10"
-                                 SelectionChanged="SecondaryNavList_SelectionChanged"
-                                 ItemContainerStyle="{StaticResource SecondaryNavItemStyle}"
-                                 Background="Transparent"
-                                 BorderThickness="0"
-                                 HorizontalContentAlignment="Stretch">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <StackPanel>
-                                        <TextBlock Text="{Binding DisplayName}"
-                                                   FontWeight="SemiBold"
-                                                   Foreground="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=Foreground}" />
-                                        <TextBlock Margin="0,4,0,0"
-                                                   FontSize="12"
-                                                   Opacity="0.82"
-                                                   Foreground="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=Foreground}"
-                                                   Text="{Binding Description}" />
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
-                    </Grid>
-                </Border>
-
-                <!-- 工作区模块 -->
-                <Border Grid.Column="2"
-                        CornerRadius="16"
-                        Background="{DynamicResource RegionBrush}"
-                        BorderBrush="{DynamicResource BorderBrush}"
-                        BorderThickness="1"
-                        Effect="{StaticResource EffectShadow4}">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="44" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
-
-                        <Border Grid.Row="0"
-                                Padding="16,0"
-                                CornerRadius="16,16,0,0"
-                                Background="{DynamicResource SecondaryRegionBrush}"
-                                BorderBrush="{DynamicResource BorderBrush}"
-                                BorderThickness="0,0,0,1">
-                            <DockPanel LastChildFill="False">
-                                <TextBlock x:Name="TextBlockWorkAreaTitle"
-                                           DockPanel.Dock="Left"
-                                           VerticalAlignment="Center"
-                                           FontSize="15"
-                                           FontWeight="SemiBold"
-                                           Foreground="{DynamicResource PrimaryTextBrush}"
-                                           Text="首页" />
-                                <TextBlock x:Name="TextBlockWorkAreaDescription"
-                                           DockPanel.Dock="Right"
-                                           VerticalAlignment="Center"
-                                           Foreground="{DynamicResource PrimaryTextBrush}"
-                                           Opacity="0.7"
-                                           Text="设备总览、生产摘要、快捷入口" />
-                            </DockPanel>
-                        </Border>
-
-                        <Grid Grid.Row="1" Margin="10">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="8" />
-                                <ColumnDefinition x:Name="AlarmPanelColumn" Width="0" />
-                            </Grid.ColumnDefinitions>
-
-                            <hc:TransitioningContentControl x:Name="MainFrame"
-                                                            Grid.Column="0"
-                                                            Background="Transparent" />
-
-                            <GridSplitter x:Name="AlarmPanelSplitter"
-                                          Grid.Column="1"
-                                          Width="8"
-                                          Background="Transparent"
-                                          HorizontalAlignment="Stretch"
-                                          VerticalAlignment="Stretch"
-                                          ResizeDirection="Columns"
-                                          ResizeBehavior="PreviousAndNext"
-                                          ShowsPreview="True"
-                                          Visibility="Collapsed" />
-
-                            <Border x:Name="BorderAlarmPanel"
-                                    Grid.Column="2"
-                                    Visibility="Collapsed"
-                                    CornerRadius="12"
-                                    Background="{DynamicResource SecondaryRegionBrush}"
-                                    BorderBrush="{DynamicResource BorderBrush}"
-                                    BorderThickness="1"
-                                    Effect="{StaticResource EffectShadow2}">
-                                <Grid Margin="10">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="8" />
-                                        <RowDefinition Height="*" />
-                                        <RowDefinition Height="8" />
-                                        <RowDefinition Height="Auto" />
-                                    </Grid.RowDefinitions>
-
-                                    <DockPanel Grid.Row="0">
-                                        <TextBlock DockPanel.Dock="Left"
-                                                   VerticalAlignment="Center"
-                                                   FontSize="14"
+                                            <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                                <TextBlock x:Name="TextBlockPopupUserName"
                                                    FontWeight="SemiBold"
                                                    Foreground="{DynamicResource PrimaryTextBrush}"
-                                                   Text="活动报警" />
-
-                                        <StackPanel DockPanel.Dock="Right"
-                                                    Orientation="Horizontal"
-                                                    VerticalAlignment="Center">
-                                            <TextBlock x:Name="TextBlockAlarmPanelCount"
-                                                       Margin="0,0,8,0"
-                                                       VerticalAlignment="Center"
-                                                       Foreground="{DynamicResource DangerBrush}"
-                                                       Text="0" />
-                                            <Button Width="28"
-                                                    Height="28"
-                                                    Padding="0"
-                                                    Click="ButtonCloseAlarmPanel_OnClick"
-                                                    Content="×" />
-                                        </StackPanel>
-                                    </DockPanel>
-
-                                    <ListBox x:Name="ListBoxActiveAlarms"
-                                             Grid.Row="2"
-                                             SelectionChanged="ListBoxActiveAlarms_SelectionChanged"
-                                             ItemContainerStyle="{StaticResource ViewNavItemStyle}"
-                                             Background="Transparent"
-                                             BorderThickness="0"
-                                             HorizontalContentAlignment="Stretch">
-                                        <ListBox.ItemTemplate>
-                                            <DataTemplate>
-                                                <StackPanel>
-                                                    <TextBlock Text="{Binding Message}"
-                                                               FontWeight="SemiBold"
-                                                               Foreground="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=Foreground}" />
-                                                    <TextBlock Margin="0,4,0,0"
-                                                               FontSize="12"
-                                                               Opacity="0.8"
-                                                               Foreground="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=Foreground}"
-                                                               Text="{Binding SummaryText}" />
-                                                </StackPanel>
-                                            </DataTemplate>
-                                        </ListBox.ItemTemplate>
-                                    </ListBox>
-
-                                    <Border Grid.Row="4"
-                                            Padding="10"
-                                            CornerRadius="8"
-                                            Background="{DynamicResource RegionBrush}">
-                                        <Grid>
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="Auto" />
-                                                <RowDefinition Height="8" />
-                                                <RowDefinition Height="Auto" />
-                                                <RowDefinition Height="8" />
-                                                <RowDefinition Height="Auto" />
-                                                <RowDefinition Height="8" />
-                                                <RowDefinition Height="Auto" />
-                                                <RowDefinition Height="8" />
-                                                <RowDefinition Height="Auto" />
-                                                <RowDefinition Height="8" />
-                                                <RowDefinition Height="Auto" />
-                                                <RowDefinition Height="8" />
-                                                <RowDefinition Height="Auto" />
-                                            </Grid.RowDefinitions>
-
-                                            <TextBlock FontWeight="SemiBold"
-                                                       Foreground="{DynamicResource PrimaryTextBrush}"
-                                                       Text="报警详情" />
-
-                                            <TextBlock FontWeight="SemiBold"
-                                                       Foreground="{DynamicResource PrimaryTextBrush}"
-                                                       Text="报警详情" />
-
-                                            <TextBlock x:Name="TextBlockAlarmDetailCode"
-                                                       Grid.Row="2"
-                                                       Foreground="{DynamicResource PrimaryTextBrush}"
-                                                       Text="报警代码：-" />
-
-                                            <TextBlock x:Name="TextBlockAlarmDetailLevel"
-                                                       Grid.Row="4"
-                                                       Foreground="{DynamicResource PrimaryTextBrush}"
-                                                       Text="报警等级：-" />
-
-                                            <TextBlock x:Name="TextBlockAlarmDetailSource"
-                                                       Grid.Row="6"
-                                                       Foreground="{DynamicResource PrimaryTextBrush}"
-                                                       Text="报警来源：-" />
-
-                                            <TextBlock x:Name="TextBlockAlarmDetailCardId"
-                                                       Grid.Row="8"
-                                                       Foreground="{DynamicResource PrimaryTextBrush}"
-                                                       Text="控制卡号：-" />
-
-                                            <TextBlock x:Name="TextBlockAlarmDetailTime"
-                                                       Grid.Row="10"
-                                                       Foreground="{DynamicResource PrimaryTextBrush}"
-                                                       Text="报警时间：-" />
-
-                                            <TextBlock x:Name="TextBlockAlarmDetailSuggestion"
-                                                       Grid.Row="12"
-                                                       TextWrapping="Wrap"
-                                                       Foreground="{DynamicResource PrimaryTextBrush}"
-                                                       Text="处理建议：-" />
+                                                   Text="当前用户" />
+                                                <TextBlock x:Name="TextBlockPopupUserRole"
+                                                   Margin="0,4,0,0"
+                                                   FontSize="12"
+                                                   Opacity="0.75"
+                                                   Foreground="{DynamicResource PrimaryTextBrush}"
+                                                   Text="角色" />
+                                            </StackPanel>
                                         </Grid>
                                     </Border>
-                                </Grid>
+
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="18" />
+                                            <RowDefinition Height="*" />
+                                        </Grid.RowDefinitions>
+                                    </Grid>
+
+                                    <Grid Grid.Row="0" VerticalAlignment="Top">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="8" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <Button Grid.Column="0"
+                                        HorizontalAlignment="Stretch"
+                                        Style="{StaticResource UserPopupActionButtonStyle}"
+                                        Click="ButtonSwitchUser_OnClick"
+                                        Content="切换用户" />
+
+                                        <Button Grid.Column="2"
+                                        HorizontalAlignment="Stretch"
+                                        Style="{StaticResource UserPopupActionButtonStyle}"
+                                        Click="ButtonChangePassword_OnClick"
+                                        Content="修改密码" />
+                                    </Grid>
+
+                                    <Grid Grid.Row="2" VerticalAlignment="Top">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="8" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <Button Grid.Column="0"
+                                        HorizontalAlignment="Stretch"
+                                        Style="{StaticResource UserPopupActionButtonStyle}"
+                                        Click="ButtonLogout_OnClick"
+                                        Content="退出登录" />
+                                    </Grid>
+                                </StackPanel>
                             </Border>
-                        </Grid>
+                        </Popup>
                     </Grid>
-                </Border>
-            </Grid>
+                </Grid>
+            </Border>
+
+            <!-- 二级导航模块 -->
+            <Border Grid.Row="0"
+            Grid.Column="1"
+            Margin="0,0,12,0"
+            CornerRadius="14"
+            Background="{DynamicResource RegionBrush}"
+            BorderBrush="{DynamicResource BorderBrush}"
+            BorderThickness="1"
+            Effect="{StaticResource EffectShadow2}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="56" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0"
+                    Padding="18,0"
+                    CornerRadius="14,14,0,0"
+                    Background="{DynamicResource SecondaryRegionBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="0,0,0,1">
+                        <TextBlock x:Name="TextBlockPrimaryTitle"
+                           VerticalAlignment="Center"
+                           FontSize="16"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource PrimaryTextBrush}"
+                           Text="首页" />
+                    </Border>
+
+                    <ListBox x:Name="SecondaryNavList"
+                     Grid.Row="1"
+                     Margin="8,8,8,10"
+                     SelectionChanged="SecondaryNavList_SelectionChanged"
+                     ItemContainerStyle="{StaticResource SecondaryNavItemStyle}"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     HorizontalContentAlignment="Stretch">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding DisplayName}"
+                                       FontWeight="SemiBold"
+                                       Foreground="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=Foreground}" />
+                                    <TextBlock Margin="0,4,0,0"
+                                       FontSize="12"
+                                       Opacity="0.82"
+                                       Foreground="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=Foreground}"
+                                       Text="{Binding Description}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </Border>
+
+            <!-- 工作区模块 -->
+            <Border Grid.Row="0"
+            Grid.Column="2"
+            CornerRadius="16"
+            Background="{DynamicResource RegionBrush}"
+            BorderBrush="{DynamicResource BorderBrush}"
+            BorderThickness="1"
+            Effect="{StaticResource EffectShadow4}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="44" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0"
+                    Padding="16,0"
+                    CornerRadius="16,16,0,0"
+                    Background="{DynamicResource SecondaryRegionBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="0,0,0,1">
+                        <DockPanel LastChildFill="False">
+                            <TextBlock x:Name="TextBlockWorkAreaTitle"
+                               DockPanel.Dock="Left"
+                               VerticalAlignment="Center"
+                               FontSize="15"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               Text="首页" />
+                            <TextBlock x:Name="TextBlockWorkAreaDescription"
+                               DockPanel.Dock="Right"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               Opacity="0.7"
+                               Text="设备总览、生产摘要、快捷入口" />
+                        </DockPanel>
+                    </Border>
+
+                    <hc:TransitioningContentControl x:Name="MainFrame"
+                                            Grid.Row="1"
+                                            Margin="10"
+                                            Background="Transparent" />
+                </Grid>
+            </Border>
+
+            
 
             <!-- 底部状态模块 -->
             <Border Grid.Row="1"
-                    Margin="0,12,0,0"
-                    Padding="14,0"
-                    CornerRadius="12"
-                    Background="{DynamicResource SecondaryRegionBrush}"
-                    BorderBrush="{DynamicResource BorderBrush}"
-                    BorderThickness="1"
-                    Effect="{StaticResource EffectShadow2}">
+            Grid.Column="0"
+            Grid.ColumnSpan="3"
+            Margin="0,12,0,0"
+            Padding="14,0"
+            CornerRadius="12"
+            Background="{DynamicResource SecondaryRegionBrush}"
+            BorderBrush="{DynamicResource BorderBrush}"
+            BorderThickness="1"
+            Effect="{StaticResource EffectShadow2}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -422,41 +304,97 @@
                     </Grid.ColumnDefinitions>
 
                     <TextBlock x:Name="TextBlockStatusMessage"
-                               Grid.Column="0"
-                               VerticalAlignment="Center"
-                               Foreground="{DynamicResource PrimaryTextBrush}"
-                               Text="系统就绪" />
+                       Grid.Column="0"
+                       VerticalAlignment="Center"
+                       Foreground="{DynamicResource PrimaryTextBrush}"
+                       Text="系统就绪" />
 
                     <TextBlock Grid.Column="1"
-                               Margin="0,0,16,0"
-                               VerticalAlignment="Center"
-                               Foreground="{DynamicResource PrimaryTextBrush}"
-                               Text="Motion: 已连接" />
+                       Margin="0,0,16,0"
+                       VerticalAlignment="Center"
+                       Foreground="{DynamicResource PrimaryTextBrush}"
+                       Text="Motion: 已连接" />
 
                     <TextBlock Grid.Column="2"
-                               Margin="0,0,16,0"
-                               VerticalAlignment="Center"
-                               Foreground="{DynamicResource PrimaryTextBrush}"
-                               Text="PLC: 已连接" />
+                       Margin="0,0,16,0"
+                       VerticalAlignment="Center"
+                       Foreground="{DynamicResource PrimaryTextBrush}"
+                       Text="PLC: 已连接" />
 
                     <TextBlock Grid.Column="3"
-                               Margin="0,0,16,0"
-                               VerticalAlignment="Center"
-                               Foreground="{DynamicResource PrimaryTextBrush}"
-                               Text="Camera: 已连接" />
+                       Margin="0,0,16,0"
+                       VerticalAlignment="Center"
+                       Foreground="{DynamicResource PrimaryTextBrush}"
+                       Text="Camera: 已连接" />
 
                     <Button x:Name="ButtonAlarmIndicator"
-                            Grid.Column="4"
-                            Height="28"
-                            MinWidth="84"
-                            Padding="12,0"
-                            Click="ButtonAlarmIndicator_OnClick"
-                            Background="{DynamicResource SecondaryRegionBrush}"
-                            BorderBrush="{DynamicResource BorderBrush}"
-                            BorderThickness="1"
-                            Content="报警: 0" />
+                    Grid.Column="4"
+                    Height="28"
+                    MinWidth="84"
+                    Padding="12,0"
+                    Click="ButtonAlarmIndicator_OnClick"
+                    Background="{DynamicResource SecondaryRegionBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    Content="报警: 0" />
                 </Grid>
             </Border>
         </Grid>
+
+        <Border x:Name="AlarmOverlayMask"
+                Panel.ZIndex="10"
+                Background="#48000000"
+                Visibility="Collapsed"
+                MouseLeftButtonDown="AlarmOverlayMask_OnMouseLeftButtonDown" />
+
+        <Border x:Name="BorderAlarmPanel"
+                Panel.ZIndex="20"
+                Width="560"
+                Margin="0,16,16,12"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Stretch"
+                Visibility="Collapsed"
+                CornerRadius="16"
+                Background="{DynamicResource RegionBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1"
+                Effect="{StaticResource EffectShadow4}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="44" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Border Grid.Row="0"
+                Padding="14,0"
+                CornerRadius="16,16,0,0"
+                Background="{DynamicResource SecondaryRegionBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="0,0,0,1">
+                    <DockPanel LastChildFill="False">
+                        <TextBlock DockPanel.Dock="Left"
+                           VerticalAlignment="Center"
+                           FontSize="15"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource PrimaryTextBrush}"
+                           Text="报警抽屉" />
+
+                        <Button DockPanel.Dock="Right"
+                        Width="30"
+                        Height="28"
+                        Margin="8,0,0,0"
+                        Padding="0"
+                        Click="ButtonCloseAlarmPanel_OnClick"
+                        Background="Transparent"
+                        BorderBrush="{DynamicResource BorderBrush}"
+                        BorderThickness="1"
+                        Content="✕" />
+                    </DockPanel>
+                </Border>
+
+                <main:ActiveAlarmPanel x:Name="ActiveAlarmPanelControl" Grid.Row="1" />
+            </Grid>
+        </Border>
+
     </Grid>
 </hc:GlowWindow>

@@ -94,11 +94,20 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Tools\Helper\LangThemeHelper.cs" />
+    <Compile Include="UserControls\Main\ActiveAlarmPanel.xaml.cs">
+      <DependentUpon>ActiveAlarmPanel.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\Main\AlarmSummaryCard.xaml.cs">
+      <DependentUpon>AlarmSummaryCard.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserControls\Main\LangAndTheme.xaml.cs">
       <DependentUpon>LangAndTheme.xaml</DependentUpon>
     </Compile>
     <Compile Include="UserControls\Main\NonClientAreaContent.xaml.cs">
       <DependentUpon>NonClientAreaContent.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Alarm\CurrentAlarmView.xaml.cs">
+      <DependentUpon>CurrentAlarmView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Am\LoginLogView.xaml.cs">
       <DependentUpon>LoginLogView.xaml</DependentUpon>
@@ -186,11 +195,23 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="UserControls\Main\ActiveAlarmPanel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\Main\AlarmSummaryCard.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="UserControls\Main\LangAndTheme.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UserControls\Main\NonClientAreaContent.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Alarm\CurrentAlarmView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -15,6 +15,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using AM.Model.Auth;
+using AMControlWPF.Views.Alarm;
 
 namespace AMControlWPF
 {
@@ -28,8 +29,10 @@ namespace AMControlWPF
         private readonly Dictionary<string, List<SecondaryNavItem>> _allSecondaryNavMap = new Dictionary<string, List<SecondaryNavItem>>();
         private readonly List<PrimaryNavItem> _visiblePrimaryNavItems = new List<PrimaryNavItem>();
         private readonly Dictionary<string, List<SecondaryNavItem>> _visibleSecondaryNavMap = new Dictionary<string, List<SecondaryNavItem>>();
-        private readonly List<AlarmDisplayItem> _activeAlarmItems = new List<AlarmDisplayItem>();
         private bool _isAlarmPanelVisible;
+
+        private const double MainLayoutScaleWhenAlarmVisible = 0.975d;
+        private const double MainLayoutOpacityWhenAlarmVisible = 0.92d;
 
         public MainWindow()
         {
@@ -53,8 +56,14 @@ namespace AMControlWPF
         {
             ApplyNavigationByUser();
             InitializeCurrentUserCard();
+
+            SeedDebugAlarmsOnStartup();
             SubscribeSystemMessages();
+
+            ActiveAlarmPanelControl.BindAlarmManager(SystemContext.Instance.AlarmManager);
+            ActiveAlarmPanelControl.AlarmCountChanged += ActiveAlarmPanelControl_AlarmCountChanged;
             RefreshAlarmPanel();
+            SetAlarmPanelVisible(ActiveAlarmPanelControl.ActiveAlarmCount > 0);
 
             PrimaryNavList.ItemsSource = _visiblePrimaryNavItems;
 
@@ -73,6 +82,7 @@ namespace AMControlWPF
         private void MainWindow_Closed(object sender, EventArgs e)
         {
             SystemContext.Instance.MessageBus?.Unsubscribe(this);
+            ActiveAlarmPanelControl.AlarmCountChanged -= ActiveAlarmPanelControl_AlarmCountChanged;
         }
 
         private void SubscribeSystemMessages()
@@ -96,9 +106,23 @@ namespace AMControlWPF
             }
 
             UpdateStatusMessage(message);
+            ShowMessageNotification(message);
+
+            if (message.Type == SystemMessageType.Alarm && !_isAlarmPanelVisible)
+            {
+                SetAlarmPanelVisible(true);
+            }
+        }
+        private void ShowMessageNotification(SystemMessage message)
+        {
+            if (message == null || string.IsNullOrWhiteSpace(message.Message))
+            {
+                return;
+            }
 
             switch (message.Type)
             {
+                case SystemMessageType.Info:
                 case SystemMessageType.Status:
                     Growl.Info(message.Message);
                     break;
@@ -110,11 +134,6 @@ namespace AMControlWPF
                     break;
                 case SystemMessageType.Alarm:
                     Growl.Warning(message.Message);
-                    RefreshAlarmPanel();
-                    if (!_isAlarmPanelVisible)
-                    {
-                        SetAlarmPanelVisible(true);
-                    }
                     break;
             }
         }
@@ -144,62 +163,46 @@ namespace AMControlWPF
             }
         }
 
-
         private void RefreshAlarmPanel()
         {
-            _activeAlarmItems.Clear();
+            ActiveAlarmPanelControl.RefreshAlarms();
+            UpdateAlarmIndicator(ActiveAlarmPanelControl.ActiveAlarmCount);
 
-            var alarms = SystemContext.Instance.AlarmManager == null
-                ? new List<AlarmInfo>()
-                : SystemContext.Instance.AlarmManager.GetActiveAlarms()
-                    .OrderByDescending(x => x.Time)
-                    .ToList();
-
-            foreach (var alarm in alarms)
+            if (ActiveAlarmPanelControl.ActiveAlarmCount == 0 && _isAlarmPanelVisible)
             {
-                _activeAlarmItems.Add(new AlarmDisplayItem
-                {
-                    CodeText = alarm.Code.ToString(),
-                    LevelText = alarm.Level.ToString(),
-                    Message = alarm.Message,
-                    Time = alarm.Time,
-                    Source = alarm.Source,
-                    CardId = alarm.CardId,
-                    Description = alarm.Description,
-                    Suggestion = alarm.Suggestion
-                });
+                SetAlarmPanelVisible(false);
             }
+        }
 
-            ListBoxActiveAlarms.ItemsSource = null;
-            ListBoxActiveAlarms.ItemsSource = _activeAlarmItems;
+        private void ActiveAlarmPanelControl_AlarmCountChanged(int count)
+        {
+            UpdateAlarmIndicator(count);
 
-            TextBlockAlarmPanelCount.Text = _activeAlarmItems.Count.ToString();
-            ButtonAlarmIndicator.Content = "报警: " + _activeAlarmItems.Count;
+            if (count == 0 && _isAlarmPanelVisible)
+            {
+                SetAlarmPanelVisible(false);
+            }
+        }
 
-            if (_activeAlarmItems.Count > 0)
+        private void UpdateAlarmIndicator(int count)
+        {
+            ButtonAlarmIndicator.Content = "报警: " + count;
+
+            if (count > 0)
             {
                 ButtonAlarmIndicator.Background = FindBrush("DangerBrush", Brushes.IndianRed);
                 ButtonAlarmIndicator.Foreground = Brushes.White;
-                if (ListBoxActiveAlarms.SelectedIndex < 0)
-                {
-                    ListBoxActiveAlarms.SelectedIndex = 0;
-                }
             }
             else
             {
                 ButtonAlarmIndicator.Background = FindBrush("SecondaryRegionBrush", Brushes.LightGray);
                 ButtonAlarmIndicator.Foreground = FindBrush("PrimaryTextBrush", Brushes.Black);
-                ShowAlarmDetail(null);
-                if (_isAlarmPanelVisible)
-                {
-                    SetAlarmPanelVisible(false);
-                }
             }
         }
 
         private void ButtonAlarmIndicator_OnClick(object sender, RoutedEventArgs e)
         {
-            if (_activeAlarmItems.Count == 0)
+            if (ActiveAlarmPanelControl.ActiveAlarmCount == 0)
             {
                 return;
             }
@@ -212,38 +215,21 @@ namespace AMControlWPF
             SetAlarmPanelVisible(false);
         }
 
+        private void AlarmOverlayMask_OnMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            SetAlarmPanelVisible(false);
+        }
+
         private void SetAlarmPanelVisible(bool visible)
         {
             _isAlarmPanelVisible = visible;
-            AlarmPanelColumn.Width = visible ? new GridLength(320) : new GridLength(0);
+
             BorderAlarmPanel.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
-            AlarmPanelSplitter.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
-        }
+            AlarmOverlayMask.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
 
-        private void ListBoxActiveAlarms_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            ShowAlarmDetail(ListBoxActiveAlarms.SelectedItem as AlarmDisplayItem);
-        }
-
-        private void ShowAlarmDetail(AlarmDisplayItem item)
-        {
-            if (item == null)
-            {
-                TextBlockAlarmDetailCode.Text = "报警代码：-";
-                TextBlockAlarmDetailLevel.Text = "报警等级：-";
-                TextBlockAlarmDetailSource.Text = "报警来源：-";
-                TextBlockAlarmDetailCardId.Text = "控制卡号：-";
-                TextBlockAlarmDetailTime.Text = "报警时间：-";
-                TextBlockAlarmDetailSuggestion.Text = "处理建议：-";
-                return;
-            }
-
-            TextBlockAlarmDetailCode.Text = "报警代码：" + item.CodeText;
-            TextBlockAlarmDetailLevel.Text = "报警等级：" + item.LevelText;
-            TextBlockAlarmDetailSource.Text = "报警来源：" + (string.IsNullOrWhiteSpace(item.Source) ? "-" : item.Source);
-            TextBlockAlarmDetailCardId.Text = "控制卡号：" + (item.CardId.HasValue ? item.CardId.Value.ToString() : "-");
-            TextBlockAlarmDetailTime.Text = "报警时间：" + item.Time.ToString("yyyy-MM-dd HH:mm:ss");
-            TextBlockAlarmDetailSuggestion.Text = "处理建议：" + (string.IsNullOrWhiteSpace(item.Suggestion) ? "-" : item.Suggestion);
+            MainLayoutScaleTransform.ScaleX = visible ? MainLayoutScaleWhenAlarmVisible : 1d;
+            MainLayoutScaleTransform.ScaleY = visible ? MainLayoutScaleWhenAlarmVisible : 1d;
+            MainLayoutHost.Opacity = visible ? MainLayoutOpacityWhenAlarmVisible : 1d;
         }
 
         private Brush FindBrush(string key, Brush fallback)
@@ -527,7 +513,7 @@ namespace AMControlWPF
                 case "Engineer.Debug":
                     return CreatePlaceholderPage("工程 / Motion/IO 调试");
                 case "AlarmLog.Current":
-                    return CreatePlaceholderPage("报警与日志 / 当前报警");
+                    return new CurrentAlarmView();
                 case "AlarmLog.History":
                     return CreatePlaceholderPage("报警与日志 / 报警历史");
                 case "AlarmLog.RunLog":
@@ -677,6 +663,47 @@ namespace AMControlWPF
 
             UpdateWorkAreaHeader(secondary.DisplayName, secondary.Description);
             NavigateToPage(secondary.Key);
+        }
+
+        private void SeedDebugAlarmsOnStartup()
+        {
+            var alarmManager = SystemContext.Instance.AlarmManager;
+            if (alarmManager == null)
+            {
+                return;
+            }
+
+            if (alarmManager.GetActiveAlarms().Count > 0)
+            {
+                return;
+            }
+
+            alarmManager.RaiseAlarm(
+                AlarmCode.PLCDisconnect,
+                AlarmLevel.Warning,
+                "PLC 通讯延迟异常，当前处于重连观察状态。",
+                "PLC",
+                null,
+                "启动联调阶段注入的调试报警，用于验证报警抽屉、分页与详情联动效果。",
+                "检查网口链路、PLC 心跳周期与重连策略。");
+
+            alarmManager.RaiseAlarm(
+                AlarmCode.AxisServoAlarm,
+                AlarmLevel.Alarm,
+                "X 轴伺服报警，设备动作已被拦截。",
+                "Motion",
+                1,
+                "伺服驱动器反馈异常，当前禁止继续下发运动命令。",
+                "检查伺服报警代码、驱动器使能状态与急停回路。");
+
+            alarmManager.RaiseAlarm(
+                AlarmCode.CameraGrabFailed,
+                AlarmLevel.Critical,
+                "相机取像失败，当前批次视觉定位中断。",
+                "Vision",
+                null,
+                "连续取像失败达到停机阈值，系统已切换为人工确认模式。",
+                "检查相机供电、网线、触发源与曝光参数。");
         }
 
         private sealed class PrimaryNavItem
