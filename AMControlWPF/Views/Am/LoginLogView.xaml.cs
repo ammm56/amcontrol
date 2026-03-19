@@ -1,17 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AM.ViewModel.ViewModels.Am;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace AMControlWPF.Views.Am
 {
@@ -20,9 +9,22 @@ namespace AMControlWPF.Views.Am
     /// </summary>
     public partial class LoginLogView : UserControl
     {
+        private readonly LoginLogViewModel _viewModel;
+
         public LoginLogView()
         {
             InitializeComponent();
+
+            _viewModel = new LoginLogViewModel();
+            DataContext = _viewModel;
+
+            Loaded += LoginLogView_Loaded;
+        }
+
+        private async void LoginLogView_Loaded(object sender, RoutedEventArgs e)
+        {
+            Loaded -= LoginLogView_Loaded;
+            await _viewModel.LoadAsync();
         }
     }
 }

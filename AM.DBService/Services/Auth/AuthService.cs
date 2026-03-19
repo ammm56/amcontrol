@@ -766,6 +766,91 @@ namespace AM.DBService.Services.Auth
             return Result.Ok("密码修改成功", ResultSource.Unknown);
         }
 
+        public Result<LoginLogSummary> GetLoginLogSummaries(
+            string loginNameKeyword,
+            bool? isSuccess,
+            DateTime? startDate,
+            DateTime? endDate,
+            int pageIndex,
+            int pageSize,
+            out int totalCount,
+            out int successCount,
+            out int failedCount)
+        {
+            totalCount = 0;
+            successCount = 0;
+            failedCount = 0;
+
+            if (pageIndex <= 0)
+            {
+                pageIndex = 1;
+            }
+
+            if (pageSize <= 0)
+            {
+                pageSize = 100;
+            }
+
+            var queryResult = _loginLogDb.QueryAll();
+            if (!queryResult.Success)
+            {
+                _reporter?.Error("AuthService", "查询登录日志失败", queryResult.Code);
+                return Result<LoginLogSummary>.Fail(queryResult.Code, "查询登录日志失败", ResultSource.Database);
+            }
+
+            IEnumerable<SysLoginLog> query = queryResult.Items;
+
+            if (!string.IsNullOrWhiteSpace(loginNameKeyword))
+            {
+                var keyword = loginNameKeyword.Trim().ToLowerInvariant();
+                query = query.Where(x =>
+                    !string.IsNullOrWhiteSpace(x.LoginName) &&
+                    x.LoginName.ToLowerInvariant().Contains(keyword));
+            }
+
+            if (isSuccess.HasValue)
+            {
+                query = query.Where(x => x.IsSuccess == isSuccess.Value);
+            }
+
+            if (startDate.HasValue)
+            {
+                var begin = startDate.Value.Date;
+                query = query.Where(x => x.LoginTime >= begin);
+            }
+
+            if (endDate.HasValue)
+            {
+                var end = endDate.Value.Date.AddDays(1);
+                query = query.Where(x => x.LoginTime < end);
+            }
+
+            var filteredList = query
+                .OrderByDescending(x => x.LoginTime)
+                .ToList();
+
+            totalCount = filteredList.Count;
+            successCount = filteredList.Count(x => x.IsSuccess);
+            failedCount = filteredList.Count(x => !x.IsSuccess);
+
+            var pageItems = filteredList
+                .Skip((pageIndex - 1) * pageSize)
+                .Take(pageSize)
+                .Select(x => new LoginLogSummary
+                {
+                    Id = x.Id,
+                    UserId = x.UserId,
+                    LoginName = x.LoginName,
+                    IsSuccess = x.IsSuccess,
+                    Message = x.Message,
+                    LoginTime = x.LoginTime,
+                    ClientInfo = x.ClientInfo
+                })
+                .ToList();
+
+            return Result<LoginLogSummary>.OkList(pageItems, "查询登录日志成功", ResultSource.Database);
+        }
+
         public static void CreatePasswordHash(string password, out string salt, out string hash)
         {
             if (password == null)
