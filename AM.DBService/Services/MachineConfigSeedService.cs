@@ -1,0 +1,284 @@
+﻿using AM.Core.Context;
+using AM.Core.Reporter;
+using AM.DBService.DBase;
+using AM.Model.Common;
+using AM.Model.DB;
+using AM.Model.Entity.Motion;
+using AM.Model.Interfaces.DB;
+using AM.Model.MotionCard;
+using SqlSugar;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace AM.DBService.Services
+{
+    /// <summary>
+    /// 运动设备配置种子服务。
+    /// 启动时自动补默认虚拟卡、默认测试轴、默认 DI/DO、默认轴参数。
+    /// 只在表为空时插入，不会重复设置种子。
+    /// </summary>
+    public class MachineConfigSeedService : IMachineConfigSeedService
+    {
+        private readonly IAppReporter _reporter;
+        private readonly DBContext _dbContext;
+
+        public MachineConfigSeedService()
+            : this(SystemContext.Instance.Reporter)
+        {
+        }
+
+        public MachineConfigSeedService(IAppReporter reporter)
+        {
+            _reporter = reporter;
+            _dbContext = new DBContext();
+        }
+
+        public Result EnsureSeedData()
+        {
+            SqlSugarClient db = null;
+
+            try
+            {
+                db = _dbContext.GetClient(new MDBaseSet { DBType = "Sqlite" });
+
+                db.CodeFirst.InitTables(
+                    typeof(MotionCardEntity),
+                    typeof(MotionAxisEntity),
+                    typeof(MotionIoMapEntity),
+                    typeof(MotionAxisConfigEntity));
+
+                var hasCard = db.Queryable<MotionCardEntity>().Any();
+                if (hasCard)
+                {
+                    _reporter.Info("MachineConfigSeed", "运动配置种子已存在，跳过初始化");
+                    return Result.Ok("运动配置种子已存在", ResultSource.Database);
+                }
+
+                db.Ado.BeginTran();
+
+                var cards = CreateDefaultCards();
+                var axes = CreateDefaultAxes();
+                var ioMaps = CreateDefaultIoMaps();
+                var axisConfigs = CreateDefaultAxisConfigs();
+
+                db.Insertable(cards).ExecuteCommand();
+                db.Insertable(axes).ExecuteCommand();
+                db.Insertable(ioMaps).ExecuteCommand();
+                db.Insertable(axisConfigs).ExecuteCommand();
+
+                db.Ado.CommitTran();
+
+                _reporter.Info("MachineConfigSeed", "默认运动配置种子初始化完成");
+                return Result.Ok("默认运动配置种子初始化完成", ResultSource.Database);
+            }
+            catch (Exception ex)
+            {
+                if (db != null)
+                {
+                    try
+                    {
+                        db.Ado.RollbackTran();
+                    }
+                    catch
+                    {
+                    }
+                }
+
+                _reporter.Error("MachineConfigSeed", ex, "默认运动配置种子初始化失败");
+                return Result.Fail((int)DbErrorCode.SaveFailed, "默认运动配置种子初始化失败", ResultSource.Database);
+            }
+        }
+
+        private static List<MotionCardEntity> CreateDefaultCards()
+        {
+            return new List<MotionCardEntity>
+            {
+                new MotionCardEntity
+                {
+                    CardId = 0,
+                    CardType = (int)MotionCardType.VIRTUAL,
+                    Name = "VirtualCard-0",
+                    ModeParam = 0,
+                    CoreNumber = 1,
+                    AxisCountNumber = 2,
+                    UseExtModule = false,
+                    IsEnabled = true,
+                    SortOrder = 1,
+                    Remark = "默认虚拟运动控制卡"
+                }
+            };
+        }
+
+        private static List<MotionAxisEntity> CreateDefaultAxes()
+        {
+            return new List<MotionAxisEntity>
+            {
+                new MotionAxisEntity
+                {
+                    CardId = 0,
+                    AxisId = 1,
+                    LogicalAxis = 101,
+                    Name = "测试X轴",
+                    PhysicalCore = 1,
+                    PhysicalAxis = 1,
+                    IsEnabled = true,
+                    SortOrder = 1,
+                    Remark = "默认测试轴X"
+                },
+                new MotionAxisEntity
+                {
+                    CardId = 0,
+                    AxisId = 2,
+                    LogicalAxis = 102,
+                    Name = "测试Y轴",
+                    PhysicalCore = 1,
+                    PhysicalAxis = 2,
+                    IsEnabled = true,
+                    SortOrder = 2,
+                    Remark = "默认测试轴Y"
+                }
+            };
+        }
+
+        private static List<MotionIoMapEntity> CreateDefaultIoMaps()
+        {
+            return new List<MotionIoMapEntity>
+            {
+                new MotionIoMapEntity
+                {
+                    CardId = 0,
+                    IoType = "DI",
+                    LogicalBit = 1001,
+                    Name = "XHome",
+                    Core = 1,
+                    IsExtModule = false,
+                    HardwareBit = 1,
+                    IsEnabled = true,
+                    SortOrder = 1,
+                    Remark = "测试X轴原点信号"
+                },
+                new MotionIoMapEntity
+                {
+                    CardId = 0,
+                    IoType = "DI",
+                    LogicalBit = 1002,
+                    Name = "YHome",
+                    Core = 1,
+                    IsExtModule = false,
+                    HardwareBit = 2,
+                    IsEnabled = true,
+                    SortOrder = 2,
+                    Remark = "测试Y轴原点信号"
+                },
+                new MotionIoMapEntity
+                {
+                    CardId = 0,
+                    IoType = "DO",
+                    LogicalBit = 2001,
+                    Name = "XServoEnable",
+                    Core = 1,
+                    IsExtModule = false,
+                    HardwareBit = 1,
+                    IsEnabled = true,
+                    SortOrder = 3,
+                    Remark = "测试X轴使能输出"
+                },
+                new MotionIoMapEntity
+                {
+                    CardId = 0,
+                    IoType = "DO",
+                    LogicalBit = 2002,
+                    Name = "YServoEnable",
+                    Core = 1,
+                    IsExtModule = false,
+                    HardwareBit = 2,
+                    IsEnabled = true,
+                    SortOrder = 4,
+                    Remark = "测试Y轴使能输出"
+                }
+            };
+        }
+
+        private static List<MotionAxisConfigEntity> CreateDefaultAxisConfigs()
+        {
+            var result = new List<MotionAxisConfigEntity>();
+            result.AddRange(CreateAxisConfigRows(101, "测试X轴"));
+            result.AddRange(CreateAxisConfigRows(102, "测试Y轴"));
+            return result;
+        }
+
+        private static IEnumerable<MotionAxisConfigEntity> CreateAxisConfigRows(int logicalAxis, string axisName)
+        {
+            yield return CreateConfig(logicalAxis, axisName, "AlarmEnabled", "报警使能", "Bool", 1D);
+            yield return CreateConfig(logicalAxis, axisName, "AlarmInvert", "报警取反", "Bool", 0D);
+            yield return CreateConfig(logicalAxis, axisName, "EnableInvert", "使能取反", "Bool", 0D);
+            yield return CreateConfig(logicalAxis, axisName, "PulseMode", "脉冲模式", "Int16", 0D);
+            yield return CreateConfig(logicalAxis, axisName, "DefaultMoveMode", "默认运动模式", "Int16", 1D);
+            yield return CreateConfig(logicalAxis, axisName, "EncoderExternal", "外部编码器", "Bool", 0D);
+            yield return CreateConfig(logicalAxis, axisName, "EncoderInvert", "编码器取反", "Bool", 0D);
+            yield return CreateConfig(logicalAxis, axisName, "LimitHomeInvert", "限位原点取反", "Bool", 0D);
+            yield return CreateConfig(logicalAxis, axisName, "LimitMode", "限位模式", "Int16", -1D);
+            yield return CreateConfig(logicalAxis, axisName, "TriggerEdge", "捕获沿", "Int16", 1D);
+
+            yield return CreateConfig(logicalAxis, axisName, "Lead", "导程", "Double", 5D);
+            yield return CreateConfig(logicalAxis, axisName, "PulsePerRev", "每圈脉冲数", "Int32", 10000D);
+            yield return CreateConfig(logicalAxis, axisName, "GearRatio", "减速比", "Double", 1D);
+
+            yield return CreateConfig(logicalAxis, axisName, "DefaultVelocity", "默认点位速度", "Double", 5D);
+            yield return CreateConfig(logicalAxis, axisName, "JogVelocity", "默认Jog速度", "Double", 2D);
+            yield return CreateConfig(logicalAxis, axisName, "Acc", "加速度", "Double", 0.5D);
+            yield return CreateConfig(logicalAxis, axisName, "Dec", "减速度", "Double", 0.5D);
+            yield return CreateConfig(logicalAxis, axisName, "SmoothTime", "平滑时间", "Int16", 25D);
+
+            yield return CreateConfig(logicalAxis, axisName, "HomeDeceleration", "回零减速度", "Double", 0.5D);
+            yield return CreateConfig(logicalAxis, axisName, "NormalStopDeceleration", "平停减速度", "Double", 0.5D);
+            yield return CreateConfig(logicalAxis, axisName, "EmergencyStopDeceleration", "急停减速度", "Double", 2D);
+
+            yield return CreateConfig(logicalAxis, axisName, "StandardHomeMode", "标准回零模式", "Int16", 1D);
+            yield return CreateConfig(logicalAxis, axisName, "ResetDirection", "复位运动方向", "Int16", 1D);
+            yield return CreateConfig(logicalAxis, axisName, "HomeSearchVelocity", "HOME搜索速度", "Double", 1D);
+            yield return CreateConfig(logicalAxis, axisName, "IndexSearchVelocity", "INDEX搜索速度", "Double", 0.2D);
+            yield return CreateConfig(logicalAxis, axisName, "HomeOffset", "原点偏移量", "Int32", 0D);
+            yield return CreateConfig(logicalAxis, axisName, "HomeMaxDistance", "HOME最大搜索距离", "Int32", 0D);
+            yield return CreateConfig(logicalAxis, axisName, "IndexMaxDistance", "INDEX最大搜索距离", "Int32", 0D);
+            yield return CreateConfig(logicalAxis, axisName, "EscapeStep", "脱离步长", "Int32", 1000D);
+            yield return CreateConfig(logicalAxis, axisName, "IndexSearchDirection", "INDEX搜索方向", "Int16", 1D);
+            yield return CreateConfig(logicalAxis, axisName, "HomeCheck", "回零自检", "Bool", 1D);
+            yield return CreateConfig(logicalAxis, axisName, "HomeUseHomeSignal", "使用Home信号", "Bool", 1D);
+            yield return CreateConfig(logicalAxis, axisName, "HomeUseIndexSignal", "使用Index信号", "Bool", 1D);
+            yield return CreateConfig(logicalAxis, axisName, "HomeUseLimitSignal", "使用限位信号", "Bool", 0D);
+            yield return CreateConfig(logicalAxis, axisName, "HomeAutoZeroPos", "回零自动清零", "Bool", 1D);
+            yield return CreateConfig(logicalAxis, axisName, "HomeTimeoutMs", "回零超时", "Int32", 60000D);
+
+            yield return CreateConfig(logicalAxis, axisName, "SoftLimitEnabled", "软件限位使能", "Bool", 1D);
+            yield return CreateConfig(logicalAxis, axisName, "SoftLimitPositive", "正向软件限位", "Double", 500000D);
+            yield return CreateConfig(logicalAxis, axisName, "SoftLimitNegative", "负向软件限位", "Double", -500000D);
+
+            yield return CreateConfig(logicalAxis, axisName, "EnableDelayMs", "使能前延时", "Int32", 50D);
+            yield return CreateConfig(logicalAxis, axisName, "DisableDelayMs", "失能后延时", "Int32", 50D);
+
+            yield return CreateConfig(logicalAxis, axisName, "EStopId", "急停序号", "Int32", 0D);
+            yield return CreateConfig(logicalAxis, axisName, "StopId", "平停序号", "Int32", 0D);
+        }
+
+        private static MotionAxisConfigEntity CreateConfig(int logicalAxis, string axisName, string paramName, string displayName, string valueType, double value)
+        {
+            return new MotionAxisConfigEntity
+            {
+                LogicalAxis = logicalAxis,
+                AxisDisplayName = axisName,
+                ParamName = paramName,
+                ParamDisplayName = displayName,
+                ParamValueType = valueType,
+                ParamSetValue = value,
+                ParamDefaultValue = value,
+                ParamMaxValue = 0D,
+                ParamMinValue = 0D,
+                Status1 = 0,
+                Status2 = 0,
+                Status3 = 0
+            };
+        }
+    }
+}

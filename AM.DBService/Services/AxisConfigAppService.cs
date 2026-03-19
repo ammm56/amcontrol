@@ -1,8 +1,8 @@
-using AM.Core.Base;
+﻿using AM.Core.Base;
 using AM.Core.Context;
 using AM.Core.Reporter;
 using AM.Model.Common;
-using AM.Model.Entity;
+using AM.Model.Entity.Motion;
 using AM.Model.Interfaces.DB;
 using AM.Model.Interfaces.MotionCard;
 using AM.Model.MotionCard;
@@ -18,8 +18,8 @@ namespace AM.DBService.Services
     /// </summary>
     public class AxisConfigAppService : ServiceBase, IAxisConfigAppService
     {
-        private readonly IConfigAxisArgService _configAxisArgService;
-        private readonly IAxisConfigOverlayService _axisConfigOverlayService;
+        private readonly IMotionAxisConfigService _motionAxisConfigService;
+        private readonly IMotionAxisConfigOverlayService _motionAxisConfigOverlayService;
 
         protected override string MessageSourceName
         {
@@ -32,18 +32,18 @@ namespace AM.DBService.Services
         }
 
         public AxisConfigAppService()
-            : this(new ConfigAxisArgService(), new AxisConfigOverlayService(), SystemContext.Instance.Reporter)
+            : this(new MotionAxisConfigService(), new MotionAxisConfigOverlayService(), SystemContext.Instance.Reporter)
         {
         }
 
         public AxisConfigAppService(
-            IConfigAxisArgService configAxisArgService,
-            IAxisConfigOverlayService axisConfigOverlayService,
+            IMotionAxisConfigService motionAxisConfigService,
+            IMotionAxisConfigOverlayService motionAxisConfigOverlayService,
             IAppReporter reporter)
             : base(reporter)
         {
-            _configAxisArgService = configAxisArgService;
-            _axisConfigOverlayService = axisConfigOverlayService;
+            _motionAxisConfigService = motionAxisConfigService;
+            _motionAxisConfigOverlayService = motionAxisConfigOverlayService;
         }
 
         /// <summary>
@@ -54,7 +54,9 @@ namespace AM.DBService.Services
         {
             var motionCards = ConfigContext.Instance.Config.MotionCardsConfig;
             if (motionCards == null)
+            {
                 return Warn<AxisConfig>((int)DbErrorCode.NotFound, "未找到运动控制卡配置");
+            }
 
             var axisConfigs = motionCards
                 .Where(p => p != null && p.AxisConfigs != null)
@@ -73,51 +75,57 @@ namespace AM.DBService.Services
         public Result<AxisConfig> QueryByLogicalAxis(short logicalAxis)
         {
             if (logicalAxis <= 0)
+            {
                 return Fail<AxisConfig>((int)DbErrorCode.InvalidArgument, "逻辑轴参数无效");
+            }
 
             var axisConfig = FindAxisConfig(logicalAxis);
             if (axisConfig == null)
+            {
                 return Warn<AxisConfig>((int)DbErrorCode.NotFound, "未找到对应逻辑轴配置");
+            }
 
             return Ok(CloneAxisConfig(axisConfig), "读取运行时轴配置成功");
         }
 
         /// <summary>
         /// 保存指定轴的运行时配置，并同步到数据库和运行中的控制卡。
-        /// 数据源以 ConfigContext 为准，不在保存后再从数据库回灌。
         /// </summary>
         public Result Save(AxisConfig axisConfig)
         {
             if (axisConfig == null)
+            {
                 return Fail((int)DbErrorCode.InvalidArgument, "轴配置不能为空");
+            }
 
             var target = FindAxisConfig(axisConfig.LogicalAxis);
             if (target == null)
+            {
                 return Fail((int)DbErrorCode.NotFound, "未找到要保存的逻辑轴配置");
+            }
 
-            // 1. 先回写到运行时配置上下文
             CopyEditableFields(axisConfig, target);
 
-            // 2. 再持久化到数据库
             var persistResult = PersistAxisConfigToDatabase(target);
             if (!persistResult.Success)
+            {
                 return persistResult;
+            }
 
-            // 3. 最后同步到已创建的控制卡实例
             ReloadMachineAxisConfigs();
-
             return Ok("运行时轴配置保存成功");
         }
 
         /// <summary>
         /// 从数据库重新覆盖当前运行时轴配置。
-        /// 该操作用于工程师参数页修改后手动重载。
         /// </summary>
         public Result ReloadFromDatabase()
         {
-            var overlayResult = _axisConfigOverlayService.ApplyToMotionCards(ConfigContext.Instance.Config.MotionCardsConfig);
+            var overlayResult = _motionAxisConfigOverlayService.ApplyToMotionCards(ConfigContext.Instance.Config.MotionCardsConfig);
             if (!overlayResult.Success)
+            {
                 return Fail(overlayResult.Code, "数据库参数覆盖运行配置失败");
+            }
 
             ReloadMachineAxisConfigs();
             return Ok("数据库参数重新加载成功");
@@ -129,14 +137,23 @@ namespace AM.DBService.Services
         private static AxisConfig FindAxisConfig(short logicalAxis)
         {
             var motionCards = ConfigContext.Instance.Config.MotionCardsConfig;
-            if (motionCards == null) return null;
+            if (motionCards == null)
+            {
+                return null;
+            }
 
             foreach (var card in motionCards)
             {
-                if (card == null || card.AxisConfigs == null) continue;
+                if (card == null || card.AxisConfigs == null)
+                {
+                    continue;
+                }
 
                 var axis = card.AxisConfigs.FirstOrDefault(p => p != null && p.LogicalAxis == logicalAxis);
-                if (axis != null) return axis;
+                if (axis != null)
+                {
+                    return axis;
+                }
             }
 
             return null;
@@ -208,25 +225,37 @@ namespace AM.DBService.Services
         /// </summary>
         private Result PersistAxisConfigToDatabase(AxisConfig axisConfig)
         {
-            var queryAllResult = _configAxisArgService.QueryAll();
-            if (!queryAllResult.Success)
-                return Fail(queryAllResult.Code, "读取数据库原始参数失败");
+            var queryResult = _motionAxisConfigService.QueryByLogicalAxis(axisConfig.LogicalAxis);
 
-            var existingMap = queryAllResult.Items
-                .Where(p => p.Axis == axisConfig.LogicalAxis)
-                .ToDictionary(p => p.ParamName, p => p, StringComparer.OrdinalIgnoreCase);
-
-            foreach (var arg in BuildAxisArgs(axisConfig))
+            var existingMap = new Dictionary<string, MotionAxisConfigEntity>(StringComparer.OrdinalIgnoreCase);
+            if (queryResult.Success)
             {
-                ConfigAxisArg existing;
-                if (existingMap.TryGetValue(arg.ParamName, out existing))
-                {
-                    arg.Id = existing.Id;
-                }
+                existingMap = queryResult.Items
+                    .Where(p => p != null && !string.IsNullOrWhiteSpace(p.ParamName))
+                    .ToDictionary(p => p.ParamName, p => p, StringComparer.OrdinalIgnoreCase);
+            }
+            else if (queryResult.Code != (int)DbErrorCode.NotFound)
+            {
+                return Fail(queryResult.Code, "读取数据库轴参数失败");
+            }
 
-                var saveResult = _configAxisArgService.Save(arg);
-                if (!saveResult.Success)
-                    return Fail(saveResult.Code, "保存数据库轴参数失败: " + arg.ParamName);
+            var saveRows = BuildAxisConfigRows(axisConfig)
+                .Select(p =>
+                {
+                    MotionAxisConfigEntity existing;
+                    if (existingMap.TryGetValue(p.ParamName, out existing))
+                    {
+                        p.Id = existing.Id;
+                    }
+
+                    return p;
+                })
+                .ToList();
+
+            var saveResult = _motionAxisConfigService.SaveRange(saveRows);
+            if (!saveResult.Success)
+            {
+                return Fail(saveResult.Code, "保存数据库轴参数失败");
             }
 
             return Ok("数据库轴参数保存成功");
@@ -239,11 +268,17 @@ namespace AM.DBService.Services
         {
             var machine = MachineContext.Instance;
             var motionCardsConfig = ConfigContext.Instance.Config.MotionCardsConfig;
-            if (motionCardsConfig == null) return;
+            if (motionCardsConfig == null)
+            {
+                return;
+            }
 
             foreach (var cardConfig in motionCardsConfig)
             {
-                if (cardConfig == null) continue;
+                if (cardConfig == null)
+                {
+                    continue;
+                }
 
                 IMotionCardService motionService;
                 if (machine.MotionCards.TryGetValue(cardConfig.CardId, out motionService))
@@ -324,77 +359,79 @@ namespace AM.DBService.Services
         /// <summary>
         /// 生成数据库参数对象集合。
         /// </summary>
-        private static IEnumerable<ConfigAxisArg> BuildAxisArgs(AxisConfig axisConfig)
+        private static IEnumerable<MotionAxisConfigEntity> BuildAxisConfigRows(AxisConfig axisConfig)
         {
-            var axis = axisConfig.LogicalAxis;
+            var logicalAxis = axisConfig.LogicalAxis;
+            var axisName = axisConfig.Name;
 
-            yield return CreateArg(axis, "AlarmEnabled", "报警使能", "Bool", axisConfig.AlarmEnabled ? 1D : 0D);
-            yield return CreateArg(axis, "AlarmInvert", "报警取反", "Bool", axisConfig.AlarmInvert ? 1D : 0D);
-            yield return CreateArg(axis, "EnableInvert", "使能取反", "Bool", axisConfig.EnableInvert ? 1D : 0D);
-            yield return CreateArg(axis, "PulseMode", "脉冲模式", "Int16", axisConfig.PulseMode);
-            yield return CreateArg(axis, "DefaultMoveMode", "默认运动模式", "Int16", axisConfig.DefaultMoveMode);
-            yield return CreateArg(axis, "EncoderExternal", "外部编码器", "Bool", axisConfig.EncoderExternal ? 1D : 0D);
-            yield return CreateArg(axis, "EncoderInvert", "编码器取反", "Bool", axisConfig.EncoderInvert ? 1D : 0D);
-            yield return CreateArg(axis, "LimitHomeInvert", "限位原点取反", "Bool", axisConfig.LimitHomeInvert ? 1D : 0D);
-            yield return CreateArg(axis, "LimitMode", "限位模式", "Int16", axisConfig.LimitMode);
-            yield return CreateArg(axis, "TriggerEdge", "捕获沿", "Int16", axisConfig.TriggerEdge);
+            yield return CreateRow(logicalAxis, axisName, "AlarmEnabled", "报警使能", "Bool", axisConfig.AlarmEnabled ? 1D : 0D);
+            yield return CreateRow(logicalAxis, axisName, "AlarmInvert", "报警取反", "Bool", axisConfig.AlarmInvert ? 1D : 0D);
+            yield return CreateRow(logicalAxis, axisName, "EnableInvert", "使能取反", "Bool", axisConfig.EnableInvert ? 1D : 0D);
+            yield return CreateRow(logicalAxis, axisName, "PulseMode", "脉冲模式", "Int16", axisConfig.PulseMode);
+            yield return CreateRow(logicalAxis, axisName, "DefaultMoveMode", "默认运动模式", "Int16", axisConfig.DefaultMoveMode);
+            yield return CreateRow(logicalAxis, axisName, "EncoderExternal", "外部编码器", "Bool", axisConfig.EncoderExternal ? 1D : 0D);
+            yield return CreateRow(logicalAxis, axisName, "EncoderInvert", "编码器取反", "Bool", axisConfig.EncoderInvert ? 1D : 0D);
+            yield return CreateRow(logicalAxis, axisName, "LimitHomeInvert", "限位原点取反", "Bool", axisConfig.LimitHomeInvert ? 1D : 0D);
+            yield return CreateRow(logicalAxis, axisName, "LimitMode", "限位模式", "Int16", axisConfig.LimitMode);
+            yield return CreateRow(logicalAxis, axisName, "TriggerEdge", "捕获沿", "Int16", axisConfig.TriggerEdge);
 
-            yield return CreateArg(axis, "Lead", "导程", "Double", axisConfig.Lead);
-            yield return CreateArg(axis, "PulsePerRev", "每圈脉冲数", "Int32", axisConfig.PulsePerRev);
-            yield return CreateArg(axis, "GearRatio", "减速比", "Double", axisConfig.GearRatio);
+            yield return CreateRow(logicalAxis, axisName, "Lead", "导程", "Double", axisConfig.Lead);
+            yield return CreateRow(logicalAxis, axisName, "PulsePerRev", "每圈脉冲数", "Int32", axisConfig.PulsePerRev);
+            yield return CreateRow(logicalAxis, axisName, "GearRatio", "减速比", "Double", axisConfig.GearRatio);
 
-            yield return CreateArg(axis, "DefaultVelocity", "默认点位速度", "Double", axisConfig.DefaultVelocity);
-            yield return CreateArg(axis, "JogVelocity", "默认Jog速度", "Double", axisConfig.JogVelocity);
+            yield return CreateRow(logicalAxis, axisName, "DefaultVelocity", "默认点位速度", "Double", axisConfig.DefaultVelocity);
+            yield return CreateRow(logicalAxis, axisName, "JogVelocity", "默认Jog速度", "Double", axisConfig.JogVelocity);
 
-            yield return CreateArg(axis, "Acc", "加速度", "Double", axisConfig.Acc);
-            yield return CreateArg(axis, "Dec", "减速度", "Double", axisConfig.Dec);
-            yield return CreateArg(axis, "SmoothTime", "平滑时间", "Int16", axisConfig.SmoothTime);
-            yield return CreateArg(axis, "HomeDeceleration", "回零减速度", "Double", axisConfig.HomeDeceleration);
-            yield return CreateArg(axis, "NormalStopDeceleration", "平停减速度", "Double", axisConfig.NormalStopDeceleration);
-            yield return CreateArg(axis, "EmergencyStopDeceleration", "急停减速度", "Double", axisConfig.EmergencyStopDeceleration);
+            yield return CreateRow(logicalAxis, axisName, "Acc", "加速度", "Double", axisConfig.Acc);
+            yield return CreateRow(logicalAxis, axisName, "Dec", "减速度", "Double", axisConfig.Dec);
+            yield return CreateRow(logicalAxis, axisName, "SmoothTime", "平滑时间", "Int16", axisConfig.SmoothTime);
+            yield return CreateRow(logicalAxis, axisName, "HomeDeceleration", "回零减速度", "Double", axisConfig.HomeDeceleration);
+            yield return CreateRow(logicalAxis, axisName, "NormalStopDeceleration", "平停减速度", "Double", axisConfig.NormalStopDeceleration);
+            yield return CreateRow(logicalAxis, axisName, "EmergencyStopDeceleration", "急停减速度", "Double", axisConfig.EmergencyStopDeceleration);
 
-            yield return CreateArg(axis, "StandardHomeMode", "标准回零模式", "Int16", axisConfig.StandardHomeMode);
-            yield return CreateArg(axis, "ResetDirection", "复位运动方向", "Int16", axisConfig.ResetDirection);
-            yield return CreateArg(axis, "HomeSearchVelocity", "HOME搜索速度", "Double", axisConfig.HomeSearchVelocity);
-            yield return CreateArg(axis, "IndexSearchVelocity", "INDEX搜索速度", "Double", axisConfig.IndexSearchVelocity);
-            yield return CreateArg(axis, "HomeOffset", "原点偏移量", "Int32", axisConfig.HomeOffset);
-            yield return CreateArg(axis, "HomeMaxDistance", "HOME最大搜索距离", "Int32", axisConfig.HomeMaxDistance);
-            yield return CreateArg(axis, "IndexMaxDistance", "INDEX最大搜索距离", "Int32", axisConfig.IndexMaxDistance);
-            yield return CreateArg(axis, "EscapeStep", "脱离步长", "Int32", axisConfig.EscapeStep);
-            yield return CreateArg(axis, "IndexSearchDirection", "INDEX搜索方向", "Int16", axisConfig.IndexSearchDirection);
-            yield return CreateArg(axis, "HomeCheck", "回零自检", "Bool", axisConfig.HomeCheck ? 1D : 0D);
-            yield return CreateArg(axis, "HomeUseHomeSignal", "使用Home信号", "Bool", axisConfig.HomeUseHomeSignal ? 1D : 0D);
-            yield return CreateArg(axis, "HomeUseIndexSignal", "使用Index信号", "Bool", axisConfig.HomeUseIndexSignal ? 1D : 0D);
-            yield return CreateArg(axis, "HomeUseLimitSignal", "使用限位信号", "Bool", axisConfig.HomeUseLimitSignal ? 1D : 0D);
-            yield return CreateArg(axis, "HomeAutoZeroPos", "回零自动清零", "Bool", axisConfig.HomeAutoZeroPos ? 1D : 0D);
-            yield return CreateArg(axis, "HomeTimeoutMs", "回零超时", "Int32", axisConfig.HomeTimeoutMs);
+            yield return CreateRow(logicalAxis, axisName, "StandardHomeMode", "标准回零模式", "Int16", axisConfig.StandardHomeMode);
+            yield return CreateRow(logicalAxis, axisName, "ResetDirection", "复位运动方向", "Int16", axisConfig.ResetDirection);
+            yield return CreateRow(logicalAxis, axisName, "HomeSearchVelocity", "HOME搜索速度", "Double", axisConfig.HomeSearchVelocity);
+            yield return CreateRow(logicalAxis, axisName, "IndexSearchVelocity", "INDEX搜索速度", "Double", axisConfig.IndexSearchVelocity);
+            yield return CreateRow(logicalAxis, axisName, "HomeOffset", "原点偏移量", "Int32", axisConfig.HomeOffset);
+            yield return CreateRow(logicalAxis, axisName, "HomeMaxDistance", "HOME最大搜索距离", "Int32", axisConfig.HomeMaxDistance);
+            yield return CreateRow(logicalAxis, axisName, "IndexMaxDistance", "INDEX最大搜索距离", "Int32", axisConfig.IndexMaxDistance);
+            yield return CreateRow(logicalAxis, axisName, "EscapeStep", "脱离步长", "Int32", axisConfig.EscapeStep);
+            yield return CreateRow(logicalAxis, axisName, "IndexSearchDirection", "INDEX搜索方向", "Int16", axisConfig.IndexSearchDirection);
+            yield return CreateRow(logicalAxis, axisName, "HomeCheck", "回零自检", "Bool", axisConfig.HomeCheck ? 1D : 0D);
+            yield return CreateRow(logicalAxis, axisName, "HomeUseHomeSignal", "使用Home信号", "Bool", axisConfig.HomeUseHomeSignal ? 1D : 0D);
+            yield return CreateRow(logicalAxis, axisName, "HomeUseIndexSignal", "使用Index信号", "Bool", axisConfig.HomeUseIndexSignal ? 1D : 0D);
+            yield return CreateRow(logicalAxis, axisName, "HomeUseLimitSignal", "使用限位信号", "Bool", axisConfig.HomeUseLimitSignal ? 1D : 0D);
+            yield return CreateRow(logicalAxis, axisName, "HomeAutoZeroPos", "回零自动清零", "Bool", axisConfig.HomeAutoZeroPos ? 1D : 0D);
+            yield return CreateRow(logicalAxis, axisName, "HomeTimeoutMs", "回零超时", "Int32", axisConfig.HomeTimeoutMs);
 
-            yield return CreateArg(axis, "SoftLimitEnabled", "软件限位使能", "Bool", axisConfig.SoftLimitEnabled ? 1D : 0D);
-            yield return CreateArg(axis, "SoftLimitPositive", "正向软件限位", "Double", axisConfig.SoftLimitPositive);
-            yield return CreateArg(axis, "SoftLimitNegative", "负向软件限位", "Double", axisConfig.SoftLimitNegative);
+            yield return CreateRow(logicalAxis, axisName, "SoftLimitEnabled", "软件限位使能", "Bool", axisConfig.SoftLimitEnabled ? 1D : 0D);
+            yield return CreateRow(logicalAxis, axisName, "SoftLimitPositive", "正向软件限位", "Double", axisConfig.SoftLimitPositive);
+            yield return CreateRow(logicalAxis, axisName, "SoftLimitNegative", "负向软件限位", "Double", axisConfig.SoftLimitNegative);
 
-            yield return CreateArg(axis, "EnableDelayMs", "使能前延时", "Int32", axisConfig.EnableDelayMs);
-            yield return CreateArg(axis, "DisableDelayMs", "失能后延时", "Int32", axisConfig.DisableDelayMs);
+            yield return CreateRow(logicalAxis, axisName, "EnableDelayMs", "使能前延时", "Int32", axisConfig.EnableDelayMs);
+            yield return CreateRow(logicalAxis, axisName, "DisableDelayMs", "失能后延时", "Int32", axisConfig.DisableDelayMs);
 
-            yield return CreateArg(axis, "EStopId", "急停序号", "Int32", axisConfig.EStopId);
-            yield return CreateArg(axis, "StopId", "平停序号", "Int32", axisConfig.StopId);
+            yield return CreateRow(logicalAxis, axisName, "EStopId", "急停序号", "Int32", axisConfig.EStopId);
+            yield return CreateRow(logicalAxis, axisName, "StopId", "平停序号", "Int32", axisConfig.StopId);
         }
 
         /// <summary>
         /// 创建数据库参数对象。
         /// </summary>
-        private static ConfigAxisArg CreateArg(int axis, string name, string nameCn, string valueType, double value)
+        private static MotionAxisConfigEntity CreateRow(int logicalAxis, string axisName, string paramName, string displayName, string valueType, double value)
         {
-            return new ConfigAxisArg
+            return new MotionAxisConfigEntity
             {
-                Axis = axis,
-                ParamName = name,
-                ParamName_Cn = nameCn,
+                LogicalAxis = logicalAxis,
+                AxisDisplayName = axisName,
+                ParamName = paramName,
+                ParamDisplayName = displayName,
                 ParamValueType = valueType,
-                ParamSetVal = value,
-                ParamDefaultVal = value,
-                ParamMaxVal = 0D,
-                ParamMinVal = 0D
+                ParamSetValue = value,
+                ParamDefaultValue = value,
+                ParamMaxValue = 0D,
+                ParamMinValue = 0D
             };
         }
     }

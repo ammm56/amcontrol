@@ -70,7 +70,9 @@
     <Compile Include="Entity\Motion\MotionAxisEntity.cs" />
     <Compile Include="Entity\Motion\MotionCardEntity.cs" />
     <Compile Include="Entity\Motion\MotionIoMapEntity.cs" />
+    <Compile Include="Interfaces\DB\IAxisConfigAppService.cs" />
     <Compile Include="Interfaces\DB\IMachineConfigAppService.cs" />
+    <Compile Include="Interfaces\DB\IMachineConfigSeedService.cs" />
     <Compile Include="Interfaces\DB\IMotionAxisConfigOverlayService.cs" />
     <Compile Include="Interfaces\DB\IMotionAxisConfigService.cs" />
     <Compile Include="MotionCard\AxisConfig.cs" />

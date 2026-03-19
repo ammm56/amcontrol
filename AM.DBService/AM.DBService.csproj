@@ -60,7 +60,9 @@
     <Compile Include="Services\Auth\AuthPermissionCatalog.cs" />
     <Compile Include="Services\Auth\AuthSeedService.cs" />
     <Compile Include="Services\Auth\AuthService.cs" />
+    <Compile Include="Services\AxisConfigAppService.cs" />
     <Compile Include="Services\MachineConfigAppService.cs" />
+    <Compile Include="Services\MachineConfigSeedService.cs" />
     <Compile Include="Services\MotionAxisConfigOverlayService.cs" />
     <Compile Include="Services\MotionAxisConfigService.cs" />
     <Compile Include="Tables\DBTableT.cs" />

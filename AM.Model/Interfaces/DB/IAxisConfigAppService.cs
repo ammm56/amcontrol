@@ -1,4 +1,4 @@
-using AM.Model.Common;
+﻿using AM.Model.Common;
 using AM.Model.MotionCard;
 
 namespace AM.Model.Interfaces.DB

@@ -12,7 +12,7 @@ namespace AM.Model.Entity.Motion
         /// <summary>
         /// 自增主键。
         /// </summary>
-        [SugarColumn(ColumnName = "id", IsPrimaryKey = true, IsIdentity = true)]
+        [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]
         public int Id { get; set; }
 
         /// <summary>

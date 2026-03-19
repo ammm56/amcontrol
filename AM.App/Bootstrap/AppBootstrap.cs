@@ -52,17 +52,28 @@ namespace AM.App.Bootstrap
             var authSeedService = new AuthSeedService(reporter);
             authSeedService.EnsureSeedData();
 
-            // 5. 从数据库加载完整设备配置
+            // 5. 初始化运动配置种子
+            var machineConfigSeedService = new MachineConfigSeedService(reporter);
+            var seedResult = machineConfigSeedService.EnsureSeedData();
+            if (!seedResult.Success)
+            {
+                SystemContext.Instance.Reporter.Error(
+                    "AppBootstrap",
+                    "默认运动配置种子初始化失败，应用启动终止",
+                    seedResult.Code);
+                return;
+            }
+
+            // 6. 从数据库加载完整设备配置
             var machineConfigResult = LoadMachineConfigFromDatabase();
             if (!machineConfigResult.Success)
             {
                 return;
             }
 
-            // 6. 初始化硬件
+            // 7. 初始化硬件
             InitializeMachine();
         }
-
         /// <summary>
         /// 从数据库加载完整设备配置到运行时上下文。
         /// </summary>
