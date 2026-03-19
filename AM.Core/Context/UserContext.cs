@@ -129,5 +129,23 @@ namespace AM.Core.Context
 
             return CurrentPageKeys.Any(x => string.Equals(x, pageKey, StringComparison.OrdinalIgnoreCase));
         }
+
+        /// <summary>
+        /// 刷新页面权限
+        /// </summary>
+        public void RefreshPagePermissions(IEnumerable<string> pageKeys, bool useCustomPagePermission)
+        {
+            CurrentPageKeys = pageKeys == null
+                ? new List<string>()
+                : pageKeys
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+            if (CurrentUser != null)
+            {
+                CurrentUser.UseCustomPagePermission = useCustomPagePermission;
+            }
+        }
     }
 }

@@ -452,6 +452,44 @@ namespace AMControlWPF
             dialog.ShowDialog();
         }
 
+        public void RefreshNavigationByCurrentUser()
+        {
+            var currentPrimaryKey = (PrimaryNavList.SelectedItem as PrimaryNavItem)?.Key;
+            var currentSecondaryKey = (SecondaryNavList.SelectedItem as SecondaryNavItem)?.Key;
+
+            ApplyNavigationByUser();
+            PrimaryNavList.ItemsSource = null;
+            PrimaryNavList.ItemsSource = _visiblePrimaryNavItems;
+
+            if (_visiblePrimaryNavItems.Count == 0)
+            {
+                TextBlockPrimaryTitle.Text = "无可用模块";
+                TextBlockWorkAreaTitle.Text = "无可用模块";
+                TextBlockWorkAreaDescription.Text = "当前用户没有可访问的页面";
+                MainFrame.Content = null;
+                return;
+            }
+
+            var primary = _visiblePrimaryNavItems.FirstOrDefault(x => x.Key == currentPrimaryKey) ?? _visiblePrimaryNavItems[0];
+            PrimaryNavList.SelectedItem = primary;
+
+            List<SecondaryNavItem> items;
+            if (!_visibleSecondaryNavMap.TryGetValue(primary.Key, out items) || items == null || items.Count == 0)
+            {
+                SecondaryNavList.ItemsSource = null;
+                MainFrame.Content = null;
+                return;
+            }
+
+            SecondaryNavList.ItemsSource = items;
+
+            var secondary = items.FirstOrDefault(x => x.Key == currentSecondaryKey) ?? items[0];
+            SecondaryNavList.SelectedItem = secondary;
+
+            UpdateWorkAreaHeader(secondary.DisplayName, secondary.Description);
+            NavigateToPage(secondary.Key);
+        }
+
         private sealed class PrimaryNavItem
         {
             public PrimaryNavItem(string key, string displayName)

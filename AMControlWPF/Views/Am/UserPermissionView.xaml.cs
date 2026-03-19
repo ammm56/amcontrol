@@ -1,4 +1,5 @@
-﻿using AM.DBService.Services.Auth;
+﻿using AM.Core.Context;
+using AM.DBService.Services.Auth;
 using AM.Model.Auth;
 using System;
 using System.Collections.Generic;
@@ -237,8 +238,30 @@ namespace AMControlWPF.Views.Am
                 .ToList();
 
             var result = _authService.SaveUserPagePermissions(_targetUser.Id, selectedKeys);
-            HandyControl.Controls.MessageBox.Show(result.Message, "权限分配", MessageBoxButton.OK,
-                result.Success ? MessageBoxImage.Information : MessageBoxImage.Warning);
+            if (!result.Success)
+            {
+                HandyControl.Controls.MessageBox.Show(result.Message, "权限分配", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (UserContext.Instance.IsLoggedIn &&
+                UserContext.Instance.CurrentUser != null &&
+                UserContext.Instance.CurrentUser.Id == _targetUser.Id)
+            {
+                var permissionResult = _authService.GetUserPagePermissions(_targetUser.Id);
+                if (permissionResult.Success)
+                {
+                    UserContext.Instance.RefreshPagePermissions(permissionResult.Items, true);
+
+                    var mainWindow = Window.GetWindow(this) as MainWindow;
+                    if (mainWindow != null)
+                    {
+                        mainWindow.RefreshNavigationByCurrentUser();
+                    }
+                }
+            }
+
+            HandyControl.Controls.MessageBox.Show(result.Message, "权限分配", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void LoadUserPermissions()
