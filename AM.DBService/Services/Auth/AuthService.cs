@@ -124,6 +124,63 @@ namespace AM.DBService.Services.Auth
             return Result.Ok("退出成功", ResultSource.Unknown);
         }
 
+        public Result DeleteUser(int userId)
+        {
+            if (userId <= 0)
+            {
+                return Result.Fail(-80, "用户标识无效", ResultSource.Unknown);
+            }
+
+            if (UserContext.Instance.IsLoggedIn &&
+                UserContext.Instance.CurrentUser != null &&
+                UserContext.Instance.CurrentUser.Id == userId)
+            {
+                return Result.Fail(-81, "不能删除当前登录用户", ResultSource.Unknown);
+            }
+
+            var userQuery = _userDb.QueryAll();
+            if (!userQuery.Success)
+            {
+                _reporter?.Error("AuthService", "删除用户时查询用户失败", userQuery.Code);
+                return Result.Fail(userQuery.Code, "查询用户失败", ResultSource.Database);
+            }
+
+            var user = userQuery.Items.FirstOrDefault(x => x.Id == userId);
+            if (user == null)
+            {
+                return Result.Fail(-82, "用户不存在", ResultSource.Unknown);
+            }
+
+            try
+            {
+                var db = _userDb._sqlSugarClient;
+                db.Ado.BeginTran();
+
+                db.Deleteable<SysUserPagePermission>()
+                    .Where(x => x.UserId == userId)
+                    .ExecuteCommand();
+
+                db.Deleteable<SysUserRole>()
+                    .Where(x => x.UserId == userId)
+                    .ExecuteCommand();
+
+                db.Deleteable<SysUser>()
+                    .Where(x => x.Id == userId)
+                    .ExecuteCommand();
+
+                db.Ado.CommitTran();
+
+                _reporter?.Info("AuthService", "删除用户成功：" + user.LoginName);
+                return Result.Ok("删除用户成功", ResultSource.Database);
+            }
+            catch (Exception ex)
+            {
+                _userDb._sqlSugarClient.Ado.RollbackTran();
+                _reporter?.Error("AuthService", ex, "删除用户失败");
+                return Result.Fail(-83, "删除用户失败", ResultSource.Database);
+            }
+        }
+
         public Result<SysRole> GetRolesByUserId(int userId)
         {
             var userRoleQuery = _userRoleDb.QueryAll();
@@ -545,18 +602,6 @@ namespace AM.DBService.Services.Auth
                 return Result.Fail(-34, "角色不存在", ResultSource.Unknown);
             }
 
-            user.UserName = userName.Trim();
-            user.IsEnabled = isEnabled;
-            user.IsAdmin = string.Equals(roleCode, "Am", StringComparison.OrdinalIgnoreCase);
-            user.Remark = string.IsNullOrWhiteSpace(remark) ? null : remark.Trim();
-
-            var editUserResult = _userDb.Edit(user);
-            if (!editUserResult.Success)
-            {
-                _reporter?.Error("AuthService", "编辑用户保存失败", editUserResult.Code);
-                return Result.Fail(editUserResult.Code, "编辑用户保存失败", ResultSource.Database);
-            }
-
             var userRoleQuery = _userRoleDb.QueryAll();
             if (!userRoleQuery.Success)
             {
@@ -565,8 +610,26 @@ namespace AM.DBService.Services.Auth
             }
 
             var userRole = userRoleQuery.Items.FirstOrDefault(x => x.UserId == userId);
-            Result saveUserRoleResult;
+            var roleChanged = userRole == null || userRole.RoleId != role.Id;
 
+            user.UserName = userName.Trim();
+            user.IsEnabled = isEnabled;
+            user.IsAdmin = string.Equals(roleCode, "Am", StringComparison.OrdinalIgnoreCase);
+            user.Remark = string.IsNullOrWhiteSpace(remark) ? null : remark.Trim();
+
+            if (roleChanged)
+            {
+                user.UseCustomPagePermission = false;
+            }
+
+            var editUserResult = _userDb.Edit(user);
+            if (!editUserResult.Success)
+            {
+                _reporter?.Error("AuthService", "编辑用户保存失败", editUserResult.Code);
+                return Result.Fail(editUserResult.Code, "编辑用户保存失败", ResultSource.Database);
+            }
+
+            Result saveUserRoleResult;
             if (userRole == null)
             {
                 saveUserRoleResult = _userRoleDb.Add(new SysUserRole
@@ -588,7 +651,23 @@ namespace AM.DBService.Services.Auth
                 return Result.Fail(saveUserRoleResult.Code, "编辑用户成功，但角色关联保存失败", ResultSource.Database);
             }
 
-            _reporter?.Info("AuthService", "编辑用户成功：" + user.LoginName);
+            if (roleChanged)
+            {
+                var clearPermissionResult = ClearUserCustomPagePermissions(userId);
+                if (!clearPermissionResult.Success)
+                {
+                    return clearPermissionResult;
+                }
+            }
+
+            RefreshCurrentUserContextIfNeeded(userId);
+
+            _reporter?.Info(
+                "AuthService",
+                roleChanged
+                    ? "编辑用户成功，角色已变更并恢复为新角色默认页面权限：" + user.LoginName
+                    : "编辑用户成功：" + user.LoginName);
+
             return Result.Ok("编辑用户成功", ResultSource.Database);
         }
 
@@ -859,6 +938,59 @@ namespace AM.DBService.Services.Auth
             }
 
             return query;
+        }
+
+        private Result ClearUserCustomPagePermissions(int userId)
+        {
+            try
+            {
+                _userPagePermissionDb._sqlSugarClient.Deleteable<SysUserPagePermission>()
+                    .Where(x => x.UserId == userId)
+                    .ExecuteCommand();
+
+                return Result.Ok("清除用户自定义页面权限成功", ResultSource.Database);
+            }
+            catch (Exception ex)
+            {
+                _reporter?.Error("AuthService", ex, "清除用户自定义页面权限失败");
+                return Result.Fail(-84, "清除用户自定义页面权限失败", ResultSource.Database);
+            }
+        }
+
+        private void RefreshCurrentUserContextIfNeeded(int userId)
+        {
+            if (!UserContext.Instance.IsLoggedIn ||
+                UserContext.Instance.CurrentUser == null ||
+                UserContext.Instance.CurrentUser.Id != userId)
+            {
+                return;
+            }
+
+            var userQuery = _userDb.QueryAll();
+            if (!userQuery.Success)
+            {
+                return;
+            }
+
+            var currentUser = userQuery.Items.FirstOrDefault(x => x.Id == userId);
+            if (currentUser == null)
+            {
+                return;
+            }
+
+            var roleResult = GetRolesByUserId(userId);
+            if (!roleResult.Success)
+            {
+                return;
+            }
+
+            var permissionResult = GetUserPagePermissions(userId);
+            if (!permissionResult.Success)
+            {
+                return;
+            }
+
+            UserContext.Instance.SignIn(currentUser, roleResult.Items, permissionResult.Items);
         }
 
         public Result RestoreDefaultPagePermissions(int userId)

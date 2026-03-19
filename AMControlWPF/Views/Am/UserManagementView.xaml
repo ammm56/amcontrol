@@ -312,7 +312,7 @@
                                 <Button MinWidth="100" Margin="0,0,8,8" Click="ButtonEditUser_OnClick" Content="编辑用户" />
                                 <Button MinWidth="100" Margin="0,0,8,8" Click="ButtonResetPassword_OnClick" Content="重置密码" />
                                 <Button MinWidth="100" Margin="0,0,8,8" Click="ButtonToggleEnabled_OnClick" Content="启用/禁用" />
-                                <Button MinWidth="100" Margin="0,0,8,8" Content="分配权限" />
+                                <Button MinWidth="100" Margin="0,0,8,8" Click="ButtonDeleteUser_OnClick" Content="删除用户" />
                             </WrapPanel>
                         </Grid>
                     </Border>

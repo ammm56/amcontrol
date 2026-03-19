@@ -1,4 +1,5 @@
-﻿using AM.DBService.Services.Auth;
+﻿using AM.Core.Context;
+using AM.DBService.Services.Auth;
 using AM.Model.Auth;
 using AM.ViewModel.ViewModels.Am;
 using System;
@@ -52,9 +53,6 @@ namespace AMControlWPF.Views.Am
                 dialog.IsEnabledUser,
                 dialog.Remark);
 
-            MessageBox.Show(result.Message, "新增用户", MessageBoxButton.OK,
-                result.Success ? MessageBoxImage.Information : MessageBoxImage.Warning);
-
             if (!result.Success)
             {
                 return;
@@ -68,7 +66,7 @@ namespace AMControlWPF.Views.Am
             var selectedUser = _viewModel.SelectedUser;
             if (selectedUser == null)
             {
-                MessageBox.Show("请先选择一个用户。", "编辑用户", MessageBoxButton.OK, MessageBoxImage.Information);
+                HandyControl.Controls.MessageBox.Show("请先选择一个用户。", "编辑用户", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
@@ -89,12 +87,20 @@ namespace AMControlWPF.Views.Am
                 dialog.IsEnabledUser,
                 dialog.Remark);
 
-            MessageBox.Show(result.Message, "编辑用户", MessageBoxButton.OK,
-                result.Success ? MessageBoxImage.Information : MessageBoxImage.Warning);
-
             if (!result.Success)
             {
                 return;
+            }
+
+            if (UserContext.Instance.IsLoggedIn &&
+                UserContext.Instance.CurrentUser != null &&
+                UserContext.Instance.CurrentUser.Id == dialog.EditingUserId)
+            {
+                var mainWindow = Window.GetWindow(this) as MainWindow;
+                if (mainWindow != null)
+                {
+                    mainWindow.RefreshNavigationByCurrentUser();
+                }
             }
 
             await _viewModel.LoadAsync();
@@ -105,7 +111,7 @@ namespace AMControlWPF.Views.Am
             var selectedUser = _viewModel.SelectedUser;
             if (selectedUser == null)
             {
-                MessageBox.Show("请先选择一个用户。", "重置密码", MessageBoxButton.OK, MessageBoxImage.Information);
+                HandyControl.Controls.MessageBox.Show("请先选择一个用户。", "重置密码", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
@@ -120,8 +126,6 @@ namespace AMControlWPF.Views.Am
             }
 
             var result = _authService.ResetUserPassword(selectedUser.Id, dialog.NewPassword);
-            MessageBox.Show(result.Message, "重置密码", MessageBoxButton.OK,
-                result.Success ? MessageBoxImage.Information : MessageBoxImage.Warning);
 
             if (!result.Success)
             {
@@ -136,18 +140,45 @@ namespace AMControlWPF.Views.Am
             var selectedUser = _viewModel.SelectedUser;
             if (selectedUser == null)
             {
-                MessageBox.Show("请先选择一个用户。", "启用/禁用", MessageBoxButton.OK, MessageBoxImage.Information);
+                HandyControl.Controls.MessageBox.Show("请先选择一个用户。", "启用/禁用", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
             var enableTarget = !selectedUser.IsEnabled;
             var result = _authService.SetUserEnabled(selectedUser.Id, enableTarget);
 
-            MessageBox.Show(result.Message, "启用/禁用", MessageBoxButton.OK,
-                result.Success ? MessageBoxImage.Information : MessageBoxImage.Warning);
-
             if (!result.Success)
             {
+                return;
+            }
+
+            await _viewModel.LoadAsync();
+        }
+
+        private async void ButtonDeleteUser_OnClick(object sender, RoutedEventArgs e)
+        {
+            var selectedUser = _viewModel.SelectedUser;
+            if (selectedUser == null)
+            {
+                HandyControl.Controls.MessageBox.Show("请先选择一个用户。", "删除用户", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var confirmResult = HandyControl.Controls.MessageBox.Show(
+                "确定要删除用户“" + selectedUser.LoginName + "”吗？\r\n\r\n将删除该用户的角色关联和页面权限，但保留登录日志等审计记录。",
+                "删除用户",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (confirmResult != MessageBoxResult.Yes)
+            {
+                return;
+            }
+
+            var result = _authService.DeleteUser(selectedUser.Id);
+            if (!result.Success)
+            {
+                HandyControl.Controls.MessageBox.Show(result.Message, "删除用户", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -159,7 +190,7 @@ namespace AMControlWPF.Views.Am
             var selectedUser = _viewModel.SelectedUser;
             if (selectedUser == null)
             {
-                MessageBox.Show("请先选择一个用户。", "分配权限", MessageBoxButton.OK, MessageBoxImage.Information);
+                HandyControl.Controls.MessageBox.Show("请先选择一个用户。", "分配权限", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
         }
