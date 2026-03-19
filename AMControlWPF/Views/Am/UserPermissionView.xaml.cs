@@ -1,6 +1,5 @@
 ﻿using AM.DBService.Services.Auth;
 using AM.Model.Auth;
-using AM.Model.Entity.Auth;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,10 +31,9 @@ namespace AMControlWPF.Views.Am
             Loaded += UserPermissionView_Loaded;
         }
 
-        private async void UserPermissionView_Loaded(object sender, RoutedEventArgs e)
+        private void UserPermissionView_Loaded(object sender, RoutedEventArgs e)
         {
             Loaded -= UserPermissionView_Loaded;
-            await System.Threading.Tasks.Task.Run(() => { });
             LoadData();
         }
 
@@ -79,11 +77,11 @@ namespace AMControlWPF.Views.Am
                 .OrderBy(x => x.DisplayName));
 
             ListBoxUsers.ItemsSource = _allUsers;
-            ComboBoxModules.ItemsSource = _modules;
+            ModuleNavList.ItemsSource = _modules;
 
             if (_modules.Count > 0)
             {
-                ComboBoxModules.SelectedIndex = 0;
+                ModuleNavList.SelectedIndex = 0;
             }
 
             if (_allUsers.Count > 0)
@@ -92,13 +90,17 @@ namespace AMControlWPF.Views.Am
             }
             else
             {
+                _targetUser = null;
                 UpdateSelectedUserDisplay(null);
+                ClearPermissionDetail();
             }
         }
 
         private void TextBoxUserSearch_OnTextChanged(object sender, TextChangedEventArgs e)
         {
-            var keyword = TextBoxUserSearch.Text == null ? string.Empty : TextBoxUserSearch.Text.Trim().ToLowerInvariant();
+            var keyword = TextBoxUserSearch.Text == null
+                ? string.Empty
+                : TextBoxUserSearch.Text.Trim().ToLowerInvariant();
 
             var list = string.IsNullOrWhiteSpace(keyword)
                 ? _allUsers
@@ -113,14 +115,12 @@ namespace AMControlWPF.Views.Am
 
         private void ListBoxUsers_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var user = ListBoxUsers.SelectedItem as UserSummary;
-            _targetUser = user;
-
-            UpdateSelectedUserDisplay(user);
+            _targetUser = ListBoxUsers.SelectedItem as UserSummary;
+            UpdateSelectedUserDisplay(_targetUser);
             LoadUserPermissions();
         }
 
-        private void ComboBoxModules_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ModuleNavList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             RefreshPermissionList();
         }
@@ -134,8 +134,6 @@ namespace AMControlWPF.Views.Am
                 return;
             }
 
-            TextBlockPermissionName.Text = item.DisplayName;
-            TextBlockPermissionKey.Text = "页面键值：" + item.PageKey;
             TextBlockPermissionRoles.Text = "建议角色：" + (string.IsNullOrWhiteSpace(item.RecommendedRoles) ? "-" : item.RecommendedRoles);
             TextBlockPermissionRisk.Text = "风险级别：" + (string.IsNullOrWhiteSpace(item.RiskLevel) ? "-" : item.RiskLevel);
             TextBlockPermissionDescription.Text = string.IsNullOrWhiteSpace(item.Description)
@@ -150,7 +148,7 @@ namespace AMControlWPF.Views.Am
 
         private void ButtonSelectAll_OnClick(object sender, RoutedEventArgs e)
         {
-            var selectedModule = ComboBoxModules.SelectedItem as PermissionModuleItem;
+            var selectedModule = ModuleNavList.SelectedItem as PermissionModuleItem;
             if (selectedModule == null)
             {
                 return;
@@ -166,7 +164,7 @@ namespace AMControlWPF.Views.Am
 
         private void ButtonClearAll_OnClick(object sender, RoutedEventArgs e)
         {
-            var selectedModule = ComboBoxModules.SelectedItem as PermissionModuleItem;
+            var selectedModule = ModuleNavList.SelectedItem as PermissionModuleItem;
             if (selectedModule == null)
             {
                 return;
@@ -208,6 +206,7 @@ namespace AMControlWPF.Views.Am
             if (_targetUser == null)
             {
                 RefreshPermissionList();
+                ClearPermissionDetail();
                 return;
             }
 
@@ -216,6 +215,7 @@ namespace AMControlWPF.Views.Am
             {
                 HandyControl.Controls.MessageBox.Show(result.Message, "权限分配", MessageBoxButton.OK, MessageBoxImage.Warning);
                 RefreshPermissionList();
+                ClearPermissionDetail();
                 return;
             }
 
@@ -230,13 +230,16 @@ namespace AMControlWPF.Views.Am
 
         private void RefreshPermissionList()
         {
-            var selectedModule = ComboBoxModules.SelectedItem as PermissionModuleItem;
+            var selectedModule = ModuleNavList.SelectedItem as PermissionModuleItem;
             if (selectedModule == null)
             {
                 ListBoxPermissions.ItemsSource = null;
+                TextBlockModuleTitle.Text = "页面权限";
                 ClearPermissionDetail();
                 return;
             }
+
+            TextBlockModuleTitle.Text = selectedModule.DisplayName + " · 页面权限";
 
             var list = _allPermissions
                 .Where(x => x.ModuleKey == selectedModule.Key)
@@ -261,11 +264,9 @@ namespace AMControlWPF.Views.Am
 
         private void ClearPermissionDetail()
         {
-            TextBlockPermissionName.Text = "-";
-            TextBlockPermissionKey.Text = "页面键值：-";
             TextBlockPermissionRoles.Text = "建议角色：-";
             TextBlockPermissionRisk.Text = "风险级别：-";
-            TextBlockPermissionDescription.Text = "请选择一个页面权限以查看说明。";
+            TextBlockPermissionDescription.Text = "请选择一个权限磁贴查看说明。";
         }
 
         private sealed class PermissionModuleItem
