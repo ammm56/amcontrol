@@ -250,7 +250,128 @@
                         </Border>
 
                         <Grid Grid.Row="1" Margin="10">
-                            <hc:TransitioningContentControl x:Name="MainFrame" Background="Transparent" />
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="8" />
+                                <ColumnDefinition x:Name="AlarmPanelColumn" Width="0" />
+                            </Grid.ColumnDefinitions>
+
+                            <hc:TransitioningContentControl x:Name="MainFrame"
+                                                            Grid.Column="0"
+                                                            Background="Transparent" />
+
+                            <GridSplitter x:Name="AlarmPanelSplitter"
+                                          Grid.Column="1"
+                                          Width="8"
+                                          Background="Transparent"
+                                          HorizontalAlignment="Stretch"
+                                          VerticalAlignment="Stretch"
+                                          ResizeDirection="Columns"
+                                          ResizeBehavior="PreviousAndNext"
+                                          ShowsPreview="True"
+                                          Visibility="Collapsed" />
+
+                            <Border x:Name="BorderAlarmPanel"
+                                    Grid.Column="2"
+                                    Visibility="Collapsed"
+                                    CornerRadius="12"
+                                    Background="{DynamicResource SecondaryRegionBrush}"
+                                    BorderBrush="{DynamicResource BorderBrush}"
+                                    BorderThickness="1"
+                                    Effect="{StaticResource EffectShadow2}">
+                                <Grid Margin="10">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="8" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="8" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <DockPanel Grid.Row="0">
+                                        <TextBlock DockPanel.Dock="Left"
+                                                   VerticalAlignment="Center"
+                                                   FontSize="14"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource PrimaryTextBrush}"
+                                                   Text="活动报警" />
+
+                                        <StackPanel DockPanel.Dock="Right"
+                                                    Orientation="Horizontal"
+                                                    VerticalAlignment="Center">
+                                            <TextBlock x:Name="TextBlockAlarmPanelCount"
+                                                       Margin="0,0,8,0"
+                                                       VerticalAlignment="Center"
+                                                       Foreground="{DynamicResource DangerBrush}"
+                                                       Text="0" />
+                                            <Button Width="28"
+                                                    Height="28"
+                                                    Padding="0"
+                                                    Click="ButtonCloseAlarmPanel_OnClick"
+                                                    Content="×" />
+                                        </StackPanel>
+                                    </DockPanel>
+
+                                    <ListBox x:Name="ListBoxActiveAlarms"
+                                             Grid.Row="2"
+                                             SelectionChanged="ListBoxActiveAlarms_SelectionChanged"
+                                             ItemContainerStyle="{StaticResource ViewNavItemStyle}"
+                                             Background="Transparent"
+                                             BorderThickness="0"
+                                             HorizontalContentAlignment="Stretch">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Message}"
+                                                               FontWeight="SemiBold"
+                                                               Foreground="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=Foreground}" />
+                                                    <TextBlock Margin="0,4,0,0"
+                                                               FontSize="12"
+                                                               Opacity="0.8"
+                                                               Foreground="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=Foreground}"
+                                                               Text="{Binding SummaryText}" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+
+                                    <Border Grid.Row="4"
+                                            Padding="10"
+                                            CornerRadius="8"
+                                            Background="{DynamicResource RegionBrush}">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="8" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="8" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="8" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+
+                                            <TextBlock FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                                       Text="报警详情" />
+
+                                            <TextBlock x:Name="TextBlockAlarmDetailCode"
+                                                       Grid.Row="2"
+                                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                                       Text="报警代码：-" />
+
+                                            <TextBlock x:Name="TextBlockAlarmDetailLevel"
+                                                       Grid.Row="4"
+                                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                                       Text="报警等级：-" />
+
+                                            <TextBlock x:Name="TextBlockAlarmDetailTime"
+                                                       Grid.Row="6"
+                                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                                       Text="报警时间：-" />
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+                            </Border>
                         </Grid>
                     </Grid>
                 </Border>
@@ -274,7 +395,8 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Column="0"
+                    <TextBlock x:Name="TextBlockStatusMessage"
+                               Grid.Column="0"
                                VerticalAlignment="Center"
                                Foreground="{DynamicResource PrimaryTextBrush}"
                                Text="系统就绪" />
@@ -297,10 +419,16 @@
                                Foreground="{DynamicResource PrimaryTextBrush}"
                                Text="Camera: 已连接" />
 
-                    <TextBlock Grid.Column="4"
-                               VerticalAlignment="Center"
-                               Foreground="{DynamicResource DangerBrush}"
-                               Text="报警: 0" />
+                    <Button x:Name="ButtonAlarmIndicator"
+                            Grid.Column="4"
+                            Height="28"
+                            MinWidth="84"
+                            Padding="12,0"
+                            Click="ButtonAlarmIndicator_OnClick"
+                            Background="{DynamicResource SecondaryRegionBrush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="1"
+                            Content="报警: 0" />
                 </Grid>
             </Border>
         </Grid>

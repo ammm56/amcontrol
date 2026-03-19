@@ -4,6 +4,9 @@ using AMControlWPF.Views.Auth;
 using AMControlWPF.Views.IO;
 using AMControlWPF.Views.Motion;
 using AMControlWPF.Views.Am;
+using AM.Core.Messaging;
+using AM.Model.Alarm;
+using System.Windows.Media;
 using AMControlWPF.Views.Template;
 using HandyControl.Controls;
 using System;
@@ -11,7 +14,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 using AM.Model.Auth;
 
 namespace AMControlWPF
@@ -26,12 +28,15 @@ namespace AMControlWPF
         private readonly Dictionary<string, List<SecondaryNavItem>> _allSecondaryNavMap = new Dictionary<string, List<SecondaryNavItem>>();
         private readonly List<PrimaryNavItem> _visiblePrimaryNavItems = new List<PrimaryNavItem>();
         private readonly Dictionary<string, List<SecondaryNavItem>> _visibleSecondaryNavMap = new Dictionary<string, List<SecondaryNavItem>>();
+        private readonly List<AlarmDisplayItem> _activeAlarmItems = new List<AlarmDisplayItem>();
+        private bool _isAlarmPanelVisible;
 
         public MainWindow()
         {
             InitializeComponent();
 
             Loaded += MainWindow_Loaded;
+            Closed += MainWindow_Closed;
             InitializeNavigation();
         }
 
@@ -48,6 +53,8 @@ namespace AMControlWPF
         {
             ApplyNavigationByUser();
             InitializeCurrentUserCard();
+            SubscribeSystemMessages();
+            RefreshAlarmPanel();
 
             PrimaryNavList.ItemsSource = _visiblePrimaryNavItems;
 
@@ -61,6 +68,178 @@ namespace AMControlWPF
                 TextBlockWorkAreaTitle.Text = "无可用模块";
                 TextBlockWorkAreaDescription.Text = "当前用户没有可访问的页面";
             }
+        }
+
+        private void MainWindow_Closed(object sender, EventArgs e)
+        {
+            SystemContext.Instance.MessageBus?.Unsubscribe(this);
+        }
+
+        private void SubscribeSystemMessages()
+        {
+            SystemContext.Instance.MessageBus?.Unsubscribe(this);
+            SystemContext.Instance.MessageBus?.Subscribe(this, OnSystemMessageReceived);
+        }
+
+
+        private void OnSystemMessageReceived(SystemMessage message)
+        {
+            if (message == null)
+            {
+                return;
+            }
+
+            if (!Dispatcher.CheckAccess())
+            {
+                Dispatcher.BeginInvoke(new Action(() => OnSystemMessageReceived(message)));
+                return;
+            }
+
+            UpdateStatusMessage(message);
+
+            switch (message.Type)
+            {
+                case SystemMessageType.Status:
+                    Growl.Info(message.Message);
+                    break;
+                case SystemMessageType.Warning:
+                    Growl.Warning(message.Message);
+                    break;
+                case SystemMessageType.Error:
+                    Growl.Error(message.Message);
+                    break;
+                case SystemMessageType.Alarm:
+                    Growl.Warning(message.Message);
+                    RefreshAlarmPanel();
+                    if (!_isAlarmPanelVisible)
+                    {
+                        SetAlarmPanelVisible(true);
+                    }
+                    break;
+            }
+        }
+
+        private void UpdateStatusMessage(SystemMessage message)
+        {
+            if (message == null)
+            {
+                return;
+            }
+
+            var prefix = string.IsNullOrWhiteSpace(message.Source) ? string.Empty : "[" + message.Source + "] ";
+            TextBlockStatusMessage.Text = prefix + message.Message;
+
+            switch (message.Type)
+            {
+                case SystemMessageType.Warning:
+                    TextBlockStatusMessage.Foreground = FindBrush("WarningBrush", Brushes.DarkOrange);
+                    break;
+                case SystemMessageType.Error:
+                case SystemMessageType.Alarm:
+                    TextBlockStatusMessage.Foreground = FindBrush("DangerBrush", Brushes.IndianRed);
+                    break;
+                default:
+                    TextBlockStatusMessage.Foreground = FindBrush("PrimaryTextBrush", Brushes.Black);
+                    break;
+            }
+        }
+
+
+        private void RefreshAlarmPanel()
+        {
+            _activeAlarmItems.Clear();
+
+            var alarms = SystemContext.Instance.AlarmManager == null
+                ? new List<AlarmInfo>()
+                : SystemContext.Instance.AlarmManager.GetActiveAlarms()
+                    .OrderByDescending(x => x.Time)
+                    .ToList();
+
+            foreach (var alarm in alarms)
+            {
+                _activeAlarmItems.Add(new AlarmDisplayItem
+                {
+                    CodeText = alarm.Code.ToString(),
+                    LevelText = alarm.Level.ToString(),
+                    Message = alarm.Message,
+                    Time = alarm.Time
+                });
+            }
+
+            ListBoxActiveAlarms.ItemsSource = null;
+            ListBoxActiveAlarms.ItemsSource = _activeAlarmItems;
+
+            TextBlockAlarmPanelCount.Text = _activeAlarmItems.Count.ToString();
+            ButtonAlarmIndicator.Content = "报警: " + _activeAlarmItems.Count;
+
+            if (_activeAlarmItems.Count > 0)
+            {
+                ButtonAlarmIndicator.Background = FindBrush("DangerBrush", Brushes.IndianRed);
+                ButtonAlarmIndicator.Foreground = Brushes.White;
+                if (ListBoxActiveAlarms.SelectedIndex < 0)
+                {
+                    ListBoxActiveAlarms.SelectedIndex = 0;
+                }
+            }
+            else
+            {
+                ButtonAlarmIndicator.Background = FindBrush("SecondaryRegionBrush", Brushes.LightGray);
+                ButtonAlarmIndicator.Foreground = FindBrush("PrimaryTextBrush", Brushes.Black);
+                ShowAlarmDetail(null);
+                if (_isAlarmPanelVisible)
+                {
+                    SetAlarmPanelVisible(false);
+                }
+            }
+        }
+
+        private void ButtonAlarmIndicator_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (_activeAlarmItems.Count == 0)
+            {
+                return;
+            }
+
+            SetAlarmPanelVisible(!_isAlarmPanelVisible);
+        }
+
+        private void ButtonCloseAlarmPanel_OnClick(object sender, RoutedEventArgs e)
+        {
+            SetAlarmPanelVisible(false);
+        }
+
+        private void SetAlarmPanelVisible(bool visible)
+        {
+            _isAlarmPanelVisible = visible;
+            AlarmPanelColumn.Width = visible ? new GridLength(320) : new GridLength(0);
+            BorderAlarmPanel.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
+            AlarmPanelSplitter.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void ListBoxActiveAlarms_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ShowAlarmDetail(ListBoxActiveAlarms.SelectedItem as AlarmDisplayItem);
+        }
+
+        private void ShowAlarmDetail(AlarmDisplayItem item)
+        {
+            if (item == null)
+            {
+                TextBlockAlarmDetailCode.Text = "报警代码：-";
+                TextBlockAlarmDetailLevel.Text = "报警等级：-";
+                TextBlockAlarmDetailTime.Text = "报警时间：-";
+                return;
+            }
+
+            TextBlockAlarmDetailCode.Text = "报警代码：" + item.CodeText;
+            TextBlockAlarmDetailLevel.Text = "报警等级：" + item.LevelText;
+            TextBlockAlarmDetailTime.Text = "报警时间：" + item.Time.ToString("yyyy-MM-dd HH:mm:ss");
+        }
+
+        private Brush FindBrush(string key, Brush fallback)
+        {
+            var brush = TryFindResource(key) as Brush;
+            return brush ?? fallback;
         }
 
         private void InitializeCurrentUserCard()
@@ -520,6 +699,22 @@ namespace AMControlWPF
             public string Description { get; private set; }
 
             public List<string> AllowedRoles { get; private set; }
+        }
+
+        private sealed class AlarmDisplayItem
+        {
+            public string CodeText { get; set; }
+
+            public string LevelText { get; set; }
+
+            public string Message { get; set; }
+
+            public DateTime Time { get; set; }
+
+            public string SummaryText
+            {
+                get { return LevelText + " · " + Time.ToString("HH:mm:ss"); }
+            }
         }
     }
 }
