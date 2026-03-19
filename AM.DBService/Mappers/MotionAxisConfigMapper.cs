@@ -1,4 +1,4 @@
-using AM.Model.Entity;
+﻿using AM.Model.Entity.Motion;
 using AM.Model.MotionCard;
 using System;
 using System.Collections.Generic;
@@ -9,68 +9,55 @@ using System.Reflection;
 namespace AM.DBService.Mappers
 {
     /// <summary>
-    /// 将数据库轴参数记录映射为强类型 AxisConfig。
+    /// 将 motion_axis_config 映射到强类型 AxisConfig。
     /// </summary>
-    public static class AxisConfigMapper
+    public static class MotionAxisConfigMapper
     {
-        private static readonly Dictionary<string, PropertyInfo> _axisConfigProperties =
+        private static readonly Dictionary<string, PropertyInfo> AxisConfigProperties =
             typeof(AxisConfig)
                 .GetProperties(BindingFlags.Public | BindingFlags.Instance)
                 .Where(p => p.CanWrite)
                 .ToDictionary(p => p.Name, p => p, StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
-        /// 根据数据库参数列表构建 AxisConfig。
-        /// </summary>
-        public static AxisConfig Build(IEnumerable<ConfigAxisArg> axisArgs, short axisId, string axisName = null)
-        {
-            var config = new AxisConfig
-            {
-                AxisId = axisId,
-                Name = axisName
-            };
-
-            Apply(config, axisArgs);
-            return config;
-        }
-
-        /// <summary>
         /// 将数据库参数覆盖到现有 AxisConfig。
         /// </summary>
-        public static void Apply(AxisConfig config, IEnumerable<ConfigAxisArg> axisArgs)
+        public static void Apply(AxisConfig config, IEnumerable<MotionAxisConfigEntity> configRows)
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
-            if (axisArgs == null) return;
+            if (configRows == null) return;
 
-            foreach (var arg in axisArgs)
+            foreach (var row in configRows)
             {
-                if (arg == null || string.IsNullOrWhiteSpace(arg.ParamName))
+                if (row == null || string.IsNullOrWhiteSpace(row.ParamName))
+                {
                     continue;
+                }
 
                 PropertyInfo property;
-                if (!_axisConfigProperties.TryGetValue(arg.ParamName, out property))
+                if (!AxisConfigProperties.TryGetValue(row.ParamName, out property))
+                {
                     continue;
+                }
 
                 object convertedValue;
-                if (!TryConvertValue(arg, property.PropertyType, out convertedValue))
+                if (!TryConvertValue(row, property.PropertyType, out convertedValue))
+                {
                     continue;
+                }
 
                 property.SetValue(config, convertedValue, null);
             }
         }
 
-        /// <summary>
-        /// 将参数值转换为目标属性类型。
-        /// </summary>
-        private static bool TryConvertValue(ConfigAxisArg arg, Type targetType, out object value)
+        private static bool TryConvertValue(MotionAxisConfigEntity row, Type targetType, out object value)
         {
             value = null;
 
             try
             {
+                var rawValue = row.ParamSetValue;
                 var underlyingType = Nullable.GetUnderlyingType(targetType) ?? targetType;
-                var rawValue = arg.ParamSetVal;
-                var valueType = (arg.ParamValueType ?? string.Empty).Trim();
 
                 if (underlyingType == typeof(bool))
                 {
@@ -116,20 +103,10 @@ namespace AM.DBService.Mappers
 
                 if (underlyingType.IsEnum)
                 {
-                    value = System.Enum.ToObject(
+                    value = Enum.ToObject(
                         underlyingType,
                         Convert.ToInt32(Math.Round(rawValue, MidpointRounding.AwayFromZero), CultureInfo.InvariantCulture));
                     return true;
-                }
-
-                // 当前方案仅处理数值型 + 布尔型 + 枚举
-                if (string.Equals(valueType, "Bool", StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(valueType, "Int16", StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(valueType, "Int32", StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(valueType, "Double", StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(valueType, "Enum", StringComparison.OrdinalIgnoreCase))
-                {
-                    return false;
                 }
 
                 return false;

@@ -54,14 +54,15 @@
     <Compile Include="DBase\DBContext.cs" />
     <Compile Include="DBase\IDBBaseCURD.cs" />
     <Compile Include="DBase\IDBContext.cs" />
-    <Compile Include="Mappers\AxisConfigMapper.cs" />
+    <Compile Include="Mappers\MotionAxisConfigMapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\AlarmRecordService.cs" />
     <Compile Include="Services\Auth\AuthPermissionCatalog.cs" />
     <Compile Include="Services\Auth\AuthSeedService.cs" />
     <Compile Include="Services\Auth\AuthService.cs" />
-    <Compile Include="Services\AxisConfigOverlayService.cs" />
-    <Compile Include="Services\ConfigAxisArgService.cs" />
+    <Compile Include="Services\MachineConfigAppService.cs" />
+    <Compile Include="Services\MotionAxisConfigOverlayService.cs" />
+    <Compile Include="Services\MotionAxisConfigService.cs" />
     <Compile Include="Tables\DBTableT.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -86,5 +87,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

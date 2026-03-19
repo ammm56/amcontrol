@@ -83,7 +83,6 @@
     <Compile Include="ViewModels\Am\UserManagementViewModel.cs" />
     <Compile Include="ViewModels\Auth\LoginViewModel.cs" />
     <Compile Include="ViewModels\Config\AxisConfigEditorViewModel.cs" />
-    <Compile Include="ViewModels\Config\ConfigAxisArgViewModel.cs" />
     <Compile Include="ViewModels\Config\ConfigEditorViewModelBase.cs" />
   </ItemGroup>
   <ItemGroup>

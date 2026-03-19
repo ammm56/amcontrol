@@ -47,12 +47,12 @@ namespace AM.DBService.Services.Auth
         private void EnsureTables(SqlSugarClient db)
         {
             db.CodeFirst.InitTables(
-                typeof(SysUser),
-                typeof(SysRole),
-                typeof(SysUserRole),
-                typeof(SysLoginLog),
-                typeof(SysPagePermission),
-                typeof(SysUserPagePermission));
+                typeof(SysUserEntity),
+                typeof(SysRoleEntity),
+                typeof(SysUserRoleEntity),
+                typeof(SysLoginLogEntity),
+                typeof(SysPagePermissionEntity),
+                typeof(SysUserPagePermissionEntity));
 
             _reporter?.Info("AuthSeed", "认证与权限表初始化完成");
         }
@@ -66,13 +66,13 @@ namespace AM.DBService.Services.Auth
 
         private void EnsureRole(SqlSugarClient db, string roleCode, string roleName)
         {
-            var exists = db.Queryable<SysRole>().Any(r => r.RoleCode == roleCode);
+            var exists = db.Queryable<SysRoleEntity>().Any(r => r.RoleCode == roleCode);
             if (exists)
             {
                 return;
             }
 
-            db.Insertable(new SysRole
+            db.Insertable(new SysRoleEntity
             {
                 RoleCode = roleCode,
                 RoleName = roleName,
@@ -85,7 +85,7 @@ namespace AM.DBService.Services.Auth
 
         private void EnsureDefaultAdmin(SqlSugarClient db)
         {
-            var adminUser = db.Queryable<SysUser>().First(u => u.LoginName == "am");
+            var adminUser = db.Queryable<SysUserEntity>().First(u => u.LoginName == "am");
 
             if (adminUser == null)
             {
@@ -93,7 +93,7 @@ namespace AM.DBService.Services.Auth
                 string hash;
                 AuthService.CreatePasswordHash("am123", out salt, out hash);
 
-                var user = new SysUser
+                var user = new SysUserEntity
                 {
                     LoginName = "am",
                     UserName = "系统管理员",
@@ -111,28 +111,28 @@ namespace AM.DBService.Services.Auth
 
                 db.Insertable(user).ExecuteCommand();
 
-                adminUser = db.Queryable<SysUser>().First(u => u.LoginName == "am");
+                adminUser = db.Queryable<SysUserEntity>().First(u => u.LoginName == "am");
                 _reporter?.Warn("AuthSeed", "已初始化默认管理员：am / am123");
             }
 
             BindAdminRole(db, adminUser);
         }
 
-        private void BindAdminRole(SqlSugarClient db, SysUser adminUser)
+        private void BindAdminRole(SqlSugarClient db, SysUserEntity adminUser)
         {
             if (adminUser == null)
             {
                 return;
             }
 
-            var adminRole = db.Queryable<SysRole>().First(r => r.RoleCode == "Am");
+            var adminRole = db.Queryable<SysRoleEntity>().First(r => r.RoleCode == "Am");
             if (adminRole == null)
             {
                 _reporter?.Error("AuthSeed", "默认管理员角色不存在");
                 return;
             }
 
-            var roleBound = db.Queryable<SysUserRole>()
+            var roleBound = db.Queryable<SysUserRoleEntity>()
                 .Any(x => x.UserId == adminUser.Id && x.RoleId == adminRole.Id);
 
             if (roleBound)
@@ -140,7 +140,7 @@ namespace AM.DBService.Services.Auth
                 return;
             }
 
-            db.Insertable(new SysUserRole
+            db.Insertable(new SysUserRoleEntity
             {
                 UserId = adminUser.Id,
                 RoleId = adminRole.Id,
@@ -152,7 +152,7 @@ namespace AM.DBService.Services.Auth
 
         private void EnsurePagePermissions(SqlSugarClient db)
         {
-            var exists = db.Queryable<SysPagePermission>().Any();
+            var exists = db.Queryable<SysPagePermissionEntity>().Any();
             if (exists)
             {
                 return;

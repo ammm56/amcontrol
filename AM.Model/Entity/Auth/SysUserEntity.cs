@@ -7,7 +7,7 @@ namespace AM.Model.Entity.Auth
     /// 系统用户。
     /// </summary>
     [SugarTable("sys_user")]
-    public class SysUser
+    public class SysUserEntity
     {
         /// <summary>
         /// 自增主键。

@@ -4,10 +4,10 @@ using System;
 namespace AM.Model.Entity.Auth
 {
     /// <summary>
-    /// 用户角色关联。
+    /// 系统角色。
     /// </summary>
-    [SugarTable("sys_user_role")]
-    public class SysUserRole
+    [SugarTable("sys_role")]
+    public class SysRoleEntity
     {
         /// <summary>
         /// 自增主键。
@@ -16,14 +16,20 @@ namespace AM.Model.Entity.Auth
         public int Id { get; set; }
 
         /// <summary>
-        /// 用户 ID。
+        /// 角色编码。
         /// </summary>
-        public int UserId { get; set; }
+        public string RoleCode { get; set; }
 
         /// <summary>
-        /// 角色 ID。
+        /// 角色名称。
         /// </summary>
-        public int RoleId { get; set; }
+        public string RoleName { get; set; }
+
+        /// <summary>
+        /// 备注。
+        /// </summary>
+        [SugarColumn(IsNullable = true)]
+        public string Remark { get; set; }
 
         /// <summary>
         /// 创建时间。

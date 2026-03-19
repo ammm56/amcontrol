@@ -20,19 +20,19 @@ namespace AM.Core.Context
         /// </summary>
         private UserContext()
         {
-            CurrentRoles = new List<SysRole>();
+            CurrentRoles = new List<SysRoleEntity>();
             CurrentPageKeys = new List<string>();
         }
 
         /// <summary>
         /// 当前登录用户。
         /// </summary>
-        public SysUser CurrentUser { get; private set; }
+        public SysUserEntity CurrentUser { get; private set; }
 
         /// <summary>
         /// 当前用户角色集合。
         /// </summary>
-        public IReadOnlyList<SysRole> CurrentRoles { get; private set; }
+        public IReadOnlyList<SysRoleEntity> CurrentRoles { get; private set; }
 
         /// <summary>
         /// 当前用户页面权限标识集合。
@@ -82,10 +82,10 @@ namespace AM.Core.Context
         /// <summary>
         /// 登录写入上下文。
         /// </summary>
-        public void SignIn(SysUser user, IEnumerable<SysRole> roles, IEnumerable<string> pageKeys)
+        public void SignIn(SysUserEntity user, IEnumerable<SysRoleEntity> roles, IEnumerable<string> pageKeys)
         {
             CurrentUser = user;
-            CurrentRoles = roles == null ? new List<SysRole>() : roles.ToList();
+            CurrentRoles = roles == null ? new List<SysRoleEntity>() : roles.ToList();
             CurrentPageKeys = pageKeys == null
                 ? new List<string>()
                 : pageKeys
@@ -100,7 +100,7 @@ namespace AM.Core.Context
         public void SignOut()
         {
             CurrentUser = null;
-            CurrentRoles = new List<SysRole>();
+            CurrentRoles = new List<SysRoleEntity>();
             CurrentPageKeys = new List<string>();
         }
 

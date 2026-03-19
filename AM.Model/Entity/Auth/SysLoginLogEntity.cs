@@ -7,7 +7,7 @@ namespace AM.Model.Entity.Auth
     /// 登录日志。
     /// </summary>
     [SugarTable("sys_login_log")]
-    public class SysLoginLog
+    public class SysLoginLogEntity
     {
         /// <summary>
         /// 自增主键。

@@ -7,7 +7,7 @@ namespace AM.Model.Entity.Auth
     /// 用户页面权限。
     /// </summary>
     [SugarTable("sys_user_page_permission")]
-    public class SysUserPagePermission
+    public class SysUserPagePermissionEntity
     {
         [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]
         public int Id { get; set; }

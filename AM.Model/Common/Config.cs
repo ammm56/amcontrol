@@ -1,9 +1,5 @@
 ﻿using AM.Model.Model;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 using AM.Model.MotionCard;
 
@@ -14,12 +10,16 @@ namespace AM.Model.Common
     /// </summary>
     public partial class Config
     {
-
         public Setting Setting { get; set; } = new Setting();
 
         public DB Sqlite { get; set; } = new DB();
 
-        public List<MotionCardConfig> MotionCardsConfig { get; set; } = new List<MotionCardConfig> { };
+        /// <summary>
+        /// 运动控制完整配置。
+        /// 运行时由数据库装载，不再写入 config.json。
+        /// </summary>
+        [JsonIgnore]
+        public List<MotionCardConfig> MotionCardsConfig { get; set; } = new List<MotionCardConfig>();
 
         /// <summary>
         /// 运行时配置
@@ -84,7 +84,7 @@ namespace AM.Model.Common
     {
         public string Connection { get; set; } = "Data Source=am.db;Version=3;";
 
-        public bool Enabled { get; set;  } = false;
+        public bool Enabled { get; set; } = false;
     }
 
     /// <summary>
@@ -98,15 +98,7 @@ namespace AM.Model.Common
         /// </summary>
         public JsonSerializerSettings CoreSerialOption { get; set; } = new JsonSerializerSettings
         {
-            // 忽略大小写（Newtonsoft 默认就是不区分大小写的）
-            // 如果需要显式设置：
-            // MetadataPropertyHandling = MetadataPropertyHandling.Default,
-
-            // 忽略空值
             NullValueHandling = NullValueHandling.Ignore,
-
-            // 对应 IgnoreReadOnlyProperties
-            // ContractResolver = new DefaultContractResolver { IgnoreSerializableAttribute = true }
         };
 
         /// <summary>

@@ -21,12 +21,12 @@ namespace AM.DBService.Services.Auth
         private const int PasswordIterations = 10000;
         private const int PasswordByteSize = 32;
 
-        private readonly DBCommon<SysUser> _userDb;
-        private readonly DBCommon<SysRole> _roleDb;
-        private readonly DBCommon<SysUserRole> _userRoleDb;
-        private readonly DBCommon<SysLoginLog> _loginLogDb;
-        private readonly DBCommon<SysPagePermission> _pagePermissionDb;
-        private readonly DBCommon<SysUserPagePermission> _userPagePermissionDb;
+        private readonly DBCommon<SysUserEntity> _userDb;
+        private readonly DBCommon<SysRoleEntity> _roleDb;
+        private readonly DBCommon<SysUserRoleEntity> _userRoleDb;
+        private readonly DBCommon<SysLoginLogEntity> _loginLogDb;
+        private readonly DBCommon<SysPagePermissionEntity> _pagePermissionDb;
+        private readonly DBCommon<SysUserPagePermissionEntity> _userPagePermissionDb;
         private readonly IAppReporter _reporter;
 
         public AuthService() : this(SystemContext.Instance.Reporter)
@@ -35,32 +35,32 @@ namespace AM.DBService.Services.Auth
 
         public AuthService(IAppReporter reporter)
         {
-            _userDb = new DBCommon<SysUser>();
-            _roleDb = new DBCommon<SysRole>();
-            _userRoleDb = new DBCommon<SysUserRole>();
-            _loginLogDb = new DBCommon<SysLoginLog>();
-            _pagePermissionDb = new DBCommon<SysPagePermission>();
-            _userPagePermissionDb = new DBCommon<SysUserPagePermission>();
+            _userDb = new DBCommon<SysUserEntity>();
+            _roleDb = new DBCommon<SysRoleEntity>();
+            _userRoleDb = new DBCommon<SysUserRoleEntity>();
+            _loginLogDb = new DBCommon<SysLoginLogEntity>();
+            _pagePermissionDb = new DBCommon<SysPagePermissionEntity>();
+            _userPagePermissionDb = new DBCommon<SysUserPagePermissionEntity>();
             _reporter = reporter;
         }
 
-        public Result<SysUser> Login(string loginName, string password, string clientInfo = null)
+        public Result<SysUserEntity> Login(string loginName, string password, string clientInfo = null)
         {
             if (string.IsNullOrWhiteSpace(loginName))
             {
-                return Result<SysUser>.Fail(-1, "登录名不能为空", ResultSource.Unknown);
+                return Result<SysUserEntity>.Fail(-1, "登录名不能为空", ResultSource.Unknown);
             }
 
             if (string.IsNullOrWhiteSpace(password))
             {
-                return Result<SysUser>.Fail(-1, "密码不能为空", ResultSource.Unknown);
+                return Result<SysUserEntity>.Fail(-1, "密码不能为空", ResultSource.Unknown);
             }
 
             var userQuery = _userDb.QueryAll();
             if (!userQuery.Success)
             {
                 _reporter?.Error("AuthService", "查询用户失败", userQuery.Code);
-                return Result<SysUser>.Fail(userQuery.Code, "查询用户失败", ResultSource.Database);
+                return Result<SysUserEntity>.Fail(userQuery.Code, "查询用户失败", ResultSource.Database);
             }
 
             var user = userQuery.Items.FirstOrDefault(u =>
@@ -70,35 +70,35 @@ namespace AM.DBService.Services.Auth
             {
                 SaveLoginLog(null, loginName, false, "用户不存在", clientInfo);
                 _reporter?.Warn("AuthService", "登录失败：用户不存在");
-                return Result<SysUser>.Fail(-2, "用户不存在", ResultSource.Unknown);
+                return Result<SysUserEntity>.Fail(-2, "用户不存在", ResultSource.Unknown);
             }
 
             if (!user.IsEnabled)
             {
                 SaveLoginLog(user.Id, loginName, false, "用户已禁用", clientInfo);
                 _reporter?.Warn("AuthService", "登录失败：用户已禁用");
-                return Result<SysUser>.Fail(-3, "用户已禁用", ResultSource.Unknown);
+                return Result<SysUserEntity>.Fail(-3, "用户已禁用", ResultSource.Unknown);
             }
 
             if (!VerifyPassword(password, user.PasswordSalt, user.PasswordHash))
             {
                 SaveLoginLog(user.Id, loginName, false, "密码错误", clientInfo);
                 _reporter?.Warn("AuthService", "登录失败：密码错误");
-                return Result<SysUser>.Fail(-4, "密码错误", ResultSource.Unknown);
+                return Result<SysUserEntity>.Fail(-4, "密码错误", ResultSource.Unknown);
             }
 
             var rolesResult = GetRolesByUserId(user.Id);
             if (!rolesResult.Success)
             {
                 SaveLoginLog(user.Id, loginName, false, "查询角色失败", clientInfo);
-                return Result<SysUser>.Fail(rolesResult.Code, "查询角色失败", ResultSource.Database);
+                return Result<SysUserEntity>.Fail(rolesResult.Code, "查询角色失败", ResultSource.Database);
             }
 
             var permissionResult = GetUserPagePermissions(user.Id);
             if (!permissionResult.Success)
             {
                 SaveLoginLog(user.Id, loginName, false, "查询页面权限失败", clientInfo);
-                return Result<SysUser>.Fail(permissionResult.Code, "查询页面权限失败", ResultSource.Database);
+                return Result<SysUserEntity>.Fail(permissionResult.Code, "查询页面权限失败", ResultSource.Database);
             }
 
             user.LastLoginTime = DateTime.Now;
@@ -113,7 +113,7 @@ namespace AM.DBService.Services.Auth
             SaveLoginLog(user.Id, loginName, true, "登录成功", clientInfo);
             _reporter?.Info("AuthService", "登录成功");
 
-            return Result<SysUser>.OkItem(user, "登录成功", ResultSource.Unknown);
+            return Result<SysUserEntity>.OkItem(user, "登录成功", ResultSource.Unknown);
         }
 
         public Result Logout()
@@ -156,15 +156,15 @@ namespace AM.DBService.Services.Auth
                 var db = _userDb._sqlSugarClient;
                 db.Ado.BeginTran();
 
-                db.Deleteable<SysUserPagePermission>()
+                db.Deleteable<SysUserPagePermissionEntity>()
                     .Where(x => x.UserId == userId)
                     .ExecuteCommand();
 
-                db.Deleteable<SysUserRole>()
+                db.Deleteable<SysUserRoleEntity>()
                     .Where(x => x.UserId == userId)
                     .ExecuteCommand();
 
-                db.Deleteable<SysUser>()
+                db.Deleteable<SysUserEntity>()
                     .Where(x => x.Id == userId)
                     .ExecuteCommand();
 
@@ -181,20 +181,20 @@ namespace AM.DBService.Services.Auth
             }
         }
 
-        public Result<SysRole> GetRolesByUserId(int userId)
+        public Result<SysRoleEntity> GetRolesByUserId(int userId)
         {
             var userRoleQuery = _userRoleDb.QueryAll();
             if (!userRoleQuery.Success)
             {
                 _reporter?.Error("AuthService", "查询用户角色关联失败", userRoleQuery.Code);
-                return Result<SysRole>.Fail(userRoleQuery.Code, "查询用户角色关联失败", ResultSource.Database);
+                return Result<SysRoleEntity>.Fail(userRoleQuery.Code, "查询用户角色关联失败", ResultSource.Database);
             }
 
             var roleQuery = _roleDb.QueryAll();
             if (!roleQuery.Success)
             {
                 _reporter?.Error("AuthService", "查询角色失败", roleQuery.Code);
-                return Result<SysRole>.Fail(roleQuery.Code, "查询角色失败", ResultSource.Database);
+                return Result<SysRoleEntity>.Fail(roleQuery.Code, "查询角色失败", ResultSource.Database);
             }
 
             var roleIds = userRoleQuery.Items
@@ -207,16 +207,16 @@ namespace AM.DBService.Services.Auth
                 .Where(r => roleIds.Contains(r.Id))
                 .ToList();
 
-            return Result<SysRole>.OkList(roles, "查询角色成功", ResultSource.Database);
+            return Result<SysRoleEntity>.OkList(roles, "查询角色成功", ResultSource.Database);
         }
 
-        public Result<SysPagePermission> GetPagePermissions()
+        public Result<SysPagePermissionEntity> GetPagePermissions()
         {
             var queryResult = _pagePermissionDb.QueryAll();
             if (!queryResult.Success)
             {
                 _reporter?.Error("AuthService", "查询页面权限目录失败", queryResult.Code);
-                return Result<SysPagePermission>.Fail(queryResult.Code, "查询页面权限目录失败", ResultSource.Database);
+                return Result<SysPagePermissionEntity>.Fail(queryResult.Code, "查询页面权限目录失败", ResultSource.Database);
             }
 
             var list = queryResult.Items
@@ -226,7 +226,7 @@ namespace AM.DBService.Services.Auth
                 .ThenBy(x => x.DisplayName)
                 .ToList();
 
-            return Result<SysPagePermission>.OkList(list, "查询页面权限目录成功", ResultSource.Database);
+            return Result<SysPagePermissionEntity>.OkList(list, "查询页面权限目录成功", ResultSource.Database);
         }
 
         /// <summary>
@@ -358,7 +358,7 @@ namespace AM.DBService.Services.Auth
 
             foreach (var pageKey in targetPageKeys)
             {
-                var addResult = _userPagePermissionDb.Add(new SysUserPagePermission
+                var addResult = _userPagePermissionDb.Add(new SysUserPagePermissionEntity
                 {
                     UserId = userId,
                     PageKey = pageKey,
@@ -415,12 +415,12 @@ namespace AM.DBService.Services.Auth
             var list = userQuery.Items
                 .Select(user =>
                 {
-                    SysUserRole userRole;
-                    SysRole role = null;
+                    SysUserRoleEntity userRole;
+                    SysRoleEntity role = null;
 
                     if (userRoleMap.TryGetValue(user.Id, out userRole) && userRole != null)
                     {
-                        SysRole tempRole;
+                        SysRoleEntity tempRole;
                         if (roleMap.TryGetValue(userRole.RoleId, out tempRole))
                         {
                             role = tempRole;
@@ -501,7 +501,7 @@ namespace AM.DBService.Services.Auth
             string hash;
             CreatePasswordHash(password, out salt, out hash);
 
-            var user = new SysUser
+            var user = new SysUserEntity
             {
                 LoginName = loginName.Trim(),
                 UserName = userName.Trim(),
@@ -539,7 +539,7 @@ namespace AM.DBService.Services.Auth
                 return Result.Fail(-27, "新增成功，但无法获取用户主键", ResultSource.Database);
             }
 
-            var addUserRoleResult = _userRoleDb.Add(new SysUserRole
+            var addUserRoleResult = _userRoleDb.Add(new SysUserRoleEntity
             {
                 UserId = savedUser.Id,
                 RoleId = role.Id,
@@ -632,7 +632,7 @@ namespace AM.DBService.Services.Auth
             Result saveUserRoleResult;
             if (userRole == null)
             {
-                saveUserRoleResult = _userRoleDb.Add(new SysUserRole
+                saveUserRoleResult = _userRoleDb.Add(new SysUserRoleEntity
                 {
                     UserId = userId,
                     RoleId = role.Id,
@@ -906,13 +906,13 @@ namespace AM.DBService.Services.Auth
             }
         }
 
-        private ISugarQueryable<SysLoginLog> BuildLoginLogQuery(
+        private ISugarQueryable<SysLoginLogEntity> BuildLoginLogQuery(
             string loginNameKeyword,
             bool? isSuccess,
             DateTime? startDate,
             DateTime? endDate)
         {
-            var query = _loginLogDb._sqlSugarClient.Queryable<SysLoginLog>();
+            var query = _loginLogDb._sqlSugarClient.Queryable<SysLoginLogEntity>();
 
             if (!string.IsNullOrWhiteSpace(loginNameKeyword))
             {
@@ -944,7 +944,7 @@ namespace AM.DBService.Services.Auth
         {
             try
             {
-                _userPagePermissionDb._sqlSugarClient.Deleteable<SysUserPagePermission>()
+                _userPagePermissionDb._sqlSugarClient.Deleteable<SysUserPagePermissionEntity>()
                     .Where(x => x.UserId == userId)
                     .ExecuteCommand();
 
@@ -1015,7 +1015,7 @@ namespace AM.DBService.Services.Auth
 
             try
             {
-                _userPagePermissionDb._sqlSugarClient.Deleteable<SysUserPagePermission>()
+                _userPagePermissionDb._sqlSugarClient.Deleteable<SysUserPagePermissionEntity>()
                     .Where(x => x.UserId == userId)
                     .ExecuteCommand();
 
@@ -1089,7 +1089,7 @@ namespace AM.DBService.Services.Auth
 
         private void SaveLoginLog(int? userId, string loginName, bool isSuccess, string message, string clientInfo)
         {
-            var entity = new SysLoginLog
+            var entity = new SysLoginLogEntity
             {
                 UserId = userId,
                 LoginName = loginName ?? string.Empty,

@@ -60,21 +60,25 @@
     <Compile Include="Common\ErrorDescriptor.cs" />
     <Compile Include="Common\ResultSource.cs" />
     <Compile Include="Entity\AlarmRecord.cs" />
-    <Compile Include="Entity\Auth\SysLoginLog.cs" />
-    <Compile Include="Entity\Auth\SysPagePermission.cs" />
-    <Compile Include="Entity\Auth\SysRole.cs" />
-    <Compile Include="Entity\Auth\SysUser.cs" />
-    <Compile Include="Entity\Auth\SysUserPagePermission.cs" />
-    <Compile Include="Entity\Auth\SysUserRole.cs" />
-    <Compile Include="Interfaces\DB\IAxisConfigOverlayService.cs" />
-    <Compile Include="Interfaces\DB\IConfigAxisArgService.cs" />
+    <Compile Include="Entity\Auth\SysLoginLogEntity.cs" />
+    <Compile Include="Entity\Auth\SysPagePermissionEntity.cs" />
+    <Compile Include="Entity\Auth\SysRoleEntity.cs" />
+    <Compile Include="Entity\Auth\SysUserEntity.cs" />
+    <Compile Include="Entity\Auth\SysUserPagePermissionEntity.cs" />
+    <Compile Include="Entity\Auth\SysUserRoleEntity.cs" />
+    <Compile Include="Entity\Motion\MotionAxisConfigEntity.cs" />
+    <Compile Include="Entity\Motion\MotionAxisEntity.cs" />
+    <Compile Include="Entity\Motion\MotionCardEntity.cs" />
+    <Compile Include="Entity\Motion\MotionIoMapEntity.cs" />
+    <Compile Include="Interfaces\DB\IMachineConfigAppService.cs" />
+    <Compile Include="Interfaces\DB\IMotionAxisConfigOverlayService.cs" />
+    <Compile Include="Interfaces\DB\IMotionAxisConfigService.cs" />
     <Compile Include="MotionCard\AxisConfig.cs" />
     <Compile Include="Common\ObservableObject_ManualImpl.cs" />
     <Compile Include="Common\Result.cs" />
     <Compile Include="Common\SettingArgsConfig.cs" />
     <Compile Include="DB\MDBaseSet.cs" />
     <Compile Include="DB\MDBInstanceEntityModelArg.cs" />
-    <Compile Include="Entity\ConfigAxisArg.cs" />
     <Compile Include="Interfaces\MotionCard\IMotionCardService.cs" />
     <Compile Include="Model\MOSInfo.cs" />
     <Compile Include="MotionCard\MotionCardConfig.cs" />
@@ -84,6 +88,10 @@
     <Compile Include="Structs\AxisParam.cs" />
     <Compile Include="Structs\AxisStatus.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Entity\Alarm\" />
+    <Folder Include="Entity\Plc\" />
+    <Folder Include="Entity\Vision\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

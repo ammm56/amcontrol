@@ -6,6 +6,7 @@ using AM.Core.Reporter;
 using AM.DBService.Services;
 using AM.DBService.Services.Auth;
 using AM.Model.Common;
+using AM.Model.Interfaces.DB;
 using AM.Model.Interfaces.MotionCard;
 using AM.Model.MotionCard;
 using AM.MotionService.Factory;
@@ -27,7 +28,7 @@ namespace AM.App.Bootstrap
         /// </summary>
         public static void Initialize()
         {
-            // 1. 初始化配置上下文
+            // 1. 初始化基础配置上下文（仅基础参数，不含设备拓扑）
             var configResult = AM.Tools.Tools.ReadConfig<Config>("config.json");
             var config = configResult.Item1 ? configResult.Item2 : new Config();
             ConfigContext.Instance.Initialize(config);
@@ -51,37 +52,46 @@ namespace AM.App.Bootstrap
             var authSeedService = new AuthSeedService(reporter);
             authSeedService.EnsureSeedData();
 
-            // 5. 用数据库参数覆盖配置文件中的轴参数
-            ApplyAxisConfigOverlay(config);
+            // 5. 从数据库加载完整设备配置
+            var machineConfigResult = LoadMachineConfigFromDatabase();
+            if (!machineConfigResult.Success)
+            {
+                return;
+            }
 
             // 6. 初始化硬件
             InitializeMachine();
         }
 
         /// <summary>
-        /// 使用数据库参数覆盖配置文件中的轴配置。
+        /// 从数据库加载完整设备配置到运行时上下文。
         /// </summary>
-        private static void ApplyAxisConfigOverlay(Config config)
+        private static Result LoadMachineConfigFromDatabase()
         {
-            if (config == null || config.MotionCardsConfig == null || config.MotionCardsConfig.Count == 0)
-            {
-                SystemContext.Instance.Reporter?.Warn("AppBootstrap", "未找到可覆盖的运动控制卡轴配置");
-                return;
-            }
+            IMachineConfigAppService machineConfigAppService = new MachineConfigAppService();
 
-            var axisConfigOverlayService = new AxisConfigOverlayService();
-            var overlayResult = axisConfigOverlayService.ApplyToMotionCards(config.MotionCardsConfig);
-
-            if (!overlayResult.Success)
+            var ensureResult = machineConfigAppService.EnsureTables();
+            if (!ensureResult.Success)
             {
-                SystemContext.Instance.Reporter?.Error(
+                SystemContext.Instance.Reporter.Error(
                     "AppBootstrap",
-                    "数据库轴参数覆盖失败，将继续使用 config.json 中的轴参数配置",
-                    overlayResult.Code);
-                return;
+                    "运动控制数据库表初始化失败，应用启动终止",
+                    ensureResult.Code);
+                return ensureResult;
             }
 
-            SystemContext.Instance.Reporter?.Info("AppBootstrap", "数据库轴参数覆盖成功");
+            var reloadResult = machineConfigAppService.ReloadFromDatabase();
+            if (!reloadResult.Success)
+            {
+                SystemContext.Instance.Reporter.Error(
+                    "AppBootstrap",
+                    "数据库运动控制配置加载失败，应用启动终止",
+                    reloadResult.Code);
+                return reloadResult;
+            }
+
+            SystemContext.Instance.Reporter.Info("AppBootstrap", "数据库运动控制配置加载成功");
+            return reloadResult;
         }
 
         /// <summary>
@@ -98,7 +108,7 @@ namespace AM.App.Bootstrap
             var cardConfigs = ConfigContext.Instance.Config.MotionCardsConfig;
             if (cardConfigs == null || cardConfigs.Count == 0)
             {
-                SystemContext.Instance.Reporter?.Warn("AppBootstrap", "未配置任何运动控制卡");
+                SystemContext.Instance.Reporter.Warn("AppBootstrap", "未配置任何运动控制卡");
                 machine.MotionHub = new MotionServiceHub();
                 return;
             }
@@ -118,13 +128,13 @@ namespace AM.App.Bootstrap
         {
             if (motionCfg == null)
             {
-                SystemContext.Instance.Reporter?.Warn("AppBootstrap", "存在空的运动控制卡配置，已跳过");
+                SystemContext.Instance.Reporter.Warn("AppBootstrap", "存在空的运动控制卡配置，已跳过");
                 return;
             }
 
             if (machine.MotionCards.ContainsKey(motionCfg.CardId))
             {
-                SystemContext.Instance.Reporter?.Error("AppBootstrap", "控制卡 CardId 重复: " + motionCfg.CardId);
+                SystemContext.Instance.Reporter.Error("AppBootstrap", "控制卡 CardId 重复: " + motionCfg.CardId);
                 return;
             }
 
@@ -143,13 +153,16 @@ namespace AM.App.Bootstrap
         /// </summary>
         private static void RegisterAxisMappings(MachineContext machine, IMotionCardService motion, MotionCardConfig motionCfg)
         {
-            if (motionCfg.AxisConfigs == null) return;
+            if (motionCfg.AxisConfigs == null)
+            {
+                return;
+            }
 
             foreach (var axisCfg in motionCfg.AxisConfigs)
             {
                 if (machine.AxisMotionCards.ContainsKey(axisCfg.LogicalAxis))
                 {
-                    SystemContext.Instance.Reporter?.Error("AppBootstrap", "逻辑轴重复映射: " + axisCfg.LogicalAxis);
+                    SystemContext.Instance.Reporter.Error("AppBootstrap", "逻辑轴重复映射: " + axisCfg.LogicalAxis);
                     continue;
                 }
 
@@ -162,13 +175,16 @@ namespace AM.App.Bootstrap
         /// </summary>
         private static void RegisterDIMappings(MachineContext machine, IMotionCardService motion, MotionCardConfig motionCfg)
         {
-            if (motionCfg.DIBitMaps == null) return;
+            if (motionCfg.DIBitMaps == null)
+            {
+                return;
+            }
 
             foreach (var di in motionCfg.DIBitMaps)
             {
                 if (machine.DICards.ContainsKey(di.LogicalBit))
                 {
-                    SystemContext.Instance.Reporter?.Error("AppBootstrap", "逻辑DI重复映射: " + di.LogicalBit);
+                    SystemContext.Instance.Reporter.Error("AppBootstrap", "逻辑DI重复映射: " + di.LogicalBit);
                     continue;
                 }
 
@@ -181,13 +197,16 @@ namespace AM.App.Bootstrap
         /// </summary>
         private static void RegisterDOMappings(MachineContext machine, IMotionCardService motion, MotionCardConfig motionCfg)
         {
-            if (motionCfg.DOBitMaps == null) return;
+            if (motionCfg.DOBitMaps == null)
+            {
+                return;
+            }
 
             foreach (var dob in motionCfg.DOBitMaps)
             {
                 if (machine.DOCards.ContainsKey(dob.LogicalBit))
                 {
-                    SystemContext.Instance.Reporter?.Error("AppBootstrap", "逻辑DO重复映射: " + dob.LogicalBit);
+                    SystemContext.Instance.Reporter.Error("AppBootstrap", "逻辑DO重复映射: " + dob.LogicalBit);
                     continue;
                 }
 
