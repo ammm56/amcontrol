@@ -1,6 +1,6 @@
 ﻿using SqlSugar;
 
-namespace AM.Model.Entity.Motion
+namespace AM.Model.Entity.Motion.Point
 {
     /// <summary>
     /// IO 点位公共配置表。

@@ -1,13 +1,14 @@
 ﻿using SqlSugar;
 
-namespace AM.Model.Entity.Motion
+namespace AM.Model.Entity.Motion.Topology
 {
     /// <summary>
-    /// 运动控制卡主表。
-    /// 保存控制卡基础信息与拓扑定义。
+    /// 运动控制卡 IO 映射表。
+    /// 逻辑 IO 点位 到 硬件 IO 点位的映射表
+    /// 用 IoType + LogicalBit 做业务关联键
     /// </summary>
-    [SugarTable("motion_card")]
-    public class MotionCardEntity
+    [SugarTable("motion_io_map")]
+    public class MotionIoMapEntity
     {
         /// <summary>
         /// 自增主键。
@@ -16,40 +17,39 @@ namespace AM.Model.Entity.Motion
         public int Id { get; set; }
 
         /// <summary>
-        /// 控制卡硬件通道号。
+        /// 所属控制卡 CardId。
         /// </summary>
         public short CardId { get; set; }
 
         /// <summary>
-        /// 控制卡类型。
-        /// 存枚举数值。
+        /// IO 类型：DI / DO。
         /// </summary>
-        public int CardType { get; set; }
+        public string IoType { get; set; }
 
         /// <summary>
-        /// 控制卡名称。
+        /// 逻辑位号。
+        /// </summary>
+        public short LogicalBit { get; set; }
+
+        /// <summary>
+        /// 名称。
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// 打开模式参数。
+        /// 所属内核。
         /// </summary>
-        public short ModeParam { get; set; }
+        public short Core { get; set; }
 
         /// <summary>
-        /// 控制卡内核数量。
+        /// 是否扩展模块 IO。
         /// </summary>
-        public int CoreNumber { get; set; }
+        public bool IsExtModule { get; set; }
 
         /// <summary>
-        /// 控制卡轴总数。
+        /// 硬件位号。
         /// </summary>
-        public short AxisCountNumber { get; set; }
-
-        /// <summary>
-        /// 是否启用扩展模块。
-        /// </summary>
-        public bool UseExtModule { get; set; }
+        public short HardwareBit { get; set; }
 
         /// <summary>
         /// 是否启用。

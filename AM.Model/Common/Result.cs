@@ -137,7 +137,7 @@ namespace AM.Model.Common
             };
         }
 
-        public static Result<T> Fail(int code, string message, ResultSource source = ResultSource.Unknown)
+        public static new Result<T> Fail(int code, string message, ResultSource source = ResultSource.Unknown)
         {
             return new Result<T>
             {

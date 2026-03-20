@@ -1,5 +1,6 @@
 ﻿using AM.DBService.Services;
 using AM.Model.Entity.Motion;
+using AM.Model.Entity.Motion.Topology;
 using AM.Model.Interfaces.DB;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;

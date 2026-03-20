@@ -1,6 +1,6 @@
 ﻿using SqlSugar;
 
-namespace AM.Model.Entity.Motion
+namespace AM.Model.Entity.Motion.Topology
 {
     /// <summary>
     /// 运动轴拓扑表。

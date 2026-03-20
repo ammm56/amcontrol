@@ -34,6 +34,7 @@
 - 数据库新表及字段命名需去掉下划线分隔，采用与现有 Auth 表一致的连写风格；后续运动配置相关实体和表字段命名应保持这一统一规则。
 - 用户最终确认运动配置表名使用带下划线分隔的风格：`motion_card`、`motion_axis`、`motion_io_map`；表字段保持当前实体属性定义格式，不需要额外下划线字段映射。
 - 配置管理服务按职责拆分，优先单独设计 IMotionCardCrudService、IMotionAxisCrudService、IMotionIoMapCrudService，再由更高层服务聚合与热重载。
+- 第三层对象层（如气缸/执行器配置）希望在 Entity、Services 等相关定义中使用独立子目录组织，以便结构更清晰。
 
 ## 服务层设计
 - 服务层统一采用“构造注入依赖 + 封装消息发布/日志通知”的风格，避免在各方法中重复直接调用 IMessageBus 和 IAMLogger。

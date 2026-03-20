@@ -1,5 +1,6 @@
 ﻿using AM.Model.Common;
 using AM.Model.Entity.Motion;
+using AM.Model.Entity.Motion.Topology;
 
 namespace AM.Model.Interfaces.DB
 {

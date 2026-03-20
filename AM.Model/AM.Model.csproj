@@ -66,11 +66,12 @@
     <Compile Include="Entity\Auth\SysUserEntity.cs" />
     <Compile Include="Entity\Auth\SysUserPagePermissionEntity.cs" />
     <Compile Include="Entity\Auth\SysUserRoleEntity.cs" />
+    <Compile Include="Entity\Motion\Actuator\CylinderConfigEntity.cs" />
     <Compile Include="Entity\Motion\MotionAxisConfigEntity.cs" />
-    <Compile Include="Entity\Motion\MotionAxisEntity.cs" />
-    <Compile Include="Entity\Motion\MotionCardEntity.cs" />
-    <Compile Include="Entity\Motion\MotionIoMapEntity.cs" />
-    <Compile Include="Entity\Motion\MotionIoPointConfigEntity.cs" />
+    <Compile Include="Entity\Motion\Point\MotionIoPointConfigEntity.cs" />
+    <Compile Include="Entity\Motion\Topology\MotionAxisEntity.cs" />
+    <Compile Include="Entity\Motion\Topology\MotionCardEntity.cs" />
+    <Compile Include="Entity\Motion\Topology\MotionIoMapEntity.cs" />
     <Compile Include="Interfaces\DB\IAxisConfigAppService.cs" />
     <Compile Include="Interfaces\DB\IMachineConfigAppService.cs" />
     <Compile Include="Interfaces\DB\IMachineConfigReloadService.cs" />
@@ -103,6 +104,10 @@
     <Folder Include="Entity\Alarm\" />
     <Folder Include="Entity\Plc\" />
     <Folder Include="Entity\Vision\" />
+    <Folder Include="Interfaces\DB\Motion\Actuator\" />
+    <Folder Include="Interfaces\DB\Motion\App\" />
+    <Folder Include="Interfaces\DB\Motion\Point\" />
+    <Folder Include="Interfaces\DB\Motion\Topology\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

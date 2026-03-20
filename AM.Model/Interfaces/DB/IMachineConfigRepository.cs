@@ -1,5 +1,6 @@
 ﻿using AM.Model.Common;
 using AM.Model.Entity.Motion;
+using AM.Model.Entity.Motion.Topology;
 using AM.Model.MotionCard;
 using System.Collections.Generic;
 

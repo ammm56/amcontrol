@@ -4,6 +4,8 @@ using AM.DBService.DBase;
 using AM.Model.Common;
 using AM.Model.DB;
 using AM.Model.Entity.Motion;
+using AM.Model.Entity.Motion.Point;
+using AM.Model.Entity.Motion.Topology;
 using AM.Model.Interfaces.DB;
 using AM.Model.MotionCard;
 using SqlSugar;
