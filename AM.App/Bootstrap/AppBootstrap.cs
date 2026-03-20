@@ -6,9 +6,11 @@ using AM.Core.Reporter;
 using AM.DBService.Services;
 using AM.DBService.Services.Auth;
 using AM.DBService.Services.Motion.App;
+using AM.DBService.Services.Runtime;
 using AM.Model.Common;
 using AM.Model.Interfaces.DB;
 using AM.Model.Interfaces.MotionCard;
+using AM.Model.Interfaces.Runtime;
 using AM.Model.MotionCard;
 using AM.MotionService.Factory;
 using AM.MotionService.Hub;
@@ -47,7 +49,8 @@ namespace AM.App.Bootstrap
             IAppReporter reporter = new AppReporter(messageBus, logger, alarmManager, errorCatalog);
 
             // 3. 初始化系统上下文
-            SystemContext.Instance.Initialize(logger, messageBus, alarmManager, errorCatalog, reporter);
+            IRuntimeTaskManager runtimeTaskManager = new RuntimeTaskManager(reporter);
+            SystemContext.Instance.Initialize(logger, messageBus, alarmManager, errorCatalog, reporter, runtimeTaskManager);
 
             // 4. 初始化认证相关表与默认管理员
             var authSeedService = new AuthSeedService(reporter);
@@ -78,12 +81,22 @@ namespace AM.App.Bootstrap
             }
             SystemContext.Instance.Reporter.Info("AppBootstrap", "数据库运动控制配置加载并完成设备上下文重建");
 
-            // 7. 启动运动控制卡IO扫描服务  
-            var ioScanService = new AM.DBService.Services.Runtime.IoScanService(reporter);
-            var ioScanResult = ioScanService.Start(50);
-            if (!ioScanResult.Success)
+            // 7. 实例化运动控制卡IO扫描任务 注册到运行时任务管理器
+            var ioScanWorker = new IoScanWorker(reporter, 50);
+            var registerResult = runtimeTaskManager.Register(ioScanWorker);
+            if (!registerResult.Success)
             {
-                SystemContext.Instance.Reporter.Warn("AppBootstrap", ioScanResult.Message, ioScanResult.Code);
+                SystemContext.Instance.Reporter.Error(
+                    "AppBootstrap",
+                    "IO 扫描工作单元注册失败，应用启动终止",
+                    registerResult.Code);
+                return;
+            }
+            // 7.1. 启动所有注册的运行时任务（目前仅IO扫描任务）
+            var startWorkersResult = runtimeTaskManager.StartAll();
+            if (!startWorkersResult.Success)
+            {
+                SystemContext.Instance.Reporter.Warn("AppBootstrap", startWorkersResult.Message, startWorkersResult.Code);
             }
 
             // 8. 初始化硬件

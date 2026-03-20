@@ -2,6 +2,7 @@
 using AM.Core.Logging;
 using AM.Core.Messaging;
 using AM.Core.Reporter;
+using AM.Model.Interfaces.Runtime;
 
 namespace AM.Core.Context
 {
@@ -49,6 +50,11 @@ namespace AM.Core.Context
         public IAppReporter Reporter { get; private set; }
 
         /// <summary>
+        /// 全局后台任务宿主。
+        /// </summary>
+        public IRuntimeTaskManager RuntimeTaskManager { get; private set; }
+
+        /// <summary>
         /// 初始化系统上下文。
         /// 注意：所有实例由组合根统一创建并注入，避免重复构造导致状态不一致。
         /// </summary>
@@ -57,18 +63,21 @@ namespace AM.Core.Context
         /// <param name="alarmManager">报警管理器。</param>
         /// <param name="errorCatalog">错误目录。</param>
         /// <param name="reporter">统一报告器。</param>
+        /// <param name="runtimeTaskManager">全局后台任务宿主。</param>
         public void Initialize(
             IAMLogger logger,
             IMessageBus bus,
             AlarmManager alarmManager,
             IErrorCatalog errorCatalog,
-            IAppReporter reporter)
+            IAppReporter reporter,
+            IRuntimeTaskManager runtimeTaskManager)
         {
             Logger = logger;
             MessageBus = bus;
             AlarmManager = alarmManager;
             ErrorCatalog = errorCatalog;
             Reporter = reporter;
+            RuntimeTaskManager = runtimeTaskManager;
         }
     }
 }

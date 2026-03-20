@@ -87,6 +87,8 @@
     <Compile Include="Interfaces\DB\Motion\Topology\IMotionIoMapCrudService.cs" />
     <Compile Include="Interfaces\Motion\Actuator\ICylinderService.cs" />
     <Compile Include="Interfaces\Runtime\IIoScanService.cs" />
+    <Compile Include="Interfaces\Runtime\IRuntimeTaskManager.cs" />
+    <Compile Include="Interfaces\Runtime\IRuntimeWorker.cs" />
     <Compile Include="MotionCard\Actuator\ActuatorConfig.cs" />
     <Compile Include="MotionCard\Actuator\CylinderConfig.cs" />
     <Compile Include="MotionCard\AxisConfig.cs" />

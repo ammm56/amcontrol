@@ -2,11 +2,9 @@
 using AM.Core.Context;
 using AM.Core.Reporter;
 using AM.Model.Common;
-using AM.Model.Interfaces.MotionCard;
 using AM.Model.Interfaces.Runtime;
 using AM.Model.MotionCard;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,10 +12,10 @@ using System.Threading.Tasks;
 namespace AM.DBService.Services.Runtime
 {
     /// <summary>
-    /// Motion IO 后台扫描服务。
+    /// Motion IO 后台扫描工作单元。
     /// 周期性扫描已注册逻辑 DI/DO，并写入 RuntimeContext。
     /// </summary>
-    public class IoScanService : ServiceBase, IIoScanService
+    public class IoScanWorker : ServiceBase, IIoScanService
     {
         private const int MinScanIntervalMs = 10;
         private const int DefaultScanIntervalMs = 50;
@@ -28,7 +26,7 @@ namespace AM.DBService.Services.Runtime
 
         protected override string MessageSourceName
         {
-            get { return "IoScanService"; }
+            get { return "IoScanWorker"; }
         }
 
         protected override ResultSource DefaultResultSource
@@ -36,15 +34,22 @@ namespace AM.DBService.Services.Runtime
             get { return ResultSource.Motion; }
         }
 
-        public IoScanService()
-            : this(SystemContext.Instance.Reporter)
+        public IoScanWorker()
+            : this(SystemContext.Instance.Reporter, DefaultScanIntervalMs)
         {
         }
 
-        public IoScanService(IAppReporter reporter)
+        public IoScanWorker(IAppReporter reporter, int scanIntervalMs = DefaultScanIntervalMs)
             : base(reporter)
         {
             _syncRoot = new object();
+            ScanIntervalMs = scanIntervalMs < MinScanIntervalMs ? MinScanIntervalMs : scanIntervalMs;
+            LastError = string.Empty;
+        }
+
+        public string Name
+        {
+            get { return "MotionIoScanWorker"; }
         }
 
         public bool IsRunning
@@ -58,22 +63,26 @@ namespace AM.DBService.Services.Runtime
             }
         }
 
-        public Result Start(int scanIntervalMs = 50)
+        public DateTime? LastRunTime { get; private set; }
+
+        public string LastError { get; private set; }
+
+        public int ScanIntervalMs { get; private set; }
+
+        public Result Start()
         {
             lock (_syncRoot)
             {
                 if (_scanLoopTask != null && !_scanLoopTask.IsCompleted)
                 {
-                    return Warn((int)MotionErrorCode.Unknown, "IO 扫描服务已启动");
+                    return Warn((int)MotionErrorCode.Unknown, "IO 扫描工作单元已启动");
                 }
 
-                var interval = scanIntervalMs < MinScanIntervalMs ? MinScanIntervalMs : scanIntervalMs;
                 _cancellationTokenSource = new CancellationTokenSource();
+                RuntimeContext.Instance.MotionIo.SetScanServiceState(true, ScanIntervalMs);
+                _scanLoopTask = Task.Run(() => ScanLoopAsync(_cancellationTokenSource.Token));
 
-                RuntimeContext.Instance.MotionIo.SetScanServiceState(true, interval);
-
-                _scanLoopTask = Task.Run(() => ScanLoopAsync(interval, _cancellationTokenSource.Token));
-                return Ok("IO 扫描服务启动成功",false);
+                return Ok("IO 扫描工作单元启动成功");
             }
         }
 
@@ -90,7 +99,7 @@ namespace AM.DBService.Services.Runtime
                 if (cts == null || loopTask == null)
                 {
                     RuntimeContext.Instance.MotionIo.SetScanServiceState(false, 0);
-                    return Ok("IO 扫描服务未启动");
+                    return Ok("IO 扫描工作单元未启动");
                 }
 
                 _cancellationTokenSource = null;
@@ -107,7 +116,8 @@ namespace AM.DBService.Services.Runtime
             }
             catch (Exception ex)
             {
-                return HandleException(ex, (int)MotionErrorCode.Unknown, "停止 IO 扫描服务失败");
+                LastError = ex.Message;
+                return HandleException(ex, (int)MotionErrorCode.Unknown, "停止 IO 扫描工作单元失败");
             }
             finally
             {
@@ -115,7 +125,7 @@ namespace AM.DBService.Services.Runtime
                 RuntimeContext.Instance.MotionIo.SetScanServiceState(false, 0);
             }
 
-            return Ok("IO 扫描服务已停止");
+            return Ok("IO 扫描工作单元已停止");
         }
 
         public Result ScanOnce()
@@ -124,7 +134,8 @@ namespace AM.DBService.Services.Runtime
             var motionHub = machine.MotionHub;
             if (motionHub == null)
             {
-                return Fail((int)MotionErrorCode.IoMapNotFound, "MotionHub 未初始化，无法执行 IO 扫描");
+                LastError = "MotionHub 未初始化，无法执行 IO 扫描";
+                return Fail((int)MotionErrorCode.IoMapNotFound, LastError);
             }
 
             var now = DateTime.Now;
@@ -136,7 +147,8 @@ namespace AM.DBService.Services.Runtime
                 var diResult = motionHub.GetDI(bit);
                 if (!diResult.Success)
                 {
-                    return Fail(diResult.Code, "扫描 DI 失败: " + bit + "，" + diResult.Message);
+                    LastError = "扫描 DI 失败: " + bit + "，" + diResult.Message;
+                    return Fail(diResult.Code, LastError);
                 }
 
                 var logicalValue = ApplyLogicalTransform(bit, true, diResult.Item);
@@ -148,18 +160,21 @@ namespace AM.DBService.Services.Runtime
                 var doResult = motionHub.GetDO(bit);
                 if (!doResult.Success)
                 {
-                    return Fail(doResult.Code, "扫描 DO 失败: " + bit + "，" + doResult.Message);
+                    LastError = "扫描 DO 失败: " + bit + "，" + doResult.Message;
+                    return Fail(doResult.Code, LastError);
                 }
 
                 var logicalValue = ApplyLogicalTransform(bit, false, doResult.Item);
                 RuntimeContext.Instance.MotionIo.SetDO(bit, logicalValue, now);
             }
 
+            LastRunTime = now;
+            LastError = string.Empty;
             RuntimeContext.Instance.MotionIo.MarkScanTime(now);
-            return Ok("IO 扫描成功", false);
+            return Ok("IO 扫描成功",false);
         }
 
-        private async Task ScanLoopAsync(int scanIntervalMs, CancellationToken cancellationToken)
+        private async Task ScanLoopAsync(CancellationToken cancellationToken)
         {
             try
             {
@@ -171,7 +186,7 @@ namespace AM.DBService.Services.Runtime
                         _reporter?.Warn(MessageSourceName, scanResult.Message, scanResult.Code);
                     }
 
-                    await Task.Delay(scanIntervalMs, cancellationToken);
+                    await Task.Delay(ScanIntervalMs, cancellationToken);
                 }
             }
             catch (OperationCanceledException)
