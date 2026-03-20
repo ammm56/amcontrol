@@ -52,10 +52,7 @@ namespace AM.DBService.Services
             var machine = MachineContext.Instance;
             var cardConfigs = ConfigContext.Instance.Config.MotionCardsConfig;
 
-            machine.MotionCards.Clear();
-            machine.AxisMotionCards.Clear();
-            machine.DICards.Clear();
-            machine.DOCards.Clear();
+            ResetMachineContext(machine);
 
             if (cardConfigs == null || cardConfigs.Count == 0)
             {
@@ -63,26 +60,15 @@ namespace AM.DBService.Services
                 return Ok("当前无运动控制卡配置，设备上下文已清空");
             }
 
-            foreach (var motionCfg in cardConfigs)
+            foreach (var motionCfg in cardConfigs.Where(p => p != null))
             {
-                if (motionCfg == null)
+                var buildResult = RegisterMotionCard(machine, motionCfg);
+                if (!buildResult.Success)
                 {
-                    continue;
+                    ResetMachineContext(machine);
+                    machine.MotionHub = new MotionServiceHub();
+                    return buildResult;
                 }
-
-                if (machine.MotionCards.ContainsKey(motionCfg.CardId))
-                {
-                    return Fail((int)DbErrorCode.InvalidArgument, "控制卡 CardId 重复: " + motionCfg.CardId);
-                }
-
-                IMotionCardService motion = MotionCardFactory.Create(motionCfg);
-                motion.LoadAxisConfig(motionCfg.AxisConfigs);
-
-                machine.MotionCards[motionCfg.CardId] = motion;
-
-                RegisterAxisMappings(machine, motion, motionCfg);
-                RegisterDIMappings(machine, motion, motionCfg);
-                RegisterDOMappings(machine, motion, motionCfg);
             }
 
             machine.MotionHub = new MotionServiceHub();
@@ -98,6 +84,53 @@ namespace AM.DBService.Services
             }
 
             return RebuildMachineContext();
+        }
+
+        private static void ResetMachineContext(MachineContext machine)
+        {
+            machine.MotionCards.Clear();
+            machine.AxisMotionCards.Clear();
+            machine.DICards.Clear();
+            machine.DOCards.Clear();
+            machine.MotionHub = null;
+        }
+
+        private Result RegisterMotionCard(MachineContext machine, MotionCardConfig motionCfg)
+        {
+            if (motionCfg == null)
+            {
+                return Fail((int)DbErrorCode.InvalidArgument, "存在空的运动控制卡配置");
+            }
+
+            if (machine.MotionCards.ContainsKey(motionCfg.CardId))
+            {
+                return Fail((int)DbErrorCode.InvalidArgument, "控制卡 CardId 重复: " + motionCfg.CardId);
+            }
+
+            IMotionCardService motion = MotionCardFactory.Create(motionCfg);
+            motion.LoadAxisConfig(motionCfg.AxisConfigs);
+
+            machine.MotionCards[motionCfg.CardId] = motion;
+
+            var axisResult = RegisterAxisMappings(machine, motion, motionCfg);
+            if (!axisResult.Success)
+            {
+                return axisResult;
+            }
+
+            var diResult = RegisterDIMappings(machine, motion, motionCfg);
+            if (!diResult.Success)
+            {
+                return diResult;
+            }
+
+            var doResult = RegisterDOMappings(machine, motion, motionCfg);
+            if (!doResult.Success)
+            {
+                return doResult;
+            }
+
+            return Ok("控制卡注册成功");
         }
 
         private Result RegisterAxisMappings(MachineContext machine, IMotionCardService motion, MotionCardConfig motionCfg)

@@ -4,7 +4,6 @@ using AM.Core.Reporter;
 using AM.Model.Common;
 using AM.Model.Entity.Motion;
 using AM.Model.Interfaces.DB;
-using AM.Model.Interfaces.MotionCard;
 using AM.Model.MotionCard;
 using System;
 using System.Collections.Generic;
@@ -14,12 +13,12 @@ namespace AM.DBService.Services
 {
     /// <summary>
     /// 轴运行时配置应用服务。
-    /// 负责强类型轴配置的读取、保存和运行时同步。
+    /// 负责强类型轴配置的读取、保存，并通过统一热重载入口同步到运行时上下文。
     /// </summary>
     public class AxisConfigAppService : ServiceBase, IAxisConfigAppService
     {
         private readonly IMotionAxisConfigService _motionAxisConfigService;
-        private readonly IMotionAxisConfigOverlayService _motionAxisConfigOverlayService;
+        private readonly IMachineConfigReloadService _machineConfigReloadService;
 
         protected override string MessageSourceName
         {
@@ -32,18 +31,21 @@ namespace AM.DBService.Services
         }
 
         public AxisConfigAppService()
-            : this(new MotionAxisConfigService(), new MotionAxisConfigOverlayService(), SystemContext.Instance.Reporter)
+            : this(
+                new MotionAxisConfigService(),
+                new MachineConfigReloadService(),
+                SystemContext.Instance.Reporter)
         {
         }
 
         public AxisConfigAppService(
             IMotionAxisConfigService motionAxisConfigService,
-            IMotionAxisConfigOverlayService motionAxisConfigOverlayService,
+            IMachineConfigReloadService machineConfigReloadService,
             IAppReporter reporter)
             : base(reporter)
         {
             _motionAxisConfigService = motionAxisConfigService;
-            _motionAxisConfigOverlayService = motionAxisConfigOverlayService;
+            _machineConfigReloadService = machineConfigReloadService;
         }
 
         /// <summary>
@@ -89,7 +91,8 @@ namespace AM.DBService.Services
         }
 
         /// <summary>
-        /// 保存指定轴的运行时配置，并同步到数据库和运行中的控制卡。
+        /// 保存指定轴的运行时配置。
+        /// 新流程：强类型配置写入 motion_axis_config -> 统一 ReloadAndRebuild。
         /// </summary>
         public Result Save(AxisConfig axisConfig)
         {
@@ -98,36 +101,46 @@ namespace AM.DBService.Services
                 return Fail((int)DbErrorCode.InvalidArgument, "轴配置不能为空");
             }
 
-            var target = FindAxisConfig(axisConfig.LogicalAxis);
-            if (target == null)
+            if (axisConfig.LogicalAxis <= 0)
+            {
+                return Fail((int)DbErrorCode.InvalidArgument, "逻辑轴参数无效");
+            }
+
+            var existing = FindAxisConfig(axisConfig.LogicalAxis);
+            if (existing == null)
             {
                 return Fail((int)DbErrorCode.NotFound, "未找到要保存的逻辑轴配置");
             }
 
-            CopyEditableFields(axisConfig, target);
+            var saveTarget = CloneAxisConfig(existing);
+            CopyEditableFields(axisConfig, saveTarget);
 
-            var persistResult = PersistAxisConfigToDatabase(target);
+            var persistResult = PersistAxisConfigToDatabase(saveTarget);
             if (!persistResult.Success)
             {
                 return persistResult;
             }
 
-            ReloadMachineAxisConfigs();
+            var reloadResult = _machineConfigReloadService.ReloadAndRebuild();
+            if (!reloadResult.Success)
+            {
+                return Fail(reloadResult.Code, "轴配置已保存到数据库，但运行时配置重建失败");
+            }
+
             return Ok("运行时轴配置保存成功");
         }
 
         /// <summary>
-        /// 从数据库重新覆盖当前运行时轴配置。
+        /// 从数据库重新加载并重建运行时配置。
         /// </summary>
         public Result ReloadFromDatabase()
         {
-            var overlayResult = _motionAxisConfigOverlayService.ApplyToMotionCards(ConfigContext.Instance.Config.MotionCardsConfig);
-            if (!overlayResult.Success)
+            var reloadResult = _machineConfigReloadService.ReloadAndRebuild();
+            if (!reloadResult.Success)
             {
-                return Fail(overlayResult.Code, "数据库参数覆盖运行配置失败");
+                return Fail(reloadResult.Code, "数据库参数重新加载失败");
             }
 
-            ReloadMachineAxisConfigs();
             return Ok("数据库参数重新加载成功");
         }
 
@@ -262,34 +275,7 @@ namespace AM.DBService.Services
         }
 
         /// <summary>
-        /// 将当前 ConfigContext 中的轴配置重新加载到已创建的控制卡实例。
-        /// </summary>
-        private static void ReloadMachineAxisConfigs()
-        {
-            var machine = MachineContext.Instance;
-            var motionCardsConfig = ConfigContext.Instance.Config.MotionCardsConfig;
-            if (motionCardsConfig == null)
-            {
-                return;
-            }
-
-            foreach (var cardConfig in motionCardsConfig)
-            {
-                if (cardConfig == null)
-                {
-                    continue;
-                }
-
-                IMotionCardService motionService;
-                if (machine.MotionCards.TryGetValue(cardConfig.CardId, out motionService))
-                {
-                    motionService.LoadAxisConfig(cardConfig.AxisConfigs);
-                }
-            }
-        }
-
-        /// <summary>
-        /// 克隆轴配置，避免 UI 直接编辑运行时对象。
+        /// 克隆轴配置，避免外部直接编辑运行时对象。
         /// </summary>
         private static AxisConfig CloneAxisConfig(AxisConfig source)
         {
