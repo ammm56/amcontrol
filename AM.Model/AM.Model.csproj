@@ -72,9 +72,14 @@
     <Compile Include="Entity\Motion\MotionIoMapEntity.cs" />
     <Compile Include="Interfaces\DB\IAxisConfigAppService.cs" />
     <Compile Include="Interfaces\DB\IMachineConfigAppService.cs" />
+    <Compile Include="Interfaces\DB\IMachineConfigReloadService.cs" />
+    <Compile Include="Interfaces\DB\IMachineConfigRepository.cs" />
     <Compile Include="Interfaces\DB\IMachineConfigSeedService.cs" />
     <Compile Include="Interfaces\DB\IMotionAxisConfigOverlayService.cs" />
     <Compile Include="Interfaces\DB\IMotionAxisConfigService.cs" />
+    <Compile Include="Interfaces\DB\IMotionAxisCrudService.cs" />
+    <Compile Include="Interfaces\DB\IMotionCardCrudService.cs" />
+    <Compile Include="Interfaces\DB\IMotionIoMapCrudService.cs" />
     <Compile Include="MotionCard\AxisConfig.cs" />
     <Compile Include="Common\ObservableObject_ManualImpl.cs" />
     <Compile Include="Common\Result.cs" />
@@ -83,6 +88,7 @@
     <Compile Include="DB\MDBInstanceEntityModelArg.cs" />
     <Compile Include="Interfaces\MotionCard\IMotionCardService.cs" />
     <Compile Include="Model\MOSInfo.cs" />
+    <Compile Include="MotionCard\MachineConfigData.cs" />
     <Compile Include="MotionCard\MotionCardConfig.cs" />
     <Compile Include="MotionCard\MotionErrorCode.cs" />
     <Compile Include="MotionCard\MotionIoBitMap.cs" />

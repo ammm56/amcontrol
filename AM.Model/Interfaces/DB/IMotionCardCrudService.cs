@@ -1,0 +1,19 @@
+﻿using AM.Model.Common;
+using AM.Model.Entity.Motion;
+
+namespace AM.Model.Interfaces.DB
+{
+    /// <summary>
+    /// 控制卡配置 CRUD 服务接口。
+    /// </summary>
+    public interface IMotionCardCrudService
+    {
+        Result<MotionCardEntity> QueryAll();
+
+        Result<MotionCardEntity> QueryByCardId(short cardId);
+
+        Result Save(MotionCardEntity entity);
+
+        Result DeleteByCardId(short cardId);
+    }
+}

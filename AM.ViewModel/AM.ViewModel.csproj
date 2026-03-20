@@ -84,6 +84,9 @@
     <Compile Include="ViewModels\Auth\LoginViewModel.cs" />
     <Compile Include="ViewModels\Config\AxisConfigEditorViewModel.cs" />
     <Compile Include="ViewModels\Config\ConfigEditorViewModelBase.cs" />
+    <Compile Include="ViewModels\Config\MotionAxisManagementViewModel.cs" />
+    <Compile Include="ViewModels\Config\MotionCardManagementViewModel.cs" />
+    <Compile Include="ViewModels\Config\MotionIoMapManagementViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Base\" />

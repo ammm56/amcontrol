@@ -62,9 +62,14 @@
     <Compile Include="Services\Auth\AuthService.cs" />
     <Compile Include="Services\AxisConfigAppService.cs" />
     <Compile Include="Services\MachineConfigAppService.cs" />
+    <Compile Include="Services\MachineConfigReloadService.cs" />
+    <Compile Include="Services\MachineConfigRepository.cs" />
     <Compile Include="Services\MachineConfigSeedService.cs" />
     <Compile Include="Services\MotionAxisConfigOverlayService.cs" />
     <Compile Include="Services\MotionAxisConfigService.cs" />
+    <Compile Include="Services\MotionAxisCrudService.cs" />
+    <Compile Include="Services\MotionCardCrudService.cs" />
+    <Compile Include="Services\MotionIoMapCrudService.cs" />
     <Compile Include="Tables\DBTableT.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -75,6 +80,10 @@
     <ProjectReference Include="..\AM.Model\AM.Model.csproj">
       <Project>{22cf4793-f392-4421-98fd-0f2e07200689}</Project>
       <Name>AM.Model</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AM.MotionService\AM.MotionService.csproj">
+      <Project>{6ea470cf-d319-459d-b90a-8981c12d9f03}</Project>
+      <Name>AM.MotionService</Name>
     </ProjectReference>
     <ProjectReference Include="..\AM.Tools\AM.Tools.csproj">
       <Project>{c3fca058-3848-457d-82c6-bee3dba7ec76}</Project>

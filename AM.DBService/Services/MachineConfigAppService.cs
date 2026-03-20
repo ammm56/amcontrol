@@ -85,6 +85,11 @@ namespace AM.DBService.Services
                     .ThenBy(p => p.CardId)
                     .ToList();
 
+                if (cardEntities.Count == 0)
+                {
+                    return OkList(new List<MotionCardConfig>(), "数据库中尚无运动控制卡配置");
+                }
+
                 var axisEntities = db.Queryable<MotionAxisEntity>()
                     .Where(p => p.IsEnabled)
                     .ToList()

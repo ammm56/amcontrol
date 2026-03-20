@@ -64,6 +64,7 @@ namespace AM.Model.Entity.Motion
         /// <summary>
         /// 备注。
         /// </summary>
+        [SugarColumn(IsNullable = true)]
         public string Remark { get; set; }
     }
 }
