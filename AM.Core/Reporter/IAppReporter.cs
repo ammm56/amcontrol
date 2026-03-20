@@ -29,6 +29,9 @@ namespace AM.Core.Reporter
         /// <param name="cardId">控制卡编号。</param>
         void Info(string source, string message, int code, short? cardId = null);
 
+        void Info(string source, string message, string code, short? cardId, ReportChannels channels);
+        void Info(string source, string message, int code, short? cardId, ReportChannels channels);
+
         /// <summary>
         /// 输出警告级消息。
         /// </summary>
@@ -47,6 +50,9 @@ namespace AM.Core.Reporter
         /// <param name="cardId">控制卡编号。</param>
         void Warn(string source, string message, int code, short? cardId = null);
 
+        //void Warn(string source, string message, string code, short? cardId, ReportChannels channels);
+        //void Warn(string source, string message, int code, short? cardId, ReportChannels channels);
+
         /// <summary>
         /// 输出错误级消息。
         /// </summary>
@@ -64,6 +70,9 @@ namespace AM.Core.Reporter
         /// <param name="code">整型错误码。</param>
         /// <param name="cardId">控制卡编号。</param>
         void Error(string source, string message, int code, short? cardId = null);
+
+        //void Error(string source, string message, string code, short? cardId, ReportChannels channels);
+        //void Error(string source, string message, int code, short? cardId, ReportChannels channels);
 
         /// <summary>
         /// 输出异常级错误消息。

@@ -66,12 +66,12 @@ namespace AM.MotionService.Virtual
 
         public override Result<bool> GetDI(short bit)
         {
-            return Ok(true, "DI状态获取成功", false);
+            return OkSilent(true, "DI状态获取成功");
         }
 
         public override Result<bool> GetDO(short bit)
         {
-            return Ok(false,"DO状态获取成功", false);
+            return OkSilent(false,"DO状态获取成功");
         }
 
         public override Result<double> GetEncoderPosition(short logicalAxis)

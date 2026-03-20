@@ -171,7 +171,7 @@ namespace AM.DBService.Services.Runtime
             LastRunTime = now;
             LastError = string.Empty;
             RuntimeContext.Instance.MotionIo.MarkScanTime(now);
-            return Ok("IO 扫描成功",false);
+            return OkSilent("IO 扫描成功");
         }
 
         private async Task ScanLoopAsync(CancellationToken cancellationToken)

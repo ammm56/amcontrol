@@ -59,6 +59,7 @@
     <Compile Include="Reporter\AppReporter.cs" />
     <Compile Include="Reporter\IAppReporter.cs" />
     <Compile Include="Reporter\IErrorCatalog.cs" />
+    <Compile Include="Reporter\ReportChannels.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Interfaces\" />

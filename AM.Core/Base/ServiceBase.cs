@@ -63,19 +63,49 @@ namespace AM.Core.Base
 
         /// <summary>
         /// 创建成功结果。
+        /// 默认为同时记录日志和发送消息。
         /// </summary>
         protected Result Ok(string message = "OK")
         {
-            _reporter?.Info(MessageSourceName, message, null, MessageCardId);
+            return Ok(message, ReportChannels.All);
+        }
+        /// <summary>
+        /// 日志和消息通知由 ReportChannels 参数控制，子类可根据需要选择不同的报告渠道。
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="channels"></param>
+        /// <returns></returns>
+        protected Result Ok(string message, ReportChannels channels)
+        {
+            _reporter?.Info(MessageSourceName, message, null, MessageCardId, channels);
             return Result.Ok(message, DefaultResultSource);
         }
-        protected Result Ok(string message = "OK", bool needreport = true)
+        /// <summary>
+        /// 高频调用且不需要日志和消息通知的场景可使用 OkSilent 来避免性能开销。
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        protected Result OkSilent(string message = "OK")
         {
-            if (needreport)
-            {
-                _reporter?.Info(MessageSourceName, message, null, MessageCardId);
-            }
-            return Result.Ok(message, DefaultResultSource);
+            return Ok(message, ReportChannels.None);
+        }
+        /// <summary>
+        /// 只记录日志不发送UI消息。
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        protected Result OkLogOnly(string message = "OK")
+        {
+            return Ok(message, ReportChannels.Log);
+        }
+        /// <summary>
+        /// 只发送UI消息不记录日志。
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        protected Result OkMessageOnly(string message = "OK")
+        {
+            return Ok(message, ReportChannels.Message);
         }
 
         /// <summary>
@@ -83,22 +113,24 @@ namespace AM.Core.Base
         /// </summary>
         protected Result<T> Ok<T>(T item, string message = "OK")
         {
-            _reporter?.Info(MessageSourceName, message, null, MessageCardId);
+            return Ok(item, message, ReportChannels.All);
+        }
+        protected Result<T> Ok<T>(T item, string message, ReportChannels channels)
+        {
+            _reporter?.Info(MessageSourceName, message, null, MessageCardId, channels);
             return Result<T>.OkItem(item, message, DefaultResultSource);
         }
-
-        /// <summary>
-        /// 创建带单项数据的成功结果。
-        /// 默认记录日志并发送消息通知，但可通过 needreport 参数控制是否记录和发送。
-        /// 频繁调用且不需要记录和发送消息通知的场景可设置 needreport 为 false 以提升性能。
-        /// </summary>
-        protected Result<T> Ok<T>(T item, string message = "OK", bool needreport = true)
+        protected Result<T> OkSilent<T>(T item, string message = "OK")
         {
-            if (needreport)
-            {
-                _reporter?.Info(MessageSourceName, message, null, MessageCardId);
-            }
-            return Result<T>.OkItem(item, message, DefaultResultSource);
+            return Ok(item, message, ReportChannels.None);
+        }
+        protected Result<T> OkLogOnly<T>(T item, string message = "OK")
+        {
+            return Ok(item, message, ReportChannels.Log);
+        }
+        protected Result<T> OkMessageOnly<T>(T item, string message = "OK")
+        {
+            return Ok(item, message, ReportChannels.Message);
         }
 
         /// <summary>
@@ -106,8 +138,24 @@ namespace AM.Core.Base
         /// </summary>
         protected Result<T> OkList<T>(IEnumerable<T> items, string message = "OK")
         {
-            _reporter?.Info(MessageSourceName, message, null, MessageCardId);
+            return OkList(items, message, ReportChannels.All);
+        }
+        protected Result<T> OkList<T>(IEnumerable<T> items, string message, ReportChannels channels)
+        {
+            _reporter?.Info(MessageSourceName, message, null, MessageCardId, channels);
             return Result<T>.OkList(items, message, DefaultResultSource);
+        }
+        protected Result<T> OkListSilent<T>(IEnumerable<T> items, string message = "OK")
+        {
+            return OkList(items, message, ReportChannels.None);
+        }
+        protected Result<T> OkListLogOnly<T>(IEnumerable<T> items, string message = "OK")
+        {
+            return OkList(items, message, ReportChannels.Log);
+        }
+        protected Result<T> OkListMessageOnly<T>(IEnumerable<T> items, string message = "OK")
+        {
+            return OkList(items, message, ReportChannels.Message);
         }
 
         /// <summary>

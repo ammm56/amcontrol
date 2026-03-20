@@ -51,28 +51,43 @@ namespace AM.Core.Reporter
         /// <summary>
         /// 记录信息级消息。
         /// </summary>
-        public void Info(string source, string message, string code = null, short? cardId = null)
+        public void Info(string source, string message, string code, short? cardId, ReportChannels channels)
         {
             var descriptor = Resolve(code);
             var finalMessage = MergeMessage(message, descriptor);
 
-            _logger?.Info(BuildLogMessage(source, finalMessage, descriptor));
-            _messageBus?.Publish(new SystemMessage(
-                finalMessage,
-                SystemMessageType.Status,
-                source,
-                code,
-                descriptor == null ? null : descriptor.Description,
-                descriptor == null ? null : descriptor.Suggestion,
-                cardId));
+            if ((channels & ReportChannels.Log) == ReportChannels.Log)
+            {
+                _logger?.Info(BuildLogMessage(source, finalMessage, descriptor));
+            }
+
+            if ((channels & ReportChannels.Message) == ReportChannels.Message)
+            {
+                _messageBus?.Publish(new SystemMessage(
+                    finalMessage,
+                    SystemMessageType.Status,
+                    source,
+                    code,
+                    descriptor == null ? null : descriptor.Description,
+                    descriptor == null ? null : descriptor.Suggestion,
+                    cardId));
+            }
+        }
+        public void Info(string source, string message, int code, short? cardId, ReportChannels channels)
+        {
+            Info(source, message, code.ToString(), cardId, channels);
         }
 
         /// <summary>
         /// 记录信息级消息。
         /// </summary>
+        public void Info(string source, string message, string code = null, short? cardId = null)
+        {
+            Info(source, message, code, cardId, ReportChannels.All);
+        }
         public void Info(string source, string message, int code, short? cardId = null)
         {
-            Info(source, message, code.ToString(), cardId);
+            Info(source, message, code.ToString(), cardId, ReportChannels.All);
         }
 
         /// <summary>
