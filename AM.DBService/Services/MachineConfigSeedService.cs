@@ -45,7 +45,8 @@ namespace AM.DBService.Services
                     typeof(MotionCardEntity),
                     typeof(MotionAxisEntity),
                     typeof(MotionIoMapEntity),
-                    typeof(MotionAxisConfigEntity));
+                    typeof(MotionAxisConfigEntity),
+                    typeof(MotionIoPointConfigEntity));
 
                 if (HasAnyMotionConfigData(db))
                 {
@@ -58,11 +59,13 @@ namespace AM.DBService.Services
                 var cards = CreateDefaultCards();
                 var axes = CreateDefaultAxes();
                 var ioMaps = CreateDefaultIoMaps();
+                var ioPointConfigs = CreateDefaultIoPointConfigs();
                 var axisConfigs = CreateDefaultAxisConfigs();
 
                 db.Insertable(cards).ExecuteCommand();
                 db.Insertable(axes).ExecuteCommand();
                 db.Insertable(ioMaps).ExecuteCommand();
+                db.Insertable(ioPointConfigs).ExecuteCommand();
                 db.Insertable(axisConfigs).ExecuteCommand();
 
                 db.Ado.CommitTran();
@@ -93,6 +96,7 @@ namespace AM.DBService.Services
             return db.Queryable<MotionCardEntity>().Any()
                 || db.Queryable<MotionAxisEntity>().Any()
                 || db.Queryable<MotionIoMapEntity>().Any()
+                || db.Queryable<MotionIoPointConfigEntity>().Any()
                 || db.Queryable<MotionAxisConfigEntity>().Any();
         }
 
@@ -202,6 +206,89 @@ namespace AM.DBService.Services
                     IsEnabled = true,
                     SortOrder = 4,
                     Remark = "测试Y轴使能输出"
+                }
+            };
+        }
+
+        private static List<MotionIoPointConfigEntity> CreateDefaultIoPointConfigs()
+        {
+            return new List<MotionIoPointConfigEntity>
+            {
+                new MotionIoPointConfigEntity
+                {
+                    IoType = "DI",
+                    LogicalBit = 1001,
+                    DisplayName = "X轴原点",
+                    SignalCategory = "Sensor",
+                    Invert = false,
+                    IsNormallyClosed = false,
+                    DebounceMs = 20,
+                    FilterMs = 0,
+                    CanManualOperate = false,
+                    DefaultOutputState = false,
+                    OutputMode = "Keep",
+                    PulseWidthMs = 0,
+                    BlinkOnMs = 0,
+                    BlinkOffMs = 0,
+                    Description = "测试X轴原点输入信号",
+                    Remark = "默认DI点位公共配置"
+                },
+                new MotionIoPointConfigEntity
+                {
+                    IoType = "DI",
+                    LogicalBit = 1002,
+                    DisplayName = "Y轴原点",
+                    SignalCategory = "Sensor",
+                    Invert = false,
+                    IsNormallyClosed = false,
+                    DebounceMs = 20,
+                    FilterMs = 0,
+                    CanManualOperate = false,
+                    DefaultOutputState = false,
+                    OutputMode = "Keep",
+                    PulseWidthMs = 0,
+                    BlinkOnMs = 0,
+                    BlinkOffMs = 0,
+                    Description = "测试Y轴原点输入信号",
+                    Remark = "默认DI点位公共配置"
+                },
+                new MotionIoPointConfigEntity
+                {
+                    IoType = "DO",
+                    LogicalBit = 2001,
+                    DisplayName = "X轴使能输出",
+                    SignalCategory = "Valve",
+                    Invert = false,
+                    IsNormallyClosed = false,
+                    DebounceMs = 0,
+                    FilterMs = 0,
+                    CanManualOperate = true,
+                    DefaultOutputState = false,
+                    OutputMode = "Keep",
+                    PulseWidthMs = 0,
+                    BlinkOnMs = 0,
+                    BlinkOffMs = 0,
+                    Description = "测试X轴使能控制输出",
+                    Remark = "默认DO点位公共配置"
+                },
+                new MotionIoPointConfigEntity
+                {
+                    IoType = "DO",
+                    LogicalBit = 2002,
+                    DisplayName = "Y轴使能输出",
+                    SignalCategory = "Valve",
+                    Invert = false,
+                    IsNormallyClosed = false,
+                    DebounceMs = 0,
+                    FilterMs = 0,
+                    CanManualOperate = true,
+                    DefaultOutputState = false,
+                    OutputMode = "Keep",
+                    PulseWidthMs = 0,
+                    BlinkOnMs = 0,
+                    BlinkOffMs = 0,
+                    Description = "测试Y轴使能控制输出",
+                    Remark = "默认DO点位公共配置"
                 }
             };
         }

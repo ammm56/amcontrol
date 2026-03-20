@@ -80,6 +80,7 @@
     <Compile Include="Interfaces\DB\IMotionAxisConfigService.cs" />
     <Compile Include="Interfaces\DB\IMotionAxisCrudService.cs" />
     <Compile Include="Interfaces\DB\IMotionCardCrudService.cs" />
+    <Compile Include="Interfaces\DB\IMotionIoConfigCrudService.cs" />
     <Compile Include="Interfaces\DB\IMotionIoMapCrudService.cs" />
     <Compile Include="Interfaces\DB\IMotionIoPointConfigCrudService.cs" />
     <Compile Include="MotionCard\AxisConfig.cs" />

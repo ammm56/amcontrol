@@ -69,6 +69,7 @@
     <Compile Include="Services\MotionAxisConfigService.cs" />
     <Compile Include="Services\MotionAxisCrudService.cs" />
     <Compile Include="Services\MotionCardCrudService.cs" />
+    <Compile Include="Services\MotionIoConfigCrudService.cs" />
     <Compile Include="Services\MotionIoMapCrudService.cs" />
     <Compile Include="Services\MotionIoPointConfigCrudService.cs" />
     <Compile Include="Tables\DBTableT.cs" />
