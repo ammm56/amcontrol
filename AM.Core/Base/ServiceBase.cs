@@ -69,6 +69,14 @@ namespace AM.Core.Base
             _reporter?.Info(MessageSourceName, message, null, MessageCardId);
             return Result.Ok(message, DefaultResultSource);
         }
+        protected Result Ok(string message = "OK", bool needreport = true)
+        {
+            if (needreport)
+            {
+                _reporter?.Info(MessageSourceName, message, null, MessageCardId);
+            }
+            return Result.Ok(message, DefaultResultSource);
+        }
 
         /// <summary>
         /// 创建带单项数据的成功结果。
@@ -76,6 +84,20 @@ namespace AM.Core.Base
         protected Result<T> Ok<T>(T item, string message = "OK")
         {
             _reporter?.Info(MessageSourceName, message, null, MessageCardId);
+            return Result<T>.OkItem(item, message, DefaultResultSource);
+        }
+
+        /// <summary>
+        /// 创建带单项数据的成功结果。
+        /// 默认记录日志并发送消息通知，但可通过 needreport 参数控制是否记录和发送。
+        /// 频繁调用且不需要记录和发送消息通知的场景可设置 needreport 为 false 以提升性能。
+        /// </summary>
+        protected Result<T> Ok<T>(T item, string message = "OK", bool needreport = true)
+        {
+            if (needreport)
+            {
+                _reporter?.Info(MessageSourceName, message, null, MessageCardId);
+            }
             return Result<T>.OkItem(item, message, DefaultResultSource);
         }
 

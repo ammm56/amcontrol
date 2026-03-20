@@ -66,12 +66,12 @@ namespace AM.MotionService.Virtual
 
         public override Result<bool> GetDI(short bit)
         {
-            throw new NotImplementedException();
+            return Ok(true, "DI状态获取成功", false);
         }
 
         public override Result<bool> GetDO(short bit)
         {
-            throw new NotImplementedException();
+            return Ok(false,"DO状态获取成功", false);
         }
 
         public override Result<double> GetEncoderPosition(short logicalAxis)

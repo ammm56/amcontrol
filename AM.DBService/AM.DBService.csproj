@@ -74,6 +74,7 @@
     <Compile Include="Services\Motion\Topology\MotionAxisCrudService.cs" />
     <Compile Include="Services\Motion\Topology\MotionCardCrudService.cs" />
     <Compile Include="Services\Motion\Topology\MotionIoMapCrudService.cs" />
+    <Compile Include="Services\Runtime\IoScanService.cs" />
     <Compile Include="Tables\DBTableT.cs" />
   </ItemGroup>
   <ItemGroup>

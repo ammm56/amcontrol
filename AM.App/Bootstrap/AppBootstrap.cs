@@ -78,7 +78,15 @@ namespace AM.App.Bootstrap
             }
             SystemContext.Instance.Reporter.Info("AppBootstrap", "数据库运动控制配置加载并完成设备上下文重建");
 
-            // 7. 初始化硬件
+            // 7. 启动运动控制卡IO扫描服务  
+            var ioScanService = new AM.DBService.Services.Runtime.IoScanService(reporter);
+            var ioScanResult = ioScanService.Start(50);
+            if (!ioScanResult.Success)
+            {
+                SystemContext.Instance.Reporter.Warn("AppBootstrap", ioScanResult.Message, ioScanResult.Code);
+            }
+
+            // 8. 初始化硬件
             InitializeMachine();
         }
 

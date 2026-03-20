@@ -17,8 +17,8 @@ namespace AM.DBService.Services.Motion.Actuator
     /// <summary>
     /// 气缸对象运行时服务。
     /// 通过 MachineContext 中已注册的气缸对象配置与 MotionHub 执行 IO 控制。
-    /// 当前版本仍基于 MotionHub.GetDI(...) 轮询等待反馈；
-    /// 后续若引入全局 IO 扫描缓存层，应切换为等待缓存状态而不是直接读点。
+    /// 输出动作直接走 MotionHub
+    /// 引入全局 IO 扫描缓存层，反馈等待走 RuntimeContext.MotionIo 缓存。
     /// </summary>
     public class CylinderService : ServiceBase, ICylinderService
     {
@@ -207,19 +207,13 @@ namespace AM.DBService.Services.Motion.Actuator
                 return Fail<bool>((int)MotionErrorCode.IoMapNotFound, "气缸未配置伸出反馈位");
             }
 
-            var motionHub = GetMotionHub();
-            if (motionHub == null)
+            bool value;
+            if (!RuntimeContext.Instance.MotionIo.TryGetDI(cylinder.ExtendFeedbackBit.Value, out value))
             {
-                return Fail<bool>((int)MotionErrorCode.IoMapNotFound, "MotionHub 未初始化");
+                return Fail<bool>((int)MotionErrorCode.IoMapNotFound, "伸出反馈位尚无缓存值，请确认 __IoScanService__ 已启动");
             }
 
-            var diResult = motionHub.GetDI(cylinder.ExtendFeedbackBit.Value);
-            if (!diResult.Success)
-            {
-                return Fail<bool>(diResult.Code, diResult.Message);
-            }
-
-            return Ok(diResult.Item, "气缸伸出状态读取成功");
+            return Ok(value, "气缸伸出状态读取成功");
         }
 
         public Result<bool> IsRetracted(string name)
@@ -236,19 +230,13 @@ namespace AM.DBService.Services.Motion.Actuator
                 return Fail<bool>((int)MotionErrorCode.IoMapNotFound, "气缸未配置缩回反馈位");
             }
 
-            var motionHub = GetMotionHub();
-            if (motionHub == null)
+            bool value;
+            if (!RuntimeContext.Instance.MotionIo.TryGetDI(cylinder.RetractFeedbackBit.Value, out value))
             {
-                return Fail<bool>((int)MotionErrorCode.IoMapNotFound, "MotionHub 未初始化");
+                return Fail<bool>((int)MotionErrorCode.IoMapNotFound, "缩回反馈位尚无缓存值，请确认 __IoScanService__ 已启动");
             }
 
-            var diResult = motionHub.GetDI(cylinder.RetractFeedbackBit.Value);
-            if (!diResult.Success)
-            {
-                return Fail<bool>(diResult.Code, diResult.Message);
-            }
-
-            return Ok(diResult.Item, "气缸缩回状态读取成功");
+            return Ok(value, "气缸缩回状态读取成功");
         }
 
         private Result ResolveCylinder(string name, out CylinderConfig cylinder)
@@ -395,7 +383,7 @@ namespace AM.DBService.Services.Motion.Actuator
                 return;
             }
 
-            _reporter?.Error(MessageSourceName, message, null, null);
+            _reporter?.Warn(MessageSourceName, message, (int)MotionErrorCode.HomeTimeout);
         }
 
         private async Task<Result> WaitForDiStateAsync(
@@ -406,27 +394,20 @@ namespace AM.DBService.Services.Motion.Actuator
             string timeoutMessage,
             CancellationToken cancellationToken)
         {
-            var motionHub = GetMotionHub();
-            if (motionHub == null)
-            {
-                return Fail((int)MotionErrorCode.IoMapNotFound, "MotionHub 未初始化");
-            }
-
+            var runtimeState = RuntimeContext.Instance.MotionIo;
             var startTime = DateTime.Now;
 
             while (true)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var diResult = motionHub.GetDI(logicalBit);
-                if (!diResult.Success)
+                bool currentValue;
+                if (runtimeState.TryGetDI(logicalBit, out currentValue))
                 {
-                    return Fail(diResult.Code, diResult.Message);
-                }
-
-                if (diResult.Item == expectedState)
-                {
-                    return Ok(successMessage);
+                    if (currentValue == expectedState)
+                    {
+                        return Ok(successMessage);
+                    }
                 }
 
                 if ((DateTime.Now - startTime).TotalMilliseconds >= timeoutMs)
