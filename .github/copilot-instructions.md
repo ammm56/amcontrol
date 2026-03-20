@@ -35,6 +35,7 @@
 - 用户最终确认运动配置表名使用带下划线分隔的风格：`motion_card`、`motion_axis`、`motion_io_map`；表字段保持当前实体属性定义格式，不需要额外下划线字段映射。
 - 配置管理服务按职责拆分，优先单独设计 IMotionCardCrudService、IMotionAxisCrudService、IMotionIoMapCrudService，再由更高层服务聚合与热重载。
 - 在各个项目中按结构和层级创建目录组织 Motion 第三层对象层（如 Cylinder/Actuator）的 Entity、Services、Interfaces，以提升代码清晰度。
+- 第三层对象注册到 MachineContext 时采用精简方案：只保留按名称索引的 Cylinders，不增加按输出位/反馈位的多个反查字典。
 
 ## 服务层设计
 - 服务层统一采用“构造注入依赖 + 封装消息发布/日志通知”的风格，避免在各方法中重复直接调用 IMessageBus 和 IAMLogger。

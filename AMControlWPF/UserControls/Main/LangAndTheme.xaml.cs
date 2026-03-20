@@ -21,7 +21,7 @@ namespace AMControlWPF.UserControls.Main
     /// </summary>
     public partial class LangAndTheme : UserControl
     {
-        public event Action<string> NavigateRequested;
+        //public event Action<string> NavigateRequested;
 
         public LangAndTheme()
         {

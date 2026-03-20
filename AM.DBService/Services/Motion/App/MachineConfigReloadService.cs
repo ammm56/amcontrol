@@ -6,6 +6,7 @@ using AM.Model.Interfaces.DB;
 using AM.Model.Interfaces.DB.Motion.App;
 using AM.Model.Interfaces.MotionCard;
 using AM.Model.MotionCard;
+using AM.Model.MotionCard.Actuator;
 using AM.MotionService.Factory;
 using AM.MotionService.Hub;
 using System.Linq;
@@ -52,6 +53,7 @@ namespace AM.DBService.Services.Motion.App
         {
             var machine = MachineContext.Instance;
             var cardConfigs = ConfigContext.Instance.Config.MotionCardsConfig;
+            var actuatorConfig = ConfigContext.Instance.Config.ActuatorConfig;
 
             ResetMachineContext(machine);
 
@@ -70,6 +72,14 @@ namespace AM.DBService.Services.Motion.App
                     machine.MotionHub = new MotionServiceHub();
                     return buildResult;
                 }
+            }
+
+            var actuatorResult = RegisterActuatorConfig(machine, actuatorConfig);
+            if (!actuatorResult.Success)
+            {
+                ResetMachineContext(machine);
+                machine.MotionHub = new MotionServiceHub();
+                return actuatorResult;
             }
 
             machine.MotionHub = new MotionServiceHub();
@@ -93,6 +103,7 @@ namespace AM.DBService.Services.Motion.App
             machine.AxisMotionCards.Clear();
             machine.DICards.Clear();
             machine.DOCards.Clear();
+            machine.Cylinders.Clear();
             machine.MotionHub = null;
         }
 
@@ -193,5 +204,61 @@ namespace AM.DBService.Services.Motion.App
 
             return Ok("DO映射注册成功");
         }
+
+        private Result RegisterActuatorConfig(MachineContext machine, ActuatorConfig actuatorConfig)
+        {
+            if (actuatorConfig == null)
+            {
+                return Ok("无执行器对象配置");
+            }
+
+            return RegisterCylinderMappings(machine, actuatorConfig);
+        }
+
+        private Result RegisterCylinderMappings(MachineContext machine, ActuatorConfig actuatorConfig)
+        {
+            if (actuatorConfig.Cylinders == null)
+            {
+                return Ok("无气缸对象配置");
+            }
+
+            foreach (var cylinder in actuatorConfig.Cylinders.Where(p => p != null && p.IsEnabled))
+            {
+                if (string.IsNullOrWhiteSpace(cylinder.Name))
+                {
+                    return Fail((int)DbErrorCode.InvalidArgument, "存在未配置名称的气缸对象");
+                }
+
+                if (machine.Cylinders.ContainsKey(cylinder.Name))
+                {
+                    return Fail((int)DbErrorCode.InvalidArgument, "气缸名称重复: " + cylinder.Name);
+                }
+
+                if (!machine.DOCards.ContainsKey(cylinder.ExtendOutputBit))
+                {
+                    return Fail((int)DbErrorCode.InvalidArgument, "气缸伸出输出位未注册到 DO 路由: " + cylinder.ExtendOutputBit);
+                }
+
+                if (cylinder.RetractOutputBit.HasValue && !machine.DOCards.ContainsKey(cylinder.RetractOutputBit.Value))
+                {
+                    return Fail((int)DbErrorCode.InvalidArgument, "气缸缩回输出位未注册到 DO 路由: " + cylinder.RetractOutputBit.Value);
+                }
+
+                if (cylinder.ExtendFeedbackBit.HasValue && !machine.DICards.ContainsKey(cylinder.ExtendFeedbackBit.Value))
+                {
+                    return Fail((int)DbErrorCode.InvalidArgument, "气缸伸出反馈位未注册到 DI 路由: " + cylinder.ExtendFeedbackBit.Value);
+                }
+
+                if (cylinder.RetractFeedbackBit.HasValue && !machine.DICards.ContainsKey(cylinder.RetractFeedbackBit.Value))
+                {
+                    return Fail((int)DbErrorCode.InvalidArgument, "气缸缩回反馈位未注册到 DI 路由: " + cylinder.RetractFeedbackBit.Value);
+                }
+
+                machine.Cylinders[cylinder.Name] = cylinder;
+            }
+
+            return Ok("气缸对象配置注册成功");
+        }
+
     }
 }

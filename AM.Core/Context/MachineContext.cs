@@ -1,4 +1,5 @@
 ﻿using AM.Model.Interfaces.MotionCard;
+using AM.Model.MotionCard.Actuator;
 using System.Collections.Generic;
 
 namespace AM.Core.Context
@@ -62,6 +63,13 @@ namespace AM.Core.Context
         /// 不直接依赖某张卡实例，保证多卡情况下调用方式一致
         /// </summary>
         public IMotionCardService MotionHub { get; set; }
+
+        /// <summary>
+        /// 气缸对象运行时配置索引。
+        /// Key: Name
+        /// </summary>
+        public IDictionary<string, CylinderConfig> Cylinders { get; } = new Dictionary<string, CylinderConfig>();
+
 
         /// <summary>
         /// 预留 PLC 服务对象。

@@ -33,7 +33,7 @@ namespace AMControlWPF.UserControls.Main
 
             VersionInfo = $"v{Assembly.GetExecutingAssembly().GetName().Version}";
             // 将内部 LangAndTheme 的事件透传出去（如果需要）
-            LangAndThemeControl.NavigateRequested += tag => NavigateRequested?.Invoke(tag);
+            //LangAndThemeControl.NavigateRequested += tag => NavigateRequested?.Invoke(tag);
 
             // 设置 DataContext 以绑定 VersionInfo xaml中 bingding 使用
             DataContext = this;
