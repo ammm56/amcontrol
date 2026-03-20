@@ -46,9 +46,12 @@ namespace AM.DBService.Services
             try
             {
                 var db = CreateDb();
+                EnsureTable(db);
+
                 var items = db.Queryable<MotionAxisConfigEntity>()
+                    .ToList()
                     .OrderBy(p => p.LogicalAxis)
-                    .OrderBy(p => p.ParamName)
+                    .ThenBy(p => p.ParamName)
                     .ToList();
 
                 return OkList(items, "运动轴参数查询成功");
@@ -69,12 +72,15 @@ namespace AM.DBService.Services
                 }
 
                 var db = CreateDb();
+                EnsureTable(db);
+
                 var items = db.Queryable<MotionAxisConfigEntity>()
                     .Where(p => p.LogicalAxis == logicalAxis)
+                    .ToList()
                     .OrderBy(p => p.ParamName)
                     .ToList();
 
-                if (items == null || items.Count == 0)
+                if (items.Count == 0)
                 {
                     return Warn<MotionAxisConfigEntity>((int)DbErrorCode.NotFound, "未找到对应逻辑轴参数");
                 }
@@ -99,6 +105,8 @@ namespace AM.DBService.Services
 
         public Result SaveRange(IEnumerable<MotionAxisConfigEntity> entities)
         {
+            SqlSugarClient db = null;
+
             try
             {
                 if (entities == null)
@@ -115,10 +123,21 @@ namespace AM.DBService.Services
                     return Warn((int)DbErrorCode.InvalidArgument, "没有可保存的有效参数");
                 }
 
-                var db = CreateDb();
+                foreach (var item in list)
+                {
+                    Normalize(item);
+                }
+
+                db = CreateDb();
+                EnsureTable(db);
+
                 db.Ado.BeginTran();
 
-                var logicalAxes = list.Select(p => p.LogicalAxis).Distinct().ToList();
+                var logicalAxes = list
+                    .Select(p => p.LogicalAxis)
+                    .Distinct()
+                    .ToList();
+
                 var existingItems = db.Queryable<MotionAxisConfigEntity>()
                     .Where(p => logicalAxes.Contains(p.LogicalAxis))
                     .ToList();
@@ -130,8 +149,6 @@ namespace AM.DBService.Services
 
                 foreach (var item in list)
                 {
-                    Normalize(item);
-
                     MotionAxisConfigEntity existing;
                     if (existingMap.TryGetValue(BuildKey(item.LogicalAxis, item.ParamName), out existing))
                     {
@@ -149,12 +166,15 @@ namespace AM.DBService.Services
             }
             catch (Exception ex)
             {
-                try
+                if (db != null)
                 {
-                    CreateDb().Ado.RollbackTran();
-                }
-                catch
-                {
+                    try
+                    {
+                        db.Ado.RollbackTran();
+                    }
+                    catch
+                    {
+                    }
                 }
 
                 return HandleException(ex, (int)DbErrorCode.SaveFailed, "运动轴参数保存失败");
@@ -171,8 +191,12 @@ namespace AM.DBService.Services
                 }
 
                 var db = CreateDb();
+                EnsureTable(db);
+
+                var normalizedParamName = paramName.Trim();
+
                 var count = db.Deleteable<MotionAxisConfigEntity>()
-                    .Where(p => p.LogicalAxis == logicalAxis && p.ParamName == paramName)
+                    .Where(p => p.LogicalAxis == logicalAxis && p.ParamName == normalizedParamName)
                     .ExecuteCommand();
 
                 if (count <= 0)
@@ -193,6 +217,11 @@ namespace AM.DBService.Services
             return _dbContext.GetClient(new MDBaseSet { DBType = "Sqlite" });
         }
 
+        private static void EnsureTable(SqlSugarClient db)
+        {
+            db.CodeFirst.InitTables(typeof(MotionAxisConfigEntity));
+        }
+
         private static string BuildKey(int logicalAxis, string paramName)
         {
             return logicalAxis.ToString() + "|" + (paramName ?? string.Empty).Trim();
@@ -200,12 +229,16 @@ namespace AM.DBService.Services
 
         private static void Normalize(MotionAxisConfigEntity entity)
         {
-            if (entity.ParamValueType == null)
-            {
-                entity.ParamValueType = "Double";
-            }
-
             entity.ParamName = (entity.ParamName ?? string.Empty).Trim();
+            entity.ParamDisplayName = string.IsNullOrWhiteSpace(entity.ParamDisplayName)
+                ? null
+                : entity.ParamDisplayName.Trim();
+            entity.AxisDisplayName = string.IsNullOrWhiteSpace(entity.AxisDisplayName)
+                ? null
+                : entity.AxisDisplayName.Trim();
+            entity.ParamValueType = string.IsNullOrWhiteSpace(entity.ParamValueType)
+                ? "Double"
+                : entity.ParamValueType.Trim();
         }
     }
 }

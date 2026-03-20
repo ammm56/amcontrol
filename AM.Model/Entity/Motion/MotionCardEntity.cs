@@ -28,7 +28,7 @@ namespace AM.Model.Entity.Motion
 
         /// <summary>
         /// 控制卡名称。
-        /// </summary
+        /// </summary>
         public string Name { get; set; }
 
         /// <summary>

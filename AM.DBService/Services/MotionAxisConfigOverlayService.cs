@@ -12,7 +12,7 @@ using System.Linq;
 namespace AM.DBService.Services
 {
     /// <summary>
-    /// 将数据库中的 motion_axis_config 覆盖到运行时 AxisConfig。
+    /// 将数据库中的 motion_axis_config 参数覆盖到运行时 AxisConfig。
     /// </summary>
     public class MotionAxisConfigOverlayService : ServiceBase, IMotionAxisConfigOverlayService
     {
@@ -64,6 +64,11 @@ namespace AM.DBService.Services
                 return Fail((int)DbErrorCode.InvalidArgument, "轴配置集合不能为空");
             }
 
+            if (axisConfigs.Count == 0)
+            {
+                return Ok("轴配置集合为空，无需覆盖");
+            }
+
             var queryResult = _motionAxisConfigService.QueryAll();
             if (!queryResult.Success)
             {
@@ -71,11 +76,17 @@ namespace AM.DBService.Services
             }
 
             var groupedRows = queryResult.Items
+                .Where(p => p != null && p.LogicalAxis > 0 && !string.IsNullOrWhiteSpace(p.ParamName))
                 .GroupBy(p => p.LogicalAxis)
                 .ToDictionary(g => g.Key, g => g.ToList());
 
             foreach (var axisConfig in axisConfigs)
             {
+                if (axisConfig == null)
+                {
+                    continue;
+                }
+
                 List<MotionAxisConfigEntity> rows;
                 if (!groupedRows.TryGetValue(axisConfig.LogicalAxis, out rows))
                 {

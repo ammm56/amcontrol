@@ -9,14 +9,13 @@ using AM.Model.MotionCard;
 using SqlSugar;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace AM.DBService.Services
 {
     /// <summary>
     /// 运动设备配置种子服务。
     /// 启动时自动补默认虚拟卡、默认测试轴、默认 DI/DO、默认轴参数。
-    /// 只在表为空时插入，不会重复设置种子。
+    /// 仅在运动配置相关表均为空时写入默认种子。
     /// </summary>
     public class MachineConfigSeedService : IMachineConfigSeedService
     {
@@ -48,8 +47,7 @@ namespace AM.DBService.Services
                     typeof(MotionIoMapEntity),
                     typeof(MotionAxisConfigEntity));
 
-                var hasCard = db.Queryable<MotionCardEntity>().Any();
-                if (hasCard)
+                if (HasAnyMotionConfigData(db))
                 {
                     _reporter.Info("MachineConfigSeed", "运动配置种子已存在，跳过初始化");
                     return Result.Ok("运动配置种子已存在", ResultSource.Database);
@@ -88,6 +86,14 @@ namespace AM.DBService.Services
                 _reporter.Error("MachineConfigSeed", ex, "默认运动配置种子初始化失败");
                 return Result.Fail((int)DbErrorCode.SaveFailed, "默认运动配置种子初始化失败", ResultSource.Database);
             }
+        }
+
+        private static bool HasAnyMotionConfigData(SqlSugarClient db)
+        {
+            return db.Queryable<MotionCardEntity>().Any()
+                || db.Queryable<MotionAxisEntity>().Any()
+                || db.Queryable<MotionIoMapEntity>().Any()
+                || db.Queryable<MotionAxisConfigEntity>().Any();
         }
 
         private static List<MotionCardEntity> CreateDefaultCards()
