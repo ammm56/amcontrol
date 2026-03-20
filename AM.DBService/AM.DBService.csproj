@@ -60,18 +60,19 @@
     <Compile Include="Services\Auth\AuthPermissionCatalog.cs" />
     <Compile Include="Services\Auth\AuthSeedService.cs" />
     <Compile Include="Services\Auth\AuthService.cs" />
-    <Compile Include="Services\AxisConfigAppService.cs" />
-    <Compile Include="Services\MachineConfigAppService.cs" />
-    <Compile Include="Services\MachineConfigReloadService.cs" />
     <Compile Include="Services\MachineConfigRepository.cs" />
-    <Compile Include="Services\MachineConfigSeedService.cs" />
     <Compile Include="Services\MotionAxisConfigOverlayService.cs" />
     <Compile Include="Services\MotionAxisConfigService.cs" />
-    <Compile Include="Services\MotionAxisCrudService.cs" />
-    <Compile Include="Services\MotionCardCrudService.cs" />
-    <Compile Include="Services\MotionIoConfigCrudService.cs" />
-    <Compile Include="Services\MotionIoMapCrudService.cs" />
-    <Compile Include="Services\MotionIoPointConfigCrudService.cs" />
+    <Compile Include="Services\Motion\Actuator\MotionCylinderConfigCrudService.cs" />
+    <Compile Include="Services\Motion\App\AxisConfigAppService.cs" />
+    <Compile Include="Services\Motion\App\MachineConfigAppService.cs" />
+    <Compile Include="Services\Motion\App\MachineConfigReloadService.cs" />
+    <Compile Include="Services\Motion\App\MachineConfigSeedService.cs" />
+    <Compile Include="Services\Motion\Point\MotionIoConfigCrudService.cs" />
+    <Compile Include="Services\Motion\Point\MotionIoPointConfigCrudService.cs" />
+    <Compile Include="Services\Motion\Topology\MotionAxisCrudService.cs" />
+    <Compile Include="Services\Motion\Topology\MotionCardCrudService.cs" />
+    <Compile Include="Services\Motion\Topology\MotionIoMapCrudService.cs" />
     <Compile Include="Tables\DBTableT.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -100,10 +101,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Services\Motion\Actuator\" />
-    <Folder Include="Services\Motion\Point\" />
-    <Folder Include="Services\Motion\Topology\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

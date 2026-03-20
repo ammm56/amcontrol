@@ -7,11 +7,12 @@ using AM.Model.DB;
 using AM.Model.Entity.Motion;
 using AM.Model.Entity.Motion.Topology;
 using AM.Model.Interfaces.DB;
+using AM.Model.Interfaces.DB.Motion.Topology;
 using SqlSugar;
 using System;
 using System.Linq;
 
-namespace AM.DBService.Services
+namespace AM.DBService.Services.Motion.Topology
 {
     /// <summary>
     /// 控制卡配置 CRUD 服务。

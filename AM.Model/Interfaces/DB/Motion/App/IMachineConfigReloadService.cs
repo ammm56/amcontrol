@@ -1,6 +1,6 @@
 ﻿using AM.Model.Common;
 
-namespace AM.Model.Interfaces.DB
+namespace AM.Model.Interfaces.DB.Motion.App
 {
     /// <summary>
     /// 设备配置热重载服务接口。

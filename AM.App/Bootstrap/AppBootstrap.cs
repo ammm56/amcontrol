@@ -5,6 +5,7 @@ using AM.Core.Messaging;
 using AM.Core.Reporter;
 using AM.DBService.Services;
 using AM.DBService.Services.Auth;
+using AM.DBService.Services.Motion.App;
 using AM.Model.Common;
 using AM.Model.Interfaces.DB;
 using AM.Model.Interfaces.MotionCard;

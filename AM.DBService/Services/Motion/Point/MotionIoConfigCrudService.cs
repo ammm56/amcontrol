@@ -1,15 +1,18 @@
 ﻿using AM.Core.Base;
 using AM.Core.Context;
 using AM.Core.Reporter;
+using AM.DBService.Services.Motion.Topology;
 using AM.Model.Common;
 using AM.Model.DB;
 using AM.Model.Entity.Motion;
 using AM.Model.Entity.Motion.Point;
 using AM.Model.Entity.Motion.Topology;
 using AM.Model.Interfaces.DB;
+using AM.Model.Interfaces.DB.Motion.Point;
+using AM.Model.Interfaces.DB.Motion.Topology;
 using System;
 
-namespace AM.DBService.Services
+namespace AM.DBService.Services.Motion.Point
 {
     /// <summary>
     /// IO 配置统一 CRUD 聚合服务。

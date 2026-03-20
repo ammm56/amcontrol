@@ -4,6 +4,7 @@ using AM.DBService.DBase;
 using AM.Model.Common;
 using AM.Model.DB;
 using AM.Model.Entity.Motion;
+using AM.Model.Entity.Motion.Actuator;
 using AM.Model.Entity.Motion.Point;
 using AM.Model.Entity.Motion.Topology;
 using AM.Model.Interfaces.DB;
@@ -12,7 +13,7 @@ using SqlSugar;
 using System;
 using System.Collections.Generic;
 
-namespace AM.DBService.Services
+namespace AM.DBService.Services.Motion.App
 {
     /// <summary>
     /// 运动设备配置种子服务。
@@ -48,7 +49,8 @@ namespace AM.DBService.Services
                     typeof(MotionAxisEntity),
                     typeof(MotionIoMapEntity),
                     typeof(MotionAxisConfigEntity),
-                    typeof(MotionIoPointConfigEntity));
+                    typeof(MotionIoPointConfigEntity),
+                    typeof(CylinderConfigEntity));
 
                 if (HasAnyMotionConfigData(db))
                 {
@@ -62,12 +64,14 @@ namespace AM.DBService.Services
                 var axes = CreateDefaultAxes();
                 var ioMaps = CreateDefaultIoMaps();
                 var ioPointConfigs = CreateDefaultIoPointConfigs();
+                var cylinders = CreateDefaultCylinders();
                 var axisConfigs = CreateDefaultAxisConfigs();
 
                 db.Insertable(cards).ExecuteCommand();
                 db.Insertable(axes).ExecuteCommand();
                 db.Insertable(ioMaps).ExecuteCommand();
                 db.Insertable(ioPointConfigs).ExecuteCommand();
+                db.Insertable(cylinders).ExecuteCommand();
                 db.Insertable(axisConfigs).ExecuteCommand();
 
                 db.Ado.CommitTran();
@@ -99,6 +103,7 @@ namespace AM.DBService.Services
                 || db.Queryable<MotionAxisEntity>().Any()
                 || db.Queryable<MotionIoMapEntity>().Any()
                 || db.Queryable<MotionIoPointConfigEntity>().Any()
+                || db.Queryable<CylinderConfigEntity>().Any()
                 || db.Queryable<MotionAxisConfigEntity>().Any();
         }
 
@@ -208,6 +213,58 @@ namespace AM.DBService.Services
                     IsEnabled = true,
                     SortOrder = 4,
                     Remark = "测试Y轴使能输出"
+                },
+                new MotionIoMapEntity
+                {
+                    CardId = 0,
+                    IoType = "DI",
+                    LogicalBit = 1101,
+                    Name = "ClampCylinderExtendArrived",
+                    Core = 1,
+                    IsExtModule = false,
+                    HardwareBit = 3,
+                    IsEnabled = true,
+                    SortOrder = 5,
+                    Remark = "测试夹紧气缸伸出到位"
+                },
+                new MotionIoMapEntity
+                {
+                    CardId = 0,
+                    IoType = "DI",
+                    LogicalBit = 1102,
+                    Name = "ClampCylinderRetractArrived",
+                    Core = 1,
+                    IsExtModule = false,
+                    HardwareBit = 4,
+                    IsEnabled = true,
+                    SortOrder = 6,
+                    Remark = "测试夹紧气缸缩回到位"
+                },
+                new MotionIoMapEntity
+                {
+                    CardId = 0,
+                    IoType = "DO",
+                    LogicalBit = 2101,
+                    Name = "ClampCylinderExtend",
+                    Core = 1,
+                    IsExtModule = false,
+                    HardwareBit = 3,
+                    IsEnabled = true,
+                    SortOrder = 7,
+                    Remark = "测试夹紧气缸伸出输出"
+                },
+                new MotionIoMapEntity
+                {
+                    CardId = 0,
+                    IoType = "DO",
+                    LogicalBit = 2102,
+                    Name = "ClampCylinderRetract",
+                    Core = 1,
+                    IsExtModule = false,
+                    HardwareBit = 4,
+                    IsEnabled = true,
+                    SortOrder = 8,
+                    Remark = "测试夹紧气缸缩回输出"
                 }
             };
         }
@@ -291,6 +348,82 @@ namespace AM.DBService.Services
                     BlinkOffMs = 0,
                     Description = "测试Y轴使能控制输出",
                     Remark = "默认DO点位公共配置"
+                },
+                new MotionIoPointConfigEntity
+                {
+                    IoType = "DI",
+                    LogicalBit = 1101,
+                    DisplayName = "夹紧气缸伸出到位",
+                    SignalCategory = "Cylinder",
+                    Invert = false,
+                    IsNormallyClosed = false,
+                    DebounceMs = 20,
+                    FilterMs = 0,
+                    CanManualOperate = false,
+                    DefaultOutputState = false,
+                    OutputMode = "Keep",
+                    PulseWidthMs = 0,
+                    BlinkOnMs = 0,
+                    BlinkOffMs = 0,
+                    Description = "测试夹紧气缸伸出到位反馈",
+                    Remark = "默认气缸 DI 点位公共配置"
+                },
+                new MotionIoPointConfigEntity
+                {
+                    IoType = "DI",
+                    LogicalBit = 1102,
+                    DisplayName = "夹紧气缸缩回到位",
+                    SignalCategory = "Cylinder",
+                    Invert = false,
+                    IsNormallyClosed = false,
+                    DebounceMs = 20,
+                    FilterMs = 0,
+                    CanManualOperate = false,
+                    DefaultOutputState = false,
+                    OutputMode = "Keep",
+                    PulseWidthMs = 0,
+                    BlinkOnMs = 0,
+                    BlinkOffMs = 0,
+                    Description = "测试夹紧气缸缩回到位反馈",
+                    Remark = "默认气缸 DI 点位公共配置"
+                },
+                new MotionIoPointConfigEntity
+                {
+                    IoType = "DO",
+                    LogicalBit = 2101,
+                    DisplayName = "夹紧气缸伸出",
+                    SignalCategory = "Cylinder",
+                    Invert = false,
+                    IsNormallyClosed = false,
+                    DebounceMs = 0,
+                    FilterMs = 0,
+                    CanManualOperate = true,
+                    DefaultOutputState = false,
+                    OutputMode = "Keep",
+                    PulseWidthMs = 0,
+                    BlinkOnMs = 0,
+                    BlinkOffMs = 0,
+                    Description = "测试夹紧气缸伸出控制输出",
+                    Remark = "默认气缸 DO 点位公共配置"
+                },
+                new MotionIoPointConfigEntity
+                {
+                    IoType = "DO",
+                    LogicalBit = 2102,
+                    DisplayName = "夹紧气缸缩回",
+                    SignalCategory = "Cylinder",
+                    Invert = false,
+                    IsNormallyClosed = false,
+                    DebounceMs = 0,
+                    FilterMs = 0,
+                    CanManualOperate = true,
+                    DefaultOutputState = false,
+                    OutputMode = "Keep",
+                    PulseWidthMs = 0,
+                    BlinkOnMs = 0,
+                    BlinkOffMs = 0,
+                    Description = "测试夹紧气缸缩回控制输出",
+                    Remark = "默认气缸 DO 点位公共配置"
                 }
             };
         }
@@ -355,6 +488,34 @@ namespace AM.DBService.Services
 
             yield return CreateConfig(logicalAxis, axisName, "EStopId", "急停序号", "Int32", 0D);
             yield return CreateConfig(logicalAxis, axisName, "StopId", "平停序号", "Int32", 0D);
+        }
+
+        private static List<CylinderConfigEntity> CreateDefaultCylinders()
+        {
+            return new List<CylinderConfigEntity>
+            {
+                new CylinderConfigEntity
+                {
+                    Name = "ClampCylinder",
+                    DisplayName = "夹紧气缸",
+                    DriveMode = "Double",
+                    ExtendOutputBit = 2101,
+                    RetractOutputBit = 2102,
+                    ExtendFeedbackBit = 1101,
+                    RetractFeedbackBit = 1102,
+                    UseFeedbackCheck = true,
+                    ExtendTimeoutMs = 1500,
+                    RetractTimeoutMs = 1500,
+                    AlarmCodeOnExtendTimeout = 91001,
+                    AlarmCodeOnRetractTimeout = 91002,
+                    AllowBothOff = false,
+                    AllowBothOn = false,
+                    IsEnabled = true,
+                    SortOrder = 1,
+                    Description = "默认测试夹紧气缸对象",
+                    Remark = "用于演示第三层对象配置"
+                }
+            };
         }
 
         private static MotionAxisConfigEntity CreateConfig(int logicalAxis, string axisName, string paramName, string displayName, string valueType, double value)

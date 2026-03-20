@@ -2,7 +2,7 @@
 using AM.Model.Entity.Motion;
 using AM.Model.Entity.Motion.Point;
 
-namespace AM.Model.Interfaces.DB
+namespace AM.Model.Interfaces.DB.Motion.Point
 {
     /// <summary>
     /// IO 点位公共配置 CRUD 服务接口。

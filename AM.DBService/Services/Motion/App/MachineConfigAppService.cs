@@ -2,19 +2,22 @@
 using AM.Core.Context;
 using AM.Core.Reporter;
 using AM.DBService.DBase;
+using AM.DBService.Services.Motion.Point;
 using AM.Model.Common;
 using AM.Model.DB;
 using AM.Model.Entity.Motion;
 using AM.Model.Entity.Motion.Point;
 using AM.Model.Entity.Motion.Topology;
 using AM.Model.Interfaces.DB;
+using AM.Model.Interfaces.DB.Motion.App;
+using AM.Model.Interfaces.DB.Motion.Point;
 using AM.Model.MotionCard;
 using SqlSugar;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AM.DBService.Services
+namespace AM.DBService.Services.Motion.App
 {
     /// <summary>
     /// 设备配置应用服务。

@@ -2,7 +2,7 @@
 using AM.Model.Entity.Motion;
 using AM.Model.Entity.Motion.Topology;
 
-namespace AM.Model.Interfaces.DB
+namespace AM.Model.Interfaces.DB.Motion.Topology
 {
     /// <summary>
     /// 轴拓扑配置 CRUD 服务接口。

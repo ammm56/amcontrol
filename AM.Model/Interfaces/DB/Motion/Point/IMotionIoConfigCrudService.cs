@@ -3,7 +3,7 @@ using AM.Model.Entity.Motion;
 using AM.Model.Entity.Motion.Point;
 using AM.Model.Entity.Motion.Topology;
 
-namespace AM.Model.Interfaces.DB
+namespace AM.Model.Interfaces.DB.Motion.Point
 {
     /// <summary>
     /// IO 配置统一 CRUD 聚合服务接口。

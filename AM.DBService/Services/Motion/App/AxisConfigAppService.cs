@@ -4,12 +4,13 @@ using AM.Core.Reporter;
 using AM.Model.Common;
 using AM.Model.Entity.Motion;
 using AM.Model.Interfaces.DB;
+using AM.Model.Interfaces.DB.Motion.App;
 using AM.Model.MotionCard;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AM.DBService.Services
+namespace AM.DBService.Services.Motion.App
 {
     /// <summary>
     /// 轴运行时配置应用服务。

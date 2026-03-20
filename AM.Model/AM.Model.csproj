@@ -72,18 +72,19 @@
     <Compile Include="Entity\Motion\Topology\MotionAxisEntity.cs" />
     <Compile Include="Entity\Motion\Topology\MotionCardEntity.cs" />
     <Compile Include="Entity\Motion\Topology\MotionIoMapEntity.cs" />
-    <Compile Include="Interfaces\DB\IAxisConfigAppService.cs" />
-    <Compile Include="Interfaces\DB\IMachineConfigAppService.cs" />
-    <Compile Include="Interfaces\DB\IMachineConfigReloadService.cs" />
     <Compile Include="Interfaces\DB\IMachineConfigRepository.cs" />
     <Compile Include="Interfaces\DB\IMachineConfigSeedService.cs" />
     <Compile Include="Interfaces\DB\IMotionAxisConfigOverlayService.cs" />
     <Compile Include="Interfaces\DB\IMotionAxisConfigService.cs" />
-    <Compile Include="Interfaces\DB\IMotionAxisCrudService.cs" />
-    <Compile Include="Interfaces\DB\IMotionCardCrudService.cs" />
-    <Compile Include="Interfaces\DB\IMotionIoConfigCrudService.cs" />
-    <Compile Include="Interfaces\DB\IMotionIoMapCrudService.cs" />
-    <Compile Include="Interfaces\DB\IMotionIoPointConfigCrudService.cs" />
+    <Compile Include="Interfaces\DB\Motion\Actuator\IMotionCylinderConfigCrudService.cs" />
+    <Compile Include="Interfaces\DB\Motion\App\IAxisConfigAppService.cs" />
+    <Compile Include="Interfaces\DB\Motion\App\IMachineConfigAppService.cs" />
+    <Compile Include="Interfaces\DB\Motion\App\IMachineConfigReloadService.cs" />
+    <Compile Include="Interfaces\DB\Motion\Point\IMotionIoConfigCrudService.cs" />
+    <Compile Include="Interfaces\DB\Motion\Point\IMotionIoPointConfigCrudService.cs" />
+    <Compile Include="Interfaces\DB\Motion\Topology\IMotionAxisCrudService.cs" />
+    <Compile Include="Interfaces\DB\Motion\Topology\IMotionCardCrudService.cs" />
+    <Compile Include="Interfaces\DB\Motion\Topology\IMotionIoMapCrudService.cs" />
     <Compile Include="MotionCard\AxisConfig.cs" />
     <Compile Include="Common\ObservableObject_ManualImpl.cs" />
     <Compile Include="Common\Result.cs" />
@@ -104,10 +105,6 @@
     <Folder Include="Entity\Alarm\" />
     <Folder Include="Entity\Plc\" />
     <Folder Include="Entity\Vision\" />
-    <Folder Include="Interfaces\DB\Motion\Actuator\" />
-    <Folder Include="Interfaces\DB\Motion\App\" />
-    <Folder Include="Interfaces\DB\Motion\Point\" />
-    <Folder Include="Interfaces\DB\Motion\Topology\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -3,13 +3,14 @@ using AM.Core.Context;
 using AM.Core.Reporter;
 using AM.Model.Common;
 using AM.Model.Interfaces.DB;
+using AM.Model.Interfaces.DB.Motion.App;
 using AM.Model.Interfaces.MotionCard;
 using AM.Model.MotionCard;
 using AM.MotionService.Factory;
 using AM.MotionService.Hub;
 using System.Linq;
 
-namespace AM.DBService.Services
+namespace AM.DBService.Services.Motion.App
 {
     /// <summary>
     /// 设备配置热重载服务。

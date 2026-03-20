@@ -1,7 +1,7 @@
 ﻿using AM.Model.Common;
 using AM.Model.MotionCard;
 
-namespace AM.Model.Interfaces.DB
+namespace AM.Model.Interfaces.DB.Motion.App
 {
     /// <summary>
     /// 设备配置应用服务接口。

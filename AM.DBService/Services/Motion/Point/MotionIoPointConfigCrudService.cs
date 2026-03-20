@@ -8,11 +8,12 @@ using AM.Model.Entity.Motion;
 using AM.Model.Entity.Motion.Point;
 using AM.Model.Entity.Motion.Topology;
 using AM.Model.Interfaces.DB;
+using AM.Model.Interfaces.DB.Motion.Point;
 using SqlSugar;
 using System;
 using System.Linq;
 
-namespace AM.DBService.Services
+namespace AM.DBService.Services.Motion.Point
 {
     /// <summary>
     /// IO 点位公共配置 CRUD 服务。
