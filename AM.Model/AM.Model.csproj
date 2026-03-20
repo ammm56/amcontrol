@@ -70,6 +70,7 @@
     <Compile Include="Entity\Motion\MotionAxisEntity.cs" />
     <Compile Include="Entity\Motion\MotionCardEntity.cs" />
     <Compile Include="Entity\Motion\MotionIoMapEntity.cs" />
+    <Compile Include="Entity\Motion\MotionIoPointConfigEntity.cs" />
     <Compile Include="Interfaces\DB\IAxisConfigAppService.cs" />
     <Compile Include="Interfaces\DB\IMachineConfigAppService.cs" />
     <Compile Include="Interfaces\DB\IMachineConfigReloadService.cs" />
@@ -80,6 +81,7 @@
     <Compile Include="Interfaces\DB\IMotionAxisCrudService.cs" />
     <Compile Include="Interfaces\DB\IMotionCardCrudService.cs" />
     <Compile Include="Interfaces\DB\IMotionIoMapCrudService.cs" />
+    <Compile Include="Interfaces\DB\IMotionIoPointConfigCrudService.cs" />
     <Compile Include="MotionCard\AxisConfig.cs" />
     <Compile Include="Common\ObservableObject_ManualImpl.cs" />
     <Compile Include="Common\Result.cs" />

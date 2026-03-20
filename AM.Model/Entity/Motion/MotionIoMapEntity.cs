@@ -4,6 +4,8 @@ namespace AM.Model.Entity.Motion
 {
     /// <summary>
     /// 运动控制卡 IO 映射表。
+    /// 逻辑 IO 点位 到 硬件 IO 点位的映射表
+    /// 用 IoType + LogicalBit 做业务关联键
     /// </summary>
     [SugarTable("motion_io_map")]
     public class MotionIoMapEntity

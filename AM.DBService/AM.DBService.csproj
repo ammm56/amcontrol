@@ -70,6 +70,7 @@
     <Compile Include="Services\MotionAxisCrudService.cs" />
     <Compile Include="Services\MotionCardCrudService.cs" />
     <Compile Include="Services\MotionIoMapCrudService.cs" />
+    <Compile Include="Services\MotionIoPointConfigCrudService.cs" />
     <Compile Include="Tables\DBTableT.cs" />
   </ItemGroup>
   <ItemGroup>
