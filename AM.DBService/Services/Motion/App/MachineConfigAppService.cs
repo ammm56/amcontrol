@@ -2,16 +2,20 @@
 using AM.Core.Context;
 using AM.Core.Reporter;
 using AM.DBService.DBase;
+using AM.DBService.Services.Motion.Actuator;
 using AM.DBService.Services.Motion.Point;
 using AM.Model.Common;
 using AM.Model.DB;
 using AM.Model.Entity.Motion;
+using AM.Model.Entity.Motion.Actuator;
 using AM.Model.Entity.Motion.Point;
 using AM.Model.Entity.Motion.Topology;
 using AM.Model.Interfaces.DB;
+using AM.Model.Interfaces.DB.Motion.Actuator;
 using AM.Model.Interfaces.DB.Motion.App;
 using AM.Model.Interfaces.DB.Motion.Point;
 using AM.Model.MotionCard;
+using AM.Model.MotionCard.Actuator;
 using SqlSugar;
 using System;
 using System.Collections.Generic;
@@ -21,13 +25,14 @@ namespace AM.DBService.Services.Motion.App
 {
     /// <summary>
     /// 设备配置应用服务。
-    /// 负责将数据库中的控制卡、轴、IO 与轴参数装配成运行时完整的运动控制配置。
+    /// 负责将数据库中的控制卡、轴、IO、点位公共配置与第三层对象配置装配成运行时完整配置。
     /// </summary>
     public class MachineConfigAppService : ServiceBase, IMachineConfigAppService
     {
         private readonly DBContext _dbContext;
         private readonly IMotionAxisConfigOverlayService _motionAxisConfigOverlayService;
         private readonly IMotionIoPointConfigCrudService _motionIoPointConfigCrudService;
+        private readonly IMotionCylinderConfigCrudService _motionCylinderConfigCrudService;
 
         protected override string MessageSourceName
         {
@@ -43,6 +48,7 @@ namespace AM.DBService.Services.Motion.App
             : this(
                 new MotionAxisConfigOverlayService(),
                 new MotionIoPointConfigCrudService(),
+                new MotionCylinderConfigCrudService(),
                 SystemContext.Instance.Reporter)
         {
         }
@@ -50,12 +56,14 @@ namespace AM.DBService.Services.Motion.App
         public MachineConfigAppService(
             IMotionAxisConfigOverlayService motionAxisConfigOverlayService,
             IMotionIoPointConfigCrudService motionIoPointConfigCrudService,
+            IMotionCylinderConfigCrudService motionCylinderConfigCrudService,
             IAppReporter reporter)
             : base(reporter)
         {
             _dbContext = new DBContext();
             _motionAxisConfigOverlayService = motionAxisConfigOverlayService;
             _motionIoPointConfigCrudService = motionIoPointConfigCrudService;
+            _motionCylinderConfigCrudService = motionCylinderConfigCrudService;
         }
 
         public Result EnsureTables()
@@ -68,7 +76,8 @@ namespace AM.DBService.Services.Motion.App
                     typeof(MotionAxisEntity),
                     typeof(MotionIoMapEntity),
                     typeof(MotionAxisConfigEntity),
-                    typeof(MotionIoPointConfigEntity));
+                    typeof(MotionIoPointConfigEntity),
+                    typeof(CylinderConfigEntity));
 
                 return Ok("运动控制配置表初始化完成");
             }
@@ -97,11 +106,6 @@ namespace AM.DBService.Services.Motion.App
                     .ThenBy(p => p.CardId)
                     .ToList();
 
-                if (cardEntities.Count == 0)
-                {
-                    return OkList(new List<MotionCardConfig>(), "数据库中尚无运动控制卡配置");
-                }
-
                 var axisEntities = db.Queryable<MotionAxisEntity>()
                     .Where(p => p.IsEnabled)
                     .ToList()
@@ -126,7 +130,17 @@ namespace AM.DBService.Services.Motion.App
                     ? ioPointConfigResult.Items.Where(p => p != null).ToList()
                     : new List<MotionIoPointConfigEntity>();
 
-                var validateResult = ValidateEntities(cardEntities, axisEntities, ioEntities, ioPointConfigs);
+                var cylinderConfigResult = _motionCylinderConfigCrudService.QueryAll();
+                if (!cylinderConfigResult.Success && cylinderConfigResult.Code != (int)DbErrorCode.NotFound)
+                {
+                    return Fail<MotionCardConfig>(cylinderConfigResult.Code, "读取气缸对象配置失败");
+                }
+
+                var cylinderConfigs = cylinderConfigResult.Success
+                    ? cylinderConfigResult.Items.Where(p => p != null && p.IsEnabled).ToList()
+                    : new List<CylinderConfigEntity>();
+
+                var validateResult = ValidateEntities(cardEntities, axisEntities, ioEntities, ioPointConfigs, cylinderConfigs);
                 if (!validateResult.Success)
                 {
                     return Fail<MotionCardConfig>(validateResult.Code, validateResult.Message);
@@ -138,6 +152,14 @@ namespace AM.DBService.Services.Motion.App
                 if (!overlayResult.Success)
                 {
                     return Fail<MotionCardConfig>(overlayResult.Code, overlayResult.Message);
+                }
+
+                var runtimeActuatorConfig = BuildActuatorConfig(cylinderConfigs, ioEntities, ioPointConfigs);
+                ConfigContext.Instance.Config.ActuatorConfig = runtimeActuatorConfig;
+
+                if (cardEntities.Count == 0)
+                {
+                    return OkList(new List<MotionCardConfig>(), "数据库中尚无运动控制卡配置");
                 }
 
                 return OkList(motionCards, "读取数据库运动控制配置成功");
@@ -159,6 +181,11 @@ namespace AM.DBService.Services.Motion.App
             ConfigContext.Instance.Config.MotionCardsConfig = queryResult.Items == null
                 ? new List<MotionCardConfig>()
                 : queryResult.Items.ToList();
+
+            if (ConfigContext.Instance.Config.ActuatorConfig == null)
+            {
+                ConfigContext.Instance.Config.ActuatorConfig = new ActuatorConfig();
+            }
 
             return Ok("运行时运动控制配置重载成功");
         }
@@ -273,7 +300,9 @@ namespace AM.DBService.Services.Motion.App
                 FilterMs = pointConfig == null ? 0 : pointConfig.FilterMs,
                 CanManualOperate = pointConfig != null && pointConfig.CanManualOperate,
                 DefaultOutputState = pointConfig != null && pointConfig.DefaultOutputState,
-                OutputMode = pointConfig == null || string.IsNullOrWhiteSpace(pointConfig.OutputMode) ? "Keep" : pointConfig.OutputMode,
+                OutputMode = pointConfig == null || string.IsNullOrWhiteSpace(pointConfig.OutputMode)
+                    ? "Keep"
+                    : pointConfig.OutputMode,
                 PulseWidthMs = pointConfig == null ? 0 : pointConfig.PulseWidthMs,
                 BlinkOnMs = pointConfig == null ? 0 : pointConfig.BlinkOnMs,
                 BlinkOffMs = pointConfig == null ? 0 : pointConfig.BlinkOffMs,
@@ -316,7 +345,8 @@ namespace AM.DBService.Services.Motion.App
             IList<MotionCardEntity> cardEntities,
             IList<MotionAxisEntity> axisEntities,
             IList<MotionIoMapEntity> ioEntities,
-            IList<MotionIoPointConfigEntity> ioPointConfigs)
+            IList<MotionIoPointConfigEntity> ioPointConfigs,
+            IList<CylinderConfigEntity> cylinderConfigs)
         {
             var duplicateCardId = cardEntities
                 .GroupBy(p => p.CardId)
@@ -360,7 +390,114 @@ namespace AM.DBService.Services.Motion.App
                     ResultSource.Database);
             }
 
+            var duplicateCylinderName = cylinderConfigs
+                .GroupBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
+                .FirstOrDefault(g => g.Count() > 1);
+            if (duplicateCylinderName != null)
+            {
+                return Result.Fail(
+                    (int)DbErrorCode.InvalidArgument,
+                    "气缸名称重复: " + duplicateCylinderName.Key,
+                    ResultSource.Database);
+            }
+
+            foreach (var cylinder in cylinderConfigs.Where(p => p != null))
+            {
+                if (string.IsNullOrWhiteSpace(cylinder.Name))
+                {
+                    return Result.Fail((int)DbErrorCode.InvalidArgument, "存在未配置名称的气缸对象", ResultSource.Database);
+                }
+
+                if (!ioKeys.Contains(BuildIoPointKey("DO", cylinder.ExtendOutputBit)))
+                {
+                    return Result.Fail(
+                        (int)DbErrorCode.InvalidArgument,
+                        "气缸伸出输出位不存在: " + cylinder.ExtendOutputBit,
+                        ResultSource.Database);
+                }
+
+                if (cylinder.RetractOutputBit.HasValue
+                    && !ioKeys.Contains(BuildIoPointKey("DO", cylinder.RetractOutputBit.Value)))
+                {
+                    return Result.Fail(
+                        (int)DbErrorCode.InvalidArgument,
+                        "气缸缩回输出位不存在: " + cylinder.RetractOutputBit.Value,
+                        ResultSource.Database);
+                }
+
+                if (cylinder.ExtendFeedbackBit.HasValue
+                    && !ioKeys.Contains(BuildIoPointKey("DI", cylinder.ExtendFeedbackBit.Value)))
+                {
+                    return Result.Fail(
+                        (int)DbErrorCode.InvalidArgument,
+                        "气缸伸出反馈位不存在: " + cylinder.ExtendFeedbackBit.Value,
+                        ResultSource.Database);
+                }
+
+                if (cylinder.RetractFeedbackBit.HasValue
+                    && !ioKeys.Contains(BuildIoPointKey("DI", cylinder.RetractFeedbackBit.Value)))
+                {
+                    return Result.Fail(
+                        (int)DbErrorCode.InvalidArgument,
+                        "气缸缩回反馈位不存在: " + cylinder.RetractFeedbackBit.Value,
+                        ResultSource.Database);
+                }
+            }
+
             return Result.Ok("运动配置校验通过", ResultSource.Database);
+        }
+
+        private static ActuatorConfig BuildActuatorConfig(
+            IList<CylinderConfigEntity> cylinderEntities,
+            IList<MotionIoMapEntity> ioEntities,
+            IList<MotionIoPointConfigEntity> ioPointConfigs)
+        {
+            return new ActuatorConfig
+            {
+                Cylinders = BuildCylinderConfigs(cylinderEntities, ioEntities, ioPointConfigs)
+            };
+        }
+
+        private static List<CylinderConfig> BuildCylinderConfigs(
+            IList<CylinderConfigEntity> cylinderEntities,
+            IList<MotionIoMapEntity> ioEntities,
+            IList<MotionIoPointConfigEntity> ioPointConfigs)
+        {
+            var result = new List<CylinderConfig>();
+            if (cylinderEntities == null || cylinderEntities.Count == 0)
+            {
+                return result;
+            }
+
+            foreach (var entity in cylinderEntities
+                .Where(p => p != null && p.IsEnabled)
+                .OrderBy(p => p.SortOrder)
+                .ThenBy(p => p.Name))
+            {
+                result.Add(new CylinderConfig
+                {
+                    Name = entity.Name,
+                    DisplayName = entity.DisplayName,
+                    DriveMode = entity.DriveMode,
+                    ExtendOutputBit = entity.ExtendOutputBit,
+                    RetractOutputBit = entity.RetractOutputBit,
+                    ExtendFeedbackBit = entity.ExtendFeedbackBit,
+                    RetractFeedbackBit = entity.RetractFeedbackBit,
+                    UseFeedbackCheck = entity.UseFeedbackCheck,
+                    ExtendTimeoutMs = entity.ExtendTimeoutMs,
+                    RetractTimeoutMs = entity.RetractTimeoutMs,
+                    AlarmCodeOnExtendTimeout = entity.AlarmCodeOnExtendTimeout,
+                    AlarmCodeOnRetractTimeout = entity.AlarmCodeOnRetractTimeout,
+                    AllowBothOff = entity.AllowBothOff,
+                    AllowBothOn = entity.AllowBothOn,
+                    IsEnabled = entity.IsEnabled,
+                    SortOrder = entity.SortOrder,
+                    Description = entity.Description,
+                    Remark = entity.Remark
+                });
+            }
+
+            return result;
         }
     }
 }

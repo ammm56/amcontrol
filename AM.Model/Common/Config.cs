@@ -1,7 +1,8 @@
 ﻿using AM.Model.Model;
-using System.Collections.Generic;
-using Newtonsoft.Json;
 using AM.Model.MotionCard;
+using AM.Model.MotionCard.Actuator;
+using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace AM.Model.Common
 {
@@ -20,6 +21,13 @@ namespace AM.Model.Common
         /// </summary>
         [JsonIgnore]
         public List<MotionCardConfig> MotionCardsConfig { get; set; } = new List<MotionCardConfig>();
+
+        /// <summary>
+        /// 第三层对象运行时配置聚合。
+        /// 运行时由数据库装载，不再写入 config.json。
+        /// </summary>
+        [JsonIgnore]
+        public ActuatorConfig ActuatorConfig { get; set; } = new ActuatorConfig();
 
         /// <summary>
         /// 运行时配置

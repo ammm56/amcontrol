@@ -85,6 +85,8 @@
     <Compile Include="Interfaces\DB\Motion\Topology\IMotionAxisCrudService.cs" />
     <Compile Include="Interfaces\DB\Motion\Topology\IMotionCardCrudService.cs" />
     <Compile Include="Interfaces\DB\Motion\Topology\IMotionIoMapCrudService.cs" />
+    <Compile Include="MotionCard\Actuator\ActuatorConfig.cs" />
+    <Compile Include="MotionCard\Actuator\CylinderConfig.cs" />
     <Compile Include="MotionCard\AxisConfig.cs" />
     <Compile Include="Common\ObservableObject_ManualImpl.cs" />
     <Compile Include="Common\Result.cs" />

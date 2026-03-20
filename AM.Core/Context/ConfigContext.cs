@@ -5,6 +5,7 @@ namespace AM.Core.Context
     /// <summary>
     /// 配置上下文。
     /// 负责保存系统当前加载的全局配置对象。
+    /// 从数据库装配出来的配置数据。
     /// </summary>
     public sealed class ConfigContext
     {
