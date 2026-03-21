@@ -9,6 +9,7 @@ namespace AM.Model.Interfaces.DB
     {
         /// <summary>
         /// 确保默认运动配置种子存在。
+        /// 包含控制卡、轴、IO、点位公共配置及第三层对象默认种子。
         /// </summary>
         Result EnsureSeedData();
     }

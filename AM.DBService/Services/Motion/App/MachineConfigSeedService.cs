@@ -50,7 +50,8 @@ namespace AM.DBService.Services.Motion.App
                     typeof(MotionIoMapEntity),
                     typeof(MotionAxisConfigEntity),
                     typeof(MotionIoPointConfigEntity),
-                    typeof(CylinderConfigEntity));
+                    typeof(CylinderConfigEntity),
+                    typeof(VacuumConfigEntity));
 
                 if (HasAnyMotionConfigData(db))
                 {
@@ -66,12 +67,14 @@ namespace AM.DBService.Services.Motion.App
                 var ioPointConfigs = CreateDefaultIoPointConfigs();
                 var cylinders = CreateDefaultCylinders();
                 var axisConfigs = CreateDefaultAxisConfigs();
+                var vacuums = CreateDefaultVacuums();
 
                 db.Insertable(cards).ExecuteCommand();
                 db.Insertable(axes).ExecuteCommand();
                 db.Insertable(ioMaps).ExecuteCommand();
                 db.Insertable(ioPointConfigs).ExecuteCommand();
                 db.Insertable(cylinders).ExecuteCommand();
+                db.Insertable(vacuums).ExecuteCommand();
                 db.Insertable(axisConfigs).ExecuteCommand();
 
                 db.Ado.CommitTran();
@@ -104,6 +107,7 @@ namespace AM.DBService.Services.Motion.App
                 || db.Queryable<MotionIoMapEntity>().Any()
                 || db.Queryable<MotionIoPointConfigEntity>().Any()
                 || db.Queryable<CylinderConfigEntity>().Any()
+                || db.Queryable<VacuumConfigEntity>().Any()
                 || db.Queryable<MotionAxisConfigEntity>().Any();
         }
 
@@ -286,6 +290,71 @@ namespace AM.DBService.Services.Motion.App
                     IsEnabled = true,
                     SortOrder = 8,
                     Remark = "测试夹紧气缸缩回输出"
+                },
+                new MotionIoMapEntity
+                {
+                    CardId = 0,
+                    IoType = "DI",
+                    LogicalBit = 1201,
+                    Name = "PickVacuumBuilt",
+                    Core = 1,
+                    IsExtModule = false,
+                    HardwareBit = 5,
+                    IsEnabled = true,
+                    SortOrder = 9,
+                    Remark = "测试真空建立反馈"
+                },
+                new MotionIoMapEntity
+                {
+                    CardId = 0,
+                    IoType = "DI",
+                    LogicalBit = 1202,
+                    Name = "PickVacuumReleased",
+                    Core = 1,
+                    IsExtModule = false,
+                    HardwareBit = 6,
+                    IsEnabled = true,
+                    SortOrder = 10,
+                    Remark = "测试真空释放反馈"
+                },
+                new MotionIoMapEntity
+                {
+                    CardId = 0,
+                    IoType = "DI",
+                    LogicalBit = 1203,
+                    Name = "PickVacuumWorkpiecePresent",
+                    Core = 1,
+                    IsExtModule = false,
+                    HardwareBit = 7,
+                    IsEnabled = true,
+                    SortOrder = 11,
+                    Remark = "测试真空工件检测"
+                },
+                new MotionIoMapEntity
+                {
+                    CardId = 0,
+                    IoType = "DO",
+                    LogicalBit = 2201,
+                    Name = "PickVacuumOn",
+                    Core = 1,
+                    IsExtModule = false,
+                    HardwareBit = 5,
+                    IsEnabled = true,
+                    SortOrder = 12,
+                    Remark = "测试真空吸附输出"
+                },
+                new MotionIoMapEntity
+                {
+                    CardId = 0,
+                    IoType = "DO",
+                    LogicalBit = 2202,
+                    Name = "PickVacuumBlowOff",
+                    Core = 1,
+                    IsExtModule = false,
+                    HardwareBit = 6,
+                    IsEnabled = true,
+                    SortOrder = 13,
+                    Remark = "测试真空破真空输出"
                 }
             };
         }
@@ -445,6 +514,101 @@ namespace AM.DBService.Services.Motion.App
                     BlinkOffMs = 0,
                     Description = "测试夹紧气缸缩回控制输出",
                     Remark = "默认气缸 DO 点位公共配置"
+                },
+                new MotionIoPointConfigEntity
+                {
+                    IoType = "DI",
+                    LogicalBit = 1201,
+                    DisplayName = "真空建立反馈",
+                    SignalCategory = "Vacuum",
+                    Invert = false,
+                    IsNormallyClosed = false,
+                    DebounceMs = 20,
+                    FilterMs = 0,
+                    CanManualOperate = false,
+                    DefaultOutputState = false,
+                    OutputMode = "Keep",
+                    PulseWidthMs = 0,
+                    BlinkOnMs = 0,
+                    BlinkOffMs = 0,
+                    Description = "测试真空建立反馈输入",
+                    Remark = "默认真空 DI 点位公共配置"
+                },
+                new MotionIoPointConfigEntity
+                {
+                    IoType = "DI",
+                    LogicalBit = 1202,
+                    DisplayName = "真空释放反馈",
+                    SignalCategory = "Vacuum",
+                    Invert = false,
+                    IsNormallyClosed = false,
+                    DebounceMs = 20,
+                    FilterMs = 0,
+                    CanManualOperate = false,
+                    DefaultOutputState = false,
+                    OutputMode = "Keep",
+                    PulseWidthMs = 0,
+                    BlinkOnMs = 0,
+                    BlinkOffMs = 0,
+                    Description = "测试真空释放反馈输入",
+                    Remark = "默认真空 DI 点位公共配置"
+                },
+                new MotionIoPointConfigEntity
+                {
+                    IoType = "DI",
+                    LogicalBit = 1203,
+                    DisplayName = "工件存在检测",
+                    SignalCategory = "Vacuum",
+                    Invert = false,
+                    IsNormallyClosed = false,
+                    DebounceMs = 20,
+                    FilterMs = 0,
+                    CanManualOperate = false,
+                    DefaultOutputState = false,
+                    OutputMode = "Keep",
+                    PulseWidthMs = 0,
+                    BlinkOnMs = 0,
+                    BlinkOffMs = 0,
+                    Description = "测试真空工件检测输入",
+                    Remark = "默认真空 DI 点位公共配置"
+                },
+                new MotionIoPointConfigEntity
+                {
+                    IoType = "DO",
+                    LogicalBit = 2201,
+                    DisplayName = "真空吸附输出",
+                    SignalCategory = "Vacuum",
+                    Invert = false,
+                    IsNormallyClosed = false,
+                    DebounceMs = 0,
+                    FilterMs = 0,
+                    CanManualOperate = true,
+                    DefaultOutputState = false,
+                    OutputMode = "Keep",
+                    PulseWidthMs = 0,
+                    BlinkOnMs = 0,
+                    BlinkOffMs = 0,
+                    Description = "测试真空吸附控制输出",
+                    Remark = "默认真空 DO 点位公共配置"
+                },
+                new MotionIoPointConfigEntity
+                {
+                    IoType = "DO",
+                    LogicalBit = 2202,
+                    DisplayName = "真空破真空输出",
+                    SignalCategory = "Vacuum",
+                    Invert = false,
+                    IsNormallyClosed = false,
+                    DebounceMs = 0,
+                    FilterMs = 0,
+                    CanManualOperate = true,
+                    DefaultOutputState = false,
+                    OutputMode = "Keep",
+                    PulseWidthMs = 0,
+                    BlinkOnMs = 0,
+                    BlinkOffMs = 0,
+                    Description = "测试真空破真空控制输出",
+                    Remark = "默认真空 DO 点位公共配置"
                 }
             };
         }
@@ -535,6 +699,35 @@ namespace AM.DBService.Services.Motion.App
                     SortOrder = 1,
                     Description = "默认测试夹紧气缸对象",
                     Remark = "用于演示第三层对象配置"
+                }
+            };
+        }
+
+        private static List<VacuumConfigEntity> CreateDefaultVacuums()
+        {
+            return new List<VacuumConfigEntity>
+            {
+                new VacuumConfigEntity
+                {
+                    Name = "PickVacuum",
+                    DisplayName = "取料真空",
+                    VacuumOnOutputBit = 2201,
+                    BlowOffOutputBit = 2202,
+                    VacuumFeedbackBit = 1201,
+                    ReleaseFeedbackBit = 1202,
+                    WorkpiecePresentBit = 1203,
+                    UseFeedbackCheck = true,
+                    UseWorkpieceCheck = true,
+                    VacuumBuildTimeoutMs = 1500,
+                    ReleaseTimeoutMs = 1000,
+                    AlarmCodeOnBuildTimeout = 92001,
+                    AlarmCodeOnReleaseTimeout = 92002,
+                    AlarmCodeOnWorkpieceLost = 92003,
+                    KeepVacuumOnAfterDetected = true,
+                    IsEnabled = true,
+                    SortOrder = 1,
+                    Description = "默认测试取料真空对象",
+                    Remark = "用于演示第三层真空对象配置"
                 }
             };
         }

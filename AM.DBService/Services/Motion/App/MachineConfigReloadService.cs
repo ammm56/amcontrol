@@ -104,6 +104,7 @@ namespace AM.DBService.Services.Motion.App
             machine.DICards.Clear();
             machine.DOCards.Clear();
             machine.Cylinders.Clear();
+            machine.Vacuums.Clear();
             machine.MotionHub = null;
         }
 
@@ -212,7 +213,19 @@ namespace AM.DBService.Services.Motion.App
                 return Ok("无执行器对象配置");
             }
 
-            return RegisterCylinderMappings(machine, actuatorConfig);
+            var cylinderResult = RegisterCylinderMappings(machine, actuatorConfig);
+            if (!cylinderResult.Success)
+            {
+                return cylinderResult;
+            }
+
+            var vacuumResult = RegisterVacuumMappings(machine, actuatorConfig);
+            if (!vacuumResult.Success)
+            {
+                return vacuumResult;
+            }
+
+            return Ok("执行器对象配置注册成功");
         }
 
         private Result RegisterCylinderMappings(MachineContext machine, ActuatorConfig actuatorConfig)
@@ -260,5 +273,54 @@ namespace AM.DBService.Services.Motion.App
             return Ok("气缸对象配置注册成功");
         }
 
+        private Result RegisterVacuumMappings(MachineContext machine, ActuatorConfig actuatorConfig)
+        {
+            if (actuatorConfig.Vacuums == null)
+            {
+                return Ok("无真空对象配置");
+            }
+
+            foreach (var vacuum in actuatorConfig.Vacuums.Where(p => p != null && p.IsEnabled))
+            {
+                if (string.IsNullOrWhiteSpace(vacuum.Name))
+                {
+                    return Fail((int)DbErrorCode.InvalidArgument, "存在未配置名称的真空对象");
+                }
+
+                if (machine.Vacuums.ContainsKey(vacuum.Name))
+                {
+                    return Fail((int)DbErrorCode.InvalidArgument, "真空名称重复: " + vacuum.Name);
+                }
+
+                if (!machine.DOCards.ContainsKey(vacuum.VacuumOnOutputBit))
+                {
+                    return Fail((int)DbErrorCode.InvalidArgument, "真空吸附输出位未注册到 DO 路由: " + vacuum.VacuumOnOutputBit);
+                }
+
+                if (vacuum.BlowOffOutputBit.HasValue && !machine.DOCards.ContainsKey(vacuum.BlowOffOutputBit.Value))
+                {
+                    return Fail((int)DbErrorCode.InvalidArgument, "真空破真空输出位未注册到 DO 路由: " + vacuum.BlowOffOutputBit.Value);
+                }
+
+                if (vacuum.VacuumFeedbackBit.HasValue && !machine.DICards.ContainsKey(vacuum.VacuumFeedbackBit.Value))
+                {
+                    return Fail((int)DbErrorCode.InvalidArgument, "真空建立反馈位未注册到 DI 路由: " + vacuum.VacuumFeedbackBit.Value);
+                }
+
+                if (vacuum.ReleaseFeedbackBit.HasValue && !machine.DICards.ContainsKey(vacuum.ReleaseFeedbackBit.Value))
+                {
+                    return Fail((int)DbErrorCode.InvalidArgument, "真空释放反馈位未注册到 DI 路由: " + vacuum.ReleaseFeedbackBit.Value);
+                }
+
+                if (vacuum.WorkpiecePresentBit.HasValue && !machine.DICards.ContainsKey(vacuum.WorkpiecePresentBit.Value))
+                {
+                    return Fail((int)DbErrorCode.InvalidArgument, "真空工件检测位未注册到 DI 路由: " + vacuum.WorkpiecePresentBit.Value);
+                }
+
+                machine.Vacuums[vacuum.Name] = vacuum;
+            }
+
+            return Ok("真空对象配置注册成功");
+        }
     }
 }

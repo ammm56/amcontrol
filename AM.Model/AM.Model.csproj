@@ -67,6 +67,7 @@
     <Compile Include="Entity\Auth\SysUserPagePermissionEntity.cs" />
     <Compile Include="Entity\Auth\SysUserRoleEntity.cs" />
     <Compile Include="Entity\Motion\Actuator\CylinderConfigEntity.cs" />
+    <Compile Include="Entity\Motion\Actuator\VacuumConfigEntity.cs" />
     <Compile Include="Entity\Motion\MotionAxisConfigEntity.cs" />
     <Compile Include="Entity\Motion\Point\MotionIoPointConfigEntity.cs" />
     <Compile Include="Entity\Motion\Topology\MotionAxisEntity.cs" />
@@ -77,6 +78,7 @@
     <Compile Include="Interfaces\DB\IMotionAxisConfigOverlayService.cs" />
     <Compile Include="Interfaces\DB\IMotionAxisConfigService.cs" />
     <Compile Include="Interfaces\DB\Motion\Actuator\IMotionCylinderConfigCrudService.cs" />
+    <Compile Include="Interfaces\DB\Motion\Actuator\IMotionVacuumConfigCrudService.cs" />
     <Compile Include="Interfaces\DB\Motion\App\IAxisConfigAppService.cs" />
     <Compile Include="Interfaces\DB\Motion\App\IMachineConfigAppService.cs" />
     <Compile Include="Interfaces\DB\Motion\App\IMachineConfigReloadService.cs" />
@@ -86,11 +88,13 @@
     <Compile Include="Interfaces\DB\Motion\Topology\IMotionCardCrudService.cs" />
     <Compile Include="Interfaces\DB\Motion\Topology\IMotionIoMapCrudService.cs" />
     <Compile Include="Interfaces\Motion\Actuator\ICylinderService.cs" />
+    <Compile Include="Interfaces\Motion\Actuator\IVacuumService.cs" />
     <Compile Include="Interfaces\Runtime\IIoScanService.cs" />
     <Compile Include="Interfaces\Runtime\IRuntimeTaskManager.cs" />
     <Compile Include="Interfaces\Runtime\IRuntimeWorker.cs" />
     <Compile Include="MotionCard\Actuator\ActuatorConfig.cs" />
     <Compile Include="MotionCard\Actuator\CylinderConfig.cs" />
+    <Compile Include="MotionCard\Actuator\VacuumConfig.cs" />
     <Compile Include="MotionCard\AxisConfig.cs" />
     <Compile Include="Common\ObservableObject_ManualImpl.cs" />
     <Compile Include="Common\Result.cs" />

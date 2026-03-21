@@ -33,6 +33,7 @@ namespace AM.DBService.Services.Motion.App
         private readonly IMotionAxisConfigOverlayService _motionAxisConfigOverlayService;
         private readonly IMotionIoPointConfigCrudService _motionIoPointConfigCrudService;
         private readonly IMotionCylinderConfigCrudService _motionCylinderConfigCrudService;
+        private readonly IMotionVacuumConfigCrudService _motionVacuumConfigCrudService;
 
         protected override string MessageSourceName
         {
@@ -49,6 +50,7 @@ namespace AM.DBService.Services.Motion.App
                 new MotionAxisConfigOverlayService(),
                 new MotionIoPointConfigCrudService(),
                 new MotionCylinderConfigCrudService(),
+                new MotionVacuumConfigCrudService(),
                 SystemContext.Instance.Reporter)
         {
         }
@@ -57,6 +59,7 @@ namespace AM.DBService.Services.Motion.App
             IMotionAxisConfigOverlayService motionAxisConfigOverlayService,
             IMotionIoPointConfigCrudService motionIoPointConfigCrudService,
             IMotionCylinderConfigCrudService motionCylinderConfigCrudService,
+            IMotionVacuumConfigCrudService motionVacuumConfigCrudService,
             IAppReporter reporter)
             : base(reporter)
         {
@@ -64,6 +67,7 @@ namespace AM.DBService.Services.Motion.App
             _motionAxisConfigOverlayService = motionAxisConfigOverlayService;
             _motionIoPointConfigCrudService = motionIoPointConfigCrudService;
             _motionCylinderConfigCrudService = motionCylinderConfigCrudService;
+            _motionVacuumConfigCrudService = motionVacuumConfigCrudService;
         }
 
         public Result EnsureTables()
@@ -77,7 +81,8 @@ namespace AM.DBService.Services.Motion.App
                     typeof(MotionIoMapEntity),
                     typeof(MotionAxisConfigEntity),
                     typeof(MotionIoPointConfigEntity),
-                    typeof(CylinderConfigEntity));
+                    typeof(CylinderConfigEntity),
+                    typeof(VacuumConfigEntity));
 
                 EnsureIndexes(db);
 
@@ -143,7 +148,23 @@ namespace AM.DBService.Services.Motion.App
                     ? cylinderConfigResult.Items.Where(p => p != null && p.IsEnabled).ToList()
                     : new List<CylinderConfigEntity>();
 
-                var validateResult = ValidateEntities(cardEntities, axisEntities, ioEntities, ioPointConfigs, cylinderConfigs);
+                var vacuumConfigResult = _motionVacuumConfigCrudService.QueryAll();
+                if (!vacuumConfigResult.Success && vacuumConfigResult.Code != (int)DbErrorCode.NotFound)
+                {
+                    return Fail<MotionCardConfig>(vacuumConfigResult.Code, "读取真空对象配置失败");
+                }
+
+                var vacuumConfigs = vacuumConfigResult.Success
+                    ? vacuumConfigResult.Items.Where(p => p != null && p.IsEnabled).ToList()
+                    : new List<VacuumConfigEntity>();
+
+                var validateResult = ValidateEntities(
+                    cardEntities,
+                    axisEntities,
+                    ioEntities,
+                    ioPointConfigs,
+                    cylinderConfigs,
+                    vacuumConfigs);
                 if (!validateResult.Success)
                 {
                     return Fail<MotionCardConfig>(validateResult.Code, validateResult.Message);
@@ -157,7 +178,11 @@ namespace AM.DBService.Services.Motion.App
                     return Fail<MotionCardConfig>(overlayResult.Code, overlayResult.Message);
                 }
 
-                var runtimeActuatorConfig = BuildActuatorConfig(cylinderConfigs, ioEntities, ioPointConfigs);
+                var runtimeActuatorConfig = BuildActuatorConfig(
+                    cylinderConfigs,
+                    vacuumConfigs,
+                    ioEntities,
+                    ioPointConfigs);
                 ConfigContext.Instance.Config.ActuatorConfig = runtimeActuatorConfig;
 
                 if (cardEntities.Count == 0)
@@ -221,6 +246,11 @@ namespace AM.DBService.Services.Motion.App
                 "CREATE UNIQUE INDEX IF NOT EXISTS ux_motion_io_map_type_bit ON motion_io_map(IoType, LogicalBit)");
             db.Ado.ExecuteCommand(
                 "CREATE UNIQUE INDEX IF NOT EXISTS ux_motion_io_point_config_type_bit ON motion_io_point_config(IoType, LogicalBit)");
+
+            db.Ado.ExecuteCommand(
+                "CREATE UNIQUE INDEX IF NOT EXISTS ux_motion_cylinder_config_name ON motion_cylinder_config(Name)");
+            db.Ado.ExecuteCommand(
+                "CREATE UNIQUE INDEX IF NOT EXISTS ux_motion_vacuum_config_name ON motion_vacuum_config(Name)");
         }
 
         private static List<MotionCardConfig> BuildMotionCards(
@@ -380,7 +410,8 @@ namespace AM.DBService.Services.Motion.App
             IList<MotionAxisEntity> axisEntities,
             IList<MotionIoMapEntity> ioEntities,
             IList<MotionIoPointConfigEntity> ioPointConfigs,
-            IList<CylinderConfigEntity> cylinderConfigs)
+            IList<CylinderConfigEntity> cylinderConfigs,
+            IList<VacuumConfigEntity> vacuumConfigs)
         {
             var duplicateCardId = cardEntities
                 .GroupBy(p => p.CardId)
@@ -432,7 +463,10 @@ namespace AM.DBService.Services.Motion.App
                 return Result.Fail((int)DbErrorCode.InvalidArgument, "IO点位公共配置重复: " + duplicateIoPointConfig.Key, ResultSource.Database);
             }
 
-            var ioKeys = new HashSet<string>(ioEntities.Select(p => BuildIoPointKey(p.IoType, p.LogicalBit)), StringComparer.OrdinalIgnoreCase);
+            var ioKeys = new HashSet<string>(
+                ioEntities.Select(p => BuildIoPointKey(p.IoType, p.LogicalBit)),
+                StringComparer.OrdinalIgnoreCase);
+
             var orphanPointConfig = ioPointConfigs.FirstOrDefault(p => !ioKeys.Contains(BuildIoPointKey(p)));
             if (orphanPointConfig != null)
             {
@@ -462,37 +496,73 @@ namespace AM.DBService.Services.Motion.App
 
                 if (!ioKeys.Contains(BuildIoPointKey("DO", cylinder.ExtendOutputBit)))
                 {
-                    return Result.Fail(
-                        (int)DbErrorCode.InvalidArgument,
-                        "气缸伸出输出位不存在: " + cylinder.ExtendOutputBit,
-                        ResultSource.Database);
+                    return Result.Fail((int)DbErrorCode.InvalidArgument, "气缸伸出输出位不存在: " + cylinder.ExtendOutputBit, ResultSource.Database);
                 }
 
                 if (cylinder.RetractOutputBit.HasValue
                     && !ioKeys.Contains(BuildIoPointKey("DO", cylinder.RetractOutputBit.Value)))
                 {
-                    return Result.Fail(
-                        (int)DbErrorCode.InvalidArgument,
-                        "气缸缩回输出位不存在: " + cylinder.RetractOutputBit.Value,
-                        ResultSource.Database);
+                    return Result.Fail((int)DbErrorCode.InvalidArgument, "气缸缩回输出位不存在: " + cylinder.RetractOutputBit.Value, ResultSource.Database);
                 }
 
                 if (cylinder.ExtendFeedbackBit.HasValue
                     && !ioKeys.Contains(BuildIoPointKey("DI", cylinder.ExtendFeedbackBit.Value)))
                 {
-                    return Result.Fail(
-                        (int)DbErrorCode.InvalidArgument,
-                        "气缸伸出反馈位不存在: " + cylinder.ExtendFeedbackBit.Value,
-                        ResultSource.Database);
+                    return Result.Fail((int)DbErrorCode.InvalidArgument, "气缸伸出反馈位不存在: " + cylinder.ExtendFeedbackBit.Value, ResultSource.Database);
                 }
 
                 if (cylinder.RetractFeedbackBit.HasValue
                     && !ioKeys.Contains(BuildIoPointKey("DI", cylinder.RetractFeedbackBit.Value)))
                 {
-                    return Result.Fail(
-                        (int)DbErrorCode.InvalidArgument,
-                        "气缸缩回反馈位不存在: " + cylinder.RetractFeedbackBit.Value,
-                        ResultSource.Database);
+                    return Result.Fail((int)DbErrorCode.InvalidArgument, "气缸缩回反馈位不存在: " + cylinder.RetractFeedbackBit.Value, ResultSource.Database);
+                }
+            }
+
+            var duplicateVacuumName = vacuumConfigs
+                .GroupBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
+                .FirstOrDefault(g => g.Count() > 1);
+            if (duplicateVacuumName != null)
+            {
+                return Result.Fail(
+                    (int)DbErrorCode.InvalidArgument,
+                    "真空名称重复: " + duplicateVacuumName.Key,
+                    ResultSource.Database);
+            }
+
+            foreach (var vacuum in vacuumConfigs.Where(p => p != null))
+            {
+                if (string.IsNullOrWhiteSpace(vacuum.Name))
+                {
+                    return Result.Fail((int)DbErrorCode.InvalidArgument, "存在未配置名称的真空对象", ResultSource.Database);
+                }
+
+                if (!ioKeys.Contains(BuildIoPointKey("DO", vacuum.VacuumOnOutputBit)))
+                {
+                    return Result.Fail((int)DbErrorCode.InvalidArgument, "真空吸附输出位不存在: " + vacuum.VacuumOnOutputBit, ResultSource.Database);
+                }
+
+                if (vacuum.BlowOffOutputBit.HasValue
+                    && !ioKeys.Contains(BuildIoPointKey("DO", vacuum.BlowOffOutputBit.Value)))
+                {
+                    return Result.Fail((int)DbErrorCode.InvalidArgument, "真空破真空输出位不存在: " + vacuum.BlowOffOutputBit.Value, ResultSource.Database);
+                }
+
+                if (vacuum.VacuumFeedbackBit.HasValue
+                    && !ioKeys.Contains(BuildIoPointKey("DI", vacuum.VacuumFeedbackBit.Value)))
+                {
+                    return Result.Fail((int)DbErrorCode.InvalidArgument, "真空建立反馈位不存在: " + vacuum.VacuumFeedbackBit.Value, ResultSource.Database);
+                }
+
+                if (vacuum.ReleaseFeedbackBit.HasValue
+                    && !ioKeys.Contains(BuildIoPointKey("DI", vacuum.ReleaseFeedbackBit.Value)))
+                {
+                    return Result.Fail((int)DbErrorCode.InvalidArgument, "真空释放反馈位不存在: " + vacuum.ReleaseFeedbackBit.Value, ResultSource.Database);
+                }
+
+                if (vacuum.WorkpiecePresentBit.HasValue
+                    && !ioKeys.Contains(BuildIoPointKey("DI", vacuum.WorkpiecePresentBit.Value)))
+                {
+                    return Result.Fail((int)DbErrorCode.InvalidArgument, "真空工件检测位不存在: " + vacuum.WorkpiecePresentBit.Value, ResultSource.Database);
                 }
             }
 
@@ -501,12 +571,14 @@ namespace AM.DBService.Services.Motion.App
 
         private static ActuatorConfig BuildActuatorConfig(
             IList<CylinderConfigEntity> cylinderEntities,
+            IList<VacuumConfigEntity> vacuumEntities,
             IList<MotionIoMapEntity> ioEntities,
             IList<MotionIoPointConfigEntity> ioPointConfigs)
         {
             return new ActuatorConfig
             {
-                Cylinders = BuildCylinderConfigs(cylinderEntities, ioEntities, ioPointConfigs)
+                Cylinders = BuildCylinderConfigs(cylinderEntities, ioEntities, ioPointConfigs),
+                Vacuums = BuildVacuumConfigs(vacuumEntities, ioEntities, ioPointConfigs)
             };
         }
 
@@ -542,6 +614,49 @@ namespace AM.DBService.Services.Motion.App
                     AlarmCodeOnRetractTimeout = entity.AlarmCodeOnRetractTimeout,
                     AllowBothOff = entity.AllowBothOff,
                     AllowBothOn = entity.AllowBothOn,
+                    IsEnabled = entity.IsEnabled,
+                    SortOrder = entity.SortOrder,
+                    Description = entity.Description,
+                    Remark = entity.Remark
+                });
+            }
+
+            return result;
+        }
+
+        private static List<VacuumConfig> BuildVacuumConfigs(
+            IList<VacuumConfigEntity> vacuumEntities,
+            IList<MotionIoMapEntity> ioEntities,
+            IList<MotionIoPointConfigEntity> ioPointConfigs)
+        {
+            var result = new List<VacuumConfig>();
+            if (vacuumEntities == null || vacuumEntities.Count == 0)
+            {
+                return result;
+            }
+
+            foreach (var entity in vacuumEntities
+                .Where(p => p != null && p.IsEnabled)
+                .OrderBy(p => p.SortOrder)
+                .ThenBy(p => p.Name))
+            {
+                result.Add(new VacuumConfig
+                {
+                    Name = entity.Name,
+                    DisplayName = entity.DisplayName,
+                    VacuumOnOutputBit = entity.VacuumOnOutputBit,
+                    BlowOffOutputBit = entity.BlowOffOutputBit,
+                    VacuumFeedbackBit = entity.VacuumFeedbackBit,
+                    ReleaseFeedbackBit = entity.ReleaseFeedbackBit,
+                    WorkpiecePresentBit = entity.WorkpiecePresentBit,
+                    UseFeedbackCheck = entity.UseFeedbackCheck,
+                    UseWorkpieceCheck = entity.UseWorkpieceCheck,
+                    VacuumBuildTimeoutMs = entity.VacuumBuildTimeoutMs,
+                    ReleaseTimeoutMs = entity.ReleaseTimeoutMs,
+                    AlarmCodeOnBuildTimeout = entity.AlarmCodeOnBuildTimeout,
+                    AlarmCodeOnReleaseTimeout = entity.AlarmCodeOnReleaseTimeout,
+                    AlarmCodeOnWorkpieceLost = entity.AlarmCodeOnWorkpieceLost,
+                    KeepVacuumOnAfterDetected = entity.KeepVacuumOnAfterDetected,
                     IsEnabled = entity.IsEnabled,
                     SortOrder = entity.SortOrder,
                     Description = entity.Description,
