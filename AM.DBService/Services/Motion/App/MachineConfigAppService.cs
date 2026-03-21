@@ -79,6 +79,8 @@ namespace AM.DBService.Services.Motion.App
                     typeof(MotionIoPointConfigEntity),
                     typeof(CylinderConfigEntity));
 
+                EnsureIndexes(db);
+
                 return Ok("运动控制配置表初始化完成");
             }
             catch (Exception ex)
@@ -102,7 +104,8 @@ namespace AM.DBService.Services.Motion.App
                 var cardEntities = db.Queryable<MotionCardEntity>()
                     .Where(p => p.IsEnabled)
                     .ToList()
-                    .OrderBy(p => p.SortOrder)
+                    .OrderBy(p => p.InitOrder)
+                    .ThenBy(p => p.SortOrder)
                     .ThenBy(p => p.CardId)
                     .ToList();
 
@@ -195,6 +198,31 @@ namespace AM.DBService.Services.Motion.App
             return _dbContext.GetClient(new MDBaseSet { DBType = "Sqlite" });
         }
 
+        private static void EnsureIndexes(SqlSugarClient db)
+        {
+            db.Ado.ExecuteCommand(
+                "CREATE UNIQUE INDEX IF NOT EXISTS ux_motion_card_cardid ON motion_card(CardId)");
+            db.Ado.ExecuteCommand(
+                "CREATE UNIQUE INDEX IF NOT EXISTS ux_motion_card_name ON motion_card(Name)");
+
+            db.Ado.ExecuteCommand(
+                "CREATE UNIQUE INDEX IF NOT EXISTS ux_motion_axis_logicalaxis ON motion_axis(LogicalAxis)");
+            db.Ado.ExecuteCommand(
+                "CREATE UNIQUE INDEX IF NOT EXISTS ux_motion_axis_name ON motion_axis(Name)");
+            db.Ado.ExecuteCommand(
+                "CREATE UNIQUE INDEX IF NOT EXISTS ux_motion_axis_cardid_axisid ON motion_axis(CardId, AxisId)");
+            db.Ado.ExecuteCommand(
+                "CREATE UNIQUE INDEX IF NOT EXISTS ux_motion_axis_cardid_core_axis ON motion_axis(CardId, PhysicalCore, PhysicalAxis)");
+
+            db.Ado.ExecuteCommand(
+                "CREATE UNIQUE INDEX IF NOT EXISTS ux_motion_axis_config_axis_param ON motion_axis_config(LogicalAxis, ParamName)");
+
+            db.Ado.ExecuteCommand(
+                "CREATE UNIQUE INDEX IF NOT EXISTS ux_motion_io_map_type_bit ON motion_io_map(IoType, LogicalBit)");
+            db.Ado.ExecuteCommand(
+                "CREATE UNIQUE INDEX IF NOT EXISTS ux_motion_io_point_config_type_bit ON motion_io_point_config(IoType, LogicalBit)");
+        }
+
         private static List<MotionCardConfig> BuildMotionCards(
             IList<MotionCardEntity> cardEntities,
             IList<MotionAxisEntity> axisEntities,
@@ -233,11 +261,17 @@ namespace AM.DBService.Services.Motion.App
                 {
                     CardType = ResolveCardType(cardEntity.CardType),
                     Name = cardEntity.Name,
+                    DisplayName = string.IsNullOrWhiteSpace(cardEntity.DisplayName) ? cardEntity.Name : cardEntity.DisplayName,
+                    DriverKey = cardEntity.DriverKey,
                     CardId = cardEntity.CardId,
                     ModeParam = cardEntity.ModeParam,
+                    OpenConfig = cardEntity.OpenConfig,
                     CoreNumber = (ushort)cardEntity.CoreNumber,
                     AxisCountNumber = cardEntity.AxisCountNumber,
                     UseExtModule = cardEntity.UseExtModule,
+                    InitOrder = cardEntity.InitOrder,
+                    Description = cardEntity.Description,
+                    Remark = cardEntity.Remark,
                     AxisConfigs = axisRows
                         .OrderBy(p => p.SortOrder)
                         .ThenBy(p => p.LogicalAxis)
@@ -356,12 +390,30 @@ namespace AM.DBService.Services.Motion.App
                 return Result.Fail((int)DbErrorCode.InvalidArgument, "控制卡 CardId 重复: " + duplicateCardId.Key, ResultSource.Database);
             }
 
+            var duplicateCardName = cardEntities
+                .Where(p => !string.IsNullOrWhiteSpace(p.Name))
+                .GroupBy(p => p.Name.Trim(), StringComparer.OrdinalIgnoreCase)
+                .FirstOrDefault(g => g.Count() > 1);
+            if (duplicateCardName != null)
+            {
+                return Result.Fail((int)DbErrorCode.InvalidArgument, "控制卡名称重复: " + duplicateCardName.Key, ResultSource.Database);
+            }
+
             var duplicateLogicalAxis = axisEntities
                 .GroupBy(p => p.LogicalAxis)
                 .FirstOrDefault(g => g.Count() > 1);
             if (duplicateLogicalAxis != null)
             {
                 return Result.Fail((int)DbErrorCode.InvalidArgument, "逻辑轴重复: " + duplicateLogicalAxis.Key, ResultSource.Database);
+            }
+
+            var duplicateAxisName = axisEntities
+                .Where(p => !string.IsNullOrWhiteSpace(p.Name))
+                .GroupBy(p => p.Name.Trim(), StringComparer.OrdinalIgnoreCase)
+                .FirstOrDefault(g => g.Count() > 1);
+            if (duplicateAxisName != null)
+            {
+                return Result.Fail((int)DbErrorCode.InvalidArgument, "轴名称重复: " + duplicateAxisName.Key, ResultSource.Database);
             }
 
             var duplicateIoLogicalBit = ioEntities

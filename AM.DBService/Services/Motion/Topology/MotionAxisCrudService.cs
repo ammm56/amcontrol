@@ -16,6 +16,8 @@ namespace AM.DBService.Services.Motion.Topology
 {
     /// <summary>
     /// 轴拓扑配置 CRUD 服务。
+    /// 对应数据库表：motion_axis
+    /// 负责轴归属关系、逻辑轴号、物理映射和基础展示信息的管理。
     /// </summary>
     public class MotionAxisCrudService : ServiceBase, IMotionAxisCrudService
     {
@@ -154,6 +156,14 @@ namespace AM.DBService.Services.Motion.Topology
                     return Fail((int)DbErrorCode.InvalidArgument, "逻辑轴已存在: " + entity.LogicalAxis);
                 }
 
+                var existingByName = db.Queryable<MotionAxisEntity>()
+                    .First(p => p.Name == entity.Name && p.Id != entity.Id);
+
+                if (existingByName != null)
+                {
+                    return Fail((int)DbErrorCode.InvalidArgument, "轴名称已存在: " + entity.Name);
+                }
+
                 var duplicateAxisId = db.Queryable<MotionAxisEntity>()
                     .First(p => p.CardId == entity.CardId && p.AxisId == entity.AxisId && p.Id != entity.Id);
 
@@ -163,12 +173,24 @@ namespace AM.DBService.Services.Motion.Topology
                 }
 
                 var duplicatePhysicalAxis = db.Queryable<MotionAxisEntity>()
-                    .First(p => p.CardId == entity.CardId && p.PhysicalAxis == entity.PhysicalAxis && p.Id != entity.Id);
+                    .First(p => p.CardId == entity.CardId
+                             && p.PhysicalCore == entity.PhysicalCore
+                             && p.PhysicalAxis == entity.PhysicalAxis
+                             && p.Id != entity.Id);
 
                 if (duplicatePhysicalAxis != null)
                 {
-                    return Fail((int)DbErrorCode.InvalidArgument, "同一卡下 PhysicalAxis 已存在: " + entity.PhysicalAxis);
+                    return Fail(
+                        (int)DbErrorCode.InvalidArgument,
+                        "同一卡下 PhysicalCore + PhysicalAxis 已存在: Core=" + entity.PhysicalCore + " Axis=" + entity.PhysicalAxis);
                 }
+
+                var now = DateTime.Now;
+                if (entity.Id <= 0 && entity.CreateTime == default(DateTime))
+                {
+                    entity.CreateTime = now;
+                }
+                entity.UpdateTime = now;
 
                 if (entity.Id > 0)
                 {
@@ -177,6 +199,8 @@ namespace AM.DBService.Services.Motion.Topology
                 else if (existingByLogicalAxis != null)
                 {
                     entity.Id = existingByLogicalAxis.Id;
+                    entity.CreateTime = existingByLogicalAxis.CreateTime;
+                    entity.UpdateTime = now;
                     db.Updateable(entity).ExecuteCommand();
                 }
                 else
@@ -256,12 +280,32 @@ namespace AM.DBService.Services.Motion.Topology
                 typeof(MotionCardEntity),
                 typeof(MotionAxisEntity),
                 typeof(MotionAxisConfigEntity));
+
+            db.Ado.ExecuteCommand(
+                "CREATE UNIQUE INDEX IF NOT EXISTS ux_motion_axis_logicalaxis ON motion_axis(LogicalAxis)");
+
+            db.Ado.ExecuteCommand(
+                "CREATE UNIQUE INDEX IF NOT EXISTS ux_motion_axis_name ON motion_axis(Name)");
+
+            db.Ado.ExecuteCommand(
+                "CREATE UNIQUE INDEX IF NOT EXISTS ux_motion_axis_cardid_axisid ON motion_axis(CardId, AxisId)");
+
+            db.Ado.ExecuteCommand(
+                "CREATE UNIQUE INDEX IF NOT EXISTS ux_motion_axis_cardid_core_axis ON motion_axis(CardId, PhysicalCore, PhysicalAxis)");
         }
 
         private static void Normalize(MotionAxisEntity entity)
         {
             entity.Name = string.IsNullOrWhiteSpace(entity.Name) ? null : entity.Name.Trim();
+            entity.DisplayName = string.IsNullOrWhiteSpace(entity.DisplayName) ? null : entity.DisplayName.Trim();
+            entity.AxisCategory = string.IsNullOrWhiteSpace(entity.AxisCategory) ? "Linear" : entity.AxisCategory.Trim();
+            entity.Description = string.IsNullOrWhiteSpace(entity.Description) ? null : entity.Description.Trim();
             entity.Remark = string.IsNullOrWhiteSpace(entity.Remark) ? null : entity.Remark.Trim();
+
+            if (string.IsNullOrWhiteSpace(entity.DisplayName) && !string.IsNullOrWhiteSpace(entity.Name))
+            {
+                entity.DisplayName = entity.Name;
+            }
         }
 
         private Result Validate(MotionAxisEntity entity)
@@ -296,7 +340,12 @@ namespace AM.DBService.Services.Motion.Topology
                 return Fail((int)DbErrorCode.InvalidArgument, "轴名称不能为空");
             }
 
-            return Ok("轴定义校验通过");
+            if (string.IsNullOrWhiteSpace(entity.AxisCategory))
+            {
+                return Fail((int)DbErrorCode.InvalidArgument, "轴分类不能为空");
+            }
+
+            return OkSilent("轴定义校验通过");
         }
     }
 }

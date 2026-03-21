@@ -8,6 +8,7 @@ using AM.Model.Interfaces.DB.Motion.App;
 using AM.Model.Interfaces.DB.Motion.Topology;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -125,6 +126,7 @@ namespace AM.ViewModel.ViewModels.Config
         private void AddItem()
         {
             var nextLogicalAxis = Items.Count == 0 ? (short)101 : (short)(Items.Max(p => p.LogicalAxis) + 1);
+            var now = DateTime.Now;
 
             var item = new MotionAxisEntity
             {
@@ -132,10 +134,16 @@ namespace AM.ViewModel.ViewModels.Config
                 AxisId = 0,
                 LogicalAxis = nextLogicalAxis,
                 Name = "Axis-" + nextLogicalAxis,
+                DisplayName = "轴-" + nextLogicalAxis,
+                AxisCategory = "Linear",
                 PhysicalCore = 1,
                 PhysicalAxis = 0,
                 IsEnabled = true,
-                SortOrder = Items.Count + 1
+                SortOrder = Items.Count + 1,
+                Description = "新建轴拓扑配置",
+                Remark = null,
+                CreateTime = now,
+                UpdateTime = now
             };
 
             Items.Add(item);
@@ -232,11 +240,16 @@ namespace AM.ViewModel.ViewModels.Config
                 AxisId = source.AxisId,
                 LogicalAxis = source.LogicalAxis,
                 Name = source.Name,
+                DisplayName = source.DisplayName,
+                AxisCategory = source.AxisCategory,
                 PhysicalCore = source.PhysicalCore,
                 PhysicalAxis = source.PhysicalAxis,
                 IsEnabled = source.IsEnabled,
                 SortOrder = source.SortOrder,
-                Remark = source.Remark
+                Description = source.Description,
+                Remark = source.Remark,
+                CreateTime = source.CreateTime,
+                UpdateTime = source.UpdateTime
             };
         }
     }

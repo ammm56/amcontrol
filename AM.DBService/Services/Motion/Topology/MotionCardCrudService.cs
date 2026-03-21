@@ -16,6 +16,8 @@ namespace AM.DBService.Services.Motion.Topology
 {
     /// <summary>
     /// 控制卡配置 CRUD 服务。
+    /// 对应数据库表：motion_card
+    /// 负责控制卡静态拓扑、驱动识别、初始化顺序等配置的查询、保存与删除。
     /// </summary>
     public class MotionCardCrudService : ServiceBase, IMotionCardCrudService
     {
@@ -51,7 +53,8 @@ namespace AM.DBService.Services.Motion.Topology
 
                 var items = db.Queryable<MotionCardEntity>()
                     .ToList()
-                    .OrderBy(p => p.SortOrder)
+                    .OrderBy(p => p.InitOrder)
+                    .ThenBy(p => p.SortOrder)
                     .ThenBy(p => p.CardId)
                     .ToList();
 
@@ -121,6 +124,21 @@ namespace AM.DBService.Services.Motion.Topology
                     return Fail((int)DbErrorCode.InvalidArgument, "控制卡 CardId 已存在: " + entity.CardId);
                 }
 
+                var existingByName = db.Queryable<MotionCardEntity>()
+                    .First(p => p.Name == entity.Name && p.Id != entity.Id);
+
+                if (existingByName != null)
+                {
+                    return Fail((int)DbErrorCode.InvalidArgument, "控制卡名称已存在: " + entity.Name);
+                }
+
+                var now = DateTime.Now;
+                if (entity.Id <= 0 && entity.CreateTime == default(DateTime))
+                {
+                    entity.CreateTime = now;
+                }
+                entity.UpdateTime = now;
+
                 if (entity.Id > 0)
                 {
                     db.Updateable(entity).ExecuteCommand();
@@ -128,6 +146,8 @@ namespace AM.DBService.Services.Motion.Topology
                 else if (existingByCardId != null)
                 {
                     entity.Id = existingByCardId.Id;
+                    entity.CreateTime = existingByCardId.CreateTime;
+                    entity.UpdateTime = now;
                     db.Updateable(entity).ExecuteCommand();
                 }
                 else
@@ -201,12 +221,30 @@ namespace AM.DBService.Services.Motion.Topology
                 typeof(MotionAxisEntity),
                 typeof(MotionIoMapEntity),
                 typeof(MotionAxisConfigEntity));
+
+            db.Ado.ExecuteCommand(
+                "CREATE UNIQUE INDEX IF NOT EXISTS ux_motion_card_cardid ON motion_card(CardId)");
+
+            db.Ado.ExecuteCommand(
+                "CREATE UNIQUE INDEX IF NOT EXISTS ux_motion_card_name ON motion_card(Name)");
+
+            db.Ado.ExecuteCommand(
+                "CREATE INDEX IF NOT EXISTS ix_motion_card_initorder ON motion_card(InitOrder)");
         }
 
         private static void Normalize(MotionCardEntity entity)
         {
             entity.Name = string.IsNullOrWhiteSpace(entity.Name) ? null : entity.Name.Trim();
+            entity.DisplayName = string.IsNullOrWhiteSpace(entity.DisplayName) ? null : entity.DisplayName.Trim();
+            entity.DriverKey = string.IsNullOrWhiteSpace(entity.DriverKey) ? null : entity.DriverKey.Trim();
+            entity.OpenConfig = string.IsNullOrWhiteSpace(entity.OpenConfig) ? null : entity.OpenConfig.Trim();
+            entity.Description = string.IsNullOrWhiteSpace(entity.Description) ? null : entity.Description.Trim();
             entity.Remark = string.IsNullOrWhiteSpace(entity.Remark) ? null : entity.Remark.Trim();
+
+            if (string.IsNullOrWhiteSpace(entity.DisplayName) && !string.IsNullOrWhiteSpace(entity.Name))
+            {
+                entity.DisplayName = entity.Name;
+            }
         }
 
         private Result Validate(MotionCardEntity entity)
@@ -231,7 +269,12 @@ namespace AM.DBService.Services.Motion.Topology
                 return Fail((int)DbErrorCode.InvalidArgument, "控制卡轴总数不能小于 0");
             }
 
-            return Ok("控制卡校验通过");
+            if (entity.InitOrder < 0)
+            {
+                return Fail((int)DbErrorCode.InvalidArgument, "初始化顺序不能小于 0");
+            }
+
+            return OkSilent("控制卡校验通过");
         }
     }
 }

@@ -109,6 +109,8 @@ namespace AM.DBService.Services.Motion.App
 
         private static List<MotionCardEntity> CreateDefaultCards()
         {
+            var now = DateTime.Now;
+
             return new List<MotionCardEntity>
             {
                 new MotionCardEntity
@@ -116,19 +118,28 @@ namespace AM.DBService.Services.Motion.App
                     CardId = 0,
                     CardType = (int)MotionCardType.VIRTUAL,
                     Name = "VirtualCard-0",
+                    DisplayName = "默认虚拟卡",
+                    DriverKey = "Virtual.Basic",
                     ModeParam = 0,
+                    OpenConfig = null,
                     CoreNumber = 1,
                     AxisCountNumber = 2,
                     UseExtModule = false,
+                    InitOrder = 1,
                     IsEnabled = true,
                     SortOrder = 1,
-                    Remark = "默认虚拟运动控制卡"
+                    Description = "默认虚拟运动控制卡",
+                    Remark = "系统初始化默认卡",
+                    CreateTime = now,
+                    UpdateTime = now
                 }
             };
         }
 
         private static List<MotionAxisEntity> CreateDefaultAxes()
         {
+            var now = DateTime.Now;
+
             return new List<MotionAxisEntity>
             {
                 new MotionAxisEntity
@@ -136,24 +147,34 @@ namespace AM.DBService.Services.Motion.App
                     CardId = 0,
                     AxisId = 1,
                     LogicalAxis = 101,
-                    Name = "测试X轴",
+                    Name = "TestAxisX",
+                    DisplayName = "测试X轴",
+                    AxisCategory = "Linear",
                     PhysicalCore = 1,
                     PhysicalAxis = 1,
                     IsEnabled = true,
                     SortOrder = 1,
-                    Remark = "默认测试轴X"
+                    Description = "默认测试X轴",
+                    Remark = "系统初始化默认轴",
+                    CreateTime = now,
+                    UpdateTime = now
                 },
                 new MotionAxisEntity
                 {
                     CardId = 0,
                     AxisId = 2,
                     LogicalAxis = 102,
-                    Name = "测试Y轴",
+                    Name = "TestAxisY",
+                    DisplayName = "测试Y轴",
+                    AxisCategory = "Linear",
                     PhysicalCore = 1,
                     PhysicalAxis = 2,
                     IsEnabled = true,
                     SortOrder = 2,
-                    Remark = "默认测试轴Y"
+                    Description = "默认测试Y轴",
+                    Remark = "系统初始化默认轴",
+                    CreateTime = now,
+                    UpdateTime = now
                 }
             };
         }
@@ -431,12 +452,12 @@ namespace AM.DBService.Services.Motion.App
         private static List<MotionAxisConfigEntity> CreateDefaultAxisConfigs()
         {
             var result = new List<MotionAxisConfigEntity>();
-            result.AddRange(CreateAxisConfigRows(101, "测试X轴"));
-            result.AddRange(CreateAxisConfigRows(102, "测试Y轴"));
+            result.AddRange(CreateAxisConfigRows((short)101, "测试X轴"));
+            result.AddRange(CreateAxisConfigRows((short)102, "测试Y轴"));
             return result;
         }
 
-        private static IEnumerable<MotionAxisConfigEntity> CreateAxisConfigRows(int logicalAxis, string axisName)
+        private static IEnumerable<MotionAxisConfigEntity> CreateAxisConfigRows(short logicalAxis, string axisName)
         {
             yield return CreateConfig(logicalAxis, axisName, "AlarmEnabled", "报警使能", "Bool", 1D);
             yield return CreateConfig(logicalAxis, axisName, "AlarmInvert", "报警取反", "Bool", 0D);
@@ -518,7 +539,7 @@ namespace AM.DBService.Services.Motion.App
             };
         }
 
-        private static MotionAxisConfigEntity CreateConfig(int logicalAxis, string axisName, string paramName, string displayName, string valueType, double value)
+        private static MotionAxisConfigEntity CreateConfig(short logicalAxis, string axisName, string paramName, string displayName, string valueType, double value)
         {
             return new MotionAxisConfigEntity
             {
@@ -530,10 +551,7 @@ namespace AM.DBService.Services.Motion.App
                 ParamSetValue = value,
                 ParamDefaultValue = value,
                 ParamMaxValue = 0D,
-                ParamMinValue = 0D,
-                Status1 = 0,
-                Status2 = 0,
-                Status3 = 0
+                ParamMinValue = 0D
             };
         }
     }

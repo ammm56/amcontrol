@@ -406,7 +406,7 @@ namespace AM.DBService.Services.Motion.App
         /// <summary>
         /// 创建数据库参数对象。
         /// </summary>
-        private static MotionAxisConfigEntity CreateRow(int logicalAxis, string axisName, string paramName, string displayName, string valueType, double value)
+        private static MotionAxisConfigEntity CreateRow(short logicalAxis, string axisName, string paramName, string displayName, string valueType, double value)
         {
             return new MotionAxisConfigEntity
             {

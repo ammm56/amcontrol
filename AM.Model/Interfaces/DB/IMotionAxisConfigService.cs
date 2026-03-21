@@ -10,9 +10,9 @@ namespace AM.Model.Interfaces.DB
     public interface IMotionAxisConfigService
     {
         Result<MotionAxisConfigEntity> QueryAll();
-        Result<MotionAxisConfigEntity> QueryByLogicalAxis(int logicalAxis);
+        Result<MotionAxisConfigEntity> QueryByLogicalAxis(short logicalAxis);
         Result Save(MotionAxisConfigEntity entity);
         Result SaveRange(IEnumerable<MotionAxisConfigEntity> entities);
-        Result Delete(int logicalAxis, string paramName);
+        Result Delete(short logicalAxis, string paramName);
     }
 }

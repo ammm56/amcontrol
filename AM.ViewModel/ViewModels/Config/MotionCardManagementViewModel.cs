@@ -8,6 +8,7 @@ using AM.Model.Interfaces.DB.Motion.App;
 using AM.Model.Interfaces.DB.Motion.Topology;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -125,18 +126,27 @@ namespace AM.ViewModel.ViewModels.Config
         private void AddItem()
         {
             var nextCardId = Items.Count == 0 ? (short)0 : (short)(Items.Max(p => p.CardId) + 1);
+            var now = DateTime.Now;
 
             var item = new MotionCardEntity
             {
                 CardId = nextCardId,
                 CardType = 90,
                 Name = "MotionCard-" + nextCardId,
+                DisplayName = "控制卡-" + nextCardId,
+                DriverKey = "Virtual.Basic",
                 ModeParam = 0,
+                OpenConfig = null,
                 CoreNumber = 1,
                 AxisCountNumber = 0,
                 UseExtModule = false,
+                InitOrder = Items.Count + 1,
                 IsEnabled = true,
-                SortOrder = Items.Count + 1
+                SortOrder = Items.Count + 1,
+                Description = "新建控制卡配置",
+                Remark = null,
+                CreateTime = now,
+                UpdateTime = now
             };
 
             Items.Add(item);
@@ -156,6 +166,8 @@ namespace AM.ViewModel.ViewModels.Config
 
             try
             {
+                var cardId = SelectedItem.CardId;
+
                 var saveResult = await Task.Run(() => _motionCardCrudService.Save(SelectedItem));
                 if (!saveResult.Success)
                 {
@@ -167,7 +179,7 @@ namespace AM.ViewModel.ViewModels.Config
                 StatusText = reloadResult.Success ? "控制卡保存成功并已热重载" : reloadResult.Message;
 
                 await LoadAsync();
-                RestoreSelectionByCardId(SelectedItem.CardId);
+                RestoreSelectionByCardId(cardId);
             }
             finally
             {
@@ -230,13 +242,20 @@ namespace AM.ViewModel.ViewModels.Config
                 CardId = source.CardId,
                 CardType = source.CardType,
                 Name = source.Name,
+                DisplayName = source.DisplayName,
+                DriverKey = source.DriverKey,
                 ModeParam = source.ModeParam,
+                OpenConfig = source.OpenConfig,
                 CoreNumber = source.CoreNumber,
                 AxisCountNumber = source.AxisCountNumber,
                 UseExtModule = source.UseExtModule,
+                InitOrder = source.InitOrder,
                 IsEnabled = source.IsEnabled,
                 SortOrder = source.SortOrder,
-                Remark = source.Remark
+                Description = source.Description,
+                Remark = source.Remark,
+                CreateTime = source.CreateTime,
+                UpdateTime = source.UpdateTime
             };
         }
     }

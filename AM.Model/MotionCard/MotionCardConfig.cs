@@ -1,148 +1,126 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace AM.Model.MotionCard
 {
     /// <summary>
-    /// 运动控制卡类型枚举
+    /// 运动控制卡类型枚举。
     /// </summary>
     public enum MotionCardType
     {
         /// <summary>
-        /// 固高
+        /// 固高。
         /// </summary>
         GOOGO = 10,
+
         /// <summary>
-        /// 雷赛
+        /// 雷赛。
         /// </summary>
         LEISAI = 20,
+
         /// <summary>
-        /// 虚拟卡
+        /// 虚拟卡。
         /// </summary>
         VIRTUAL = 90,
+
         /// <summary>
-        /// 其它
+        /// 其它。
         /// </summary>
         Other = 99
     }
+
+    /// <summary>
+    /// 运动控制卡运行时完整配置。
+    /// 由 `motion_card`、`motion_axis`、`motion_io_map`、`motion_axis_config`
+    /// 等数据库表聚合装配而成。
+    /// </summary>
     public class MotionCardConfig
     {
         /// <summary>
-        /// 运动控制卡类型
+        /// 控制卡类型。
         /// </summary>
         public MotionCardType CardType { get; set; } = MotionCardType.GOOGO;
 
         /// <summary>
-        /// 控制卡名称，主要用于区分不同的控制卡实例
+        /// 控制卡内部名称。
+        /// 用于系统标识、日志、配置关联。
         /// </summary>
-
         public string Name { get; set; } = "MotionCard-0";
 
         /// <summary>
-        /// 硬件通信通道（通常对应电脑插槽里的物理卡索引，从 0 开始）
-        /// 对应 GTN_Open 的 channel
+        /// 控制卡显示名称。
+        /// 用于配置页、监视页、报警页展示。
+        /// 为空时可回退到 Name。
+        /// </summary>
+        public string DisplayName { get; set; }
+
+        /// <summary>
+        /// 驱动识别键。
+        /// 用于细分同一控制卡类型下的具体驱动实现。
+        /// </summary>
+        public string DriverKey { get; set; }
+
+        /// <summary>
+        /// 硬件通信通道。
+        /// 通常对应物理卡索引或厂商驱动通道号。
         /// </summary>
         public short CardId { get; set; } = 0;
 
         /// <summary>
-        /// 1 配置模式, 1：表示使用配置文件初始化,按照文件里的参数（轴数、脉冲极性、限位开关极性等）直接配置硬件。
-        /// 取值为 0（可选）：通常表示不加载配置，仅打开控制卡。这种模式下，需要通过后续代码手动设置每一个硬件参数。
+        /// 打开模式参数。
+        /// 例如：0=仅打开，1=按配置初始化。
         /// </summary>
-        public short ModeParam { get; set; } = 0; 
+        public short ModeParam { get; set; } = 0;
 
         /// <summary>
-        /// 控制卡内核数量，现在用的有2核，但是入门卡只有1核
+        /// 控制卡扩展打开配置。
+        /// 一般承载厂商专属的 JSON 配置参数。
+        /// </summary>
+        public string OpenConfig { get; set; }
+
+        /// <summary>
+        /// 控制卡内核数量。
         /// </summary>
         public ushort CoreNumber { get; set; } = 2;
 
         /// <summary>
-        /// 控制卡轴的总数量
+        /// 控制卡轴总数。
         /// </summary>
         public short AxisCountNumber { get; set; } = 4;
 
         /// <summary>
-        /// 使用扩展模块
+        /// 是否启用扩展模块。
         /// </summary>
-        public bool UseExtModule {  get; set; } = false;
+        public bool UseExtModule { get; set; }
 
         /// <summary>
-        /// 板载/扩展 DI 映射
+        /// 初始化顺序。
+        /// 多卡场景下用于统一启动顺序控制。
+        /// </summary>
+        public int InitOrder { get; set; }
+
+        /// <summary>
+        /// 控制卡说明。
+        /// </summary>
+        public string Description { get; set; }
+
+        /// <summary>
+        /// 控制卡备注。
+        /// </summary>
+        public string Remark { get; set; }
+
+        /// <summary>
+        /// 板载/扩展 DI 映射。
         /// </summary>
         public List<MotionIoBitMap> DIBitMaps { get; set; } = new List<MotionIoBitMap>();
 
         /// <summary>
-        /// 板载/扩展 DO 映射
+        /// 板载/扩展 DO 映射。
         /// </summary>
         public List<MotionIoBitMap> DOBitMaps { get; set; } = new List<MotionIoBitMap>();
 
-
         /// <summary>
-        /// 该卡下的所有轴配置
+        /// 该卡下的所有轴配置。
         /// </summary>
-        public List<AxisConfig> AxisConfigs { get; set; } = new List<AxisConfig>
-        {
-
-            new AxisConfig
-            {
-                AxisId = 14,
-                Name = "水平X轴",
-                LogicalAxis = 114,
-                PhysicalCore = 1,
-                PhysicalAxis = 14,
-
-                AlarmEnabled = true,
-                AlarmInvert = false,
-                EnableInvert = false,
-                PulseMode = 0,
-                DefaultMoveMode = 1,
-                EncoderExternal = false,
-                EncoderInvert = false,
-                LimitHomeInvert = false,
-                LimitMode = -1,
-                TriggerEdge = 1,
-
-                Lead = 5.0,
-                PulsePerRev = 10000,
-                GearRatio = 1.0,
-
-                DefaultVelocity = 5.0,
-                JogVelocity = 2.0,
-                Acc = 0.5,
-                Dec = 0.5,
-                SmoothTime = 25,
-                HomeDeceleration = 0.5,
-                NormalStopDeceleration = 0.5,
-                EmergencyStopDeceleration = 2.0,
-
-                StandardHomeMode = 1,
-                ResetDirection = 1,
-                HomeSearchVelocity = 1.0,
-                IndexSearchVelocity = 0.2,
-                HomeOffset = 0,
-                HomeMaxDistance = 0,
-                IndexMaxDistance = 0,
-                EscapeStep = 1000,
-                IndexSearchDirection = 1,
-                HomeCheck = true,
-                HomeUseHomeSignal = true,
-                HomeUseIndexSignal = true,
-                HomeUseLimitSignal = false,
-                HomeAutoZeroPos = true,
-                HomeTimeoutMs = 60000,
-
-                SoftLimitEnabled = true,
-                SoftLimitPositive = 500000,
-                SoftLimitNegative = -500000,
-
-                EnableDelayMs = 50,
-                DisableDelayMs = 50,
-
-                EStopId = 0,
-                StopId = 0
-            }
-        };
+        public List<AxisConfig> AxisConfigs { get; set; } = new List<AxisConfig>();
     }
 }
