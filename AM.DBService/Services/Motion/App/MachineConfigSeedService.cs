@@ -51,7 +51,8 @@ namespace AM.DBService.Services.Motion.App
                     typeof(MotionAxisConfigEntity),
                     typeof(MotionIoPointConfigEntity),
                     typeof(CylinderConfigEntity),
-                    typeof(VacuumConfigEntity));
+                    typeof(VacuumConfigEntity),
+                    typeof(StackLightConfigEntity));
 
                 if (HasAnyMotionConfigData(db))
                 {
@@ -68,6 +69,7 @@ namespace AM.DBService.Services.Motion.App
                 var cylinders = CreateDefaultCylinders();
                 var axisConfigs = CreateDefaultAxisConfigs();
                 var vacuums = CreateDefaultVacuums();
+                var stackLights = CreateDefaultStackLights();
 
                 db.Insertable(cards).ExecuteCommand();
                 db.Insertable(axes).ExecuteCommand();
@@ -76,6 +78,7 @@ namespace AM.DBService.Services.Motion.App
                 db.Insertable(cylinders).ExecuteCommand();
                 db.Insertable(vacuums).ExecuteCommand();
                 db.Insertable(axisConfigs).ExecuteCommand();
+                db.Insertable(stackLights).ExecuteCommand();
 
                 db.Ado.CommitTran();
 
@@ -108,7 +111,8 @@ namespace AM.DBService.Services.Motion.App
                 || db.Queryable<MotionIoPointConfigEntity>().Any()
                 || db.Queryable<CylinderConfigEntity>().Any()
                 || db.Queryable<VacuumConfigEntity>().Any()
-                || db.Queryable<MotionAxisConfigEntity>().Any();
+                || db.Queryable<MotionAxisConfigEntity>().Any()
+                || db.Queryable<StackLightConfigEntity>().Any();
         }
 
         private static List<MotionCardEntity> CreateDefaultCards()
@@ -355,6 +359,58 @@ namespace AM.DBService.Services.Motion.App
                     IsEnabled = true,
                     SortOrder = 13,
                     Remark = "测试真空破真空输出"
+                },
+                new MotionIoMapEntity
+                {
+                    CardId = 0,
+                    IoType = "DO",
+                    LogicalBit = 2301,
+                    Name = "MainTowerRed",
+                    Core = 1,
+                    IsExtModule = false,
+                    HardwareBit = 7,
+                    IsEnabled = true,
+                    SortOrder = 14,
+                    Remark = "测试灯塔红灯输出"
+                },
+                new MotionIoMapEntity
+                {
+                    CardId = 0,
+                    IoType = "DO",
+                    LogicalBit = 2302,
+                    Name = "MainTowerYellow",
+                    Core = 1,
+                    IsExtModule = false,
+                    HardwareBit = 8,
+                    IsEnabled = true,
+                    SortOrder = 15,
+                    Remark = "测试灯塔黄灯输出"
+                },
+                new MotionIoMapEntity
+                {
+                    CardId = 0,
+                    IoType = "DO",
+                    LogicalBit = 2303,
+                    Name = "MainTowerGreen",
+                    Core = 1,
+                    IsExtModule = false,
+                    HardwareBit = 9,
+                    IsEnabled = true,
+                    SortOrder = 16,
+                    Remark = "测试灯塔绿灯输出"
+                },
+                new MotionIoMapEntity
+                {
+                    CardId = 0,
+                    IoType = "DO",
+                    LogicalBit = 2304,
+                    Name = "MainTowerBuzzer",
+                    Core = 1,
+                    IsExtModule = false,
+                    HardwareBit = 10,
+                    IsEnabled = true,
+                    SortOrder = 17,
+                    Remark = "测试灯塔蜂鸣器输出"
                 }
             };
         }
@@ -609,6 +665,82 @@ namespace AM.DBService.Services.Motion.App
                     BlinkOffMs = 0,
                     Description = "测试真空破真空控制输出",
                     Remark = "默认真空 DO 点位公共配置"
+                },
+                new MotionIoPointConfigEntity
+                {
+                    IoType = "DO",
+                    LogicalBit = 2301,
+                    DisplayName = "主灯塔红灯",
+                    SignalCategory = "TowerLight",
+                    Invert = false,
+                    IsNormallyClosed = false,
+                    DebounceMs = 0,
+                    FilterMs = 0,
+                    CanManualOperate = true,
+                    DefaultOutputState = false,
+                    OutputMode = "Keep",
+                    PulseWidthMs = 0,
+                    BlinkOnMs = 0,
+                    BlinkOffMs = 0,
+                    Description = "测试主灯塔红灯输出",
+                    Remark = "默认灯塔 DO 点位公共配置"
+                },
+                new MotionIoPointConfigEntity
+                {
+                    IoType = "DO",
+                    LogicalBit = 2302,
+                    DisplayName = "主灯塔黄灯",
+                    SignalCategory = "TowerLight",
+                    Invert = false,
+                    IsNormallyClosed = false,
+                    DebounceMs = 0,
+                    FilterMs = 0,
+                    CanManualOperate = true,
+                    DefaultOutputState = false,
+                    OutputMode = "Keep",
+                    PulseWidthMs = 0,
+                    BlinkOnMs = 0,
+                    BlinkOffMs = 0,
+                    Description = "测试主灯塔黄灯输出",
+                    Remark = "默认灯塔 DO 点位公共配置"
+                },
+                new MotionIoPointConfigEntity
+                {
+                    IoType = "DO",
+                    LogicalBit = 2303,
+                    DisplayName = "主灯塔绿灯",
+                    SignalCategory = "TowerLight",
+                    Invert = false,
+                    IsNormallyClosed = false,
+                    DebounceMs = 0,
+                    FilterMs = 0,
+                    CanManualOperate = true,
+                    DefaultOutputState = false,
+                    OutputMode = "Keep",
+                    PulseWidthMs = 0,
+                    BlinkOnMs = 0,
+                    BlinkOffMs = 0,
+                    Description = "测试主灯塔绿灯输出",
+                    Remark = "默认灯塔 DO 点位公共配置"
+                },
+                new MotionIoPointConfigEntity
+                {
+                    IoType = "DO",
+                    LogicalBit = 2304,
+                    DisplayName = "主灯塔蜂鸣器",
+                    SignalCategory = "TowerLight",
+                    Invert = false,
+                    IsNormallyClosed = false,
+                    DebounceMs = 0,
+                    FilterMs = 0,
+                    CanManualOperate = true,
+                    DefaultOutputState = false,
+                    OutputMode = "Keep",
+                    PulseWidthMs = 0,
+                    BlinkOnMs = 0,
+                    BlinkOffMs = 0,
+                    Description = "测试主灯塔蜂鸣器输出",
+                    Remark = "默认灯塔 DO 点位公共配置"
                 }
             };
         }
@@ -728,6 +860,30 @@ namespace AM.DBService.Services.Motion.App
                     SortOrder = 1,
                     Description = "默认测试取料真空对象",
                     Remark = "用于演示第三层真空对象配置"
+                }
+            };
+        }
+
+        private static List<StackLightConfigEntity> CreateDefaultStackLights()
+        {
+            return new List<StackLightConfigEntity>
+            {
+                new StackLightConfigEntity
+                {
+                    Name = "MainTower",
+                    DisplayName = "主灯塔",
+                    RedOutputBit = 2301,
+                    YellowOutputBit = 2302,
+                    GreenOutputBit = 2303,
+                    BlueOutputBit = null,
+                    BuzzerOutputBit = 2304,
+                    EnableBuzzerOnWarning = false,
+                    EnableBuzzerOnAlarm = true,
+                    AllowMultiSegmentOn = false,
+                    IsEnabled = true,
+                    SortOrder = 1,
+                    Description = "默认测试主灯塔对象",
+                    Remark = "用于演示第三层灯塔对象配置"
                 }
             };
         }

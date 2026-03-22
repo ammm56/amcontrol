@@ -8,6 +8,7 @@ namespace AM.Model.MotionCard.Actuator
     /// 当前已正式实现的类别：
     /// 1. 气缸
     /// 2. 真空
+    /// 3. 灯塔/声光报警
     /// 其余类别待后续按同一模式扩展。
     /// </summary>
     public class ActuatorConfig
@@ -23,9 +24,9 @@ namespace AM.Model.MotionCard.Actuator
         public List<VacuumConfig> Vacuums { get; set; } = new List<VacuumConfig>();
 
         /// <summary>
-        /// 预留：灯塔/声光报警对象集合。
+        /// 灯塔/声光报警对象集合。
         /// </summary>
-        // public List<StackLightConfig> StackLights { get; set; } = new List<StackLightConfig>();
+        public List<StackLightConfig> StackLights { get; set; } = new List<StackLightConfig>();
 
         /// <summary>
         /// 预留：夹爪对象集合。

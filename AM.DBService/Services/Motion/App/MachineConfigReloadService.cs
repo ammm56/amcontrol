@@ -105,6 +105,7 @@ namespace AM.DBService.Services.Motion.App
             machine.DOCards.Clear();
             machine.Cylinders.Clear();
             machine.Vacuums.Clear();
+            machine.StackLights.Clear();
             machine.MotionHub = null;
         }
 
@@ -225,6 +226,12 @@ namespace AM.DBService.Services.Motion.App
                 return vacuumResult;
             }
 
+            var stackLightResult = RegisterStackLightMappings(machine, actuatorConfig);
+            if (!stackLightResult.Success)
+            {
+                return stackLightResult;
+            }
+
             return Ok("执行器对象配置注册成功");
         }
 
@@ -322,5 +329,57 @@ namespace AM.DBService.Services.Motion.App
 
             return Ok("真空对象配置注册成功");
         }
+
+        private Result RegisterStackLightMappings(MachineContext machine, ActuatorConfig actuatorConfig)
+        {
+            if (actuatorConfig.StackLights == null)
+            {
+                return Ok("无灯塔对象配置");
+            }
+
+            foreach (var stackLight in actuatorConfig.StackLights.Where(p => p != null && p.IsEnabled))
+            {
+                if (string.IsNullOrWhiteSpace(stackLight.Name))
+                {
+                    return Fail((int)DbErrorCode.InvalidArgument, "存在未配置名称的灯塔对象");
+                }
+
+                if (machine.StackLights.ContainsKey(stackLight.Name))
+                {
+                    return Fail((int)DbErrorCode.InvalidArgument, "灯塔名称重复: " + stackLight.Name);
+                }
+
+                if (stackLight.RedOutputBit.HasValue && !machine.DOCards.ContainsKey(stackLight.RedOutputBit.Value))
+                {
+                    return Fail((int)DbErrorCode.InvalidArgument, "灯塔红灯输出位未注册到 DO 路由: " + stackLight.RedOutputBit.Value);
+                }
+
+                if (stackLight.YellowOutputBit.HasValue && !machine.DOCards.ContainsKey(stackLight.YellowOutputBit.Value))
+                {
+                    return Fail((int)DbErrorCode.InvalidArgument, "灯塔黄灯输出位未注册到 DO 路由: " + stackLight.YellowOutputBit.Value);
+                }
+
+                if (stackLight.GreenOutputBit.HasValue && !machine.DOCards.ContainsKey(stackLight.GreenOutputBit.Value))
+                {
+                    return Fail((int)DbErrorCode.InvalidArgument, "灯塔绿灯输出位未注册到 DO 路由: " + stackLight.GreenOutputBit.Value);
+                }
+
+                if (stackLight.BlueOutputBit.HasValue && !machine.DOCards.ContainsKey(stackLight.BlueOutputBit.Value))
+                {
+                    return Fail((int)DbErrorCode.InvalidArgument, "灯塔蓝灯输出位未注册到 DO 路由: " + stackLight.BlueOutputBit.Value);
+                }
+
+                if (stackLight.BuzzerOutputBit.HasValue && !machine.DOCards.ContainsKey(stackLight.BuzzerOutputBit.Value))
+                {
+                    return Fail((int)DbErrorCode.InvalidArgument, "灯塔蜂鸣器输出位未注册到 DO 路由: " + stackLight.BuzzerOutputBit.Value);
+                }
+
+                machine.StackLights[stackLight.Name] = stackLight;
+            }
+
+            return Ok("灯塔对象配置注册成功");
+        }
+
+
     }
 }

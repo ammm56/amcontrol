@@ -34,6 +34,7 @@ namespace AM.DBService.Services.Motion.App
         private readonly IMotionIoPointConfigCrudService _motionIoPointConfigCrudService;
         private readonly IMotionCylinderConfigCrudService _motionCylinderConfigCrudService;
         private readonly IMotionVacuumConfigCrudService _motionVacuumConfigCrudService;
+        private readonly IMotionStackLightConfigCrudService _motionStackLightConfigCrudService;
 
         protected override string MessageSourceName
         {
@@ -51,6 +52,7 @@ namespace AM.DBService.Services.Motion.App
                 new MotionIoPointConfigCrudService(),
                 new MotionCylinderConfigCrudService(),
                 new MotionVacuumConfigCrudService(),
+                new MotionStackLightConfigCrudService(),
                 SystemContext.Instance.Reporter)
         {
         }
@@ -60,6 +62,7 @@ namespace AM.DBService.Services.Motion.App
             IMotionIoPointConfigCrudService motionIoPointConfigCrudService,
             IMotionCylinderConfigCrudService motionCylinderConfigCrudService,
             IMotionVacuumConfigCrudService motionVacuumConfigCrudService,
+            IMotionStackLightConfigCrudService motionStackLightConfigCrudService,
             IAppReporter reporter)
             : base(reporter)
         {
@@ -68,6 +71,7 @@ namespace AM.DBService.Services.Motion.App
             _motionIoPointConfigCrudService = motionIoPointConfigCrudService;
             _motionCylinderConfigCrudService = motionCylinderConfigCrudService;
             _motionVacuumConfigCrudService = motionVacuumConfigCrudService;
+            _motionStackLightConfigCrudService = motionStackLightConfigCrudService;
         }
 
         public Result EnsureTables()
@@ -82,7 +86,8 @@ namespace AM.DBService.Services.Motion.App
                     typeof(MotionAxisConfigEntity),
                     typeof(MotionIoPointConfigEntity),
                     typeof(CylinderConfigEntity),
-                    typeof(VacuumConfigEntity));
+                    typeof(VacuumConfigEntity),
+                    typeof(StackLightConfigEntity));
 
                 EnsureIndexes(db);
 
@@ -158,13 +163,24 @@ namespace AM.DBService.Services.Motion.App
                     ? vacuumConfigResult.Items.Where(p => p != null && p.IsEnabled).ToList()
                     : new List<VacuumConfigEntity>();
 
+                var stackLightConfigResult = _motionStackLightConfigCrudService.QueryAll();
+                if (!stackLightConfigResult.Success && stackLightConfigResult.Code != (int)DbErrorCode.NotFound)
+                {
+                    return Fail<MotionCardConfig>(stackLightConfigResult.Code, "读取灯塔对象配置失败");
+                }
+
+                var stackLightConfigs = stackLightConfigResult.Success
+                    ? stackLightConfigResult.Items.Where(p => p != null && p.IsEnabled).ToList()
+                    : new List<StackLightConfigEntity>();
+
                 var validateResult = ValidateEntities(
                     cardEntities,
                     axisEntities,
                     ioEntities,
                     ioPointConfigs,
                     cylinderConfigs,
-                    vacuumConfigs);
+                    vacuumConfigs,
+                    stackLightConfigs);
                 if (!validateResult.Success)
                 {
                     return Fail<MotionCardConfig>(validateResult.Code, validateResult.Message);
@@ -181,6 +197,7 @@ namespace AM.DBService.Services.Motion.App
                 var runtimeActuatorConfig = BuildActuatorConfig(
                     cylinderConfigs,
                     vacuumConfigs,
+                    stackLightConfigs,
                     ioEntities,
                     ioPointConfigs);
                 ConfigContext.Instance.Config.ActuatorConfig = runtimeActuatorConfig;
@@ -251,6 +268,10 @@ namespace AM.DBService.Services.Motion.App
                 "CREATE UNIQUE INDEX IF NOT EXISTS ux_motion_cylinder_config_name ON motion_cylinder_config(Name)");
             db.Ado.ExecuteCommand(
                 "CREATE UNIQUE INDEX IF NOT EXISTS ux_motion_vacuum_config_name ON motion_vacuum_config(Name)");
+
+            db.Ado.ExecuteCommand(
+                "CREATE UNIQUE INDEX IF NOT EXISTS ux_motion_stacklight_config_name ON motion_stacklight_config(Name)");
+
         }
 
         private static List<MotionCardConfig> BuildMotionCards(
@@ -411,7 +432,8 @@ namespace AM.DBService.Services.Motion.App
             IList<MotionIoMapEntity> ioEntities,
             IList<MotionIoPointConfigEntity> ioPointConfigs,
             IList<CylinderConfigEntity> cylinderConfigs,
-            IList<VacuumConfigEntity> vacuumConfigs)
+            IList<VacuumConfigEntity> vacuumConfigs,
+            IList<StackLightConfigEntity> stackLightConfigs)
         {
             var duplicateCardId = cardEntities
                 .GroupBy(p => p.CardId)
@@ -566,19 +588,70 @@ namespace AM.DBService.Services.Motion.App
                 }
             }
 
+            var duplicateStackLightName = stackLightConfigs
+                .GroupBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
+                .FirstOrDefault(g => g.Count() > 1);
+            if (duplicateStackLightName != null)
+            {
+                return Result.Fail(
+                    (int)DbErrorCode.InvalidArgument,
+                    "灯塔名称重复: " + duplicateStackLightName.Key,
+                    ResultSource.Database);
+            }
+
+            foreach (var stackLight in stackLightConfigs.Where(p => p != null))
+            {
+                if (string.IsNullOrWhiteSpace(stackLight.Name))
+                {
+                    return Result.Fail((int)DbErrorCode.InvalidArgument, "存在未配置名称的灯塔对象", ResultSource.Database);
+                }
+
+                if (stackLight.RedOutputBit.HasValue
+                    && !ioKeys.Contains(BuildIoPointKey("DO", stackLight.RedOutputBit.Value)))
+                {
+                    return Result.Fail((int)DbErrorCode.InvalidArgument, "灯塔红灯输出位不存在: " + stackLight.RedOutputBit.Value, ResultSource.Database);
+                }
+
+                if (stackLight.YellowOutputBit.HasValue
+                    && !ioKeys.Contains(BuildIoPointKey("DO", stackLight.YellowOutputBit.Value)))
+                {
+                    return Result.Fail((int)DbErrorCode.InvalidArgument, "灯塔黄灯输出位不存在: " + stackLight.YellowOutputBit.Value, ResultSource.Database);
+                }
+
+                if (stackLight.GreenOutputBit.HasValue
+                    && !ioKeys.Contains(BuildIoPointKey("DO", stackLight.GreenOutputBit.Value)))
+                {
+                    return Result.Fail((int)DbErrorCode.InvalidArgument, "灯塔绿灯输出位不存在: " + stackLight.GreenOutputBit.Value, ResultSource.Database);
+                }
+
+                if (stackLight.BlueOutputBit.HasValue
+                    && !ioKeys.Contains(BuildIoPointKey("DO", stackLight.BlueOutputBit.Value)))
+                {
+                    return Result.Fail((int)DbErrorCode.InvalidArgument, "灯塔蓝灯输出位不存在: " + stackLight.BlueOutputBit.Value, ResultSource.Database);
+                }
+
+                if (stackLight.BuzzerOutputBit.HasValue
+                    && !ioKeys.Contains(BuildIoPointKey("DO", stackLight.BuzzerOutputBit.Value)))
+                {
+                    return Result.Fail((int)DbErrorCode.InvalidArgument, "灯塔蜂鸣器输出位不存在: " + stackLight.BuzzerOutputBit.Value, ResultSource.Database);
+                }
+            }
+
             return Result.Ok("运动配置校验通过", ResultSource.Database);
         }
 
         private static ActuatorConfig BuildActuatorConfig(
             IList<CylinderConfigEntity> cylinderEntities,
             IList<VacuumConfigEntity> vacuumEntities,
+            IList<StackLightConfigEntity> stackLightEntities,
             IList<MotionIoMapEntity> ioEntities,
             IList<MotionIoPointConfigEntity> ioPointConfigs)
         {
             return new ActuatorConfig
             {
                 Cylinders = BuildCylinderConfigs(cylinderEntities, ioEntities, ioPointConfigs),
-                Vacuums = BuildVacuumConfigs(vacuumEntities, ioEntities, ioPointConfigs)
+                Vacuums = BuildVacuumConfigs(vacuumEntities, ioEntities, ioPointConfigs),
+                StackLights = BuildStackLightConfigs(stackLightEntities, ioEntities, ioPointConfigs)
             };
         }
 
@@ -666,5 +739,44 @@ namespace AM.DBService.Services.Motion.App
 
             return result;
         }
+
+        private static List<StackLightConfig> BuildStackLightConfigs(
+            IList<StackLightConfigEntity> stackLightEntities,
+            IList<MotionIoMapEntity> ioEntities,
+            IList<MotionIoPointConfigEntity> ioPointConfigs)
+        {
+            var result = new List<StackLightConfig>();
+            if (stackLightEntities == null || stackLightEntities.Count == 0)
+            {
+                return result;
+            }
+
+            foreach (var entity in stackLightEntities
+                .Where(p => p != null && p.IsEnabled)
+                .OrderBy(p => p.SortOrder)
+                .ThenBy(p => p.Name))
+            {
+                result.Add(new StackLightConfig
+                {
+                    Name = entity.Name,
+                    DisplayName = entity.DisplayName,
+                    RedOutputBit = entity.RedOutputBit,
+                    YellowOutputBit = entity.YellowOutputBit,
+                    GreenOutputBit = entity.GreenOutputBit,
+                    BlueOutputBit = entity.BlueOutputBit,
+                    BuzzerOutputBit = entity.BuzzerOutputBit,
+                    EnableBuzzerOnWarning = entity.EnableBuzzerOnWarning,
+                    EnableBuzzerOnAlarm = entity.EnableBuzzerOnAlarm,
+                    AllowMultiSegmentOn = entity.AllowMultiSegmentOn,
+                    IsEnabled = entity.IsEnabled,
+                    SortOrder = entity.SortOrder,
+                    Description = entity.Description,
+                    Remark = entity.Remark
+                });
+            }
+
+            return result;
+        }
+
     }
 }
