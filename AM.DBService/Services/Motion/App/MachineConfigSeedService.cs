@@ -52,7 +52,8 @@ namespace AM.DBService.Services.Motion.App
                     typeof(MotionIoPointConfigEntity),
                     typeof(CylinderConfigEntity),
                     typeof(VacuumConfigEntity),
-                    typeof(StackLightConfigEntity));
+                    typeof(StackLightConfigEntity),
+                    typeof(GripperConfigEntity));
 
                 if (HasAnyMotionConfigData(db))
                 {
@@ -70,6 +71,7 @@ namespace AM.DBService.Services.Motion.App
                 var axisConfigs = CreateDefaultAxisConfigs();
                 var vacuums = CreateDefaultVacuums();
                 var stackLights = CreateDefaultStackLights();
+                var grippers = CreateDefaultGrippers();
 
                 db.Insertable(cards).ExecuteCommand();
                 db.Insertable(axes).ExecuteCommand();
@@ -79,6 +81,7 @@ namespace AM.DBService.Services.Motion.App
                 db.Insertable(vacuums).ExecuteCommand();
                 db.Insertable(axisConfigs).ExecuteCommand();
                 db.Insertable(stackLights).ExecuteCommand();
+                db.Insertable(grippers).ExecuteCommand();
 
                 db.Ado.CommitTran();
 
@@ -112,7 +115,8 @@ namespace AM.DBService.Services.Motion.App
                 || db.Queryable<CylinderConfigEntity>().Any()
                 || db.Queryable<VacuumConfigEntity>().Any()
                 || db.Queryable<MotionAxisConfigEntity>().Any()
-                || db.Queryable<StackLightConfigEntity>().Any();
+                || db.Queryable<StackLightConfigEntity>().Any()
+                || db.Queryable<GripperConfigEntity>().Any();
         }
 
         private static List<MotionCardEntity> CreateDefaultCards()
@@ -411,6 +415,71 @@ namespace AM.DBService.Services.Motion.App
                     IsEnabled = true,
                     SortOrder = 17,
                     Remark = "测试灯塔蜂鸣器输出"
+                },
+                new MotionIoMapEntity
+                {
+                    CardId = 0,
+                    IoType = "DI",
+                    LogicalBit = 1401,
+                    Name = "PickGripperClosed",
+                    Core = 1,
+                    IsExtModule = false,
+                    HardwareBit = 11,
+                    IsEnabled = true,
+                    SortOrder = 18,
+                    Remark = "测试夹爪夹紧到位反馈"
+                },
+                new MotionIoMapEntity
+                {
+                    CardId = 0,
+                    IoType = "DI",
+                    LogicalBit = 1402,
+                    Name = "PickGripperOpened",
+                    Core = 1,
+                    IsExtModule = false,
+                    HardwareBit = 12,
+                    IsEnabled = true,
+                    SortOrder = 19,
+                    Remark = "测试夹爪打开到位反馈"
+                },
+                new MotionIoMapEntity
+                {
+                    CardId = 0,
+                    IoType = "DI",
+                    LogicalBit = 1403,
+                    Name = "PickGripperWorkpiecePresent",
+                    Core = 1,
+                    IsExtModule = false,
+                    HardwareBit = 13,
+                    IsEnabled = true,
+                    SortOrder = 20,
+                    Remark = "测试夹爪工件检测"
+                },
+                new MotionIoMapEntity
+                {
+                    CardId = 0,
+                    IoType = "DO",
+                    LogicalBit = 2401,
+                    Name = "PickGripperClose",
+                    Core = 1,
+                    IsExtModule = false,
+                    HardwareBit = 11,
+                    IsEnabled = true,
+                    SortOrder = 21,
+                    Remark = "测试夹爪夹紧输出"
+                },
+                new MotionIoMapEntity
+                {
+                    CardId = 0,
+                    IoType = "DO",
+                    LogicalBit = 2402,
+                    Name = "PickGripperOpen",
+                    Core = 1,
+                    IsExtModule = false,
+                    HardwareBit = 12,
+                    IsEnabled = true,
+                    SortOrder = 22,
+                    Remark = "测试夹爪打开输出"
                 }
             };
         }
@@ -741,6 +810,101 @@ namespace AM.DBService.Services.Motion.App
                     BlinkOffMs = 0,
                     Description = "测试主灯塔蜂鸣器输出",
                     Remark = "默认灯塔 DO 点位公共配置"
+                },
+                new MotionIoPointConfigEntity
+                {
+                    IoType = "DI",
+                    LogicalBit = 1401,
+                    DisplayName = "夹爪夹紧到位",
+                    SignalCategory = "Gripper",
+                    Invert = false,
+                    IsNormallyClosed = false,
+                    DebounceMs = 20,
+                    FilterMs = 0,
+                    CanManualOperate = false,
+                    DefaultOutputState = false,
+                    OutputMode = "Keep",
+                    PulseWidthMs = 0,
+                    BlinkOnMs = 0,
+                    BlinkOffMs = 0,
+                    Description = "测试夹爪夹紧到位反馈输入",
+                    Remark = "默认夹爪 DI 点位公共配置"
+                },
+                new MotionIoPointConfigEntity
+                {
+                    IoType = "DI",
+                    LogicalBit = 1402,
+                    DisplayName = "夹爪打开到位",
+                    SignalCategory = "Gripper",
+                    Invert = false,
+                    IsNormallyClosed = false,
+                    DebounceMs = 20,
+                    FilterMs = 0,
+                    CanManualOperate = false,
+                    DefaultOutputState = false,
+                    OutputMode = "Keep",
+                    PulseWidthMs = 0,
+                    BlinkOnMs = 0,
+                    BlinkOffMs = 0,
+                    Description = "测试夹爪打开到位反馈输入",
+                    Remark = "默认夹爪 DI 点位公共配置"
+                },
+                new MotionIoPointConfigEntity
+                {
+                    IoType = "DI",
+                    LogicalBit = 1403,
+                    DisplayName = "夹爪工件检测",
+                    SignalCategory = "Gripper",
+                    Invert = false,
+                    IsNormallyClosed = false,
+                    DebounceMs = 20,
+                    FilterMs = 0,
+                    CanManualOperate = false,
+                    DefaultOutputState = false,
+                    OutputMode = "Keep",
+                    PulseWidthMs = 0,
+                    BlinkOnMs = 0,
+                    BlinkOffMs = 0,
+                    Description = "测试夹爪工件检测输入",
+                    Remark = "默认夹爪 DI 点位公共配置"
+                },
+                new MotionIoPointConfigEntity
+                {
+                    IoType = "DO",
+                    LogicalBit = 2401,
+                    DisplayName = "夹爪夹紧输出",
+                    SignalCategory = "Gripper",
+                    Invert = false,
+                    IsNormallyClosed = false,
+                    DebounceMs = 0,
+                    FilterMs = 0,
+                    CanManualOperate = true,
+                    DefaultOutputState = false,
+                    OutputMode = "Keep",
+                    PulseWidthMs = 0,
+                    BlinkOnMs = 0,
+                    BlinkOffMs = 0,
+                    Description = "测试夹爪夹紧控制输出",
+                    Remark = "默认夹爪 DO 点位公共配置"
+                },
+                new MotionIoPointConfigEntity
+                {
+                    IoType = "DO",
+                    LogicalBit = 2402,
+                    DisplayName = "夹爪打开输出",
+                    SignalCategory = "Gripper",
+                    Invert = false,
+                    IsNormallyClosed = false,
+                    DebounceMs = 0,
+                    FilterMs = 0,
+                    CanManualOperate = true,
+                    DefaultOutputState = false,
+                    OutputMode = "Keep",
+                    PulseWidthMs = 0,
+                    BlinkOnMs = 0,
+                    BlinkOffMs = 0,
+                    Description = "测试夹爪打开控制输出",
+                    Remark = "默认夹爪 DO 点位公共配置"
                 }
             };
         }
@@ -884,6 +1048,37 @@ namespace AM.DBService.Services.Motion.App
                     SortOrder = 1,
                     Description = "默认测试主灯塔对象",
                     Remark = "用于演示第三层灯塔对象配置"
+                }
+            };
+        }
+
+        private static List<GripperConfigEntity> CreateDefaultGrippers()
+        {
+            return new List<GripperConfigEntity>
+            {
+                new GripperConfigEntity
+                {
+                    Name = "PickGripper",
+                    DisplayName = "取料夹爪",
+                    DriveMode = "Double",
+                    CloseOutputBit = 2401,
+                    OpenOutputBit = 2402,
+                    CloseFeedbackBit = 1401,
+                    OpenFeedbackBit = 1402,
+                    WorkpiecePresentBit = 1403,
+                    UseFeedbackCheck = true,
+                    UseWorkpieceCheck = true,
+                    CloseTimeoutMs = 1500,
+                    OpenTimeoutMs = 1500,
+                    AlarmCodeOnCloseTimeout = 93001,
+                    AlarmCodeOnOpenTimeout = 93002,
+                    AlarmCodeOnWorkpieceLost = 93003,
+                    AllowBothOff = false,
+                    AllowBothOn = false,
+                    IsEnabled = true,
+                    SortOrder = 1,
+                    Description = "默认测试取料夹爪对象",
+                    Remark = "用于演示第三层夹爪对象配置"
                 }
             };
         }

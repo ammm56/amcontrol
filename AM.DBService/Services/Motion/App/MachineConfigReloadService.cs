@@ -106,6 +106,7 @@ namespace AM.DBService.Services.Motion.App
             machine.Cylinders.Clear();
             machine.Vacuums.Clear();
             machine.StackLights.Clear();
+            machine.Grippers.Clear();
             machine.MotionHub = null;
         }
 
@@ -230,6 +231,12 @@ namespace AM.DBService.Services.Motion.App
             if (!stackLightResult.Success)
             {
                 return stackLightResult;
+            }
+
+            var gripperResult = RegisterGripperMappings(machine, actuatorConfig);
+            if (!gripperResult.Success)
+            {
+                return gripperResult;
             }
 
             return Ok("执行器对象配置注册成功");
@@ -380,6 +387,55 @@ namespace AM.DBService.Services.Motion.App
             return Ok("灯塔对象配置注册成功");
         }
 
+        private Result RegisterGripperMappings(MachineContext machine, ActuatorConfig actuatorConfig)
+        {
+            if (actuatorConfig.Grippers == null)
+            {
+                return Ok("无夹爪对象配置");
+            }
+
+            foreach (var gripper in actuatorConfig.Grippers.Where(p => p != null && p.IsEnabled))
+            {
+                if (string.IsNullOrWhiteSpace(gripper.Name))
+                {
+                    return Fail((int)DbErrorCode.InvalidArgument, "存在未配置名称的夹爪对象");
+                }
+
+                if (machine.Grippers.ContainsKey(gripper.Name))
+                {
+                    return Fail((int)DbErrorCode.InvalidArgument, "夹爪名称重复: " + gripper.Name);
+                }
+
+                if (!machine.DOCards.ContainsKey(gripper.CloseOutputBit))
+                {
+                    return Fail((int)DbErrorCode.InvalidArgument, "夹爪夹紧输出位未注册到 DO 路由: " + gripper.CloseOutputBit);
+                }
+
+                if (gripper.OpenOutputBit.HasValue && !machine.DOCards.ContainsKey(gripper.OpenOutputBit.Value))
+                {
+                    return Fail((int)DbErrorCode.InvalidArgument, "夹爪打开输出位未注册到 DO 路由: " + gripper.OpenOutputBit.Value);
+                }
+
+                if (gripper.CloseFeedbackBit.HasValue && !machine.DICards.ContainsKey(gripper.CloseFeedbackBit.Value))
+                {
+                    return Fail((int)DbErrorCode.InvalidArgument, "夹爪夹紧反馈位未注册到 DI 路由: " + gripper.CloseFeedbackBit.Value);
+                }
+
+                if (gripper.OpenFeedbackBit.HasValue && !machine.DICards.ContainsKey(gripper.OpenFeedbackBit.Value))
+                {
+                    return Fail((int)DbErrorCode.InvalidArgument, "夹爪打开反馈位未注册到 DI 路由: " + gripper.OpenFeedbackBit.Value);
+                }
+
+                if (gripper.WorkpiecePresentBit.HasValue && !machine.DICards.ContainsKey(gripper.WorkpiecePresentBit.Value))
+                {
+                    return Fail((int)DbErrorCode.InvalidArgument, "夹爪工件检测位未注册到 DI 路由: " + gripper.WorkpiecePresentBit.Value);
+                }
+
+                machine.Grippers[gripper.Name] = gripper;
+            }
+
+            return Ok("夹爪对象配置注册成功");
+        }
 
     }
 }

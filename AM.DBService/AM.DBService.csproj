@@ -64,7 +64,9 @@
     <Compile Include="Services\MotionAxisConfigOverlayService.cs" />
     <Compile Include="Services\MotionAxisConfigService.cs" />
     <Compile Include="Services\Motion\Actuator\CylinderService.cs" />
+    <Compile Include="Services\Motion\Actuator\GripperService.cs" />
     <Compile Include="Services\Motion\Actuator\MotionCylinderConfigCrudService.cs" />
+    <Compile Include="Services\Motion\Actuator\MotionGripperConfigCrudService.cs" />
     <Compile Include="Services\Motion\Actuator\MotionStackLightConfigCrudService.cs" />
     <Compile Include="Services\Motion\Actuator\MotionVacuumConfigCrudService.cs" />
     <Compile Include="Services\Motion\Actuator\StackLightService.cs" />

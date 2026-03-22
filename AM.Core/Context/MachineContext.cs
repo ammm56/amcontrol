@@ -67,6 +67,12 @@ namespace AM.Core.Context
         public IDictionary<string, StackLightConfig> StackLights { get; } = new Dictionary<string, StackLightConfig>();
 
         /// <summary>
+        /// 夹爪对象运行时配置索引。
+        /// Key: Name
+        /// </summary>
+        public IDictionary<string, GripperConfig> Grippers { get; } = new Dictionary<string, GripperConfig>();
+
+        /// <summary>
         /// 预留：PLC 服务对象。
         /// </summary>
         // public IPLCService Plc { get; set; }

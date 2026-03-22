@@ -35,6 +35,7 @@ namespace AM.DBService.Services.Motion.App
         private readonly IMotionCylinderConfigCrudService _motionCylinderConfigCrudService;
         private readonly IMotionVacuumConfigCrudService _motionVacuumConfigCrudService;
         private readonly IMotionStackLightConfigCrudService _motionStackLightConfigCrudService;
+        private readonly IMotionGripperConfigCrudService _motionGripperConfigCrudService;
 
         protected override string MessageSourceName
         {
@@ -53,6 +54,7 @@ namespace AM.DBService.Services.Motion.App
                 new MotionCylinderConfigCrudService(),
                 new MotionVacuumConfigCrudService(),
                 new MotionStackLightConfigCrudService(),
+                new MotionGripperConfigCrudService(),
                 SystemContext.Instance.Reporter)
         {
         }
@@ -63,6 +65,7 @@ namespace AM.DBService.Services.Motion.App
             IMotionCylinderConfigCrudService motionCylinderConfigCrudService,
             IMotionVacuumConfigCrudService motionVacuumConfigCrudService,
             IMotionStackLightConfigCrudService motionStackLightConfigCrudService,
+            IMotionGripperConfigCrudService motionGripperConfigCrudService,
             IAppReporter reporter)
             : base(reporter)
         {
@@ -72,6 +75,7 @@ namespace AM.DBService.Services.Motion.App
             _motionCylinderConfigCrudService = motionCylinderConfigCrudService;
             _motionVacuumConfigCrudService = motionVacuumConfigCrudService;
             _motionStackLightConfigCrudService = motionStackLightConfigCrudService;
+            _motionGripperConfigCrudService = motionGripperConfigCrudService;
         }
 
         public Result EnsureTables()
@@ -87,7 +91,8 @@ namespace AM.DBService.Services.Motion.App
                     typeof(MotionIoPointConfigEntity),
                     typeof(CylinderConfigEntity),
                     typeof(VacuumConfigEntity),
-                    typeof(StackLightConfigEntity));
+                    typeof(StackLightConfigEntity),
+                    typeof(GripperConfigEntity));
 
                 EnsureIndexes(db);
 
@@ -148,7 +153,6 @@ namespace AM.DBService.Services.Motion.App
                 {
                     return Fail<MotionCardConfig>(cylinderConfigResult.Code, "读取气缸对象配置失败");
                 }
-
                 var cylinderConfigs = cylinderConfigResult.Success
                     ? cylinderConfigResult.Items.Where(p => p != null && p.IsEnabled).ToList()
                     : new List<CylinderConfigEntity>();
@@ -158,7 +162,6 @@ namespace AM.DBService.Services.Motion.App
                 {
                     return Fail<MotionCardConfig>(vacuumConfigResult.Code, "读取真空对象配置失败");
                 }
-
                 var vacuumConfigs = vacuumConfigResult.Success
                     ? vacuumConfigResult.Items.Where(p => p != null && p.IsEnabled).ToList()
                     : new List<VacuumConfigEntity>();
@@ -168,10 +171,18 @@ namespace AM.DBService.Services.Motion.App
                 {
                     return Fail<MotionCardConfig>(stackLightConfigResult.Code, "读取灯塔对象配置失败");
                 }
-
                 var stackLightConfigs = stackLightConfigResult.Success
                     ? stackLightConfigResult.Items.Where(p => p != null && p.IsEnabled).ToList()
                     : new List<StackLightConfigEntity>();
+
+                var gripperConfigResult = _motionGripperConfigCrudService.QueryAll();
+                if (!gripperConfigResult.Success && gripperConfigResult.Code != (int)DbErrorCode.NotFound)
+                {
+                    return Fail<MotionCardConfig>(gripperConfigResult.Code, "读取夹爪对象配置失败");
+                }
+                var gripperConfigs = gripperConfigResult.Success
+                    ? gripperConfigResult.Items.Where(p => p != null && p.IsEnabled).ToList()
+                    : new List<GripperConfigEntity>();
 
                 var validateResult = ValidateEntities(
                     cardEntities,
@@ -180,7 +191,8 @@ namespace AM.DBService.Services.Motion.App
                     ioPointConfigs,
                     cylinderConfigs,
                     vacuumConfigs,
-                    stackLightConfigs);
+                    stackLightConfigs,
+                    gripperConfigs);
                 if (!validateResult.Success)
                 {
                     return Fail<MotionCardConfig>(validateResult.Code, validateResult.Message);
@@ -198,6 +210,7 @@ namespace AM.DBService.Services.Motion.App
                     cylinderConfigs,
                     vacuumConfigs,
                     stackLightConfigs,
+                    gripperConfigs,
                     ioEntities,
                     ioPointConfigs);
                 ConfigContext.Instance.Config.ActuatorConfig = runtimeActuatorConfig;
@@ -271,6 +284,10 @@ namespace AM.DBService.Services.Motion.App
 
             db.Ado.ExecuteCommand(
                 "CREATE UNIQUE INDEX IF NOT EXISTS ux_motion_stacklight_config_name ON motion_stacklight_config(Name)");
+
+            db.Ado.ExecuteCommand(
+                "CREATE UNIQUE INDEX IF NOT EXISTS ux_motion_gripper_config_name ON motion_gripper_config(Name)");
+
 
         }
 
@@ -433,7 +450,8 @@ namespace AM.DBService.Services.Motion.App
             IList<MotionIoPointConfigEntity> ioPointConfigs,
             IList<CylinderConfigEntity> cylinderConfigs,
             IList<VacuumConfigEntity> vacuumConfigs,
-            IList<StackLightConfigEntity> stackLightConfigs)
+            IList<StackLightConfigEntity> stackLightConfigs,
+            IList<GripperConfigEntity> gripperConfigs)
         {
             var duplicateCardId = cardEntities
                 .GroupBy(p => p.CardId)
@@ -637,6 +655,54 @@ namespace AM.DBService.Services.Motion.App
                 }
             }
 
+            var duplicateGripperName = gripperConfigs
+    .GroupBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
+    .FirstOrDefault(g => g.Count() > 1);
+            if (duplicateGripperName != null)
+            {
+                return Result.Fail(
+                    (int)DbErrorCode.InvalidArgument,
+                    "夹爪名称重复: " + duplicateGripperName.Key,
+                    ResultSource.Database);
+            }
+
+            foreach (var gripper in gripperConfigs.Where(p => p != null))
+            {
+                if (string.IsNullOrWhiteSpace(gripper.Name))
+                {
+                    return Result.Fail((int)DbErrorCode.InvalidArgument, "存在未配置名称的夹爪对象", ResultSource.Database);
+                }
+
+                if (!ioKeys.Contains(BuildIoPointKey("DO", gripper.CloseOutputBit)))
+                {
+                    return Result.Fail((int)DbErrorCode.InvalidArgument, "夹爪夹紧输出位不存在: " + gripper.CloseOutputBit, ResultSource.Database);
+                }
+
+                if (gripper.OpenOutputBit.HasValue
+                    && !ioKeys.Contains(BuildIoPointKey("DO", gripper.OpenOutputBit.Value)))
+                {
+                    return Result.Fail((int)DbErrorCode.InvalidArgument, "夹爪打开输出位不存在: " + gripper.OpenOutputBit.Value, ResultSource.Database);
+                }
+
+                if (gripper.CloseFeedbackBit.HasValue
+                    && !ioKeys.Contains(BuildIoPointKey("DI", gripper.CloseFeedbackBit.Value)))
+                {
+                    return Result.Fail((int)DbErrorCode.InvalidArgument, "夹爪夹紧反馈位不存在: " + gripper.CloseFeedbackBit.Value, ResultSource.Database);
+                }
+
+                if (gripper.OpenFeedbackBit.HasValue
+                    && !ioKeys.Contains(BuildIoPointKey("DI", gripper.OpenFeedbackBit.Value)))
+                {
+                    return Result.Fail((int)DbErrorCode.InvalidArgument, "夹爪打开反馈位不存在: " + gripper.OpenFeedbackBit.Value, ResultSource.Database);
+                }
+
+                if (gripper.WorkpiecePresentBit.HasValue
+                    && !ioKeys.Contains(BuildIoPointKey("DI", gripper.WorkpiecePresentBit.Value)))
+                {
+                    return Result.Fail((int)DbErrorCode.InvalidArgument, "夹爪工件检测位不存在: " + gripper.WorkpiecePresentBit.Value, ResultSource.Database);
+                }
+            }
+
             return Result.Ok("运动配置校验通过", ResultSource.Database);
         }
 
@@ -644,6 +710,7 @@ namespace AM.DBService.Services.Motion.App
             IList<CylinderConfigEntity> cylinderEntities,
             IList<VacuumConfigEntity> vacuumEntities,
             IList<StackLightConfigEntity> stackLightEntities,
+            IList<GripperConfigEntity> gripperEntities,
             IList<MotionIoMapEntity> ioEntities,
             IList<MotionIoPointConfigEntity> ioPointConfigs)
         {
@@ -651,7 +718,8 @@ namespace AM.DBService.Services.Motion.App
             {
                 Cylinders = BuildCylinderConfigs(cylinderEntities, ioEntities, ioPointConfigs),
                 Vacuums = BuildVacuumConfigs(vacuumEntities, ioEntities, ioPointConfigs),
-                StackLights = BuildStackLightConfigs(stackLightEntities, ioEntities, ioPointConfigs)
+                StackLights = BuildStackLightConfigs(stackLightEntities, ioEntities, ioPointConfigs),
+                Grippers = BuildGripperConfigs(gripperEntities, ioEntities, ioPointConfigs)
             };
         }
 
@@ -777,6 +845,52 @@ namespace AM.DBService.Services.Motion.App
 
             return result;
         }
+
+        private static List<GripperConfig> BuildGripperConfigs(
+    IList<GripperConfigEntity> gripperEntities,
+    IList<MotionIoMapEntity> ioEntities,
+    IList<MotionIoPointConfigEntity> ioPointConfigs)
+        {
+            var result = new List<GripperConfig>();
+            if (gripperEntities == null || gripperEntities.Count == 0)
+            {
+                return result;
+            }
+
+            foreach (var entity in gripperEntities
+                .Where(p => p != null && p.IsEnabled)
+                .OrderBy(p => p.SortOrder)
+                .ThenBy(p => p.Name))
+            {
+                result.Add(new GripperConfig
+                {
+                    Name = entity.Name,
+                    DisplayName = entity.DisplayName,
+                    DriveMode = entity.DriveMode,
+                    CloseOutputBit = entity.CloseOutputBit,
+                    OpenOutputBit = entity.OpenOutputBit,
+                    CloseFeedbackBit = entity.CloseFeedbackBit,
+                    OpenFeedbackBit = entity.OpenFeedbackBit,
+                    WorkpiecePresentBit = entity.WorkpiecePresentBit,
+                    UseFeedbackCheck = entity.UseFeedbackCheck,
+                    UseWorkpieceCheck = entity.UseWorkpieceCheck,
+                    CloseTimeoutMs = entity.CloseTimeoutMs,
+                    OpenTimeoutMs = entity.OpenTimeoutMs,
+                    AlarmCodeOnCloseTimeout = entity.AlarmCodeOnCloseTimeout,
+                    AlarmCodeOnOpenTimeout = entity.AlarmCodeOnOpenTimeout,
+                    AlarmCodeOnWorkpieceLost = entity.AlarmCodeOnWorkpieceLost,
+                    AllowBothOff = entity.AllowBothOff,
+                    AllowBothOn = entity.AllowBothOn,
+                    IsEnabled = entity.IsEnabled,
+                    SortOrder = entity.SortOrder,
+                    Description = entity.Description,
+                    Remark = entity.Remark
+                });
+            }
+
+            return result;
+        }
+
 
     }
 }
