@@ -6,8 +6,8 @@
                xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                mc:Ignorable="d"
                Title="轴拓扑配置"
-               Width="500"
-               Height="620"
+               Width="520"
+               Height="640"
                ResizeMode="NoResize"
                ShowNonClientArea="False"
                WindowStartupLocation="CenterOwner"
@@ -112,23 +112,61 @@
                                     <ColumnDefinition Width="12" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
+
+                                <!-- 所属控制卡：从已配置的卡中下拉选择 -->
                                 <StackPanel Grid.Column="0">
                                     <TextBlock Margin="0,0,0,4"
                                                Foreground="{DynamicResource PrimaryTextBrush}"
-                                               Text="所属控制卡 (CardId)" />
-                                    <TextBox x:Name="TextBoxCardId"
-                                             Height="36"
-                                             VerticalContentAlignment="Center"
-                                             MaxLength="5" />
+                                               Text="所属控制卡 *" />
+                                    <ComboBox x:Name="ComboBoxCardId"
+                                              Height="36"
+                                              SelectionChanged="ComboBoxCardId_OnSelectionChanged">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal"
+                                                            Margin="0,2"
+                                                            VerticalAlignment="Center">
+                                                    <Border Padding="6,2"
+                                                            CornerRadius="3"
+                                                            Margin="0,0,8,0"
+                                                            VerticalAlignment="Center"
+                                                            Background="{DynamicResource PrimaryBrush}">
+                                                        <TextBlock Text="{Binding CardId, StringFormat='#{0}'}"
+                                                                   FontSize="10"
+                                                                   FontWeight="SemiBold"
+                                                                   Foreground="White" />
+                                                    </Border>
+                                                    <StackPanel VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding Name}"
+                                                                   FontSize="12"
+                                                                   Foreground="{DynamicResource PrimaryTextBrush}" />
+                                                        <TextBlock Text="{Binding DisplayName}"
+                                                                   FontSize="10"
+                                                                   Opacity="0.6"
+                                                                   Foreground="{DynamicResource PrimaryTextBrush}">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Style.Triggers>
+                                                                        <Trigger Property="Text" Value="">
+                                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                                        </Trigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
                                 </StackPanel>
+
+                                <!-- 卡内轴编号：根据所选控制卡的轴数量动态生成 -->
                                 <StackPanel Grid.Column="2">
                                     <TextBlock Margin="0,0,0,4"
                                                Foreground="{DynamicResource PrimaryTextBrush}"
-                                               Text="卡内轴编号 (AxisId)" />
-                                    <TextBox x:Name="TextBoxAxisId"
-                                             Height="36"
-                                             VerticalContentAlignment="Center"
-                                             MaxLength="5" />
+                                               Text="卡内轴编号 (AxisId) *" />
+                                    <ComboBox x:Name="ComboBoxAxisId" Height="36" />
                                 </StackPanel>
                             </Grid>
 

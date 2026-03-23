@@ -1,9 +1,6 @@
-﻿using AM.DBService.Services;
-using AM.DBService.Services.Motion.App;
+﻿using AM.DBService.Services.Motion.App;
 using AM.DBService.Services.Motion.Topology;
-using AM.Model.Entity.Motion;
 using AM.Model.Entity.Motion.Topology;
-using AM.Model.Interfaces.DB;
 using AM.Model.Interfaces.DB.Motion.App;
 using AM.Model.Interfaces.DB.Motion.Topology;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -21,6 +18,7 @@ namespace AM.ViewModel.ViewModels.Config
     public class MotionAxisManagementViewModel : ObservableObject
     {
         private readonly IMotionAxisCrudService _motionAxisCrudService;
+        private readonly IMotionCardCrudService _motionCardCrudService;
         private readonly IMachineConfigReloadService _machineConfigReloadService;
 
         private MotionAxisEntity _selectedItem;
@@ -28,18 +26,21 @@ namespace AM.ViewModel.ViewModels.Config
         private bool _isBusy;
 
         public MotionAxisManagementViewModel()
-            : this(new MotionAxisCrudService(), new MachineConfigReloadService())
+            : this(new MotionAxisCrudService(), new MotionCardCrudService(), new MachineConfigReloadService())
         {
         }
 
         public MotionAxisManagementViewModel(
             IMotionAxisCrudService motionAxisCrudService,
+            IMotionCardCrudService motionCardCrudService,
             IMachineConfigReloadService machineConfigReloadService)
         {
             _motionAxisCrudService = motionAxisCrudService;
+            _motionCardCrudService = motionCardCrudService;
             _machineConfigReloadService = machineConfigReloadService;
 
             Items = new ObservableCollection<MotionAxisEntity>();
+            AvailableCards = new ObservableCollection<MotionCardEntity>();
             _statusText = "请加载轴拓扑配置";
 
             RefreshCommand = new AsyncRelayCommand(LoadAsync, CanExecuteCommand);
@@ -49,6 +50,9 @@ namespace AM.ViewModel.ViewModels.Config
         }
 
         public ObservableCollection<MotionAxisEntity> Items { get; private set; }
+
+        /// <summary>已配置的控制卡列表，用于对话框下拉选择与详情面板名称显示。</summary>
+        public ObservableCollection<MotionCardEntity> AvailableCards { get; private set; }
 
         public IAsyncRelayCommand RefreshCommand { get; private set; }
 
@@ -67,6 +71,59 @@ namespace AM.ViewModel.ViewModels.Config
                 {
                     SaveCommand.NotifyCanExecuteChanged();
                     DeleteCommand.NotifyCanExecuteChanged();
+                    OnPropertyChanged(nameof(SelectedItemCardDisplay));
+                    OnPropertyChanged(nameof(SelectedItemAxisCategoryDisplay));
+                }
+            }
+        }
+
+        /// <summary>
+        /// 详情面板与 Shield 徽标使用：控制卡 ID + 名称组合显示。
+        /// 例如 "0 — 虚拟控制卡"。
+        /// </summary>
+        public string SelectedItemCardDisplay
+        {
+            get
+            {
+                if (_selectedItem == null)
+                {
+                    return "—";
+                }
+
+                var card = AvailableCards.FirstOrDefault(c => c.CardId == _selectedItem.CardId);
+                if (card == null)
+                {
+                    return _selectedItem.CardId.ToString();
+                }
+
+                var label = string.IsNullOrWhiteSpace(card.DisplayName) ? card.Name : card.DisplayName;
+                return _selectedItem.CardId + " — " + label;
+            }
+        }
+
+        /// <summary>
+        /// 详情面板与 Shield 徽标使用：轴分类中文名。
+        /// </summary>
+        public string SelectedItemAxisCategoryDisplay
+        {
+            get
+            {
+                if (_selectedItem == null)
+                {
+                    return "—";
+                }
+
+                switch (_selectedItem.AxisCategory)
+                {
+                    case "Linear": return "直线轴";
+                    case "Rotary": return "旋转轴";
+                    case "GantryMaster": return "龙门主轴";
+                    case "GantrySlave": return "龙门从轴";
+                    case "Virtual": return "虚拟轴";
+                    default:
+                        return string.IsNullOrWhiteSpace(_selectedItem.AxisCategory)
+                            ? "—"
+                            : _selectedItem.AxisCategory;
                 }
             }
         }
@@ -99,6 +156,17 @@ namespace AM.ViewModel.ViewModels.Config
 
             try
             {
+                // 先加载控制卡列表，供 CardId 下拉与名称显示使用
+                var cardResult = await Task.Run(() => _motionCardCrudService.QueryAll());
+                AvailableCards.Clear();
+                if (cardResult.Success && cardResult.Items != null)
+                {
+                    foreach (var card in cardResult.Items)
+                    {
+                        AvailableCards.Add(card);
+                    }
+                }
+
                 var result = await Task.Run(() => _motionAxisCrudService.QueryAll());
                 Items.Clear();
 
@@ -130,7 +198,7 @@ namespace AM.ViewModel.ViewModels.Config
 
             var item = new MotionAxisEntity
             {
-                CardId = 0,
+                CardId = AvailableCards.Count > 0 ? AvailableCards[0].CardId : (short)0,
                 AxisId = 0,
                 LogicalAxis = nextLogicalAxis,
                 Name = "Axis-" + nextLogicalAxis,

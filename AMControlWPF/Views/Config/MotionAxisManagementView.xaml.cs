@@ -41,14 +41,14 @@ namespace AMControlWPF.Views.Config
             var now = DateTime.Now;
             var defaultEntity = new MotionAxisEntity
             {
-                CardId = 0,
-                AxisId = (short)_vm.Items.Count,
+                CardId = _vm.AvailableCards.Count > 0 ? _vm.AvailableCards[0].CardId : (short)0,
+                AxisId = 0,
                 LogicalAxis = nextLogicalAxis,
                 Name = "Axis-" + nextLogicalAxis,
                 DisplayName = "轴-" + nextLogicalAxis,
                 AxisCategory = "Linear",
                 PhysicalCore = 1,
-                PhysicalAxis = (short)_vm.Items.Count,
+                PhysicalAxis = 0,
                 IsEnabled = true,
                 SortOrder = _vm.Items.Count + 1,
                 Description = "新建轴拓扑配置",
@@ -56,7 +56,7 @@ namespace AMControlWPF.Views.Config
                 UpdateTime = now
             };
 
-            var dialog = new MotionAxisEditDialog(defaultEntity, true)
+            var dialog = new MotionAxisEditDialog(defaultEntity, true, _vm.AvailableCards)
             {
                 Owner = Window.GetWindow(this)
             };
@@ -79,7 +79,7 @@ namespace AMControlWPF.Views.Config
             }
 
             var clone = CloneEntity(_vm.SelectedItem);
-            var dialog = new MotionAxisEditDialog(clone, false)
+            var dialog = new MotionAxisEditDialog(clone, false, _vm.AvailableCards)
             {
                 Owner = Window.GetWindow(this)
             };
@@ -106,7 +106,8 @@ namespace AMControlWPF.Views.Config
                 : _vm.SelectedItem.Name;
 
             var result = HandyControl.Controls.MessageBox.Show(
-                $"确认删除轴 [{name}]（逻辑轴 L#{_vm.SelectedItem.LogicalAxis}）吗？\n\n此操作不可撤销。",
+                string.Format("确认删除轴 [{0}]（逻辑轴 L#{1}）吗？\n\n此操作不可撤销。",
+                    name, _vm.SelectedItem.LogicalAxis),
                 "确认删除",
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Warning);

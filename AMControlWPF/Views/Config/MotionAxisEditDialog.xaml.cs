@@ -1,5 +1,7 @@
 ﻿using AM.Model.Entity.Motion.Topology;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -10,16 +12,19 @@ namespace AMControlWPF.Views.Config
         private readonly bool _isAdd;
         private readonly int _originalId;
         private readonly DateTime _originalCreateTime;
+        private readonly IReadOnlyList<MotionCardEntity> _availableCards;
 
         /// <summary>对话框确认后的结果实体，由调用方读取并写回 ViewModel。</summary>
         public MotionAxisEntity ResultEntity { get; private set; }
 
-        public MotionAxisEditDialog(MotionAxisEntity entity, bool isAdd)
+        public MotionAxisEditDialog(MotionAxisEntity entity, bool isAdd,
+            IReadOnlyList<MotionCardEntity> availableCards = null)
         {
             InitializeComponent();
             _isAdd = isAdd;
             _originalId = entity.Id;
             _originalCreateTime = entity.CreateTime;
+            _availableCards = availableCards ?? new List<MotionCardEntity>();
 
             TextBlockTitle.Text = isAdd ? "新增轴拓扑" : "编辑轴拓扑";
 
@@ -31,8 +36,13 @@ namespace AMControlWPF.Views.Config
             TextBoxDisplayName.Text = entity.DisplayName ?? string.Empty;
             SelectComboBoxByTag(ComboBoxAxisCategory, entity.AxisCategory ?? "Linear");
 
-            TextBoxCardId.Text = entity.CardId.ToString();
-            TextBoxAxisId.Text = entity.AxisId.ToString();
+            // 填充控制卡下拉列表并选中当前卡
+            PopulateCardComboBox();
+            SelectCardById(entity.CardId);
+
+            // 根据所选控制卡更新轴编号选项，并选中当前轴编号
+            UpdateAxisIdOptions(entity.AxisId);
+
             TextBoxPhysicalCore.Text = entity.PhysicalCore.ToString();
             TextBoxPhysicalAxis.Text = entity.PhysicalAxis.ToString();
 
@@ -41,6 +51,55 @@ namespace AMControlWPF.Views.Config
 
             TextBoxDescription.Text = entity.Description ?? string.Empty;
             TextBoxRemark.Text = entity.Remark ?? string.Empty;
+        }
+
+        private void PopulateCardComboBox()
+        {
+            ComboBoxCardId.ItemsSource = _availableCards;
+        }
+
+        private void SelectCardById(short cardId)
+        {
+            var card = _availableCards.FirstOrDefault(c => c.CardId == cardId);
+            ComboBoxCardId.SelectedItem = card ?? (_availableCards.Count > 0 ? _availableCards[0] : null);
+        }
+
+        private void ComboBoxCardId_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // 保留当前已选轴编号，切换卡后刷新可选范围
+            short currentAxisId = 0;
+            if (ComboBoxAxisId.SelectedItem is short s)
+            {
+                currentAxisId = s;
+            }
+
+            UpdateAxisIdOptions(currentAxisId);
+        }
+
+        private void UpdateAxisIdOptions(short preferAxisId = 0)
+        {
+            var selectedCard = ComboBoxCardId.SelectedItem as MotionCardEntity;
+            var maxCount = selectedCard != null && selectedCard.AxisCountNumber > 0
+                ? selectedCard.AxisCountNumber
+                : 32;
+
+            var options = new List<short>();
+            for (short i = 0; i < maxCount; i++)
+            {
+                options.Add(i);
+            }
+
+            ComboBoxAxisId.ItemsSource = options;
+
+            // 优先保持原轴编号，越界则选第 0 号
+            if (preferAxisId >= 0 && preferAxisId < maxCount)
+            {
+                ComboBoxAxisId.SelectedIndex = preferAxisId;
+            }
+            else if (options.Count > 0)
+            {
+                ComboBoxAxisId.SelectedIndex = 0;
+            }
         }
 
         private void ButtonSave_OnClick(object sender, RoutedEventArgs e)
@@ -56,7 +115,7 @@ namespace AMControlWPF.Views.Config
                 return;
             }
 
-            var name = TextBoxName.Text == null ? string.Empty : TextBoxName.Text.Trim();
+            var name = (TextBoxName.Text ?? string.Empty).Trim();
             if (string.IsNullOrEmpty(name))
             {
                 ShowError("内部名称不能为空。");
@@ -65,17 +124,16 @@ namespace AMControlWPF.Views.Config
 
             var axisCategory = GetComboBoxTagString(ComboBoxAxisCategory, "Linear");
 
-            short cardId;
-            if (!short.TryParse(TextBoxCardId.Text.Trim(), out cardId) || cardId < 0)
+            var selectedCard = ComboBoxCardId.SelectedItem as MotionCardEntity;
+            if (selectedCard == null)
             {
-                ShowError("所属控制卡号必须为非负整数。");
+                ShowError("请选择所属控制卡。若列表为空，请先在控制卡管理页面添加控制卡。");
                 return;
             }
 
-            short axisId;
-            if (!short.TryParse(TextBoxAxisId.Text.Trim(), out axisId) || axisId < 0)
+            if (!(ComboBoxAxisId.SelectedItem is short axisId))
             {
-                ShowError("卡内轴编号必须为非负整数。");
+                ShowError("请选择卡内轴编号。");
                 return;
             }
 
@@ -104,18 +162,18 @@ namespace AMControlWPF.Views.Config
             ResultEntity = new MotionAxisEntity
             {
                 Id = _originalId,
-                CardId = cardId,
+                CardId = selectedCard.CardId,
                 AxisId = axisId,
                 LogicalAxis = logicalAxis,
                 Name = name,
-                DisplayName = TextBoxDisplayName.Text == null ? null : TextBoxDisplayName.Text.Trim(),
+                DisplayName = (TextBoxDisplayName.Text ?? string.Empty).Trim(),
                 AxisCategory = axisCategory,
                 PhysicalCore = physicalCore,
                 PhysicalAxis = physicalAxis,
                 IsEnabled = CheckBoxIsEnabled.IsChecked == true,
                 SortOrder = sortOrder,
-                Description = TextBoxDescription.Text == null ? null : TextBoxDescription.Text.Trim(),
-                Remark = TextBoxRemark.Text == null ? null : TextBoxRemark.Text.Trim(),
+                Description = (TextBoxDescription.Text ?? string.Empty).Trim(),
+                Remark = (TextBoxRemark.Text ?? string.Empty).Trim(),
                 CreateTime = _originalCreateTime,
                 UpdateTime = DateTime.Now
             };
