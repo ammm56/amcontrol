@@ -327,11 +327,14 @@ namespace AMControlWPF
 
             _allSecondaryNavMap["Config"] = new List<SecondaryNavItem>
                 {
-                    new SecondaryNavItem("Config.Axis", "轴配置编辑", "运行配置层编辑", "Engineer", "Am"),
-                    new SecondaryNavItem("Config.Card", "控制卡配置编辑", "卡参数与映射", "Engineer", "Am"),
+                    new SecondaryNavItem("Config.Card", "控制卡配置", "控制卡基础信息与驱动配置", "Engineer", "Am"),
+                    new SecondaryNavItem("Config.Axis", "轴拓扑配置", "逻辑轴、物理轴与归属配置", "Engineer", "Am"),
+                    new SecondaryNavItem("Config.IoMap", "IO 映射配置", "DI/DO 逻辑点与硬件点映射", "Engineer", "Am"),
+                    new SecondaryNavItem("Config.AxisParam", "轴运行参数", "轴运行参数与回零限位配置", "Engineer", "Am"),
+                    new SecondaryNavItem("Config.Actuator", "执行器配置", "气缸、真空、灯塔、夹爪对象配置", "Engineer", "Am"),
+                    new SecondaryNavItem("Config.Runtime", "运行配置编辑", "系统运行参数", "Engineer", "Am"),
                     new SecondaryNavItem("Config.Camera", "相机配置编辑", "相机与任务配置", "Engineer", "Am"),
-                    new SecondaryNavItem("Config.Plc", "PLC 配置编辑", "PLC 业务配置", "Engineer", "Am"),
-                    new SecondaryNavItem("Config.Runtime", "运行配置编辑", "系统运行参数", "Engineer", "Am")
+                    new SecondaryNavItem("Config.Plc", "PLC 配置编辑", "PLC 业务配置", "Engineer", "Am")
                 };
 
             _allSecondaryNavMap["Engineer"] = new List<SecondaryNavItem>
@@ -470,38 +473,51 @@ namespace AMControlWPF
                     return CreatePlaceholderPage("首页 / 总览看板");
                 case "Home.Status":
                     return CreatePlaceholderPage("首页 / 设备状态");
+
                 case "Production.Data":
                     return CreatePlaceholderPage("生产 / 生产数据");
                 case "Production.Report":
                     return CreatePlaceholderPage("生产 / 班次统计");
+
                 case "Motion.Axis":
                     return new MotionAxisView();
                 case "Motion.Status":
                     return CreatePlaceholderPage("运动 / 位置监视");
                 case "Motion.Alarm":
                     return CreatePlaceholderPage("运动 / 运动报警");
+
                 case "IO.DI":
                     return new DIMonitorView();
                 case "IO.DO":
                     return new DOMonitorView();
                 case "IO.Debug":
                     return CreatePlaceholderPage("IO / IO 调试");
+
                 case "Vision.Monitor":
                     return CreatePlaceholderPage("视觉 / 相机监视");
+
                 case "PLC.Monitor":
                     return CreatePlaceholderPage("PLC / 点位监视");
                 case "PLC.Debug":
                     return CreatePlaceholderPage("PLC / 通讯状态");
-                case "Config.Axis":
-                    return CreatePlaceholderPage("配置 / 轴配置编辑");
+
                 case "Config.Card":
-                    return CreatePlaceholderPage("配置 / 控制卡配置编辑");
+                    return CreatePlaceholderPage("配置 / 控制卡配置");
+                case "Config.Axis":
+                    return CreatePlaceholderPage("配置 / 轴拓扑配置");
+                case "Config.IoMap":
+                    return CreatePlaceholderPage("配置 / IO 映射配置");
+                case "Config.AxisParam":
+                    return CreatePlaceholderPage("配置 / 轴运行参数");
+                case "Config.Actuator":
+                    return CreatePlaceholderPage("配置 / 执行器配置");
+                case "Config.Runtime":
+                    return CreatePlaceholderPage("配置 / 运行配置编辑");
                 case "Config.Camera":
                     return CreatePlaceholderPage("配置 / 相机配置编辑");
                 case "Config.Plc":
                     return CreatePlaceholderPage("配置 / PLC 配置编辑");
-                case "Config.Runtime":
-                    return CreatePlaceholderPage("配置 / 运行配置编辑");
+
                 case "Engineer.RawAxis":
                     return CreatePlaceholderPage("工程 / 原始轴参数");
                 case "Engineer.RawPlc":
@@ -512,20 +528,21 @@ namespace AMControlWPF
                     return CreatePlaceholderPage("工程 / 设备诊断");
                 case "Engineer.Debug":
                     return CreatePlaceholderPage("工程 / Motion/IO 调试");
+
                 case "AlarmLog.Current":
                     return new CurrentAlarmView();
                 case "AlarmLog.History":
                     return CreatePlaceholderPage("报警与日志 / 报警历史");
                 case "AlarmLog.RunLog":
                     return CreatePlaceholderPage("报警与日志 / 运行日志");
+
                 case "System.User":
-                    var userManagementView = new UserManagementView();
-                    return userManagementView;
+                    return new UserManagementView();
                 case "System.Permission":
-                    var permissionView = new UserPermissionView();
-                    return permissionView;
+                    return new UserPermissionView();
                 case "System.LoginLog":
                     return new LoginLogView();
+
                 default:
                     return CreatePlaceholderPage("未定义页面: " + tag);
             }

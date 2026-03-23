@@ -152,19 +152,50 @@ namespace AM.DBService.Services.Auth
 
         private void EnsurePagePermissions(SqlSugarClient db)
         {
-            var exists = db.Queryable<SysPagePermissionEntity>().Any();
-            if (exists)
-            {
-                return;
-            }
-
             var defaults = AuthPermissionCatalog.CreateDefaultPagePermissions();
+            var exists = db.Queryable<SysPagePermissionEntity>().ToList();
+
+            var existsMap = exists
+                .Where(x => !string.IsNullOrWhiteSpace(x.PageKey))
+                .GroupBy(x => x.PageKey, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(x => x.Key, x => x.First(), StringComparer.OrdinalIgnoreCase);
+
+            var insertedCount = 0;
+            var updatedCount = 0;
+
             foreach (var item in defaults)
             {
-                db.Insertable(item).ExecuteCommand();
+                SysPagePermissionEntity current;
+                if (existsMap.TryGetValue(item.PageKey, out current))
+                {
+                    current.ModuleKey = item.ModuleKey;
+                    current.ModuleName = item.ModuleName;
+                    current.DisplayName = item.DisplayName;
+                    current.Description = item.Description;
+                    current.DefaultRoleCodes = item.DefaultRoleCodes;
+                    current.RecommendedRoles = item.RecommendedRoles;
+                    current.RiskLevel = item.RiskLevel;
+                    current.SortOrder = item.SortOrder;
+                    current.IsEnabled = item.IsEnabled;
+
+                    if (current.CreateTime == default(DateTime))
+                    {
+                        current.CreateTime = item.CreateTime;
+                    }
+
+                    db.Updateable(current).ExecuteCommand();
+                    updatedCount++;
+                }
+                else
+                {
+                    db.Insertable(item).ExecuteCommand();
+                    insertedCount++;
+                }
             }
 
-            _reporter?.Info("AuthSeed", "默认页面权限目录初始化完成");
+            _reporter?.Info(
+                "AuthSeed",
+                "页面权限目录同步完成，新增: " + insertedCount + "，更新: " + updatedCount);
         }
     }
 }
