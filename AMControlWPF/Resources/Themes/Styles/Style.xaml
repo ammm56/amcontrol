@@ -78,12 +78,12 @@
             <Setter.Value>
                 <ControlTemplate TargetType="ListBoxItem">
                     <Border x:Name="BorderRoot"
-                        Margin="4,6"
-                        Padding="14,12"
-                        CornerRadius="10"
-                        Background="{DynamicResource SecondaryRegionBrush}"
-                        BorderBrush="Transparent"
-                        BorderThickness="1">
+                            Margin="4,6"
+                            Padding="14,12"
+                            CornerRadius="10"
+                            Background="{DynamicResource SecondaryRegionBrush}"
+                            BorderBrush="Transparent"
+                            BorderThickness="1">
                         <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center" />
                     </Border>
                     <ControlTemplate.Triggers>
@@ -113,94 +113,27 @@
     </Style>
 
     <Style x:Key="UserPopupActionButtonStyle"
-       TargetType="Button"
-       BasedOn="{StaticResource {x:Type Button}}">
+           TargetType="Button"
+           BasedOn="{StaticResource {x:Type Button}}">
         <Setter Property="Height" Value="38" />
         <Setter Property="Margin" Value="0,0,0,8" />
         <Setter Property="Padding" Value="12,0" />
-        <Setter Property="HorizontalContentAlignment" Value="Center" />
-        <Setter Property="Background" Value="{DynamicResource SecondaryRegionBrush}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
-        <Setter Property="BorderThickness" Value="1" />
     </Style>
 
-    <Style TargetType="DataGridCell">
-        <Setter Property="Padding" Value="8,6" />
-        <Setter Property="Background" Value="Transparent" />
-        <Setter Property="BorderBrush" Value="Transparent" />
-        <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="DataGridCell">
-                    <Border Background="{TemplateBinding Background}" 
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            Padding="{TemplateBinding Padding}">
-                        <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Stretch" />
-                    </Border>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-        <Style.Triggers>
-            <Trigger Property="IsSelected" Value="True">
-                <Setter Property="Background" Value="{DynamicResource PrimaryBrush}" />
-                <Setter Property="Foreground" Value="White" />
-            </Trigger>
-        </Style.Triggers>
-    </Style>
-
-    <Style x:Key="PermissionChipItemStyle" TargetType="ListBoxItem">
-        <Setter Property="Margin" Value="0,0,6,6" />
-        <Setter Property="Padding" Value="10,5" />
+    <!-- 配置详情区只读字段标签样式 -->
+    <Style x:Key="DetailLabelStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="Opacity" Value="0.6" />
         <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="ListBoxItem">
-                    <Border x:Name="BorderRoot"
-                        Padding="{TemplateBinding Padding}"
-                        CornerRadius="6"
-                        Background="{DynamicResource RegionBrush}"
-                        BorderBrush="{DynamicResource BorderBrush}"
-                        BorderThickness="1">
-                        <ContentPresenter HorizontalAlignment="Center"
-                                      VerticalAlignment="Center" />
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="BorderRoot" Property="Background" Value="{DynamicResource SecondaryRegionBrush}" />
-                            <Setter Property="Cursor" Value="Hand" />
-                        </Trigger>
-                        <Trigger Property="IsSelected" Value="True">
-                            <Setter TargetName="BorderRoot" Property="Background" Value="{DynamicResource SecondaryRegionBrush}" />
-                            <Setter Property="FontWeight" Value="SemiBold" />
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
+        <Setter Property="Margin" Value="0,8,0,2" />
     </Style>
 
-    <Style x:Key="PermissionToolbarButtonStyle"
-       TargetType="Button"
-       BasedOn="{StaticResource UserPopupActionButtonStyle}">
-        <Setter Property="Height" Value="34" />
-        <Setter Property="Margin" Value="0,0,8,0" />
-        <Setter Property="Padding" Value="12,0" />
-        <Setter Property="MinWidth" Value="72" />
+    <!-- 配置详情区只读字段值样式 -->
+    <Style x:Key="DetailValueStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
     </Style>
 
-    <Style x:Key="PermissionTileListBoxItemStyle" TargetType="ListBoxItem">
-        <Setter Property="Margin" Value="0,0,12,12" />
-        <Setter Property="Padding" Value="0" />
-        <Setter Property="Background" Value="Transparent" />
-        <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="ListBoxItem">
-                    <ContentPresenter />
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
 
 </ResourceDictionary>

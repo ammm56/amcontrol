@@ -1,12 +1,14 @@
 ﻿using AM.Core.Context;
-using AMControlWPF.UserControls.Main;
-using AMControlWPF.Views.Auth;
-using AMControlWPF.Views.IO;
-using AMControlWPF.Views.Motion;
-using AMControlWPF.Views.Am;
 using AM.Core.Messaging;
 using AM.Model.Alarm;
-using System.Windows.Media;
+using AM.Model.Auth;
+using AMControlWPF.UserControls.Main;
+using AMControlWPF.Views.Alarm;
+using AMControlWPF.Views.Am;
+using AMControlWPF.Views.Auth;
+using AMControlWPF.Views.Config;
+using AMControlWPF.Views.IO;
+using AMControlWPF.Views.Motion;
 using AMControlWPF.Views.Template;
 using HandyControl.Controls;
 using System;
@@ -14,8 +16,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using AM.Model.Auth;
-using AMControlWPF.Views.Alarm;
+using System.Windows.Media;
 
 namespace AMControlWPF
 {
@@ -502,7 +503,7 @@ namespace AMControlWPF
                     return CreatePlaceholderPage("PLC / 通讯状态");
 
                 case "Config.Card":
-                    return CreatePlaceholderPage("配置 / 控制卡配置");
+                    return new MotionCardManagementView();
                 case "Config.Axis":
                     return CreatePlaceholderPage("配置 / 轴拓扑配置");
                 case "Config.IoMap":

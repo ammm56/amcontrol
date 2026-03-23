@@ -371,6 +371,10 @@ namespace AM.DBService.Services.Motion.App
             {
                 AxisId = entity.AxisId,
                 Name = entity.Name,
+                DisplayName = string.IsNullOrWhiteSpace(entity.DisplayName) ? entity.Name : entity.DisplayName,
+                AxisCategory = entity.AxisCategory,
+                Description = entity.Description,
+                SortOrder = entity.SortOrder,
                 LogicalAxis = entity.LogicalAxis,
                 PhysicalCore = entity.PhysicalCore,
                 PhysicalAxis = entity.PhysicalAxis

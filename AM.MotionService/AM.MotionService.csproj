@@ -50,6 +50,7 @@
     <Compile Include="Leisai\LeisaiMotionCardService.cs" />
     <Compile Include="Factory\MotionCardFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Virtual\VirtualAxisState.cs" />
     <Compile Include="Virtual\VirtualMotionCardService.cs" />
   </ItemGroup>
   <ItemGroup />

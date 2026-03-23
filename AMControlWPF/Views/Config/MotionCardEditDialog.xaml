@@ -1,0 +1,272 @@
+﻿<hc:GlowWindow x:Class="AMControlWPF.Views.Config.MotionCardEditDialog"
+               xmlns:hc="https://handyorg.github.io/handycontrol"
+               xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+               xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+               xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+               xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+               mc:Ignorable="d"
+               Title="控制卡配置"
+               Width="520"
+               Height="640"
+               ResizeMode="NoResize"
+               ShowNonClientArea="False"
+               WindowStartupLocation="CenterOwner"
+               Background="{DynamicResource RegionBrush}">
+
+    <Grid>
+        <Rectangle Fill="{StaticResource ShellTextureBrush}" />
+
+        <Grid Margin="16">
+            <Border CornerRadius="14"
+                    Background="{DynamicResource RegionBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    Effect="{StaticResource EffectShadow4}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <!-- 标题栏 -->
+                    <Border Grid.Row="0"
+                            Padding="20,16"
+                            CornerRadius="14,14,0,0"
+                            Background="{DynamicResource SecondaryRegionBrush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="0,0,0,1">
+                        <TextBlock x:Name="TextBlockTitle"
+                                   FontSize="18"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource PrimaryTextBrush}"
+                                   Text="新增控制卡" />
+                    </Border>
+
+                    <!-- 表单区 -->
+                    <ScrollViewer Grid.Row="1"
+                                  Padding="20,12,20,8"
+                                  VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel>
+
+                            <!-- ── 基础标识 ── -->
+                            <TextBlock Margin="0,0,0,8"
+                                       FontSize="11"
+                                       FontWeight="SemiBold"
+                                       Opacity="0.5"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                       Text="基础标识" />
+
+                            <TextBlock Margin="0,0,0,4"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                       Text="硬件卡号 (CardId)" />
+                            <TextBox x:Name="TextBoxCardId"
+                                     Height="36"
+                                     VerticalContentAlignment="Center"
+                                     MaxLength="5" />
+
+                            <TextBlock Margin="0,10,0,4"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                       Text="控制卡类型" />
+                            <ComboBox x:Name="ComboBoxCardType" Height="36">
+                                <ComboBoxItem Content="GOOGO（固高）" Tag="10" />
+                                <ComboBoxItem Content="LEISAI（雷赛）" Tag="20" />
+                                <ComboBoxItem Content="VIRTUAL（虚拟）" Tag="90" />
+                                <ComboBoxItem Content="OTHER（其他）" Tag="99" />
+                            </ComboBox>
+
+                            <TextBlock Margin="0,10,0,4"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                       Text="内部名称 *" />
+                            <TextBox x:Name="TextBoxName"
+                                     Height="36"
+                                     VerticalContentAlignment="Center"
+                                     MaxLength="64" />
+
+                            <TextBlock Margin="0,10,0,4"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                       Text="显示名称（界面展示用）" />
+                            <TextBox x:Name="TextBoxDisplayName"
+                                     Height="36"
+                                     VerticalContentAlignment="Center"
+                                     MaxLength="64" />
+
+                            <TextBlock Margin="0,10,0,4"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                       Text="驱动识别键 (DriverKey)" />
+                            <TextBox x:Name="TextBoxDriverKey"
+                                     Height="36"
+                                     VerticalContentAlignment="Center"
+                                     MaxLength="64" />
+
+                            <!-- ── 初始化参数 ── -->
+                            <Rectangle Height="1"
+                                       Margin="0,14,0,10"
+                                       Fill="{DynamicResource BorderBrush}"
+                                       Opacity="0.5" />
+                            <TextBlock Margin="0,0,0,8"
+                                       FontSize="11"
+                                       FontWeight="SemiBold"
+                                       Opacity="0.5"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                       Text="初始化参数" />
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="12" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Margin="0,0,0,4"
+                                               Foreground="{DynamicResource PrimaryTextBrush}"
+                                               Text="内核数量" />
+                                    <TextBox x:Name="TextBoxCoreNumber"
+                                             Height="36"
+                                             VerticalContentAlignment="Center"
+                                             MaxLength="4" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Margin="0,0,0,4"
+                                               Foreground="{DynamicResource PrimaryTextBrush}"
+                                               Text="支持轴总数" />
+                                    <TextBox x:Name="TextBoxAxisCountNumber"
+                                             Height="36"
+                                             VerticalContentAlignment="Center"
+                                             MaxLength="4" />
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid Margin="0,10,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="12" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Margin="0,0,0,4"
+                                               Foreground="{DynamicResource PrimaryTextBrush}"
+                                               Text="打开模式参数" />
+                                    <TextBox x:Name="TextBoxModeParam"
+                                             Height="36"
+                                             VerticalContentAlignment="Center"
+                                             MaxLength="8" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Margin="0,0,0,4"
+                                               Foreground="{DynamicResource PrimaryTextBrush}"
+                                               Text="初始化顺序" />
+                                    <TextBox x:Name="TextBoxInitOrder"
+                                             Height="36"
+                                             VerticalContentAlignment="Center"
+                                             MaxLength="4" />
+                                </StackPanel>
+                            </Grid>
+
+                            <CheckBox x:Name="CheckBoxUseExtModule"
+                                      Margin="0,12,0,0"
+                                      Content="启用扩展 IO 模块"
+                                      Foreground="{DynamicResource PrimaryTextBrush}" />
+
+                            <!-- ── 状态与排序 ── -->
+                            <Rectangle Height="1"
+                                       Margin="0,14,0,10"
+                                       Fill="{DynamicResource BorderBrush}"
+                                       Opacity="0.5" />
+                            <TextBlock Margin="0,0,0,8"
+                                       FontSize="11"
+                                       FontWeight="SemiBold"
+                                       Opacity="0.5"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                       Text="状态与排序" />
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="12" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <CheckBox x:Name="CheckBoxIsEnabled"
+                                          Grid.Column="0"
+                                          VerticalAlignment="Center"
+                                          Content="启用此控制卡"
+                                          Foreground="{DynamicResource PrimaryTextBrush}" />
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Margin="0,0,0,4"
+                                               Foreground="{DynamicResource PrimaryTextBrush}"
+                                               Text="排序号" />
+                                    <TextBox x:Name="TextBoxSortOrder"
+                                             Height="36"
+                                             VerticalContentAlignment="Center"
+                                             MaxLength="4" />
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- ── 说明与备注 ── -->
+                            <Rectangle Height="1"
+                                       Margin="0,14,0,10"
+                                       Fill="{DynamicResource BorderBrush}"
+                                       Opacity="0.5" />
+                            <TextBlock Margin="0,0,0,8"
+                                       FontSize="11"
+                                       FontWeight="SemiBold"
+                                       Opacity="0.5"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                       Text="说明与备注" />
+
+                            <TextBlock Margin="0,0,0,4"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                       Text="描述" />
+                            <TextBox x:Name="TextBoxDescription"
+                                     Height="60"
+                                     Padding="8,6"
+                                     TextWrapping="Wrap"
+                                     AcceptsReturn="True"
+                                     VerticalScrollBarVisibility="Auto"
+                                     MaxLength="256" />
+
+                            <TextBlock Margin="0,10,0,4"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                       Text="备注" />
+                            <TextBox x:Name="TextBoxRemark"
+                                     Height="52"
+                                     Padding="8,6"
+                                     TextWrapping="Wrap"
+                                     AcceptsReturn="True"
+                                     VerticalScrollBarVisibility="Auto"
+                                     MaxLength="256" />
+
+                            <TextBlock x:Name="TextBlockError"
+                                       Margin="0,10,0,0"
+                                       FontSize="12"
+                                       Foreground="{DynamicResource DangerBrush}"
+                                       TextWrapping="Wrap"
+                                       Visibility="Collapsed" />
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- 底部按钮 -->
+                    <Border Grid.Row="2"
+                            Padding="20,12"
+                            CornerRadius="0,0,13,13"
+                            Background="{DynamicResource SecondaryRegionBrush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="0,1,0,0">
+                        <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                            <Button Width="80"
+                                    Height="34"
+                                    Click="ButtonCancel_OnClick"
+                                    Content="取消" />
+                            <Button Width="80"
+                                    Height="34"
+                                    Margin="10,0,0,0"
+                                    Click="ButtonSave_OnClick"
+                                    Content="保存" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</hc:GlowWindow>

@@ -77,6 +77,30 @@ namespace AM.Model.MotionCard
         /// </summary>
         public short PhysicalAxis { get; set; }
 
+        /// <summary>
+        /// 轴显示名称。
+        /// 用于界面展示，为空时回退为 Name。
+        /// </summary>
+        public string DisplayName { get; set; }
+
+        /// <summary>
+        /// 轴分类。
+        /// Linear / Rotary / GantryMaster / GantrySlave / Virtual / Other。
+        /// </summary>
+        public string AxisCategory { get; set; }
+
+        /// <summary>
+        /// 轴说明。
+        /// </summary>
+        [JsonIgnore]
+        public string Description { get; set; }
+
+        /// <summary>
+        /// 排序号。
+        /// </summary>
+        [JsonIgnore]
+        public int SortOrder { get; set; }
+
         #endregion
 
         #region 硬件信号与极性
