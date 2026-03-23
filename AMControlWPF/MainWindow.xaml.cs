@@ -438,7 +438,7 @@ namespace AMControlWPF
                 case "Config.Card":
                     return new MotionCardManagementView();
                 case "Config.Axis":
-                    return CreatePlaceholderPage("配置 / 轴拓扑配置");
+                    return new MotionAxisManagementView();
                 case "Config.IoMap":
                     return CreatePlaceholderPage("配置 / IO 映射配置");
                 case "Config.AxisParam":
