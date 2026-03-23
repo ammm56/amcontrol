@@ -6,6 +6,61 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d"
              Background="Transparent">
+    <UserControl.Resources>
+        <Style x:Key="PermissionChipItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Margin" Value="0,0,6,6" />
+            <Setter Property="Padding" Value="10,5" />
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="BorderRoot"
+                                Padding="{TemplateBinding Padding}"
+                                CornerRadius="6"
+                                Background="{DynamicResource RegionBrush}"
+                                BorderBrush="{DynamicResource BorderBrush}"
+                                BorderThickness="1">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="BorderRoot" Property="Background" Value="{DynamicResource SecondaryRegionBrush}" />
+                                <Setter Property="Cursor" Value="Hand" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="BorderRoot" Property="Background" Value="{DynamicResource SecondaryRegionBrush}" />
+                                <Setter Property="FontWeight" Value="SemiBold" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="PermissionToolbarButtonStyle"
+               TargetType="Button"
+               BasedOn="{StaticResource UserPopupActionButtonStyle}">
+            <Setter Property="Height" Value="34" />
+            <Setter Property="Margin" Value="0,0,8,0" />
+            <Setter Property="Padding" Value="12,0" />
+            <Setter Property="MinWidth" Value="72" />
+        </Style>
+
+        <Style x:Key="PermissionTileListBoxItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Margin" Value="0,0,12,12" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <ContentPresenter />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
     <Grid Margin="10">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="250" />
@@ -236,7 +291,7 @@
                                             Background="{DynamicResource RegionBrush}"
                                             BorderBrush="{DynamicResource BorderBrush}"
                                             BorderThickness="1"
-                                            Effect="{StaticResource EffectShadow1}">
+                                            Effect="{StaticResource EffectShadow2}">
                                         <Grid>
                                             <Grid.RowDefinitions>
                                                 <RowDefinition Height="Auto" />
@@ -289,7 +344,7 @@
                                     <DataTemplate.Triggers>
                                         <Trigger SourceName="TileRoot" Property="IsMouseOver" Value="True">
                                             <Setter TargetName="TileRoot" Property="Background" Value="{DynamicResource SecondaryRegionBrush}" />
-                                            <Setter TargetName="TileRoot" Property="Effect" Value="{StaticResource EffectShadow4}" />
+                                            <Setter TargetName="TileRoot" Property="Effect" Value="{StaticResource EffectShadow2}" />
                                         </Trigger>
 
                                         <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=IsSelected}" Value="True">
@@ -298,7 +353,7 @@
 
                                         <Trigger SourceName="TileCheckBox" Property="IsChecked" Value="True">
                                             <Setter TargetName="TileRoot" Property="Background" Value="{DynamicResource SecondaryRegionBrush}" />
-                                            <Setter TargetName="TileRoot" Property="Effect" Value="{StaticResource EffectShadow4}" />
+                                            <Setter TargetName="TileRoot" Property="Effect" Value="{StaticResource EffectShadow2}" />
                                         </Trigger>
 
                                         <DataTrigger Binding="{Binding RiskLevel}" Value="高">

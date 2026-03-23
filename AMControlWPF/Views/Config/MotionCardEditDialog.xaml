@@ -73,7 +73,7 @@
                                 <ComboBoxItem Content="GOOGO（固高）" Tag="10" />
                                 <ComboBoxItem Content="LEISAI（雷赛）" Tag="20" />
                                 <ComboBoxItem Content="VIRTUAL（虚拟）" Tag="90" />
-                                <ComboBoxItem Content="OTHER（其他）" Tag="99" />
+                                <!--<ComboBoxItem Content="OTHER（其他）" Tag="99" />-->
                             </ComboBox>
 
                             <TextBlock Margin="0,10,0,4"

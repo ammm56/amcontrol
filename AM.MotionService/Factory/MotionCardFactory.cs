@@ -30,6 +30,7 @@ namespace AM.MotionService.Factory
                     return new VirtualMotionCardService(config);
 
                 default:
+                    return new VirtualMotionCardService(config);
                     throw new NotSupportedException($"不支持的运动控制卡类型: {config.CardType}");
             }
         }

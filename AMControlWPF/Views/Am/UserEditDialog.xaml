@@ -7,7 +7,6 @@
                mc:Ignorable="d"
                Title="用户编辑"
                Width="560"
-               Height="600"
                ResizeMode="NoResize"
                ShowNonClientArea="False"
                WindowStartupLocation="CenterOwner"
@@ -16,134 +15,152 @@
     <Grid>
         <Rectangle Fill="{StaticResource ShellTextureBrush}" />
 
-        <Grid Margin="20">
+        <Grid Margin="16">
             <Border CornerRadius="14"
                     Background="{DynamicResource RegionBrush}"
                     BorderBrush="{DynamicResource BorderBrush}"
                     BorderThickness="1"
                     Effect="{StaticResource EffectShadow4}">
-                <Grid Margin="20">
+                <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
-                        <RowDefinition Height="16" />
                         <RowDefinition Height="*" />
-                        <RowDefinition Height="16" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
-                    <TextBlock x:Name="TextBlockTitle"
-                               Grid.Row="0"
-                               FontSize="22"
-                               FontWeight="SemiBold"
-                               Foreground="{DynamicResource PrimaryTextBrush}"
-                               Text="新增用户" />
-
-                    <Grid Grid.Row="2">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="10" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="10" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="10" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition x:Name="PasswordTopSpacingRow" Height="10" />
-                            <RowDefinition x:Name="PasswordLabelRow" Height="Auto" />
-                            <RowDefinition x:Name="PasswordInputRow" Height="Auto" />
-                            <RowDefinition x:Name="PasswordBottomSpacingRow" Height="10" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="10" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
-
-                        <StackPanel Grid.Row="0">
-                            <TextBlock Margin="0,0,0,6"
-                                       Foreground="{DynamicResource PrimaryTextBrush}"
-                                       Text="登录名" />
-                            <TextBox x:Name="TextBoxLoginName"
-                                     Height="36"
-                                     VerticalContentAlignment="Center" />
-                        </StackPanel>
-
-                        <StackPanel Grid.Row="2">
-                            <TextBlock Margin="0,0,0,6"
-                                       Foreground="{DynamicResource PrimaryTextBrush}"
-                                       Text="用户名" />
-                            <TextBox x:Name="TextBoxUserName"
-                                     Height="36"
-                                     VerticalContentAlignment="Center" />
-                        </StackPanel>
-
-                        <StackPanel Grid.Row="4">
-                            <TextBlock Margin="0,0,0,6"
-                                       Foreground="{DynamicResource PrimaryTextBrush}"
-                                       Text="角色" />
-                            <ComboBox x:Name="ComboBoxRole"
-                                      Height="36"
-                                      SelectedIndex="2">
-                                <ComboBoxItem Content="操作员" Tag="Operator" />
-                                <ComboBoxItem Content="工程师" Tag="Engineer" />
-                                <ComboBoxItem Content="管理员" Tag="Am" />
-                            </ComboBox>
-                        </StackPanel>
-
-                        <CheckBox x:Name="CheckBoxIsEnabled"
-                                  Grid.Row="6"
-                                  IsChecked="True"
-                                  VerticalAlignment="Center"
-                                  Content="启用账户" />
-
-                        <TextBlock x:Name="TextBlockPasswordLabel"
-                                   Grid.Row="8"
-                                   Margin="0,0,0,6"
+                    <!-- 标题栏 -->
+                    <Border Grid.Row="0"
+                            Padding="20,16"
+                            CornerRadius="14,14,0,0"
+                            Background="{DynamicResource SecondaryRegionBrush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="0,0,0,1">
+                        <TextBlock x:Name="TextBlockTitle"
+                                   FontSize="18"
+                                   FontWeight="SemiBold"
                                    Foreground="{DynamicResource PrimaryTextBrush}"
-                                   Text="初始密码" />
+                                   Text="新增用户" />
+                    </Border>
 
-                        <PasswordBox x:Name="PasswordBoxPassword"
-                                     Grid.Row="9"
-                                     Height="36"
-                                     VerticalContentAlignment="Center" />
+                    <!-- 表单区（Grid 保留所有 x:Name 行定义，供代码后端控制密码行高度） -->
+                    <ScrollViewer Grid.Row="1"
+                                  Padding="20,12,20,8"
+                                  VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="10" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="10" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="10" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition x:Name="PasswordTopSpacingRow" Height="10" />
+                                <RowDefinition x:Name="PasswordLabelRow" Height="Auto" />
+                                <RowDefinition x:Name="PasswordInputRow" Height="Auto" />
+                                <RowDefinition x:Name="PasswordBottomSpacingRow" Height="10" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="10" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
 
-                        <StackPanel Grid.Row="11">
-                            <TextBlock Margin="0,0,0,6"
+                            <!-- 登录名 -->
+                            <StackPanel Grid.Row="0">
+                                <TextBlock Margin="0,0,0,6"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="登录名" />
+                                <TextBox x:Name="TextBoxLoginName"
+                                         Height="36"
+                                         VerticalContentAlignment="Center" />
+                            </StackPanel>
+
+                            <!-- 用户名 -->
+                            <StackPanel Grid.Row="2">
+                                <TextBlock Margin="0,0,0,6"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="用户名" />
+                                <TextBox x:Name="TextBoxUserName"
+                                         Height="36"
+                                         VerticalContentAlignment="Center" />
+                            </StackPanel>
+
+                            <!-- 角色 -->
+                            <StackPanel Grid.Row="4">
+                                <TextBlock Margin="0,0,0,6"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="角色" />
+                                <ComboBox x:Name="ComboBoxRole"
+                                          Height="36"
+                                          SelectedIndex="2">
+                                    <ComboBoxItem Content="操作员" Tag="Operator" />
+                                    <ComboBoxItem Content="工程师" Tag="Engineer" />
+                                    <ComboBoxItem Content="管理员" Tag="Am" />
+                                </ComboBox>
+                            </StackPanel>
+
+                            <!-- 启用账户 -->
+                            <CheckBox x:Name="CheckBoxIsEnabled"
+                                      Grid.Row="6"
+                                      IsChecked="True"
+                                      VerticalAlignment="Center"
+                                      Content="启用账户" />
+
+                            <!-- 初始密码标签（编辑模式隐藏） -->
+                            <TextBlock x:Name="TextBlockPasswordLabel"
+                                       Grid.Row="8"
+                                       Margin="0,0,0,6"
                                        Foreground="{DynamicResource PrimaryTextBrush}"
-                                       Text="备注" />
-                            <TextBox x:Name="TextBoxRemark"
-                                     Height="96"
-                                     AcceptsReturn="True"
-                                     TextWrapping="Wrap"
-                                     VerticalScrollBarVisibility="Auto" />
+                                       Text="初始密码" />
+
+                            <!-- 初始密码输入框（编辑模式隐藏） -->
+                            <PasswordBox x:Name="PasswordBoxPassword"
+                                         Grid.Row="9"
+                                         Height="36"
+                                         VerticalContentAlignment="Center" />
+
+                            <!-- 备注 -->
+                            <StackPanel Grid.Row="11">
+                                <TextBlock Margin="0,0,0,6"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="备注" />
+                                <TextBox x:Name="TextBoxRemark"
+                                         Height="96"
+                                         Padding="8,6"
+                                         AcceptsReturn="True"
+                                         TextWrapping="Wrap"
+                                         VerticalScrollBarVisibility="Auto" />
+                            </StackPanel>
+
+                            <!-- 错误提示 -->
+                            <TextBlock x:Name="TextBlockMessage"
+                                       Grid.Row="13"
+                                       MinHeight="22"
+                                       Margin="0,4,0,4"
+                                       Foreground="{DynamicResource DangerBrush}"
+                                       TextWrapping="Wrap" />
+                        </Grid>
+                    </ScrollViewer>
+
+                    <!-- 底部按钮 -->
+                    <Border Grid.Row="2"
+                            Padding="20,12"
+                            CornerRadius="0,0,13,13"
+                            Background="{DynamicResource SecondaryRegionBrush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="0,1,0,0">
+                        <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                            <Button Width="80"
+                                    Height="34"
+                                    Click="ButtonCancel_OnClick"
+                                    Content="取消" />
+                            <Button Width="80"
+                                    Height="34"
+                                    Margin="10,0,0,0"
+                                    Click="ButtonSubmit_OnClick"
+                                    Content="保存" />
                         </StackPanel>
-
-                        <TextBlock x:Name="TextBlockMessage"
-                                   Grid.Row="13"
-                                   MinHeight="22"
-                                   Margin="0,8,0,0"
-                                   Foreground="{DynamicResource DangerBrush}"
-                                   TextWrapping="Wrap" />
-                    </Grid>
-
-                    <Grid Grid.Row="4">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="8" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-
-                        <Button Grid.Column="0"
-                                Width="186"
-                                Height="36"
-                                Click="ButtonCancel_OnClick"
-                                Content="取消"
-                                HorizontalAlignment="Left" />
-
-                        <Button Grid.Column="2"
-                                Width="186"
-                                Height="36"
-                                Click="ButtonSubmit_OnClick"
-                                Content="保存"
-                                HorizontalAlignment="Right" />
-                    </Grid>
+                    </Border>
                 </Grid>
             </Border>
         </Grid>

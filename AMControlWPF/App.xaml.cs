@@ -2,10 +2,12 @@
 using AM.Core.Context;
 using AM.Core.Logging;
 using AM.Core.Messaging;
+using AM.DBService.Services.Auth;
 using AM.Model.Common;
 using AM.Tools;
 using AM.Tools.Logging;
 using AM.Tools.Messaging;
+using AMControlWPF.Navigation;
 using AMControlWPF.Tools.Helper;
 using AMControlWPF.Views.Auth;
 using System;
@@ -38,6 +40,18 @@ namespace AMControlWPF
             AppBootstrap.Initialize();
 
             LangThemeHelper.ApplyFromConfig();
+
+            // 以 NavigationCatalog 为权威来源，全量同步权限目录到 DB
+            // 每次启动执行，确保新增/删除的页面自动反映到权限管理界面
+            try
+            {
+                var authSeed = new AuthSeedService(SystemContext.Instance.Reporter);
+                authSeed.SyncPagePermissions(NavigationCatalog.ToPermissionEntities());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("权限目录同步失败：" + ex.Message);
+            }
 
             // 登录窗口是模态的，必须在主窗口显示之前处理登录逻辑
             ShutdownMode = ShutdownMode.OnExplicitShutdown;

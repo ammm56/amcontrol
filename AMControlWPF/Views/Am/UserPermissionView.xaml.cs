@@ -246,7 +246,7 @@ namespace AMControlWPF.Views.Am
 
             RefreshCurrentUserPermissionContext(true);
 
-            HandyControl.Controls.MessageBox.Show(result.Message, "权限分配", MessageBoxButton.OK, MessageBoxImage.Information);
+            //HandyControl.Controls.MessageBox.Show(result.Message, "权限分配", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void LoadUserPermissions()
@@ -333,7 +333,7 @@ namespace AMControlWPF.Views.Am
             LoadUserPermissions();
             RefreshCurrentUserPermissionContext(false);
 
-            HandyControl.Controls.MessageBox.Show(result.Message, "权限分配", MessageBoxButton.OK, MessageBoxImage.Information);
+            //HandyControl.Controls.MessageBox.Show(result.Message, "权限分配", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void RefreshCurrentUserPermissionContext(bool useCustomPagePermission)

@@ -331,8 +331,26 @@
                                            Text="{Binding SelectedItem.CardId, FallbackValue='—'}" />
 
                                 <TextBlock Style="{StaticResource DetailLabelStyle}" Text="控制卡类型" />
-                                <TextBlock Style="{StaticResource DetailValueStyle}">
+                                <TextBlock FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" >
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="OTHER" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding SelectedItem.CardType}" Value="10">
+                                                    <Setter Property="Text" Value="GOOGO" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding SelectedItem.CardType}" Value="20">
+                                                    <Setter Property="Text" Value="LEISAI" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding SelectedItem.CardType}" Value="90">
+                                                    <Setter Property="Text" Value="VIRTUAL" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
                                 </TextBlock>
+                                <!--<TextBlock Style="{StaticResource DetailValueStyle}">
+                                </TextBlock>-->
 
                                 <TextBlock Style="{StaticResource DetailLabelStyle}" Text="显示名称" />
                                 <TextBlock Style="{StaticResource DetailValueStyle}"
