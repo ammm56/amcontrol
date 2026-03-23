@@ -106,6 +106,7 @@
                                        Foreground="{DynamicResource PrimaryTextBrush}"
                                        Text="物理映射" />
 
+                            <!-- 行 1：所属控制卡 + 卡内轴编号 -->
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
@@ -113,7 +114,6 @@
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
 
-                                <!-- 所属控制卡：从已配置的卡中下拉选择 -->
                                 <StackPanel Grid.Column="0">
                                     <TextBlock Margin="0,0,0,4"
                                                Foreground="{DynamicResource PrimaryTextBrush}"
@@ -161,7 +161,6 @@
                                     </ComboBox>
                                 </StackPanel>
 
-                                <!-- 卡内轴编号：根据所选控制卡的轴数量动态生成 -->
                                 <StackPanel Grid.Column="2">
                                     <TextBlock Margin="0,0,0,4"
                                                Foreground="{DynamicResource PrimaryTextBrush}"
@@ -170,29 +169,26 @@
                                 </StackPanel>
                             </Grid>
 
+                            <!-- 行 2：物理内核号 + 物理轴号（均依赖所选控制卡动态生成） -->
                             <Grid Margin="0,10,0,0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="12" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
+
                                 <StackPanel Grid.Column="0">
                                     <TextBlock Margin="0,0,0,4"
                                                Foreground="{DynamicResource PrimaryTextBrush}"
                                                Text="物理内核号 (PhysicalCore)" />
-                                    <TextBox x:Name="TextBoxPhysicalCore"
-                                             Height="36"
-                                             VerticalContentAlignment="Center"
-                                             MaxLength="4" />
+                                    <ComboBox x:Name="ComboBoxPhysicalCore" Height="36" />
                                 </StackPanel>
+
                                 <StackPanel Grid.Column="2">
                                     <TextBlock Margin="0,0,0,4"
                                                Foreground="{DynamicResource PrimaryTextBrush}"
                                                Text="物理轴号 (PhysicalAxis)" />
-                                    <TextBox x:Name="TextBoxPhysicalAxis"
-                                             Height="36"
-                                             VerticalContentAlignment="Center"
-                                             MaxLength="4" />
+                                    <ComboBox x:Name="ComboBoxPhysicalAxis" Height="36" />
                                 </StackPanel>
                             </Grid>
 

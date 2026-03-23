@@ -36,78 +36,66 @@ namespace AMControlWPF.Views.Config
             TextBoxDisplayName.Text = entity.DisplayName ?? string.Empty;
             SelectComboBoxByTag(ComboBoxAxisCategory, entity.AxisCategory ?? "Linear");
 
-            // 填充控制卡下拉列表并选中当前卡
-            PopulateCardComboBox();
+            // 填充控制卡列表 → 选中当前卡 → 联动刷新三个物理映射下拉
+            ComboBoxCardId.ItemsSource = _availableCards;
             SelectCardById(entity.CardId);
-
-            // 根据所选控制卡更新轴编号选项，并选中当前轴编号
-            UpdateAxisIdOptions(entity.AxisId);
-
-            TextBoxPhysicalCore.Text = entity.PhysicalCore.ToString();
-            TextBoxPhysicalAxis.Text = entity.PhysicalAxis.ToString();
+            RefreshPhysicalMappingOptions(entity.AxisId, entity.PhysicalCore, entity.PhysicalAxis);
 
             CheckBoxIsEnabled.IsChecked = entity.IsEnabled;
             TextBoxSortOrder.Text = entity.SortOrder.ToString();
-
             TextBoxDescription.Text = entity.Description ?? string.Empty;
             TextBoxRemark.Text = entity.Remark ?? string.Empty;
         }
 
-        private void PopulateCardComboBox()
-        {
-            ComboBoxCardId.ItemsSource = _availableCards;
-        }
-
-        private void SelectCardById(short cardId)
-        {
-            var card = _availableCards.FirstOrDefault(c => c.CardId == cardId);
-            ComboBoxCardId.SelectedItem = card ?? (_availableCards.Count > 0 ? _availableCards[0] : null);
-        }
+        // ── 控制卡选择变更 ────────────────────────────────────────────────
 
         private void ComboBoxCardId_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // 保留当前已选轴编号，切换卡后刷新可选范围
-            short currentAxisId = 0;
-            if (ComboBoxAxisId.SelectedItem is short s)
-            {
-                currentAxisId = s;
-            }
+            // 保留当前已选值，切换卡后按新卡范围重新约束
+            var currentAxisId  = GetSelectedShort(ComboBoxAxisId,      0);
+            var currentCore    = GetSelectedShort(ComboBoxPhysicalCore, 1);
+            var currentPhysAxis = GetSelectedShort(ComboBoxPhysicalAxis, 0);
 
-            UpdateAxisIdOptions(currentAxisId);
+            RefreshPhysicalMappingOptions(currentAxisId, currentCore, currentPhysAxis);
         }
 
-        private void UpdateAxisIdOptions(short preferAxisId = 0)
+        /// <summary>
+        /// 根据当前所选控制卡的轴数（AxisCountNumber）和内核数（CoreNumber）
+        /// 统一刷新三个物理映射下拉框的可选项，并尽量保留用户已选值。
+        /// </summary>
+        private void RefreshPhysicalMappingOptions(short preferAxisId, short preferCore, short preferPhysAxis)
         {
-            var selectedCard = ComboBoxCardId.SelectedItem as MotionCardEntity;
-            var maxCount = selectedCard != null && selectedCard.AxisCountNumber > 0
-                ? selectedCard.AxisCountNumber
-                : 32;
+            var card = ComboBoxCardId.SelectedItem as MotionCardEntity;
 
-            var options = new List<short>();
-            for (short i = 0; i < maxCount; i++)
-            {
-                options.Add(i);
-            }
+            // 轴数：无卡时默认 32 个选项
+            int axisMax  = card != null && card.AxisCountNumber > 0 ? card.AxisCountNumber : 32;
+            // 内核数：1-based，无卡时默认 1 个
+            int coreMax  = card != null && card.CoreNumber > 0 ? card.CoreNumber : 1;
 
-            ComboBoxAxisId.ItemsSource = options;
+            // AxisId：0 .. axisMax-1
+            var axisOptions = BuildShortRange(0, axisMax - 1);
+            ComboBoxAxisId.ItemsSource = axisOptions;
+            ComboBoxAxisId.SelectedIndex = (preferAxisId >= 0 && preferAxisId < axisMax) ? preferAxisId : 0;
 
-            // 优先保持原轴编号，越界则选第 0 号
-            if (preferAxisId >= 0 && preferAxisId < maxCount)
-            {
-                ComboBoxAxisId.SelectedIndex = preferAxisId;
-            }
-            else if (options.Count > 0)
-            {
-                ComboBoxAxisId.SelectedIndex = 0;
-            }
+            // PhysicalCore：1 .. coreMax（1-based）
+            var coreOptions = BuildShortRange(1, coreMax);
+            ComboBoxPhysicalCore.ItemsSource = coreOptions;
+            var coreIdx = coreOptions.IndexOf(preferCore);
+            ComboBoxPhysicalCore.SelectedIndex = coreIdx >= 0 ? coreIdx : 0;
+
+            // PhysicalAxis：0 .. axisMax-1（与 AxisId 范围相同）
+            var physAxisOptions = BuildShortRange(0, axisMax - 1);
+            ComboBoxPhysicalAxis.ItemsSource = physAxisOptions;
+            ComboBoxPhysicalAxis.SelectedIndex = (preferPhysAxis >= 0 && preferPhysAxis < axisMax) ? preferPhysAxis : 0;
         }
+
+        // ── 保存 ─────────────────────────────────────────────────────────
 
         private void ButtonSave_OnClick(object sender, RoutedEventArgs e)
         {
             TextBlockError.Visibility = Visibility.Collapsed;
             TextBlockError.Text = string.Empty;
 
-            // ── 校验 ────────────────────────────────────────────────────
             short logicalAxis;
             if (!short.TryParse(TextBoxLogicalAxis.Text.Trim(), out logicalAxis) || logicalAxis < 0)
             {
@@ -131,25 +119,10 @@ namespace AMControlWPF.Views.Config
                 return;
             }
 
-            if (!(ComboBoxAxisId.SelectedItem is short axisId))
-            {
-                ShowError("请选择卡内轴编号。");
-                return;
-            }
-
-            short physicalCore;
-            if (!short.TryParse(TextBoxPhysicalCore.Text.Trim(), out physicalCore) || physicalCore < 1)
-            {
-                ShowError("物理内核号必须 ≥ 1。");
-                return;
-            }
-
-            short physicalAxis;
-            if (!short.TryParse(TextBoxPhysicalAxis.Text.Trim(), out physicalAxis) || physicalAxis < 0)
-            {
-                ShowError("物理轴号必须为非负整数。");
-                return;
-            }
+            // 三个物理映射字段均来自下拉框，范围已在填充时约束，直接读取
+            var axisId      = GetSelectedShort(ComboBoxAxisId,       0);
+            var physCore    = GetSelectedShort(ComboBoxPhysicalCore,  1);
+            var physAxis    = GetSelectedShort(ComboBoxPhysicalAxis,  0);
 
             int sortOrder;
             if (!int.TryParse(TextBoxSortOrder.Text.Trim(), out sortOrder) || sortOrder < 0)
@@ -158,7 +131,6 @@ namespace AMControlWPF.Views.Config
                 return;
             }
 
-            // ── 构建结果 ────────────────────────────────────────────────
             ResultEntity = new MotionAxisEntity
             {
                 Id = _originalId,
@@ -168,8 +140,8 @@ namespace AMControlWPF.Views.Config
                 Name = name,
                 DisplayName = (TextBoxDisplayName.Text ?? string.Empty).Trim(),
                 AxisCategory = axisCategory,
-                PhysicalCore = physicalCore,
-                PhysicalAxis = physicalAxis,
+                PhysicalCore = physCore,
+                PhysicalAxis = physAxis,
                 IsEnabled = CheckBoxIsEnabled.IsChecked == true,
                 SortOrder = sortOrder,
                 Description = (TextBoxDescription.Text ?? string.Empty).Trim(),
@@ -186,12 +158,39 @@ namespace AMControlWPF.Views.Config
             DialogResult = false;
         }
 
-        // ── 辅助方法 ─────────────────────────────────────────────────────
+        // ── 辅助方法 ──────────────────────────────────────────────────────
+
+        private void SelectCardById(short cardId)
+        {
+            var card = _availableCards.FirstOrDefault(c => c.CardId == cardId);
+            ComboBoxCardId.SelectedItem = card ?? (_availableCards.Count > 0 ? _availableCards[0] : null);
+        }
 
         private void ShowError(string message)
         {
             TextBlockError.Text = message;
             TextBlockError.Visibility = Visibility.Visible;
+        }
+
+        /// <summary>读取 ComboBox 当前选中的 short 值，未选时返回 defaultValue。</summary>
+        private static short GetSelectedShort(ComboBox comboBox, short defaultValue)
+        {
+            return comboBox.SelectedItem is short s ? s : defaultValue;
+        }
+
+        /// <summary>
+        /// 生成从 from 到 to（含两端）的 short 列表。
+        /// 例：BuildShortRange(0, 3) → [0, 1, 2, 3]
+        ///     BuildShortRange(1, 2) → [1, 2]
+        /// </summary>
+        private static List<short> BuildShortRange(int from, int to)
+        {
+            var list = new List<short>(Math.Max(to - from + 1, 0));
+            for (var i = from; i <= to; i++)
+            {
+                list.Add((short)i);
+            }
+            return list;
         }
 
         private static void SelectComboBoxByTag(ComboBox comboBox, string tag)
@@ -214,12 +213,7 @@ namespace AMControlWPF.Views.Config
         private static string GetComboBoxTagString(ComboBox comboBox, string defaultValue)
         {
             var item = comboBox.SelectedItem as ComboBoxItem;
-            if (item == null || item.Tag == null)
-            {
-                return defaultValue;
-            }
-
-            return item.Tag.ToString();
+            return item?.Tag?.ToString() ?? defaultValue;
         }
     }
 }
