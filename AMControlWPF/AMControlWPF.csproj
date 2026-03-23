@@ -143,6 +143,12 @@
     <Compile Include="Views\Config\MotionCardManagementView.xaml.cs">
       <DependentUpon>MotionCardManagementView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Config\MotionIoMapEditDialog.xaml.cs">
+      <DependentUpon>MotionIoMapEditDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Config\MotionIoMapManagementView.xaml.cs">
+      <DependentUpon>MotionIoMapManagementView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\IO\DIMonitorView.xaml.cs">
       <DependentUpon>DIMonitorView.xaml</DependentUpon>
     </Compile>
@@ -269,6 +275,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Config\MotionCardManagementView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Config\MotionIoMapEditDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Config\MotionIoMapManagementView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

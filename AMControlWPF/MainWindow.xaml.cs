@@ -440,7 +440,7 @@ namespace AMControlWPF
                 case "Config.Axis":
                     return new MotionAxisManagementView();
                 case "Config.IoMap":
-                    return CreatePlaceholderPage("配置 / IO 映射配置");
+                    return new MotionIoMapManagementView();
                 case "Config.AxisParam":
                     return CreatePlaceholderPage("配置 / 轴运行参数");
                 case "Config.Actuator":

@@ -60,6 +60,33 @@ namespace AM.DBService.Services.Runtime
             return Ok("后台工作单元注册成功: " + worker.Name);
         }
 
+        /// <summary>
+        /// 注册后台工作单元，并根据 autoStart 决定是否立即启动。
+        /// 注册失败 → Fail（上层应中止）。
+        /// 启动失败 → 内部 Warn，注册结果仍返回成功（非致命，可后续手动启动）。
+        /// </summary>
+        public Result Register(IRuntimeWorker worker, bool autoStart)
+        {
+            var regResult = Register(worker);
+            if (!regResult.Success || !autoStart)
+            {
+                return regResult;
+            }
+
+            // 自动启动：失败时仅 Warn，不阻断启动流程
+            var startResult = worker.Start();
+            if (!startResult.Success)
+            {
+                _reporter?.Warn(
+                    MessageSourceName,
+                    string.Format("后台工作单元自动启动失败: {0}，{1}", worker.Name, startResult.Message),
+                    startResult.Code);
+            }
+
+            // 无论启动是否成功，注册本身已完成，返回注册结果
+            return regResult;
+        }
+
         public Result<IRuntimeWorker> QueryAll()
         {
             return OkList(_workers.Values.ToList(), "后台工作单元查询成功");

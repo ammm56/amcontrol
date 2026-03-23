@@ -81,9 +81,13 @@ namespace AM.App.Bootstrap
             }
             SystemContext.Instance.Reporter.Info("AppBootstrap", "数据库运动控制配置加载并完成设备上下文重建");
 
-            // 7. 实例化运动控制卡IO扫描任务 注册到运行时任务管理器
-            var ioScanWorker = new IoScanWorker(reporter, 50);
-            var registerResult = runtimeTaskManager.Register(ioScanWorker);
+            // 7. 注册后台工作单元
+            //    Register(worker, autoStart) 统一管理注册与条件启动
+            //    注册失败 → 致命错误，终止启动
+            //    自动启动失败 → 内部 Warn，非致命，可后续手动启动
+            var ioScanConfig = config.IoScanConfig;
+            var ioScanWorker = new IoScanWorker(reporter, ioScanConfig.ScanIntervalMs);
+            var registerResult = runtimeTaskManager.Register(ioScanWorker, ioScanConfig.AutoStart);
             if (!registerResult.Success)
             {
                 SystemContext.Instance.Reporter.Error(
@@ -91,12 +95,6 @@ namespace AM.App.Bootstrap
                     "IO 扫描工作单元注册失败，应用启动终止",
                     registerResult.Code);
                 return;
-            }
-            // 7.1. 启动所有注册的运行时任务（目前仅IO扫描任务）
-            var startWorkersResult = runtimeTaskManager.StartAll();
-            if (!startWorkersResult.Success)
-            {
-                SystemContext.Instance.Reporter.Warn("AppBootstrap", startWorkersResult.Message, startWorkersResult.Code);
             }
 
             // 8. 初始化硬件

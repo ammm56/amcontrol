@@ -14,6 +14,10 @@
 		"Connection": "DataSource=W:\\db\\sqlite\\gsna",
 		"Enable": true
 	},
+	"IoScanConfig": {
+		"AutoStart": true,
+		"ScanIntervalMs": 50
+	},
 	"MotionCardsConfig": [
 		{
 			"CardType": 10,

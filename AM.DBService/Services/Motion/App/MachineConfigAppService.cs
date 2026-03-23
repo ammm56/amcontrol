@@ -131,11 +131,15 @@ namespace AM.DBService.Services.Motion.App
                     .ThenBy(p => p.LogicalAxis)
                     .ToList();
 
-                var ioEntities = db.Queryable<MotionIoMapEntity>()
-                    .Where(p => p.IsEnabled)
+                // 加载全量 IO 映射（含禁用）→ 用于孤立检查
+                var allIoEntities = db.Queryable<MotionIoMapEntity>()
                     .ToList()
                     .OrderBy(p => p.SortOrder)
                     .ThenBy(p => p.LogicalBit)
+                    .ToList();
+                // 仅启用 → 用于运行时装配 DIBitMaps / DOBitMaps
+                var ioEntities = allIoEntities
+                    .Where(p => p.IsEnabled)
                     .ToList();
 
                 var ioPointConfigResult = _motionIoPointConfigCrudService.QueryAll();
@@ -192,7 +196,8 @@ namespace AM.DBService.Services.Motion.App
                     cylinderConfigs,
                     vacuumConfigs,
                     stackLightConfigs,
-                    gripperConfigs);
+                    gripperConfigs,
+                    allIoEntities);
                 if (!validateResult.Success)
                 {
                     return Fail<MotionCardConfig>(validateResult.Code, validateResult.Message);
@@ -455,8 +460,10 @@ namespace AM.DBService.Services.Motion.App
             IList<CylinderConfigEntity> cylinderConfigs,
             IList<VacuumConfigEntity> vacuumConfigs,
             IList<StackLightConfigEntity> stackLightConfigs,
-            IList<GripperConfigEntity> gripperConfigs)
+            IList<GripperConfigEntity> gripperConfigs,
+            IList<MotionIoMapEntity> allIoEntities)
         {
+            // ── 控制卡唯一性 ──
             var duplicateCardId = cardEntities
                 .GroupBy(p => p.CardId)
                 .FirstOrDefault(g => g.Count() > 1);
@@ -464,7 +471,6 @@ namespace AM.DBService.Services.Motion.App
             {
                 return Result.Fail((int)DbErrorCode.InvalidArgument, "控制卡 CardId 重复: " + duplicateCardId.Key, ResultSource.Database);
             }
-
             var duplicateCardName = cardEntities
                 .Where(p => !string.IsNullOrWhiteSpace(p.Name))
                 .GroupBy(p => p.Name.Trim(), StringComparer.OrdinalIgnoreCase)
@@ -474,6 +480,7 @@ namespace AM.DBService.Services.Motion.App
                 return Result.Fail((int)DbErrorCode.InvalidArgument, "控制卡名称重复: " + duplicateCardName.Key, ResultSource.Database);
             }
 
+            // ── 轴唯一性 ──
             var duplicateLogicalAxis = axisEntities
                 .GroupBy(p => p.LogicalAxis)
                 .FirstOrDefault(g => g.Count() > 1);
@@ -481,7 +488,6 @@ namespace AM.DBService.Services.Motion.App
             {
                 return Result.Fail((int)DbErrorCode.InvalidArgument, "逻辑轴重复: " + duplicateLogicalAxis.Key, ResultSource.Database);
             }
-
             var duplicateAxisName = axisEntities
                 .Where(p => !string.IsNullOrWhiteSpace(p.Name))
                 .GroupBy(p => p.Name.Trim(), StringComparer.OrdinalIgnoreCase)
@@ -491,6 +497,7 @@ namespace AM.DBService.Services.Motion.App
                 return Result.Fail((int)DbErrorCode.InvalidArgument, "轴名称重复: " + duplicateAxisName.Key, ResultSource.Database);
             }
 
+            // ── IO 映射唯一性 ──
             var duplicateIoLogicalBit = ioEntities
                 .GroupBy(p => BuildIoPointKey(p.IoType, p.LogicalBit))
                 .FirstOrDefault(g => g.Count() > 1);
@@ -499,6 +506,7 @@ namespace AM.DBService.Services.Motion.App
                 return Result.Fail((int)DbErrorCode.InvalidArgument, "逻辑IO重复: " + duplicateIoLogicalBit.Key, ResultSource.Database);
             }
 
+            // ── IO 点位公共配置唯一性 ──
             var duplicateIoPointConfig = ioPointConfigs
                 .GroupBy(p => BuildIoPointKey(p))
                 .FirstOrDefault(g => g.Count() > 1);
@@ -507,11 +515,18 @@ namespace AM.DBService.Services.Motion.App
                 return Result.Fail((int)DbErrorCode.InvalidArgument, "IO点位公共配置重复: " + duplicateIoPointConfig.Key, ResultSource.Database);
             }
 
+            // ── IO 点位公共配置孤立检查 ──
+            // ioKeys：仅启用的 IO 映射，供执行器 IO 位引用校验使用
             var ioKeys = new HashSet<string>(
                 ioEntities.Select(p => BuildIoPointKey(p.IoType, p.LogicalBit)),
                 StringComparer.OrdinalIgnoreCase);
 
-            var orphanPointConfig = ioPointConfigs.FirstOrDefault(p => !ioKeys.Contains(BuildIoPointKey(p)));
+            // allIoKeys：包含禁用条目，避免将已禁用 IO 的公共配置误判为孤立
+            var allIoKeys = new HashSet<string>(
+                allIoEntities.Select(p => BuildIoPointKey(p.IoType, p.LogicalBit)),
+                StringComparer.OrdinalIgnoreCase);
+
+            var orphanPointConfig = ioPointConfigs.FirstOrDefault(p => !allIoKeys.Contains(BuildIoPointKey(p)));
             if (orphanPointConfig != null)
             {
                 return Result.Fail(
@@ -520,17 +535,14 @@ namespace AM.DBService.Services.Motion.App
                     ResultSource.Database);
             }
 
+            // ── 气缸对象验证（引用的 IO 位须在启用集合中） ──
             var duplicateCylinderName = cylinderConfigs
                 .GroupBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
                 .FirstOrDefault(g => g.Count() > 1);
             if (duplicateCylinderName != null)
             {
-                return Result.Fail(
-                    (int)DbErrorCode.InvalidArgument,
-                    "气缸名称重复: " + duplicateCylinderName.Key,
-                    ResultSource.Database);
+                return Result.Fail((int)DbErrorCode.InvalidArgument, "气缸名称重复: " + duplicateCylinderName.Key, ResultSource.Database);
             }
-
             foreach (var cylinder in cylinderConfigs.Where(p => p != null))
             {
                 if (string.IsNullOrWhiteSpace(cylinder.Name))
@@ -562,17 +574,14 @@ namespace AM.DBService.Services.Motion.App
                 }
             }
 
+            // ── 真空对象验证 ──
             var duplicateVacuumName = vacuumConfigs
                 .GroupBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
                 .FirstOrDefault(g => g.Count() > 1);
             if (duplicateVacuumName != null)
             {
-                return Result.Fail(
-                    (int)DbErrorCode.InvalidArgument,
-                    "真空名称重复: " + duplicateVacuumName.Key,
-                    ResultSource.Database);
+                return Result.Fail((int)DbErrorCode.InvalidArgument, "真空名称重复: " + duplicateVacuumName.Key, ResultSource.Database);
             }
-
             foreach (var vacuum in vacuumConfigs.Where(p => p != null))
             {
                 if (string.IsNullOrWhiteSpace(vacuum.Name))
@@ -610,17 +619,14 @@ namespace AM.DBService.Services.Motion.App
                 }
             }
 
+            // ── 灯塔对象验证 ──
             var duplicateStackLightName = stackLightConfigs
                 .GroupBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
                 .FirstOrDefault(g => g.Count() > 1);
             if (duplicateStackLightName != null)
             {
-                return Result.Fail(
-                    (int)DbErrorCode.InvalidArgument,
-                    "灯塔名称重复: " + duplicateStackLightName.Key,
-                    ResultSource.Database);
+                return Result.Fail((int)DbErrorCode.InvalidArgument, "灯塔名称重复: " + duplicateStackLightName.Key, ResultSource.Database);
             }
-
             foreach (var stackLight in stackLightConfigs.Where(p => p != null))
             {
                 if (string.IsNullOrWhiteSpace(stackLight.Name))
@@ -659,17 +665,14 @@ namespace AM.DBService.Services.Motion.App
                 }
             }
 
+            // ── 夹爪对象验证 ──
             var duplicateGripperName = gripperConfigs
-    .GroupBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
-    .FirstOrDefault(g => g.Count() > 1);
+                .GroupBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
+                .FirstOrDefault(g => g.Count() > 1);
             if (duplicateGripperName != null)
             {
-                return Result.Fail(
-                    (int)DbErrorCode.InvalidArgument,
-                    "夹爪名称重复: " + duplicateGripperName.Key,
-                    ResultSource.Database);
+                return Result.Fail((int)DbErrorCode.InvalidArgument, "夹爪名称重复: " + duplicateGripperName.Key, ResultSource.Database);
             }
-
             foreach (var gripper in gripperConfigs.Where(p => p != null))
             {
                 if (string.IsNullOrWhiteSpace(gripper.Name))

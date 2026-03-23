@@ -23,6 +23,12 @@ namespace AM.Model.Common
         public List<MotionCardConfig> MotionCardsConfig { get; set; } = new List<MotionCardConfig>();
 
         /// <summary>
+        /// IO 扫描服务配置。
+        /// 持久化到 config.json。
+        /// </summary>
+        public IoScanConfig IoScanConfig { get; set; } = new IoScanConfig();
+
+        /// <summary>
         /// 第三层对象运行时配置聚合。
         /// 运行时由数据库装载，不再写入 config.json。
         /// </summary>
@@ -93,6 +99,26 @@ namespace AM.Model.Common
         public string Connection { get; set; } = "Data Source=am.db;Version=3;";
 
         public bool Enabled { get; set; } = false;
+    }
+
+    /// <summary>
+    /// IO 扫描服务启动配置。
+    /// 持久化到 config.json，控制扫描行为。
+    /// </summary>
+    public class IoScanConfig
+    {
+        /// <summary>
+        /// 应用启动后是否自动开始 IO 扫描。
+        /// 默认 false：需在设备就绪后手动启动。
+        /// 调试/生产环境可设为 true 实现开机自动扫描。
+        /// </summary>
+        public bool AutoStart { get; set; } = false;
+
+        /// <summary>
+        /// 扫描周期，单位 ms。
+        /// 最小值为 10ms，默认 50ms。
+        /// </summary>
+        public int ScanIntervalMs { get; set; } = 50;
     }
 
     /// <summary>
