@@ -444,7 +444,7 @@ namespace AMControlWPF
                 case "Config.AxisParam":
                     return new MotionAxisParamManagementView();
                 case "Config.Actuator":
-                    return CreatePlaceholderPage("配置 / 执行器配置");
+                    return new ActuatorManagementView();
                 case "Config.Runtime":
                     return CreatePlaceholderPage("配置 / 运行配置编辑");
                 case "Config.Camera":

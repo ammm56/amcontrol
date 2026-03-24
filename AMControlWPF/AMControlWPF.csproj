@@ -131,11 +131,20 @@
     <Compile Include="Views\Auth\LoginView.xaml.cs">
       <DependentUpon>LoginView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Config\ActuatorManagementView.xaml.cs">
+      <DependentUpon>ActuatorManagementView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Config\AxisParamAddDialog.xaml.cs">
       <DependentUpon>AxisParamAddDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Config\AxisParamEditDialog.xaml.cs">
       <DependentUpon>AxisParamEditDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Config\CylinderEditDialog.xaml.cs">
+      <DependentUpon>CylinderEditDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Config\GripperEditDialog.xaml.cs">
+      <DependentUpon>GripperEditDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Config\MotionAxisEditDialog.xaml.cs">
       <DependentUpon>MotionAxisEditDialog.xaml</DependentUpon>
@@ -157,6 +166,12 @@
     </Compile>
     <Compile Include="Views\Config\MotionIoMapManagementView.xaml.cs">
       <DependentUpon>MotionIoMapManagementView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Config\StackLightEditDialog.xaml.cs">
+      <DependentUpon>StackLightEditDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Config\VacuumEditDialog.xaml.cs">
+      <DependentUpon>VacuumEditDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\IO\DIMonitorView.xaml.cs">
       <DependentUpon>DIMonitorView.xaml</DependentUpon>
@@ -271,11 +286,23 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Config\ActuatorManagementView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Config\AxisParamAddDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Config\AxisParamEditDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Config\CylinderEditDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Config\GripperEditDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -304,6 +331,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Config\MotionIoMapManagementView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Config\StackLightEditDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Config\VacuumEditDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -1,0 +1,405 @@
+﻿<UserControl x:Class="AMControlWPF.Views.Config.ActuatorManagementView"
+             xmlns:hc="https://handyorg.github.io/handycontrol"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             Background="Transparent"
+             Loaded="UserControl_Loaded">
+
+    <Grid Margin="10">
+        <TabControl x:Name="MainTabControl"
+                    SelectionChanged="MainTabControl_SelectionChanged">
+
+            <!-- ══════════════ 气缸 ══════════════ -->
+            <TabItem Header="气缸">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="28" />
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0"
+                            Padding="12,8"
+                            Margin="0,0,0,8"
+                            CornerRadius="8"
+                            Background="{DynamicResource SecondaryRegionBrush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="1">
+                        <DockPanel LastChildFill="False">
+                            <TextBlock DockPanel.Dock="Left"
+                                       VerticalAlignment="Center"
+                                       FontSize="14"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                       Text="气缸配置" />
+                            <StackPanel DockPanel.Dock="Right"
+                                        Orientation="Horizontal"
+                                        VerticalAlignment="Center">
+                                <Button MinWidth="72"
+                                        Margin="0,0,8,0"
+                                        Click="ButtonRefreshCylinders_OnClick"
+                                        Content="刷新" />
+                                <Button MinWidth="88"
+                                        Click="ButtonAddCylinder_OnClick"
+                                        Content="+ 新增" />
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+
+                    <DataGrid x:Name="DataGridCylinders"
+                              Grid.Row="1"
+                              ItemsSource="{Binding Cylinders}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              SelectionMode="Single"
+                              SelectionUnit="FullRow"
+                              GridLinesVisibility="Horizontal"
+                              RowHeight="34"
+                              ColumnHeaderHeight="34"
+                              BorderThickness="1"
+                              BorderBrush="{DynamicResource BorderBrush}"
+                              Background="{DynamicResource RegionBrush}"
+                              MouseDoubleClick="DataGridCylinders_OnMouseDoubleClick">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="名称"         Binding="{Binding Name}"              Width="140" />
+                            <DataGridTextColumn Header="显示名称"      Binding="{Binding DisplayName}"       Width="140" />
+                            <DataGridTextColumn Header="驱动模式"      Binding="{Binding DriveMode}"         Width="80" />
+                            <DataGridTextColumn Header="伸出位 (DO)"   Binding="{Binding ExtendOutputBit}"   Width="90" />
+                            <DataGridTextColumn Header="缩回位 (DO)"   Binding="{Binding RetractOutputBit}"  Width="90" />
+                            <DataGridTextColumn Header="伸出反馈 (DI)" Binding="{Binding ExtendFeedbackBit}" Width="96" />
+                            <DataGridTextColumn Header="缩回反馈 (DI)" Binding="{Binding RetractFeedbackBit}" Width="96" />
+                            <DataGridCheckBoxColumn Header="反馈校验"  Binding="{Binding UseFeedbackCheck}"  Width="70" />
+                            <DataGridCheckBoxColumn Header="启用"       Binding="{Binding IsEnabled}"         Width="50" />
+                            <DataGridTemplateColumn Header="操作" Width="110" IsReadOnly="False">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" Margin="4,2">
+                                            <Button Content="编辑"
+                                                    Height="24"
+                                                    MinWidth="46"
+                                                    Padding="6,0"
+                                                    Margin="0,0,4,0"
+                                                    Click="ButtonEditCylinder_OnClick"
+                                                    Tag="{Binding}" />
+                                            <Button Content="删除"
+                                                    Height="24"
+                                                    MinWidth="46"
+                                                    Padding="6,0"
+                                                    Foreground="{DynamicResource DangerBrush}"
+                                                    Click="ButtonDeleteCylinder_OnClick"
+                                                    Tag="{Binding}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <TextBlock x:Name="TextBlockCylinderStatus"
+                               Grid.Row="2"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               Opacity="0.55"
+                               Text="加载中..." />
+                </Grid>
+            </TabItem>
+
+            <!-- ══════════════ 真空 ══════════════ -->
+            <TabItem Header="真空">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="28" />
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0"
+                            Padding="12,8"
+                            Margin="0,0,0,8"
+                            CornerRadius="8"
+                            Background="{DynamicResource SecondaryRegionBrush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="1">
+                        <DockPanel LastChildFill="False">
+                            <TextBlock DockPanel.Dock="Left"
+                                       VerticalAlignment="Center"
+                                       FontSize="14"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                       Text="真空配置" />
+                            <StackPanel DockPanel.Dock="Right"
+                                        Orientation="Horizontal"
+                                        VerticalAlignment="Center">
+                                <Button MinWidth="72"
+                                        Margin="0,0,8,0"
+                                        Click="ButtonRefreshVacuums_OnClick"
+                                        Content="刷新" />
+                                <Button MinWidth="88"
+                                        Click="ButtonAddVacuum_OnClick"
+                                        Content="+ 新增" />
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+
+                    <DataGrid x:Name="DataGridVacuums"
+                              Grid.Row="1"
+                              ItemsSource="{Binding Vacuums}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              SelectionMode="Single"
+                              SelectionUnit="FullRow"
+                              GridLinesVisibility="Horizontal"
+                              RowHeight="34"
+                              ColumnHeaderHeight="34"
+                              BorderThickness="1"
+                              BorderBrush="{DynamicResource BorderBrush}"
+                              Background="{DynamicResource RegionBrush}"
+                              MouseDoubleClick="DataGridVacuums_OnMouseDoubleClick">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="名称"          Binding="{Binding Name}"               Width="140" />
+                            <DataGridTextColumn Header="显示名称"       Binding="{Binding DisplayName}"        Width="140" />
+                            <DataGridTextColumn Header="吸真空位 (DO)" Binding="{Binding VacuumOnOutputBit}"   Width="100" />
+                            <DataGridTextColumn Header="破真空位 (DO)" Binding="{Binding BlowOffOutputBit}"    Width="100" />
+                            <DataGridTextColumn Header="真空反馈 (DI)" Binding="{Binding VacuumFeedbackBit}"   Width="100" />
+                            <DataGridTextColumn Header="释放反馈 (DI)" Binding="{Binding ReleaseFeedbackBit}"  Width="100" />
+                            <DataGridTextColumn Header="工件检测 (DI)" Binding="{Binding WorkpiecePresentBit}" Width="100" />
+                            <DataGridCheckBoxColumn Header="反馈校验"  Binding="{Binding UseFeedbackCheck}"    Width="70" />
+                            <DataGridCheckBoxColumn Header="启用"       Binding="{Binding IsEnabled}"          Width="50" />
+                            <DataGridTemplateColumn Header="操作" Width="110" IsReadOnly="False">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" Margin="4,2">
+                                            <Button Content="编辑"
+                                                    Height="24"
+                                                    MinWidth="46"
+                                                    Padding="6,0"
+                                                    Margin="0,0,4,0"
+                                                    Click="ButtonEditVacuum_OnClick"
+                                                    Tag="{Binding}" />
+                                            <Button Content="删除"
+                                                    Height="24"
+                                                    MinWidth="46"
+                                                    Padding="6,0"
+                                                    Foreground="{DynamicResource DangerBrush}"
+                                                    Click="ButtonDeleteVacuum_OnClick"
+                                                    Tag="{Binding}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <TextBlock x:Name="TextBlockVacuumStatus"
+                               Grid.Row="2"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               Opacity="0.55"
+                               Text="加载中..." />
+                </Grid>
+            </TabItem>
+
+            <!-- ══════════════ 灯塔 ══════════════ -->
+            <TabItem Header="灯塔">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="28" />
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0"
+                            Padding="12,8"
+                            Margin="0,0,0,8"
+                            CornerRadius="8"
+                            Background="{DynamicResource SecondaryRegionBrush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="1">
+                        <DockPanel LastChildFill="False">
+                            <TextBlock DockPanel.Dock="Left"
+                                       VerticalAlignment="Center"
+                                       FontSize="14"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                       Text="灯塔配置" />
+                            <StackPanel DockPanel.Dock="Right"
+                                        Orientation="Horizontal"
+                                        VerticalAlignment="Center">
+                                <Button MinWidth="72"
+                                        Margin="0,0,8,0"
+                                        Click="ButtonRefreshStackLights_OnClick"
+                                        Content="刷新" />
+                                <Button MinWidth="88"
+                                        Click="ButtonAddStackLight_OnClick"
+                                        Content="+ 新增" />
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+
+                    <DataGrid x:Name="DataGridStackLights"
+                              Grid.Row="1"
+                              ItemsSource="{Binding StackLights}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              SelectionMode="Single"
+                              SelectionUnit="FullRow"
+                              GridLinesVisibility="Horizontal"
+                              RowHeight="34"
+                              ColumnHeaderHeight="34"
+                              BorderThickness="1"
+                              BorderBrush="{DynamicResource BorderBrush}"
+                              Background="{DynamicResource RegionBrush}"
+                              MouseDoubleClick="DataGridStackLights_OnMouseDoubleClick">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="名称"      Binding="{Binding Name}"             Width="140" />
+                            <DataGridTextColumn Header="显示名称"   Binding="{Binding DisplayName}"      Width="140" />
+                            <DataGridTextColumn Header="红灯 (DO)" Binding="{Binding RedOutputBit}"     Width="80" />
+                            <DataGridTextColumn Header="黄灯 (DO)" Binding="{Binding YellowOutputBit}"  Width="80" />
+                            <DataGridTextColumn Header="绿灯 (DO)" Binding="{Binding GreenOutputBit}"   Width="80" />
+                            <DataGridTextColumn Header="蓝灯 (DO)" Binding="{Binding BlueOutputBit}"    Width="80" />
+                            <DataGridTextColumn Header="蜂鸣 (DO)" Binding="{Binding BuzzerOutputBit}"  Width="80" />
+                            <DataGridCheckBoxColumn Header="报警蜂鸣" Binding="{Binding EnableBuzzerOnAlarm}"   Width="70" />
+                            <DataGridCheckBoxColumn Header="启用"     Binding="{Binding IsEnabled}"             Width="50" />
+                            <DataGridTemplateColumn Header="操作" Width="110" IsReadOnly="False">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" Margin="4,2">
+                                            <Button Content="编辑"
+                                                    Height="24"
+                                                    MinWidth="46"
+                                                    Padding="6,0"
+                                                    Margin="0,0,4,0"
+                                                    Click="ButtonEditStackLight_OnClick"
+                                                    Tag="{Binding}" />
+                                            <Button Content="删除"
+                                                    Height="24"
+                                                    MinWidth="46"
+                                                    Padding="6,0"
+                                                    Foreground="{DynamicResource DangerBrush}"
+                                                    Click="ButtonDeleteStackLight_OnClick"
+                                                    Tag="{Binding}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <TextBlock x:Name="TextBlockStackLightStatus"
+                               Grid.Row="2"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               Opacity="0.55"
+                               Text="加载中..." />
+                </Grid>
+            </TabItem>
+
+            <!-- ══════════════ 夹爪 ══════════════ -->
+            <TabItem Header="夹爪">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="28" />
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0"
+                            Padding="12,8"
+                            Margin="0,0,0,8"
+                            CornerRadius="8"
+                            Background="{DynamicResource SecondaryRegionBrush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="1">
+                        <DockPanel LastChildFill="False">
+                            <TextBlock DockPanel.Dock="Left"
+                                       VerticalAlignment="Center"
+                                       FontSize="14"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                       Text="夹爪配置" />
+                            <StackPanel DockPanel.Dock="Right"
+                                        Orientation="Horizontal"
+                                        VerticalAlignment="Center">
+                                <Button MinWidth="72"
+                                        Margin="0,0,8,0"
+                                        Click="ButtonRefreshGrippers_OnClick"
+                                        Content="刷新" />
+                                <Button MinWidth="88"
+                                        Click="ButtonAddGripper_OnClick"
+                                        Content="+ 新增" />
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+
+                    <DataGrid x:Name="DataGridGrippers"
+                              Grid.Row="1"
+                              ItemsSource="{Binding Grippers}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              SelectionMode="Single"
+                              SelectionUnit="FullRow"
+                              GridLinesVisibility="Horizontal"
+                              RowHeight="34"
+                              ColumnHeaderHeight="34"
+                              BorderThickness="1"
+                              BorderBrush="{DynamicResource BorderBrush}"
+                              Background="{DynamicResource RegionBrush}"
+                              MouseDoubleClick="DataGridGrippers_OnMouseDoubleClick">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="名称"          Binding="{Binding Name}"             Width="140" />
+                            <DataGridTextColumn Header="显示名称"       Binding="{Binding DisplayName}"      Width="140" />
+                            <DataGridTextColumn Header="驱动模式"       Binding="{Binding DriveMode}"        Width="80" />
+                            <DataGridTextColumn Header="夹紧位 (DO)"   Binding="{Binding CloseOutputBit}"   Width="90" />
+                            <DataGridTextColumn Header="打开位 (DO)"   Binding="{Binding OpenOutputBit}"    Width="90" />
+                            <DataGridTextColumn Header="夹紧反馈 (DI)" Binding="{Binding CloseFeedbackBit}" Width="96" />
+                            <DataGridTextColumn Header="打开反馈 (DI)" Binding="{Binding OpenFeedbackBit}"  Width="96" />
+                            <DataGridCheckBoxColumn Header="反馈校验"  Binding="{Binding UseFeedbackCheck}" Width="70" />
+                            <DataGridCheckBoxColumn Header="启用"       Binding="{Binding IsEnabled}"        Width="50" />
+                            <DataGridTemplateColumn Header="操作" Width="110" IsReadOnly="False">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" Margin="4,2">
+                                            <Button Content="编辑"
+                                                    Height="24"
+                                                    MinWidth="46"
+                                                    Padding="6,0"
+                                                    Margin="0,0,4,0"
+                                                    Click="ButtonEditGripper_OnClick"
+                                                    Tag="{Binding}" />
+                                            <Button Content="删除"
+                                                    Height="24"
+                                                    MinWidth="46"
+                                                    Padding="6,0"
+                                                    Foreground="{DynamicResource DangerBrush}"
+                                                    Click="ButtonDeleteGripper_OnClick"
+                                                    Tag="{Binding}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <TextBlock x:Name="TextBlockGripperStatus"
+                               Grid.Row="2"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               Opacity="0.55"
+                               Text="加载中..." />
+                </Grid>
+            </TabItem>
+
+        </TabControl>
+    </Grid>
+</UserControl>
