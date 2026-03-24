@@ -388,13 +388,14 @@
                                     <ColumnDefinition Width="8" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
+                                
                                 <Button Grid.Column="0"
-                                        Click="ButtonEdit_OnClick"
-                                        Content="编辑" />
-                                <Button Grid.Column="2"
                                         Foreground="{DynamicResource DangerBrush}"
                                         Click="ButtonDelete_OnClick"
                                         Content="删除" />
+                                <Button Grid.Column="2" 
+                                        Click="ButtonEdit_OnClick"
+                                        Content="编辑" />
                             </Grid>
                         </Border>
                         <ScrollViewer VerticalScrollBarVisibility="Auto"
