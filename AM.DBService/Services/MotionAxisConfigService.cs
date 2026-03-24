@@ -305,7 +305,9 @@ namespace AM.DBService.Services
                 return Fail((int)DbErrorCode.InvalidArgument, "整型/枚举参数必须为整数值: " + entity.ParamName);
             }
 
-            if (entity.ParamSetValue < entity.ParamMinValue || entity.ParamSetValue > entity.ParamMaxValue)
+            // 仅当 Min < Max 时才有实际约束，Min == Max == 0 表示"不限范围"
+            if (entity.ParamMinValue < entity.ParamMaxValue 
+                && (entity.ParamSetValue < entity.ParamMinValue || entity.ParamSetValue > entity.ParamMaxValue))
             {
                 return Fail(
                     (int)DbErrorCode.InvalidArgument,

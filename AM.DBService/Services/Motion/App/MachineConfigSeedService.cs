@@ -920,61 +920,61 @@ namespace AM.DBService.Services.Motion.App
         private static IEnumerable<MotionAxisConfigEntity> CreateAxisConfigRows(short logicalAxis, string axisName)
         {
             // ── 硬件信号（Hardware） ──
-            yield return CreateConfig(logicalAxis, axisName, "AlarmEnabled", "报警使能", "Bool", 1D, "Hardware");
-            yield return CreateConfig(logicalAxis, axisName, "AlarmInvert", "报警取反", "Bool", 0D, "Hardware");
-            yield return CreateConfig(logicalAxis, axisName, "EnableInvert", "使能取反", "Bool", 0D, "Hardware");
-            yield return CreateConfig(logicalAxis, axisName, "PulseMode", "脉冲模式", "Int16", 0D, "Hardware");
-            yield return CreateConfig(logicalAxis, axisName, "DefaultMoveMode", "默认运动模式", "Int16", 1D, "Hardware");
-            yield return CreateConfig(logicalAxis, axisName, "EncoderExternal", "外部编码器", "Bool", 0D, "Hardware");
-            yield return CreateConfig(logicalAxis, axisName, "EncoderInvert", "编码器取反", "Bool", 0D, "Hardware");
-            yield return CreateConfig(logicalAxis, axisName, "LimitHomeInvert", "限位原点取反", "Bool", 0D, "Hardware");
-            yield return CreateConfig(logicalAxis, axisName, "LimitMode", "限位模式", "Int16", -1D, "Hardware");
-            yield return CreateConfig(logicalAxis, axisName, "TriggerEdge", "捕获沿", "Int16", 1D, "Hardware");
+            yield return CreateConfig(logicalAxis, axisName, "AlarmEnabled", "报警使能", "Bool", 1D, "Hardware", "none", 0D, 1D);
+            yield return CreateConfig(logicalAxis, axisName, "AlarmInvert", "报警取反", "Bool", 0D, "Hardware", "none", 0D, 1D);
+            yield return CreateConfig(logicalAxis, axisName, "EnableInvert", "使能取反", "Bool", 0D, "Hardware", "none", 0D, 1D);
+            yield return CreateConfig(logicalAxis, axisName, "PulseMode", "脉冲模式", "Int16", 0D, "Hardware", "none", 0D, 3D);
+            yield return CreateConfig(logicalAxis, axisName, "DefaultMoveMode", "默认运动模式", "Int16", 1D, "Hardware", "none", 0D, 2D);
+            yield return CreateConfig(logicalAxis, axisName, "EncoderExternal", "外部编码器", "Bool", 0D, "Hardware", "none", 0D, 1D);
+            yield return CreateConfig(logicalAxis, axisName, "EncoderInvert", "编码器取反", "Bool", 0D, "Hardware", "none", 0D, 1D);
+            yield return CreateConfig(logicalAxis, axisName, "LimitHomeInvert", "限位原点取反", "Bool", 0D, "Hardware", "none", 0D, 1D);
+            yield return CreateConfig(logicalAxis, axisName, "LimitMode", "限位模式", "Int16", -1D, "Hardware", "none", -1D, 3D);
+            yield return CreateConfig(logicalAxis, axisName, "TriggerEdge", "捕获沿", "Int16", 1D, "Hardware", "none", 0D, 1D);
 
             // ── 单位换算（Scale） ──
-            yield return CreateConfig(logicalAxis, axisName, "Lead", "导程", "Double", 5D, "Scale");
-            yield return CreateConfig(logicalAxis, axisName, "PulsePerRev", "每圈脉冲数", "Int32", 10000D, "Scale");
-            yield return CreateConfig(logicalAxis, axisName, "GearRatio", "减速比", "Double", 1D, "Scale");
+            yield return CreateConfig(logicalAxis, axisName, "Lead", "导程", "Double", 5D, "Scale", "mm/rev", 0.001D, 1000D);
+            yield return CreateConfig(logicalAxis, axisName, "PulsePerRev", "每圈脉冲数", "Int32", 10000D, "Scale", "pulse/rev", 1D, 10000000D);
+            yield return CreateConfig(logicalAxis, axisName, "GearRatio", "减速比", "Double", 1D, "Scale", "—", 0.0001D, 10000D);
 
             // ── 运动参数（Motion） ──
-            yield return CreateConfig(logicalAxis, axisName, "DefaultVelocity", "默认点位速度", "Double", 5D, "Motion");
-            yield return CreateConfig(logicalAxis, axisName, "JogVelocity", "默认Jog速度", "Double", 2D, "Motion");
-            yield return CreateConfig(logicalAxis, axisName, "Acc", "加速度", "Double", 0.5D, "Motion");
-            yield return CreateConfig(logicalAxis, axisName, "Dec", "减速度", "Double", 0.5D, "Motion");
-            yield return CreateConfig(logicalAxis, axisName, "SmoothTime", "平滑时间", "Int16", 25D, "Motion");
+            yield return CreateConfig(logicalAxis, axisName, "DefaultVelocity", "默认点位速度", "Double", 5D, "Motion", "mm/s", 0.001D, 200D);
+            yield return CreateConfig(logicalAxis, axisName, "JogVelocity", "默认Jog速度", "Double", 2D, "Motion", "mm/s", 0.001D, 100D);
+            yield return CreateConfig(logicalAxis, axisName, "Acc", "加速度", "Double", 0.5D, "Motion", "g", 0.001D, 100D);
+            yield return CreateConfig(logicalAxis, axisName, "Dec", "减速度", "Double", 0.5D, "Motion", "g", 0.001D, 100D);
+            yield return CreateConfig(logicalAxis, axisName, "SmoothTime", "平滑时间", "Int16", 25D, "Motion", "ms", 0D, 256D);
 
             // ── 回零参数（Home） ──
-            yield return CreateConfig(logicalAxis, axisName, "HomeDeceleration", "回零减速度", "Double", 0.5D, "Home");
-            yield return CreateConfig(logicalAxis, axisName, "StandardHomeMode", "标准回零模式", "Int16", 1D, "Home");
-            yield return CreateConfig(logicalAxis, axisName, "ResetDirection", "复位运动方向", "Int16", 1D, "Home");
-            yield return CreateConfig(logicalAxis, axisName, "HomeSearchVelocity", "HOME搜索速度", "Double", 1D, "Home");
-            yield return CreateConfig(logicalAxis, axisName, "IndexSearchVelocity", "INDEX搜索速度", "Double", 0.2D, "Home");
-            yield return CreateConfig(logicalAxis, axisName, "HomeOffset", "原点偏移量", "Int32", 0D, "Home");
-            yield return CreateConfig(logicalAxis, axisName, "HomeMaxDistance", "HOME最大搜索距离", "Int32", 0D, "Home");
-            yield return CreateConfig(logicalAxis, axisName, "IndexMaxDistance", "INDEX最大搜索距离", "Int32", 0D, "Home");
-            yield return CreateConfig(logicalAxis, axisName, "EscapeStep", "脱离步长", "Int32", 1000D, "Home");
-            yield return CreateConfig(logicalAxis, axisName, "IndexSearchDirection", "INDEX搜索方向", "Int16", 1D, "Home");
-            yield return CreateConfig(logicalAxis, axisName, "HomeCheck", "回零自检", "Bool", 1D, "Home");
-            yield return CreateConfig(logicalAxis, axisName, "HomeUseHomeSignal", "使用Home信号", "Bool", 1D, "Home");
-            yield return CreateConfig(logicalAxis, axisName, "HomeUseIndexSignal", "使用Index信号", "Bool", 1D, "Home");
-            yield return CreateConfig(logicalAxis, axisName, "HomeUseLimitSignal", "使用限位信号", "Bool", 0D, "Home");
-            yield return CreateConfig(logicalAxis, axisName, "HomeAutoZeroPos", "回零自动清零", "Bool", 1D, "Home");
-            yield return CreateConfig(logicalAxis, axisName, "HomeTimeoutMs", "回零超时(ms)", "Int32", 60000D, "Home");
+            yield return CreateConfig(logicalAxis, axisName, "HomeDeceleration", "回零减速度", "Double", 0.5D, "Home", "g", 0.001D, 100D);
+            yield return CreateConfig(logicalAxis, axisName, "StandardHomeMode", "标准回零模式", "Int16", 1D, "Home", "none", 0D, 7D);
+            yield return CreateConfig(logicalAxis, axisName, "ResetDirection", "复位运动方向", "Int16", 1D, "Home", "none", 0D, 0D);   // 取值 -1/1，0/0=不限范围
+            yield return CreateConfig(logicalAxis, axisName, "HomeSearchVelocity", "HOME搜索速度", "Double", 1D, "Home", "mm/s", 0.001D, 50D);
+            yield return CreateConfig(logicalAxis, axisName, "IndexSearchVelocity", "INDEX搜索速度", "Double", 0.2D, "Home", "mm/s", 0.001D, 20D);
+            yield return CreateConfig(logicalAxis, axisName, "HomeOffset", "原点偏移量", "Int32", 0D, "Home", "pulse", 0D, 0D);   // 可负，0/0=不限
+            yield return CreateConfig(logicalAxis, axisName, "HomeMaxDistance", "HOME最大搜索距离", "Int32", 0D, "Home", "pulse", 0D, 0D);   // 0=不限
+            yield return CreateConfig(logicalAxis, axisName, "IndexMaxDistance", "INDEX最大搜索距离", "Int32", 0D, "Home", "pulse", 0D, 0D);
+            yield return CreateConfig(logicalAxis, axisName, "EscapeStep", "脱离步长", "Int32", 1000D, "Home", "pulse", 0D, 1000000D);
+            yield return CreateConfig(logicalAxis, axisName, "IndexSearchDirection", "INDEX搜索方向", "Int16", 1D, "Home", "none", 0D, 0D);   // 取值 -1/1
+            yield return CreateConfig(logicalAxis, axisName, "HomeCheck", "回零自检", "Bool", 1D, "Home", "none", 0D, 1D);
+            yield return CreateConfig(logicalAxis, axisName, "HomeUseHomeSignal", "使用Home信号", "Bool", 1D, "Home", "none", 0D, 1D);
+            yield return CreateConfig(logicalAxis, axisName, "HomeUseIndexSignal", "使用Index信号", "Bool", 1D, "Home", "none", 0D, 1D);
+            yield return CreateConfig(logicalAxis, axisName, "HomeUseLimitSignal", "使用限位信号", "Bool", 0D, "Home", "none", 0D, 1D);
+            yield return CreateConfig(logicalAxis, axisName, "HomeAutoZeroPos", "回零自动清零", "Bool", 1D, "Home", "none", 0D, 1D);
+            yield return CreateConfig(logicalAxis, axisName, "HomeTimeoutMs", "回零超时", "Int32", 60000D, "Home", "ms", 1000D, 600000D);
 
             // ── 软件限位（SoftLimit） ──
-            yield return CreateConfig(logicalAxis, axisName, "SoftLimitEnabled", "软件限位使能", "Bool", 1D, "SoftLimit");
-            yield return CreateConfig(logicalAxis, axisName, "SoftLimitPositive", "正向软件限位", "Double", 500000D, "SoftLimit");
-            yield return CreateConfig(logicalAxis, axisName, "SoftLimitNegative", "负向软件限位", "Double", -500000D, "SoftLimit");
+            yield return CreateConfig(logicalAxis, axisName, "SoftLimitEnabled", "软件限位使能", "Bool", 1D, "SoftLimit", "none", 0D, 1D);
+            yield return CreateConfig(logicalAxis, axisName, "SoftLimitPositive", "正向软件限位", "Double", 500000D, "SoftLimit", "mm", 0D, 0D);  // 机器相关，0/0=不限
+            yield return CreateConfig(logicalAxis, axisName, "SoftLimitNegative", "负向软件限位", "Double", -500000D, "SoftLimit", "mm", 0D, 0D);  // 可负，0/0=不限
 
             // ── 使能时序（Timing） ──
-            yield return CreateConfig(logicalAxis, axisName, "EnableDelayMs", "使能前延时(ms)", "Int32", 50D, "Timing");
-            yield return CreateConfig(logicalAxis, axisName, "DisableDelayMs", "失能后延时(ms)", "Int32", 50D, "Timing");
+            yield return CreateConfig(logicalAxis, axisName, "EnableDelayMs", "使能前延时", "Int32", 50D, "Timing", "ms", 0D, 10000D);
+            yield return CreateConfig(logicalAxis, axisName, "DisableDelayMs", "失能后延时", "Int32", 50D, "Timing", "ms", 0D, 10000D);
 
             // ── 安全联动（Safety） ──
-            yield return CreateConfig(logicalAxis, axisName, "NormalStopDeceleration", "平停减速度", "Double", 0.5D, "Safety");
-            yield return CreateConfig(logicalAxis, axisName, "EmergencyStopDeceleration", "急停减速度", "Double", 2D, "Safety");
-            yield return CreateConfig(logicalAxis, axisName, "EStopId", "急停序号", "Int32", 0D, "Safety");
-            yield return CreateConfig(logicalAxis, axisName, "StopId", "平停序号", "Int32", 0D, "Safety");
+            yield return CreateConfig(logicalAxis, axisName, "NormalStopDeceleration", "平停减速度", "Double", 0.5D, "Safety", "g", 0.001D, 100D);
+            yield return CreateConfig(logicalAxis, axisName, "EmergencyStopDeceleration", "急停减速度", "Double", 2D, "Safety", "g", 0.001D, 100D);
+            yield return CreateConfig(logicalAxis, axisName, "EStopId", "急停序号", "Int32", 0D, "Safety", "none", 0D, 999D);
+            yield return CreateConfig(logicalAxis, axisName, "StopId", "平停序号", "Int32", 0D, "Safety", "none", 0D, 999D);
         }
 
         private static List<CylinderConfigEntity> CreateDefaultCylinders()
@@ -1093,7 +1093,10 @@ namespace AM.DBService.Services.Motion.App
             short logicalAxis, string axisName,
             string paramName, string displayName,
             string valueType, double value,
-            string group = "Motion")
+            string group = "Motion",
+            string unit = "",
+            double minValue = 0D,
+            double maxValue = 0D)
         {
             return new MotionAxisConfigEntity
             {
@@ -1105,8 +1108,9 @@ namespace AM.DBService.Services.Motion.App
                 ParamValueType = valueType,
                 ParamSetValue = value,
                 ParamDefaultValue = value,
-                ParamMaxValue = 0D,
-                ParamMinValue = 0D
+                Unit = unit,
+                ParamMinValue = minValue,
+                ParamMaxValue = maxValue,
             };
         }
     }

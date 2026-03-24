@@ -7,7 +7,7 @@
                mc:Ignorable="d"
                Title="新增轴运行参数"
                Width="520"
-               Height="620"
+               Height="680"
                ResizeMode="NoResize"
                ShowNonClientArea="False"
                WindowStartupLocation="CenterOwner"
@@ -57,18 +57,40 @@
                                   HorizontalScrollBarVisibility="Disabled">
                         <StackPanel>
 
-                            <!-- 显示名称 -->
-                            <TextBlock FontSize="12"
-                                       Opacity="0.6"
-                                       Margin="0,0,0,4"
-                                       Foreground="{DynamicResource PrimaryTextBrush}"
-                                       Text="显示名称 *" />
-                            <TextBox x:Name="TextBoxDisplayName"
-                                     Height="36"
-                                     FontSize="13"
-                                     VerticalContentAlignment="Center"
-                                     MaxLength="50"
-                                     Margin="0,0,0,14" />
+                            <!-- 参数名（代码名） + 显示名称 -->
+                            <Grid Margin="0,0,0,14">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="12" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock FontSize="12"
+                                               Opacity="0.6"
+                                               Margin="0,0,0,4"
+                                               Foreground="{DynamicResource PrimaryTextBrush}"
+                                               Text="参数名 *（英文代码名）" />
+                                    <TextBox x:Name="TextBoxParamName"
+                                             Height="36"
+                                             FontSize="13"
+                                             VerticalContentAlignment="Center"
+                                             MaxLength="60" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock FontSize="12"
+                                               Opacity="0.6"
+                                               Margin="0,0,0,4"
+                                               Foreground="{DynamicResource PrimaryTextBrush}"
+                                               Text="显示名称 *" />
+                                    <TextBox x:Name="TextBoxDisplayName"
+                                             Height="36"
+                                             FontSize="13"
+                                             VerticalContentAlignment="Center"
+                                             MaxLength="50" />
+                                </StackPanel>
+                            </Grid>
 
                             <!-- 分组 + 类型 -->
                             <Grid Margin="0,0,0,14">
@@ -193,7 +215,7 @@
                                        Opacity="0.6"
                                        Margin="0,0,0,4"
                                        Foreground="{DynamicResource PrimaryTextBrush}"
-                                       Text="单位（可选）" />
+                                       Text="单位（无单位填 none）" />
                             <TextBox x:Name="TextBoxUnit"
                                      Height="36"
                                      FontSize="13"
@@ -208,7 +230,7 @@
                                        Foreground="{DynamicResource PrimaryTextBrush}"
                                        Text="说明（可选）" />
                             <TextBox x:Name="TextBoxDescription"
-                                     MinHeight="64"
+                                     MinHeight="60"
                                      FontSize="12"
                                      VerticalContentAlignment="Top"
                                      TextWrapping="Wrap"

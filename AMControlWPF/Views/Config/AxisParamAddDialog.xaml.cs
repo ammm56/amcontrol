@@ -2,7 +2,6 @@
 using AM.ViewModel.ViewModels.Config;
 using System;
 using System.Globalization;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -23,13 +22,27 @@ namespace AMControlWPF.Views.Config
             var axisTitle = string.IsNullOrWhiteSpace(axis.DisplayName) ? axis.Name : axis.DisplayName;
             TextBlockAxisContext.Text = string.Format("— 轴 {0} · {1}", axis.LogicalAxis, axisTitle);
 
-            Loaded += (s, e) => TextBoxDisplayName.Focus();
+            Loaded += (s, e) => TextBoxParamName.Focus();
         }
 
         private void ButtonSave_OnClick(object sender, RoutedEventArgs e)
         {
             HideError();
 
+            // ── 参数名（代码名）校验 ──
+            var paramName = (TextBoxParamName.Text ?? string.Empty).Trim();
+            if (string.IsNullOrEmpty(paramName))
+            {
+                ShowError("参数名不能为空，请输入英文代码名（如 MyCustomParam）");
+                return;
+            }
+            if (!IsValidParamName(paramName))
+            {
+                ShowError("参数名只能包含英文字母、数字和下划线，且不能以数字开头");
+                return;
+            }
+
+            // ── 显示名称校验 ──
             var displayName = (TextBoxDisplayName.Text ?? string.Empty).Trim();
             if (string.IsNullOrEmpty(displayName))
             {
@@ -37,6 +50,7 @@ namespace AMControlWPF.Views.Config
                 return;
             }
 
+            // ── 数值校验 ──
             double setValue;
             if (!TryParseValue(TextBoxSetValue.Text, out setValue))
             {
@@ -57,6 +71,12 @@ namespace AMControlWPF.Views.Config
             double maxValue;
             TryParseValue(TextBoxMaxValue.Text, out maxValue);
 
+            if (minValue != 0D && maxValue != 0D && minValue >= maxValue)
+            {
+                ShowError("最小值必须小于最大值（均填 0 表示不限范围）");
+                return;
+            }
+
             var groupItem = ComboBoxGroup.SelectedItem as ComboBoxItem;
             var typeItem = ComboBoxType.SelectedItem as ComboBoxItem;
 
@@ -72,7 +92,7 @@ namespace AMControlWPF.Views.Config
                 Id = 0,
                 LogicalAxis = _axis.LogicalAxis,
                 AxisDisplayName = axisDisplay,
-                ParamName = "Custom_" + GenerateSafeKey(displayName),
+                ParamName = paramName,
                 ParamDisplayName = displayName,
                 ParamGroup = paramGroup,
                 ParamValueType = paramType,
@@ -92,6 +112,18 @@ namespace AMControlWPF.Views.Config
             DialogResult = false;
         }
 
+        /// <summary>合法标识符：字母/下划线开头，仅含字母数字下划线。</summary>
+        private static bool IsValidParamName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return false;
+            if (char.IsDigit(name[0])) return false;
+            foreach (var c in name)
+            {
+                if (!char.IsLetterOrDigit(c) && c != '_') return false;
+            }
+            return true;
+        }
+
         private static bool TryParseValue(string text, out double value)
         {
             var t = (text ?? string.Empty).Trim();
@@ -99,20 +131,6 @@ namespace AMControlWPF.Views.Config
             if (string.Equals(t, "true", StringComparison.OrdinalIgnoreCase)) { value = 1; return true; }
             if (string.Equals(t, "false", StringComparison.OrdinalIgnoreCase)) { value = 0; return true; }
             return double.TryParse(t, NumberStyles.Any, CultureInfo.InvariantCulture, out value);
-        }
-
-        private static string GenerateSafeKey(string displayName)
-        {
-            if (string.IsNullOrWhiteSpace(displayName))
-                return "Param_" + DateTime.Now.Ticks;
-
-            var sb = new StringBuilder();
-            foreach (var c in displayName)
-            {
-                if (char.IsLetterOrDigit(c)) sb.Append(c);
-                else sb.Append('_');
-            }
-            return sb.Length > 0 ? sb.ToString() : "Param_" + DateTime.Now.Ticks;
         }
 
         private void ShowError(string message)

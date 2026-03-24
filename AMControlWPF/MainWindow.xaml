@@ -366,11 +366,11 @@
                 </Grid.RowDefinitions>
 
                 <Border Grid.Row="0"
-                Padding="14,0"
-                CornerRadius="16,16,0,0"
-                Background="{DynamicResource SecondaryRegionBrush}"
-                BorderBrush="{DynamicResource BorderBrush}"
-                BorderThickness="0,0,0,1">
+                        Padding="14,0"
+                        CornerRadius="16,16,0,0"
+                        Background="{DynamicResource SecondaryRegionBrush}"
+                        BorderBrush="{DynamicResource BorderBrush}"
+                        BorderThickness="0,0,0,1">
                     <DockPanel LastChildFill="False">
                         <TextBlock DockPanel.Dock="Left"
                            VerticalAlignment="Center"
@@ -380,21 +380,28 @@
                            Text="报警抽屉" />
 
                         <Button DockPanel.Dock="Right"
-                        Width="30"
-                        Height="28"
-                        Margin="8,0,0,0"
-                        Padding="0"
-                        Click="ButtonCloseAlarmPanel_OnClick"
-                        Background="Transparent"
-                        BorderBrush="{DynamicResource BorderBrush}"
-                        BorderThickness="1"
-                        Content="✕" />
+                                Width="30"
+                                Height="28"
+                                Margin="8,0,0,0"
+                                Padding="0"
+                                Click="ButtonCloseAlarmPanel_OnClick"
+                                Background="Transparent"
+                                BorderBrush="{DynamicResource BorderBrush}"
+                                BorderThickness="1"
+                                Content="✕" />
                     </DockPanel>
                 </Border>
 
                 <main:ActiveAlarmPanel x:Name="ActiveAlarmPanelControl" Grid.Row="1" />
             </Grid>
         </Border>
+
+        <!-- Growl 通知面板：置于 MainLayoutHost 外部，避免受报警抽屉缩放变换影响 -->
+        <StackPanel hc:Growl.GrowlParent="True"
+            Panel.ZIndex="30"
+            VerticalAlignment="Top"
+            HorizontalAlignment="Right"
+            Margin="0,20,20,0" />
 
     </Grid>
 </hc:GlowWindow>

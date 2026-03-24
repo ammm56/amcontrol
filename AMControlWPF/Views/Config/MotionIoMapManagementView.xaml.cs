@@ -206,17 +206,17 @@ namespace AMControlWPF.Views.Config
 
         private void UpdateFilterButtonStyles()
         {
-            var activeBg = TryFindResource("PrimaryBrush") as Brush ?? Brushes.DodgerBlue;
+            var activeBg   = TryFindResource("SuccessBrush") as Brush ?? Brushes.DodgerBlue;
             var inactiveBg = TryFindResource("SecondaryRegionBrush") as Brush ?? Brushes.LightGray;
-            var activeFg = Brushes.White;
+            var activeFg   = Brushes.White;
             var inactiveFg = TryFindResource("PrimaryTextBrush") as Brush ?? Brushes.Black;
 
             ButtonFilterAll.Background = _currentIoTypeFilter == "All" ? activeBg : inactiveBg;
             ButtonFilterAll.Foreground = _currentIoTypeFilter == "All" ? activeFg : inactiveFg;
-            ButtonFilterDI.Background = _currentIoTypeFilter == "DI" ? activeBg : inactiveBg;
-            ButtonFilterDI.Foreground = _currentIoTypeFilter == "DI" ? activeFg : inactiveFg;
-            ButtonFilterDO.Background = _currentIoTypeFilter == "DO" ? activeBg : inactiveBg;
-            ButtonFilterDO.Foreground = _currentIoTypeFilter == "DO" ? activeFg : inactiveFg;
+            ButtonFilterDI.Background  = _currentIoTypeFilter == "DI"  ? activeBg : inactiveBg;
+            ButtonFilterDI.Foreground  = _currentIoTypeFilter == "DI"  ? activeFg : inactiveFg;
+            ButtonFilterDO.Background  = _currentIoTypeFilter == "DO"  ? activeBg : inactiveBg;
+            ButtonFilterDO.Foreground  = _currentIoTypeFilter == "DO"  ? activeFg : inactiveFg;
         }
 
         // ── 辅助 ────────────────────────────────────────────────────────

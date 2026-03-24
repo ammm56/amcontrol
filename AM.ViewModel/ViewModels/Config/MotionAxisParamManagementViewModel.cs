@@ -154,10 +154,6 @@ namespace AM.ViewModel.ViewModels.Config
             try
             {
                 var result = await Task.Run(() => _axisCrudService.QueryAll());
-                var previousKey = _selectedAxis?.LogicalAxis;
-
-                AxisItems.Clear();
-                ClearParams();
 
                 if (!result.Success)
                 {
@@ -165,9 +161,27 @@ namespace AM.ViewModel.ViewModels.Config
                     return;
                 }
 
-                foreach (var axis in result.Items ?? Enumerable.Empty<MotionAxisEntity>())
+                var newAxisList = (result.Items ?? Enumerable.Empty<MotionAxisEntity>())
+                    .Where(x => x != null)
+                    .ToList();
+
+                // 保存当前选中引用，用于判断刷新后是否仍复用同一实例
+                var previousRef = _selectedAxis;
+                var previousKey = _selectedAxis?.LogicalAxis;
+
+                // ① 移除 DB 中已不存在的轴（避免 Clear() 全量销毁所有容器导致选中闪烁）
+                for (var i = AxisItems.Count - 1; i >= 0; i--)
                 {
-                    if (axis == null) continue;
+                    if (!newAxisList.Any(n => n.LogicalAxis == AxisItems[i].LogicalAxis))
+                        AxisItems.RemoveAt(i);
+                }
+
+                // ② 新增 DB 中新出现的轴；已有实例保持不动，容器不销毁
+                foreach (var axis in newAxisList)
+                {
+                    if (AxisItems.Any(a => a.LogicalAxis == axis.LogicalAxis))
+                        continue;
+
                     AxisItems.Add(new AxisParamAxisItem
                     {
                         LogicalAxis = axis.LogicalAxis,
@@ -179,8 +193,16 @@ namespace AM.ViewModel.ViewModels.Config
 
                 StatusText = string.Format("已加载 {0} 条轴配置，请选择轴查看参数", AxisItems.Count);
 
-                if (previousKey.HasValue)
+                // ③ 恢复选中：若之前选中的对象实例仍在集合中（未被移除），
+                //    直接重载参数即可，无需重新 set SelectedAxis（避免触发 LoadParams 两次）
+                if (previousRef != null && AxisItems.Contains(previousRef))
+                {
+                    await LoadParamsForAxisAsync();
+                }
+                else if (previousKey.HasValue)
+                {
                     SelectedAxis = AxisItems.FirstOrDefault(a => a.LogicalAxis == previousKey.Value);
+                }
             }
             finally
             {
@@ -293,9 +315,8 @@ namespace AM.ViewModel.ViewModels.Config
 
             var invalidParams = _allParams
                 .Where(p => { double v; return !p.TryGetSetValue(out v); })
-                .Select(p => p.ParamDisplayName)
+                .Select(p => string.Format("{0}({1})", p.ParamName, p.ParamDisplayName))
                 .ToList();
-
             if (invalidParams.Count > 0)
             {
                 StatusText = "保存失败，以下参数值无效: " + string.Join("、", invalidParams);

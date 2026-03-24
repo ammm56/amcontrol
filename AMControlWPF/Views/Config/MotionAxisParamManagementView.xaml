@@ -121,7 +121,7 @@
                                                     </Trigger>
                                                     <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
                                                         <Setter Property="Background" Value="{DynamicResource RegionBrush}" />
-                                                        <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}" />
+                                                        <Setter Property="BorderBrush" Value="{DynamicResource SuccessBrush}" />
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
@@ -221,7 +221,7 @@
                                                         <Setter Property="Background" Value="{DynamicResource BorderBrush}" />
                                                     </Trigger>
                                                     <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
-                                                        <Setter Property="Background" Value="{DynamicResource PrimaryBrush}" />
+                                                        <Setter Property="Background" Value="{DynamicResource SuccessBrush}" />
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
@@ -334,7 +334,7 @@
                                                             </DataTrigger>
                                                             <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
                                                                 <Setter Property="Background" Value="{DynamicResource RegionBrush}" />
-                                                                <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}" />
+                                                                <Setter Property="BorderBrush" Value="{DynamicResource SuccessBrush}" />
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
@@ -478,10 +478,10 @@
                                 </Grid.ColumnDefinitions>
                                 <Button Grid.Column="0"
                                         Command="{Binding ResetSelectedParamToDefaultCommand}"
-                                        Content="恢复默认值" />
+                                        Content="默认值" />
                                 <Button Grid.Column="2"
                                         Click="ButtonEditParam_OnClick"
-                                        Content="修改参数值" />
+                                        Content="修改参数" />
                             </Grid>
                         </Border>
 
