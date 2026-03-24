@@ -23,6 +23,30 @@ namespace AM.ViewModel.ViewModels.Config
         private MotionIoMapEntity _selectedItem;
         private string _statusText;
         private bool _isBusy;
+        private string _ioTypeFilter = "All";
+
+        public string IoTypeFilter
+        {
+            get { return _ioTypeFilter; }
+        }
+
+        public bool IsFilterAll
+        {
+            get { return _ioTypeFilter == "All"; }
+            set { if (value && _ioTypeFilter != "All") { _ioTypeFilter = "All"; OnPropertyChanged(nameof(IsFilterAll)); OnPropertyChanged(nameof(IsFilterDI)); OnPropertyChanged(nameof(IsFilterDO)); OnPropertyChanged(nameof(IoTypeFilter)); } }
+        }
+
+        public bool IsFilterDI
+        {
+            get { return _ioTypeFilter == "DI"; }
+            set { if (value && _ioTypeFilter != "DI") { _ioTypeFilter = "DI"; OnPropertyChanged(nameof(IsFilterAll)); OnPropertyChanged(nameof(IsFilterDI)); OnPropertyChanged(nameof(IsFilterDO)); OnPropertyChanged(nameof(IoTypeFilter)); } }
+        }
+
+        public bool IsFilterDO
+        {
+            get { return _ioTypeFilter == "DO"; }
+            set { if (value && _ioTypeFilter != "DO") { _ioTypeFilter = "DO"; OnPropertyChanged(nameof(IsFilterAll)); OnPropertyChanged(nameof(IsFilterDI)); OnPropertyChanged(nameof(IsFilterDO)); OnPropertyChanged(nameof(IoTypeFilter)); } }
+        }
 
         public MotionIoMapManagementViewModel()
             : this(new MotionIoMapCrudService(), new MotionCardCrudService(), new MachineConfigReloadService())

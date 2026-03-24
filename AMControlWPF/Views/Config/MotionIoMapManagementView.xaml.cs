@@ -11,9 +11,8 @@ namespace AMControlWPF.Views.Config
     public partial class MotionIoMapManagementView : UserControl
     {
         private readonly MotionIoMapManagementViewModel _vm;
-        private short? _currentCardFilter = null;   // null = 全部控制卡
-        private string _currentIoTypeFilter = "All"; // "All" / "DI" / "DO"
-
+        private short? _currentCardFilter = null;
+        private string _currentIoTypeFilter = "All";
         public MotionIoMapManagementView()
         {
             InitializeComponent();
@@ -32,11 +31,32 @@ namespace AMControlWPF.Views.Config
             RefreshDetailPanel();
         }
 
+        private void ButtonFilter_OnClick(object sender, RoutedEventArgs e)
+        {
+            var btn = sender as Button;
+            if (btn == null) return;
+
+            _currentIoTypeFilter = btn.Tag?.ToString() ?? "All";
+            UpdateFilterButtonStyles();
+            _vm.ApplyFilter(_currentCardFilter, _currentIoTypeFilter);
+            RefreshDetailPanel();
+        }
+        private void UpdateFilterButtonStyles()
+        {
+            // 只切换 Style，HC 样式系统完整接管颜色/悬停/按压等所有视觉
+            var successStyle = TryFindResource("ButtonSuccess") as Style;
+            var defaultStyle = TryFindResource("ButtonDefault") as Style;
+
+            ButtonFilterAll.Style = _currentIoTypeFilter == "All" ? successStyle : defaultStyle;
+            ButtonFilterDI.Style = _currentIoTypeFilter == "DI" ? successStyle : defaultStyle;
+            ButtonFilterDO.Style = _currentIoTypeFilter == "DO" ? successStyle : defaultStyle;
+        }
+
         private async void ButtonRefresh_OnClick(object sender, RoutedEventArgs e)
         {
             await _vm.LoadAsync();
             PopulateCardFilterComboBox();
-            _vm.ApplyFilter(_currentCardFilter, _currentIoTypeFilter);
+            _vm.ApplyFilter(_currentCardFilter, _vm.IoTypeFilter);
             RefreshDetailPanel();
         }
 
@@ -45,11 +65,11 @@ namespace AMControlWPF.Views.Config
             var nextLogicalBit = _vm.FilteredItems.Count == 0
                 ? (short)1
                 : (short)(_vm.AllItems
-                    .Where(x => string.IsNullOrEmpty(_currentIoTypeFilter) || _currentIoTypeFilter == "All" || x.IoType == _currentIoTypeFilter)
+                    .Where(x => string.IsNullOrEmpty(_vm.IoTypeFilter) || _vm.IoTypeFilter == "All" || x.IoType == _vm.IoTypeFilter)
                     .Max(p => p.LogicalBit) + 1);
 
-            var defaultIoType = _currentIoTypeFilter == "DI" || _currentIoTypeFilter == "DO"
-                ? _currentIoTypeFilter
+            var defaultIoType = _vm.IoTypeFilter == "DI" || _vm.IoTypeFilter == "DO"
+                ? _vm.IoTypeFilter
                 : "DI";
 
             var defaultCardId = _currentCardFilter
@@ -81,7 +101,7 @@ namespace AMControlWPF.Views.Config
 
             _vm.SelectedItem = dialog.ResultEntity;
             await _vm.SaveCommand.ExecuteAsync(null);
-            _vm.ApplyFilter(_currentCardFilter, _currentIoTypeFilter);
+            _vm.ApplyFilter(_currentCardFilter, _vm.IoTypeFilter);
             RefreshDetailPanel();
         }
 
@@ -105,7 +125,7 @@ namespace AMControlWPF.Views.Config
 
             ApplyDialogResult(dialog.ResultEntity, _vm.SelectedItem);
             await _vm.SaveCommand.ExecuteAsync(null);
-            _vm.ApplyFilter(_currentCardFilter, _currentIoTypeFilter);
+            _vm.ApplyFilter(_currentCardFilter, _vm.IoTypeFilter);
             RefreshDetailPanel();
         }
 
@@ -130,26 +150,11 @@ namespace AMControlWPF.Views.Config
             }
 
             await _vm.DeleteCommand.ExecuteAsync(null);
-            _vm.ApplyFilter(_currentCardFilter, _currentIoTypeFilter);
+            _vm.ApplyFilter(_currentCardFilter, _vm.IoTypeFilter);
             RefreshDetailPanel();
         }
 
         // ── 过滤 ────────────────────────────────────────────────────────
-
-        private void ButtonFilter_OnClick(object sender, RoutedEventArgs e)
-        {
-            var btn = sender as Button;
-            if (btn == null)
-            {
-                return;
-            }
-
-            _currentIoTypeFilter = btn.Tag?.ToString() ?? "All";
-            UpdateFilterButtonStyles();
-            _vm.ApplyFilter(_currentCardFilter, _currentIoTypeFilter);
-            RefreshDetailPanel();
-        }
-
         private void ComboBoxCardFilter_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var item = ComboBoxCardFilter.SelectedItem as ComboBoxItem;
@@ -159,7 +164,15 @@ namespace AMControlWPF.Views.Config
             }
 
             _currentCardFilter = item.Tag is short s ? s : (short?)null;
-            _vm.ApplyFilter(_currentCardFilter, _currentIoTypeFilter);
+            _vm.ApplyFilter(_currentCardFilter, _vm.IoTypeFilter);
+            RefreshDetailPanel();
+        }
+
+        // 3. 新增 Checked 处理器
+        private void RadioButtonFilter_OnChecked(object sender, RoutedEventArgs e)
+        {
+            if (_vm == null) return;
+            _vm.ApplyFilter(_currentCardFilter, _vm.IoTypeFilter);
             RefreshDetailPanel();
         }
 
@@ -202,21 +215,6 @@ namespace AMControlWPF.Views.Config
             }
 
             ComboBoxCardFilter.SelectionChanged += ComboBoxCardFilter_OnSelectionChanged;
-        }
-
-        private void UpdateFilterButtonStyles()
-        {
-            var activeBg   = TryFindResource("SuccessBrush") as Brush ?? Brushes.DodgerBlue;
-            var inactiveBg = TryFindResource("SecondaryRegionBrush") as Brush ?? Brushes.LightGray;
-            var activeFg   = Brushes.White;
-            var inactiveFg = TryFindResource("PrimaryTextBrush") as Brush ?? Brushes.Black;
-
-            ButtonFilterAll.Background = _currentIoTypeFilter == "All" ? activeBg : inactiveBg;
-            ButtonFilterAll.Foreground = _currentIoTypeFilter == "All" ? activeFg : inactiveFg;
-            ButtonFilterDI.Background  = _currentIoTypeFilter == "DI"  ? activeBg : inactiveBg;
-            ButtonFilterDI.Foreground  = _currentIoTypeFilter == "DI"  ? activeFg : inactiveFg;
-            ButtonFilterDO.Background  = _currentIoTypeFilter == "DO"  ? activeBg : inactiveBg;
-            ButtonFilterDO.Foreground  = _currentIoTypeFilter == "DO"  ? activeFg : inactiveFg;
         }
 
         // ── 辅助 ────────────────────────────────────────────────────────

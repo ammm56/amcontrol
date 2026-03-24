@@ -42,13 +42,14 @@
                             Margin="0,0,8,0"
                             Command="{Binding ResetToDefaultCommand}"
                             Content="恢复所有默认值" />
-                    <Button MinWidth="88"
-                            Margin="0,0,8,0"
-                            Click="ButtonAddParam_OnClick"
-                            Content="＋ 新增参数" />
                     <Button MinWidth="108"
+                            Margin="0,0,8,0"
                             Command="{Binding SaveCurrentAxisCommand}"
                             Content="保存当前轴参数" />
+                    <Button MinWidth="88"
+                            Margin="0,0,0,0"
+                            Click="ButtonAddParam_OnClick"
+                            Content="＋ 新增参数" />
                 </WrapPanel>
             </DockPanel>
         </Border>

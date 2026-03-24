@@ -55,7 +55,6 @@
                                 Width="46"
                                 Height="28"
                                 Click="ButtonFilter_OnClick"
-                                Style="{StaticResource ButtonSuccess}"
                                 Content="全部" />
                         <Button x:Name="ButtonFilterDI"
                                 Tag="DI"
@@ -63,7 +62,6 @@
                                 Height="28"
                                 Margin="4,0,0,0"
                                 Click="ButtonFilter_OnClick"
-                                Style="{StaticResource ButtonSuccess}"
                                 Content="DI" />
                         <Button x:Name="ButtonFilterDO"
                                 Tag="DO"
@@ -71,7 +69,6 @@
                                 Height="28"
                                 Margin="4,0,0,0"
                                 Click="ButtonFilter_OnClick"
-                                Style="{StaticResource ButtonSuccess}"
                                 Content="DO" />
                     </StackPanel>
 
