@@ -131,11 +131,20 @@
     <Compile Include="Views\Auth\LoginView.xaml.cs">
       <DependentUpon>LoginView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Config\AxisParamAddDialog.xaml.cs">
+      <DependentUpon>AxisParamAddDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Config\AxisParamEditDialog.xaml.cs">
+      <DependentUpon>AxisParamEditDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Config\MotionAxisEditDialog.xaml.cs">
       <DependentUpon>MotionAxisEditDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Config\MotionAxisManagementView.xaml.cs">
       <DependentUpon>MotionAxisManagementView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Config\MotionAxisParamManagementView.xaml.cs">
+      <DependentUpon>MotionAxisParamManagementView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Config\MotionCardEditDialog.xaml.cs">
       <DependentUpon>MotionCardEditDialog.xaml</DependentUpon>
@@ -262,11 +271,23 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Config\AxisParamAddDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Config\AxisParamEditDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Config\MotionAxisEditDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Config\MotionAxisManagementView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Config\MotionAxisParamManagementView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

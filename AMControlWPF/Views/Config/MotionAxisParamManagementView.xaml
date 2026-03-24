@@ -1,0 +1,703 @@
+﻿<UserControl x:Class="AMControlWPF.Views.Config.MotionAxisParamManagementView"
+             xmlns:hc="https://handyorg.github.io/handycontrol"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             Background="Transparent">
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="32" />
+        </Grid.RowDefinitions>
+
+        <!-- ─── 顶部工具栏 ─── -->
+        <Border Grid.Row="0"
+                Padding="12,10"
+                CornerRadius="8"
+                Background="{DynamicResource SecondaryRegionBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1">
+            <DockPanel LastChildFill="True">
+                <StackPanel DockPanel.Dock="Left"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center">
+                    <TextBlock VerticalAlignment="Center"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               Text="轴运行参数" />
+                </StackPanel>
+                <WrapPanel DockPanel.Dock="Right"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Center">
+                    <Button MinWidth="72"
+                            Margin="0,0,8,0"
+                            Command="{Binding RefreshCommand}"
+                            Content="刷新" />
+                    <Button MinWidth="100"
+                            Margin="0,0,8,0"
+                            Command="{Binding ResetToDefaultCommand}"
+                            Content="恢复所有默认值" />
+                    <Button MinWidth="88"
+                            Margin="0,0,8,0"
+                            Click="ButtonAddParam_OnClick"
+                            Content="＋ 新增参数" />
+                    <Button MinWidth="108"
+                            Command="{Binding SaveCurrentAxisCommand}"
+                            Content="保存当前轴参数" />
+                </WrapPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- ─── 主体三列 ─── -->
+        <Grid Grid.Row="1" Margin="0,8,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="220" />
+                <ColumnDefinition Width="8" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="8" />
+                <ColumnDefinition Width="180" />
+            </Grid.ColumnDefinitions>
+
+            <!-- ════ 左列：轴列表 ════ -->
+            <Border Grid.Column="0"
+                    Padding="10"
+                    CornerRadius="8"
+                    Background="{DynamicResource RegionBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="8" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock FontSize="13"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               Text="轴列表" />
+
+                    <ScrollViewer Grid.Row="2"
+                                  VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled">
+                        <ListBox ItemsSource="{Binding AxisItems}"
+                                 SelectedItem="{Binding SelectedAxis, Mode=TwoWay}"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 HorizontalContentAlignment="Stretch">
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                    <Setter Property="Padding" Value="0" />
+                                    <Setter Property="Margin" Value="0,0,0,8" />
+                                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ListBoxItem">
+                                                <ContentPresenter />
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border CornerRadius="8"
+                                            BorderThickness="1"
+                                            Cursor="Hand"
+                                            Effect="{StaticResource EffectShadow2}">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="{DynamicResource SecondaryRegionBrush}" />
+                                                <Setter Property="BorderBrush" Value="Transparent" />
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+                                                    </Trigger>
+                                                    <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                                        <Setter Property="Background" Value="{DynamicResource RegionBrush}" />
+                                                        <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+
+                                        <StackPanel Margin="10,8,10,8">
+                                            <DockPanel LastChildFill="False">
+                                                <Border DockPanel.Dock="Left"
+                                                        Padding="5,2"
+                                                        CornerRadius="3"
+                                                        Background="{DynamicResource PrimaryBrush}">
+                                                    <TextBlock FontSize="10"
+                                                               FontWeight="SemiBold"
+                                                               Foreground="White"
+                                                               Text="{Binding LogicalAxis, StringFormat='L#{0}'}" />
+                                                </Border>
+                                                <TextBlock DockPanel.Dock="Right"
+                                                           FontSize="10"
+                                                           Opacity="0.5"
+                                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                                           Text="{Binding CardId, StringFormat='卡 #{0}'}" />
+                                            </DockPanel>
+                                            <TextBlock Margin="0,6,0,0"
+                                                       FontSize="13"
+                                                       FontWeight="SemiBold"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                                       Text="{Binding DisplayName}" />
+                                            <TextBlock Margin="0,2,0,0"
+                                                       FontSize="11"
+                                                       Opacity="0.6"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                                       Text="{Binding Name}" />
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+
+            <!-- ════ 中列：分组过滤 + 参数磁贴 ════ -->
+            <Border Grid.Column="2"
+                    CornerRadius="8"
+                    Background="{DynamicResource RegionBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!-- 分组过滤器条（已加载参数时显示） -->
+                    <Border Grid.Row="0"
+                            Padding="10,7"
+                            Background="{DynamicResource SecondaryRegionBrush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="0,0,0,1"
+                            Visibility="{Binding IsParamsLoaded, Converter={StaticResource Boolean2VisibilityConverter}}">
+                        <ListBox ItemsSource="{Binding GroupFilters}"
+                                 SelectedItem="{Binding SelectedGroupFilter, Mode=TwoWay}"
+                                 Background="Transparent"
+                                 BorderThickness="0">
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                    <Setter Property="Padding" Value="0" />
+                                    <Setter Property="Margin" Value="0,0,4,4" />
+                                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ListBoxItem">
+                                                <ContentPresenter />
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border x:Name="ChipBorder"
+                                            Padding="10,4"
+                                            CornerRadius="4"
+                                            Cursor="Hand">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="Transparent" />
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="{DynamicResource BorderBrush}" />
+                                                    </Trigger>
+                                                    <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                                        <Setter Property="Background" Value="{DynamicResource PrimaryBrush}" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock FontSize="12" Text="{Binding}">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                                            <Setter Property="Foreground" Value="White" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Border>
+
+                    <!-- 磁贴内容区 -->
+                    <Grid Grid.Row="1">
+
+                        <!-- 未选轴提示 -->
+                        <StackPanel HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Visibility="{Binding IsAxisSelected, Converter={StaticResource Boolean2VisibilityReConverter}}">
+                            <TextBlock HorizontalAlignment="Center" FontSize="28" Opacity="0.15" Text="⇌" />
+                            <TextBlock Margin="0,8,0,0"
+                                       FontSize="14"
+                                       Opacity="0.4"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                       Text="请在左侧选择轴以查看运行参数" />
+                        </StackPanel>
+
+                        <!-- 已选轴 -->
+                        <Grid Visibility="{Binding IsAxisSelected, Converter={StaticResource Boolean2VisibilityConverter}}">
+
+                            <!-- 暂无参数提示 -->
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding FilteredParams.Count}" Value="0">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+                                <TextBlock HorizontalAlignment="Center" FontSize="24" Opacity="0.15" Text="◻" />
+                                <TextBlock Margin="0,8,0,0"
+                                           FontSize="14"
+                                           Opacity="0.4"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="该轴暂无运行参数配置" />
+                            </StackPanel>
+
+                            <!-- 参数磁贴 WrapPanel -->
+                            <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                          HorizontalScrollBarVisibility="Disabled"
+                                          Padding="4,6,4,4">
+                                <ListBox ItemsSource="{Binding FilteredParams}"
+                                         SelectedItem="{Binding SelectedParam, Mode=TwoWay}"
+                                         Background="Transparent"
+                                         BorderThickness="0">
+                                    <ListBox.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel Orientation="Horizontal" />
+                                        </ItemsPanelTemplate>
+                                    </ListBox.ItemsPanel>
+                                    <ListBox.ItemContainerStyle>
+                                        <Style TargetType="ListBoxItem">
+                                            <Setter Property="Padding" Value="0" />
+                                            <Setter Property="Margin" Value="0" />
+                                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="ListBoxItem">
+                                                        <ContentPresenter />
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </ListBox.ItemContainerStyle>
+
+                                    <!-- 参数磁贴卡片模板 -->
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Width="150"
+                                                    Margin="6"
+                                                    Padding="10,9"
+                                                    CornerRadius="6"
+                                                    BorderThickness="1"
+                                                    Cursor="Hand"
+                                                    Effect="{StaticResource EffectShadow2}">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Setter Property="Background" Value="{DynamicResource SecondaryRegionBrush}" />
+                                                        <Setter Property="BorderBrush" Value="Transparent" />
+                                                        <Style.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+                                                            </Trigger>
+                                                            <DataTrigger Binding="{Binding IsDirty}" Value="True">
+                                                                <Setter Property="Background" Value="#FFF8E1" />
+                                                                <Setter Property="BorderBrush" Value="#FFCC80" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                                                <Setter Property="Background" Value="{DynamicResource RegionBrush}" />
+                                                                <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+
+                                                <StackPanel>
+                                                    <!-- 分组色标签 -->
+                                                    <Border Padding="5,2"
+                                                            CornerRadius="3"
+                                                            Margin="0,0,0,6"
+                                                            HorizontalAlignment="Left">
+                                                        <Border.Style>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="Background" Value="#607D8B" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding GroupDisplayName}" Value="单位换算">
+                                                                        <Setter Property="Background" Value="#1976D2" />
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding GroupDisplayName}" Value="运动参数">
+                                                                        <Setter Property="Background" Value="#388E3C" />
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding GroupDisplayName}" Value="回零参数">
+                                                                        <Setter Property="Background" Value="#F57C00" />
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding GroupDisplayName}" Value="软件限位">
+                                                                        <Setter Property="Background" Value="#D32F2F" />
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding GroupDisplayName}" Value="使能时序">
+                                                                        <Setter Property="Background" Value="#7B1FA2" />
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding GroupDisplayName}" Value="安全联动">
+                                                                        <Setter Property="Background" Value="#B71C1C" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
+                                                        <TextBlock FontSize="9"
+                                                                   FontWeight="SemiBold"
+                                                                   Foreground="White"
+                                                                   Text="{Binding GroupDisplayName}" />
+                                                    </Border>
+
+                                                    <!-- 参数显示名称 -->
+                                                    <TextBlock FontSize="11"
+                                                               FontWeight="SemiBold"
+                                                               TextTrimming="CharacterEllipsis"
+                                                               TextWrapping="NoWrap"
+                                                               Foreground="{DynamicResource PrimaryTextBrush}"
+                                                               Text="{Binding ParamDisplayName}" />
+
+                                                    <!-- 当前值 + 单位 -->
+                                                    <StackPanel Orientation="Horizontal"
+                                                                Margin="0,8,0,0"
+                                                                VerticalAlignment="Center">
+                                                        <TextBlock FontSize="18"
+                                                                   FontWeight="Bold"
+                                                                   Foreground="{DynamicResource PrimaryTextBrush}"
+                                                                   Text="{Binding EditValue}">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding IsDirty}" Value="True">
+                                                                            <Setter Property="Foreground" Value="#E65100" />
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                        <TextBlock Margin="4,0,0,0"
+                                                                   FontSize="11"
+                                                                   Opacity="0.6"
+                                                                   VerticalAlignment="Bottom"
+                                                                   Foreground="{DynamicResource PrimaryTextBrush}"
+                                                                   Text="{Binding UnitDisplay}" />
+                                                    </StackPanel>
+
+                                                    <!-- 待保存标记 -->
+                                                    <TextBlock FontSize="10"
+                                                               Foreground="#E65100"
+                                                               Margin="0,5,0,0"
+                                                               Text="● 待保存">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsDirty}" Value="True">
+                                                                        <Setter Property="Visibility" Value="Visible" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </ScrollViewer>
+
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- ════ 右列：参数详情面板 ════ -->
+            <Border Grid.Column="4"
+                    CornerRadius="8"
+                    Background="{DynamicResource RegionBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1">
+                <Grid>
+
+                    <!-- 未选中参数时的占位 -->
+                    <StackPanel HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Visibility="{Binding IsParamSelected, Converter={StaticResource Boolean2VisibilityReConverter}}">
+                        <TextBlock HorizontalAlignment="Center" FontSize="28" Opacity="0.15" Text="☰" />
+                        <TextBlock Margin="0,8,0,0"
+                                   HorizontalAlignment="Center"
+                                   FontSize="13"
+                                   Opacity="0.4"
+                                   Foreground="{DynamicResource PrimaryTextBrush}"
+                                   Text="请点击参数卡片查看详情" />
+                    </StackPanel>
+
+                    <!-- 已选中参数时的详情 -->
+                    <DockPanel Visibility="{Binding IsParamSelected, Converter={StaticResource Boolean2VisibilityConverter}}">
+
+                        <!-- 底部操作按钮 -->
+                        <Border DockPanel.Dock="Bottom"
+                                Padding="14,10"
+                                CornerRadius="0,0,8,8"
+                                Background="{DynamicResource SecondaryRegionBrush}"
+                                BorderBrush="{DynamicResource BorderBrush}"
+                                BorderThickness="0,1,0,0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="8" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Button Grid.Column="0"
+                                        Command="{Binding ResetSelectedParamToDefaultCommand}"
+                                        Content="恢复默认值" />
+                                <Button Grid.Column="2"
+                                        Click="ButtonEditParam_OnClick"
+                                        Content="修改参数值" />
+                            </Grid>
+                        </Border>
+
+                        <!-- 参数详情滚动区 -->
+                        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Disabled">
+                            <StackPanel Margin="16,14,16,10">
+
+                                <!-- 分组色标签 -->
+                                <Border Padding="6,2"
+                                        CornerRadius="3"
+                                        HorizontalAlignment="Left"
+                                        Margin="0,0,0,8">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Background" Value="#607D8B" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding SelectedParam.GroupDisplayName}" Value="单位换算">
+                                                    <Setter Property="Background" Value="#1976D2" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding SelectedParam.GroupDisplayName}" Value="运动参数">
+                                                    <Setter Property="Background" Value="#388E3C" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding SelectedParam.GroupDisplayName}" Value="回零参数">
+                                                    <Setter Property="Background" Value="#F57C00" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding SelectedParam.GroupDisplayName}" Value="软件限位">
+                                                    <Setter Property="Background" Value="#D32F2F" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding SelectedParam.GroupDisplayName}" Value="使能时序">
+                                                    <Setter Property="Background" Value="#7B1FA2" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding SelectedParam.GroupDisplayName}" Value="安全联动">
+                                                    <Setter Property="Background" Value="#B71C1C" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <TextBlock FontSize="11"
+                                               FontWeight="SemiBold"
+                                               Foreground="White"
+                                               Text="{Binding SelectedParam.GroupDisplayName}" />
+                                </Border>
+
+                                <!-- 参数名称 -->
+                                <TextBlock FontSize="15"
+                                           FontWeight="Bold"
+                                           TextWrapping="Wrap"
+                                           Margin="0,0,0,12"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="{Binding SelectedParam.ParamDisplayName}" />
+
+                                <!-- 元数据标签（每行一个） -->
+                                <StackPanel Margin="0,0,0,12">
+                                    <hc:Shield HorizontalAlignment="Left"
+                                               Margin="0,0,0,6"
+                                               Subject="类型"
+                                               Status="{Binding SelectedParam.TypeLabel}"
+                                               Color="#1976D2" />
+                                    <hc:Shield HorizontalAlignment="Left"
+                                               Margin="0,0,0,6"
+                                               Subject="单位"
+                                               Status="{Binding SelectedParam.UnitDisplay}"
+                                               Color="#455A64" />
+                                    <hc:Shield HorizontalAlignment="Left"
+                                               Margin="0,0,0,6"
+                                               Subject="默认值"
+                                               Status="{Binding SelectedParam.ParamDefaultValueText}"
+                                               Color="#388E3C" />
+                                    <hc:Shield HorizontalAlignment="Left"
+                                               Subject="允许范围"
+                                               Status="{Binding SelectedParam.RangeText}"
+                                               Color="#F57C00" />
+                                </StackPanel>
+
+                                <!-- 当前值展示 -->
+                                <TextBlock FontSize="12"
+                                           Opacity="0.55"
+                                           Margin="0,0,0,4"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="当前值" />
+                                <Border Padding="12,8"
+                                        CornerRadius="6"
+                                        Margin="0,0,0,12"
+                                        Background="{DynamicResource SecondaryRegionBrush}"
+                                        BorderBrush="{DynamicResource BorderBrush}"
+                                        BorderThickness="1">
+                                    <DockPanel LastChildFill="False">
+                                        <TextBlock DockPanel.Dock="Left"
+                                                   FontSize="22"
+                                                   FontWeight="Bold"
+                                                   Foreground="{DynamicResource PrimaryTextBrush}"
+                                                   Text="{Binding SelectedParam.EditValue}">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding SelectedParam.IsDirty}" Value="True">
+                                                            <Setter Property="Foreground" Value="#E65100" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                        <TextBlock DockPanel.Dock="Left"
+                                                   Margin="5,0,0,0"
+                                                   FontSize="12"
+                                                   Opacity="0.6"
+                                                   VerticalAlignment="Bottom"
+                                                   Foreground="{DynamicResource PrimaryTextBrush}"
+                                                   Text="{Binding SelectedParam.UnitDisplay}" />
+                                        <!-- 待保存角标 -->
+                                        <Border DockPanel.Dock="Right"
+                                                Padding="6,2"
+                                                CornerRadius="4"
+                                                Background="#FFF8E1"
+                                                BorderBrush="#FFCC80"
+                                                BorderThickness="1"
+                                                VerticalAlignment="Center">
+                                            <TextBlock FontSize="11" Foreground="#E65100" Text="● 待保存" />
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding SelectedParam.IsDirty}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                        </Border>
+                                    </DockPanel>
+                                </Border>
+
+                                <!-- 分隔线 -->
+                                <Rectangle Height="1"
+                                           Margin="0,0,0,12"
+                                           Fill="{DynamicResource BorderBrush}"
+                                           Opacity="0.5" />
+
+                                <!-- 参数说明 -->
+                                <TextBlock FontSize="12"
+                                           Opacity="0.55"
+                                           Margin="0,0,0,4"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="说明" />
+                                <TextBlock FontSize="12"
+                                           Opacity="0.8"
+                                           TextWrapping="Wrap"
+                                           Margin="0,0,0,8"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="{Binding SelectedParam.Description}" />
+
+                                <!-- 值含义（非空时显示） -->
+                                <TextBlock FontSize="12"
+                                           Opacity="0.55"
+                                           Margin="0,0,0,4"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="值含义">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding SelectedParam.ValueDescription}" Value="">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <TextBlock FontSize="12"
+                                           Opacity="0.7"
+                                           TextWrapping="Wrap"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="{Binding SelectedParam.ValueDescription}">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding SelectedParam.ValueDescription}" Value="">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+
+                                <!-- 内部键名 -->
+                                <Rectangle Height="1"
+                                           Margin="0,12,0,8"
+                                           Fill="{DynamicResource BorderBrush}"
+                                           Opacity="0.3" />
+                                <TextBlock FontSize="10"
+                                           Opacity="0.4"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="{Binding SelectedParam.ParamName, StringFormat='键名：{0}'}" />
+
+                            </StackPanel>
+                        </ScrollViewer>
+                    </DockPanel>
+                </Grid>
+            </Border>
+
+        </Grid>
+
+        <!-- ─── 状态栏 ─── -->
+        <Border Grid.Row="2"
+                Margin="0,6,0,0"
+                Padding="12,0"
+                CornerRadius="6"
+                Background="{DynamicResource SecondaryRegionBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1">
+            <TextBlock VerticalAlignment="Center"
+                       FontSize="12"
+                       Foreground="{DynamicResource PrimaryTextBrush}"
+                       Text="{Binding StatusText}" />
+        </Border>
+    </Grid>
+</UserControl>
