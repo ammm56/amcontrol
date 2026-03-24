@@ -13,34 +13,41 @@ namespace AMControlWPF.Views.Config
         public VacuumEditDialog(VacuumConfigEntity entity, bool isAdd)
         {
             InitializeComponent();
-            _originalId = entity.Id;
 
+            var e = entity ?? new VacuumConfigEntity
+            {
+                IsEnabled = true,
+                VacuumBuildTimeoutMs = 3000,
+                ReleaseTimeoutMs = 1000
+            };
+
+            _originalId = isAdd ? 0 : e.Id;
             TextBlockTitle.Text = isAdd ? "新增真空" : "编辑真空";
 
-            TextBoxName.Text = entity.Name ?? string.Empty;
+            TextBoxName.Text = e.Name ?? string.Empty;
             TextBoxName.IsReadOnly = !isAdd;
             TextBoxName.Opacity = isAdd ? 1.0 : 0.6;
 
-            TextBoxDisplayName.Text = entity.DisplayName ?? string.Empty;
+            TextBoxDisplayName.Text = e.DisplayName ?? string.Empty;
 
-            TextBoxVacuumOnOutputBit.Text = entity.VacuumOnOutputBit > 0 ? entity.VacuumOnOutputBit.ToString() : string.Empty;
-            TextBoxBlowOffOutputBit.Text = entity.BlowOffOutputBit.HasValue ? entity.BlowOffOutputBit.Value.ToString() : string.Empty;
-            TextBoxVacuumFeedbackBit.Text = entity.VacuumFeedbackBit.HasValue ? entity.VacuumFeedbackBit.Value.ToString() : string.Empty;
-            TextBoxReleaseFeedbackBit.Text = entity.ReleaseFeedbackBit.HasValue ? entity.ReleaseFeedbackBit.Value.ToString() : string.Empty;
-            TextBoxWorkpiecePresentBit.Text = entity.WorkpiecePresentBit.HasValue ? entity.WorkpiecePresentBit.Value.ToString() : string.Empty;
+            TextBoxVacuumOnOutputBit.Text = e.VacuumOnOutputBit.ToString();
+            TextBoxBlowOffOutputBit.Text = e.BlowOffOutputBit.HasValue ? e.BlowOffOutputBit.Value.ToString() : string.Empty;
+            TextBoxVacuumFeedbackBit.Text = e.VacuumFeedbackBit.HasValue ? e.VacuumFeedbackBit.Value.ToString() : string.Empty;
+            TextBoxReleaseFeedbackBit.Text = e.ReleaseFeedbackBit.HasValue ? e.ReleaseFeedbackBit.Value.ToString() : string.Empty;
+            TextBoxWorkpiecePresentBit.Text = e.WorkpiecePresentBit.HasValue ? e.WorkpiecePresentBit.Value.ToString() : string.Empty;
 
-            CheckBoxUseFeedbackCheck.IsChecked = entity.UseFeedbackCheck;
-            CheckBoxUseWorkpieceCheck.IsChecked = entity.UseWorkpieceCheck;
-            CheckBoxKeepVacuumOnAfterDetected.IsChecked = entity.KeepVacuumOnAfterDetected;
+            CheckBoxUseFeedbackCheck.IsChecked = e.UseFeedbackCheck;
+            CheckBoxUseWorkpieceCheck.IsChecked = e.UseWorkpieceCheck;
+            CheckBoxKeepVacuumOnAfterDetected.IsChecked = e.KeepVacuumOnAfterDetected;
 
-            TextBoxVacuumBuildTimeoutMs.Text = entity.VacuumBuildTimeoutMs.ToString();
-            TextBoxReleaseTimeoutMs.Text = entity.ReleaseTimeoutMs.ToString();
+            TextBoxVacuumBuildTimeoutMs.Text = e.VacuumBuildTimeoutMs.ToString();
+            TextBoxReleaseTimeoutMs.Text = e.ReleaseTimeoutMs.ToString();
 
-            TextBoxSortOrder.Text = entity.SortOrder.ToString();
-            CheckBoxIsEnabled.IsChecked = entity.IsEnabled;
+            TextBoxSortOrder.Text = e.SortOrder.ToString();
+            CheckBoxIsEnabled.IsChecked = e.IsEnabled;
 
-            TextBoxDescription.Text = entity.Description ?? string.Empty;
-            TextBoxRemark.Text = entity.Remark ?? string.Empty;
+            TextBoxDescription.Text = e.Description ?? string.Empty;
+            TextBoxRemark.Text = e.Remark ?? string.Empty;
         }
 
         private void ButtonSave_OnClick(object sender, RoutedEventArgs e)

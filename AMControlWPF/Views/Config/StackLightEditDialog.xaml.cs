@@ -13,31 +13,33 @@ namespace AMControlWPF.Views.Config
         public StackLightEditDialog(StackLightConfigEntity entity, bool isAdd)
         {
             InitializeComponent();
-            _originalId = entity.Id;
 
+            var e = entity ?? new StackLightConfigEntity { IsEnabled = true };
+
+            _originalId = isAdd ? 0 : e.Id;
             TextBlockTitle.Text = isAdd ? "新增灯塔" : "编辑灯塔";
 
-            TextBoxName.Text = entity.Name ?? string.Empty;
+            TextBoxName.Text = e.Name ?? string.Empty;
             TextBoxName.IsReadOnly = !isAdd;
             TextBoxName.Opacity = isAdd ? 1.0 : 0.6;
 
-            TextBoxDisplayName.Text = entity.DisplayName ?? string.Empty;
+            TextBoxDisplayName.Text = e.DisplayName ?? string.Empty;
 
-            TextBoxRedOutputBit.Text = entity.RedOutputBit.HasValue ? entity.RedOutputBit.Value.ToString() : string.Empty;
-            TextBoxYellowOutputBit.Text = entity.YellowOutputBit.HasValue ? entity.YellowOutputBit.Value.ToString() : string.Empty;
-            TextBoxGreenOutputBit.Text = entity.GreenOutputBit.HasValue ? entity.GreenOutputBit.Value.ToString() : string.Empty;
-            TextBoxBlueOutputBit.Text = entity.BlueOutputBit.HasValue ? entity.BlueOutputBit.Value.ToString() : string.Empty;
-            TextBoxBuzzerOutputBit.Text = entity.BuzzerOutputBit.HasValue ? entity.BuzzerOutputBit.Value.ToString() : string.Empty;
+            TextBoxRedOutputBit.Text = e.RedOutputBit.HasValue ? e.RedOutputBit.Value.ToString() : string.Empty;
+            TextBoxYellowOutputBit.Text = e.YellowOutputBit.HasValue ? e.YellowOutputBit.Value.ToString() : string.Empty;
+            TextBoxGreenOutputBit.Text = e.GreenOutputBit.HasValue ? e.GreenOutputBit.Value.ToString() : string.Empty;
+            TextBoxBlueOutputBit.Text = e.BlueOutputBit.HasValue ? e.BlueOutputBit.Value.ToString() : string.Empty;
+            TextBoxBuzzerOutputBit.Text = e.BuzzerOutputBit.HasValue ? e.BuzzerOutputBit.Value.ToString() : string.Empty;
 
-            CheckBoxEnableBuzzerOnWarning.IsChecked = entity.EnableBuzzerOnWarning;
-            CheckBoxEnableBuzzerOnAlarm.IsChecked = entity.EnableBuzzerOnAlarm;
-            CheckBoxAllowMultiSegmentOn.IsChecked = entity.AllowMultiSegmentOn;
+            CheckBoxEnableBuzzerOnWarning.IsChecked = e.EnableBuzzerOnWarning;
+            CheckBoxEnableBuzzerOnAlarm.IsChecked = e.EnableBuzzerOnAlarm;
+            CheckBoxAllowMultiSegmentOn.IsChecked = e.AllowMultiSegmentOn;
 
-            TextBoxSortOrder.Text = entity.SortOrder.ToString();
-            CheckBoxIsEnabled.IsChecked = entity.IsEnabled;
+            TextBoxSortOrder.Text = e.SortOrder.ToString();
+            CheckBoxIsEnabled.IsChecked = e.IsEnabled;
 
-            TextBoxDescription.Text = entity.Description ?? string.Empty;
-            TextBoxRemark.Text = entity.Remark ?? string.Empty;
+            TextBoxDescription.Text = e.Description ?? string.Empty;
+            TextBoxRemark.Text = e.Remark ?? string.Empty;
         }
 
         private void ButtonSave_OnClick(object sender, RoutedEventArgs e)

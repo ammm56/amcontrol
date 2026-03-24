@@ -14,37 +14,45 @@ namespace AMControlWPF.Views.Config
         public GripperEditDialog(GripperConfigEntity entity, bool isAdd)
         {
             InitializeComponent();
-            _originalId = entity.Id;
 
+            var e = entity ?? new GripperConfigEntity
+            {
+                IsEnabled = true,
+                DriveMode = "Double",
+                CloseTimeoutMs = 3000,
+                OpenTimeoutMs = 3000
+            };
+
+            _originalId = isAdd ? 0 : e.Id;
             TextBlockTitle.Text = isAdd ? "新增夹爪" : "编辑夹爪";
 
-            TextBoxName.Text = entity.Name ?? string.Empty;
+            TextBoxName.Text = e.Name ?? string.Empty;
             TextBoxName.IsReadOnly = !isAdd;
             TextBoxName.Opacity = isAdd ? 1.0 : 0.6;
 
-            TextBoxDisplayName.Text = entity.DisplayName ?? string.Empty;
-            SelectComboBoxByTag(ComboBoxDriveMode, entity.DriveMode ?? "Double");
+            TextBoxDisplayName.Text = e.DisplayName ?? string.Empty;
+            SelectComboBoxByTag(ComboBoxDriveMode, e.DriveMode ?? "Double");
 
-            TextBoxCloseOutputBit.Text = entity.CloseOutputBit > 0 ? entity.CloseOutputBit.ToString() : string.Empty;
-            TextBoxOpenOutputBit.Text = entity.OpenOutputBit.HasValue ? entity.OpenOutputBit.Value.ToString() : string.Empty;
-            TextBoxCloseFeedbackBit.Text = entity.CloseFeedbackBit.HasValue ? entity.CloseFeedbackBit.Value.ToString() : string.Empty;
-            TextBoxOpenFeedbackBit.Text = entity.OpenFeedbackBit.HasValue ? entity.OpenFeedbackBit.Value.ToString() : string.Empty;
-            TextBoxWorkpiecePresentBit.Text = entity.WorkpiecePresentBit.HasValue ? entity.WorkpiecePresentBit.Value.ToString() : string.Empty;
+            TextBoxCloseOutputBit.Text = e.CloseOutputBit.ToString();
+            TextBoxOpenOutputBit.Text = e.OpenOutputBit.HasValue ? e.OpenOutputBit.Value.ToString() : string.Empty;
+            TextBoxCloseFeedbackBit.Text = e.CloseFeedbackBit.HasValue ? e.CloseFeedbackBit.Value.ToString() : string.Empty;
+            TextBoxOpenFeedbackBit.Text = e.OpenFeedbackBit.HasValue ? e.OpenFeedbackBit.Value.ToString() : string.Empty;
+            TextBoxWorkpiecePresentBit.Text = e.WorkpiecePresentBit.HasValue ? e.WorkpiecePresentBit.Value.ToString() : string.Empty;
 
-            CheckBoxUseFeedbackCheck.IsChecked = entity.UseFeedbackCheck;
-            CheckBoxUseWorkpieceCheck.IsChecked = entity.UseWorkpieceCheck;
+            CheckBoxUseFeedbackCheck.IsChecked = e.UseFeedbackCheck;
+            CheckBoxUseWorkpieceCheck.IsChecked = e.UseWorkpieceCheck;
 
-            TextBoxCloseTimeoutMs.Text = entity.CloseTimeoutMs.ToString();
-            TextBoxOpenTimeoutMs.Text = entity.OpenTimeoutMs.ToString();
+            TextBoxCloseTimeoutMs.Text = e.CloseTimeoutMs.ToString();
+            TextBoxOpenTimeoutMs.Text = e.OpenTimeoutMs.ToString();
 
-            CheckBoxAllowBothOff.IsChecked = entity.AllowBothOff;
-            CheckBoxAllowBothOn.IsChecked = entity.AllowBothOn;
+            CheckBoxAllowBothOff.IsChecked = e.AllowBothOff;
+            CheckBoxAllowBothOn.IsChecked = e.AllowBothOn;
 
-            TextBoxSortOrder.Text = entity.SortOrder.ToString();
-            CheckBoxIsEnabled.IsChecked = entity.IsEnabled;
+            TextBoxSortOrder.Text = e.SortOrder.ToString();
+            CheckBoxIsEnabled.IsChecked = e.IsEnabled;
 
-            TextBoxDescription.Text = entity.Description ?? string.Empty;
-            TextBoxRemark.Text = entity.Remark ?? string.Empty;
+            TextBoxDescription.Text = e.Description ?? string.Empty;
+            TextBoxRemark.Text = e.Remark ?? string.Empty;
 
             UpdateOpenBitState();
         }

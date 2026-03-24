@@ -14,34 +14,43 @@ namespace AMControlWPF.Views.Config
         public CylinderEditDialog(CylinderConfigEntity entity, bool isAdd)
         {
             InitializeComponent();
-            _originalId = entity.Id;
 
+            // 新增时 entity 为 null，创建默认值
+            var e = entity ?? new CylinderConfigEntity
+            {
+                IsEnabled = true,
+                DriveMode = "Double",
+                ExtendTimeoutMs = 3000,
+                RetractTimeoutMs = 3000
+            };
+
+            _originalId = isAdd ? 0 : e.Id;
             TextBlockTitle.Text = isAdd ? "新增气缸" : "编辑气缸";
 
-            TextBoxName.Text = entity.Name ?? string.Empty;
+            TextBoxName.Text = e.Name ?? string.Empty;
             TextBoxName.IsReadOnly = !isAdd;
             TextBoxName.Opacity = isAdd ? 1.0 : 0.6;
 
-            TextBoxDisplayName.Text = entity.DisplayName ?? string.Empty;
-            SelectComboBoxByTag(ComboBoxDriveMode, entity.DriveMode ?? "Double");
+            TextBoxDisplayName.Text = e.DisplayName ?? string.Empty;
+            SelectComboBoxByTag(ComboBoxDriveMode, e.DriveMode ?? "Double");
 
-            TextBoxExtendOutputBit.Text = entity.ExtendOutputBit > 0 ? entity.ExtendOutputBit.ToString() : string.Empty;
-            TextBoxRetractOutputBit.Text = entity.RetractOutputBit.HasValue ? entity.RetractOutputBit.Value.ToString() : string.Empty;
-            TextBoxExtendFeedbackBit.Text = entity.ExtendFeedbackBit.HasValue ? entity.ExtendFeedbackBit.Value.ToString() : string.Empty;
-            TextBoxRetractFeedbackBit.Text = entity.RetractFeedbackBit.HasValue ? entity.RetractFeedbackBit.Value.ToString() : string.Empty;
+            TextBoxExtendOutputBit.Text = e.ExtendOutputBit > 0 ? e.ExtendOutputBit.ToString() : string.Empty;
+            TextBoxRetractOutputBit.Text = e.RetractOutputBit.HasValue ? e.RetractOutputBit.Value.ToString() : string.Empty;
+            TextBoxExtendFeedbackBit.Text = e.ExtendFeedbackBit.HasValue ? e.ExtendFeedbackBit.Value.ToString() : string.Empty;
+            TextBoxRetractFeedbackBit.Text = e.RetractFeedbackBit.HasValue ? e.RetractFeedbackBit.Value.ToString() : string.Empty;
 
-            CheckBoxUseFeedbackCheck.IsChecked = entity.UseFeedbackCheck;
-            TextBoxExtendTimeoutMs.Text = entity.ExtendTimeoutMs.ToString();
-            TextBoxRetractTimeoutMs.Text = entity.RetractTimeoutMs.ToString();
+            CheckBoxUseFeedbackCheck.IsChecked = e.UseFeedbackCheck;
+            TextBoxExtendTimeoutMs.Text = e.ExtendTimeoutMs.ToString();
+            TextBoxRetractTimeoutMs.Text = e.RetractTimeoutMs.ToString();
 
-            CheckBoxAllowBothOff.IsChecked = entity.AllowBothOff;
-            CheckBoxAllowBothOn.IsChecked = entity.AllowBothOn;
+            CheckBoxAllowBothOff.IsChecked = e.AllowBothOff;
+            CheckBoxAllowBothOn.IsChecked = e.AllowBothOn;
 
-            TextBoxSortOrder.Text = entity.SortOrder.ToString();
-            CheckBoxIsEnabled.IsChecked = entity.IsEnabled;
+            TextBoxSortOrder.Text = e.SortOrder.ToString();
+            CheckBoxIsEnabled.IsChecked = e.IsEnabled;
 
-            TextBoxDescription.Text = entity.Description ?? string.Empty;
-            TextBoxRemark.Text = entity.Remark ?? string.Empty;
+            TextBoxDescription.Text = e.Description ?? string.Empty;
+            TextBoxRemark.Text = e.Remark ?? string.Empty;
 
             UpdateRetractBitState();
         }
@@ -126,8 +135,6 @@ namespace AMControlWPF.Views.Config
         {
             DialogResult = false;
         }
-
-        // ── 辅助方法 ─────────────────────────────────────────────────────
 
         private void ShowError(string message)
         {
