@@ -624,9 +624,25 @@ namespace AMControlWPF
                 return;
             }
 
+            // 内存中已有活动报警，无需注入
             if (alarmManager.GetActiveAlarms().Count > 0)
             {
                 return;
+            }
+
+            // 数据库中已存在任何报警记录，跳过调试种子
+            // 避免每次重启向持久化存储追加重复调试数据
+            try
+            {
+                var recordService = new AM.DBService.Services.Dev.DevAlarmRecordService();
+                if (recordService.QueryTotalCount() > 0)
+                {
+                    return;
+                }
+            }
+            catch
+            {
+                // 查询失败不影响种子注入
             }
 
             alarmManager.RaiseAlarm(

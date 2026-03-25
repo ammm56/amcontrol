@@ -1,10 +1,13 @@
 ﻿using AM.Core.Alarm;
+using AM.Core.Context;
+using AM.Core.Logging;
 using AM.DBService.DBase;
 using AM.Model.Alarm;
 using AM.Model.Common;
 using AM.Model.Entity.Dev;
 using System;
 using System.Collections.Generic;
+using System.Data;
 
 namespace AM.DBService.Services.Dev
 {
@@ -12,28 +15,100 @@ namespace AM.DBService.Services.Dev
     /// 报警持久化与查询服务。
     /// 实现 IDevAlarmRecord，将报警发生/清除记录写入 SQLite 并提供分页查询。
     ///
-    /// 重要：写入方法（SaveRaised/SaveCleared）不使用 IAppReporter,
-    ///   避免 AlarmManager → IDevAlarmRecord → Reporter → AlarmManager 的循环调用。
-    /// 写入异常一律静默，持久化失败不影响主报警流程。
-    /// 查询方法通过 Result 返回错误，由调用方决定是否展示。
+    /// 设计约束：写入路径只使用 IAMLogger，不使用 IAppReporter,
+    ///   规避 AlarmManager → IDevAlarmRecord → Reporter → AlarmManager 的循环调用。
+    /// Logger 通过 SystemContext 惰性获取：服务构造时 SystemContext 尚未初始化,
+    ///   但 SaveRaised/SaveCleared 被调用时已初始化完成，因此惰性访问是安全的。
     /// </summary>
     public class DevAlarmRecordService : IDevAlarmRecord
     {
         private readonly DBCommon<DevAlarmRecordEntity> _db;
 
+        /// <summary>
+        /// 惰性获取日志器，规避构造时 SystemContext 未就绪的问题。
+        /// </summary>
+        private IAMLogger Logger
+        {
+            get
+            {
+                try { return SystemContext.Instance.Logger; }
+                catch { return null; }
+            }
+        }
+
         public DevAlarmRecordService()
         {
             _db = new DBCommon<DevAlarmRecordEntity>();
+            EnsureTableSchema();
+        }
+
+        // ── 表结构初始化与自动迁移 ────────────────────────────────────────
+
+        /// <summary>
+        /// 确保表结构与当前实体定义一致。
+        /// 若表不存在则建表；若旧版建表时 CardId 缺少 IsNullable 标注（NOT NULL）,
+        /// 则自动重建表（开发阶段旧数据会丢失，生产环境应使用正式迁移脚本）。
+        /// </summary>
+        private void EnsureTableSchema()
+        {
             try
             {
-                _db._sqlSugarClient.CodeFirst.InitTables<DevAlarmRecordEntity>();
+                var client = _db._sqlSugarClient;
+
+                if (!client.DbMaintenance.IsAnyTable("dev_alarm_record", false))
+                {
+                    client.CodeFirst.InitTables<DevAlarmRecordEntity>();
+                    return;
+                }
+
+                // 使用 SQLite PRAGMA 检测 CardId 是否因旧版缺少 IsNullable 而被建为 NOT NULL
+                if (IsColumnNotNull(client, "dev_alarm_record", "CardId"))
+                {
+                    LogWarn("dev_alarm_record.CardId 存在 NOT NULL 约束（实体缺少 IsNullable 标注导致），将重建表以修复 schema，旧报警记录会丢失。");
+                    client.DbMaintenance.DropTable("dev_alarm_record");
+                    client.CodeFirst.InitTables<DevAlarmRecordEntity>();
+                    LogWarn("dev_alarm_record 表已按正确 schema 重建完成。");
+                    return;
+                }
+
+                // Schema 正确，正常 InitTables（幂等）
+                client.CodeFirst.InitTables<DevAlarmRecordEntity>();
             }
-            catch { /* 表初始化失败不影响应用启动 */ }
+            catch (Exception ex)
+            {
+                LogError("dev_alarm_record 表 schema 初始化失败，后续写入可能失败", ex);
+            }
+        }
+
+        /// <summary>
+        /// 通过 SQLite PRAGMA table_info 检测指定列是否有 NOT NULL 约束。
+        /// </summary>
+        private bool IsColumnNotNull(SqlSugar.SqlSugarClient client, string tableName, string columnName)
+        {
+            try
+            {
+                var dt = client.Ado.GetDataTable("PRAGMA table_info('" + tableName + "')");
+                foreach (DataRow row in dt.Rows)
+                {
+                    var col = row["name"]?.ToString() ?? string.Empty;
+                    if (string.Equals(col, columnName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        // notnull = 1 表示列存在 NOT NULL 约束
+                        return (row["notnull"]?.ToString() ?? "0") == "1";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogError("PRAGMA table_info('" + tableName + "') 检查失败", ex);
+            }
+
+            return false;
         }
 
         // ── 写入（IAlarmRecord） ──────────────────────────────────────────
 
-        /// <summary>写入报警触发记录。</summary>
+        /// <summary>写入报警触发记录。失败只写日志，不影响主报警流程。</summary>
         public void SaveRaised(
             AlarmCode code, AlarmLevel level,
             string message, string source,
@@ -41,7 +116,7 @@ namespace AM.DBService.Services.Dev
         {
             try
             {
-                _db.Add(new DevAlarmRecordEntity
+                var result = _db.Add(new DevAlarmRecordEntity
                 {
                     AlarmCode  = (int)code,
                     AlarmLevel = level.ToString(),
@@ -51,28 +126,50 @@ namespace AM.DBService.Services.Dev
                     RaisedTime = raisedTime,
                     IsCleared  = false
                 });
+
+                if (!result.Success)
+                {
+                    LogError("SaveRaised 写入失败 [Code=" + code + "]: " + result.Message);
+                }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogError("SaveRaised 发生异常 [Code=" + code + "]", ex);
+            }
         }
 
-        /// <summary>将指定报警码所有未清除记录标记为已清除。</summary>
+        /// <summary>将指定报警码所有未清除记录标记为已清除。失败只写日志。</summary>
         public void SaveCleared(AlarmCode code, DateTime clearedTime)
         {
             try
             {
                 var client = _db._sqlSugarClient;
+
                 var records = client.Queryable<DevAlarmRecordEntity>()
                     .Where(x => x.AlarmCode == (int)code && !x.IsCleared)
                     .ToList();
+
+                if (records == null || records.Count == 0)
+                {
+                    return;
+                }
 
                 foreach (var rec in records)
                 {
                     rec.IsCleared   = true;
                     rec.ClearedTime = clearedTime;
-                    client.Updateable(rec).ExecuteCommand();
+
+                    int affected = client.Updateable(rec).ExecuteCommand();
+                    if (affected <= 0)
+                    {
+                        LogWarn("SaveCleared 更新无生效行 [Id=" + rec.Id + ", Code=" + code + "]");
+                    }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogError("SaveCleared 发生异常 [Code=" + code + "]", ex);
+            }
         }
 
         // ── 查询（IDevAlarmRecord 扩展）───────────────────────────────────
@@ -104,7 +201,6 @@ namespace AM.DBService.Services.Dev
                 if (to.HasValue)
                     query = query.Where(x => x.RaisedTime <= to.Value);
 
-                // SqlSugar ToPageList：page 从 1 开始
                 var items = query
                     .OrderByDescending(x => x.RaisedTime)
                     .ToPageList(page, pageSize);
@@ -114,6 +210,7 @@ namespace AM.DBService.Services.Dev
             }
             catch (Exception ex)
             {
+                LogError("QueryPage 发生异常", ex);
                 return Result<DevAlarmRecordEntity>.Fail(-1, "报警记录分页查询失败: " + ex.Message);
             }
         }
@@ -143,8 +240,9 @@ namespace AM.DBService.Services.Dev
 
                 return query.Count();
             }
-            catch
+            catch (Exception ex)
             {
+                LogError("QueryTotalCount 发生异常", ex);
                 return 0;
             }
         }
@@ -165,8 +263,29 @@ namespace AM.DBService.Services.Dev
             }
             catch (Exception ex)
             {
+                LogError("QueryById 发生异常 [Id=" + id + "]", ex);
                 return Result<DevAlarmRecordEntity>.Fail(-1, "报警记录查询失败: " + ex.Message);
             }
+        }
+
+        // ── 日志辅助（只用 IAMLogger，不走 IAppReporter） ──────────────────
+
+        private void LogWarn(string message)
+        {
+            try { Logger?.Warn("[DevAlarmRecordService] " + message); }
+            catch { }
+        }
+
+        private void LogError(string message, Exception ex = null)
+        {
+            try
+            {
+                if (ex != null)
+                    Logger?.Error(ex, "[DevAlarmRecordService] " + message);
+                else
+                    Logger?.Error("[DevAlarmRecordService] " + message);
+            }
+            catch { }
         }
     }
 }
