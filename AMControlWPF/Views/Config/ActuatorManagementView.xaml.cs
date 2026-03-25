@@ -1,10 +1,10 @@
 ﻿using AM.Model.Entity.Motion.Actuator;
-using AM.ViewModel.ViewModels.Config;
 using HandyControl.Controls;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using AM.ViewModel.ViewModels.Config;
 
 namespace AMControlWPF.Views.Config
 {
@@ -50,22 +50,22 @@ namespace AMControlWPF.Views.Config
             var successStyle = TryFindResource("ButtonSuccess") as Style;
             var defaultStyle = TryFindResource("ButtonDefault") as Style;
 
-            ButtonFilterAll.Style = _currentTypeFilter == "All" ? successStyle : defaultStyle;
-            ButtonFilterCylinder.Style = _currentTypeFilter == "Cylinder" ? successStyle : defaultStyle;
-            ButtonFilterVacuum.Style = _currentTypeFilter == "Vacuum" ? successStyle : defaultStyle;
+            ButtonFilterAll.Style        = _currentTypeFilter == "All"        ? successStyle : defaultStyle;
+            ButtonFilterCylinder.Style   = _currentTypeFilter == "Cylinder"   ? successStyle : defaultStyle;
+            ButtonFilterVacuum.Style     = _currentTypeFilter == "Vacuum"     ? successStyle : defaultStyle;
             ButtonFilterStackLight.Style = _currentTypeFilter == "StackLight" ? successStyle : defaultStyle;
-            ButtonFilterGripper.Style = _currentTypeFilter == "Gripper" ? successStyle : defaultStyle;
+            ButtonFilterGripper.Style    = _currentTypeFilter == "Gripper"    ? successStyle : defaultStyle;
         }
 
         private string GetFilterDisplayName(string typeFilter)
         {
             switch (typeFilter)
             {
-                case "Cylinder": return "气缸";
-                case "Vacuum": return "真空";
+                case "Cylinder":   return "气缸";
+                case "Vacuum":     return "真空";
                 case "StackLight": return "灯塔";
-                case "Gripper": return "夹爪";
-                default: return "全部";
+                case "Gripper":    return "夹爪";
+                default:           return "全部";
             }
         }
 
@@ -85,49 +85,39 @@ namespace AMControlWPF.Views.Config
             var item = _vm.SelectedActuatorItem;
             if (item == null) return;
 
-            // 类型徽章
             var badge = new Border
             {
-                Padding = new Thickness(6, 2, 6, 2),
-                CornerRadius = new CornerRadius(3),
+                Padding             = new Thickness(6, 2, 6, 2),
+                CornerRadius        = new CornerRadius(3),
                 HorizontalAlignment = HorizontalAlignment.Left,
-                Margin = new Thickness(0, 0, 0, 8),
-                Background = GetTypeBrush(item.ActuatorType),
+                Margin              = new Thickness(0, 0, 0, 8),
+                Background          = GetTypeBrush(item.ActuatorType),
                 Child = new TextBlock
                 {
-                    FontSize = 11,
+                    FontSize   = 11,
                     FontWeight = FontWeights.SemiBold,
                     Foreground = Brushes.White,
-                    Text = item.TypeDisplay
+                    Text       = item.TypeDisplay
                 }
             };
             DetailContent.Children.Add(badge);
 
-            // 显示名称
             DetailContent.Children.Add(new TextBlock
             {
-                FontSize = 15,
-                FontWeight = FontWeights.Bold,
-                Margin = new Thickness(0, 0, 0, 12),
+                FontSize    = 15,
+                FontWeight  = FontWeights.Bold,
+                Margin      = new Thickness(0, 0, 0, 12),
                 TextWrapping = TextWrapping.Wrap,
-                Foreground = TryFindResource("PrimaryTextBrush") as Brush,
-                Text = item.DisplayName
+                Foreground  = TryFindResource("PrimaryTextBrush") as Brush,
+                Text        = item.DisplayName
             });
 
             switch (item.ActuatorType)
             {
-                case "Cylinder":
-                    ShowCylinderDetail(item.SourceEntity as CylinderConfigEntity);
-                    break;
-                case "Vacuum":
-                    ShowVacuumDetail(item.SourceEntity as VacuumConfigEntity);
-                    break;
-                case "StackLight":
-                    ShowStackLightDetail(item.SourceEntity as StackLightConfigEntity);
-                    break;
-                case "Gripper":
-                    ShowGripperDetail(item.SourceEntity as GripperConfigEntity);
-                    break;
+                case "Cylinder":   ShowCylinderDetail(item.SourceEntity as CylinderConfigEntity);     break;
+                case "Vacuum":     ShowVacuumDetail(item.SourceEntity as VacuumConfigEntity);         break;
+                case "StackLight": ShowStackLightDetail(item.SourceEntity as StackLightConfigEntity); break;
+                case "Gripper":    ShowGripperDetail(item.SourceEntity as GripperConfigEntity);       break;
             }
         }
 
@@ -146,76 +136,76 @@ namespace AMControlWPF.Views.Config
         private void ShowCylinderDetail(CylinderConfigEntity e)
         {
             if (e == null) return;
-            AddShield("名称",         e.Name,                                                         "#455A64");
-            AddShield("驱动模式",     e.DriveMode,                                                    "#1976D2");
-            AddShield("伸出位 (DO)",  e.ExtendOutputBit > 0 ? e.ExtendOutputBit.ToString() : "-",     "#388E3C");
-            AddShield("缩回位 (DO)",  e.RetractOutputBit.HasValue  ? e.RetractOutputBit.Value.ToString()  : "-", "#388E3C");
-            AddShield("伸出反馈 (DI)",e.ExtendFeedbackBit.HasValue ? e.ExtendFeedbackBit.Value.ToString() : "-", "#388E3C");
-            AddShield("缩回反馈 (DI)",e.RetractFeedbackBit.HasValue? e.RetractFeedbackBit.Value.ToString(): "-", "#388E3C");
-            AddShield("反馈校验",     e.UseFeedbackCheck ? "是" : "否",                               "#455A64");
-            AddShield("伸出超时 (ms)",e.ExtendTimeoutMs.ToString(),                                   "#F57C00");
-            AddShield("缩回超时 (ms)",e.RetractTimeoutMs.ToString(),                                  "#F57C00");
-            AddShield("允许双OFF",    e.AllowBothOff ? "是" : "否",                                   "#455A64");
-            AddShield("允许双ON",     e.AllowBothOn  ? "是" : "否",                                   "#455A64");
-            AddShield("启用",         e.IsEnabled    ? "是" : "否", e.IsEnabled ? "#388E3C" : "#B71C1C");
-            AddShield("排序",         e.SortOrder.ToString(),                                         "#455A64");
+            AddShield("名称",          e.Name,                                                                   "#455A64");
+            AddShield("驱动模式",      e.DriveMode,                                                              "#1976D2");
+            AddShield("伸出位 (DO)",   e.ExtendOutputBit > 0 ? e.ExtendOutputBit.ToString() : "-",               "#388E3C");
+            AddShield("缩回位 (DO)",   e.RetractOutputBit.HasValue  ? e.RetractOutputBit.Value.ToString()  : "-", "#388E3C");
+            AddShield("伸出反馈 (DI)", e.ExtendFeedbackBit.HasValue ? e.ExtendFeedbackBit.Value.ToString() : "-", "#388E3C");
+            AddShield("缩回反馈 (DI)", e.RetractFeedbackBit.HasValue? e.RetractFeedbackBit.Value.ToString(): "-", "#388E3C");
+            AddShield("反馈校验",      e.UseFeedbackCheck ? "是" : "否",                                         "#455A64");
+            AddShield("伸出超时 (ms)", e.ExtendTimeoutMs.ToString(),                                             "#F57C00");
+            AddShield("缩回超时 (ms)", e.RetractTimeoutMs.ToString(),                                            "#F57C00");
+            AddShield("允许双OFF",     e.AllowBothOff ? "是" : "否",                                             "#455A64");
+            AddShield("允许双ON",      e.AllowBothOn  ? "是" : "否",                                             "#455A64");
+            AddShield("启用",          e.IsEnabled    ? "是" : "否", e.IsEnabled ? "#388E3C" : "#B71C1C");
+            AddShield("排序",          e.SortOrder.ToString(),                                                   "#455A64");
             AddDescriptionAndRemark(e.Description, e.Remark);
         }
 
         private void ShowVacuumDetail(VacuumConfigEntity e)
         {
             if (e == null) return;
-            AddShield("名称",           e.Name,                                                              "#455A64");
-            AddShield("吸真空位 (DO)",  e.VacuumOnOutputBit.ToString(), "#388E3C");
+            AddShield("名称",           e.Name,                                                                     "#455A64");
+            AddShield("吸真空位 (DO)",  e.VacuumOnOutputBit > 0 ? e.VacuumOnOutputBit.ToString() : "-",            "#388E3C");
             AddShield("破真空位 (DO)",  e.BlowOffOutputBit.HasValue   ? e.BlowOffOutputBit.Value.ToString()   : "-", "#388E3C");
             AddShield("真空反馈 (DI)",  e.VacuumFeedbackBit.HasValue  ? e.VacuumFeedbackBit.Value.ToString()  : "-", "#388E3C");
             AddShield("释放反馈 (DI)",  e.ReleaseFeedbackBit.HasValue ? e.ReleaseFeedbackBit.Value.ToString() : "-", "#388E3C");
             AddShield("工件检测 (DI)",  e.WorkpiecePresentBit.HasValue? e.WorkpiecePresentBit.Value.ToString(): "-", "#388E3C");
-            AddShield("反馈校验",       e.UseFeedbackCheck ? "是" : "否",                                    "#455A64");
-            AddShield("工件检测",       e.UseWorkpieceCheck ? "是" : "否",                                   "#455A64");
-            AddShield("检测后保持真空", e.KeepVacuumOnAfterDetected ? "是" : "否",                           "#455A64");
-            AddShield("建压超时 (ms)",  e.VacuumBuildTimeoutMs.ToString(),                                   "#F57C00");
-            AddShield("释放超时 (ms)",  e.ReleaseTimeoutMs.ToString(),                                       "#F57C00");
+            AddShield("反馈校验",       e.UseFeedbackCheck ? "是" : "否",                                           "#455A64");
+            AddShield("工件检测",       e.UseWorkpieceCheck ? "是" : "否",                                          "#455A64");
+            AddShield("检测后保持真空", e.KeepVacuumOnAfterDetected ? "是" : "否",                                  "#455A64");
+            AddShield("建压超时 (ms)",  e.VacuumBuildTimeoutMs.ToString(),                                          "#F57C00");
+            AddShield("释放超时 (ms)",  e.ReleaseTimeoutMs.ToString(),                                              "#F57C00");
             AddShield("启用",           e.IsEnabled ? "是" : "否", e.IsEnabled ? "#388E3C" : "#B71C1C");
-            AddShield("排序",           e.SortOrder.ToString(),                                              "#455A64");
+            AddShield("排序",           e.SortOrder.ToString(),                                                     "#455A64");
             AddDescriptionAndRemark(e.Description, e.Remark);
         }
 
         private void ShowStackLightDetail(StackLightConfigEntity e)
         {
             if (e == null) return;
-            AddShield("名称",         e.Name,                                                              "#455A64");
-            AddShield("红灯 (DO)",    e.RedOutputBit.HasValue    ? e.RedOutputBit.Value.ToString()    : "-", "#D32F2F");
-            AddShield("黄灯 (DO)",    e.YellowOutputBit.HasValue ? e.YellowOutputBit.Value.ToString() : "-", "#F57C00");
-            AddShield("绿灯 (DO)",    e.GreenOutputBit.HasValue  ? e.GreenOutputBit.Value.ToString()  : "-", "#388E3C");
-            AddShield("蓝灯 (DO)",    e.BlueOutputBit.HasValue   ? e.BlueOutputBit.Value.ToString()   : "-", "#1976D2");
-            AddShield("蜂鸣 (DO)",    e.BuzzerOutputBit.HasValue ? e.BuzzerOutputBit.Value.ToString() : "-", "#455A64");
-            AddShield("警告时蜂鸣",   e.EnableBuzzerOnWarning  ? "是" : "否",                             "#455A64");
-            AddShield("报警时蜂鸣",   e.EnableBuzzerOnAlarm    ? "是" : "否",                             "#455A64");
-            AddShield("允许多段同亮", e.AllowMultiSegmentOn    ? "是" : "否",                             "#455A64");
+            AddShield("名称",         e.Name,                                                                  "#455A64");
+            AddShield("红灯 (DO)",    e.RedOutputBit.HasValue    ? e.RedOutputBit.Value.ToString()    : "-",   "#D32F2F");
+            AddShield("黄灯 (DO)",    e.YellowOutputBit.HasValue ? e.YellowOutputBit.Value.ToString() : "-",   "#F57C00");
+            AddShield("绿灯 (DO)",    e.GreenOutputBit.HasValue  ? e.GreenOutputBit.Value.ToString()  : "-",   "#388E3C");
+            AddShield("蓝灯 (DO)",    e.BlueOutputBit.HasValue   ? e.BlueOutputBit.Value.ToString()   : "-",   "#1976D2");
+            AddShield("蜂鸣 (DO)",    e.BuzzerOutputBit.HasValue ? e.BuzzerOutputBit.Value.ToString() : "-",   "#455A64");
+            AddShield("警告时蜂鸣",   e.EnableBuzzerOnWarning  ? "是" : "否",                                  "#455A64");
+            AddShield("报警时蜂鸣",   e.EnableBuzzerOnAlarm    ? "是" : "否",                                  "#455A64");
+            AddShield("允许多段同亮", e.AllowMultiSegmentOn    ? "是" : "否",                                  "#455A64");
             AddShield("启用",         e.IsEnabled ? "是" : "否", e.IsEnabled ? "#388E3C" : "#B71C1C");
-            AddShield("排序",         e.SortOrder.ToString(),                                             "#455A64");
+            AddShield("排序",         e.SortOrder.ToString(),                                                  "#455A64");
             AddDescriptionAndRemark(e.Description, e.Remark);
         }
 
         private void ShowGripperDetail(GripperConfigEntity e)
         {
             if (e == null) return;
-            AddShield("名称",          e.Name,                                                               "#455A64");
-            AddShield("驱动模式",      e.DriveMode,                                                          "#1976D2");
-            AddShield("夹紧位 (DO)",   e.CloseOutputBit.ToString(), "#388E3C");
-            AddShield("打开位 (DO)",   e.OpenOutputBit.HasValue    ? e.OpenOutputBit.Value.ToString()    : "-", "#388E3C");
-            AddShield("夹紧反馈 (DI)", e.CloseFeedbackBit.HasValue ? e.CloseFeedbackBit.Value.ToString() : "-", "#388E3C");
-            AddShield("打开反馈 (DI)", e.OpenFeedbackBit.HasValue  ? e.OpenFeedbackBit.Value.ToString()  : "-", "#388E3C");
+            AddShield("名称",          e.Name,                                                                     "#455A64");
+            AddShield("驱动模式",      e.DriveMode,                                                               "#1976D2");
+            AddShield("夹紧位 (DO)",   e.CloseOutputBit > 0 ? e.CloseOutputBit.ToString() : "-",                  "#388E3C");
+            AddShield("打开位 (DO)",   e.OpenOutputBit.HasValue    ? e.OpenOutputBit.Value.ToString()    : "-",    "#388E3C");
+            AddShield("夹紧反馈 (DI)", e.CloseFeedbackBit.HasValue ? e.CloseFeedbackBit.Value.ToString() : "-",   "#388E3C");
+            AddShield("打开反馈 (DI)", e.OpenFeedbackBit.HasValue  ? e.OpenFeedbackBit.Value.ToString()  : "-",   "#388E3C");
             AddShield("工件检测 (DI)", e.WorkpiecePresentBit.HasValue ? e.WorkpiecePresentBit.Value.ToString() : "-", "#388E3C");
-            AddShield("反馈校验",      e.UseFeedbackCheck   ? "是" : "否",                                   "#455A64");
-            AddShield("工件检测",      e.UseWorkpieceCheck  ? "是" : "否",                                   "#455A64");
-            AddShield("夹紧超时 (ms)", e.CloseTimeoutMs.ToString(),                                          "#F57C00");
-            AddShield("打开超时 (ms)", e.OpenTimeoutMs.ToString(),                                           "#F57C00");
-            AddShield("允许双OFF",     e.AllowBothOff ? "是" : "否",                                         "#455A64");
-            AddShield("允许双ON",      e.AllowBothOn  ? "是" : "否",                                         "#455A64");
+            AddShield("反馈校验",      e.UseFeedbackCheck   ? "是" : "否",                                        "#455A64");
+            AddShield("工件检测",      e.UseWorkpieceCheck  ? "是" : "否",                                        "#455A64");
+            AddShield("夹紧超时 (ms)", e.CloseTimeoutMs.ToString(),                                               "#F57C00");
+            AddShield("打开超时 (ms)", e.OpenTimeoutMs.ToString(),                                                "#F57C00");
+            AddShield("允许双OFF",     e.AllowBothOff ? "是" : "否",                                              "#455A64");
+            AddShield("允许双ON",      e.AllowBothOn  ? "是" : "否",                                              "#455A64");
             AddShield("启用",          e.IsEnabled ? "是" : "否", e.IsEnabled ? "#388E3C" : "#B71C1C");
-            AddShield("排序",          e.SortOrder.ToString(),                                               "#455A64");
+            AddShield("排序",          e.SortOrder.ToString(),                                                    "#455A64");
             AddDescriptionAndRemark(e.Description, e.Remark);
         }
 
@@ -229,10 +219,10 @@ namespace AMControlWPF.Views.Config
             var shield = new Shield
             {
                 HorizontalAlignment = HorizontalAlignment.Left,
-                Margin = new Thickness(0, 0, 0, 6),
+                Margin  = new Thickness(0, 0, 0, 6),
                 Subject = subject,
-                Status = status ?? "-",
-                Color = HexToBrush(colorHex)
+                Status  = status ?? "-",
+                Color   = HexToBrush(colorHex)
             };
             DetailContent.Children.Add(shield);
         }
@@ -253,43 +243,14 @@ namespace AMControlWPF.Views.Config
 
             if (!string.IsNullOrWhiteSpace(description))
             {
-                DetailContent.Children.Add(new TextBlock
-                {
-                    FontSize = 12,
-                    Opacity = 0.55,
-                    Margin = new Thickness(0, 0, 0, 4),
-                    Foreground = TryFindResource("PrimaryTextBrush") as Brush,
-                    Text = "说明"
-                });
-                DetailContent.Children.Add(new TextBlock
-                {
-                    FontSize = 12,
-                    Opacity = 0.8,
-                    TextWrapping = TextWrapping.Wrap,
-                    Margin = new Thickness(0, 0, 0, 8),
-                    Foreground = TryFindResource("PrimaryTextBrush") as Brush,
-                    Text = description
-                });
+                DetailContent.Children.Add(new TextBlock { FontSize = 12, Opacity = 0.55, Margin = new Thickness(0, 0, 0, 4), Foreground = TryFindResource("PrimaryTextBrush") as Brush, Text = "说明" });
+                DetailContent.Children.Add(new TextBlock { FontSize = 12, Opacity = 0.8, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 0, 0, 8), Foreground = TryFindResource("PrimaryTextBrush") as Brush, Text = description });
             }
 
             if (!string.IsNullOrWhiteSpace(remark))
             {
-                DetailContent.Children.Add(new TextBlock
-                {
-                    FontSize = 12,
-                    Opacity = 0.55,
-                    Margin = new Thickness(0, 0, 0, 4),
-                    Foreground = TryFindResource("PrimaryTextBrush") as Brush,
-                    Text = "备注"
-                });
-                DetailContent.Children.Add(new TextBlock
-                {
-                    FontSize = 12,
-                    Opacity = 0.7,
-                    TextWrapping = TextWrapping.Wrap,
-                    Foreground = TryFindResource("PrimaryTextBrush") as Brush,
-                    Text = remark
-                });
+                DetailContent.Children.Add(new TextBlock { FontSize = 12, Opacity = 0.55, Margin = new Thickness(0, 0, 0, 4), Foreground = TryFindResource("PrimaryTextBrush") as Brush, Text = "备注" });
+                DetailContent.Children.Add(new TextBlock { FontSize = 12, Opacity = 0.7, TextWrapping = TextWrapping.Wrap, Foreground = TryFindResource("PrimaryTextBrush") as Brush, Text = remark });
             }
         }
 
@@ -341,40 +302,60 @@ namespace AMControlWPF.Views.Config
             if (dialog.ShowDialog() == true && dialog.ResultEntity != null)
             {
                 var result = _vm.SaveCylinder(dialog.ResultEntity);
-                if (result.Success) { Growl.Success("气缸保存成功"); await _vm.LoadCylindersAsync(); _vm.RebuildUnifiedList(_currentTypeFilter); }
+                if (result.Success)
+                {
+                    await _vm.LoadCylindersAsync();
+                    _vm.RebuildUnifiedList(_currentTypeFilter);
+                    TextBlockStatus.Text = $"气缸已保存 - 共 {_vm.AllActuatorItems.Count} 条记录";
+                }
                 else Growl.Error($"气缸保存失败: {result.Message}");
             }
         }
 
         private async void AddVacuum()
         {
-            var dialog = new VacuumEditDialog(null, true) { Owner = HandyControl.Controls.Window.GetWindow(this) };
+            var dialog = new VacuumEditDialog(null, true) { Owner = System.Windows.Window.GetWindow(this) };
             if (dialog.ShowDialog() == true && dialog.ResultEntity != null)
             {
                 var result = _vm.SaveVacuum(dialog.ResultEntity);
-                if (result.Success) { Growl.Success("真空保存成功"); await _vm.LoadVacuumsAsync(); _vm.RebuildUnifiedList(_currentTypeFilter); }
+                if (result.Success)
+                {
+                    await _vm.LoadVacuumsAsync();
+                    _vm.RebuildUnifiedList(_currentTypeFilter);
+                    TextBlockStatus.Text = $"真空已保存 - 共 {_vm.AllActuatorItems.Count} 条记录";
+                }
                 else Growl.Error($"真空保存失败: {result.Message}");
             }
         }
 
         private async void AddStackLight()
         {
-            var dialog = new StackLightEditDialog(null, true) { Owner = HandyControl.Controls.Window.GetWindow(this) };
+            var dialog = new StackLightEditDialog(null, true) { Owner = System.Windows.Window.GetWindow(this) };
             if (dialog.ShowDialog() == true && dialog.ResultEntity != null)
             {
                 var result = _vm.SaveStackLight(dialog.ResultEntity);
-                if (result.Success) { Growl.Success("灯塔保存成功"); await _vm.LoadStackLightsAsync(); _vm.RebuildUnifiedList(_currentTypeFilter); }
+                if (result.Success)
+                {
+                    await _vm.LoadStackLightsAsync();
+                    _vm.RebuildUnifiedList(_currentTypeFilter);
+                    TextBlockStatus.Text = $"灯塔已保存 - 共 {_vm.AllActuatorItems.Count} 条记录";
+                }
                 else Growl.Error($"灯塔保存失败: {result.Message}");
             }
         }
 
         private async void AddGripper()
         {
-            var dialog = new GripperEditDialog(null, true) { Owner = HandyControl.Controls.Window.GetWindow(this) };
+            var dialog = new GripperEditDialog(null, true) { Owner = System.Windows.Window.GetWindow(this) };
             if (dialog.ShowDialog() == true && dialog.ResultEntity != null)
             {
                 var result = _vm.SaveGripper(dialog.ResultEntity);
-                if (result.Success) { Growl.Success("夹爪保存成功"); await _vm.LoadGrippersAsync(); _vm.RebuildUnifiedList(_currentTypeFilter); }
+                if (result.Success)
+                {
+                    await _vm.LoadGrippersAsync();
+                    _vm.RebuildUnifiedList(_currentTypeFilter);
+                    TextBlockStatus.Text = $"夹爪已保存 - 共 {_vm.AllActuatorItems.Count} 条记录";
+                }
                 else Growl.Error($"夹爪保存失败: {result.Message}");
             }
         }
@@ -397,11 +378,17 @@ namespace AMControlWPF.Views.Config
         private async void EditCylinder(CylinderConfigEntity entity)
         {
             if (entity == null) return;
-            var dialog = new CylinderEditDialog(entity, false) { Owner = HandyControl.Controls.Window.GetWindow(this) };
+            var dialog = new CylinderEditDialog(entity, false) { Owner = System.Windows.Window.GetWindow(this) };
             if (dialog.ShowDialog() == true && dialog.ResultEntity != null)
             {
                 var result = _vm.SaveCylinder(dialog.ResultEntity);
-                if (result.Success) { Growl.Success("气缸更新成功"); await _vm.LoadCylindersAsync(); _vm.RebuildUnifiedList(_currentTypeFilter); RefreshDetailPanel(); }
+                if (result.Success)
+                {
+                    await _vm.LoadCylindersAsync();
+                    _vm.RebuildUnifiedList(_currentTypeFilter);
+                    RefreshDetailPanel();
+                    TextBlockStatus.Text = $"气缸已更新 - 共 {_vm.AllActuatorItems.Count} 条记录";
+                }
                 else Growl.Error($"气缸更新失败: {result.Message}");
             }
         }
@@ -409,11 +396,17 @@ namespace AMControlWPF.Views.Config
         private async void EditVacuum(VacuumConfigEntity entity)
         {
             if (entity == null) return;
-            var dialog = new VacuumEditDialog(entity, false) { Owner = HandyControl.Controls.Window.GetWindow(this) };
+            var dialog = new VacuumEditDialog(entity, false) { Owner = System.Windows.Window.GetWindow(this) };
             if (dialog.ShowDialog() == true && dialog.ResultEntity != null)
             {
                 var result = _vm.SaveVacuum(dialog.ResultEntity);
-                if (result.Success) { Growl.Success("真空更新成功"); await _vm.LoadVacuumsAsync(); _vm.RebuildUnifiedList(_currentTypeFilter); RefreshDetailPanel(); }
+                if (result.Success)
+                {
+                    await _vm.LoadVacuumsAsync();
+                    _vm.RebuildUnifiedList(_currentTypeFilter);
+                    RefreshDetailPanel();
+                    TextBlockStatus.Text = $"真空已更新 - 共 {_vm.AllActuatorItems.Count} 条记录";
+                }
                 else Growl.Error($"真空更新失败: {result.Message}");
             }
         }
@@ -421,11 +414,17 @@ namespace AMControlWPF.Views.Config
         private async void EditStackLight(StackLightConfigEntity entity)
         {
             if (entity == null) return;
-            var dialog = new StackLightEditDialog(entity, false) { Owner = HandyControl.Controls.Window.GetWindow(this) };
+            var dialog = new StackLightEditDialog(entity, false) { Owner = System.Windows.Window.GetWindow(this) };
             if (dialog.ShowDialog() == true && dialog.ResultEntity != null)
             {
                 var result = _vm.SaveStackLight(dialog.ResultEntity);
-                if (result.Success) { Growl.Success("灯塔更新成功"); await _vm.LoadStackLightsAsync(); _vm.RebuildUnifiedList(_currentTypeFilter); RefreshDetailPanel(); }
+                if (result.Success)
+                {
+                    await _vm.LoadStackLightsAsync();
+                    _vm.RebuildUnifiedList(_currentTypeFilter);
+                    RefreshDetailPanel();
+                    TextBlockStatus.Text = $"灯塔已更新 - 共 {_vm.AllActuatorItems.Count} 条记录";
+                }
                 else Growl.Error($"灯塔更新失败: {result.Message}");
             }
         }
@@ -433,11 +432,17 @@ namespace AMControlWPF.Views.Config
         private async void EditGripper(GripperConfigEntity entity)
         {
             if (entity == null) return;
-            var dialog = new GripperEditDialog(entity, false) { Owner = HandyControl.Controls.Window.GetWindow(this) };
+            var dialog = new GripperEditDialog(entity, false) { Owner = System.Windows.Window.GetWindow(this) };
             if (dialog.ShowDialog() == true && dialog.ResultEntity != null)
             {
                 var result = _vm.SaveGripper(dialog.ResultEntity);
-                if (result.Success) { Growl.Success("夹爪更新成功"); await _vm.LoadGrippersAsync(); _vm.RebuildUnifiedList(_currentTypeFilter); RefreshDetailPanel(); }
+                if (result.Success)
+                {
+                    await _vm.LoadGrippersAsync();
+                    _vm.RebuildUnifiedList(_currentTypeFilter);
+                    RefreshDetailPanel();
+                    TextBlockStatus.Text = $"夹爪已更新 - 共 {_vm.AllActuatorItems.Count} 条记录";
+                }
                 else Growl.Error($"夹爪更新失败: {result.Message}");
             }
         }
@@ -458,32 +463,19 @@ namespace AMControlWPF.Views.Config
             AM.Model.Common.Result result = null;
             switch (item.ActuatorType)
             {
-                case "Cylinder":
-                    result = _vm.DeleteCylinder(item.Name);
-                    if (result.Success) await _vm.LoadCylindersAsync();
-                    break;
-                case "Vacuum":
-                    result = _vm.DeleteVacuum(item.Name);
-                    if (result.Success) await _vm.LoadVacuumsAsync();
-                    break;
-                case "StackLight":
-                    result = _vm.DeleteStackLight(item.Name);
-                    if (result.Success) await _vm.LoadStackLightsAsync();
-                    break;
-                case "Gripper":
-                    result = _vm.DeleteGripper(item.Name);
-                    if (result.Success) await _vm.LoadGrippersAsync();
-                    break;
+                case "Cylinder":   result = _vm.DeleteCylinder(item.Name);   if (result.Success) await _vm.LoadCylindersAsync();   break;
+                case "Vacuum":     result = _vm.DeleteVacuum(item.Name);     if (result.Success) await _vm.LoadVacuumsAsync();     break;
+                case "StackLight": result = _vm.DeleteStackLight(item.Name); if (result.Success) await _vm.LoadStackLightsAsync(); break;
+                case "Gripper":    result = _vm.DeleteGripper(item.Name);    if (result.Success) await _vm.LoadGrippersAsync();    break;
             }
 
             if (result != null)
             {
                 if (result.Success)
                 {
-                    Growl.Success("删除成功");
                     _vm.SelectedActuatorItem = null;
                     _vm.RebuildUnifiedList(_currentTypeFilter);
-                    TextBlockStatus.Text = $"{GetFilterDisplayName(_currentTypeFilter)} - 共 {_vm.AllActuatorItems.Count} 条记录";
+                    TextBlockStatus.Text = $"已删除 - {GetFilterDisplayName(_currentTypeFilter)} 共 {_vm.AllActuatorItems.Count} 条记录";
                 }
                 else Growl.Error($"删除失败: {result.Message}");
             }
