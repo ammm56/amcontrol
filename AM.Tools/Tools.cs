@@ -1,219 +1,125 @@
 ﻿using AM.Core.Context;
+using AM.Core.Reporter;
 using AM.Model.Common;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Xml;
 
 namespace AM.Tools
 {
-    /// <summary>
-    /// 工具
-    /// 静态方法
-    /// </summary>
     public class Tools
     {
-        private static void ReportInfo(string message, string code = null)
-        {
-            SystemContext.Instance.Reporter?.Info("Tools", message, code);
-        }
-
-        private static void ReportWarn(string message, string code = null)
-        {
-            SystemContext.Instance.Reporter?.Warn("Tools", message, code);
-        }
-
-        private static void ReportError(string message, Exception ex = null, string code = null)
+        // 工具类 reporter 调用：成功不上报，警告/错误仅写日志，不推送 UI 消息
+        private static void LogWarn(string message, Exception ex = null)
         {
             if (ex == null)
-                SystemContext.Instance.Reporter?.Error("Tools", message, code);
+                SystemContext.Instance.Reporter?.Info("Tools", message, null, null, ReportChannels.Log);
             else
-                SystemContext.Instance.Reporter?.Error("Tools", ex, message, code);
+                SystemContext.Instance.Reporter?.Error("Tools", ex, message, null, null);
         }
+
+        private static void LogError(string message, Exception ex = null)
+        {
+            if (ex == null)
+                SystemContext.Instance.Reporter?.Error("Tools", message, (string)null);
+            else
+                SystemContext.Instance.Reporter?.Error("Tools", ex, message, (string)null);
+        }
+
+        // ── 时间/ID 工具（保持不变）───────────────────────────────────────
 
         public static string Guid(int len = 12)
         {
-            string res = System.Guid.NewGuid().ToString().Replace("-", "").Substring(0, len);
-            return res;
+            return System.Guid.NewGuid().ToString().Replace("-", "").Substring(0, len);
         }
 
-        public static string Now()
-        {
-            string res = DateTime.Now.ToString("yyyyMMddHHmmss");
-            return res;
-        }
-        public static string NowCommon()
-        {
-            string res = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            return res;
-        }
-        public static decimal NowNum()
-        {
-            return Convert.ToDecimal(DateTime.Now.ToString("yyyyMMddHHmmss"));
-        }
-        public static string NowFormat()
-        {
-            string res = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:fff");
-            return res;
-        }
+        public static string Now() { return DateTime.Now.ToString("yyyyMMddHHmmss"); }
+        public static string NowCommon() { return DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"); }
+        public static string NowFormat() { return DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:fff"); }
+        public static decimal NowNum() { return Convert.ToDecimal(DateTime.Now.ToString("yyyyMMddHHmmss")); }
 
+        // ── 配置读取 ──────────────────────────────────────────────────────
 
         /// <summary>
-        /// 读取配置文件
+        /// 读取配置文件，失败时自动尝试备份文件。
+        /// 成功返回 Result&lt;T&gt;，NotifyMode=Silent（配置读取静默，不推送 UI）。
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="configname"></param>
-        /// <returns></returns>
-        public static (bool, T) ReadConfig<T>(string configname)
+        public static Result<T> ReadConfig<T>(string configname)
         {
             try
             {
-                // 1. 获取基础目录
                 string baseDir = AppDomain.CurrentDomain.BaseDirectory;
                 string configFolder = Path.Combine(baseDir, "Configuration");
                 string filePath = Path.Combine(configFolder, configname);
 
-                T config = default(T);
-
-                // 2. 检查主配置文件是否存在
                 if (File.Exists(filePath))
                 {
-                    // 使用 File.ReadAllText 替代 StreamReader 可以更安全地处理文件流锁定
-                    string json = File.ReadAllText(filePath, Encoding.UTF8);
-                    config = JsonConvert.DeserializeObject<T>(json);
+                    var config = JsonConvert.DeserializeObject<T>(File.ReadAllText(filePath, Encoding.UTF8));
+                    return Result<T>.OkItem(config).WithNotifyMode(ResultNotifyMode.Silent);
                 }
-                else
+
+                string bakName = Path.GetFileNameWithoutExtension(configname) + "_bak.json";
+                string filePathBak = Path.Combine(configFolder, bakName);
+
+                if (File.Exists(filePathBak))
                 {
-                    // 3. 尝试读取备份文件逻辑
-                    // 使用 Path 库处理文件名，比 Substring 更健壮
-                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(configname);
-                    string confignamebak = fileNameWithoutExt + "_bak.json";
-                    string filePathBak = Path.Combine(configFolder, confignamebak);
-
-                    if (File.Exists(filePathBak))
-                    {
-                        string json = File.ReadAllText(filePathBak, Encoding.UTF8);
-                        config = JsonConvert.DeserializeObject<T>(json);
-                        ReportWarn("主配置不存在，已回退到备份配置：" + configname);
-                    }
-                    else
-                    {
-                        // 如果主文件和备份都不存在，返回失败
-                        ReportWarn("配置文件不存在：" + configname);
-                        return (false, default(T));
-                    }
+                    LogWarn("主配置不存在，已回退到备份配置：" + configname);
+                    var config = JsonConvert.DeserializeObject<T>(File.ReadAllText(filePathBak, Encoding.UTF8));
+                    return Result<T>.OkItem(config).WithNotifyMode(ResultNotifyMode.Silent);
                 }
 
-                return (true, config);
+                LogWarn("配置文件不存在：" + configname);
+                return Result<T>.Fail(-1, "配置文件不存在：" + configname);
             }
             catch (Exception ex)
             {
-                ReportError("ReadConfig failed: " + configname, ex);
-                return (false, default(T));
+                LogError("ReadConfig failed: " + configname, ex);
+                return Result<T>.Fail(-1, "读取配置文件失败：" + configname);
             }
         }
 
-        /// <summary>
-        /// 保存设置参数配置文件
-        /// </summary>
-        /// <param name="settingArgsConfig"></param>
-        /// <returns></returns>
-        public static (bool, string) SaveSettingArgsConfig(SettingArgsConfig settingArgsConfig)
-        {
-            try
-            {
-                // 1. 使用 AppDomain 获取根目录，并用 Path.Combine 安全拼接
-                string configDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configuration");
-                string filePath = Path.Combine(configDir, "settingargsconfig.json");
-                string filePathBak = Path.Combine(configDir, "settingargsconfig_bak.json");
-
-                // 2. 确保配置目录存在
-                if (!Directory.Exists(configDir))
-                {
-                    Directory.CreateDirectory(configDir);
-                }
-
-                // 3. 备份逻辑优化
-                if (File.Exists(filePath))
-                {
-                    // 如果备份文件已存在，先删除（File.Move 不支持覆盖）
-                    if (File.Exists(filePathBak))
-                    {
-                        File.Delete(filePathBak);
-                    }
-                    // 移动当前文件到备份
-                    File.Move(filePath, filePathBak);
-                }
-
-                // 4. 序列化并写入 (使用简化的 File.WriteAllText)
-                // Formatting.Indented 对应 .NET Core 的 WriteIndented = true
-                string jsonContent = JsonConvert.SerializeObject(settingArgsConfig, Newtonsoft.Json.Formatting.Indented);
-
-                // WriteAllText 会自动创建文件、写入 UTF-8 并在完成后关闭连接
-                File.WriteAllText(filePath, jsonContent, Encoding.UTF8);
-
-                ReportInfo("SaveSettingArgsConfig success");
-                return (true, "OK");
-            }
-            catch (Exception ex)
-            {
-                ReportError("SaveSettingArgsConfig failed", ex);
-                return (false, $"Tools SaveSettingArgsConfig ex: {ex.Message}");
-            }
-        }
+        // ── 配置保存 ──────────────────────────────────────────────────────
 
         /// <summary>
-        /// 保存配置
+        /// 保存配置文件（含备份）。
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="configname"></param>
-        /// <param name="config"></param>
-        /// <returns></returns>
-        public static (bool, string) SaveConfig<T>(string configname, T config)
+        public static Result SaveConfig<T>(string configname, T config)
         {
             try
             {
                 string configDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configuration");
                 string filePath = Path.Combine(configDir, configname);
-
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(configname);
-                string filePathBak = Path.Combine(configDir, fileNameWithoutExt + "_bak.json");
+                string filePathBak = Path.Combine(configDir,
+                    Path.GetFileNameWithoutExtension(configname) + "_bak.json");
 
                 if (!Directory.Exists(configDir))
-                {
                     Directory.CreateDirectory(configDir);
-                }
 
                 if (File.Exists(filePath))
                 {
-                    if (File.Exists(filePathBak))
-                    {
-                        File.Delete(filePathBak);
-                    }
-
+                    if (File.Exists(filePathBak)) File.Delete(filePathBak);
                     File.Move(filePath, filePathBak);
                 }
 
-                string jsonContent = JsonConvert.SerializeObject(config, Newtonsoft.Json.Formatting.Indented);
-                File.WriteAllText(filePath, jsonContent, Encoding.UTF8);
+                File.WriteAllText(filePath,
+                    JsonConvert.SerializeObject(config, Formatting.Indented), Encoding.UTF8);
 
-                ReportInfo("SaveConfig success: " + configname);
-                return (true, "OK");
+                return Result.Ok("SaveConfig OK").WithNotifyMode(ResultNotifyMode.Silent);
             }
             catch (Exception ex)
             {
-                ReportError("SaveConfig failed: " + configname, ex);
-                return (false, $"Tools SaveConfig ex: {ex.Message}");
+                LogError("SaveConfig failed: " + configname, ex);
+                return Result.Fail(-1, "保存配置文件失败：" + configname);
             }
         }
+
+        /// <summary>
+        /// 保存 SettingArgsConfig 配置文件。
+        /// </summary>
+        public static Result SaveSettingArgsConfig(SettingArgsConfig settingArgsConfig)
+        {
+            return SaveConfig("settingargsconfig.json", settingArgsConfig);
+        }
     }
-
-    
-
-
 }

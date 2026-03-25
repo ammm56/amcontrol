@@ -33,7 +33,7 @@ namespace AM.App.Bootstrap
         {
             // 1. 初始化基础配置上下文（仅基础参数，不含设备拓扑）
             var configResult = AM.Tools.Tools.ReadConfig<Config>("config.json");
-            var config = configResult.Item1 ? configResult.Item2 : new Config();
+            var config = configResult.Success ? configResult.Item : new Config();
             ConfigContext.Instance.Initialize(config);
 
             // 2. 构造系统基础设施
