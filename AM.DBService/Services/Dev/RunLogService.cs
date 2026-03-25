@@ -1,5 +1,5 @@
 ﻿using AM.Model.Common;
-using AM.Model.Dev;
+using AM.Model.Model;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -64,13 +64,13 @@ namespace AM.DBService.Services.Dev
         /// </summary>
         /// <param name="filePath">日志文件完整路径。</param>
         /// <param name="maxLines">最大读取行数，默认 5000。</param>
-        public Result<LogEntry> ReadFile(string filePath, int maxLines = 5000)
+        public Result<LogModel> ReadFile(string filePath, int maxLines = 5000)
         {
             try
             {
                 if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
                 {
-                    return Result<LogEntry>.Fail(-1, "日志文件不存在: " + filePath);
+                    return Result<LogModel>.Fail(-1, "日志文件不存在: " + filePath);
                 }
 
                 var allLines = new List<string>();
@@ -91,7 +91,7 @@ namespace AM.DBService.Services.Dev
 
                 linesToProcess.Reverse();
 
-                var entries = new List<LogEntry>();
+                var entries = new List<LogModel>();
                 for (int i = 0; i < linesToProcess.Count; i++)
                 {
                     var entry = ParseLine(linesToProcess[i]);
@@ -99,32 +99,32 @@ namespace AM.DBService.Services.Dev
                     entries.Add(entry);
                 }
 
-                return Result<LogEntry>.OkList(entries, "日志文件读取成功")
+                return Result<LogModel>.OkList(entries, "日志文件读取成功")
                     .WithNotifyMode(ResultNotifyMode.Silent);
             }
             catch (Exception ex)
             {
-                return Result<LogEntry>.Fail(-1, "日志文件读取失败: " + ex.Message);
+                return Result<LogModel>.Fail(-1, "日志文件读取失败: " + ex.Message);
             }
         }
 
-        private LogEntry ParseLine(string line)
+        private LogModel ParseLine(string line)
         {
             if (string.IsNullOrWhiteSpace(line))
             {
-                return new LogEntry { RawLine = line ?? string.Empty, IsParsed = false };
+                return new LogModel { RawLine = line ?? string.Empty, IsParsed = false };
             }
 
             var parts = line.Split(new[] { '|' }, 4);
             if (parts.Length < 4)
             {
-                return new LogEntry { RawLine = line, Message = line, IsParsed = false };
+                return new LogModel { RawLine = line, Message = line, IsParsed = false };
             }
 
             DateTime time;
             var parsed = DateTime.TryParse(parts[0].Trim(), out time);
 
-            return new LogEntry
+            return new LogModel
             {
                 Time = parsed ? time : (DateTime?)null,
                 Level = parts[1].Trim(),

@@ -1,5 +1,5 @@
 ﻿using AM.DBService.Services.Dev;
-using AM.Model.Dev;
+using AM.Model.Model;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
@@ -21,7 +21,7 @@ namespace AM.ViewModel.ViewModels.Alarm
         private RunLogService.LogFileInfo _selectedLogFile;
         private string _selectedLevel;
         private string _searchText;
-        private LogEntry _selectedEntry;
+        private LogModel _selectedEntry;
         private int _pageIndex;
         private int _totalPages;
         private int _totalCount;
@@ -29,14 +29,14 @@ namespace AM.ViewModel.ViewModels.Alarm
         private string _jumpPageText;
         private bool _isLoading;
 
-        private IReadOnlyList<LogEntry> _allEntries = new List<LogEntry>();
+        private IReadOnlyList<LogModel> _allEntries = new List<LogModel>();
 
         public RunLogViewModel()
         {
             _logService = new RunLogService();
 
             LogFiles = new ObservableCollection<RunLogService.LogFileInfo>();
-            Entries = new ObservableCollection<LogEntry>();
+            Entries = new ObservableCollection<LogModel>();
             Levels = new ObservableCollection<string>();
             PageSizes = new ObservableCollection<int>();
 
@@ -67,7 +67,7 @@ namespace AM.ViewModel.ViewModels.Alarm
         }
 
         public ObservableCollection<RunLogService.LogFileInfo> LogFiles { get; private set; }
-        public ObservableCollection<LogEntry> Entries { get; private set; }
+        public ObservableCollection<LogModel> Entries { get; private set; }
         public ObservableCollection<string> Levels { get; private set; }
         public ObservableCollection<int> PageSizes { get; private set; }
 
@@ -115,7 +115,7 @@ namespace AM.ViewModel.ViewModels.Alarm
             }
         }
 
-        public LogEntry SelectedEntry
+        public LogModel SelectedEntry
         {
             get { return _selectedEntry; }
             set { SetProperty(ref _selectedEntry, value); }
@@ -203,7 +203,7 @@ namespace AM.ViewModel.ViewModels.Alarm
                 var result = await Task.Run(() => _logService.ReadFile(_selectedLogFile.FilePath));
                 _allEntries = result.Success && result.Items != null
                     ? result.Items
-                    : new List<LogEntry>();
+                    : new List<LogModel>();
             }
             finally
             {
@@ -215,7 +215,7 @@ namespace AM.ViewModel.ViewModels.Alarm
 
         private void ApplyFiltersAndPaginate()
         {
-            IEnumerable<LogEntry> filtered = _allEntries;
+            IEnumerable<LogModel> filtered = _allEntries;
 
             if (!string.IsNullOrEmpty(SelectedLevel) && SelectedLevel != "全部")
             {

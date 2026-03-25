@@ -1,11 +1,11 @@
 ﻿using System;
 
-namespace AM.Model.Dev
+namespace AM.Model.Model
 {
     /// <summary>
     /// 运行日志条目（从 NLog 日志文件逐行解析得到）。
     /// </summary>
-    public class LogEntry
+    public class LogModel
     {
         /// <summary>在文件中的行号（从 1 开始）。</summary>
         public int LineNumber { get; set; }
