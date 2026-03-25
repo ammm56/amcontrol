@@ -56,10 +56,10 @@
     <Compile Include="DBase\IDBContext.cs" />
     <Compile Include="Mappers\MotionAxisConfigMapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Services\AlarmRecordService.cs" />
     <Compile Include="Services\Auth\AuthPermissionCatalog.cs" />
     <Compile Include="Services\Auth\AuthSeedService.cs" />
     <Compile Include="Services\Auth\AuthService.cs" />
+    <Compile Include="Services\Dev\DevAlarmRecordService.cs" />
     <Compile Include="Services\MachineConfigRepository.cs" />
     <Compile Include="Services\MotionAxisConfigOverlayService.cs" />
     <Compile Include="Services\MotionAxisConfigService.cs" />

@@ -5,6 +5,7 @@ using AM.Core.Messaging;
 using AM.Core.Reporter;
 using AM.DBService.Services;
 using AM.DBService.Services.Auth;
+using AM.DBService.Services.Dev;
 using AM.DBService.Services.Motion.App;
 using AM.DBService.Services.Runtime;
 using AM.Model.Common;
@@ -17,6 +18,7 @@ using AM.MotionService.Hub;
 using AM.Tools.Logging;
 using AM.Tools.Messaging;
 using AM.Tools.Reporter;
+using System.Linq;
 
 namespace AM.App.Bootstrap
 {
@@ -28,6 +30,7 @@ namespace AM.App.Bootstrap
     {
         /// <summary>
         /// 初始化应用运行环境。
+        /// 启动顺序：基础设施 → DB种子 → 配置重载 → 硬件连接 → 后台扫描
         /// </summary>
         public static void Initialize()
         {
@@ -41,9 +44,8 @@ namespace AM.App.Bootstrap
             IMessageBus messageBus = new MessageBusToolkit();
             IErrorCatalog errorCatalog = new JsonErrorCatalog();
 
-            // 数据库未启用时先不记录报警
-            IAlarmRecord alarmRecord = new NullAlarmRecordService();
-            // IAlarmRecord alarmRecord = new AlarmRecordService();
+            // 报警持久化：使用 DevAlarmRecordService，不走 reporter 避免循环调用
+            IAlarmRecord alarmRecord = new DevAlarmRecordService(); 
 
             AlarmManager alarmManager = new AlarmManager(messageBus, logger, alarmRecord);
             IAppReporter reporter = new AppReporter(messageBus, logger, alarmManager, errorCatalog);
@@ -52,64 +54,109 @@ namespace AM.App.Bootstrap
             IRuntimeTaskManager runtimeTaskManager = new RuntimeTaskManager(reporter);
             SystemContext.Instance.Initialize(logger, messageBus, alarmManager, errorCatalog, reporter, runtimeTaskManager);
 
-            // 4. 初始化认证相关表与默认管理员
+            // 4. 初始化认证相关表与默认管理员账号
             var authSeedService = new AuthSeedService(reporter);
             authSeedService.EnsureSeedData();
 
-            // 5. 初始化运动配置种子
+            // 5. 初始化运动配置种子数据
             var machineConfigSeedService = new MachineConfigSeedService(reporter);
             var seedResult = machineConfigSeedService.EnsureSeedData();
             if (!seedResult.Success)
             {
-                SystemContext.Instance.Reporter.Error(
-                    "AppBootstrap",
-                    "默认运动配置种子初始化失败，应用启动终止",
-                    seedResult.Code);
+                reporter.Error("AppBootstrap", "默认运动配置种子初始化失败，应用启动终止", seedResult.Code);
                 return;
             }
 
-            // 6. 从数据库加载完整设备配置
+            // 6. 从数据库加载完整设备配置并重建 MachineContext
+            //    完成后 MachineContext 中已有所有控制卡服务实例、轴/DI/DO 映射、执行器配置
+            //    但控制卡尚未物理连接
             var reloadService = new MachineConfigReloadService();
             var reloadResult = reloadService.ReloadAndRebuild();
             if (!reloadResult.Success)
             {
-                SystemContext.Instance.Reporter.Error(
-                    "AppBootstrap",
-                    "数据库运动控制配置加载或设备上下文重建失败，应用启动终止",
-                    reloadResult.Code);
+                reporter.Error("AppBootstrap", "数据库运动控制配置加载或设备上下文重建失败，应用启动终止", reloadResult.Code);
                 return;
             }
-            SystemContext.Instance.Reporter.Info("AppBootstrap", "数据库运动控制配置加载并完成设备上下文重建");
+            reporter.Info("AppBootstrap", "数据库运动控制配置加载并完成设备上下文重建");
 
-            // 7. 注册后台工作单元
-            //    Register(worker, autoStart) 统一管理注册与条件启动
-            //    注册失败 → 致命错误，终止启动
-            //    自动启动失败 → 内部 Warn，非致命，可后续手动启动
+            // 7. 建立硬件连接（必须在 IoScanWorker 注册前完成，确保 autoStart 时卡已就绪）
+            var machineResult = InitializeMachine();
+            if (!machineResult.Success)
+            {
+                reporter.Error("AppBootstrap", "硬件初始化失败，应用启动终止", machineResult.Code);
+                return;
+            }
+
+            // 8. 注册后台工作单元（此时控制卡已连接，autoStart 扫描安全）
             var ioScanConfig = config.IoScanConfig;
             var ioScanWorker = new IoScanWorker(reporter, ioScanConfig.ScanIntervalMs);
             var registerResult = runtimeTaskManager.Register(ioScanWorker, ioScanConfig.AutoStart);
             if (!registerResult.Success)
             {
-                SystemContext.Instance.Reporter.Error(
-                    "AppBootstrap",
-                    "IO 扫描工作单元注册失败，应用启动终止",
-                    registerResult.Code);
+                reporter.Error("AppBootstrap", "IO 扫描工作单元注册失败，应用启动终止", registerResult.Code);
                 return;
             }
 
-            // 8. 初始化硬件
-            InitializeMachine();
+            reporter.Info("AppBootstrap", "应用启动完成");
         }
 
 
         /// <summary>
-        /// 初始化硬件
+        /// 按 InitOrder 顺序依次 Initialize + Connect 所有已注册控制卡。
+        ///
+        /// 前置条件：MachineConfigReloadService.ReloadAndRebuild() 已调用，
+        ///   MachineContext.MotionCards 已按配置创建好控制卡服务实例。
+        /// 任意一张卡失败则立即终止，不尝试其余卡。
         /// </summary>
-        private static void InitializeMachine()
+        private static Result InitializeMachine()
         {
+            var machine = MachineContext.Instance;
+            var reporter = SystemContext.Instance.Reporter;
+            var cardConfigs = ConfigContext.Instance.Config.MotionCardsConfig;
 
+            if (machine.MotionCards.Count == 0)
+            {
+                reporter?.Info("AppBootstrap", "当前无运动控制卡注册，跳过硬件初始化");
+                return Result.Ok("无运动控制卡，跳过硬件初始化");
+            }
+
+            // 按 InitOrder 升序处理，多卡场景下确保初始化顺序可控
+            var ordered = cardConfigs
+                .Where(c => c != null && machine.MotionCards.ContainsKey(c.CardId))
+                .OrderBy(c => c.InitOrder)
+                .ToList();
+
+            foreach (var cfg in ordered)
+            {
+                var card = machine.MotionCards[cfg.CardId];
+                string label = string.Format("CardId={0} ({1})", cfg.CardId, cfg.DisplayName ?? cfg.Name);
+
+                // 驱动层初始化（厂商卡加载底层驱动；虚拟卡为空操作）
+                var initResult = card.Initialize(null);
+                if (!initResult.Success)
+                {
+                    reporter?.Error("AppBootstrap",
+                        string.Format("控制卡 {0} 驱动初始化失败: {1}", label, initResult.Message),
+                        initResult.Code);
+                    return initResult;
+                }
+
+                // 建立物理连接（虚拟卡：内存中创建轴状态并标记已连接）
+                var connectResult = card.Connect();
+                if (!connectResult.Success)
+                {
+                    reporter?.Error("AppBootstrap",
+                        string.Format("控制卡 {0} 连接失败: {1}", label, connectResult.Message),
+                        connectResult.Code);
+                    return connectResult;
+                }
+
+                reporter?.Info("AppBootstrap", string.Format("控制卡 {0} 连接成功", label));
+            }
+
+            reporter?.Info("AppBootstrap",
+                string.Format("全部 {0} 张控制卡初始化完成", ordered.Count));
+            return Result.Ok("所有控制卡初始化成功");
         }
-
-        
     }
 }

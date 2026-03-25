@@ -60,13 +60,13 @@
     <Compile Include="Common\ErrorDescriptor.cs" />
     <Compile Include="Common\IoScanState.cs" />
     <Compile Include="Common\ResultSource.cs" />
-    <Compile Include="Entity\AlarmRecord.cs" />
     <Compile Include="Entity\Auth\SysLoginLogEntity.cs" />
     <Compile Include="Entity\Auth\SysPagePermissionEntity.cs" />
     <Compile Include="Entity\Auth\SysRoleEntity.cs" />
     <Compile Include="Entity\Auth\SysUserEntity.cs" />
     <Compile Include="Entity\Auth\SysUserPagePermissionEntity.cs" />
     <Compile Include="Entity\Auth\SysUserRoleEntity.cs" />
+    <Compile Include="Entity\Dev\DevAlarmRecordEntity.cs" />
     <Compile Include="Entity\Motion\Actuator\CylinderConfigEntity.cs" />
     <Compile Include="Entity\Motion\Actuator\GripperConfigEntity.cs" />
     <Compile Include="Entity\Motion\Actuator\StackLightConfigEntity.cs" />
@@ -122,7 +122,6 @@
     <Compile Include="Structs\AxisStatus.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Entity\Alarm\" />
     <Folder Include="Entity\Plc\" />
     <Folder Include="Entity\Vision\" />
   </ItemGroup>
