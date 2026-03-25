@@ -6,8 +6,7 @@
                xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                mc:Ignorable="d"
                Title="气缸配置"
-               Width="520"
-               Height="720"
+               Width="520" Height="720"
                ResizeMode="NoResize"
                ShowNonClientArea="False"
                WindowStartupLocation="CenterOwner"
@@ -27,34 +26,20 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
-                    <!-- 标题栏 -->
-                    <Border Grid.Row="0"
-                            Padding="20,16"
-                            CornerRadius="14,14,0,0"
+                    <Border Grid.Row="0" Padding="20,16" CornerRadius="14,14,0,0"
                             Background="{DynamicResource SecondaryRegionBrush}"
-                            BorderBrush="{DynamicResource BorderBrush}"
-                            BorderThickness="0,0,0,1">
-                        <TextBlock x:Name="TextBlockTitle"
-                                   FontSize="18"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource PrimaryTextBrush}"
-                                   Text="新增气缸" />
+                            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
+                        <TextBlock x:Name="TextBlockTitle" FontSize="18" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource PrimaryTextBrush}" Text="新增气缸" />
                     </Border>
 
-                    <!-- 表单区 -->
-                    <ScrollViewer Grid.Row="1"
-                                  Padding="20,12,20,8"
-                                  VerticalScrollBarVisibility="Auto"
-                                  HorizontalScrollBarVisibility="Disabled">
+                    <ScrollViewer Grid.Row="1" Padding="20,12,20,8"
+                                  VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                         <StackPanel>
 
                             <!-- ── 基础标识 ── -->
-                            <TextBlock Margin="0,0,0,8"
-                                       FontSize="11"
-                                       FontWeight="SemiBold"
-                                       Opacity="0.5"
-                                       Foreground="{DynamicResource PrimaryTextBrush}"
-                                       Text="基础标识" />
+                            <TextBlock Margin="0,0,0,8" FontSize="11" FontWeight="SemiBold" Opacity="0.5"
+                                       Foreground="{DynamicResource PrimaryTextBrush}" Text="基础标识" />
 
                             <TextBlock Margin="0,0,0,4" Foreground="{DynamicResource PrimaryTextBrush}" Text="内部名称 *" />
                             <TextBox x:Name="TextBoxName" Height="36" VerticalContentAlignment="Center" MaxLength="64" />
@@ -70,12 +55,9 @@
 
                             <!-- ── IO 映射 ── -->
                             <Rectangle Height="1" Margin="0,14,0,10" Fill="{DynamicResource BorderBrush}" Opacity="0.5" />
-                            <TextBlock Margin="0,0,0,8"
-                                       FontSize="11"
-                                       FontWeight="SemiBold"
-                                       Opacity="0.5"
+                            <TextBlock Margin="0,0,0,8" FontSize="11" FontWeight="SemiBold" Opacity="0.5"
                                        Foreground="{DynamicResource PrimaryTextBrush}"
-                                       Text="IO 映射（填写 motion_io_map 中的逻辑位号，空白=不使用）" />
+                                       Text="IO 映射（从已配置 IO 点位中选择，不使用请选「── 不配置 ──」）" />
 
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -85,11 +67,11 @@
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
                                     <TextBlock Margin="0,0,0,4" Foreground="{DynamicResource PrimaryTextBrush}" Text="伸出输出位 (DO) *" />
-                                    <TextBox x:Name="TextBoxExtendOutputBit" Height="36" VerticalContentAlignment="Center" MaxLength="6" />
+                                    <ComboBox x:Name="CbExtendOutputBit" Height="36" />
                                 </StackPanel>
                                 <StackPanel Grid.Column="2">
                                     <TextBlock Margin="0,0,0,4" Foreground="{DynamicResource PrimaryTextBrush}" Text="缩回输出位 (DO)" />
-                                    <TextBox x:Name="TextBoxRetractOutputBit" Height="36" VerticalContentAlignment="Center" MaxLength="6" />
+                                    <ComboBox x:Name="CbRetractOutputBit" Height="36" />
                                 </StackPanel>
                             </Grid>
 
@@ -101,22 +83,18 @@
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
                                     <TextBlock Margin="0,0,0,4" Foreground="{DynamicResource PrimaryTextBrush}" Text="伸出反馈位 (DI)" />
-                                    <TextBox x:Name="TextBoxExtendFeedbackBit" Height="36" VerticalContentAlignment="Center" MaxLength="6" />
+                                    <ComboBox x:Name="CbExtendFeedbackBit" Height="36" />
                                 </StackPanel>
                                 <StackPanel Grid.Column="2">
                                     <TextBlock Margin="0,0,0,4" Foreground="{DynamicResource PrimaryTextBrush}" Text="缩回反馈位 (DI)" />
-                                    <TextBox x:Name="TextBoxRetractFeedbackBit" Height="36" VerticalContentAlignment="Center" MaxLength="6" />
+                                    <ComboBox x:Name="CbRetractFeedbackBit" Height="36" />
                                 </StackPanel>
                             </Grid>
 
                             <!-- ── 控制参数 ── -->
                             <Rectangle Height="1" Margin="0,14,0,10" Fill="{DynamicResource BorderBrush}" Opacity="0.5" />
-                            <TextBlock Margin="0,0,0,8"
-                                       FontSize="11"
-                                       FontWeight="SemiBold"
-                                       Opacity="0.5"
-                                       Foreground="{DynamicResource PrimaryTextBrush}"
-                                       Text="控制参数" />
+                            <TextBlock Margin="0,0,0,8" FontSize="11" FontWeight="SemiBold" Opacity="0.5"
+                                       Foreground="{DynamicResource PrimaryTextBrush}" Text="控制参数" />
 
                             <CheckBox x:Name="CheckBoxUseFeedbackCheck" Margin="0,0,0,10" Content="启用反馈校验" />
 
@@ -138,12 +116,8 @@
 
                             <!-- ── 高级设置 ── -->
                             <Rectangle Height="1" Margin="0,14,0,10" Fill="{DynamicResource BorderBrush}" Opacity="0.5" />
-                            <TextBlock Margin="0,0,0,8"
-                                       FontSize="11"
-                                       FontWeight="SemiBold"
-                                       Opacity="0.5"
-                                       Foreground="{DynamicResource PrimaryTextBrush}"
-                                       Text="高级设置" />
+                            <TextBlock Margin="0,0,0,8" FontSize="11" FontWeight="SemiBold" Opacity="0.5"
+                                       Foreground="{DynamicResource PrimaryTextBrush}" Text="高级设置" />
 
                             <CheckBox x:Name="CheckBoxAllowBothOff" Margin="0,0,0,6" Content="允许双输出同时关闭（AllowBothOff）" />
                             <CheckBox x:Name="CheckBoxAllowBothOn" Margin="0,0,0,10" Content="允许双输出同时导通（AllowBothOn，一般禁用）" />
@@ -174,33 +148,20 @@
                         </StackPanel>
                     </ScrollViewer>
 
-                    <!-- 页脚 -->
-                    <Border Grid.Row="2"
-                            Padding="20,12"
-                            CornerRadius="0,0,14,14"
+                    <Border Grid.Row="2" Padding="20,12" CornerRadius="0,0,14,14"
                             Background="{DynamicResource SecondaryRegionBrush}"
-                            BorderBrush="{DynamicResource BorderBrush}"
-                            BorderThickness="0,1,0,0">
+                            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
-                            <TextBlock x:Name="TextBlockError"
-                                       Grid.Row="0"
-                                       Margin="0,0,0,8"
+                            <TextBlock x:Name="TextBlockError" Grid.Row="0" Margin="0,0,0,8"
                                        Foreground="{DynamicResource DangerBrush}"
-                                       TextWrapping="Wrap"
-                                       Visibility="Collapsed" />
+                                       TextWrapping="Wrap" Visibility="Collapsed" />
                             <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                                <Button MinWidth="80"
-                                        Margin="0,0,8,0"
-                                        Click="ButtonCancel_OnClick"
-                                        Content="取消" />
-                                <Button MinWidth="80"
-                                        Style="{StaticResource ButtonSuccess}"
-                                        Click="ButtonSave_OnClick"
-                                        Content="保存" />
+                                <Button MinWidth="80" Margin="0,0,8,0" Click="ButtonCancel_OnClick" Content="取消" />
+                                <Button MinWidth="80" Style="{StaticResource ButtonSuccess}" Click="ButtonSave_OnClick" Content="保存" />
                             </StackPanel>
                         </Grid>
                     </Border>

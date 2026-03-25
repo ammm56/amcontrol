@@ -1,6 +1,6 @@
 ﻿using AM.Model.Entity.Motion.Actuator;
+using AMControlWPF.Helpers;
 using System.Windows;
-using System.Windows.Controls;
 
 namespace AMControlWPF.Views.Config
 {
@@ -21,25 +21,28 @@ namespace AMControlWPF.Views.Config
 
             TextBoxName.Text = e.Name ?? string.Empty;
             TextBoxName.IsReadOnly = !isAdd;
-            TextBoxName.Opacity = isAdd ? 1.0 : 0.6;
+            TextBoxName.Opacity    = isAdd ? 1.0 : 0.6;
 
             TextBoxDisplayName.Text = e.DisplayName ?? string.Empty;
 
-            TextBoxRedOutputBit.Text = e.RedOutputBit.HasValue ? e.RedOutputBit.Value.ToString() : string.Empty;
-            TextBoxYellowOutputBit.Text = e.YellowOutputBit.HasValue ? e.YellowOutputBit.Value.ToString() : string.Empty;
-            TextBoxGreenOutputBit.Text = e.GreenOutputBit.HasValue ? e.GreenOutputBit.Value.ToString() : string.Empty;
-            TextBoxBlueOutputBit.Text = e.BlueOutputBit.HasValue ? e.BlueOutputBit.Value.ToString() : string.Empty;
-            TextBoxBuzzerOutputBit.Text = e.BuzzerOutputBit.HasValue ? e.BuzzerOutputBit.Value.ToString() : string.Empty;
+            // 加载 IO 映射并绑定下拉列表（灯塔全为 DO 可空点位）
+            var allIo      = IoDialogHelper.LoadAll();
+            var doOptional = IoDialogHelper.BuildItems(allIo, "DO", nullable: true);
+
+            IoDialogHelper.Apply(CbRedOutputBit,    doOptional, e.RedOutputBit);
+            IoDialogHelper.Apply(CbYellowOutputBit, doOptional, e.YellowOutputBit);
+            IoDialogHelper.Apply(CbGreenOutputBit,  doOptional, e.GreenOutputBit);
+            IoDialogHelper.Apply(CbBlueOutputBit,   doOptional, e.BlueOutputBit);
+            IoDialogHelper.Apply(CbBuzzerOutputBit, doOptional, e.BuzzerOutputBit);
 
             CheckBoxEnableBuzzerOnWarning.IsChecked = e.EnableBuzzerOnWarning;
-            CheckBoxEnableBuzzerOnAlarm.IsChecked = e.EnableBuzzerOnAlarm;
-            CheckBoxAllowMultiSegmentOn.IsChecked = e.AllowMultiSegmentOn;
+            CheckBoxEnableBuzzerOnAlarm.IsChecked   = e.EnableBuzzerOnAlarm;
+            CheckBoxAllowMultiSegmentOn.IsChecked   = e.AllowMultiSegmentOn;
 
-            TextBoxSortOrder.Text = e.SortOrder.ToString();
+            TextBoxSortOrder.Text       = e.SortOrder.ToString();
             CheckBoxIsEnabled.IsChecked = e.IsEnabled;
-
-            TextBoxDescription.Text = e.Description ?? string.Empty;
-            TextBoxRemark.Text = e.Remark ?? string.Empty;
+            TextBoxDescription.Text     = e.Description ?? string.Empty;
+            TextBoxRemark.Text          = e.Remark      ?? string.Empty;
         }
 
         private void ButtonSave_OnClick(object sender, RoutedEventArgs e)
@@ -53,47 +56,36 @@ namespace AMControlWPF.Views.Config
                 return;
             }
 
-            int sortOrder;
-            int.TryParse(TextBoxSortOrder.Text.Trim(), out sortOrder);
+            int sortOrder; int.TryParse(TextBoxSortOrder.Text.Trim(), out sortOrder);
 
             ResultEntity = new StackLightConfigEntity
             {
-                Id = _originalId,
-                Name = name,
-                DisplayName = (TextBoxDisplayName.Text ?? string.Empty).Trim(),
-                RedOutputBit = ParseNullableShort(TextBoxRedOutputBit.Text),
-                YellowOutputBit = ParseNullableShort(TextBoxYellowOutputBit.Text),
-                GreenOutputBit = ParseNullableShort(TextBoxGreenOutputBit.Text),
-                BlueOutputBit = ParseNullableShort(TextBoxBlueOutputBit.Text),
-                BuzzerOutputBit = ParseNullableShort(TextBoxBuzzerOutputBit.Text),
+                Id                    = _originalId,
+                Name                  = name,
+                DisplayName           = (TextBoxDisplayName.Text ?? string.Empty).Trim(),
+                RedOutputBit          = IoDialogHelper.GetValue(CbRedOutputBit),
+                YellowOutputBit       = IoDialogHelper.GetValue(CbYellowOutputBit),
+                GreenOutputBit        = IoDialogHelper.GetValue(CbGreenOutputBit),
+                BlueOutputBit         = IoDialogHelper.GetValue(CbBlueOutputBit),
+                BuzzerOutputBit       = IoDialogHelper.GetValue(CbBuzzerOutputBit),
                 EnableBuzzerOnWarning = CheckBoxEnableBuzzerOnWarning.IsChecked == true,
-                EnableBuzzerOnAlarm = CheckBoxEnableBuzzerOnAlarm.IsChecked == true,
-                AllowMultiSegmentOn = CheckBoxAllowMultiSegmentOn.IsChecked == true,
-                IsEnabled = CheckBoxIsEnabled.IsChecked == true,
-                SortOrder = sortOrder,
-                Description = (TextBoxDescription.Text ?? string.Empty).Trim(),
-                Remark = (TextBoxRemark.Text ?? string.Empty).Trim()
+                EnableBuzzerOnAlarm   = CheckBoxEnableBuzzerOnAlarm.IsChecked   == true,
+                AllowMultiSegmentOn   = CheckBoxAllowMultiSegmentOn.IsChecked   == true,
+                IsEnabled             = CheckBoxIsEnabled.IsChecked == true,
+                SortOrder             = sortOrder,
+                Description           = (TextBoxDescription.Text ?? string.Empty).Trim(),
+                Remark                = (TextBoxRemark.Text      ?? string.Empty).Trim()
             };
 
             DialogResult = true;
         }
 
-        private void ButtonCancel_OnClick(object sender, RoutedEventArgs e)
-        {
-            DialogResult = false;
-        }
+        private void ButtonCancel_OnClick(object sender, RoutedEventArgs e) => DialogResult = false;
 
         private void ShowError(string message)
         {
-            TextBlockError.Text = message;
+            TextBlockError.Text       = message;
             TextBlockError.Visibility = Visibility.Visible;
-        }
-
-        private static short? ParseNullableShort(string text)
-        {
-            if (string.IsNullOrWhiteSpace(text)) return null;
-            short val;
-            return short.TryParse(text.Trim(), out val) ? val : (short?)null;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using AM.Model.Entity.Motion.Actuator;
+using AMControlWPF.Helpers;
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -15,7 +16,6 @@ namespace AMControlWPF.Views.Config
         {
             InitializeComponent();
 
-            // 新增时 entity 为 null，创建默认值
             var e = entity ?? new CylinderConfigEntity
             {
                 IsEnabled = true,
@@ -34,23 +34,28 @@ namespace AMControlWPF.Views.Config
             TextBoxDisplayName.Text = e.DisplayName ?? string.Empty;
             SelectComboBoxByTag(ComboBoxDriveMode, e.DriveMode ?? "Double");
 
-            TextBoxExtendOutputBit.Text = e.ExtendOutputBit > 0 ? e.ExtendOutputBit.ToString() : string.Empty;
-            TextBoxRetractOutputBit.Text = e.RetractOutputBit.HasValue ? e.RetractOutputBit.Value.ToString() : string.Empty;
-            TextBoxExtendFeedbackBit.Text = e.ExtendFeedbackBit.HasValue ? e.ExtendFeedbackBit.Value.ToString() : string.Empty;
-            TextBoxRetractFeedbackBit.Text = e.RetractFeedbackBit.HasValue ? e.RetractFeedbackBit.Value.ToString() : string.Empty;
+            // 加载 IO 映射并绑定下拉列表
+            var allIo      = IoDialogHelper.LoadAll();
+            var doRequired = IoDialogHelper.BuildItems(allIo, "DO", nullable: false);
+            var doOptional = IoDialogHelper.BuildItems(allIo, "DO", nullable: true);
+            var diOptional = IoDialogHelper.BuildItems(allIo, "DI", nullable: true);
+
+            IoDialogHelper.Apply(CbExtendOutputBit,  doRequired, e.ExtendOutputBit > 0 ? (short?)e.ExtendOutputBit : null);
+            IoDialogHelper.Apply(CbRetractOutputBit, doOptional, e.RetractOutputBit);
+            IoDialogHelper.Apply(CbExtendFeedbackBit,  diOptional, e.ExtendFeedbackBit);
+            IoDialogHelper.Apply(CbRetractFeedbackBit, diOptional, e.RetractFeedbackBit);
 
             CheckBoxUseFeedbackCheck.IsChecked = e.UseFeedbackCheck;
-            TextBoxExtendTimeoutMs.Text = e.ExtendTimeoutMs.ToString();
+            TextBoxExtendTimeoutMs.Text  = e.ExtendTimeoutMs.ToString();
             TextBoxRetractTimeoutMs.Text = e.RetractTimeoutMs.ToString();
 
             CheckBoxAllowBothOff.IsChecked = e.AllowBothOff;
-            CheckBoxAllowBothOn.IsChecked = e.AllowBothOn;
+            CheckBoxAllowBothOn.IsChecked  = e.AllowBothOn;
 
-            TextBoxSortOrder.Text = e.SortOrder.ToString();
-            CheckBoxIsEnabled.IsChecked = e.IsEnabled;
-
-            TextBoxDescription.Text = e.Description ?? string.Empty;
-            TextBoxRemark.Text = e.Remark ?? string.Empty;
+            TextBoxSortOrder.Text          = e.SortOrder.ToString();
+            CheckBoxIsEnabled.IsChecked    = e.IsEnabled;
+            TextBoxDescription.Text        = e.Description ?? string.Empty;
+            TextBoxRemark.Text             = e.Remark      ?? string.Empty;
 
             UpdateRetractBitState();
         }
@@ -62,13 +67,12 @@ namespace AMControlWPF.Views.Config
 
         private void UpdateRetractBitState()
         {
-            if (TextBoxRetractOutputBit == null) return;
-
+            if (CbRetractOutputBit == null) return;
             var isSingle = GetComboBoxTagString(ComboBoxDriveMode, "Double") == "Single";
-            TextBoxRetractOutputBit.IsEnabled = !isSingle;
-            TextBoxRetractOutputBit.Opacity = isSingle ? 0.45 : 1.0;
-            if (isSingle)
-                TextBoxRetractOutputBit.Text = string.Empty;
+            CbRetractOutputBit.IsEnabled = !isSingle;
+            CbRetractOutputBit.Opacity   = isSingle ? 0.45 : 1.0;
+            if (isSingle && CbRetractOutputBit.Items.Count > 0)
+                CbRetractOutputBit.SelectedIndex = 0; // 选中「不配置」
         }
 
         private void ButtonSave_OnClick(object sender, RoutedEventArgs e)
@@ -82,91 +86,75 @@ namespace AMControlWPF.Views.Config
                 return;
             }
 
-            short extendBit;
-            if (!short.TryParse(TextBoxExtendOutputBit.Text.Trim(), out extendBit) || extendBit <= 0)
+            var extendBit = IoDialogHelper.GetValue(CbExtendOutputBit);
+            if (!extendBit.HasValue)
             {
-                ShowError("伸出输出位必须为正整数（DO 逻辑位号）。");
+                ShowError("请选择伸出输出位 (DO)。");
                 return;
             }
 
-            var driveMode = GetComboBoxTagString(ComboBoxDriveMode, "Double");
-            var retractBit = ParseNullableShort(TextBoxRetractOutputBit.Text);
+            var driveMode  = GetComboBoxTagString(ComboBoxDriveMode, "Double");
+            var retractBit = IoDialogHelper.GetValue(CbRetractOutputBit);
 
             if (string.Equals(driveMode, "Double", StringComparison.OrdinalIgnoreCase) && !retractBit.HasValue)
             {
-                ShowError("双线圈气缸必须填写缩回输出位。");
+                ShowError("双线圈气缸必须选择缩回输出位。");
                 return;
             }
 
-            int extendTimeout;
-            int.TryParse(TextBoxExtendTimeoutMs.Text.Trim(), out extendTimeout);
-
-            int retractTimeout;
-            int.TryParse(TextBoxRetractTimeoutMs.Text.Trim(), out retractTimeout);
-
-            int sortOrder;
-            int.TryParse(TextBoxSortOrder.Text.Trim(), out sortOrder);
+            int extendTimeout;  int.TryParse(TextBoxExtendTimeoutMs.Text.Trim(),  out extendTimeout);
+            int retractTimeout; int.TryParse(TextBoxRetractTimeoutMs.Text.Trim(), out retractTimeout);
+            int sortOrder;      int.TryParse(TextBoxSortOrder.Text.Trim(),        out sortOrder);
 
             ResultEntity = new CylinderConfigEntity
             {
-                Id = _originalId,
-                Name = name,
-                DisplayName = (TextBoxDisplayName.Text ?? string.Empty).Trim(),
-                DriveMode = driveMode,
-                ExtendOutputBit = extendBit,
+                Id               = _originalId,
+                Name             = name,
+                DisplayName      = (TextBoxDisplayName.Text ?? string.Empty).Trim(),
+                DriveMode        = driveMode,
+                ExtendOutputBit  = extendBit.Value,
                 RetractOutputBit = retractBit,
-                ExtendFeedbackBit = ParseNullableShort(TextBoxExtendFeedbackBit.Text),
-                RetractFeedbackBit = ParseNullableShort(TextBoxRetractFeedbackBit.Text),
+                ExtendFeedbackBit  = IoDialogHelper.GetValue(CbExtendFeedbackBit),
+                RetractFeedbackBit = IoDialogHelper.GetValue(CbRetractFeedbackBit),
                 UseFeedbackCheck = CheckBoxUseFeedbackCheck.IsChecked == true,
-                ExtendTimeoutMs = extendTimeout,
+                ExtendTimeoutMs  = extendTimeout,
                 RetractTimeoutMs = retractTimeout,
-                AllowBothOff = CheckBoxAllowBothOff.IsChecked == true,
-                AllowBothOn = CheckBoxAllowBothOn.IsChecked == true,
-                IsEnabled = CheckBoxIsEnabled.IsChecked == true,
-                SortOrder = sortOrder,
-                Description = (TextBoxDescription.Text ?? string.Empty).Trim(),
-                Remark = (TextBoxRemark.Text ?? string.Empty).Trim()
+                AllowBothOff     = CheckBoxAllowBothOff.IsChecked == true,
+                AllowBothOn      = CheckBoxAllowBothOn.IsChecked  == true,
+                IsEnabled        = CheckBoxIsEnabled.IsChecked    == true,
+                SortOrder        = sortOrder,
+                Description      = (TextBoxDescription.Text ?? string.Empty).Trim(),
+                Remark           = (TextBoxRemark.Text      ?? string.Empty).Trim()
             };
 
             DialogResult = true;
         }
 
-        private void ButtonCancel_OnClick(object sender, RoutedEventArgs e)
-        {
-            DialogResult = false;
-        }
+        private void ButtonCancel_OnClick(object sender, RoutedEventArgs e) => DialogResult = false;
 
         private void ShowError(string message)
         {
-            TextBlockError.Text = message;
+            TextBlockError.Text       = message;
             TextBlockError.Visibility = Visibility.Visible;
         }
 
-        private static void SelectComboBoxByTag(ComboBox comboBox, string tag)
+        private static void SelectComboBoxByTag(ComboBox cb, string tag)
         {
-            foreach (ComboBoxItem item in comboBox.Items)
+            foreach (ComboBoxItem item in cb.Items)
             {
                 if (item.Tag != null && item.Tag.ToString() == tag)
                 {
-                    comboBox.SelectedItem = item;
+                    cb.SelectedItem = item;
                     return;
                 }
             }
-            if (comboBox.Items.Count > 0)
-                comboBox.SelectedIndex = 0;
+            if (cb.Items.Count > 0) cb.SelectedIndex = 0;
         }
 
-        private static string GetComboBoxTagString(ComboBox comboBox, string defaultValue)
+        private static string GetComboBoxTagString(ComboBox cb, string defaultValue)
         {
-            var item = comboBox.SelectedItem as ComboBoxItem;
+            var item = cb.SelectedItem as ComboBoxItem;
             return item?.Tag?.ToString() ?? defaultValue;
-        }
-
-        private static short? ParseNullableShort(string text)
-        {
-            if (string.IsNullOrWhiteSpace(text)) return null;
-            short val;
-            return short.TryParse(text.Trim(), out val) ? val : (short?)null;
         }
     }
 }

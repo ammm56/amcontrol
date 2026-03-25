@@ -6,8 +6,7 @@
                xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                mc:Ignorable="d"
                Title="夹爪配置"
-               Width="520"
-               Height="740"
+               Width="520" Height="740"
                ResizeMode="NoResize"
                ShowNonClientArea="False"
                WindowStartupLocation="CenterOwner"
@@ -69,7 +68,7 @@
                             <TextBlock Margin="0,0,0,8"
                                        FontSize="11" FontWeight="SemiBold" Opacity="0.5"
                                        Foreground="{DynamicResource PrimaryTextBrush}"
-                                       Text="IO 映射（填写 motion_io_map 中的逻辑位号，空白=不使用）" />
+                                       Text="IO 映射（从已配置 IO 点位中选择，不使用请选「── 不配置 ──」）" />
 
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -79,11 +78,11 @@
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
                                     <TextBlock Margin="0,0,0,4" Foreground="{DynamicResource PrimaryTextBrush}" Text="夹紧输出位 (DO) *" />
-                                    <TextBox x:Name="TextBoxCloseOutputBit" Height="36" VerticalContentAlignment="Center" MaxLength="6" />
+                                    <ComboBox x:Name="CbCloseOutputBit" Height="36" />
                                 </StackPanel>
                                 <StackPanel Grid.Column="2">
                                     <TextBlock Margin="0,0,0,4" Foreground="{DynamicResource PrimaryTextBrush}" Text="打开输出位 (DO)" />
-                                    <TextBox x:Name="TextBoxOpenOutputBit" Height="36" VerticalContentAlignment="Center" MaxLength="6" />
+                                    <ComboBox x:Name="CbOpenOutputBit" Height="36" />
                                 </StackPanel>
                             </Grid>
 
@@ -95,25 +94,23 @@
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
                                     <TextBlock Margin="0,0,0,4" Foreground="{DynamicResource PrimaryTextBrush}" Text="夹紧反馈 (DI)" />
-                                    <TextBox x:Name="TextBoxCloseFeedbackBit" Height="36" VerticalContentAlignment="Center" MaxLength="6" />
+                                    <ComboBox x:Name="CbCloseFeedbackBit" Height="36" />
                                 </StackPanel>
                                 <StackPanel Grid.Column="2">
                                     <TextBlock Margin="0,0,0,4" Foreground="{DynamicResource PrimaryTextBrush}" Text="打开反馈 (DI)" />
-                                    <TextBox x:Name="TextBoxOpenFeedbackBit" Height="36" VerticalContentAlignment="Center" MaxLength="6" />
+                                    <ComboBox x:Name="CbOpenFeedbackBit" Height="36" />
                                 </StackPanel>
                             </Grid>
 
                             <TextBlock Margin="0,10,0,4" Foreground="{DynamicResource PrimaryTextBrush}" Text="工件存在检测 (DI)" />
-                            <TextBox x:Name="TextBoxWorkpiecePresentBit" Height="36" VerticalContentAlignment="Center" MaxLength="6" />
+                            <ComboBox x:Name="CbWorkpiecePresentBit" Height="36" />
 
                             <!-- ── 控制参数 ── -->
                             <Rectangle Height="1" Margin="0,14,0,10" Fill="{DynamicResource BorderBrush}" Opacity="0.5" />
-                            <TextBlock Margin="0,0,0,8"
-                                       FontSize="11" FontWeight="SemiBold" Opacity="0.5"
-                                       Foreground="{DynamicResource PrimaryTextBrush}"
-                                       Text="控制参数" />
+                            <TextBlock Margin="0,0,0,8" FontSize="11" FontWeight="SemiBold" Opacity="0.5"
+                                       Foreground="{DynamicResource PrimaryTextBrush}" Text="控制参数" />
 
-                            <CheckBox x:Name="CheckBoxUseFeedbackCheck" Margin="0,0,0,6" Content="启用反馈校验" />
+                            <CheckBox x:Name="CheckBoxUseFeedbackCheck"  Margin="0,0,0,6"  Content="启用反馈校验" />
                             <CheckBox x:Name="CheckBoxUseWorkpieceCheck" Margin="0,0,0,10" Content="启用工件检测校验" />
 
                             <Grid>
@@ -134,13 +131,11 @@
 
                             <!-- ── 高级设置 ── -->
                             <Rectangle Height="1" Margin="0,14,0,10" Fill="{DynamicResource BorderBrush}" Opacity="0.5" />
-                            <TextBlock Margin="0,0,0,8"
-                                       FontSize="11" FontWeight="SemiBold" Opacity="0.5"
-                                       Foreground="{DynamicResource PrimaryTextBrush}"
-                                       Text="高级设置" />
+                            <TextBlock Margin="0,0,0,8" FontSize="11" FontWeight="SemiBold" Opacity="0.5"
+                                       Foreground="{DynamicResource PrimaryTextBrush}" Text="高级设置" />
 
-                            <CheckBox x:Name="CheckBoxAllowBothOff" Margin="0,0,0,6" Content="允许双输出同时关闭（AllowBothOff）" />
-                            <CheckBox x:Name="CheckBoxAllowBothOn" Margin="0,0,0,10" Content="允许双输出同时导通（AllowBothOn，一般禁用）" />
+                            <CheckBox x:Name="CheckBoxAllowBothOff" Margin="0,0,0,6"  Content="允许双输出同时关闭（AllowBothOff）" />
+                            <CheckBox x:Name="CheckBoxAllowBothOn"  Margin="0,0,0,10" Content="允许双输出同时导通（AllowBothOn，一般禁用）" />
 
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -168,23 +163,17 @@
                         </StackPanel>
                     </ScrollViewer>
 
-                    <Border Grid.Row="2"
-                            Padding="20,12"
-                            CornerRadius="0,0,14,14"
+                    <Border Grid.Row="2" Padding="20,12" CornerRadius="0,0,14,14"
                             Background="{DynamicResource SecondaryRegionBrush}"
-                            BorderBrush="{DynamicResource BorderBrush}"
-                            BorderThickness="0,1,0,0">
+                            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
-                            <TextBlock x:Name="TextBlockError"
-                                       Grid.Row="0"
-                                       Margin="0,0,0,8"
+                            <TextBlock x:Name="TextBlockError" Grid.Row="0" Margin="0,0,0,8"
                                        Foreground="{DynamicResource DangerBrush}"
-                                       TextWrapping="Wrap"
-                                       Visibility="Collapsed" />
+                                       TextWrapping="Wrap" Visibility="Collapsed" />
                             <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
                                 <Button MinWidth="80" Margin="0,0,8,0" Click="ButtonCancel_OnClick" Content="取消" />
                                 <Button MinWidth="80" Style="{StaticResource ButtonSuccess}" Click="ButtonSave_OnClick" Content="保存" />

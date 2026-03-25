@@ -314,13 +314,13 @@
                                             VerticalAlignment="Center">
                                     <Button Height="30"
                                             Padding="14,0"
-                                            Click="ButtonEdit_OnClick"
-                                            Content="✏  编辑" />
-                                    <Button Margin="8,0,0,0"
-                                            Height="30"
-                                            Padding="14,0"
                                             Click="ButtonDelete_OnClick"
                                             Content="删除" />
+                                    <Button Margin="8,0,0,0" 
+                                            Height="30"
+                                            Padding="14,0"
+                                            Click="ButtonEdit_OnClick"
+                                            Content="✏  编辑" />
                                 </StackPanel>
                                 <StackPanel VerticalAlignment="Center">
                                     <TextBlock FontSize="15"

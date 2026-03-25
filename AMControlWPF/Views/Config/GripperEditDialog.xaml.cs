@@ -1,4 +1,5 @@
 ﻿using AM.Model.Entity.Motion.Actuator;
+using AMControlWPF.Helpers;
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -33,11 +34,17 @@ namespace AMControlWPF.Views.Config
             TextBoxDisplayName.Text = e.DisplayName ?? string.Empty;
             SelectComboBoxByTag(ComboBoxDriveMode, e.DriveMode ?? "Double");
 
-            TextBoxCloseOutputBit.Text = e.CloseOutputBit.ToString();
-            TextBoxOpenOutputBit.Text = e.OpenOutputBit.HasValue ? e.OpenOutputBit.Value.ToString() : string.Empty;
-            TextBoxCloseFeedbackBit.Text = e.CloseFeedbackBit.HasValue ? e.CloseFeedbackBit.Value.ToString() : string.Empty;
-            TextBoxOpenFeedbackBit.Text = e.OpenFeedbackBit.HasValue ? e.OpenFeedbackBit.Value.ToString() : string.Empty;
-            TextBoxWorkpiecePresentBit.Text = e.WorkpiecePresentBit.HasValue ? e.WorkpiecePresentBit.Value.ToString() : string.Empty;
+            // 加载 IO 映射并绑定下拉列表
+            var allIo = IoDialogHelper.LoadAll();
+            var doRequired = IoDialogHelper.BuildItems(allIo, "DO", nullable: false);
+            var doOptional = IoDialogHelper.BuildItems(allIo, "DO", nullable: true);
+            var diOptional = IoDialogHelper.BuildItems(allIo, "DI", nullable: true);
+
+            IoDialogHelper.Apply(CbCloseOutputBit, doRequired, e.CloseOutputBit > 0 ? (short?)e.CloseOutputBit : null);
+            IoDialogHelper.Apply(CbOpenOutputBit, doOptional, e.OpenOutputBit);
+            IoDialogHelper.Apply(CbCloseFeedbackBit, diOptional, e.CloseFeedbackBit);
+            IoDialogHelper.Apply(CbOpenFeedbackBit, diOptional, e.OpenFeedbackBit);
+            IoDialogHelper.Apply(CbWorkpiecePresentBit, diOptional, e.WorkpiecePresentBit);
 
             CheckBoxUseFeedbackCheck.IsChecked = e.UseFeedbackCheck;
             CheckBoxUseWorkpieceCheck.IsChecked = e.UseWorkpieceCheck;
@@ -50,7 +57,6 @@ namespace AMControlWPF.Views.Config
 
             TextBoxSortOrder.Text = e.SortOrder.ToString();
             CheckBoxIsEnabled.IsChecked = e.IsEnabled;
-
             TextBoxDescription.Text = e.Description ?? string.Empty;
             TextBoxRemark.Text = e.Remark ?? string.Empty;
 
@@ -64,13 +70,12 @@ namespace AMControlWPF.Views.Config
 
         private void UpdateOpenBitState()
         {
-            if (TextBoxOpenOutputBit == null) return;
-
+            if (CbOpenOutputBit == null) return;
             var isSingle = GetComboBoxTagString(ComboBoxDriveMode, "Double") == "Single";
-            TextBoxOpenOutputBit.IsEnabled = !isSingle;
-            TextBoxOpenOutputBit.Opacity = isSingle ? 0.45 : 1.0;
-            if (isSingle)
-                TextBoxOpenOutputBit.Text = string.Empty;
+            CbOpenOutputBit.IsEnabled = !isSingle;
+            CbOpenOutputBit.Opacity = isSingle ? 0.45 : 1.0;
+            if (isSingle && CbOpenOutputBit.Items.Count > 0)
+                CbOpenOutputBit.SelectedIndex = 0; // 选中「不配置」
         }
 
         private void ButtonSave_OnClick(object sender, RoutedEventArgs e)
@@ -84,30 +89,25 @@ namespace AMControlWPF.Views.Config
                 return;
             }
 
-            short closeBit;
-            if (!short.TryParse(TextBoxCloseOutputBit.Text.Trim(), out closeBit) || closeBit <= 0)
+            var closeBit = IoDialogHelper.GetValue(CbCloseOutputBit);
+            if (!closeBit.HasValue)
             {
-                ShowError("夹紧输出位必须为正整数（DO 逻辑位号）。");
+                ShowError("请选择夹紧输出位 (DO)。");
                 return;
             }
 
             var driveMode = GetComboBoxTagString(ComboBoxDriveMode, "Double");
-            var openBit = ParseNullableShort(TextBoxOpenOutputBit.Text);
+            var openBit = IoDialogHelper.GetValue(CbOpenOutputBit);
 
             if (string.Equals(driveMode, "Double", StringComparison.OrdinalIgnoreCase) && !openBit.HasValue)
             {
-                ShowError("双线圈夹爪必须填写打开输出位。");
+                ShowError("双线圈夹爪必须选择打开输出位。");
                 return;
             }
 
-            int closeTimeout;
-            int.TryParse(TextBoxCloseTimeoutMs.Text.Trim(), out closeTimeout);
-
-            int openTimeout;
-            int.TryParse(TextBoxOpenTimeoutMs.Text.Trim(), out openTimeout);
-
-            int sortOrder;
-            int.TryParse(TextBoxSortOrder.Text.Trim(), out sortOrder);
+            int closeTimeout; int.TryParse(TextBoxCloseTimeoutMs.Text.Trim(), out closeTimeout);
+            int openTimeout; int.TryParse(TextBoxOpenTimeoutMs.Text.Trim(), out openTimeout);
+            int sortOrder; int.TryParse(TextBoxSortOrder.Text.Trim(), out sortOrder);
 
             ResultEntity = new GripperConfigEntity
             {
@@ -115,11 +115,11 @@ namespace AMControlWPF.Views.Config
                 Name = name,
                 DisplayName = (TextBoxDisplayName.Text ?? string.Empty).Trim(),
                 DriveMode = driveMode,
-                CloseOutputBit = closeBit,
+                CloseOutputBit = closeBit.Value,
                 OpenOutputBit = openBit,
-                CloseFeedbackBit = ParseNullableShort(TextBoxCloseFeedbackBit.Text),
-                OpenFeedbackBit = ParseNullableShort(TextBoxOpenFeedbackBit.Text),
-                WorkpiecePresentBit = ParseNullableShort(TextBoxWorkpiecePresentBit.Text),
+                CloseFeedbackBit = IoDialogHelper.GetValue(CbCloseFeedbackBit),
+                OpenFeedbackBit = IoDialogHelper.GetValue(CbOpenFeedbackBit),
+                WorkpiecePresentBit = IoDialogHelper.GetValue(CbWorkpiecePresentBit),
                 UseFeedbackCheck = CheckBoxUseFeedbackCheck.IsChecked == true,
                 UseWorkpieceCheck = CheckBoxUseWorkpieceCheck.IsChecked == true,
                 CloseTimeoutMs = closeTimeout,
@@ -135,10 +135,7 @@ namespace AMControlWPF.Views.Config
             DialogResult = true;
         }
 
-        private void ButtonCancel_OnClick(object sender, RoutedEventArgs e)
-        {
-            DialogResult = false;
-        }
+        private void ButtonCancel_OnClick(object sender, RoutedEventArgs e) => DialogResult = false;
 
         private void ShowError(string message)
         {
@@ -146,31 +143,23 @@ namespace AMControlWPF.Views.Config
             TextBlockError.Visibility = Visibility.Visible;
         }
 
-        private static void SelectComboBoxByTag(ComboBox comboBox, string tag)
+        private static void SelectComboBoxByTag(ComboBox cb, string tag)
         {
-            foreach (ComboBoxItem item in comboBox.Items)
+            foreach (ComboBoxItem item in cb.Items)
             {
                 if (item.Tag != null && item.Tag.ToString() == tag)
                 {
-                    comboBox.SelectedItem = item;
+                    cb.SelectedItem = item;
                     return;
                 }
             }
-            if (comboBox.Items.Count > 0)
-                comboBox.SelectedIndex = 0;
+            if (cb.Items.Count > 0) cb.SelectedIndex = 0;
         }
 
-        private static string GetComboBoxTagString(ComboBox comboBox, string defaultValue)
+        private static string GetComboBoxTagString(ComboBox cb, string defaultValue)
         {
-            var item = comboBox.SelectedItem as ComboBoxItem;
+            var item = cb.SelectedItem as ComboBoxItem;
             return item?.Tag?.ToString() ?? defaultValue;
-        }
-
-        private static short? ParseNullableShort(string text)
-        {
-            if (string.IsNullOrWhiteSpace(text)) return null;
-            short val;
-            return short.TryParse(text.Trim(), out val) ? val : (short?)null;
         }
     }
 }

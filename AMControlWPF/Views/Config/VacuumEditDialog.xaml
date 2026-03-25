@@ -6,8 +6,7 @@
                xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                mc:Ignorable="d"
                Title="真空配置"
-               Width="520"
-               Height="720"
+               Width="520" Height="720"
                ResizeMode="NoResize"
                ShowNonClientArea="False"
                WindowStartupLocation="CenterOwner"
@@ -27,30 +26,20 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
-                    <Border Grid.Row="0"
-                            Padding="20,16"
-                            CornerRadius="14,14,0,0"
+                    <Border Grid.Row="0" Padding="20,16" CornerRadius="14,14,0,0"
                             Background="{DynamicResource SecondaryRegionBrush}"
-                            BorderBrush="{DynamicResource BorderBrush}"
-                            BorderThickness="0,0,0,1">
-                        <TextBlock x:Name="TextBlockTitle"
-                                   FontSize="18"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource PrimaryTextBrush}"
-                                   Text="新增真空" />
+                            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
+                        <TextBlock x:Name="TextBlockTitle" FontSize="18" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource PrimaryTextBrush}" Text="新增真空" />
                     </Border>
 
-                    <ScrollViewer Grid.Row="1"
-                                  Padding="20,12,20,8"
-                                  VerticalScrollBarVisibility="Auto"
-                                  HorizontalScrollBarVisibility="Disabled">
+                    <ScrollViewer Grid.Row="1" Padding="20,12,20,8"
+                                  VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                         <StackPanel>
 
                             <!-- ── 基础标识 ── -->
-                            <TextBlock Margin="0,0,0,8"
-                                       FontSize="11" FontWeight="SemiBold" Opacity="0.5"
-                                       Foreground="{DynamicResource PrimaryTextBrush}"
-                                       Text="基础标识" />
+                            <TextBlock Margin="0,0,0,8" FontSize="11" FontWeight="SemiBold" Opacity="0.5"
+                                       Foreground="{DynamicResource PrimaryTextBrush}" Text="基础标识" />
 
                             <TextBlock Margin="0,0,0,4" Foreground="{DynamicResource PrimaryTextBrush}" Text="内部名称 *" />
                             <TextBox x:Name="TextBoxName" Height="36" VerticalContentAlignment="Center" MaxLength="64" />
@@ -60,10 +49,9 @@
 
                             <!-- ── IO 映射 ── -->
                             <Rectangle Height="1" Margin="0,14,0,10" Fill="{DynamicResource BorderBrush}" Opacity="0.5" />
-                            <TextBlock Margin="0,0,0,8"
-                                       FontSize="11" FontWeight="SemiBold" Opacity="0.5"
+                            <TextBlock Margin="0,0,0,8" FontSize="11" FontWeight="SemiBold" Opacity="0.5"
                                        Foreground="{DynamicResource PrimaryTextBrush}"
-                                       Text="IO 映射（填写 motion_io_map 中的逻辑位号，空白=不使用）" />
+                                       Text="IO 映射（从已配置 IO 点位中选择，不使用请选「── 不配置 ──」）" />
 
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -73,11 +61,11 @@
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
                                     <TextBlock Margin="0,0,0,4" Foreground="{DynamicResource PrimaryTextBrush}" Text="吸真空输出位 (DO) *" />
-                                    <TextBox x:Name="TextBoxVacuumOnOutputBit" Height="36" VerticalContentAlignment="Center" MaxLength="6" />
+                                    <ComboBox x:Name="CbVacuumOnOutputBit" Height="36" />
                                 </StackPanel>
                                 <StackPanel Grid.Column="2">
                                     <TextBlock Margin="0,0,0,4" Foreground="{DynamicResource PrimaryTextBrush}" Text="破真空/吹气位 (DO)" />
-                                    <TextBox x:Name="TextBoxBlowOffOutputBit" Height="36" VerticalContentAlignment="Center" MaxLength="6" />
+                                    <ComboBox x:Name="CbBlowOffOutputBit" Height="36" />
                                 </StackPanel>
                             </Grid>
 
@@ -89,26 +77,24 @@
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
                                     <TextBlock Margin="0,0,0,4" Foreground="{DynamicResource PrimaryTextBrush}" Text="真空建立反馈 (DI)" />
-                                    <TextBox x:Name="TextBoxVacuumFeedbackBit" Height="36" VerticalContentAlignment="Center" MaxLength="6" />
+                                    <ComboBox x:Name="CbVacuumFeedbackBit" Height="36" />
                                 </StackPanel>
                                 <StackPanel Grid.Column="2">
                                     <TextBlock Margin="0,0,0,4" Foreground="{DynamicResource PrimaryTextBrush}" Text="真空释放反馈 (DI)" />
-                                    <TextBox x:Name="TextBoxReleaseFeedbackBit" Height="36" VerticalContentAlignment="Center" MaxLength="6" />
+                                    <ComboBox x:Name="CbReleaseFeedbackBit" Height="36" />
                                 </StackPanel>
                             </Grid>
 
                             <TextBlock Margin="0,10,0,4" Foreground="{DynamicResource PrimaryTextBrush}" Text="工件存在检测 (DI)" />
-                            <TextBox x:Name="TextBoxWorkpiecePresentBit" Height="36" VerticalContentAlignment="Center" MaxLength="6" />
+                            <ComboBox x:Name="CbWorkpiecePresentBit" Height="36" />
 
                             <!-- ── 控制参数 ── -->
                             <Rectangle Height="1" Margin="0,14,0,10" Fill="{DynamicResource BorderBrush}" Opacity="0.5" />
-                            <TextBlock Margin="0,0,0,8"
-                                       FontSize="11" FontWeight="SemiBold" Opacity="0.5"
-                                       Foreground="{DynamicResource PrimaryTextBrush}"
-                                       Text="控制参数" />
+                            <TextBlock Margin="0,0,0,8" FontSize="11" FontWeight="SemiBold" Opacity="0.5"
+                                       Foreground="{DynamicResource PrimaryTextBrush}" Text="控制参数" />
 
-                            <CheckBox x:Name="CheckBoxUseFeedbackCheck" Margin="0,0,0,6" Content="启用反馈校验（建立/释放检测）" />
-                            <CheckBox x:Name="CheckBoxUseWorkpieceCheck" Margin="0,0,0,6" Content="启用工件存在检测校验" />
+                            <CheckBox x:Name="CheckBoxUseFeedbackCheck"          Margin="0,0,0,6"  Content="启用反馈校验（建立/释放检测）" />
+                            <CheckBox x:Name="CheckBoxUseWorkpieceCheck"         Margin="0,0,0,6"  Content="启用工件存在检测校验" />
                             <CheckBox x:Name="CheckBoxKeepVacuumOnAfterDetected" Margin="0,0,0,10" Content="检测到工件后保持真空持续导通" />
 
                             <Grid>
@@ -155,23 +141,17 @@
                         </StackPanel>
                     </ScrollViewer>
 
-                    <Border Grid.Row="2"
-                            Padding="20,12"
-                            CornerRadius="0,0,14,14"
+                    <Border Grid.Row="2" Padding="20,12" CornerRadius="0,0,14,14"
                             Background="{DynamicResource SecondaryRegionBrush}"
-                            BorderBrush="{DynamicResource BorderBrush}"
-                            BorderThickness="0,1,0,0">
+                            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
-                            <TextBlock x:Name="TextBlockError"
-                                       Grid.Row="0"
-                                       Margin="0,0,0,8"
+                            <TextBlock x:Name="TextBlockError" Grid.Row="0" Margin="0,0,0,8"
                                        Foreground="{DynamicResource DangerBrush}"
-                                       TextWrapping="Wrap"
-                                       Visibility="Collapsed" />
+                                       TextWrapping="Wrap" Visibility="Collapsed" />
                             <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
                                 <Button MinWidth="80" Margin="0,0,8,0" Click="ButtonCancel_OnClick" Content="取消" />
                                 <Button MinWidth="80" Style="{StaticResource ButtonSuccess}" Click="ButtonSave_OnClick" Content="保存" />

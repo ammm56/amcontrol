@@ -287,17 +287,17 @@
                                 <StackPanel DockPanel.Dock="Right"
                                             Orientation="Horizontal"
                                             VerticalAlignment="Center">
-                                    <Button x:Name="ButtonEdit"
-                                            Height="30"
-                                            Padding="14,0"
-                                            Click="ButtonEdit_OnClick"
-                                            Content="✏  编辑" />
                                     <Button x:Name="ButtonDelete"
-                                            Margin="8,0,0,0"
                                             Height="30"
                                             Padding="14,0"
                                             Click="ButtonDelete_OnClick"
                                             Content="删除" />
+                                    <Button x:Name="ButtonEdit"
+                                            Margin="8,0,0,0"
+                                            Height="30"
+                                            Padding="14,0"
+                                            Click="ButtonEdit_OnClick"
+                                            Content="✏  编辑" />
                                 </StackPanel>
                                 <StackPanel VerticalAlignment="Center">
                                     <TextBlock FontSize="15"
