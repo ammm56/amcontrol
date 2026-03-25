@@ -466,9 +466,9 @@ namespace AMControlWPF
                 case "AlarmLog.Current":
                     return new CurrentAlarmView();
                 case "AlarmLog.History":
-                    return CreatePlaceholderPage("报警与日志 / 报警历史");
+                    return new AlarmHistoryView();
                 case "AlarmLog.RunLog":
-                    return CreatePlaceholderPage("报警与日志 / 运行日志");
+                    return new RunLogView();
 
                 case "System.User":
                     return new UserManagementView();

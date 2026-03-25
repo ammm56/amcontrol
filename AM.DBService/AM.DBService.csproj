@@ -60,6 +60,7 @@
     <Compile Include="Services\Auth\AuthSeedService.cs" />
     <Compile Include="Services\Auth\AuthService.cs" />
     <Compile Include="Services\Dev\DevAlarmRecordService.cs" />
+    <Compile Include="Services\Dev\RunLogService.cs" />
     <Compile Include="Services\MachineConfigRepository.cs" />
     <Compile Include="Services\MotionAxisConfigOverlayService.cs" />
     <Compile Include="Services\MotionAxisConfigService.cs" />

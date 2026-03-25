@@ -108,8 +108,14 @@
     <Compile Include="UserControls\Main\NonClientAreaContent.xaml.cs">
       <DependentUpon>NonClientAreaContent.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Alarm\AlarmHistoryView.xaml.cs">
+      <DependentUpon>AlarmHistoryView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Alarm\CurrentAlarmView.xaml.cs">
       <DependentUpon>CurrentAlarmView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Alarm\RunLogView.xaml.cs">
+      <DependentUpon>RunLogView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Am\LoginLogView.xaml.cs">
       <DependentUpon>LoginLogView.xaml</DependentUpon>
@@ -255,7 +261,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Alarm\AlarmHistoryView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Alarm\CurrentAlarmView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Alarm\RunLogView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

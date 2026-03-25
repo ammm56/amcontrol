@@ -79,6 +79,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ViewModels\Alarm\AlarmHistoryViewModel.cs" />
+    <Compile Include="ViewModels\Alarm\RunLogViewModel.cs" />
     <Compile Include="ViewModels\Am\LoginLogViewModel.cs" />
     <Compile Include="ViewModels\Am\UserManagementViewModel.cs" />
     <Compile Include="ViewModels\Auth\LoginViewModel.cs" />

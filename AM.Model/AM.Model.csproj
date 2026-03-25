@@ -60,6 +60,7 @@
     <Compile Include="Common\ErrorDescriptor.cs" />
     <Compile Include="Common\IoScanState.cs" />
     <Compile Include="Common\ResultSource.cs" />
+    <Compile Include="Dev\LogEntry.cs" />
     <Compile Include="Entity\Auth\SysLoginLogEntity.cs" />
     <Compile Include="Entity\Auth\SysPagePermissionEntity.cs" />
     <Compile Include="Entity\Auth\SysRoleEntity.cs" />
