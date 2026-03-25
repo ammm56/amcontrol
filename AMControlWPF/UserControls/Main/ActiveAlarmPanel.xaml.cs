@@ -45,9 +45,7 @@ namespace AMControlWPF.UserControls.Main
         public void BindAlarmManager(AlarmManager alarmManager)
         {
             UnsubscribeAlarmManager();
-
             _alarmManager = alarmManager;
-
             SubscribeAlarmManager();
             RefreshAlarms();
         }
@@ -66,22 +64,7 @@ namespace AMControlWPF.UserControls.Main
 
             foreach (var alarm in alarms)
             {
-                _allAlarmItems.Add(new AlarmDisplayItem
-                {
-                    Alarm = alarm,
-                    CodeText = alarm.Code.ToString(),
-                    Level = alarm.Level,
-                    LevelText = alarm.Level.ToString(),
-                    Message = alarm.Message,
-                    Time = alarm.Time,
-                    TimeText = alarm.Time.ToString("yyyy-MM-dd HH:mm:ss"),
-                    Source = alarm.Source,
-                    SourceDisplay = string.IsNullOrWhiteSpace(alarm.Source) ? "-" : alarm.Source,
-                    CardId = alarm.CardId,
-                    CardIdText = alarm.CardId.HasValue ? alarm.CardId.Value.ToString() : "-",
-                    Description = alarm.Description,
-                    Suggestion = alarm.Suggestion
-                });
+                _allAlarmItems.Add(new AlarmDisplayItem { Alarm = alarm });
             }
 
             TextBlockAlarmCount.Text = _allAlarmItems.Count.ToString();
@@ -329,39 +312,66 @@ namespace AMControlWPF.UserControls.Main
             TextBlockAlarmDetailSuggestion.Text = string.IsNullOrWhiteSpace(item.Suggestion) ? "-" : item.Suggestion;
         }
 
+        /// <summary>
+        /// 活动报警显示项。
+        /// 持有活体 AlarmInfo 引用（用于 ClearAlarm），所有展示字段均从 Alarm 计算，避免冗余映射。
+        /// </summary>
         private sealed class AlarmDisplayItem
         {
             public AlarmInfo Alarm { get; set; }
 
-            public string CodeText { get; set; }
+            public AlarmLevel Level
+            {
+                get { return Alarm == null ? AlarmLevel.Info : Alarm.Level; }
+            }
 
-            public AlarmLevel Level { get; set; }
+            public string CodeText
+            {
+                get { return Alarm == null ? "-" : Alarm.Code.ToString(); }
+            }
 
-            public string LevelText { get; set; }
+            public string LevelText
+            {
+                get { return Alarm == null ? "-" : Alarm.Level.ToString(); }
+            }
 
-            public string Message { get; set; }
+            public string Message
+            {
+                get { return Alarm == null ? "-" : Alarm.Message; }
+            }
 
-            public DateTime Time { get; set; }
+            public string TimeText
+            {
+                get { return Alarm == null ? "-" : Alarm.Time.ToString("yyyy-MM-dd HH:mm:ss"); }
+            }
 
-            public string TimeText { get; set; }
+            public string SourceDisplay
+            {
+                get { return Alarm == null || string.IsNullOrWhiteSpace(Alarm.Source) ? "-" : Alarm.Source; }
+            }
 
-            public string Source { get; set; }
+            public string CardIdText
+            {
+                get { return Alarm != null && Alarm.CardId.HasValue ? Alarm.CardId.Value.ToString() : "-"; }
+            }
 
-            public string SourceDisplay { get; set; }
+            public string Description
+            {
+                get { return Alarm == null ? null : Alarm.Description; }
+            }
 
-            public short? CardId { get; set; }
-
-            public string CardIdText { get; set; }
-
-            public string Description { get; set; }
-
-            public string Suggestion { get; set; }
+            public string Suggestion
+            {
+                get { return Alarm == null ? null : Alarm.Suggestion; }
+            }
 
             public string UniqueKey
             {
                 get
                 {
-                    return CodeText + "|" + Message + "|" + Time.Ticks;
+                    return Alarm == null
+                        ? string.Empty
+                        : Alarm.Code + "|" + Alarm.Message + "|" + Alarm.Time.Ticks;
                 }
             }
         }

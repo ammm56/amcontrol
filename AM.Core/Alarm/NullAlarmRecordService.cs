@@ -12,7 +12,7 @@ namespace AM.Core.Alarm
     /// </summary>
     public class NullAlarmRecordService : IDevAlarmRecord
     {
-        public void SaveRaised(AlarmCode code, AlarmLevel level, string message, string source, short? cardId, DateTime raisedTime)
+        public void SaveRaised(AlarmCode code, AlarmLevel level, string message, string source, short? cardId, DateTime raisedTime, string description, string suggestion)
         {
         }
 

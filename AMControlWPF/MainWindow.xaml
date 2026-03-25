@@ -304,39 +304,38 @@
                     </Grid.ColumnDefinitions>
 
                     <TextBlock x:Name="TextBlockStatusMessage"
-                       Grid.Column="0"
-                       VerticalAlignment="Center"
-                       Foreground="{DynamicResource PrimaryTextBrush}"
-                       Text="系统就绪" />
+                               Grid.Column="0"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               Text="系统就绪" />
 
                     <TextBlock Grid.Column="1"
-                       Margin="0,0,16,0"
-                       VerticalAlignment="Center"
-                       Foreground="{DynamicResource PrimaryTextBrush}"
-                       Text="Motion: 已连接" />
+                               Margin="0,0,16,0"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               Text="Motion: 已连接" />
 
                     <TextBlock Grid.Column="2"
-                       Margin="0,0,16,0"
-                       VerticalAlignment="Center"
-                       Foreground="{DynamicResource PrimaryTextBrush}"
-                       Text="PLC: 已连接" />
+                               Margin="0,0,16,0"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               Text="PLC: 已连接" />
 
                     <TextBlock Grid.Column="3"
-                       Margin="0,0,16,0"
-                       VerticalAlignment="Center"
-                       Foreground="{DynamicResource PrimaryTextBrush}"
-                       Text="Camera: 已连接" />
+                               Margin="0,0,16,0"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               Text="Camera: 已连接" />
 
                     <Button x:Name="ButtonAlarmIndicator"
-                    Grid.Column="4"
-                    Height="28"
-                    MinWidth="84"
-                    Padding="12,0"
-                    Click="ButtonAlarmIndicator_OnClick"
-                    Background="{DynamicResource SecondaryRegionBrush}"
-                    BorderBrush="{DynamicResource BorderBrush}"
-                    BorderThickness="1"
-                    Content="报警: 0" />
+                            Grid.Column="4"
+                            Height="28"
+                            MinWidth="84"
+                            Padding="12,0"
+                            Click="ButtonAlarmIndicator_OnClick"
+                            
+                            BorderThickness="1"
+                            Content="报警: 0" />
                 </Grid>
             </Border>
         </Grid>

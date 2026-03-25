@@ -28,48 +28,53 @@
                        Text="存在高等级报警，请立即处理。" />
         </Border>
 
-        <DockPanel Grid.Row="1" Margin="0,0,0,10">
-            <StackPanel DockPanel.Dock="Left"
-                        Orientation="Horizontal"
-                        VerticalAlignment="Center">
-                <TextBlock VerticalAlignment="Center"
-                           FontSize="14"
-                           FontWeight="SemiBold"
-                           Foreground="{DynamicResource PrimaryTextBrush}"
-                           Text="活动报警" />
+        <!-- ── Row 1: 工具栏 ── -->
+        <Border Grid.Row="1"
+                Margin="0,0,0,8"
+                Padding="12,10"
+                CornerRadius="8"
+                Background="{DynamicResource SecondaryRegionBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1">
+            <DockPanel LastChildFill="True">
+                <StackPanel DockPanel.Dock="Left"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center">
+                    <TextBlock VerticalAlignment="Center"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               Text="活动报警" />
+                    <TextBlock Margin="10,0,0,0"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               Opacity="0.75"
+                               Text="总数：" />
+                    <TextBlock x:Name="TextBlockAlarmCount"
+                               Margin="4,0,0,0"
+                               VerticalAlignment="Center"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource DangerBrush}"
+                               Text="0" />
+                </StackPanel>
 
-                <TextBlock Margin="10,0,0,0"
-                           VerticalAlignment="Center"
-                           Foreground="{DynamicResource PrimaryTextBrush}"
-                           Opacity="0.75"
-                           Text="总数：" />
-
-                <TextBlock x:Name="TextBlockAlarmCount"
-                           Margin="4,0,0,0"
-                           VerticalAlignment="Center"
-                           FontWeight="SemiBold"
-                           Foreground="{DynamicResource DangerBrush}"
-                           Text="0" />
-            </StackPanel>
-
-            <StackPanel DockPanel.Dock="Right"
-                        Orientation="Horizontal"
-                        VerticalAlignment="Center">
-                <Button Margin="0,0,8,0"
-                        MinWidth="72"
-                        Click="ButtonRefresh_OnClick"
-                        Content="刷新" />
-
-                <Button Margin="0,0,8,0"
-                        MinWidth="88"
-                        Click="ButtonClearCurrent_OnClick"
-                        Content="清除当前" />
-
-                <Button MinWidth="88"
-                        Click="ButtonClearAll_OnClick"
-                        Content="全部清除" />
-            </StackPanel>
-        </DockPanel>
+                <WrapPanel DockPanel.Dock="Right"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Center">
+                    <Button MinWidth="72"
+                            Margin="0,0,8,0"
+                            Click="ButtonRefresh_OnClick"
+                            Content="刷新" />
+                    <Button MinWidth="88"
+                            Margin="0,0,8,0"
+                            Click="ButtonClearCurrent_OnClick"
+                            Content="清除当前" />
+                    <Button MinWidth="88"
+                            Click="ButtonClearAll_OnClick"
+                            Content="全部清除" />
+                </WrapPanel>
+            </DockPanel>
+        </Border>
 
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
@@ -224,32 +229,39 @@
             </Border>
         </Grid>
 
-        <DockPanel Grid.Row="3" Margin="0,10,0,0" LastChildFill="False">
-            <TextBlock x:Name="TextBlockPageRange"
-                       DockPanel.Dock="Left"
-                       VerticalAlignment="Center"
-                       Foreground="{DynamicResource PrimaryTextBrush}"
-                       Opacity="0.75"
-                       Text="0 / 0" />
-
-            <StackPanel DockPanel.Dock="Right"
-                        Orientation="Horizontal">
-                <Button x:Name="ButtonPrevPage"
-                        Width="78"
-                        Click="ButtonPrevPage_OnClick"
-                        Content="上一页" />
-
-                <TextBlock x:Name="TextBlockPageInfo"
-                           Margin="12,0"
+        <!-- ── Row 3: 分页栏 ── -->
+        <Border Grid.Row="3"
+                Margin="0,8,0,0"
+                Padding="12,6"
+                CornerRadius="8"
+                Background="{DynamicResource SecondaryRegionBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1">
+            <DockPanel LastChildFill="False">
+                <TextBlock x:Name="TextBlockPageRange"
+                           DockPanel.Dock="Left"
                            VerticalAlignment="Center"
                            Foreground="{DynamicResource PrimaryTextBrush}"
-                           Text="第 0 / 0 页" />
+                           Opacity="0.75"
+                           Text="0 / 0" />
 
-                <Button x:Name="ButtonNextPage"
-                        Width="78"
-                        Click="ButtonNextPage_OnClick"
-                        Content="下一页" />
-            </StackPanel>
-        </DockPanel>
+                <StackPanel DockPanel.Dock="Right"
+                            Orientation="Horizontal">
+                    <Button x:Name="ButtonPrevPage"
+                            Width="78"
+                            Click="ButtonPrevPage_OnClick"
+                            Content="上一页" />
+                    <TextBlock x:Name="TextBlockPageInfo"
+                               Margin="12,0"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               Text="第 0 / 0 页" />
+                    <Button x:Name="ButtonNextPage"
+                            Width="78"
+                            Click="ButtonNextPage_OnClick"
+                            Content="下一页" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
     </Grid>
 </UserControl>

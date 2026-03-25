@@ -123,11 +123,11 @@ namespace AM.Core.Alarm
 
             try
             {
-                _alarmrecord?.SaveRaised(code, level, finalMessage, finalSource, cardId, alarm.Time);
+                _alarmrecord?.SaveRaised(code, level, finalMessage, finalSource, cardId, alarm.Time, alarm.Description, alarm.Suggestion);
             }
             catch (Exception ex)
             {
-                _logger?.Error(ex, "Alarm record save raised failed");
+                _logger?.Error(ex, "报警记录保存失败");
             }
 
             _bus?.Publish(new SystemMessage(
@@ -173,7 +173,7 @@ namespace AM.Core.Alarm
             }
             catch (Exception ex)
             {
-                _logger?.Error(ex, "Alarm record save cleared failed");
+                _logger?.Error(ex, "报警记录保存清除失败");
             }
         }
 
@@ -213,7 +213,7 @@ namespace AM.Core.Alarm
             }
             catch (Exception ex)
             {
-                _logger?.Error(ex, "Alarm record save cleared failed");
+                _logger?.Error(ex, "报警记录保存清除失败");
             }
         }
 
@@ -229,6 +229,32 @@ namespace AM.Core.Alarm
                     .Where(a => !a.IsCleared)
                     .ToList();
             }
+        }
+
+        /// <summary>
+        /// 从持久化存储还原未清除报警（应用启动时调用一次）。
+        /// 直接入内存列表，不触发 SaveRaised 避免重复写库，
+        /// 也不发布 SystemMessage 避免启动时刷屏。
+        /// </summary>
+        public void RestoreUnclearedAlarms(System.Collections.Generic.IEnumerable<AlarmInfo> alarms)
+        {
+            if (alarms == null)
+            {
+                return;
+            }
+
+            lock (_alarms)
+            {
+                foreach (var alarm in alarms)
+                {
+                    if (alarm != null)
+                    {
+                        _alarms.Add(alarm);
+                    }
+                }
+            }
+
+            NotifyAlarmStateChanged();
         }
     }
 }

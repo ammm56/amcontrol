@@ -8,6 +8,7 @@ using AM.DBService.Services.Auth;
 using AM.DBService.Services.Dev;
 using AM.DBService.Services.Motion.App;
 using AM.DBService.Services.Runtime;
+using AM.Model.Alarm;
 using AM.Model.Common;
 using AM.Model.Interfaces.DB;
 using AM.Model.Interfaces.MotionCard;
@@ -18,6 +19,8 @@ using AM.MotionService.Hub;
 using AM.Tools.Logging;
 using AM.Tools.Messaging;
 using AM.Tools.Reporter;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace AM.App.Bootstrap
@@ -44,10 +47,11 @@ namespace AM.App.Bootstrap
             IMessageBus messageBus = new MessageBusToolkit();
             IErrorCatalog errorCatalog = new JsonErrorCatalog();
 
-            // 报警持久化：使用 DevAlarmRecordService，不走 reporter 避免循环调用
-            IAlarmRecord alarmRecord = new DevAlarmRecordService(); 
-
-            AlarmManager alarmManager = new AlarmManager(messageBus, logger, alarmRecord);
+            // 报警持久化：保留强类型引用用于启动时恢复未清除报警，DevAlarmRecordService，不走 reporter 避免循环调用
+            var devAlarmRecord = new DevAlarmRecordService();
+            AlarmManager alarmManager = new AlarmManager(messageBus, logger, devAlarmRecord);
+            // 恢复上次未清除的历史报警（跨重启持续有效，直到被明确清除）
+            RestoreUnclearedAlarms(devAlarmRecord, alarmManager, logger);
             IAppReporter reporter = new AppReporter(messageBus, logger, alarmManager, errorCatalog);
 
             // 3. 初始化系统上下文
@@ -157,6 +161,49 @@ namespace AM.App.Bootstrap
             reporter?.Info("AppBootstrap",
                 string.Format("全部 {0} 张控制卡初始化完成", ordered.Count));
             return Result.Ok("所有控制卡初始化成功");
+        }
+
+        /// <summary>
+        /// 从数据库查询未清除报警并还原到 AlarmManager 内存中。
+        /// 失败只写日志，不阻断启动流程。
+        /// </summary>
+        private static void RestoreUnclearedAlarms(DevAlarmRecordService record, AlarmManager alarmManager, IAMLogger logger)
+        {
+            try
+            {
+                var result = record.QueryPage(1, 500, isCleared: false);
+                if (!result.Success || result.Items == null || result.Items.Count == 0)
+                {
+                    return;
+                }
+
+                var infos = new List<AlarmInfo>();
+                foreach (var e in result.Items)
+                {
+                    AlarmLevel level;
+                    if (!Enum.TryParse(e.AlarmLevel, out level))
+                    {
+                        level = AlarmLevel.Info;
+                    }
+
+                    infos.Add(new AlarmInfo(
+                        (AlarmCode)e.AlarmCode,
+                        level,
+                        e.Message ?? string.Empty,
+                        e.Source ?? string.Empty,
+                        e.CardId,
+                        e.Description,
+                        e.Suggestion,
+                        e.RaisedTime));
+                }
+
+                alarmManager.RestoreUnclearedAlarms(infos);
+                logger?.Info("AppBootstrap 已从数据库恢复 " + infos.Count + " 条未清除报警到活动报警面板");
+            }
+            catch (Exception ex)
+            {
+                logger?.Error(ex, "从数据库恢复未清除报警失败，此次忽略，不影响启动流程");
+            }
         }
     }
 }

@@ -46,7 +46,7 @@ namespace AM.DBService.Services.Dev
 
         /// <summary>
         /// 确保表结构与当前实体定义一致。
-        /// 若表不存在则建表；若旧版建表时 CardId 缺少 IsNullable 标注（NOT NULL）,
+        /// 若表不存在则建表；若检测到任何已知 schema 问题（旧版缺 IsNullable 或缺列），
         /// 则自动重建表（开发阶段旧数据会丢失，生产环境应使用正式迁移脚本）。
         /// </summary>
         private void EnsureTableSchema()
@@ -61,17 +61,19 @@ namespace AM.DBService.Services.Dev
                     return;
                 }
 
-                // 使用 SQLite PRAGMA 检测 CardId 是否因旧版缺少 IsNullable 而被建为 NOT NULL
-                if (IsColumnNotNull(client, "dev_alarm_record", "CardId"))
+                // CardId NOT NULL（旧版缺 IsNullable 标注） 或 Description 列不存在（新增字段）→ 重建
+                var needRebuild = IsColumnNotNull(client, "dev_alarm_record", "CardId")
+                               || !HasColumn(client, "dev_alarm_record", "Description");
+
+                if (needRebuild)
                 {
-                    LogWarn("dev_alarm_record.CardId 存在 NOT NULL 约束（实体缺少 IsNullable 标注导致），将重建表以修复 schema，旧报警记录会丢失。");
+                    LogWarn("dev_alarm_record 表 schema 与当前实体不一致，将重建表（开发阶段旧数据会丢失）。");
                     client.DbMaintenance.DropTable("dev_alarm_record");
                     client.CodeFirst.InitTables<DevAlarmRecordEntity>();
-                    LogWarn("dev_alarm_record 表已按正确 schema 重建完成。");
+                    LogWarn("dev_alarm_record 表已按最新 schema 重建完成。");
                     return;
                 }
 
-                // Schema 正确，正常 InitTables（幂等）
                 client.CodeFirst.InitTables<DevAlarmRecordEntity>();
             }
             catch (Exception ex)
@@ -92,15 +94,35 @@ namespace AM.DBService.Services.Dev
                 {
                     var col = row["name"]?.ToString() ?? string.Empty;
                     if (string.Equals(col, columnName, StringComparison.OrdinalIgnoreCase))
-                    {
-                        // notnull = 1 表示列存在 NOT NULL 约束
                         return (row["notnull"]?.ToString() ?? "0") == "1";
-                    }
                 }
             }
             catch (Exception ex)
             {
                 LogError("PRAGMA table_info('" + tableName + "') 检查失败", ex);
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// 通过 SQLite PRAGMA table_info 检测指定列是否存在。
+        /// </summary>
+        private bool HasColumn(SqlSugar.SqlSugarClient client, string tableName, string columnName)
+        {
+            try
+            {
+                var dt = client.Ado.GetDataTable("PRAGMA table_info('" + tableName + "')");
+                foreach (DataRow row in dt.Rows)
+                {
+                    var col = row["name"]?.ToString() ?? string.Empty;
+                    if (string.Equals(col, columnName, StringComparison.OrdinalIgnoreCase))
+                        return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogError("PRAGMA table_info('" + tableName + "') HasColumn 检查失败", ex);
             }
 
             return false;
@@ -112,19 +134,22 @@ namespace AM.DBService.Services.Dev
         public void SaveRaised(
             AlarmCode code, AlarmLevel level,
             string message, string source,
-            short? cardId, DateTime raisedTime)
+            short? cardId, DateTime raisedTime,
+            string description, string suggestion)
         {
             try
             {
                 var result = _db.Add(new DevAlarmRecordEntity
                 {
-                    AlarmCode  = (int)code,
+                    AlarmCode = (int)code,
                     AlarmLevel = level.ToString(),
-                    Message    = message,
-                    Source     = source,
-                    CardId     = cardId,
+                    Message = message,
+                    Source = source,
+                    CardId = cardId,
                     RaisedTime = raisedTime,
-                    IsCleared  = false
+                    IsCleared = false,
+                    Description = description,
+                    Suggestion = suggestion
                 });
 
                 if (!result.Success)
@@ -150,13 +175,11 @@ namespace AM.DBService.Services.Dev
                     .ToList();
 
                 if (records == null || records.Count == 0)
-                {
                     return;
-                }
 
                 foreach (var rec in records)
                 {
-                    rec.IsCleared   = true;
+                    rec.IsCleared = true;
                     rec.ClearedTime = clearedTime;
 
                     int affected = client.Updateable(rec).ExecuteCommand();
@@ -178,13 +201,13 @@ namespace AM.DBService.Services.Dev
         public Result<DevAlarmRecordEntity> QueryPage(
             int page, int pageSize,
             string levelFilter = null,
-            bool? isCleared    = null,
-            DateTime? from     = null,
-            DateTime? to       = null)
+            bool? isCleared = null,
+            DateTime? from = null,
+            DateTime? to = null)
         {
             try
             {
-                if (page < 1)     page     = 1;
+                if (page < 1) page = 1;
                 if (pageSize < 1) pageSize = 20;
 
                 var query = _db._sqlSugarClient.Queryable<DevAlarmRecordEntity>();
@@ -218,9 +241,9 @@ namespace AM.DBService.Services.Dev
         /// <summary>查询满足过滤条件的总条数，供分页控件计算页数。</summary>
         public int QueryTotalCount(
             string levelFilter = null,
-            bool? isCleared    = null,
-            DateTime? from     = null,
-            DateTime? to       = null)
+            bool? isCleared = null,
+            DateTime? from = null,
+            DateTime? to = null)
         {
             try
             {

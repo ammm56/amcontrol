@@ -192,13 +192,17 @@ namespace AMControlWPF
 
             if (count > 0)
             {
-                ButtonAlarmIndicator.Background = FindBrush("DangerBrush", Brushes.IndianRed);
+                // SetResourceReference 建立动态引用，主题切换后自动跟随资源字典更新
+                ButtonAlarmIndicator.SetResourceReference(Control.BackgroundProperty, "DangerBrush");
                 ButtonAlarmIndicator.Foreground = Brushes.White;
             }
             else
             {
-                ButtonAlarmIndicator.Background = FindBrush("SecondaryRegionBrush", Brushes.LightGray);
-                ButtonAlarmIndicator.Foreground = FindBrush("PrimaryTextBrush", Brushes.Black);
+                // ClearValue 清除本地值，将控制权交还给 Style/主题
+                ButtonAlarmIndicator.ClearValue(Control.BackgroundProperty);
+                ButtonAlarmIndicator.ClearValue(Control.ForegroundProperty);
+                // 同样用 SetResourceReference 持有动态 Style 引用
+                ButtonAlarmIndicator.SetResourceReference(FrameworkElement.StyleProperty, "ButtonDefault");
             }
         }
 

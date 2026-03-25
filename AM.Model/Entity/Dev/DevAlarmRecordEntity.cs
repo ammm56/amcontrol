@@ -44,5 +44,13 @@ namespace AM.Model.Entity.Dev
 
         /// <summary>是否已清除。</summary>
         public bool IsCleared { get; set; }
+
+        /// <summary>报警详细说明（原因分析）。</summary>
+        [SugarColumn(IsNullable = true)]
+        public string Description { get; set; }
+
+        /// <summary>处置建议。</summary>
+        [SugarColumn(IsNullable = true)]
+        public string Suggestion { get; set; }
     }
 }
