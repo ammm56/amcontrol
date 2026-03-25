@@ -62,7 +62,7 @@ namespace AM.DBService.Services.Motion.Actuator
                 .ThenBy(p => p.Name)
                 .ToList();
 
-            return OkList(list, "气缸对象查询成功");
+            return OkListLogOnly(list, "气缸对象查询成功");
         }
 
         public Result<CylinderConfig> QueryByName(string name)
@@ -74,7 +74,7 @@ namespace AM.DBService.Services.Motion.Actuator
                 return Fail<CylinderConfig>(resolveResult.Code, resolveResult.Message);
             }
 
-            return Ok(cylinder, "气缸对象查询成功");
+            return OkLogOnly(cylinder, "气缸对象查询成功");
         }
 
         public Result Extend(string name, bool waitFeedback = true)

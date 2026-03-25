@@ -55,7 +55,7 @@ namespace AM.DBService.Services.Motion.Actuator
                     .ThenBy(p => p.Name)
                     .ToList();
 
-                return OkList(items, "气缸对象配置查询成功");
+                return OkListLogOnly(items, "气缸对象配置查询成功");
             }
             catch (Exception ex)
             {
@@ -84,7 +84,7 @@ namespace AM.DBService.Services.Motion.Actuator
                     return Warn<CylinderConfigEntity>((int)DbErrorCode.NotFound, "未找到对应气缸对象配置");
                 }
 
-                return Ok(item, "气缸对象配置查询成功");
+                return OkLogOnly(item, "气缸对象配置查询成功");
             }
             catch (Exception ex)
             {
@@ -296,7 +296,7 @@ namespace AM.DBService.Services.Motion.Actuator
                 return Fail((int)DbErrorCode.InvalidArgument, "双线圈气缸通常不允许双输出同时导通");
             }
 
-            return Ok("气缸对象配置校验通过");
+            return OkSilent("气缸对象配置校验通过");
         }
     }
 }

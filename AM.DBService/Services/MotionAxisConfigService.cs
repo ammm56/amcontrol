@@ -57,7 +57,7 @@ namespace AM.DBService.Services
                     .ThenBy(p => p.ParamName)
                     .ToList();
 
-                return OkList(items, "运动轴参数查询成功");
+                return OkListLogOnly(items, "运动轴参数查询成功");
             }
             catch (Exception ex)
             {
@@ -89,7 +89,7 @@ namespace AM.DBService.Services
                     return Warn<MotionAxisConfigEntity>((int)DbErrorCode.NotFound, "未找到对应逻辑轴参数");
                 }
 
-                return OkList(items, "运动轴参数查询成功");
+                return OkListLogOnly(items, "运动轴参数查询成功");
             }
             catch (Exception ex)
             {

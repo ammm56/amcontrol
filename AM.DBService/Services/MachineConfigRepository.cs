@@ -121,7 +121,7 @@ namespace AM.DBService.Services
                     .ThenBy(p => p.CardId)
                     .ToList();
 
-                return OkList(items, "控制卡查询成功");
+                return OkListLogOnly(items, "控制卡查询成功");
             }
             catch (Exception ex)
             {
@@ -140,7 +140,7 @@ namespace AM.DBService.Services
                     .ThenBy(p => p.LogicalAxis)
                     .ToList();
 
-                return OkList(items, "轴定义查询成功");
+                return OkListLogOnly(items, "轴定义查询成功");
             }
             catch (Exception ex)
             {
@@ -159,7 +159,7 @@ namespace AM.DBService.Services
                     .ThenBy(p => p.LogicalBit)
                     .ToList();
 
-                return OkList(items, "IO映射查询成功");
+                return OkListLogOnly(items, "IO映射查询成功");
             }
             catch (Exception ex)
             {

@@ -59,7 +59,7 @@ namespace AM.DBService.Services.Motion.Actuator
                     .ThenBy(p => p.Name)
                     .ToList();
 
-                return OkList(items, "真空对象配置查询成功");
+                return OkListLogOnly(items, "真空对象配置查询成功");
             }
             catch (Exception ex)
             {
@@ -91,7 +91,7 @@ namespace AM.DBService.Services.Motion.Actuator
                     return Warn<VacuumConfigEntity>((int)DbErrorCode.NotFound, "未找到对应真空对象配置");
                 }
 
-                return Ok(item, "真空对象配置查询成功");
+                return OkLogOnly(item, "真空对象配置查询成功");
             }
             catch (Exception ex)
             {

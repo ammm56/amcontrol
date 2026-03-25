@@ -58,7 +58,7 @@ namespace AM.DBService.Services.Motion.Topology
                     .ThenBy(p => p.CardId)
                     .ToList();
 
-                return OkList(items, "控制卡查询成功");
+                return OkListLogOnly(items, "控制卡查询成功");
             }
             catch (Exception ex)
             {
@@ -86,7 +86,7 @@ namespace AM.DBService.Services.Motion.Topology
                     return Warn<MotionCardEntity>((int)DbErrorCode.NotFound, "未找到对应控制卡");
                 }
 
-                return Ok(item, "控制卡查询成功");
+                return OkLogOnly(item, "控制卡查询成功");
             }
             catch (Exception ex)
             {

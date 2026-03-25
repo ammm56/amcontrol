@@ -56,7 +56,7 @@ namespace AM.DBService.Services.Motion.Point
                     .ThenBy(p => p.LogicalBit)
                     .ToList();
 
-                return OkList(items, "IO点位公共配置查询成功");
+                return OkListLogOnly(items, "IO点位公共配置查询成功");
             }
             catch (Exception ex)
             {
@@ -90,7 +90,7 @@ namespace AM.DBService.Services.Motion.Point
                     return Warn<MotionIoPointConfigEntity>((int)DbErrorCode.NotFound, "未找到对应 IO 点位公共配置");
                 }
 
-                return Ok(item, "IO点位公共配置查询成功");
+                return OkLogOnly(item, "IO点位公共配置查询成功");
             }
             catch (Exception ex)
             {
@@ -307,7 +307,7 @@ namespace AM.DBService.Services.Motion.Point
                 }
             }
 
-            return Ok("IO点位公共配置校验通过");
+            return OkSilent("IO点位公共配置校验通过");
         }
     }
 }

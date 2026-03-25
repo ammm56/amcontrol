@@ -225,7 +225,7 @@ namespace AM.DBService.Services.Motion.App
                     return OkList(new List<MotionCardConfig>(), "数据库中尚无运动控制卡配置");
                 }
 
-                return OkList(motionCards, "读取数据库运动控制配置成功");
+                return OkListLogOnly(motionCards, "读取数据库运动控制配置成功");
             }
             catch (Exception ex)
             {

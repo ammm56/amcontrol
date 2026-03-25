@@ -57,7 +57,7 @@ namespace AM.DBService.Services.Motion.Topology
                     .ThenBy(p => p.LogicalAxis)
                     .ToList();
 
-                return OkList(items, "轴定义查询成功");
+                return OkListLogOnly(items, "轴定义查询成功");
             }
             catch (Exception ex)
             {
@@ -85,7 +85,7 @@ namespace AM.DBService.Services.Motion.Topology
                     return Warn<MotionAxisEntity>((int)DbErrorCode.NotFound, "未找到对应逻辑轴");
                 }
 
-                return Ok(item, "轴定义查询成功");
+                return OkLogOnly(item, "轴定义查询成功");
             }
             catch (Exception ex)
             {
@@ -112,7 +112,7 @@ namespace AM.DBService.Services.Motion.Topology
                     .ThenBy(p => p.LogicalAxis)
                     .ToList();
 
-                return OkList(items, "按控制卡查询轴定义成功");
+                return OkListLogOnly(items, "按控制卡查询轴定义成功");
             }
             catch (Exception ex)
             {

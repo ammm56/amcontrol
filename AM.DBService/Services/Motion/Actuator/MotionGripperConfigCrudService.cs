@@ -56,7 +56,7 @@ namespace AM.DBService.Services.Motion.Actuator
                     .ThenBy(p => p.Name)
                     .ToList();
 
-                return OkList(items, "夹爪对象配置查询成功");
+                return OkListLogOnly(items, "夹爪对象配置查询成功");
             }
             catch (Exception ex)
             {
@@ -85,7 +85,7 @@ namespace AM.DBService.Services.Motion.Actuator
                     return Warn<GripperConfigEntity>((int)DbErrorCode.NotFound, "未找到对应夹爪对象配置");
                 }
 
-                return Ok(item, "夹爪对象配置查询成功");
+                return OkLogOnly(item, "夹爪对象配置查询成功");
             }
             catch (Exception ex)
             {

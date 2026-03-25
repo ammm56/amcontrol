@@ -66,7 +66,7 @@ namespace AM.DBService.Services.Motion.Actuator
                 .ThenBy(p => p.Name)
                 .ToList();
 
-            return OkList(list, "真空对象查询成功");
+            return OkListLogOnly(list, "真空对象查询成功");
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace AM.DBService.Services.Motion.Actuator
                 return Fail<VacuumConfig>(resolveResult.Code, resolveResult.Message);
             }
 
-            return Ok(vacuum, "真空对象查询成功");
+            return OkLogOnly(vacuum, "真空对象查询成功");
         }
 
         /// <summary>

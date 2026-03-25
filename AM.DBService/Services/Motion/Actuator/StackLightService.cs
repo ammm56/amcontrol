@@ -62,7 +62,7 @@ namespace AM.DBService.Services.Motion.Actuator
                 .ThenBy(p => p.Name)
                 .ToList();
 
-            return OkList(list, "灯塔对象查询成功");
+            return OkListLogOnly(list, "灯塔对象查询成功");
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace AM.DBService.Services.Motion.Actuator
                 return Fail<StackLightConfig>(resolveResult.Code, resolveResult.Message);
             }
 
-            return Ok(stackLight, "灯塔对象查询成功");
+            return OkLogOnly(stackLight, "灯塔对象查询成功");
         }
 
         /// <summary>

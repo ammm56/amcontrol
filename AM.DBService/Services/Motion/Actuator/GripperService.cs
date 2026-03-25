@@ -62,7 +62,7 @@ namespace AM.DBService.Services.Motion.Actuator
                 .ThenBy(p => p.Name)
                 .ToList();
 
-            return OkList(list, "夹爪对象查询成功");
+            return OkListLogOnly(list, "夹爪对象查询成功");
         }
 
         public Result<GripperConfig> QueryByName(string name)
@@ -74,7 +74,7 @@ namespace AM.DBService.Services.Motion.Actuator
                 return Fail<GripperConfig>(resolveResult.Code, resolveResult.Message);
             }
 
-            return Ok(gripper, "夹爪对象查询成功");
+            return OkLogOnly(gripper, "夹爪对象查询成功");
         }
 
         public Result Close(string name, bool waitFeedback = true, bool waitWorkpiece = false)

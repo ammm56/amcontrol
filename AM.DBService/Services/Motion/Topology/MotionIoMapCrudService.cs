@@ -58,7 +58,7 @@ namespace AM.DBService.Services.Motion.Topology
                     .ThenBy(p => p.LogicalBit)
                     .ToList();
 
-                return OkList(items, "IO映射查询成功");
+                return OkListLogOnly(items, "IO映射查询成功");
             }
             catch (Exception ex)
             {
@@ -85,7 +85,7 @@ namespace AM.DBService.Services.Motion.Topology
                     .ThenBy(p => p.LogicalBit)
                     .ToList();
 
-                return OkList(items, "按控制卡查询 IO 映射成功");
+                return OkListLogOnly(items, "按控制卡查询 IO 映射成功");
             }
             catch (Exception ex)
             {
@@ -119,7 +119,7 @@ namespace AM.DBService.Services.Motion.Topology
                     return Warn<MotionIoMapEntity>((int)DbErrorCode.NotFound, "未找到对应 IO 映射");
                 }
 
-                return Ok(item, "IO映射查询成功");
+                return OkLogOnly(item, "IO映射查询成功");
             }
             catch (Exception ex)
             {

@@ -68,7 +68,7 @@ namespace AM.DBService.Services.Motion.App
                 .Select(CloneAxisConfig)
                 .ToList();
 
-            return OkList(axisConfigs, "读取运行时轴配置成功");
+            return OkListLogOnly(axisConfigs, "读取运行时轴配置成功");
         }
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace AM.DBService.Services.Motion.App
                 return Warn<AxisConfig>((int)DbErrorCode.NotFound, "未找到对应逻辑轴配置");
             }
 
-            return Ok(CloneAxisConfig(axisConfig), "读取运行时轴配置成功");
+            return OkLogOnly(CloneAxisConfig(axisConfig), "读取运行时轴配置成功");
         }
 
         /// <summary>
