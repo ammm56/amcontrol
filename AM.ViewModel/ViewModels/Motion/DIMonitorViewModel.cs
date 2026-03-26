@@ -43,9 +43,8 @@ namespace AM.ViewModel.ViewModels.Motion
             PageSizes = new ObservableCollection<int>();
 
             PageSizes.Add(6);
-            PageSizes.Add(12);
-            PageSizes.Add(24);
-            PageSizes.Add(48);
+            PageSizes.Add(18);
+            PageSizes.Add(36);
             PageSizes.Add(72);
             PageSizes.Add(96);
             PageSizes.Add(192);
@@ -53,7 +52,7 @@ namespace AM.ViewModel.ViewModels.Motion
             _searchText = string.Empty;
             _statusText = "请等待 DI 运行态加载";
             _scanStateText = "未启动";
-            _selectedPageSize = 48;
+            _selectedPageSize = 72;
             _pageIndex = 1;
             _totalPages = 1;
 
@@ -177,7 +176,10 @@ namespace AM.ViewModel.ViewModels.Motion
 
         public string PageSummaryText
         {
-            get { return "第 " + PageIndex + " / " + TotalPages + " 页"; }
+            get
+            {
+                return "页码 " + PageIndex + " / " + TotalPages;
+            }
         }
 
         public async Task LoadAsync()
@@ -230,7 +232,7 @@ namespace AM.ViewModel.ViewModels.Motion
                 }
 
                 StatusText = string.Format(
-                    "DI 已刷新，当前卡共 {0} 条，匹配 {1} 条，当前页 {2} 条",
+                    "DI 已刷新，当前卡共 {0} 个 IO，匹配 {1} 个，当前页显示 {2} 个",
                     TotalCount,
                     _filteredItems.Count,
                     Items.Count);
@@ -368,7 +370,7 @@ namespace AM.ViewModel.ViewModels.Motion
             }
 
             StatusText = string.Format(
-                "当前卡共 {0} 条，匹配 {1} 条，当前页 {2} 条",
+                "当前控制卡共 {0} 个 IO，筛选命中 {1} 个，当前页显示 {2} 个",
                 TotalCount,
                 _filteredItems.Count,
                 Items.Count);
