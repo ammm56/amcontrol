@@ -180,10 +180,10 @@
     <Compile Include="Views\Config\VacuumEditDialog.xaml.cs">
       <DependentUpon>VacuumEditDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\IO\DIMonitorView.xaml.cs">
+    <Compile Include="Views\Motion\DIMonitorView.xaml.cs">
       <DependentUpon>DIMonitorView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\IO\DOMonitorView.xaml.cs">
+    <Compile Include="Views\Motion\DOMonitorView.xaml.cs">
       <DependentUpon>DOMonitorView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Motion\MotionAxisView.xaml.cs">
@@ -357,11 +357,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\IO\DIMonitorView.xaml">
+    <Page Include="Views\Motion\DIMonitorView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\IO\DOMonitorView.xaml">
+    <Page Include="Views\Motion\DOMonitorView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

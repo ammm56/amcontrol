@@ -252,7 +252,7 @@ namespace AM.DBService.Services.Motion.Actuator
                 return Fail<bool>(readResult.Code, readResult.Message);
             }
 
-            return Ok(value, "夹爪夹紧状态读取成功");
+            return OkSilent(value, "夹爪夹紧状态读取成功");
         }
 
         public Result<bool> IsOpened(string name)
@@ -276,7 +276,7 @@ namespace AM.DBService.Services.Motion.Actuator
                 return Fail<bool>(readResult.Code, readResult.Message);
             }
 
-            return Ok(value, "夹爪打开状态读取成功");
+            return OkSilent(value, "夹爪打开状态读取成功");
         }
 
         public Result<bool> HasWorkpiece(string name)
@@ -300,7 +300,7 @@ namespace AM.DBService.Services.Motion.Actuator
                 return Fail<bool>(readResult.Code, readResult.Message);
             }
 
-            return Ok(value, "夹爪工件检测状态读取成功");
+            return OkSilent(value, "夹爪工件检测状态读取成功");
         }
 
         private Result ResolveGripper(string name, out GripperConfig gripper)

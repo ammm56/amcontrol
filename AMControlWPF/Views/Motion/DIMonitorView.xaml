@@ -1,10 +1,10 @@
-﻿<UserControl x:Class="AMControlWPF.Views.IO.DOMonitorView"
+﻿<UserControl x:Class="AMControlWPF.Views.Motion.DIMonitorView"
              xmlns:hc="https://handyorg.github.io/handycontrol"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:AMControlWPF.Views.IO"
+             xmlns:local="clr-namespace:AMControlWPF.Views.Motion"
              mc:Ignorable="d"
              Background="Transparent">
 
@@ -28,7 +28,7 @@
                            FontSize="14"
                            FontWeight="SemiBold"
                            Foreground="{DynamicResource PrimaryTextBrush}"
-                           Text="输出点监视与控制" />
+                           Text="输入点筛选与监视" />
 
                 <WrapPanel HorizontalAlignment="Right"
                            VerticalAlignment="Center"
@@ -37,9 +37,8 @@
                              Height="30"
                              Margin="0,0,8,0"
                              VerticalContentAlignment="Center"
-                             Text="搜索输出点..." />
+                             Text="搜索输入点..." />
                     <Button MinWidth="72" Margin="0,0,8,0" Content="刷新" />
-                    <Button MinWidth="72" Margin="0,0,8,0" Content="全部复位" />
                     <Button MinWidth="72" Margin="0,0,0,0" Content="导出" />
                 </WrapPanel>
             </DockPanel>
@@ -70,18 +69,19 @@
                     <TextBlock FontSize="14"
                                FontWeight="SemiBold"
                                Foreground="{DynamicResource PrimaryTextBrush}"
-                               Text="输出分组" />
+                               Text="输入分组" />
 
                     <ListBox x:Name="ListBoxAxis"
                              ItemContainerStyle="{StaticResource ViewNavItemStyle}"
                              Grid.Row="2"
                              BorderThickness="0"
                              SelectedIndex="0">
-                        <ListBoxItem Content="全部输出" />
-                        <ListBoxItem Content="气缸电磁阀" />
-                        <ListBoxItem Content="指示灯/蜂鸣器" />
-                        <ListBoxItem Content="相机触发" />
-                        <ListBoxItem Content="PLC 输出联动" />
+                        <ListBoxItem Content="全部输入" />
+                        <ListBoxItem Content="启动/停止按钮" />
+                        <ListBoxItem Content="安全信号" />
+                        <ListBoxItem Content="气缸到位" />
+                        <ListBoxItem Content="视觉触发" />
+                        <ListBoxItem Content="PLC 联动" />
                     </ListBox>
                 </Grid>
             </Border>
@@ -109,11 +109,11 @@
                             <StackPanel>
                                 <TextBlock Opacity="0.7"
                                            Foreground="{DynamicResource PrimaryTextBrush}"
-                                           Text="输出总数" />
+                                           Text="输入总数" />
                                 <TextBlock FontSize="18"
                                            FontWeight="SemiBold"
                                            Foreground="{DynamicResource PrimaryTextBrush}"
-                                           Text="48" />
+                                           Text="64" />
                             </StackPanel>
                         </Border>
 
@@ -125,11 +125,11 @@
                             <StackPanel>
                                 <TextBlock Opacity="0.7"
                                            Foreground="{DynamicResource PrimaryTextBrush}"
-                                           Text="当前激活输出" />
+                                           Text="当前激活输入" />
                                 <TextBlock FontSize="18"
                                            FontWeight="SemiBold"
-                                           Foreground="{DynamicResource PrimaryBrush}"
-                                           Text="3" />
+                                           Foreground="{DynamicResource SuccessBrush}"
+                                           Text="5" />
                             </StackPanel>
                         </Border>
 
@@ -161,12 +161,12 @@
                                 <TextBlock FontSize="18"
                                            FontWeight="SemiBold"
                                            Foreground="{DynamicResource PrimaryBrush}"
-                                           Text="DO-001" />
+                                           Text="DI-001" />
                             </StackPanel>
                         </Border>
                     </WrapPanel>
 
-                    <!-- 主区 -->
+                    <!-- 主监视区 -->
                     <Grid Grid.Row="2">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -188,7 +188,7 @@
                                 <TextBlock FontSize="14"
                                            FontWeight="SemiBold"
                                            Foreground="{DynamicResource PrimaryTextBrush}"
-                                           Text="输出点监视" />
+                                           Text="输入点监视" />
 
                                 <DataGrid Grid.Row="2"
                                           AutoGenerateColumns="False"
@@ -203,7 +203,7 @@
                                           RowHeaderWidth="0"
                                           GridLinesVisibility="None"
                                           HorizontalGridLinesBrush="Transparent"
-                                          VerticalGridLinesBrush="Transparent">     
+                                          VerticalGridLinesBrush="Transparent">
                                     <DataGrid.Columns>
                                         <DataGridTextColumn Header="逻辑点位" Width="90" Binding="{Binding}" />
                                         <DataGridTextColumn Header="名称" Width="180" Binding="{Binding}" />
@@ -211,7 +211,7 @@
                                         <DataGridTextColumn Header="卡号" Width="70" Binding="{Binding}" />
                                         <DataGridTextColumn Header="通道" Width="70" Binding="{Binding}" />
                                         <DataGridTextColumn Header="状态" Width="80" Binding="{Binding}" />
-                                        <DataGridTextColumn Header="联动对象" Width="*" Binding="{Binding}" />
+                                        <DataGridTextColumn Header="最后触发" Width="*" Binding="{Binding}" />
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </Grid>
@@ -225,27 +225,34 @@
                                 <TextBlock FontSize="14"
                                            FontWeight="SemiBold"
                                            Foreground="{DynamicResource PrimaryTextBrush}"
-                                           Text="输出详情与控制" />
+                                           Text="点位详情" />
 
                                 <Border Margin="0,12,0,8"
                                         Padding="10"
                                         CornerRadius="6"
                                         Background="{DynamicResource RegionBrush}">
-                                    <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" Text="当前点位：DO-001" />
+                                    <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" Text="当前点位：DI-001" />
                                 </Border>
 
                                 <Border Margin="0,0,0,8"
                                         Padding="10"
                                         CornerRadius="6"
                                         Background="{DynamicResource RegionBrush}">
-                                    <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" Text="名称：夹爪气缸伸出" />
+                                    <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" Text="名称：启动按钮" />
                                 </Border>
 
                                 <Border Margin="0,0,0,8"
                                         Padding="10"
                                         CornerRadius="6"
                                         Background="{DynamicResource RegionBrush}">
-                                    <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" Text="联动对象：夹爪电磁阀" />
+                                    <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" Text="类型：数字输入" />
+                                </Border>
+
+                                <Border Margin="0,0,0,8"
+                                        Padding="10"
+                                        CornerRadius="6"
+                                        Background="{DynamicResource RegionBrush}">
+                                    <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" Text="作用：启动流程判断" />
                                 </Border>
 
                                 <Border Margin="0,0,0,8"
@@ -259,27 +266,22 @@
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" Text="当前状态" />
                                         <TextBlock Grid.Column="1"
-                                                   Foreground="{DynamicResource PrimaryBrush}"
+                                                   Foreground="{DynamicResource SuccessBrush}"
                                                    FontWeight="SemiBold"
-                                                   Text="OFF" />
+                                                   Text="ON" />
                                     </Grid>
                                 </Border>
-
-                                <WrapPanel Margin="0,8,0,0">
-                                    <Button MinWidth="88" Margin="0,0,8,8" Content="置位输出" />
-                                    <Button MinWidth="88" Margin="0,0,8,8" Content="复位输出" />
-                                </WrapPanel>
 
                                 <Border Padding="10"
                                         CornerRadius="6"
                                         Background="{DynamicResource RegionBrush}">
-                                    <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" Text="安全提示：手动输出前请确认联锁状态" />
+                                    <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" Text="最后触发：22:35:18.256" />
                                 </Border>
                             </StackPanel>
                         </Border>
                     </Grid>
 
-                    <!-- 底部操作记录 -->
+                    <!-- 底部变化记录 -->
                     <Border Grid.Row="4"
                             Padding="12"
                             CornerRadius="8"
@@ -294,7 +296,7 @@
                             <TextBlock FontSize="14"
                                        FontWeight="SemiBold"
                                        Foreground="{DynamicResource PrimaryTextBrush}"
-                                       Text="输出操作记录" />
+                                       Text="输入变化记录" />
 
                             <DataGrid Grid.Row="2"
                                       AutoGenerateColumns="False"
@@ -313,8 +315,8 @@
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="时间" Width="180" Binding="{Binding}" />
                                     <DataGridTextColumn Header="点位" Width="100" Binding="{Binding}" />
-                                    <DataGridTextColumn Header="操作" Width="120" Binding="{Binding}" />
-                                    <DataGridTextColumn Header="结果" Width="100" Binding="{Binding}" />
+                                    <DataGridTextColumn Header="变化" Width="100" Binding="{Binding}" />
+                                    <DataGridTextColumn Header="来源" Width="100" Binding="{Binding}" />
                                     <DataGridTextColumn Header="说明" Width="*" Binding="{Binding}" />
                                 </DataGrid.Columns>
                             </DataGrid>
@@ -339,7 +341,7 @@
                 <TextBlock DockPanel.Dock="Right"
                            VerticalAlignment="Center"
                            Foreground="{DynamicResource PrimaryTextBrush}"
-                           Text="当前输出分组：气缸电磁阀" />
+                           Text="当前输入分组：启动/停止按钮" />
             </DockPanel>
         </Border>
     </Grid>

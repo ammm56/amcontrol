@@ -43,14 +43,14 @@
 
             <!-- 一级导航模块 -->
             <Border Grid.Row="0"
-            Grid.Column="0"
-            Margin="0,0,12,0"
-            Padding="8,12"
-            CornerRadius="14"
-            Background="{DynamicResource RegionBrush}"
-            BorderBrush="{DynamicResource BorderBrush}"
-            BorderThickness="1"
-            Effect="{StaticResource EffectShadow2}">
+                    Grid.Column="0"
+                    Margin="0,0,12,0"
+                    Padding="8,12"
+                    CornerRadius="14"
+                    Background="{DynamicResource RegionBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    Effect="{StaticResource EffectShadow2}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*" />

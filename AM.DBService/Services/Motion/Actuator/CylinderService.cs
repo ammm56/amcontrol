@@ -216,7 +216,7 @@ namespace AM.DBService.Services.Motion.Actuator
                 return Fail<bool>(readResult.Code, readResult.Message);
             }
 
-            return Ok(value, "气缸伸出状态读取成功");
+            return OkSilent(value, "气缸伸出状态读取成功");
         }
 
         public Result<bool> IsRetracted(string name)
@@ -240,7 +240,7 @@ namespace AM.DBService.Services.Motion.Actuator
                 return Fail<bool>(readResult.Code, readResult.Message);
             }
 
-            return Ok(value, "气缸缩回状态读取成功");
+            return OkSilent(value, "气缸缩回状态读取成功");
         }
 
         private Result ResolveCylinder(string name, out CylinderConfig cylinder)
@@ -268,7 +268,7 @@ namespace AM.DBService.Services.Motion.Actuator
                 return Fail((int)MotionErrorCode.InvalidIoBit, "气缸对象未启用: " + name);
             }
 
-            return Ok("气缸对象解析成功");
+            return OkSilent("气缸对象解析成功");
         }
 
         private IMotionCardService GetMotionHub()
@@ -321,7 +321,7 @@ namespace AM.DBService.Services.Motion.Actuator
                 return Fail((int)MotionErrorCode.IoMapNotFound, "Motion IO 运行时缓存已过期");
             }
 
-            return Ok("Motion IO 运行时缓存可用");
+            return OkSilent("Motion IO 运行时缓存可用");
         }
 
         private Result TryReadCachedDI(short logicalBit, out bool value)
@@ -350,7 +350,7 @@ namespace AM.DBService.Services.Motion.Actuator
                 }
             }
 
-            return Ok("逻辑DI缓存读取成功");
+            return OkSilent("逻辑DI缓存读取成功");
         }
 
         private Result SetOutputsForExtend(CylinderConfig cylinder)

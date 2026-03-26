@@ -10,7 +10,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="ListBoxItem">
                     <Border x:Name="BorderRoot"
-                            Margin="4,6"
+                            Margin="2,3"
                             Padding="8,12"
                             CornerRadius="10"
                             Background="Transparent"

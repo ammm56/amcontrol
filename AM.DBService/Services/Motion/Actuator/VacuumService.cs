@@ -292,7 +292,7 @@ namespace AM.DBService.Services.Motion.Actuator
                 return Fail<bool>(readResult.Code, readResult.Message);
             }
 
-            return Ok(value, "真空建立状态读取成功");
+            return OkSilent(value, "真空建立状态读取成功");
         }
 
         /// <summary>
@@ -318,7 +318,7 @@ namespace AM.DBService.Services.Motion.Actuator
                     return Fail<bool>(readResult.Code, readResult.Message);
                 }
 
-                return Ok(value, "真空释放状态读取成功");
+                return OkSilent(value, "真空释放状态读取成功");
             }
 
             if (vacuum.VacuumFeedbackBit.HasValue)
@@ -329,7 +329,7 @@ namespace AM.DBService.Services.Motion.Actuator
                     return Fail<bool>(readResult.Code, readResult.Message);
                 }
 
-                return Ok(!value, "真空释放状态读取成功");
+                return OkSilent(!value, "真空释放状态读取成功");
             }
 
             return Fail<bool>((int)MotionErrorCode.IoMapNotFound, "真空对象未配置释放反馈位或建立反馈位");
@@ -359,7 +359,7 @@ namespace AM.DBService.Services.Motion.Actuator
                 return Fail<bool>(readResult.Code, readResult.Message);
             }
 
-            return Ok(value, "工件检测状态读取成功");
+            return OkSilent(value, "工件检测状态读取成功");
         }
 
         private Result ResolveVacuum(string name, out VacuumConfig vacuum)

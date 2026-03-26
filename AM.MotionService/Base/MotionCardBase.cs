@@ -81,7 +81,7 @@ namespace AM.MotionService.Base
             lock (_axisMapLock)
             {
                 if (_axisMap.TryGetValue(logicalAxis, out cfg))
-                    return Ok(cfg, "逻辑轴映射获取成功");
+                    return OkSilent(cfg, "逻辑轴映射获取成功");
             }
 
             return Fail<AxisConfig>(MotionErrorCode.AxisMapNotFound, "逻辑轴 " + logicalAxis + " 映射未找到");

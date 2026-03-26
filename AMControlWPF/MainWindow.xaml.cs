@@ -8,7 +8,6 @@ using AMControlWPF.Views.Alarm;
 using AMControlWPF.Views.Am;
 using AMControlWPF.Views.Auth;
 using AMControlWPF.Views.Config;
-using AMControlWPF.Views.IO;
 using AMControlWPF.Views.Motion;
 using AMControlWPF.Views.Template;
 using HandyControl.Controls;
@@ -407,66 +406,113 @@ namespace AMControlWPF
         {
             switch (tag)
             {
+                // ── 首页 ──
                 case "Home.Overview":
                     return CreatePlaceholderPage("首页 / 总览看板");
-                case "Home.Status":
-                    return CreatePlaceholderPage("首页 / 设备状态");
+                case "Home.SysStatus":
+                    return CreatePlaceholderPage("首页 / 系统状态");
 
+                // ── 设备 ──
+                case "Motion.DI":
+                    return new DIMonitorView();
+                case "Motion.DO":
+                    return new DOMonitorView();
+                case "Motion.Monitor":
+                    return CreatePlaceholderPage("设备 / 多轴总览");
+                case "Motion.Axis":
+                    return new MotionAxisView();
+                case "Motion.Actuator":
+                    return CreatePlaceholderPage("设备 / 执行器控制");
+                
+                // ── 生产 ──
+                case "Production.Order":
+                    return CreatePlaceholderPage("生产 / 工单管理");
+                case "Production.Recipe":
+                    return CreatePlaceholderPage("生产 / 配方管理");
                 case "Production.Data":
                     return CreatePlaceholderPage("生产 / 生产数据");
                 case "Production.Report":
                     return CreatePlaceholderPage("生产 / 班次统计");
+                case "Production.Trace":
+                    return CreatePlaceholderPage("生产 / 追溯查询");
+                case "Production.MesStatus":
+                    return CreatePlaceholderPage("生产 / MES 状态");
+                case "Production.UploadLog":
+                    return CreatePlaceholderPage("生产 / 上传记录");
 
-                case "Motion.Axis":
-                    return new MotionAxisView();
-                case "Motion.Status":
-                    return CreatePlaceholderPage("运动 / 位置监视");
-                case "Motion.Alarm":
-                    return CreatePlaceholderPage("运动 / 运动报警");
-
-                case "IO.DI":
-                    return new DIMonitorView();
-                case "IO.DO":
-                    return new DOMonitorView();
-                case "IO.Debug":
-                    return CreatePlaceholderPage("IO / IO 调试");
-
+                // ── 视觉 ──
                 case "Vision.Monitor":
                     return CreatePlaceholderPage("视觉 / 相机监视");
+                case "Vision.Result":
+                    return CreatePlaceholderPage("视觉 / 检测结果");
+                case "Vision.Calibrate":
+                    return CreatePlaceholderPage("视觉 / 标定管理");
 
+                // ── PLC ──
                 case "PLC.Monitor":
                     return CreatePlaceholderPage("PLC / 点位监视");
-                case "PLC.Debug":
+                case "PLC.Register":
+                    return CreatePlaceholderPage("PLC / 寄存器监视");
+                case "PLC.Status":
                     return CreatePlaceholderPage("PLC / 通讯状态");
+                case "PLC.Write":
+                    return CreatePlaceholderPage("PLC / 写入调试");
 
-                case "Config.Card":
+                // ── 外设 ──
+                case "Peripheral.Scanner":
+                    return CreatePlaceholderPage("外设 / 扫码监视");
+                case "Peripheral.ScanTest":
+                    return CreatePlaceholderPage("外设 / 扫码测试");
+                case "Peripheral.Sensor ":
+                    return CreatePlaceholderPage("外设 / 传感器监视");
+                case "Peripheral.SensorTrend ":
+                    return CreatePlaceholderPage("外设 / 传感器数据趋势");
+
+                // ── 运控配置 ──
+                case "MotionConfig.Card":
                     return new MotionCardManagementView();
-                case "Config.Axis":
+                case "MotionConfig.Axis":
                     return new MotionAxisManagementView();
-                case "Config.IoMap":
+                case "MotionConfig.IoMap":
                     return new MotionIoMapManagementView();
-                case "Config.AxisParam":
+                case "MotionConfig.AxisParam":
                     return new MotionAxisParamManagementView();
-                case "Config.Actuator":
+                case "MotionConfig.Actuator":
                     return new ActuatorManagementView();
-                case "Config.Runtime":
-                    return CreatePlaceholderPage("配置 / 运行配置编辑");
-                case "Config.Camera":
-                    return CreatePlaceholderPage("配置 / 相机配置编辑");
-                case "Config.Plc":
-                    return CreatePlaceholderPage("配置 / PLC 配置编辑");
 
+                // ── 系统配置 ──
+                case "SysConfig.Camera":
+                    return CreatePlaceholderPage("系统配置 / 相机配置");
+                case "SysConfig.Plc":
+                    return CreatePlaceholderPage("系统配置 / PLC 配置");
+                case "SysConfig.Sensor":
+                    return CreatePlaceholderPage("系统配置 / 传感器配置");
+                case "SysConfig.Scanner":
+                    return CreatePlaceholderPage("系统配置 / 扫码器配置");
+                case "SysConfig.Mes":
+                    return CreatePlaceholderPage("系统配置 / MES 配置");
+                case "SysConfig.Runtime":
+                    return CreatePlaceholderPage("系统配置 / 运行配置");
+
+                // ── 工程 ──
+                case "Engineer.Diagnostic":
+                    return CreatePlaceholderPage("工程 / 设备诊断");
                 case "Engineer.RawAxis":
                     return CreatePlaceholderPage("工程 / 原始轴参数");
                 case "Engineer.RawPlc":
                     return CreatePlaceholderPage("工程 / 原始 PLC 参数");
                 case "Engineer.RawCamera":
                     return CreatePlaceholderPage("工程 / 原始相机参数");
-                case "Engineer.Diagnostic":
-                    return CreatePlaceholderPage("工程 / 设备诊断");
-                case "Engineer.Debug":
-                    return CreatePlaceholderPage("工程 / Motion/IO 调试");
 
+                // ── 维保 ──
+                case "Maintenance.Life":
+                    return CreatePlaceholderPage("维保 / 寿命管理");
+                case "Maintenance.Plan":
+                    return CreatePlaceholderPage("维保 / 保养计划");
+                case "Maintenance.Record":
+                    return CreatePlaceholderPage("维保 / 维保记录");
+
+                // ── 报警与日志 ──
                 case "AlarmLog.Current":
                     return new CurrentAlarmView();
                 case "AlarmLog.History":
@@ -474,12 +520,15 @@ namespace AMControlWPF
                 case "AlarmLog.RunLog":
                     return new RunLogView();
 
+                // ── 系统 ──
                 case "System.User":
                     return new UserManagementView();
                 case "System.Permission":
                     return new UserPermissionView();
                 case "System.LoginLog":
                     return new LoginLogView();
+                case "System.Backup":
+                    return CreatePlaceholderPage("系统 / 数据备份");
 
                 default:
                     return CreatePlaceholderPage("未定义页面: " + tag);
@@ -709,32 +758,5 @@ namespace AMControlWPF
             public List<string> AllowedRoles { get; private set; }
         }
 
-        private sealed class AlarmDisplayItem
-        {
-            public string CodeText { get; set; }
-
-            public string LevelText { get; set; }
-
-            public string Message { get; set; }
-
-            public DateTime Time { get; set; }
-
-            public string Source { get; set; }
-
-            public short? CardId { get; set; }
-
-            public string Description { get; set; }
-
-            public string Suggestion { get; set; }
-
-            public string SummaryText
-            {
-                get
-                {
-                    var source = string.IsNullOrWhiteSpace(Source) ? "-" : Source;
-                    return LevelText + " · " + source + " · " + Time.ToString("HH:mm:ss");
-                }
-            }
-        }
     }
 }

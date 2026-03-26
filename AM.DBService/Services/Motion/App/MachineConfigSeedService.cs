@@ -480,7 +480,45 @@ namespace AM.DBService.Services.Motion.App
                     IsEnabled = true,
                     SortOrder = 22,
                     Remark = "测试夹爪打开输出"
-                }
+                },
+                // ── 安全 IO — DI ──
+                new MotionIoMapEntity
+                {
+                    CardId = 0, IoType = "DI", LogicalBit = 1501, Name = "EStop",
+                    Core = 1, IsExtModule = false, HardwareBit = 14, IsEnabled = true,
+                    SortOrder = 23, Remark = "急停按钮（NC）"
+                },
+                new MotionIoMapEntity
+                {
+                    CardId = 0, IoType = "DI", LogicalBit = 1502, Name = "SafetyDoor1",
+                    Core = 1, IsExtModule = false, HardwareBit = 15, IsEnabled = true,
+                    SortOrder = 24, Remark = "安全门1（NC）"
+                },
+                new MotionIoMapEntity
+                {
+                    CardId = 0, IoType = "DI", LogicalBit = 1503, Name = "LightCurtain1",
+                    Core = 1, IsExtModule = false, HardwareBit = 16, IsEnabled = true,
+                    SortOrder = 25, Remark = "正面光幕（NC）"
+                },
+                new MotionIoMapEntity
+                {
+                    CardId = 0, IoType = "DI", LogicalBit = 1504, Name = "LightCurtain2",
+                    Core = 1, IsExtModule = false, HardwareBit = 17, IsEnabled = true,
+                    SortOrder = 26, Remark = "侧面光幕（NC）"
+                },
+                new MotionIoMapEntity
+                {
+                    CardId = 0, IoType = "DI", LogicalBit = 1505, Name = "SafetyMat1",
+                    Core = 1, IsExtModule = false, HardwareBit = 18, IsEnabled = true,
+                    SortOrder = 27, Remark = "安全地毯（NC）"
+                },
+                // ── 安全 IO — DO ──
+                new MotionIoMapEntity
+                {
+                    CardId = 0, IoType = "DO", LogicalBit = 2501, Name = "SafetyRelayReset",
+                    Core = 1, IsExtModule = false, HardwareBit = 13, IsEnabled = true,
+                    SortOrder = 28, Remark = "安全继电器复位脉冲输出"
+                },
             };
         }
 
@@ -905,7 +943,62 @@ namespace AM.DBService.Services.Motion.App
                     BlinkOffMs = 0,
                     Description = "测试夹爪打开控制输出",
                     Remark = "默认夹爪 DO 点位公共配置"
-                }
+                },
+                // ── 安全 IO 点位公共配置 ──
+                new MotionIoPointConfigEntity
+                {
+                    IoType = "DI", LogicalBit = 1501, DisplayName = "急停按钮",
+                    SignalCategory = "Safety", Invert = false, IsNormallyClosed = true,
+                    DebounceMs = 5, FilterMs = 0, CanManualOperate = false,
+                    DefaultOutputState = false, OutputMode = "Keep",
+                    PulseWidthMs = 0, BlinkOnMs = 0, BlinkOffMs = 0,
+                    Description = "急停按钮，NC 接线，触发后立即停机", Remark = "安全 DI"
+                },
+                new MotionIoPointConfigEntity
+                {
+                    IoType = "DI", LogicalBit = 1502, DisplayName = "安全门1",
+                    SignalCategory = "Safety", Invert = false, IsNormallyClosed = true,
+                    DebounceMs = 10, FilterMs = 0, CanManualOperate = false,
+                    DefaultOutputState = false, OutputMode = "Keep",
+                    PulseWidthMs = 0, BlinkOnMs = 0, BlinkOffMs = 0,
+                    Description = "安全门1，NC 接线，开门时禁止运动", Remark = "安全 DI"
+                },
+                new MotionIoPointConfigEntity
+                {
+                    IoType = "DI", LogicalBit = 1503, DisplayName = "正面光幕",
+                    SignalCategory = "Safety", Invert = false, IsNormallyClosed = true,
+                    DebounceMs = 5, FilterMs = 0, CanManualOperate = false,
+                    DefaultOutputState = false, OutputMode = "Keep",
+                    PulseWidthMs = 0, BlinkOnMs = 0, BlinkOffMs = 0,
+                    Description = "正面安全光幕，NC 接线，遮光时触发停机", Remark = "安全 DI"
+                },
+                new MotionIoPointConfigEntity
+                {
+                    IoType = "DI", LogicalBit = 1504, DisplayName = "侧面光幕",
+                    SignalCategory = "Safety", Invert = false, IsNormallyClosed = true,
+                    DebounceMs = 5, FilterMs = 0, CanManualOperate = false,
+                    DefaultOutputState = false, OutputMode = "Keep",
+                    PulseWidthMs = 0, BlinkOnMs = 0, BlinkOffMs = 0,
+                    Description = "侧面安全光幕，NC 接线，遮光时触发停机", Remark = "安全 DI"
+                },
+                new MotionIoPointConfigEntity
+                {
+                    IoType = "DI", LogicalBit = 1505, DisplayName = "安全地毯",
+                    SignalCategory = "Safety", Invert = false, IsNormallyClosed = true,
+                    DebounceMs = 10, FilterMs = 0, CanManualOperate = false,
+                    DefaultOutputState = false, OutputMode = "Keep",
+                    PulseWidthMs = 0, BlinkOnMs = 0, BlinkOffMs = 0,
+                    Description = "安全地毯，NC 接线，踩踏时触发停机", Remark = "安全 DI"
+                },
+                new MotionIoPointConfigEntity
+                {
+                    IoType = "DO", LogicalBit = 2501, DisplayName = "安全继电器复位",
+                    SignalCategory = "Safety", Invert = false, IsNormallyClosed = false,
+                    DebounceMs = 0, FilterMs = 0, CanManualOperate = false,
+                    DefaultOutputState = false, OutputMode = "Pulse",
+                    PulseWidthMs = 300, BlinkOnMs = 0, BlinkOffMs = 0,
+                    Description = "向安全继电器发送复位脉冲，报警确认后恢复使能", Remark = "安全 DO"
+                },
             };
         }
 
