@@ -140,29 +140,37 @@
                         <ListBox ItemsSource="{Binding Items}"
                                  SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
                                  Background="Transparent"
-                                 BorderThickness="0">
+                                 BorderThickness="0"
+                                 HorizontalContentAlignment="Stretch"
+                                 VerticalContentAlignment="Stretch">
                             <ListBox.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <WrapPanel Orientation="Horizontal" />
                                 </ItemsPanelTemplate>
                             </ListBox.ItemsPanel>
+
                             <ListBox.ItemContainerStyle>
                                 <Style TargetType="ListBoxItem">
+                                    <Setter Property="OverridesDefaultStyle" Value="True" />
                                     <Setter Property="Padding" Value="0" />
                                     <Setter Property="Margin" Value="0" />
                                     <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                    <Setter Property="Background" Value="Transparent" />
+                                    <Setter Property="BorderThickness" Value="0" />
                                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                                     <Setter Property="VerticalContentAlignment" Value="Stretch" />
                                     <Setter Property="Template">
                                         <Setter.Value>
                                             <ControlTemplate TargetType="ListBoxItem">
                                                 <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                                                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                                  SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
                                             </ControlTemplate>
                                         </Setter.Value>
                                     </Setter>
                                 </Style>
                             </ListBox.ItemContainerStyle>
+                            
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <Border Width="154"
