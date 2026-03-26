@@ -7,6 +7,84 @@
              mc:Ignorable="d"
              Background="Transparent">
 
+    <UserControl.Resources>
+        <Style x:Key="MotionActionTileButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="78" />
+            <Setter Property="Height" Value="66" />
+            <Setter Property="Margin" Value="6" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="#607D8B" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="TileRoot"
+                                Padding="10,9"
+                                CornerRadius="6"
+                                BorderThickness="1"
+                                Background="{DynamicResource SecondaryRegionBrush}"
+                                BorderBrush="Transparent"
+                                Effect="{StaticResource EffectShadow2}">
+                            <Grid>
+                                <Border HorizontalAlignment="Left"
+                                        VerticalAlignment="Top"
+                                        Padding="5,2"
+                                        CornerRadius="3"
+                                        Background="{TemplateBinding Background}">
+                                    <TextBlock FontSize="9"
+                                               FontWeight="SemiBold"
+                                               Foreground="White"
+                                               Text="{TemplateBinding Tag}" />
+                                </Border>
+
+                                <TextBlock HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Padding="0,12,0,0"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="{TemplateBinding Content}"
+                                           TextWrapping="Wrap"
+                                           TextAlignment="Center" />
+                            </Grid>
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="TileRoot"
+                                        Property="BorderBrush"
+                                        Value="{DynamicResource BorderBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="TileRoot"
+                                        Property="Opacity"
+                                        Value="0.88" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="TileRoot"
+                                        Property="Opacity"
+                                        Value="0.45" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="MotionInputTileBorderStyle" TargetType="Border">
+            <Setter Property="Width" Value="140" />
+            <Setter Property="Height" Value="86" />
+            <Setter Property="Margin" Value="6" />
+            <Setter Property="Padding" Value="10,9" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Background" Value="{DynamicResource SecondaryRegionBrush}" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="Effect" Value="{StaticResource EffectShadow2}" />
+        </Style>
+    </UserControl.Resources>
+
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition x:Name="RootToolbarRow" Height="Auto" />
@@ -63,11 +141,11 @@
         <!-- 主体区 -->
         <Grid Grid.Row="1" Margin="0,8,0,8">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="220" />
+                <ColumnDefinition Width="200" />
                 <ColumnDefinition Width="8" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="8" />
-                <ColumnDefinition Width="250" />
+                <ColumnDefinition Width="235" />
             </Grid.ColumnDefinitions>
 
             <!-- 左侧轴列表 -->
@@ -153,11 +231,6 @@
                                                                Foreground="White"
                                                                Text="{Binding LogicalAxis, StringFormat='L#{0}'}" />
                                                 </Border>
-                                                <TextBlock DockPanel.Dock="Right"
-                                                           FontSize="10"
-                                                           Opacity="0.5"
-                                                           Foreground="{DynamicResource PrimaryTextBrush}"
-                                                           Text="{Binding StateText}" />
                                             </DockPanel>
 
                                             <TextBlock Margin="0,6,0,0"
@@ -182,7 +255,7 @@
                 </Grid>
             </Border>
 
-            <!-- 中间控制工作区 -->
+            <!-- 中间控制区 -->
             <Border Grid.Column="2"
                     CornerRadius="8"
                     Background="{DynamicResource RegionBrush}"
@@ -190,8 +263,8 @@
                     BorderThickness="1">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition x:Name="AxisActionHeaderRow" Height="Auto" />
-                        <RowDefinition x:Name="AxisActionContentRow" Height="*" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
                     <Border Grid.Row="0"
@@ -228,11 +301,10 @@
                                        Text="请先在左侧选择一个轴" />
                         </StackPanel>
 
-                        <!-- 已选轴控制区 -->
-                        <ScrollViewer VerticalScrollBarVisibility="Auto"
-                                      HorizontalScrollBarVisibility="Disabled">
-                            <ScrollViewer.Style>
-                                <Style TargetType="ScrollViewer">
+                        <!-- 已选轴磁贴区 -->
+                        <Grid>
+                            <Grid.Style>
+                                <Style TargetType="Grid">
                                     <Setter Property="Visibility" Value="Visible" />
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding SelectedAxisItem}" Value="{x:Null}">
@@ -240,178 +312,178 @@
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
-                            </ScrollViewer.Style>
+                            </Grid.Style>
 
-                            <WrapPanel Orientation="Horizontal"
-                                       ItemWidth="360"
-                                       Margin="8">
-                                <!-- 手动控制 -->
-                                <Border Width="360"
-                                        Margin="0,0,8,8"
-                                        Padding="12"
-                                        CornerRadius="8"
-                                        Background="{DynamicResource SecondaryRegionBrush}"
-                                        BorderBrush="{DynamicResource BorderBrush}"
-                                        BorderThickness="1">
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition x:Name="ManualTitleRow" Height="Auto" />
-                                            <RowDefinition x:Name="ManualGap1Row" Height="12" />
-                                            <RowDefinition x:Name="ManualServoRow" Height="Auto" />
-                                            <RowDefinition x:Name="ManualGap2Row" Height="12" />
-                                            <RowDefinition x:Name="ManualJogRow" Height="Auto" />
-                                            <RowDefinition x:Name="ManualGap3Row" Height="12" />
-                                            <RowDefinition x:Name="ManualSpeedTitleRow" Height="Auto" />
-                                            <RowDefinition x:Name="ManualGap4Row" Height="8" />
-                                            <RowDefinition x:Name="ManualSpeedRow" Height="Auto" />
-                                        </Grid.RowDefinitions>
+                            <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                          HorizontalScrollBarVisibility="Disabled"
+                                          Padding="4,6,4,4">
+                                <WrapPanel Orientation="Horizontal">
 
-                                        <TextBlock Grid.Row="0"
-                                                   FontSize="14"
-                                                   FontWeight="SemiBold"
-                                                   Foreground="{DynamicResource PrimaryTextBrush}"
-                                                   Text="手动控制" />
+                                    <Button Style="{StaticResource MotionActionTileButtonStyle}"
+                                            Background="#1976D2"
+                                            Tag="基础操作"
+                                            Content="使能"
+                                            Command="{Binding ServoOnCommand}" />
 
-                                        <WrapPanel Grid.Row="2">
-                                            <Button MinWidth="92"
-                                                    Margin="0,0,8,8"
-                                                    Command="{Binding ServoOnCommand}"
-                                                    Content="使能" />
-                                            <Button MinWidth="92"
-                                                    Margin="0,0,8,8"
-                                                    Command="{Binding ServoOffCommand}"
-                                                    Content="失能" />
-                                            <Button MinWidth="92"
-                                                    Margin="0,0,8,8"
-                                                    Command="{Binding HomeCommand}"
-                                                    Content="回零" />
-                                            <Button MinWidth="92"
-                                                    Margin="0,0,8,8"
-                                                    Command="{Binding ClearStatusCommand}"
-                                                    Content="清状态" />
-                                            <Button MinWidth="92"
-                                                    Margin="0,0,8,8"
-                                                    Command="{Binding StopCommand}"
-                                                    Content="平停" />
-                                            <Button MinWidth="92"
-                                                    Margin="0,0,8,8"
-                                                    Command="{Binding EmergencyStopCommand}"
-                                                    Content="急停" />
-                                        </WrapPanel>
+                                    <Button Style="{StaticResource MotionActionTileButtonStyle}"
+                                            Background="#1976D2"
+                                            Tag="基础操作"
+                                            Content="失能"
+                                            Command="{Binding ServoOffCommand}" />
 
-                                        <Grid Grid.Row="4">
+                                    <Button Style="{StaticResource MotionActionTileButtonStyle}"
+                                            Background="#F57C00"
+                                            Tag="回零"
+                                            Content="回零"
+                                            Command="{Binding HomeCommand}" />
+
+                                    <Button Style="{StaticResource MotionActionTileButtonStyle}"
+                                            Background="#607D8B"
+                                            Tag="维护"
+                                            Content="清状态"
+                                            Command="{Binding ClearStatusCommand}" />
+
+                                    <Button Style="{StaticResource MotionActionTileButtonStyle}"
+                                            Background="#00897B"
+                                            Tag="停止"
+                                            Content="平停"
+                                            Command="{Binding StopCommand}" />
+
+                                    <Button Style="{StaticResource MotionActionTileButtonStyle}"
+                                            Background="#D32F2F"
+                                            Tag="停止"
+                                            Content="急停"
+                                            Command="{Binding EmergencyStopCommand}" />
+
+                                    <Button Style="{StaticResource MotionActionTileButtonStyle}"
+                                            Background="#5E35B1"
+                                            Tag="Jog"
+                                            Content="负运动"
+                                            Command="{Binding JogNegativeCommand}" />
+
+                                    <Button Style="{StaticResource MotionActionTileButtonStyle}"
+                                            Background="#5E35B1"
+                                            Tag="Jog"
+                                            Content="停止"
+                                            Command="{Binding JogStopCommand}" />
+
+                                    <Button Style="{StaticResource MotionActionTileButtonStyle}"
+                                            Background="#5E35B1"
+                                            Tag="Jog"
+                                            Content="正运动"
+                                            Command="{Binding JogPositiveCommand}" />
+
+                                    <Border Style="{StaticResource MotionInputTileBorderStyle}">
+                                        <Grid>
                                             <Grid.RowDefinitions>
                                                 <RowDefinition Height="Auto" />
-                                                <RowDefinition Height="8" />
-                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="*" />
                                             </Grid.RowDefinitions>
 
-                                            <TextBlock Grid.Row="0"
-                                                       Foreground="{DynamicResource PrimaryTextBrush}"
-                                                       Text="Jog / 手动运动" />
+                                            <DockPanel Grid.Row="0" LastChildFill="False">
+                                                <Border DockPanel.Dock="Left"
+                                                        Padding="5,2"
+                                                        CornerRadius="3"
+                                                        Background="#607D8B">
+                                                    <TextBlock FontSize="9"
+                                                               FontWeight="SemiBold"
+                                                               Foreground="White"
+                                                               Text="输入" />
+                                                </Border>
+                                                <Button DockPanel.Dock="Right"
+                                                        Width="72"
+                                                        Height="24"
+                                                        Margin="8,0,0,0"
+                                                        Command="{Binding ApplyVelocityCommand}"
+                                                        Content="应用速度" />
+                                            </DockPanel>
 
-                                            <WrapPanel Grid.Row="2">
-                                                <Button MinWidth="100"
-                                                        Margin="0,0,8,8"
-                                                        Command="{Binding JogNegativeCommand}"
-                                                        Content="负向运动" />
-                                                <Button MinWidth="100"
-                                                        Margin="0,0,8,8"
-                                                        Command="{Binding JogStopCommand}"
-                                                        Content="Jog停止" />
-                                                <Button MinWidth="100"
-                                                        Margin="0,0,8,8"
-                                                        Command="{Binding JogPositiveCommand}"
-                                                        Content="正向运动" />
-                                            </WrapPanel>
-                                        </Grid>
-
-                                        <TextBlock Grid.Row="6"
-                                                   Foreground="{DynamicResource PrimaryTextBrush}"
-                                                   Text="速度(mm/s)" />
-
-                                        <Grid Grid.Row="8">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="8" />
-                                                <ColumnDefinition Width="110" />
-                                            </Grid.ColumnDefinitions>
-
-                                            <TextBox Grid.Column="0"
-                                                     Height="30"
+                                            <TextBox Grid.Row="1"
+                                                     Margin="0,10,0,0"
                                                      VerticalContentAlignment="Center"
-                                                     Text="{Binding VelocityMmText, UpdateSourceTrigger=PropertyChanged}" />
-
-                                            <Button Grid.Column="2"
-                                                    Height="30"
-                                                    Command="{Binding ApplyVelocityCommand}"
-                                                    Content="应用速度" />
+                                                     HorizontalContentAlignment="Center"
+                                                     FontSize="18"
+                                                     Text="{Binding VelocityMmText, UpdateSourceTrigger=PropertyChanged}"
+                                                     hc:TitleElement.Title="速度(mm/s)"
+                                                     hc:TitleElement.TitlePlacement="Top" />
                                         </Grid>
-                                    </Grid>
-                                </Border>
+                                    </Border>
 
-                                <!-- 定位控制 -->
-                                <Border Width="360"
-                                        Margin="0,0,8,8"
-                                        Padding="12"
-                                        CornerRadius="8"
-                                        Background="{DynamicResource SecondaryRegionBrush}"
-                                        BorderBrush="{DynamicResource BorderBrush}"
-                                        BorderThickness="1">
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition x:Name="PosTitleRow" Height="Auto" />
-                                            <RowDefinition x:Name="PosGap1Row" Height="12" />
-                                            <RowDefinition x:Name="AbsTitleRow" Height="Auto" />
-                                            <RowDefinition x:Name="AbsGap1Row" Height="8" />
-                                            <RowDefinition x:Name="AbsInputRow" Height="Auto" />
-                                            <RowDefinition x:Name="AbsGap2Row" Height="8" />
-                                            <RowDefinition x:Name="AbsBtnRow" Height="Auto" />
-                                            <RowDefinition x:Name="PosGap2Row" Height="14" />
-                                            <RowDefinition x:Name="RelTitleRow" Height="Auto" />
-                                            <RowDefinition x:Name="RelGap1Row" Height="8" />
-                                            <RowDefinition x:Name="RelInputRow" Height="Auto" />
-                                            <RowDefinition x:Name="RelGap2Row" Height="8" />
-                                            <RowDefinition x:Name="RelBtnRow" Height="Auto" />
-                                        </Grid.RowDefinitions>
+                                    <Border Style="{StaticResource MotionInputTileBorderStyle}">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="*" />
+                                            </Grid.RowDefinitions>
 
-                                        <TextBlock Grid.Row="0"
-                                                   FontSize="14"
-                                                   FontWeight="SemiBold"
-                                                   Foreground="{DynamicResource PrimaryTextBrush}"
-                                                   Text="定位控制" />
+                                            <DockPanel Grid.Row="0" LastChildFill="False">
+                                                <Border DockPanel.Dock="Left"
+                                                        Padding="5,2"
+                                                        CornerRadius="3"
+                                                        Background="#1976D2">
+                                                    <TextBlock FontSize="9"
+                                                               FontWeight="SemiBold"
+                                                               Foreground="White"
+                                                               Text="定位" />
+                                                </Border>
+                                                <Button DockPanel.Dock="Right"
+                                                        Width="72"
+                                                        Height="24"
+                                                        Margin="8,0,0,0"
+                                                        Command="{Binding MoveAbsoluteCommand}"
+                                                        Content="绝对定位" />
+                                            </DockPanel>
 
-                                        <TextBlock Grid.Row="2"
-                                                   Foreground="{DynamicResource PrimaryTextBrush}"
-                                                   Text="绝对定位目标(mm)" />
+                                            <TextBox Grid.Row="1"
+                                                     Margin="0,10,0,0"
+                                                     VerticalContentAlignment="Center"
+                                                     HorizontalContentAlignment="Center"
+                                                     FontSize="18"
+                                                     Text="{Binding TargetPositionMmText, UpdateSourceTrigger=PropertyChanged}"
+                                                     hc:TitleElement.Title="绝对位置(mm)"
+                                                     hc:TitleElement.TitlePlacement="Top" />
+                                        </Grid>
+                                    </Border>
 
-                                        <TextBox Grid.Row="4"
-                                                 Height="30"
-                                                 VerticalContentAlignment="Center"
-                                                 Text="{Binding TargetPositionMmText, UpdateSourceTrigger=PropertyChanged}" />
+                                    <Border Style="{StaticResource MotionInputTileBorderStyle}">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="*" />
+                                            </Grid.RowDefinitions>
 
-                                        <Button Grid.Row="6"
-                                                Height="32"
-                                                Command="{Binding MoveAbsoluteCommand}"
-                                                Content="执行绝对定位" />
+                                            <DockPanel Grid.Row="0" LastChildFill="False">
+                                                <Border DockPanel.Dock="Left"
+                                                        Padding="5,2"
+                                                        CornerRadius="3"
+                                                        Background="#1976D2">
+                                                    <TextBlock FontSize="9"
+                                                               FontWeight="SemiBold"
+                                                               Foreground="White"
+                                                               Text="定位" />
+                                                </Border>
+                                                <Button DockPanel.Dock="Right"
+                                                        Width="72"
+                                                        Height="24"
+                                                        Margin="8,0,0,0"
+                                                        Command="{Binding MoveRelativeCommand}"
+                                                        Content="相对移动" />
+                                            </DockPanel>
 
-                                        <TextBlock Grid.Row="8"
-                                                   Foreground="{DynamicResource PrimaryTextBrush}"
-                                                   Text="相对移动距离(mm)" />
+                                            <TextBox Grid.Row="1"
+                                                     Margin="0,10,0,0"
+                                                     VerticalContentAlignment="Center"
+                                                     HorizontalContentAlignment="Center"
+                                                     FontSize="18"
+                                                     Text="{Binding MoveDistanceMmText, UpdateSourceTrigger=PropertyChanged}"
+                                                     hc:TitleElement.Title="相对距离(mm)"
+                                                     hc:TitleElement.TitlePlacement="Top" />
+                                        </Grid>
+                                    </Border>
 
-                                        <TextBox Grid.Row="10"
-                                                 Height="30"
-                                                 VerticalContentAlignment="Center"
-                                                 Text="{Binding MoveDistanceMmText, UpdateSourceTrigger=PropertyChanged}" />
-
-                                        <Button Grid.Row="12"
-                                                Height="32"
-                                                Command="{Binding MoveRelativeCommand}"
-                                                Content="执行相对移动" />
-                                    </Grid>
-                                </Border>
-                            </WrapPanel>
-                        </ScrollViewer>
+                                </WrapPanel>
+                            </ScrollViewer>
+                        </Grid>
                     </Grid>
                 </Grid>
             </Border>
@@ -473,11 +545,6 @@
                                            TextTrimming="CharacterEllipsis"
                                            Foreground="{DynamicResource PrimaryTextBrush}"
                                            Text="{Binding SelectedAxisHeader}" />
-                                <TextBlock Margin="0,2,0,0"
-                                           FontSize="11"
-                                           Opacity="0.6"
-                                           Foreground="{DynamicResource PrimaryTextBrush}"
-                                           Text="{Binding SelectedAxisCardText}" />
                             </StackPanel>
                         </Border>
 
@@ -499,7 +566,7 @@
                                            HorizontalAlignment="Left"
                                            Subject="更新时间"
                                            Status="{Binding SelectedAxisRuntimeUpdateTimeText}"
-                                           Color="#6C4A9A" />
+                                           Color="#A6E22E" />
                                 <hc:Shield Margin="0,0,0,6"
                                            HorizontalAlignment="Left"
                                            Subject="当前状态"
@@ -512,9 +579,19 @@
                                            Color="#F57C00" />
                                 <hc:Shield Margin="0,0,0,6"
                                            HorizontalAlignment="Left"
-                                           Subject="原点/到位/使能"
-                                           Status="{Binding SelectedAxisSignalText}"
+                                           Subject="使能状态"
+                                           Status="{Binding SelectedAxisEnabledText}"
                                            Color="#1976D2" />
+                                <hc:Shield Margin="0,0,0,6"
+                                           HorizontalAlignment="Left"
+                                           Subject="原点状态"
+                                           Status="{Binding SelectedAxisHomeText}"
+                                           Color="#5E35B1" />
+                                <hc:Shield Margin="0,0,0,6"
+                                           HorizontalAlignment="Left"
+                                           Subject="到位状态"
+                                           Status="{Binding SelectedAxisDoneText}"
+                                           Color="#00897B" />
                                 <hc:Shield Margin="0,0,0,6"
                                            HorizontalAlignment="Left"
                                            Subject="规划位置(mm)"
@@ -555,7 +632,7 @@
                                            Opacity="0.75"
                                            TextWrapping="Wrap"
                                            Foreground="{DynamicResource PrimaryTextBrush}"
-                                           Text="当前页面用于单轴手动控制与运行状态确认。采样缓存仅用于界面显示，不参与运动安全判断与控制过程判定。" />
+                                           Text="当前页面用于单轴手动控制与运行状态确认。" />
                             </StackPanel>
                         </ScrollViewer>
                     </Grid>

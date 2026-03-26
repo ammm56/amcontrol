@@ -17,7 +17,7 @@ namespace AM.ViewModel.ViewModels.Motion
 {
     /// <summary>
     /// 单轴控制页视图模型。
-    /// 轴列表/控制卡为静态结构，实时值来自 RuntimeContext.Instance.MotionAxis。
+    /// 轴列表与控制卡为静态结构，运行态完全来自 RuntimeContext.Instance.MotionAxis。
     /// </summary>
     public class MotionAxisViewModel : ObservableObject
     {
@@ -35,6 +35,7 @@ namespace AM.ViewModel.ViewModels.Motion
         private bool _isBusy;
         private bool _isRefreshingCardFilters;
         private bool _isDisposed;
+        private bool _suppressVelocityReset;
 
         public MotionAxisViewModel()
         {
@@ -131,7 +132,7 @@ namespace AM.ViewModel.ViewModels.Motion
                 {
                     var currentAxis = _selectedAxisItem == null ? (short?)null : _selectedAxisItem.LogicalAxis;
 
-                    if (currentAxis.HasValue && currentAxis != previousAxis)
+                    if (!_suppressVelocityReset && currentAxis.HasValue && currentAxis != previousAxis)
                     {
                         VelocityMmText = _selectedAxisItem.DefaultVelocityMm > 0
                             ? _selectedAxisItem.DefaultVelocityMm.ToString("0.###", CultureInfo.InvariantCulture)
@@ -217,21 +218,39 @@ namespace AM.ViewModel.ViewModels.Motion
             }
         }
 
-        public string SelectedAxisSignalText
-        {
-            get
-            {
-                var snapshot = GetSelectedAxisRuntime();
-                return snapshot == null ? "—" : snapshot.SignalSummaryText;
-            }
-        }
-
         public string SelectedAxisLimitText
         {
             get
             {
                 var snapshot = GetSelectedAxisRuntime();
                 return snapshot == null ? "—" : snapshot.LimitStateText;
+            }
+        }
+
+        public string SelectedAxisEnabledText
+        {
+            get
+            {
+                var snapshot = GetSelectedAxisRuntime();
+                return snapshot == null ? "—" : (snapshot.IsEnabled ? "已使能" : "未使能");
+            }
+        }
+
+        public string SelectedAxisHomeText
+        {
+            get
+            {
+                var snapshot = GetSelectedAxisRuntime();
+                return snapshot == null ? "—" : (snapshot.IsAtHome ? "在原点" : "未回原点");
+            }
+        }
+
+        public string SelectedAxisDoneText
+        {
+            get
+            {
+                var snapshot = GetSelectedAxisRuntime();
+                return snapshot == null ? "—" : (snapshot.IsDone ? "已到位" : "未到位");
             }
         }
 
@@ -387,8 +406,6 @@ namespace AM.ViewModel.ViewModels.Motion
                     return;
                 }
 
-                var previousAxis = SelectedAxisItem == null ? (short?)null : SelectedAxisItem.LogicalAxis;
-                RebuildAxisItems(previousAxis);
                 RefreshSelectedAxisRuntimeDisplay();
             }, null);
         }
@@ -416,8 +433,10 @@ namespace AM.ViewModel.ViewModels.Motion
             OnPropertyChanged(nameof(SelectedAxisHeader));
             OnPropertyChanged(nameof(SelectedAxisCardText));
             OnPropertyChanged(nameof(SelectedAxisStatusText));
-            OnPropertyChanged(nameof(SelectedAxisSignalText));
             OnPropertyChanged(nameof(SelectedAxisLimitText));
+            OnPropertyChanged(nameof(SelectedAxisEnabledText));
+            OnPropertyChanged(nameof(SelectedAxisHomeText));
+            OnPropertyChanged(nameof(SelectedAxisDoneText));
             OnPropertyChanged(nameof(SelectedAxisCommandPositionText));
             OnPropertyChanged(nameof(SelectedAxisEncoderPositionText));
             OnPropertyChanged(nameof(SelectedAxisPositionErrorText));
@@ -628,48 +647,30 @@ namespace AM.ViewModel.ViewModels.Motion
 
             var list = query
                 .OrderBy(x => x.LogicalAxis)
-                .Select(CloneAxisDefinition)
                 .ToList();
-
-            _runtimeQueryService.ApplyAxisRuntime(list);
 
             foreach (var item in list)
             {
                 AxisItems.Add(item);
             }
 
-            if (previousAxis.HasValue)
+            _suppressVelocityReset = true;
+            try
             {
-                SelectedAxisItem = AxisItems.FirstOrDefault(x => x.LogicalAxis == previousAxis.Value)
-                    ?? FirstAxisOrNull();
+                if (previousAxis.HasValue)
+                {
+                    SelectedAxisItem = AxisItems.FirstOrDefault(x => x.LogicalAxis == previousAxis.Value)
+                        ?? FirstAxisOrNull();
+                }
+                else
+                {
+                    SelectedAxisItem = FirstAxisOrNull();
+                }
             }
-            else
+            finally
             {
-                SelectedAxisItem = FirstAxisOrNull();
+                _suppressVelocityReset = false;
             }
-        }
-
-        private static MotionAxisDisplayItem CloneAxisDefinition(MotionAxisDisplayItem source)
-        {
-            if (source == null)
-            {
-                return null;
-            }
-
-            return new MotionAxisDisplayItem
-            {
-                LogicalAxis = source.LogicalAxis,
-                CardId = source.CardId,
-                AxisId = source.AxisId,
-                PhysicalCore = source.PhysicalCore,
-                PhysicalAxis = source.PhysicalAxis,
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                AxisCategory = source.AxisCategory,
-                CardDisplayName = source.CardDisplayName,
-                DefaultVelocityMm = source.DefaultVelocityMm,
-                JogVelocityMm = source.JogVelocityMm
-            };
         }
 
         private MotionAxisDisplayItem FirstAxisOrNull()
