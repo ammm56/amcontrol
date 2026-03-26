@@ -25,6 +25,12 @@ namespace AM.Model.Runtime
         }
 
         /// <summary>
+        /// 整轮扫描结果更新完成事件。
+        /// ViewModel 订阅此事件后执行刷新。
+        /// </summary>
+        public event Action SnapshotChanged;
+
+        /// <summary>
         /// 扫描服务是否运行中。
         /// </summary>
         public bool IsScanServiceRunning { get; private set; }
@@ -92,6 +98,18 @@ namespace AM.Model.Runtime
             return _doValues.ToDictionary(p => p.Key, p => p.Value);
         }
 
+        /// <summary>
+        /// 通知订阅方：本轮扫描缓存已整体更新完成。
+        /// </summary>
+        public void NotifySnapshotChanged()
+        {
+            var handler = SnapshotChanged;
+            if (handler != null)
+            {
+                handler();
+            }
+        }
+
         public void Clear()
         {
             _diValues.Clear();
@@ -101,6 +119,7 @@ namespace AM.Model.Runtime
             LastScanTime = null;
             IsScanServiceRunning = false;
             ScanIntervalMs = 0;
+            NotifySnapshotChanged();
         }
     }
 }

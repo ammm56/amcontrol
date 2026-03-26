@@ -230,8 +230,9 @@ namespace AM.ViewModel.ViewModels.Motion
                 }
 
                 StatusText = string.Format(
-                    "DI 已刷新，筛选后 {0} 条，当前页 {1} 条",
+                    "DI 已刷新，当前卡共 {0} 条，匹配 {1} 条，当前页 {2} 条",
                     TotalCount,
+                    _filteredItems.Count,
                     Items.Count);
             }
             finally
@@ -279,12 +280,25 @@ namespace AM.ViewModel.ViewModels.Motion
             }
         }
 
-        private void UpdateSummary(IEnumerable<MotionIoDisplayItem> scopedItems)
+        private List<MotionIoDisplayItem> GetCardScopedItems()
         {
-            var scopedList = scopedItems == null ? new List<MotionIoDisplayItem>() : scopedItems.ToList();
+            if (SelectedCardFilter == null)
+            {
+                return _allItems.ToList();
+            }
 
-            TotalCount = scopedList.Count;
-            ActiveCount = scopedList.Count(x => x.CurrentValue);
+            return _allItems
+                .Where(x => x.CardId == SelectedCardFilter.CardId)
+                .OrderBy(x => x.LogicalBit)
+                .ToList();
+        }
+
+        private void UpdateSummary(IList<MotionIoDisplayItem> scopedItems)
+        {
+            var list = scopedItems ?? new List<MotionIoDisplayItem>();
+
+            TotalCount = list.Count;
+            ActiveCount = list.Count(x => x.CurrentValue);
 
             var runtime = RuntimeContext.Instance.MotionIo;
             ScanStateText = runtime.IsScanServiceRunning
@@ -295,12 +309,9 @@ namespace AM.ViewModel.ViewModels.Motion
         private void ApplyFilter()
         {
             var previousBit = SelectedItem == null ? (short?)null : SelectedItem.LogicalBit;
-            IEnumerable<MotionIoDisplayItem> query = _allItems;
+            var scopedItems = GetCardScopedItems();
 
-            if (SelectedCardFilter != null)
-            {
-                query = query.Where(x => x.CardId == SelectedCardFilter.CardId);
-            }
+            IEnumerable<MotionIoDisplayItem> query = scopedItems;
 
             if (!string.IsNullOrWhiteSpace(SearchText))
             {
@@ -343,7 +354,7 @@ namespace AM.ViewModel.ViewModels.Motion
                 Items.Add(item);
             }
 
-            UpdateSummary(filteredList);
+            UpdateSummary(scopedItems);
             OnPropertyChanged(nameof(PageSummaryText));
 
             if (previousBit.HasValue)
@@ -355,6 +366,12 @@ namespace AM.ViewModel.ViewModels.Motion
             {
                 SelectedItem = Items.Count > 0 ? Items[0] : null;
             }
+
+            StatusText = string.Format(
+                "当前卡共 {0} 条，匹配 {1} 条，当前页 {2} 条",
+                TotalCount,
+                _filteredItems.Count,
+                Items.Count);
         }
 
         private void PrevPage()

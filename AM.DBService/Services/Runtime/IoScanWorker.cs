@@ -203,6 +203,7 @@ namespace AM.DBService.Services.Runtime
             LastRunTime = now;
             LastError = string.Empty;
             RuntimeContext.Instance.MotionIo.MarkScanTime(now);
+            RuntimeContext.Instance.MotionIo.NotifySnapshotChanged();
             return OkSilent("IO 扫描成功");
         }
 
