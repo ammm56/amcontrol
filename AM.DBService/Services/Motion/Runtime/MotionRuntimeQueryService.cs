@@ -3,6 +3,7 @@ using AM.Core.Context;
 using AM.Model.Common;
 using AM.Model.Model.Motion;
 using AM.Model.MotionCard;
+using AM.Model.Runtime;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -112,12 +113,14 @@ namespace AM.DBService.Services.Motion.Runtime
             return OkListSilent(list, "IO 控制卡筛选项查询成功");
         }
 
-        public Result<MotionAxisDisplayItem> QueryAxisSnapshot()
+        /// <summary>
+        /// 仅查询轴静态结构信息，不读取控制卡实时状态。
+        /// </summary>
+        public Result<MotionAxisDisplayItem> QueryAxisDefinitions()
         {
             try
             {
                 var cards = ConfigContext.Instance.Config.MotionCardsConfig ?? new List<MotionCardConfig>();
-                var motionHub = MachineContext.Instance.MotionHub;
                 var list = new List<MotionAxisDisplayItem>();
 
                 foreach (var card in cards.Where(x => x != null).OrderBy(x => x.InitOrder).ThenBy(x => x.CardId))
@@ -129,7 +132,7 @@ namespace AM.DBService.Services.Motion.Runtime
 
                     foreach (var axis in card.AxisConfigs.Where(x => x != null).OrderBy(x => x.SortOrder).ThenBy(x => x.LogicalAxis))
                     {
-                        var item = new MotionAxisDisplayItem
+                        list.Add(new MotionAxisDisplayItem
                         {
                             LogicalAxis = axis.LogicalAxis,
                             CardId = card.CardId,
@@ -142,23 +145,87 @@ namespace AM.DBService.Services.Motion.Runtime
                             CardDisplayName = string.IsNullOrWhiteSpace(card.DisplayName) ? card.Name : card.DisplayName,
                             DefaultVelocityMm = ConvertPulseVelocityToMm(axis.DefaultVelocity, axis.K),
                             JogVelocityMm = ConvertPulseVelocityToMm(axis.JogVelocity, axis.K)
-                        };
-
-                        if (motionHub != null)
-                        {
-                            FillAxisRuntime(item, motionHub);
-                        }
-
-                        list.Add(item);
+                        });
                     }
                 }
 
-                return OkListSilent(list, "轴运行快照查询成功");
+                return OkListSilent(list, "轴静态结构查询成功");
             }
             catch (Exception ex)
             {
-                return HandleException<MotionAxisDisplayItem>(ex, -1003, "轴运行快照查询失败");
+                return HandleException<MotionAxisDisplayItem>(ex, -1003, "轴静态结构查询失败");
             }
+        }
+
+        /// <summary>
+        /// 将运行态缓存覆盖到指定轴显示项。
+        /// </summary>
+        public void ApplyAxisRuntime(MotionAxisDisplayItem item)
+        {
+            if (item == null)
+            {
+                return;
+            }
+
+            MotionAxisRuntimeSnapshot snapshot;
+            if (!RuntimeContext.Instance.MotionAxis.TryGetAxisSnapshot(item.LogicalAxis, out snapshot) || snapshot == null)
+            {
+                item.IsEnabled = false;
+                item.IsAlarm = false;
+                item.IsAtHome = false;
+                item.PositiveLimit = false;
+                item.NegativeLimit = false;
+                item.IsDone = false;
+                item.IsMoving = false;
+                item.CommandPositionPulse = 0D;
+                item.EncoderPositionPulse = 0D;
+                item.CommandPositionMm = 0D;
+                item.EncoderPositionMm = 0D;
+                return;
+            }
+
+            item.IsEnabled = snapshot.IsEnabled;
+            item.IsAlarm = snapshot.IsAlarm;
+            item.IsAtHome = snapshot.IsAtHome;
+            item.PositiveLimit = snapshot.PositiveLimit;
+            item.NegativeLimit = snapshot.NegativeLimit;
+            item.IsDone = snapshot.IsDone;
+            item.IsMoving = snapshot.IsMoving;
+            item.CommandPositionPulse = snapshot.CommandPositionPulse;
+            item.EncoderPositionPulse = snapshot.EncoderPositionPulse;
+            item.CommandPositionMm = snapshot.CommandPositionMm;
+            item.EncoderPositionMm = snapshot.EncoderPositionMm;
+        }
+
+        /// <summary>
+        /// 将运行态缓存覆盖到轴列表。
+        /// </summary>
+        public void ApplyAxisRuntime(IEnumerable<MotionAxisDisplayItem> items)
+        {
+            if (items == null)
+            {
+                return;
+            }
+
+            foreach (var item in items)
+            {
+                ApplyAxisRuntime(item);
+            }
+        }
+
+        /// <summary>
+        /// 兼容入口：返回静态结构 + 运行态缓存覆盖结果。
+        /// </summary>
+        public Result<MotionAxisDisplayItem> QueryAxisSnapshot()
+        {
+            var result = QueryAxisDefinitions();
+            if (!result.Success)
+            {
+                return result;
+            }
+
+            ApplyAxisRuntime(result.Items);
+            return OkListSilent(result.Items.ToList(), "轴运行快照查询成功");
         }
 
         private static string NormalizeIoType(string ioType)
@@ -185,50 +252,6 @@ namespace AM.DBService.Services.Motion.Runtime
             }
 
             return pulsePerMs * 1000D / k;
-        }
-
-        private static void FillAxisRuntime(MotionAxisDisplayItem item, global::AM.Model.Interfaces.MotionCard.IMotionCardService motionHub)
-        {
-            var statusResult = motionHub.GetAxisStatus(item.LogicalAxis);
-            if (statusResult.Success)
-            {
-                item.IsEnabled = statusResult.Item.IsEnabled;
-                item.IsAlarm = statusResult.Item.IsAlarm;
-                item.IsAtHome = statusResult.Item.IsAtHome;
-                item.PositiveLimit = statusResult.Item.PositiveLimit;
-                item.NegativeLimit = statusResult.Item.NegativeLimit;
-                item.IsDone = statusResult.Item.IsDone;
-            }
-
-            var movingResult = motionHub.IsMoving(item.LogicalAxis);
-            if (movingResult.Success)
-            {
-                item.IsMoving = movingResult.Item;
-            }
-
-            var cmdPulseResult = motionHub.GetCommandPosition(item.LogicalAxis);
-            if (cmdPulseResult.Success)
-            {
-                item.CommandPositionPulse = cmdPulseResult.Item;
-            }
-
-            var encPulseResult = motionHub.GetEncoderPosition(item.LogicalAxis);
-            if (encPulseResult.Success)
-            {
-                item.EncoderPositionPulse = encPulseResult.Item;
-            }
-
-            var cmdMmResult = motionHub.GetCommandPositionMm(item.LogicalAxis);
-            if (cmdMmResult.Success)
-            {
-                item.CommandPositionMm = cmdMmResult.Item;
-            }
-
-            var encMmResult = motionHub.GetEncoderPositionMm(item.LogicalAxis);
-            if (encMmResult.Success)
-            {
-                item.EncoderPositionMm = encMmResult.Item;
-            }
         }
 
         private static bool TryGetRuntimeIoValue(string ioType, short logicalBit, out bool value, out DateTime updateTime)
@@ -319,86 +342,79 @@ namespace AM.DBService.Services.Motion.Runtime
 
         private static string ResolveLinkedObjects(short logicalBit, string ioType)
         {
-            var links = new List<string>();
-            var machine = MachineContext.Instance;
-
-            if (ioType == "DI")
+            var actuatorConfig = ConfigContext.Instance.Config.ActuatorConfig;
+            if (actuatorConfig == null)
             {
-                foreach (var item in machine.Cylinders.Values.Where(x => x != null))
-                {
-                    if (item.ExtendFeedbackBit == logicalBit || item.RetractFeedbackBit == logicalBit)
-                    {
-                        links.Add("气缸:" + GetDisplayName(item.DisplayName, item.Name));
-                    }
-                }
-
-                foreach (var item in machine.Vacuums.Values.Where(x => x != null))
-                {
-                    if (item.VacuumFeedbackBit == logicalBit
-                        || item.ReleaseFeedbackBit == logicalBit
-                        || item.WorkpiecePresentBit == logicalBit)
-                    {
-                        links.Add("真空:" + GetDisplayName(item.DisplayName, item.Name));
-                    }
-                }
-
-                foreach (var item in machine.Grippers.Values.Where(x => x != null))
-                {
-                    if (item.CloseFeedbackBit == logicalBit
-                        || item.OpenFeedbackBit == logicalBit
-                        || item.WorkpiecePresentBit == logicalBit)
-                    {
-                        links.Add("夹爪:" + GetDisplayName(item.DisplayName, item.Name));
-                    }
-                }
-            }
-            else
-            {
-                foreach (var item in machine.Cylinders.Values.Where(x => x != null))
-                {
-                    if (item.ExtendOutputBit == logicalBit || item.RetractOutputBit == logicalBit)
-                    {
-                        links.Add("气缸:" + GetDisplayName(item.DisplayName, item.Name));
-                    }
-                }
-
-                foreach (var item in machine.Vacuums.Values.Where(x => x != null))
-                {
-                    if (item.VacuumOnOutputBit == logicalBit || item.BlowOffOutputBit == logicalBit)
-                    {
-                        links.Add("真空:" + GetDisplayName(item.DisplayName, item.Name));
-                    }
-                }
-
-                foreach (var item in machine.Grippers.Values.Where(x => x != null))
-                {
-                    if (item.CloseOutputBit == logicalBit || item.OpenOutputBit == logicalBit)
-                    {
-                        links.Add("夹爪:" + GetDisplayName(item.DisplayName, item.Name));
-                    }
-                }
-
-                foreach (var item in machine.StackLights.Values.Where(x => x != null))
-                {
-                    if (item.RedOutputBit == logicalBit
-                        || item.YellowOutputBit == logicalBit
-                        || item.GreenOutputBit == logicalBit
-                        || item.BlueOutputBit == logicalBit
-                        || item.BuzzerOutputBit == logicalBit)
-                    {
-                        links.Add("灯塔:" + GetDisplayName(item.DisplayName, item.Name));
-                    }
-                }
+                return "—";
             }
 
-            return links.Count == 0
-                ? "—"
-                : string.Join(" / ", links.Distinct(StringComparer.OrdinalIgnoreCase));
+            var names = new List<string>();
+
+            if (actuatorConfig.Cylinders != null)
+            {
+                names.AddRange(actuatorConfig.Cylinders
+                    .Where(x => x != null && IsIoBitMatched(x, logicalBit, ioType))
+                    .Select(x => x.Name));
+            }
+
+            if (actuatorConfig.Vacuums != null)
+            {
+                names.AddRange(actuatorConfig.Vacuums
+                    .Where(x => x != null && IsIoBitMatched(x, logicalBit, ioType))
+                    .Select(x => x.Name));
+            }
+
+            if (actuatorConfig.StackLights != null)
+            {
+                names.AddRange(actuatorConfig.StackLights
+                    .Where(x => x != null && IsIoBitMatched(x, logicalBit, ioType))
+                    .Select(x => x.Name));
+            }
+
+            if (actuatorConfig.Grippers != null)
+            {
+                names.AddRange(actuatorConfig.Grippers
+                    .Where(x => x != null && IsIoBitMatched(x, logicalBit, ioType))
+                    .Select(x => x.Name));
+            }
+
+            var list = names
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct()
+                .ToList();
+
+            return list.Count == 0 ? "—" : string.Join(" / ", list);
         }
 
-        private static string GetDisplayName(string displayName, string name)
+        private static bool IsIoBitMatched(object config, short logicalBit, string ioType)
         {
-            return string.IsNullOrWhiteSpace(displayName) ? (name ?? "未命名对象") : displayName;
+            var type = config.GetType();
+            var properties = type.GetProperties();
+
+            foreach (var property in properties)
+            {
+                if (property == null || property.PropertyType != typeof(short))
+                {
+                    continue;
+                }
+
+                var name = property.Name ?? string.Empty;
+                var isDo = name.EndsWith("DoBit", StringComparison.OrdinalIgnoreCase);
+                var isDi = name.EndsWith("DiBit", StringComparison.OrdinalIgnoreCase);
+
+                if ((ioType == "DO" && !isDo) || (ioType == "DI" && !isDi))
+                {
+                    continue;
+                }
+
+                var value = (short)property.GetValue(config, null);
+                if (value == logicalBit)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

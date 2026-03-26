@@ -26,6 +26,13 @@ namespace AM.Core.Context
         public MotionIoRuntimeState MotionIo { get; } = new MotionIoRuntimeState();
 
         /// <summary>
+        /// Motion 轴运行时状态。
+        /// 仅供 UI / 监视 / 诊断使用，不参与控制安全逻辑。
+        /// 内部字典维护了多轴
+        /// </summary>
+        public MotionAxisRuntimeState MotionAxis { get; } = new MotionAxisRuntimeState();
+
+        /// <summary>
         /// 预留：PLC 运行时状态。
         /// </summary>
         // public PlcRuntimeState Plc { get; } = new PlcRuntimeState();

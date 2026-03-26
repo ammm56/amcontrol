@@ -67,7 +67,7 @@
                 <ColumnDefinition Width="8" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="8" />
-                <ColumnDefinition Width="230" />
+                <ColumnDefinition Width="250" />
             </Grid.ColumnDefinitions>
 
             <!-- 左侧轴列表 -->
@@ -172,7 +172,7 @@
                                                        Opacity="0.6"
                                                        TextTrimming="CharacterEllipsis"
                                                        Foreground="{DynamicResource PrimaryTextBrush}"
-                                                       Text="{Binding CardDisplayName}" />
+                                                       Text="{Binding Name}" />
                                         </StackPanel>
                                     </Border>
                                 </DataTemplate>
@@ -206,179 +206,213 @@
                                    Text="控制动作" />
                     </Border>
 
-                    <ScrollViewer Grid.Row="1"
-                                  VerticalScrollBarVisibility="Auto"
-                                  HorizontalScrollBarVisibility="Disabled"
-                                  Padding="8">
-                        <WrapPanel Orientation="Horizontal"
-                                   ItemWidth="360">
-                            <!-- 手动控制 -->
-                            <Border Width="360"
-                                    Margin="0,0,8,8"
-                                    Padding="12"
-                                    CornerRadius="8"
-                                    Background="{DynamicResource SecondaryRegionBrush}"
-                                    BorderBrush="{DynamicResource BorderBrush}"
-                                    BorderThickness="1">
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition x:Name="ManualTitleRow" Height="Auto" />
-                                        <RowDefinition x:Name="ManualGap1Row" Height="12" />
-                                        <RowDefinition x:Name="ManualServoRow" Height="Auto" />
-                                        <RowDefinition x:Name="ManualGap2Row" Height="12" />
-                                        <RowDefinition x:Name="ManualJogRow" Height="Auto" />
-                                        <RowDefinition x:Name="ManualGap3Row" Height="12" />
-                                        <RowDefinition x:Name="ManualSpeedTitleRow" Height="Auto" />
-                                        <RowDefinition x:Name="ManualGap4Row" Height="8" />
-                                        <RowDefinition x:Name="ManualSpeedRow" Height="Auto" />
-                                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="1">
+                        <!-- 未选轴提示 -->
+                        <StackPanel HorizontalAlignment="Center"
+                                    VerticalAlignment="Center">
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedAxisItem}" Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+                            <TextBlock HorizontalAlignment="Center" FontSize="28" Opacity="0.15" Text="⇌" />
+                            <TextBlock Margin="0,8,0,0"
+                                       FontSize="14"
+                                       Opacity="0.4"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                       Text="请先在左侧选择一个轴" />
+                        </StackPanel>
 
-                                    <TextBlock Grid.Row="0"
-                                               FontSize="14"
-                                               FontWeight="SemiBold"
-                                               Foreground="{DynamicResource PrimaryTextBrush}"
-                                               Text="手动控制" />
+                        <!-- 已选轴控制区 -->
+                        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Disabled">
+                            <ScrollViewer.Style>
+                                <Style TargetType="ScrollViewer">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedAxisItem}" Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ScrollViewer.Style>
 
-                                    <WrapPanel Grid.Row="2">
-                                        <Button MinWidth="92"
-                                                Margin="0,0,8,8"
-                                                Command="{Binding ServoOnCommand}"
-                                                Content="使能" />
-                                        <Button MinWidth="92"
-                                                Margin="0,0,8,8"
-                                                Command="{Binding ServoOffCommand}"
-                                                Content="失能" />
-                                        <Button MinWidth="92"
-                                                Margin="0,0,8,8"
-                                                Command="{Binding HomeCommand}"
-                                                Content="回零" />
-                                        <Button MinWidth="92"
-                                                Margin="0,0,8,8"
-                                                Command="{Binding ClearStatusCommand}"
-                                                Content="清状态" />
-                                        <Button MinWidth="92"
-                                                Margin="0,0,8,8"
-                                                Command="{Binding StopCommand}"
-                                                Content="平停" />
-                                        <Button MinWidth="92"
-                                                Margin="0,0,8,8"
-                                                Command="{Binding EmergencyStopCommand}"
-                                                Content="急停" />
-                                    </WrapPanel>
-
-                                    <Grid Grid.Row="4">
+                            <WrapPanel Orientation="Horizontal"
+                                       ItemWidth="360"
+                                       Margin="8">
+                                <!-- 手动控制 -->
+                                <Border Width="360"
+                                        Margin="0,0,8,8"
+                                        Padding="12"
+                                        CornerRadius="8"
+                                        Background="{DynamicResource SecondaryRegionBrush}"
+                                        BorderBrush="{DynamicResource BorderBrush}"
+                                        BorderThickness="1">
+                                    <Grid>
                                         <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="8" />
-                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition x:Name="ManualTitleRow" Height="Auto" />
+                                            <RowDefinition x:Name="ManualGap1Row" Height="12" />
+                                            <RowDefinition x:Name="ManualServoRow" Height="Auto" />
+                                            <RowDefinition x:Name="ManualGap2Row" Height="12" />
+                                            <RowDefinition x:Name="ManualJogRow" Height="Auto" />
+                                            <RowDefinition x:Name="ManualGap3Row" Height="12" />
+                                            <RowDefinition x:Name="ManualSpeedTitleRow" Height="Auto" />
+                                            <RowDefinition x:Name="ManualGap4Row" Height="8" />
+                                            <RowDefinition x:Name="ManualSpeedRow" Height="Auto" />
                                         </Grid.RowDefinitions>
 
                                         <TextBlock Grid.Row="0"
+                                                   FontSize="14"
+                                                   FontWeight="SemiBold"
                                                    Foreground="{DynamicResource PrimaryTextBrush}"
-                                                   Text="Jog / 手动运动" />
+                                                   Text="手动控制" />
 
                                         <WrapPanel Grid.Row="2">
-                                            <Button MinWidth="100"
+                                            <Button MinWidth="92"
                                                     Margin="0,0,8,8"
-                                                    Command="{Binding JogNegativeCommand}"
-                                                    Content="负向运动" />
-                                            <Button MinWidth="100"
+                                                    Command="{Binding ServoOnCommand}"
+                                                    Content="使能" />
+                                            <Button MinWidth="92"
                                                     Margin="0,0,8,8"
-                                                    Command="{Binding JogStopCommand}"
-                                                    Content="Jog停止" />
-                                            <Button MinWidth="100"
+                                                    Command="{Binding ServoOffCommand}"
+                                                    Content="失能" />
+                                            <Button MinWidth="92"
                                                     Margin="0,0,8,8"
-                                                    Command="{Binding JogPositiveCommand}"
-                                                    Content="正向运动" />
+                                                    Command="{Binding HomeCommand}"
+                                                    Content="回零" />
+                                            <Button MinWidth="92"
+                                                    Margin="0,0,8,8"
+                                                    Command="{Binding ClearStatusCommand}"
+                                                    Content="清状态" />
+                                            <Button MinWidth="92"
+                                                    Margin="0,0,8,8"
+                                                    Command="{Binding StopCommand}"
+                                                    Content="平停" />
+                                            <Button MinWidth="92"
+                                                    Margin="0,0,8,8"
+                                                    Command="{Binding EmergencyStopCommand}"
+                                                    Content="急停" />
                                         </WrapPanel>
+
+                                        <Grid Grid.Row="4">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="8" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+
+                                            <TextBlock Grid.Row="0"
+                                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                                       Text="Jog / 手动运动" />
+
+                                            <WrapPanel Grid.Row="2">
+                                                <Button MinWidth="100"
+                                                        Margin="0,0,8,8"
+                                                        Command="{Binding JogNegativeCommand}"
+                                                        Content="负向运动" />
+                                                <Button MinWidth="100"
+                                                        Margin="0,0,8,8"
+                                                        Command="{Binding JogStopCommand}"
+                                                        Content="Jog停止" />
+                                                <Button MinWidth="100"
+                                                        Margin="0,0,8,8"
+                                                        Command="{Binding JogPositiveCommand}"
+                                                        Content="正向运动" />
+                                            </WrapPanel>
+                                        </Grid>
+
+                                        <TextBlock Grid.Row="6"
+                                                   Foreground="{DynamicResource PrimaryTextBrush}"
+                                                   Text="速度(mm/s)" />
+
+                                        <Grid Grid.Row="8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="8" />
+                                                <ColumnDefinition Width="110" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBox Grid.Column="0"
+                                                     Height="30"
+                                                     VerticalContentAlignment="Center"
+                                                     Text="{Binding VelocityMmText, UpdateSourceTrigger=PropertyChanged}" />
+
+                                            <Button Grid.Column="2"
+                                                    Height="30"
+                                                    Command="{Binding ApplyVelocityCommand}"
+                                                    Content="应用速度" />
+                                        </Grid>
                                     </Grid>
+                                </Border>
 
-                                    <TextBlock Grid.Row="6"
-                                               Foreground="{DynamicResource PrimaryTextBrush}"
-                                               Text="速度(mm/s)" />
+                                <!-- 定位控制 -->
+                                <Border Width="360"
+                                        Margin="0,0,8,8"
+                                        Padding="12"
+                                        CornerRadius="8"
+                                        Background="{DynamicResource SecondaryRegionBrush}"
+                                        BorderBrush="{DynamicResource BorderBrush}"
+                                        BorderThickness="1">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition x:Name="PosTitleRow" Height="Auto" />
+                                            <RowDefinition x:Name="PosGap1Row" Height="12" />
+                                            <RowDefinition x:Name="AbsTitleRow" Height="Auto" />
+                                            <RowDefinition x:Name="AbsGap1Row" Height="8" />
+                                            <RowDefinition x:Name="AbsInputRow" Height="Auto" />
+                                            <RowDefinition x:Name="AbsGap2Row" Height="8" />
+                                            <RowDefinition x:Name="AbsBtnRow" Height="Auto" />
+                                            <RowDefinition x:Name="PosGap2Row" Height="14" />
+                                            <RowDefinition x:Name="RelTitleRow" Height="Auto" />
+                                            <RowDefinition x:Name="RelGap1Row" Height="8" />
+                                            <RowDefinition x:Name="RelInputRow" Height="Auto" />
+                                            <RowDefinition x:Name="RelGap2Row" Height="8" />
+                                            <RowDefinition x:Name="RelBtnRow" Height="Auto" />
+                                        </Grid.RowDefinitions>
 
-                                    <Grid Grid.Row="8">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="8" />
-                                            <ColumnDefinition Width="110" />
-                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Row="0"
+                                                   FontSize="14"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource PrimaryTextBrush}"
+                                                   Text="定位控制" />
 
-                                        <TextBox Grid.Column="0"
+                                        <TextBlock Grid.Row="2"
+                                                   Foreground="{DynamicResource PrimaryTextBrush}"
+                                                   Text="绝对定位目标(mm)" />
+
+                                        <TextBox Grid.Row="4"
                                                  Height="30"
                                                  VerticalContentAlignment="Center"
-                                                 Text="{Binding VelocityMmText, UpdateSourceTrigger=PropertyChanged}" />
+                                                 Text="{Binding TargetPositionMmText, UpdateSourceTrigger=PropertyChanged}" />
 
-                                        <Button Grid.Column="2"
-                                                Height="30"
-                                                Command="{Binding ApplyVelocityCommand}"
-                                                Content="应用速度" />
+                                        <Button Grid.Row="6"
+                                                Height="32"
+                                                Command="{Binding MoveAbsoluteCommand}"
+                                                Content="执行绝对定位" />
+
+                                        <TextBlock Grid.Row="8"
+                                                   Foreground="{DynamicResource PrimaryTextBrush}"
+                                                   Text="相对移动距离(mm)" />
+
+                                        <TextBox Grid.Row="10"
+                                                 Height="30"
+                                                 VerticalContentAlignment="Center"
+                                                 Text="{Binding MoveDistanceMmText, UpdateSourceTrigger=PropertyChanged}" />
+
+                                        <Button Grid.Row="12"
+                                                Height="32"
+                                                Command="{Binding MoveRelativeCommand}"
+                                                Content="执行相对移动" />
                                     </Grid>
-                                </Grid>
-                            </Border>
-
-                            <!-- 定位控制 -->
-                            <Border Width="360"
-                                    Margin="0,0,8,8"
-                                    Padding="12"
-                                    CornerRadius="8"
-                                    Background="{DynamicResource SecondaryRegionBrush}"
-                                    BorderBrush="{DynamicResource BorderBrush}"
-                                    BorderThickness="1">
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition x:Name="PosTitleRow" Height="Auto" />
-                                        <RowDefinition x:Name="PosGap1Row" Height="12" />
-                                        <RowDefinition x:Name="AbsTitleRow" Height="Auto" />
-                                        <RowDefinition x:Name="AbsGap1Row" Height="8" />
-                                        <RowDefinition x:Name="AbsInputRow" Height="Auto" />
-                                        <RowDefinition x:Name="AbsGap2Row" Height="8" />
-                                        <RowDefinition x:Name="AbsBtnRow" Height="Auto" />
-                                        <RowDefinition x:Name="PosGap2Row" Height="14" />
-                                        <RowDefinition x:Name="RelTitleRow" Height="Auto" />
-                                        <RowDefinition x:Name="RelGap1Row" Height="8" />
-                                        <RowDefinition x:Name="RelInputRow" Height="Auto" />
-                                        <RowDefinition x:Name="RelGap2Row" Height="8" />
-                                        <RowDefinition x:Name="RelBtnRow" Height="Auto" />
-                                    </Grid.RowDefinitions>
-
-                                    <TextBlock Grid.Row="0"
-                                               FontSize="14"
-                                               FontWeight="SemiBold"
-                                               Foreground="{DynamicResource PrimaryTextBrush}"
-                                               Text="定位控制" />
-
-                                    <TextBlock Grid.Row="2"
-                                               Foreground="{DynamicResource PrimaryTextBrush}"
-                                               Text="绝对定位目标(mm)" />
-
-                                    <TextBox Grid.Row="4"
-                                             Height="30"
-                                             VerticalContentAlignment="Center"
-                                             Text="{Binding TargetPositionMmText, UpdateSourceTrigger=PropertyChanged}" />
-
-                                    <Button Grid.Row="6"
-                                            Height="32"
-                                            Command="{Binding MoveAbsoluteCommand}"
-                                            Content="执行绝对定位" />
-
-                                    <TextBlock Grid.Row="8"
-                                               Foreground="{DynamicResource PrimaryTextBrush}"
-                                               Text="相对移动距离(mm)" />
-
-                                    <TextBox Grid.Row="10"
-                                             Height="30"
-                                             VerticalContentAlignment="Center"
-                                             Text="{Binding MoveDistanceMmText, UpdateSourceTrigger=PropertyChanged}" />
-
-                                    <Button Grid.Row="12"
-                                            Height="32"
-                                            Command="{Binding MoveRelativeCommand}"
-                                            Content="执行相对移动" />
-                                </Grid>
-                            </Border>
-                        </WrapPanel>
-                    </ScrollViewer>
+                                </Border>
+                            </WrapPanel>
+                        </ScrollViewer>
+                    </Grid>
                 </Grid>
             </Border>
 
@@ -458,6 +492,16 @@
                                            Color="#455A64" />
                                 <hc:Shield Margin="0,0,0,6"
                                            HorizontalAlignment="Left"
+                                           Subject="采样状态"
+                                           Status="{Binding AxisRuntimeScanStateText}"
+                                           Color="#546E7A" />
+                                <hc:Shield Margin="0,0,0,6"
+                                           HorizontalAlignment="Left"
+                                           Subject="更新时间"
+                                           Status="{Binding SelectedAxisRuntimeUpdateTimeText}"
+                                           Color="#6C4A9A" />
+                                <hc:Shield Margin="0,0,0,6"
+                                           HorizontalAlignment="Left"
                                            Subject="当前状态"
                                            Status="{Binding SelectedAxisStatusText}"
                                            Color="#388E3C" />
@@ -475,12 +519,12 @@
                                            HorizontalAlignment="Left"
                                            Subject="规划位置(mm)"
                                            Status="{Binding SelectedAxisCommandPositionText}"
-                                           Color="#6C4A9A" />
+                                           Color="#00838F" />
                                 <hc:Shield Margin="0,0,0,6"
                                            HorizontalAlignment="Left"
                                            Subject="编码器位置(mm)"
                                            Status="{Binding SelectedAxisEncoderPositionText}"
-                                           Color="#00838F" />
+                                           Color="#0097A7" />
                                 <hc:Shield Margin="0,0,0,6"
                                            HorizontalAlignment="Left"
                                            Subject="位置误差(mm)"
@@ -511,7 +555,7 @@
                                            Opacity="0.75"
                                            TextWrapping="Wrap"
                                            Foreground="{DynamicResource PrimaryTextBrush}"
-                                           Text="当前页面用于单轴手动控制与运行状态确认。动作记录不在本页内表格显示，后续通过统一的运动记录面板或独立记录页查看。" />
+                                           Text="当前页面用于单轴手动控制与运行状态确认。采样缓存仅用于界面显示，不参与运动安全判断与控制过程判定。" />
                             </StackPanel>
                         </ScrollViewer>
                     </Grid>

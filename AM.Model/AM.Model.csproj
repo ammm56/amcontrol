@@ -121,6 +121,7 @@
     <Compile Include="MotionCard\MotionErrorCode.cs" />
     <Compile Include="MotionCard\MotionIoBitMap.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Runtime\MotionAxisRuntimeState.cs" />
     <Compile Include="Runtime\MotionIoRuntimeState.cs" />
     <Compile Include="Structs\AxisParam.cs" />
     <Compile Include="Structs\AxisStatus.cs" />

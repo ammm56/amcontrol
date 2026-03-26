@@ -101,6 +101,16 @@ namespace AM.App.Bootstrap
                 return;
             }
 
+            // 8.1 注册后台工作单元（此时控制卡已连接，autoStart 扫描安全）
+            // 第一版：轴运行态采样独立于 IO 扫描注册。仅供 UI / 监视使用，不参与控制安全逻辑。
+            var axisScanWorker = new MotionAxisScanWorker(reporter, 100);
+            var axisRegisterResult = runtimeTaskManager.Register(axisScanWorker, true);
+            if (!axisRegisterResult.Success)
+            {
+                reporter.Error("AppBootstrap", "轴运行态采样服务注册失败，应用启动终止", axisRegisterResult.Code);
+                return;
+            }
+
             reporter.Info("AppBootstrap", "应用启动完成");
         }
 
