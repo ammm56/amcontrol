@@ -463,9 +463,9 @@ namespace AMControlWPF
                     return CreatePlaceholderPage("外设 / 扫码监视");
                 case "Peripheral.ScanTest":
                     return CreatePlaceholderPage("外设 / 扫码测试");
-                case "Peripheral.Sensor ":
+                case "Peripheral.Sensor":
                     return CreatePlaceholderPage("外设 / 传感器监视");
-                case "Peripheral.SensorTrend ":
+                case "Peripheral.SensorTrend":
                     return CreatePlaceholderPage("外设 / 传感器数据趋势");
 
                 // ── 运控配置 ──

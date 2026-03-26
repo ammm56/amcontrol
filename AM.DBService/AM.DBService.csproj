@@ -78,6 +78,8 @@
     <Compile Include="Services\Motion\App\MachineConfigSeedService.cs" />
     <Compile Include="Services\Motion\Point\MotionIoConfigCrudService.cs" />
     <Compile Include="Services\Motion\Point\MotionIoPointConfigCrudService.cs" />
+    <Compile Include="Services\Motion\Runtime\MotionAxisOperationService.cs" />
+    <Compile Include="Services\Motion\Runtime\MotionRuntimeQueryService.cs" />
     <Compile Include="Services\Motion\Topology\MotionAxisCrudService.cs" />
     <Compile Include="Services\Motion\Topology\MotionCardCrudService.cs" />
     <Compile Include="Services\Motion\Topology\MotionIoMapCrudService.cs" />

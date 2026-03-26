@@ -92,6 +92,9 @@
     <Compile Include="ViewModels\Config\MotionAxisParamManagementViewModel.cs" />
     <Compile Include="ViewModels\Config\MotionCardManagementViewModel.cs" />
     <Compile Include="ViewModels\Config\MotionIoMapManagementViewModel.cs" />
+    <Compile Include="ViewModels\Motion\DIMonitorViewModel.cs" />
+    <Compile Include="ViewModels\Motion\DOMonitorViewModel.cs" />
+    <Compile Include="ViewModels\Motion\MotionAxisViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Base\" />

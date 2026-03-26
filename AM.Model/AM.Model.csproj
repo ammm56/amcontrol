@@ -100,6 +100,9 @@
     <Compile Include="Interfaces\Runtime\IIoScanService.cs" />
     <Compile Include="Interfaces\Runtime\IRuntimeTaskManager.cs" />
     <Compile Include="Interfaces\Runtime\IRuntimeWorker.cs" />
+    <Compile Include="Model\Motion\MotionAxisDisplayItem.cs" />
+    <Compile Include="Model\Motion\MotionCardFilterItem.cs" />
+    <Compile Include="Model\Motion\MotionIoDisplayItem.cs" />
     <Compile Include="MotionCard\Actuator\ActuatorConfig.cs" />
     <Compile Include="MotionCard\Actuator\CylinderConfig.cs" />
     <Compile Include="MotionCard\Actuator\GripperConfig.cs" />

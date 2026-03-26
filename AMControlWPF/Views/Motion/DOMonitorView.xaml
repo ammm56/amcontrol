@@ -4,105 +4,90 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:AMControlWPF.Views.Motion"
              mc:Ignorable="d"
              Background="Transparent">
-
     <Grid Margin="10">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="32" />
+            <RowDefinition x:Name="RootToolbarRow" Height="Auto" />
+            <RowDefinition x:Name="RootContentRow" Height="*" />
+            <RowDefinition x:Name="RootStatusRow" Height="40" />
         </Grid.RowDefinitions>
 
-        <!-- 顶部工具栏 -->
         <Border Grid.Row="0"
-                Padding="12,10"
+                Padding="12,8"
                 CornerRadius="8"
                 Background="{DynamicResource SecondaryRegionBrush}"
                 BorderBrush="{DynamicResource BorderBrush}"
                 BorderThickness="1">
-            <DockPanel LastChildFill="True">
+            <DockPanel LastChildFill="False">
                 <TextBlock DockPanel.Dock="Left"
                            VerticalAlignment="Center"
                            FontSize="14"
                            FontWeight="SemiBold"
                            Foreground="{DynamicResource PrimaryTextBrush}"
-                           Text="输出点监视与控制" />
+                           Text="DO 输出监视" />
 
-                <WrapPanel HorizontalAlignment="Right"
-                           VerticalAlignment="Center"
-                           DockPanel.Dock="Right">
-                    <TextBox Width="150"
-                             Height="30"
-                             Margin="0,0,8,0"
+                <StackPanel DockPanel.Dock="Right"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center">
+                    <Button MinWidth="72"
+                            Command="{Binding RefreshCommand}"
+                            Content="刷新" />
+                </StackPanel>
+
+                <StackPanel DockPanel.Dock="Right"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            Margin="0,0,16,0">
+                    <ComboBox Width="220"
+                              Height="28"
+                              VerticalContentAlignment="Center"
+                              ItemsSource="{Binding CardFilters}"
+                              SelectedItem="{Binding SelectedCardFilter, Mode=TwoWay}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding DisplayText}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+
+                    <TextBox Width="180"
+                             Height="28"
+                             Margin="12,0,0,0"
                              VerticalContentAlignment="Center"
-                             Text="搜索输出点..." />
-                    <Button MinWidth="72" Margin="0,0,8,0" Content="刷新" />
-                    <Button MinWidth="72" Margin="0,0,8,0" Content="全部复位" />
-                    <Button MinWidth="72" Margin="0,0,0,0" Content="导出" />
-                </WrapPanel>
+                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
             </DockPanel>
         </Border>
 
-        <!-- 主体区 -->
         <Grid Grid.Row="1" Margin="0,8,0,8">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="180" />
-                <ColumnDefinition Width="8" />
                 <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="8" />
+                <ColumnDefinition Width="230" />
             </Grid.ColumnDefinitions>
 
-            <!-- 左侧分组 -->
             <Border Grid.Column="0"
-                    Padding="10"
                     CornerRadius="8"
                     Background="{DynamicResource RegionBrush}"
                     BorderBrush="{DynamicResource BorderBrush}"
                     BorderThickness="1">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="8" />
-                        <RowDefinition Height="*" />
+                        <RowDefinition x:Name="SummaryRow" Height="Auto" />
+                        <RowDefinition x:Name="CardListRow" Height="*" />
                     </Grid.RowDefinitions>
 
-                    <TextBlock FontSize="14"
-                               FontWeight="SemiBold"
-                               Foreground="{DynamicResource PrimaryTextBrush}"
-                               Text="输出分组" />
+                    <Grid Grid.Row="0" Margin="10,10,10,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="120" />
+                            <ColumnDefinition Width="8" />
+                            <ColumnDefinition Width="120" />
+                            <ColumnDefinition Width="8" />
+                            <ColumnDefinition Width="180" />
+                        </Grid.ColumnDefinitions>
 
-                    <ListBox x:Name="ListBoxAxis"
-                             ItemContainerStyle="{StaticResource ViewNavItemStyle}"
-                             Grid.Row="2"
-                             BorderThickness="0"
-                             SelectedIndex="0">
-                        <ListBoxItem Content="全部输出" />
-                        <ListBoxItem Content="气缸电磁阀" />
-                        <ListBoxItem Content="指示灯/蜂鸣器" />
-                        <ListBoxItem Content="相机触发" />
-                        <ListBoxItem Content="PLC 输出联动" />
-                    </ListBox>
-                </Grid>
-            </Border>
-
-            <!-- 右侧工作台 -->
-            <ScrollViewer Grid.Column="2"
-                          VerticalScrollBarVisibility="Auto"
-                          HorizontalScrollBarVisibility="Disabled">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="8" />
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="8" />
-                        <RowDefinition Height="220" />
-                    </Grid.RowDefinitions>
-
-                    <!-- 顶部统计 -->
-                    <WrapPanel Grid.Row="0">
-                        <Border Width="160"
-                                Margin="0,0,8,8"
+                        <Border Grid.Column="0"
                                 Padding="10"
                                 CornerRadius="6"
                                 Background="{DynamicResource SecondaryRegionBrush}">
@@ -113,234 +98,357 @@
                                 <TextBlock FontSize="18"
                                            FontWeight="SemiBold"
                                            Foreground="{DynamicResource PrimaryTextBrush}"
-                                           Text="48" />
+                                           Text="{Binding TotalCount}" />
                             </StackPanel>
-                        </Border>
-
-                        <Border Width="160"
-                                Margin="0,0,8,8"
-                                Padding="10"
-                                CornerRadius="6"
-                                Background="{DynamicResource SecondaryRegionBrush}">
-                            <StackPanel>
-                                <TextBlock Opacity="0.7"
-                                           Foreground="{DynamicResource PrimaryTextBrush}"
-                                           Text="当前激活输出" />
-                                <TextBlock FontSize="18"
-                                           FontWeight="SemiBold"
-                                           Foreground="{DynamicResource PrimaryBrush}"
-                                           Text="3" />
-                            </StackPanel>
-                        </Border>
-
-                        <Border Width="160"
-                                Margin="0,0,8,8"
-                                Padding="10"
-                                CornerRadius="6"
-                                Background="{DynamicResource SecondaryRegionBrush}">
-                            <StackPanel>
-                                <TextBlock Opacity="0.7"
-                                           Foreground="{DynamicResource PrimaryTextBrush}"
-                                           Text="通讯状态" />
-                                <TextBlock FontSize="18"
-                                           FontWeight="SemiBold"
-                                           Foreground="{DynamicResource SuccessBrush}"
-                                           Text="OK" />
-                            </StackPanel>
-                        </Border>
-
-                        <Border Width="160"
-                                Margin="0,0,8,8"
-                                Padding="10"
-                                CornerRadius="6"
-                                Background="{DynamicResource SecondaryRegionBrush}">
-                            <StackPanel>
-                                <TextBlock Opacity="0.7"
-                                           Foreground="{DynamicResource PrimaryTextBrush}"
-                                           Text="当前点位" />
-                                <TextBlock FontSize="18"
-                                           FontWeight="SemiBold"
-                                           Foreground="{DynamicResource PrimaryBrush}"
-                                           Text="DO-001" />
-                            </StackPanel>
-                        </Border>
-                    </WrapPanel>
-
-                    <!-- 主区 -->
-                    <Grid Grid.Row="2">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="8" />
-                            <ColumnDefinition Width="240" />
-                        </Grid.ColumnDefinitions>
-
-                        <Border Grid.Column="0"
-                                Padding="12"
-                                CornerRadius="8"
-                                Background="{DynamicResource SecondaryRegionBrush}">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="8" />
-                                    <RowDefinition Height="*" />
-                                </Grid.RowDefinitions>
-
-                                <TextBlock FontSize="14"
-                                           FontWeight="SemiBold"
-                                           Foreground="{DynamicResource PrimaryTextBrush}"
-                                           Text="输出点监视" />
-
-                                <DataGrid Grid.Row="2"
-                                          AutoGenerateColumns="False"
-                                          HeadersVisibility="Column"
-                                          CanUserAddRows="False"
-                                          CanUserDeleteRows="False"
-                                          IsReadOnly="True"
-                                          SelectionMode="Single"
-                                          SelectionUnit="FullRow"
-                                          Background="Transparent"
-                                          BorderThickness="0"
-                                          RowHeaderWidth="0"
-                                          GridLinesVisibility="None"
-                                          HorizontalGridLinesBrush="Transparent"
-                                          VerticalGridLinesBrush="Transparent">
-                                    <DataGrid.Columns>
-                                        <DataGridTextColumn Header="逻辑点位" Width="90" Binding="{Binding}" />
-                                        <DataGridTextColumn Header="名称" Width="180" Binding="{Binding}" />
-                                        <DataGridTextColumn Header="分组" Width="100" Binding="{Binding}" />
-                                        <DataGridTextColumn Header="卡号" Width="70" Binding="{Binding}" />
-                                        <DataGridTextColumn Header="通道" Width="70" Binding="{Binding}" />
-                                        <DataGridTextColumn Header="状态" Width="80" Binding="{Binding}" />
-                                        <DataGridTextColumn Header="联动对象" Width="*" Binding="{Binding}" />
-                                    </DataGrid.Columns>
-                                </DataGrid>
-                            </Grid>
                         </Border>
 
                         <Border Grid.Column="2"
-                                Padding="12"
-                                CornerRadius="8"
+                                Padding="10"
+                                CornerRadius="6"
                                 Background="{DynamicResource SecondaryRegionBrush}">
                             <StackPanel>
-                                <TextBlock FontSize="14"
-                                           FontWeight="SemiBold"
+                                <TextBlock Opacity="0.7"
                                            Foreground="{DynamicResource PrimaryTextBrush}"
-                                           Text="输出详情与控制" />
+                                           Text="当前导通" />
+                                <TextBlock FontSize="18"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource WarningBrush}"
+                                           Text="{Binding ActiveCount}" />
+                            </StackPanel>
+                        </Border>
 
-                                <Border Margin="0,12,0,8"
-                                        Padding="10"
-                                        CornerRadius="6"
-                                        Background="{DynamicResource RegionBrush}">
-                                    <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" Text="当前点位：DO-001" />
-                                </Border>
-
-                                <Border Margin="0,0,0,8"
-                                        Padding="10"
-                                        CornerRadius="6"
-                                        Background="{DynamicResource RegionBrush}">
-                                    <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" Text="名称：夹爪气缸伸出" />
-                                </Border>
-
-                                <Border Margin="0,0,0,8"
-                                        Padding="10"
-                                        CornerRadius="6"
-                                        Background="{DynamicResource RegionBrush}">
-                                    <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" Text="联动对象：夹爪电磁阀" />
-                                </Border>
-
-                                <Border Margin="0,0,0,8"
-                                        Padding="10"
-                                        CornerRadius="6"
-                                        Background="{DynamicResource RegionBrush}">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" Text="当前状态" />
-                                        <TextBlock Grid.Column="1"
-                                                   Foreground="{DynamicResource PrimaryBrush}"
-                                                   FontWeight="SemiBold"
-                                                   Text="OFF" />
-                                    </Grid>
-                                </Border>
-
-                                <WrapPanel Margin="0,8,0,0">
-                                    <Button MinWidth="88" Margin="0,0,8,8" Content="置位输出" />
-                                    <Button MinWidth="88" Margin="0,0,8,8" Content="复位输出" />
-                                </WrapPanel>
-
-                                <Border Padding="10"
-                                        CornerRadius="6"
-                                        Background="{DynamicResource RegionBrush}">
-                                    <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" Text="安全提示：手动输出前请确认联锁状态" />
-                                </Border>
+                        <Border Grid.Column="4"
+                                Padding="10"
+                                CornerRadius="6"
+                                Background="{DynamicResource SecondaryRegionBrush}">
+                            <StackPanel>
+                                <TextBlock Opacity="0.7"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="扫描状态" />
+                                <TextBlock FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource PrimaryBrush}"
+                                           Text="{Binding ScanStateText}" />
                             </StackPanel>
                         </Border>
                     </Grid>
 
-                    <!-- 底部操作记录 -->
-                    <Border Grid.Row="4"
-                            Padding="12"
-                            CornerRadius="8"
-                            Background="{DynamicResource SecondaryRegionBrush}">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="8" />
-                                <RowDefinition Height="*" />
-                            </Grid.RowDefinitions>
+                    <ScrollViewer Grid.Row="1"
+                                  VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  Padding="4,6,4,4">
+                        <ListBox ItemsSource="{Binding Items}"
+                                 SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
+                                 Background="Transparent"
+                                 BorderThickness="0">
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                    <Setter Property="Padding" Value="0" />
+                                    <Setter Property="Margin" Value="0" />
+                                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ListBoxItem">
+                                                <ContentPresenter />
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Width="154"
+                                            Margin="5"
+                                            Padding="9,8"
+                                            CornerRadius="6"
+                                            BorderThickness="1"
+                                            Cursor="Hand"
+                                            Effect="{StaticResource EffectShadow2}">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="{DynamicResource SecondaryRegionBrush}" />
+                                                <Setter Property="BorderBrush" Value="Transparent" />
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+                                                    </Trigger>
+                                                    <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                                        <Setter Property="Background" Value="{DynamicResource RegionBrush}" />
+                                                        <Setter Property="BorderBrush" Value="{DynamicResource WarningBrush}" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
 
-                            <TextBlock FontSize="14"
-                                       FontWeight="SemiBold"
-                                       Foreground="{DynamicResource PrimaryTextBrush}"
-                                       Text="输出操作记录" />
+                                        <StackPanel>
+                                            <DockPanel LastChildFill="False">
+                                                <Border DockPanel.Dock="Left"
+                                                        CornerRadius="3,0,0,3"
+                                                        Padding="5,2"
+                                                        Background="{DynamicResource WarningBrush}">
+                                                    <TextBlock FontSize="10"
+                                                               FontWeight="SemiBold"
+                                                               Foreground="White"
+                                                               Text="DO" />
+                                                </Border>
 
-                            <DataGrid Grid.Row="2"
-                                      AutoGenerateColumns="False"
-                                      HeadersVisibility="Column"
-                                      CanUserAddRows="False"
-                                      CanUserDeleteRows="False"
-                                      IsReadOnly="True"
-                                      SelectionMode="Single"
-                                      SelectionUnit="FullRow"
-                                      Background="Transparent"
-                                      BorderThickness="0"
-                                      RowHeaderWidth="0"
-                                      GridLinesVisibility="None"
-                                      HorizontalGridLinesBrush="Transparent"
-                                      VerticalGridLinesBrush="Transparent">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="时间" Width="180" Binding="{Binding}" />
-                                    <DataGridTextColumn Header="点位" Width="100" Binding="{Binding}" />
-                                    <DataGridTextColumn Header="操作" Width="120" Binding="{Binding}" />
-                                    <DataGridTextColumn Header="结果" Width="100" Binding="{Binding}" />
-                                    <DataGridTextColumn Header="说明" Width="*" Binding="{Binding}" />
-                                </DataGrid.Columns>
-                            </DataGrid>
-                        </Grid>
-                    </Border>
+                                                <Border DockPanel.Dock="Left"
+                                                        CornerRadius="0,3,3,0"
+                                                        Padding="5,2">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="Background" Value="{DynamicResource DangerBrush}" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding CurrentValue}" Value="True">
+                                                                    <Setter Property="Background" Value="{DynamicResource SuccessBrush}" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                    <TextBlock FontSize="10"
+                                                               FontWeight="SemiBold"
+                                                               Foreground="White"
+                                                               Text="{Binding StateText}" />
+                                                </Border>
+
+                                                <TextBlock DockPanel.Dock="Right"
+                                                           FontSize="10"
+                                                           Opacity="0.45"
+                                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                                           Text="{Binding LogicalBit, StringFormat='L#{0}'}" />
+                                            </DockPanel>
+
+                                            <TextBlock Margin="0,7,0,0"
+                                                       FontSize="12"
+                                                       FontWeight="SemiBold"
+                                                       TextWrapping="Wrap"
+                                                       MaxHeight="34"
+                                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                                       Text="{Binding DisplayTitle}" />
+
+                                            <TextBlock Margin="0,3,0,0"
+                                                       FontSize="10"
+                                                       Opacity="0.68"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                                       Text="{Binding SignalCategoryDisplayName}" />
+
+                                            <TextBlock Margin="0,3,0,0"
+                                                       FontSize="10"
+                                                       Opacity="0.68"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                                       Text="{Binding HardwareAddressText}" />
+
+                                            <Border Margin="0,7,0,0"
+                                                    Padding="6,3"
+                                                    CornerRadius="4"
+                                                    Background="{DynamicResource RegionBrush}">
+                                                <TextBlock FontSize="10"
+                                                           Opacity="0.78"
+                                                           TextTrimming="CharacterEllipsis"
+                                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                                           Text="{Binding LinkObjectName, StringFormat=使用对象：{0}}" />
+                                            </Border>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </ScrollViewer>
                 </Grid>
-            </ScrollViewer>
+            </Border>
+
+            <Grid Grid.Column="2">
+                <Border CornerRadius="8"
+                        Background="{DynamicResource SecondaryRegionBrush}"
+                        BorderBrush="{DynamicResource BorderBrush}"
+                        BorderThickness="1">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding SelectedItem}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock HorizontalAlignment="Center" FontSize="28" Opacity="0.15" Text="⇅" />
+                        <TextBlock Margin="0,8,0,0"
+                                   FontSize="13"
+                                   Opacity="0.4"
+                                   Foreground="{DynamicResource PrimaryTextBrush}"
+                                   Text="请选择一个输出点查看详情" />
+                    </StackPanel>
+                </Border>
+
+                <Border CornerRadius="8"
+                        Background="{DynamicResource SecondaryRegionBrush}"
+                        BorderBrush="{DynamicResource BorderBrush}"
+                        BorderThickness="1">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Visibility" Value="Visible" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding SelectedItem}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <Border Grid.Row="0"
+                                Padding="14,10"
+                                CornerRadius="8,8,0,0"
+                                Background="{DynamicResource RegionBrush}"
+                                BorderBrush="{DynamicResource BorderBrush}"
+                                BorderThickness="0,0,0,1">
+                            <StackPanel>
+                                <TextBlock FontSize="15"
+                                           FontWeight="SemiBold"
+                                           TextTrimming="CharacterEllipsis"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="{Binding SelectedItem.DisplayTitle, FallbackValue='—'}" />
+                                <TextBlock Margin="0,2,0,0"
+                                           FontSize="11"
+                                           Opacity="0.6"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="{Binding SelectedItem.Name, FallbackValue='—'}" />
+                            </StackPanel>
+                        </Border>
+
+                        <ScrollViewer Grid.Row="1"
+                                      VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Disabled">
+                            <StackPanel Margin="14,12,14,12">
+                                <hc:Shield Margin="0,0,0,6"
+                                           HorizontalAlignment="Left"
+                                           Subject="逻辑位"
+                                           Status="{Binding SelectedItem.LogicalBit}"
+                                           Color="#F57C00" />
+                                <hc:Shield Margin="0,0,0,6"
+                                           HorizontalAlignment="Left"
+                                           Subject="分类"
+                                           Status="{Binding SelectedItem.SignalCategoryDisplayName}"
+                                           Color="#00796B" />
+                                <hc:Shield Margin="0,0,0,6"
+                                           HorizontalAlignment="Left"
+                                           Subject="控制卡"
+                                           Status="{Binding SelectedItem.CardDisplayText}"
+                                           Color="#455A64" />
+                                <hc:Shield Margin="0,0,0,6"
+                                           HorizontalAlignment="Left"
+                                           Subject="硬件地址"
+                                           Status="{Binding SelectedItem.HardwareAddressText}"
+                                           Color="#1976D2" />
+                                <hc:Shield Margin="0,0,0,6"
+                                           HorizontalAlignment="Left"
+                                           Subject="当前状态"
+                                           Status="{Binding SelectedItem.StateText}"
+                                           Color="#388E3C" />
+                                <hc:Shield Margin="0,0,0,6"
+                                           HorizontalAlignment="Left"
+                                           Subject="最后触发"
+                                           Status="{Binding SelectedItem.LastUpdateTimeText}"
+                                           Color="#A6E22E" />
+                                <hc:Shield Margin="0,0,0,6"
+                                           HorizontalAlignment="Left"
+                                           Subject="输出模式"
+                                           Status="{Binding SelectedItem.OutputMode}"
+                                           Color="#6D4C41" />
+                                <hc:Shield Margin="0,0,0,6"
+                                           HorizontalAlignment="Left"
+                                           Subject="使用对象"
+                                           Status="{Binding SelectedItem.LinkObjectDisplayText}"
+                                           Color="#00838F" />
+
+                                <Rectangle Height="1"
+                                           Margin="0,12,0,12"
+                                           Fill="{DynamicResource BorderBrush}"
+                                           Opacity="0.5" />
+
+                                <TextBlock FontSize="12"
+                                           Opacity="0.55"
+                                           Margin="0,0,0,4"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="说明" />
+                                <TextBlock FontSize="12"
+                                           Opacity="0.82"
+                                           TextWrapping="Wrap"
+                                           Margin="0,0,0,8"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="{Binding SelectedItem.Description, TargetNullValue=—}" />
+
+                                <TextBlock FontSize="12"
+                                           Opacity="0.55"
+                                           Margin="0,0,0,4"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="备注" />
+                                <TextBlock FontSize="12"
+                                           Opacity="0.72"
+                                           TextWrapping="Wrap"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="{Binding SelectedItem.Remark, TargetNullValue=—}" />
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+            </Grid>
         </Grid>
 
-        <!-- 页内状态栏 -->
         <Border Grid.Row="2"
-                Padding="12,0"
-                CornerRadius="8"
                 Background="{DynamicResource SecondaryRegionBrush}"
                 BorderBrush="{DynamicResource BorderBrush}"
-                BorderThickness="1">
-            <DockPanel>
-                <TextBlock DockPanel.Dock="Left"
+                BorderThickness="1"
+                CornerRadius="6"
+                Padding="10,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0"
                            VerticalAlignment="Center"
                            Foreground="{DynamicResource PrimaryTextBrush}"
-                           Text="最后刷新：2026-03-17 22:35:18" />
-                <TextBlock DockPanel.Dock="Right"
-                           VerticalAlignment="Center"
-                           Foreground="{DynamicResource PrimaryTextBrush}"
-                           Text="当前输出分组：气缸电磁阀" />
-            </DockPanel>
+                           Text="{Binding StatusText}" />
+
+                <StackPanel Grid.Column="1"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center">
+                    <TextBlock VerticalAlignment="Center"
+                               Margin="0,0,8,0"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               Text="{Binding PageSummaryText}" />
+                    <ComboBox Width="72"
+                              Height="26"
+                              Margin="0,0,8,0"
+                              ItemsSource="{Binding PageSizes}"
+                              SelectedItem="{Binding SelectedPageSize, Mode=TwoWay}" />
+                    <Button Width="56"
+                            Height="26"
+                            Margin="0,0,6,0"
+                            Command="{Binding PrevPageCommand}"
+                            Content="上一页" />
+                    <Button Width="56"
+                            Height="26"
+                            Command="{Binding NextPageCommand}"
+                            Content="下一页" />
+                </StackPanel>
+            </Grid>
         </Border>
     </Grid>
 </UserControl>
