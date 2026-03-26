@@ -3,7 +3,6 @@ using AM.Core.Context;
 using AM.Model.Common;
 using AM.Model.Interfaces.MotionCard;
 using AM.Model.MotionCard;
-using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -83,6 +82,17 @@ namespace AM.DBService.Services.Motion.Runtime
             }
 
             return hub.Item.JogStop(logicalAxis);
+        }
+
+        public Result ClearStatus(short logicalAxis)
+        {
+            var hub = GetMotionHub();
+            if (!hub.Success)
+            {
+                return Fail(hub.Code, hub.Message);
+            }
+
+            return hub.Item.ClearStatus(logicalAxis);
         }
 
         public Result MoveAbsoluteMm(short logicalAxis, double positionMm, double velocityMm)

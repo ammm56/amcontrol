@@ -4,6 +4,7 @@ using AM.Model.Model.Motion;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
@@ -18,25 +19,30 @@ namespace AM.ViewModel.ViewModels.Motion
     {
         private readonly MotionRuntimeQueryService _runtimeQueryService;
         private readonly MotionAxisOperationService _operationService;
+        private readonly List<MotionAxisDisplayItem> _allAxisItems;
 
+        private MotionCardFilterItem _selectedCardFilter;
         private MotionAxisDisplayItem _selectedAxisItem;
         private string _targetPositionMmText;
         private string _moveDistanceMmText;
         private string _velocityMmText;
         private string _statusText;
         private bool _isBusy;
+        private bool _isRefreshingCardFilters;
 
         public MotionAxisViewModel()
         {
             _runtimeQueryService = new MotionRuntimeQueryService();
             _operationService = new MotionAxisOperationService();
+            _allAxisItems = new List<MotionAxisDisplayItem>();
 
+            CardFilters = new ObservableCollection<MotionCardFilterItem>();
             AxisItems = new ObservableCollection<MotionAxisDisplayItem>();
 
             _targetPositionMmText = "0";
             _moveDistanceMmText = "10";
             _velocityMmText = "10";
-            _statusText = "请选择左侧轴";
+            _statusText = "请选择控制卡和轴";
 
             RefreshCommand = new AsyncRelayCommand(RefreshAsync, CanOperate);
             ServoOnCommand = new AsyncRelayCommand(ServoOnAsync, CanOperateAxis);
@@ -44,12 +50,16 @@ namespace AM.ViewModel.ViewModels.Motion
             StopCommand = new AsyncRelayCommand(StopAsync, CanOperateAxis);
             EmergencyStopCommand = new AsyncRelayCommand(EmergencyStopAsync, CanOperateAxis);
             HomeCommand = new AsyncRelayCommand(HomeAsync, CanOperateAxis);
+            ClearStatusCommand = new AsyncRelayCommand(ClearStatusAsync, CanOperateAxis);
             JogNegativeCommand = new AsyncRelayCommand(JogNegativeAsync, CanOperateAxis);
+            JogStopCommand = new AsyncRelayCommand(JogStopAsync, CanOperateAxis);
             JogPositiveCommand = new AsyncRelayCommand(JogPositiveAsync, CanOperateAxis);
             MoveAbsoluteCommand = new AsyncRelayCommand(MoveAbsoluteAsync, CanOperateAxis);
             MoveRelativeCommand = new AsyncRelayCommand(MoveRelativeAsync, CanOperateAxis);
             ApplyVelocityCommand = new AsyncRelayCommand(ApplyVelocityAsync, CanOperateAxis);
         }
+
+        public ObservableCollection<MotionCardFilterItem> CardFilters { get; private set; }
 
         public ObservableCollection<MotionAxisDisplayItem> AxisItems { get; private set; }
 
@@ -65,7 +75,11 @@ namespace AM.ViewModel.ViewModels.Motion
 
         public IAsyncRelayCommand HomeCommand { get; private set; }
 
+        public IAsyncRelayCommand ClearStatusCommand { get; private set; }
+
         public IAsyncRelayCommand JogNegativeCommand { get; private set; }
+
+        public IAsyncRelayCommand JogStopCommand { get; private set; }
 
         public IAsyncRelayCommand JogPositiveCommand { get; private set; }
 
@@ -75,21 +89,71 @@ namespace AM.ViewModel.ViewModels.Motion
 
         public IAsyncRelayCommand ApplyVelocityCommand { get; private set; }
 
+        public MotionCardFilterItem SelectedCardFilter
+        {
+            get { return _selectedCardFilter; }
+            set
+            {
+                if (IsSameCardFilter(_selectedCardFilter, value))
+                {
+                    return;
+                }
+
+                if (SetProperty(ref _selectedCardFilter, value))
+                {
+                    OnPropertyChanged(nameof(SelectedCardHeader));
+
+                    if (!_isRefreshingCardFilters)
+                    {
+                        ApplyCardFilter(null);
+                    }
+                }
+            }
+        }
+
         public MotionAxisDisplayItem SelectedAxisItem
         {
             get { return _selectedAxisItem; }
             set
             {
+                var previousAxis = _selectedAxisItem == null ? (short?)null : _selectedAxisItem.LogicalAxis;
+
                 if (SetProperty(ref _selectedAxisItem, value))
                 {
-                    if (_selectedAxisItem != null)
+                    var currentAxis = _selectedAxisItem == null ? (short?)null : _selectedAxisItem.LogicalAxis;
+
+                    if (currentAxis.HasValue && currentAxis != previousAxis)
                     {
-                        VelocityMmText = _selectedAxisItem.DefaultVelocityMm.ToString("0.###", CultureInfo.InvariantCulture);
+                        VelocityMmText = _selectedAxisItem.DefaultVelocityMm > 0
+                            ? _selectedAxisItem.DefaultVelocityMm.ToString("0.###", CultureInfo.InvariantCulture)
+                            : "10";
                     }
 
                     OnPropertyChanged(nameof(SelectedAxisHeader));
+                    OnPropertyChanged(nameof(SelectedAxisCardText));
+                    OnPropertyChanged(nameof(SelectedAxisStatusText));
+                    OnPropertyChanged(nameof(SelectedAxisSignalText));
+                    OnPropertyChanged(nameof(SelectedAxisLimitText));
+                    OnPropertyChanged(nameof(SelectedAxisCommandPositionText));
+                    OnPropertyChanged(nameof(SelectedAxisEncoderPositionText));
+                    OnPropertyChanged(nameof(SelectedAxisPositionErrorText));
+                    OnPropertyChanged(nameof(SelectedAxisDefaultVelocityText));
+                    OnPropertyChanged(nameof(SelectedAxisJogVelocityText));
                     NotifyCommandState();
                 }
+            }
+        }
+
+        public string SelectedCardHeader
+        {
+            get
+            {
+                if (SelectedCardFilter == null)
+                {
+                    return "当前控制卡：未选择";
+                }
+
+                return "当前控制卡：" + SelectedCardFilter.DisplayText;
             }
         }
 
@@ -97,12 +161,106 @@ namespace AM.ViewModel.ViewModels.Motion
         {
             get
             {
-                if (_selectedAxisItem == null)
+                if (SelectedAxisItem == null)
                 {
                     return "当前轴：未选择";
                 }
 
-                return "当前轴：L#" + _selectedAxisItem.LogicalAxis + "  " + _selectedAxisItem.DisplayTitle;
+                return "当前轴：L#" + SelectedAxisItem.LogicalAxis + "  " + SelectedAxisItem.DisplayTitle;
+            }
+        }
+
+        public string SelectedAxisCardText
+        {
+            get
+            {
+                if (SelectedAxisItem == null)
+                {
+                    return "—";
+                }
+
+                return "卡#" + SelectedAxisItem.CardId + "  " +
+                    (string.IsNullOrWhiteSpace(SelectedAxisItem.CardDisplayName)
+                        ? "未命名控制卡"
+                        : SelectedAxisItem.CardDisplayName);
+            }
+        }
+
+        public string SelectedAxisStatusText
+        {
+            get
+            {
+                return SelectedAxisItem == null ? "—" : SelectedAxisItem.StateText;
+            }
+        }
+
+        public string SelectedAxisSignalText
+        {
+            get
+            {
+                return SelectedAxisItem == null ? "—" : SelectedAxisItem.SignalSummaryText;
+            }
+        }
+
+        public string SelectedAxisLimitText
+        {
+            get
+            {
+                return SelectedAxisItem == null ? "—" : SelectedAxisItem.LimitStateText;
+            }
+        }
+
+        public string SelectedAxisCommandPositionText
+        {
+            get
+            {
+                return SelectedAxisItem == null
+                    ? "—"
+                    : SelectedAxisItem.CommandPositionMm.ToString("0.###", CultureInfo.InvariantCulture);
+            }
+        }
+
+        public string SelectedAxisEncoderPositionText
+        {
+            get
+            {
+                return SelectedAxisItem == null
+                    ? "—"
+                    : SelectedAxisItem.EncoderPositionMm.ToString("0.###", CultureInfo.InvariantCulture);
+            }
+        }
+
+        public string SelectedAxisPositionErrorText
+        {
+            get
+            {
+                if (SelectedAxisItem == null)
+                {
+                    return "—";
+                }
+
+                var error = SelectedAxisItem.CommandPositionMm - SelectedAxisItem.EncoderPositionMm;
+                return error.ToString("0.###", CultureInfo.InvariantCulture);
+            }
+        }
+
+        public string SelectedAxisDefaultVelocityText
+        {
+            get
+            {
+                return SelectedAxisItem == null
+                    ? "—"
+                    : SelectedAxisItem.DefaultVelocityMm.ToString("0.###", CultureInfo.InvariantCulture);
+            }
+        }
+
+        public string SelectedAxisJogVelocityText
+        {
+            get
+            {
+                return SelectedAxisItem == null
+                    ? "—"
+                    : SelectedAxisItem.JogVelocityMm.ToString("0.###", CultureInfo.InvariantCulture);
             }
         }
 
@@ -147,7 +305,9 @@ namespace AM.ViewModel.ViewModels.Motion
 
             try
             {
-                var selectedAxis = SelectedAxisItem == null ? (short?)null : SelectedAxisItem.LogicalAxis;
+                var previousCardId = SelectedCardFilter == null ? (short?)null : SelectedCardFilter.CardId;
+                var previousAxis = SelectedAxisItem == null ? (short?)null : SelectedAxisItem.LogicalAxis;
+
                 var result = await Task.Run(() => _runtimeQueryService.QueryAxisSnapshot());
 
                 if (!result.Success)
@@ -156,23 +316,15 @@ namespace AM.ViewModel.ViewModels.Motion
                     return;
                 }
 
-                AxisItems.Clear();
-                foreach (var item in result.Items)
-                {
-                    AxisItems.Add(item);
-                }
+                _allAxisItems.Clear();
+                _allAxisItems.AddRange(result.Items.OrderBy(x => x.CardId).ThenBy(x => x.LogicalAxis));
 
-                if (selectedAxis.HasValue)
-                {
-                    SelectedAxisItem = AxisItems.FirstOrDefault(x => x.LogicalAxis == selectedAxis.Value) ?? (AxisItems.Count > 0 ? AxisItems[0] : null);
-                }
-                else
-                {
-                    SelectedAxisItem = AxisItems.Count > 0 ? AxisItems[0] : null;
-                }
+                RefreshCardFilters(previousCardId);
+                ApplyCardFilter(previousAxis);
 
-                StatusText = "轴运行态已刷新，共 " + AxisItems.Count + " 条";
-                OnPropertyChanged(nameof(SelectedAxisHeader));
+                StatusText = string.Format(
+                    "单轴控制运行态已刷新，当前卡共 {0} 轴",
+                    AxisItems.Count);
             }
             finally
             {
@@ -215,13 +367,19 @@ namespace AM.ViewModel.ViewModels.Motion
             {
                 var result = await _operationService.HomeAsync(SelectedAxisItem.LogicalAxis);
                 StatusText = result.Message;
-                await RefreshAsync();
             }
             finally
             {
                 _isBusy = false;
                 NotifyCommandState();
             }
+
+            await RefreshAsync();
+        }
+
+        private async Task ClearStatusAsync()
+        {
+            await ExecuteOperationAsync(() => _operationService.ClearStatus(SelectedAxisItem.LogicalAxis));
         }
 
         private async Task JogNegativeAsync()
@@ -233,6 +391,11 @@ namespace AM.ViewModel.ViewModels.Motion
             }
 
             await ExecuteOperationAsync(() => _operationService.JogMove(SelectedAxisItem.LogicalAxis, false, velocityMm));
+        }
+
+        private async Task JogStopAsync()
+        {
+            await ExecuteOperationAsync(() => _operationService.JogStop(SelectedAxisItem.LogicalAxis));
         }
 
         private async Task JogPositiveAsync()
@@ -307,12 +470,83 @@ namespace AM.ViewModel.ViewModels.Motion
             {
                 var result = await Task.Run(action);
                 StatusText = result.Message;
-                await RefreshAsync();
             }
             finally
             {
                 _isBusy = false;
                 NotifyCommandState();
+            }
+
+            await RefreshAsync();
+        }
+
+        private void RefreshCardFilters(short? previousCardId)
+        {
+            CardFilters.Clear();
+
+            foreach (var item in _allAxisItems
+                .GroupBy(x => x.CardId)
+                .Select(g => new MotionCardFilterItem
+                {
+                    CardId = g.Key,
+                    DisplayName = g.Select(x => x.CardDisplayName).FirstOrDefault()
+                })
+                .OrderBy(x => x.CardId))
+            {
+                CardFilters.Add(item);
+            }
+
+            MotionCardFilterItem selected = null;
+
+            if (previousCardId.HasValue)
+            {
+                selected = CardFilters.FirstOrDefault(x => x.CardId == previousCardId.Value);
+            }
+
+            if (selected == null && CardFilters.Count > 0)
+            {
+                selected = CardFilters[0];
+            }
+
+            _isRefreshingCardFilters = true;
+            try
+            {
+                SelectedCardFilter = selected;
+            }
+            finally
+            {
+                _isRefreshingCardFilters = false;
+            }
+
+            OnPropertyChanged(nameof(SelectedCardHeader));
+        }
+
+        private void ApplyCardFilter(short? previousAxis)
+        {
+            AxisItems.Clear();
+
+            IEnumerable<MotionAxisDisplayItem> query = _allAxisItems;
+
+            if (SelectedCardFilter != null)
+            {
+                query = query.Where(x => x.CardId == SelectedCardFilter.CardId);
+            }
+
+            var list = query.OrderBy(x => x.LogicalAxis).ToList();
+
+            foreach (var item in list)
+            {
+                AxisItems.Add(item);
+            }
+
+            if (previousAxis.HasValue)
+            {
+                SelectedAxisItem = AxisItems.FirstOrDefault(x => x.LogicalAxis == previousAxis.Value)
+                    ?? (AxisItems.Count > 0 ? AxisItems[0] : null);
+            }
+            else
+            {
+                SelectedAxisItem = AxisItems.Count > 0 ? AxisItems[0] : null;
             }
         }
 
@@ -361,11 +595,28 @@ namespace AM.ViewModel.ViewModels.Motion
             StopCommand.NotifyCanExecuteChanged();
             EmergencyStopCommand.NotifyCanExecuteChanged();
             HomeCommand.NotifyCanExecuteChanged();
+            ClearStatusCommand.NotifyCanExecuteChanged();
             JogNegativeCommand.NotifyCanExecuteChanged();
+            JogStopCommand.NotifyCanExecuteChanged();
             JogPositiveCommand.NotifyCanExecuteChanged();
             MoveAbsoluteCommand.NotifyCanExecuteChanged();
             MoveRelativeCommand.NotifyCanExecuteChanged();
             ApplyVelocityCommand.NotifyCanExecuteChanged();
+        }
+
+        private static bool IsSameCardFilter(MotionCardFilterItem left, MotionCardFilterItem right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (left == null || right == null)
+            {
+                return false;
+            }
+
+            return left.CardId == right.CardId;
         }
     }
 }

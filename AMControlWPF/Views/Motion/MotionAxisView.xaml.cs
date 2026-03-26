@@ -33,6 +33,7 @@ namespace AMControlWPF.Views.Motion
 
         private async void MotionAxisView_Loaded(object sender, RoutedEventArgs e)
         {
+            _refreshTimer.Stop();
             await _viewModel.LoadAsync();
             _refreshTimer.Start();
         }
