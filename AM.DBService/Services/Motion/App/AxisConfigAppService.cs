@@ -142,7 +142,7 @@ namespace AM.DBService.Services.Motion.App
                 return Fail(reloadResult.Code, "数据库参数重新加载失败");
             }
 
-            return Ok("数据库参数重新加载成功");
+            return OkLogOnly("数据库参数重新加载成功");
         }
 
         /// <summary>

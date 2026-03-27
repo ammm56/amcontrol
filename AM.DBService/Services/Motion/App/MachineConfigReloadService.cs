@@ -145,7 +145,7 @@ namespace AM.DBService.Services.Motion.App
                 return doResult;
             }
 
-            return Ok("控制卡注册成功");
+            return OkLogOnly("控制卡注册成功");
         }
 
         private Result RegisterAxisMappings(MachineContext machine, IMotionCardService motion, MotionCardConfig motionCfg)
@@ -165,7 +165,7 @@ namespace AM.DBService.Services.Motion.App
                 machine.AxisMotionCards[axisCfg.LogicalAxis] = motion;
             }
 
-            return Ok("轴映射注册成功");
+            return OkLogOnly("轴映射注册成功");
         }
 
         private Result RegisterDIMappings(MachineContext machine, IMotionCardService motion, MotionCardConfig motionCfg)
@@ -185,7 +185,7 @@ namespace AM.DBService.Services.Motion.App
                 machine.DICards[di.LogicalBit] = motion;
             }
 
-            return Ok("DI映射注册成功");
+            return OkLogOnly("DI映射注册成功");
         }
 
         private Result RegisterDOMappings(MachineContext machine, IMotionCardService motion, MotionCardConfig motionCfg)
@@ -205,7 +205,7 @@ namespace AM.DBService.Services.Motion.App
                 machine.DOCards[dob.LogicalBit] = motion;
             }
 
-            return Ok("DO映射注册成功");
+            return OkLogOnly("DO映射注册成功");
         }
 
         private Result RegisterActuatorConfig(MachineContext machine, ActuatorConfig actuatorConfig)
@@ -239,7 +239,7 @@ namespace AM.DBService.Services.Motion.App
                 return gripperResult;
             }
 
-            return Ok("执行器对象配置注册成功");
+            return OkLogOnly("执行器对象配置注册成功");
         }
 
         private Result RegisterCylinderMappings(MachineContext machine, ActuatorConfig actuatorConfig)
@@ -284,7 +284,7 @@ namespace AM.DBService.Services.Motion.App
                 machine.Cylinders[cylinder.Name] = cylinder;
             }
 
-            return Ok("气缸对象配置注册成功");
+            return OkLogOnly("气缸对象配置注册成功");
         }
 
         private Result RegisterVacuumMappings(MachineContext machine, ActuatorConfig actuatorConfig)
@@ -334,7 +334,7 @@ namespace AM.DBService.Services.Motion.App
                 machine.Vacuums[vacuum.Name] = vacuum;
             }
 
-            return Ok("真空对象配置注册成功");
+            return OkLogOnly("真空对象配置注册成功");
         }
 
         private Result RegisterStackLightMappings(MachineContext machine, ActuatorConfig actuatorConfig)
@@ -384,7 +384,7 @@ namespace AM.DBService.Services.Motion.App
                 machine.StackLights[stackLight.Name] = stackLight;
             }
 
-            return Ok("灯塔对象配置注册成功");
+            return OkLogOnly("灯塔对象配置注册成功");
         }
 
         private Result RegisterGripperMappings(MachineContext machine, ActuatorConfig actuatorConfig)
@@ -434,7 +434,7 @@ namespace AM.DBService.Services.Motion.App
                 machine.Grippers[gripper.Name] = gripper;
             }
 
-            return Ok("夹爪对象配置注册成功");
+            return OkLogOnly("夹爪对象配置注册成功");
         }
 
     }

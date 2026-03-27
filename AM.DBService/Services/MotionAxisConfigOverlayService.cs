@@ -96,7 +96,7 @@ namespace AM.DBService.Services
                 MotionAxisConfigMapper.Apply(axisConfig, rows);
             }
 
-            return Ok("数据库轴参数覆盖成功");
+            return OkLogOnly("数据库轴参数覆盖成功");
         }
     }
 }

@@ -67,7 +67,7 @@ namespace AM.MotionService.Base
                 _axisMap = tempMap;
             }
 
-            return Ok("轴映射加载完成");
+            return OkLogOnly("轴映射加载完成");
         }
 
         public virtual void LoadAxisConfig(List<AxisConfig> configs)

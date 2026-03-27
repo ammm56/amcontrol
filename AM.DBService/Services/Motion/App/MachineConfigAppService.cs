@@ -96,7 +96,7 @@ namespace AM.DBService.Services.Motion.App
 
                 EnsureIndexes(db);
 
-                return Ok("运动控制配置表初始化完成");
+                return OkLogOnly("运动控制配置表初始化完成");
             }
             catch (Exception ex)
             {
@@ -250,7 +250,7 @@ namespace AM.DBService.Services.Motion.App
                 ConfigContext.Instance.Config.ActuatorConfig = new ActuatorConfig();
             }
 
-            return Ok("运行时运动控制配置重载成功");
+            return OkLogOnly("运行时运动控制配置重载成功");
         }
 
         private SqlSugarClient CreateDb()

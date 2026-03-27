@@ -57,7 +57,7 @@ namespace AM.DBService.Services.Runtime
             }
 
             _workers[worker.Name] = worker;
-            return Ok("后台工作单元注册成功: " + worker.Name);
+            return OkLogOnly("后台工作单元注册成功: " + worker.Name);
         }
 
         /// <summary>
