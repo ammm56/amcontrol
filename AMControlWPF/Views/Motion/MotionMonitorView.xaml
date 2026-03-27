@@ -213,7 +213,7 @@
 
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <Border Width="182"
+                                    <Border Width="154"
                                             Margin="5"
                                             Padding="9,8"
                                             CornerRadius="6"
@@ -280,7 +280,7 @@
                                                            FontSize="10"
                                                            Opacity="0.45"
                                                            Foreground="{DynamicResource PrimaryTextBrush}"
-                                                           Text="{Binding CardId, StringFormat='卡#{0}'}" />
+                                                           Text="{Binding PhysicalAxis, StringFormat='P#{0}'}" />
                                             </DockPanel>
 
                                             <TextBlock Margin="0,7,0,0"
@@ -296,14 +296,14 @@
                                                        Opacity="0.68"
                                                        TextTrimming="CharacterEllipsis"
                                                        Foreground="{DynamicResource PrimaryTextBrush}"
-                                                       Text="{Binding Name}" />
+                                                       Text="{Binding AxisCategory, StringFormat=类型：{0}}" />
 
                                             <TextBlock Margin="0,3,0,0"
                                                        FontSize="10"
                                                        Opacity="0.68"
                                                        TextTrimming="CharacterEllipsis"
                                                        Foreground="{DynamicResource PrimaryTextBrush}"
-                                                       Text="{Binding CardDisplayName}" />
+                                                       Text="{Binding PhysicalCore, StringFormat=核 {0}}" />
 
                                             <Grid Margin="0,7,0,0">
                                                 <Grid.ColumnDefinitions>
@@ -347,16 +347,16 @@
                                                 </Border>
                                             </Grid>
 
-                                            <Border Margin="0,7,0,0"
+                                            <!--<Border Margin="0,7,0,0"
                                                     Padding="6,3"
                                                     CornerRadius="4"
                                                     Background="{DynamicResource RegionBrush}">
                                                 <TextBlock FontSize="10"
-                                                           Opacity="0.82"
+                                                           Opacity="0.78"
                                                            TextTrimming="CharacterEllipsis"
                                                            Foreground="{DynamicResource PrimaryTextBrush}"
-                                                           Text="{Binding SignalSummaryText}" />
-                                            </Border>
+                                                           Text="{Binding DefaultVelocityMm, StringFormat='默认/点动：{0:0.###}'}" />
+                                            </Border>-->
 
                                             <TextBlock Margin="0,5,0,0"
                                                        FontSize="10"
