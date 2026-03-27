@@ -9,7 +9,11 @@ using System.Windows.Controls;
 namespace AMControlWPF.Views.Am
 {
     /// <summary>
-    /// UserManagementView.xaml 的交互逻辑
+    /// UserManagementView.xaml 的交互逻辑。
+    ///
+    /// 重要说明：
+    /// 当前页面由主窗口缓存复用，因此不要在首次加载后解绑 Loaded，
+    /// 否则再次进入页面时不会重新从数据库加载最新用户数据。
     /// </summary>
     public partial class UserManagementView : UserControl
     {
@@ -29,7 +33,6 @@ namespace AMControlWPF.Views.Am
 
         private async void UserManagementView_Loaded(object sender, RoutedEventArgs e)
         {
-            Loaded -= UserManagementView_Loaded;
             await _viewModel.LoadAsync();
         }
 

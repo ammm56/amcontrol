@@ -381,6 +381,13 @@ namespace AM.ViewModel.ViewModels.Motion
             }
         }
 
+        /// <summary>
+        /// 释放运行态订阅。
+        ///
+        /// 注意：当前 MotionAxisView 被 MainWindow 页面缓存复用，
+        /// 正常导航切换时不应调用本方法；否则会导致再次进入页面后实时刷新链路断开。
+        /// 本方法仅适用于页面实例真正销毁的场景。
+        /// </summary>
         public void Dispose()
         {
             if (_isDisposed)

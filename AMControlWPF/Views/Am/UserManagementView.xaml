@@ -7,7 +7,12 @@
              xmlns:local="clr-namespace:AMControlWPF.Views.Am"
              mc:Ignorable="d"
              Background="Transparent">
-
+    <UserControl.Resources>
+        <Style x:Key="AMDataGridCellStyle" TargetType="DataGridCell" BasedOn="{StaticResource DataGridCellStyle}">
+            <Setter Property="hc:BorderElement.CornerRadius" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+        </Style>
+    </UserControl.Resources>
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -209,11 +214,11 @@
                                       ItemsSource="{Binding Users}"
                                       SelectedItem="{Binding SelectedUser, Mode=TwoWay}">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="登录名" Width="100" Binding="{Binding LoginName}" />
-                                    <DataGridTextColumn Header="用户名" Width="120" Binding="{Binding DisplayName}" />
-                                    <DataGridTextColumn Header="角色" Width="100" Binding="{Binding RoleDisplayName}" />
-                                    <DataGridTextColumn Header="状态" Width="80" Binding="{Binding StateText}" />
-                                    <DataGridTextColumn Header="最后登录" Width="*" Binding="{Binding LastLoginTimeText}" />
+                                    <DataGridTextColumn CellStyle="{StaticResource AMDataGridCellStyle}" Header="登录名" Width="100" Binding="{Binding LoginName}" />
+                                    <DataGridTextColumn CellStyle="{StaticResource AMDataGridCellStyle}" Header="用户名" Width="120" Binding="{Binding DisplayName}" />
+                                    <DataGridTextColumn CellStyle="{StaticResource AMDataGridCellStyle}" Header="角色" Width="100" Binding="{Binding RoleDisplayName}" />
+                                    <DataGridTextColumn CellStyle="{StaticResource AMDataGridCellStyle}" Header="状态" Width="80" Binding="{Binding StateText}" />
+                                    <DataGridTextColumn CellStyle="{StaticResource AMDataGridCellStyle}" Header="最后登录" Width="*" Binding="{Binding LastLoginTimeText}" />
                                 </DataGrid.Columns>
                             </DataGrid>
                         </Grid>

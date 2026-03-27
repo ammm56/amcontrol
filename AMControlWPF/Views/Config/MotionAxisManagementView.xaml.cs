@@ -10,6 +10,7 @@ namespace AMControlWPF.Views.Config
     public partial class MotionAxisManagementView : UserControl
     {
         private readonly MotionAxisManagementViewModel _vm;
+        private bool _isFirstLoaded;
 
         public MotionAxisManagementView()
         {
@@ -21,7 +22,12 @@ namespace AMControlWPF.Views.Config
 
         private async void OnLoaded(object sender, RoutedEventArgs e)
         {
-            Loaded -= OnLoaded;
+            // 页面被主窗口缓存复用，不能在首次加载后解绑 Loaded。
+            // 首次进入执行完整加载，后续再次进入时重新刷新列表即可。
+            if (!_isFirstLoaded)
+            {
+                _isFirstLoaded = true;
+            }
             await _vm.LoadAsync();
             RefreshDetailPanel();
         }
@@ -89,7 +95,7 @@ namespace AMControlWPF.Views.Config
                 return;
             }
 
-            ApplyDialogResult(dialog.ResultEntity, _vm.SelectedItem);
+            _vm.SelectedItem = dialog.ResultEntity;
             await _vm.SaveCommand.ExecuteAsync(null);
             RefreshDetailPanel();
         }
@@ -101,16 +107,11 @@ namespace AMControlWPF.Views.Config
                 return;
             }
 
-            var name = !string.IsNullOrEmpty(_vm.SelectedItem.DisplayName)
-                ? _vm.SelectedItem.DisplayName
-                : _vm.SelectedItem.Name;
-
-            var result = HandyControl.Controls.MessageBox.Show(
-                string.Format("确认删除轴 [{0}]（逻辑轴 L#{1}）吗？\n\n此操作不可撤销。",
-                    name, _vm.SelectedItem.LogicalAxis),
-                "确认删除",
+            var result = MessageBox.Show(
+                "确定删除当前轴吗？",
+                "删除确认",
                 MessageBoxButton.YesNo,
-                MessageBoxImage.Warning);
+                MessageBoxImage.Question);
 
             if (result != MessageBoxResult.Yes)
             {
@@ -131,22 +132,6 @@ namespace AMControlWPF.Views.Config
             var hasSelection = _vm.SelectedItem != null;
             BorderNoSelection.Visibility = hasSelection ? Visibility.Collapsed : Visibility.Visible;
             BorderDetailContent.Visibility = hasSelection ? Visibility.Visible : Visibility.Collapsed;
-        }
-
-        private static void ApplyDialogResult(MotionAxisEntity source, MotionAxisEntity target)
-        {
-            target.CardId = source.CardId;
-            target.AxisId = source.AxisId;
-            target.Name = source.Name;
-            target.DisplayName = source.DisplayName;
-            target.AxisCategory = source.AxisCategory;
-            target.PhysicalCore = source.PhysicalCore;
-            target.PhysicalAxis = source.PhysicalAxis;
-            target.IsEnabled = source.IsEnabled;
-            target.SortOrder = source.SortOrder;
-            target.Description = source.Description;
-            target.Remark = source.Remark;
-            target.UpdateTime = source.UpdateTime;
         }
 
         private static MotionAxisEntity CloneEntity(MotionAxisEntity src)

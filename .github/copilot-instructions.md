@@ -1,5 +1,3 @@
-File: .github\copilot-instructions.md
-````````markdown
 # Copilot Instructions
 
 ## 项目指南
@@ -48,6 +46,7 @@ File: .github\copilot-instructions.md
 - DI/DO监视页头部不显示筛选结果；磁贴卡片中不再重复显示控制卡信息；DI/DO与ON/OFF徽标需像右侧Shield那样紧连显示无中间分隔空白；卡片中不显示扫描时间，以缩小卡片并同时展示更多IO信息。
 - DI/DO监视页需要支持分页以提升性能；顶部不显示最后扫描时间；卡片左上角需直接突出显示DI/DO与ON/OFF且颜色明显区分；右侧详情区的Shield元数据需像轴参数页那样每行一个并带明显颜色差异，不应全部同色。
 - 用户要求按WPF MVVM的数据绑定思路实现页面刷新，避免在页面 code-behind 中使用 DispatcherTimer/TimeSpan.FromMilliseconds 这类轮询式刷新页面的方式；优先采用数据变化驱动刷新。
+- 用户要求对页面在主窗口缓存复用场景下的生命周期实现方式形成统一规则并长期遵循：被 MainWindow 页面缓存复用的页面，不应在 Unloaded 中释放会断开实时订阅的 ViewModel/运行态绑定；此类页面的首次加载应用布尔标记控制，而不是 Loaded 后解绑事件；实现代码中需补充明确注释说明原因，避免后续页面重复出现相同问题。
 
 ## 服务层设计
 - 服务层统一采用“构造注入依赖 + 封装消息发布/日志通知”的风格，避免在各方法中重复直接调用 IMessageBus 和 IAMLogger。
@@ -57,8 +56,3 @@ File: .github\copilot-instructions.md
 ## 用户认证
 - 默认管理员账户登录名改为 `am`，初始密码为 `am123`。
 - 角色编码改为 `Operator`（操作员）、`Engineer`（工程师）、`Am`（管理员）。
-````````
-
-
-# Response
-````````markdown
