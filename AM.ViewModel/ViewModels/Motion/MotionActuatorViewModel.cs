@@ -1,6 +1,7 @@
 ﻿using AM.Core.Context;
 using AM.DBService.Services.Motion.Actuator;
 using AM.Model.Common;
+using AM.Model.MotionCard;
 using AM.Model.MotionCard.Actuator;
 using AM.Model.Runtime;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -124,10 +125,8 @@ namespace AM.ViewModel.ViewModels.Motion
             {
                 if (SetProperty(ref _isBusy, value))
                 {
+                    NotifyActionCommandState();
                     RefreshCommand.NotifyCanExecuteChanged();
-                    ExecutePrimaryActionCommand.NotifyCanExecuteChanged();
-                    ExecuteSecondaryActionCommand.NotifyCanExecuteChanged();
-                    SetStackLightStateCommand.NotifyCanExecuteChanged();
                 }
             }
         }
@@ -135,19 +134,37 @@ namespace AM.ViewModel.ViewModels.Motion
         public bool WaitFeedback
         {
             get { return _waitFeedback; }
-            set { SetProperty(ref _waitFeedback, value); }
+            set
+            {
+                if (SetProperty(ref _waitFeedback, value))
+                {
+                    NotifyActionCommandState();
+                }
+            }
         }
 
         public bool WaitWorkpiece
         {
             get { return _waitWorkpiece; }
-            set { SetProperty(ref _waitWorkpiece, value); }
+            set
+            {
+                if (SetProperty(ref _waitWorkpiece, value))
+                {
+                    NotifyActionCommandState();
+                }
+            }
         }
 
         public bool StackLightWithBuzzer
         {
             get { return _stackLightWithBuzzer; }
-            set { SetProperty(ref _stackLightWithBuzzer, value); }
+            set
+            {
+                if (SetProperty(ref _stackLightWithBuzzer, value))
+                {
+                    NotifyActionCommandState();
+                }
+            }
         }
 
         public int TotalCount
@@ -261,6 +278,213 @@ namespace AM.ViewModel.ViewModels.Motion
             }
         }
 
+        public string PrimaryActionButtonText
+        {
+            get
+            {
+                if (SelectedItem == null)
+                {
+                    return "主操作";
+                }
+
+                switch (SelectedItem.ActuatorType)
+                {
+                    case "Cylinder":
+                        return SelectedItem.PrimaryState == true && SelectedItem.SecondaryState != true
+                            ? "伸出（已到位）"
+                            : "伸出";
+
+                    case "Vacuum":
+                        if (SelectedItem.PrimaryState == true && (!WaitWorkpiece || SelectedItem.WorkpieceState != false))
+                        {
+                            return "吸真空（已建立）";
+                        }
+
+                        return WaitWorkpiece ? "吸真空+检测" : "吸真空";
+
+                    case "Gripper":
+                        if (SelectedItem.PrimaryState == true && (!WaitWorkpiece || SelectedItem.WorkpieceState != false))
+                        {
+                            return "夹紧（已到位）";
+                        }
+
+                        return WaitWorkpiece ? "夹紧+检测" : "夹紧";
+
+                    default:
+                        return "主操作";
+                }
+            }
+        }
+
+        public string SecondaryActionButtonText
+        {
+            get
+            {
+                if (SelectedItem == null)
+                {
+                    return "副操作";
+                }
+
+                switch (SelectedItem.ActuatorType)
+                {
+                    case "Cylinder":
+                        return SelectedItem.SecondaryState == true && SelectedItem.PrimaryState != true
+                            ? "缩回（已到位）"
+                            : "缩回";
+
+                    case "Vacuum":
+                        return SelectedItem.SecondaryState == true || SelectedItem.PrimaryState == false
+                            ? "关闭真空（已释放）"
+                            : "关闭真空";
+
+                    case "Gripper":
+                        return SelectedItem.SecondaryState == true && SelectedItem.PrimaryState != true
+                            ? "打开（已到位）"
+                            : "打开";
+
+                    default:
+                        return "副操作";
+                }
+            }
+        }
+
+        public string PrimaryActionToolTipText
+        {
+            get
+            {
+                var result = ValidatePrimaryAction();
+                return result.Success ? "执行当前主动作" : result.Message;
+            }
+        }
+
+        public string SecondaryActionToolTipText
+        {
+            get
+            {
+                var result = ValidateSecondaryAction();
+                return result.Success ? "执行当前副动作" : result.Message;
+            }
+        }
+
+        public string StackLightOffButtonText
+        {
+            get
+            {
+                return IsStackLightCurrentState("Off") ? "熄灭（当前）" : "熄灭";
+            }
+        }
+
+        public string StackLightIdleButtonText
+        {
+            get
+            {
+                return IsStackLightCurrentState("Idle") ? "空闲（当前）" : "空闲";
+            }
+        }
+
+        public string StackLightRunningButtonText
+        {
+            get
+            {
+                return IsStackLightCurrentState("Running") ? "运行（当前）" : "运行";
+            }
+        }
+
+        public string StackLightWarningButtonText
+        {
+            get
+            {
+                return IsStackLightCurrentState("Warning") ? "警告（当前）" : "警告";
+            }
+        }
+
+        public string StackLightAlarmButtonText
+        {
+            get
+            {
+                return IsStackLightCurrentState("Alarm") ? "报警（当前）" : "报警";
+            }
+        }
+
+        public string StackLightOffToolTipText
+        {
+            get
+            {
+                var result = ValidateStackLightState("Off");
+                return result.Success ? "切换为全灭状态" : result.Message;
+            }
+        }
+
+        public string StackLightIdleToolTipText
+        {
+            get
+            {
+                var result = ValidateStackLightState("Idle");
+                return result.Success ? "切换为空闲状态" : result.Message;
+            }
+        }
+
+        public string StackLightRunningToolTipText
+        {
+            get
+            {
+                var result = ValidateStackLightState("Running");
+                return result.Success ? "切换为运行状态" : result.Message;
+            }
+        }
+
+        public string StackLightWarningToolTipText
+        {
+            get
+            {
+                var result = ValidateStackLightState("Warning");
+                return result.Success ? "切换为警告状态" : result.Message;
+            }
+        }
+
+        public string StackLightAlarmToolTipText
+        {
+            get
+            {
+                var result = ValidateStackLightState("Alarm");
+                return result.Success ? "切换为报警状态" : result.Message;
+            }
+        }
+
+        private bool IsStackLightCurrentState(string stateKey)
+        {
+            if (SelectedItem == null || SelectedItem.ActuatorType != "StackLight")
+            {
+                return false;
+            }
+
+            StackLightState state;
+            if (!TryParseStackLightState(stateKey, out state))
+            {
+                return false;
+            }
+
+            return IsStackLightAlreadyInTargetState(SelectedItem, state, StackLightWithBuzzer);
+        }
+
+        private void RaiseActionUiTextChanged()
+        {
+            OnPropertyChanged(nameof(PrimaryActionButtonText));
+            OnPropertyChanged(nameof(SecondaryActionButtonText));
+            OnPropertyChanged(nameof(PrimaryActionToolTipText));
+            OnPropertyChanged(nameof(SecondaryActionToolTipText));
+            OnPropertyChanged(nameof(StackLightOffButtonText));
+            OnPropertyChanged(nameof(StackLightIdleButtonText));
+            OnPropertyChanged(nameof(StackLightRunningButtonText));
+            OnPropertyChanged(nameof(StackLightWarningButtonText));
+            OnPropertyChanged(nameof(StackLightAlarmButtonText));
+            OnPropertyChanged(nameof(StackLightOffToolTipText));
+            OnPropertyChanged(nameof(StackLightIdleToolTipText));
+            OnPropertyChanged(nameof(StackLightRunningToolTipText));
+            OnPropertyChanged(nameof(StackLightWarningToolTipText));
+            OnPropertyChanged(nameof(StackLightAlarmToolTipText));
+        }
+
         public async Task LoadAsync()
         {
             await RefreshAsync();
@@ -334,6 +558,10 @@ namespace AM.ViewModel.ViewModels.Motion
                     Description = item.Description,
                     Remark = item.Remark,
                     ControlModeText = ResolveDriveModeText(item.DriveMode),
+                    PrimaryOutputBit = item.ExtendOutputBit,
+                    SecondaryOutputBit = item.RetractOutputBit,
+                    PrimaryFeedbackBit = item.ExtendFeedbackBit,
+                    SecondaryFeedbackBit = item.RetractFeedbackBit,
                     PrimaryOutputText = FormatIoText("伸出输出", "DO", item.ExtendOutputBit),
                     SecondaryOutputText = FormatIoText("缩回输出", "DO", item.RetractOutputBit),
                     PrimaryFeedbackText = FormatIoText("伸出反馈", "DI", item.ExtendFeedbackBit),
@@ -346,7 +574,9 @@ namespace AM.ViewModel.ViewModels.Motion
                     SecondaryActionText = "缩回",
                     HasSecondaryAction = true,
                     UseFeedbackCheck = item.UseFeedbackCheck,
-                    UseWorkpieceCheck = false
+                    UseWorkpieceCheck = false,
+                    LastActionMessage = "最近操作：未执行",
+                    LastActionLevel = "Secondary"
                 });
             }
 
@@ -366,6 +596,11 @@ namespace AM.ViewModel.ViewModels.Motion
                     Description = item.Description,
                     Remark = item.Remark,
                     ControlModeText = item.KeepVacuumOnAfterDetected ? "吸附保持" : "普通释放",
+                    PrimaryOutputBit = item.VacuumOnOutputBit,
+                    SecondaryOutputBit = item.BlowOffOutputBit,
+                    PrimaryFeedbackBit = item.VacuumFeedbackBit,
+                    SecondaryFeedbackBit = item.ReleaseFeedbackBit,
+                    WorkpieceBit = item.WorkpiecePresentBit,
                     PrimaryOutputText = FormatIoText("吸真空输出", "DO", item.VacuumOnOutputBit),
                     SecondaryOutputText = FormatIoText("破真空输出", "DO", item.BlowOffOutputBit),
                     PrimaryFeedbackText = FormatIoText("建压反馈", "DI", item.VacuumFeedbackBit),
@@ -378,7 +613,9 @@ namespace AM.ViewModel.ViewModels.Motion
                     SecondaryActionText = "关闭真空",
                     HasSecondaryAction = true,
                     UseFeedbackCheck = item.UseFeedbackCheck,
-                    UseWorkpieceCheck = item.UseWorkpieceCheck
+                    UseWorkpieceCheck = item.UseWorkpieceCheck,
+                    LastActionMessage = "最近操作：未执行",
+                    LastActionLevel = "Secondary"
                 });
             }
 
@@ -398,6 +635,11 @@ namespace AM.ViewModel.ViewModels.Motion
                     Description = item.Description,
                     Remark = item.Remark,
                     ControlModeText = ResolveDriveModeText(item.DriveMode),
+                    PrimaryOutputBit = item.CloseOutputBit,
+                    SecondaryOutputBit = item.OpenOutputBit,
+                    PrimaryFeedbackBit = item.CloseFeedbackBit,
+                    SecondaryFeedbackBit = item.OpenFeedbackBit,
+                    WorkpieceBit = item.WorkpiecePresentBit,
                     PrimaryOutputText = FormatIoText("夹紧输出", "DO", item.CloseOutputBit),
                     SecondaryOutputText = FormatIoText("打开输出", "DO", item.OpenOutputBit),
                     PrimaryFeedbackText = FormatIoText("夹紧反馈", "DI", item.CloseFeedbackBit),
@@ -410,7 +652,9 @@ namespace AM.ViewModel.ViewModels.Motion
                     SecondaryActionText = "打开",
                     HasSecondaryAction = true,
                     UseFeedbackCheck = item.UseFeedbackCheck,
-                    UseWorkpieceCheck = item.UseWorkpieceCheck
+                    UseWorkpieceCheck = item.UseWorkpieceCheck,
+                    LastActionMessage = "最近操作：未执行",
+                    LastActionLevel = "Secondary"
                 });
             }
 
@@ -430,6 +674,11 @@ namespace AM.ViewModel.ViewModels.Motion
                     Description = item.Description,
                     Remark = item.Remark,
                     ControlModeText = item.AllowMultiSegmentOn ? "允许多段同亮" : "单段控制",
+                    RedOutputBit = item.RedOutputBit,
+                    YellowOutputBit = item.YellowOutputBit,
+                    GreenOutputBit = item.GreenOutputBit,
+                    BlueOutputBit = item.BlueOutputBit,
+                    BuzzerOutputBit = item.BuzzerOutputBit,
                     PrimaryOutputText = FormatIoText("红灯输出", "DO", item.RedOutputBit),
                     SecondaryOutputText = FormatIoText("黄灯输出", "DO", item.YellowOutputBit),
                     PrimaryFeedbackText = FormatIoText("绿灯输出", "DO", item.GreenOutputBit),
@@ -450,7 +699,9 @@ namespace AM.ViewModel.ViewModels.Motion
                     SecondaryActionText = string.Empty,
                     HasSecondaryAction = false,
                     UseFeedbackCheck = false,
-                    UseWorkpieceCheck = false
+                    UseWorkpieceCheck = false,
+                    LastActionMessage = "最近操作：未执行",
+                    LastActionLevel = "Secondary"
                 });
             }
 
@@ -519,6 +770,8 @@ namespace AM.ViewModel.ViewModels.Motion
                         break;
                 }
             }
+
+            NotifyActionCommandState();
         }
 
         private void RefreshCylinderState(MotionActuatorDisplayItem item)
@@ -526,24 +779,58 @@ namespace AM.ViewModel.ViewModels.Motion
             bool? isExtended = TryReadBoolResult(() => _cylinderService.IsExtended(item.Name));
             bool? isRetracted = TryReadBoolResult(() => _cylinderService.IsRetracted(item.Name));
 
-            if (isExtended == true)
+            item.PrimaryState = isExtended;
+            item.SecondaryState = isRetracted;
+            item.WorkpieceState = null;
+
+            if (!item.PrimaryFeedbackBit.HasValue && !item.SecondaryFeedbackBit.HasValue)
             {
-                item.StateText = "已伸出";
+                item.StateText = "未配反馈";
+                item.StateLevel = "Warning";
+                item.DetailText = "未配置伸出/缩回反馈位";
+                item.FooterText = "反馈：— / —";
+            }
+            else if (isExtended == true && isRetracted == true)
+            {
+                item.StateText = "反馈冲突";
+                item.StateLevel = "Danger";
+                item.DetailText = "伸出与缩回反馈同时为到位";
+                item.FooterText = "伸出=Y / 缩回=Y";
+                item.HasFault = true;
+            }
+            else if (isExtended == true)
+            {
+                item.StateText = "伸出到位";
                 item.StateLevel = "Success";
+                item.DetailText = "气缸当前处于伸出端";
+                item.FooterText = "伸出=Y / 缩回=" + BoolToShortText(isRetracted);
+                item.HasFault = false;
             }
             else if (isRetracted == true)
             {
-                item.StateText = "已缩回";
+                item.StateText = "缩回到位";
                 item.StateLevel = "Primary";
+                item.DetailText = "气缸当前处于缩回端";
+                item.FooterText = "伸出=" + BoolToShortText(isExtended) + " / 缩回=Y";
+                item.HasFault = false;
+            }
+            else if (isExtended == false && isRetracted == false)
+            {
+                item.StateText = "双未到位";
+                item.StateLevel = "Warning";
+                item.DetailText = "伸出与缩回反馈均未到位";
+                item.FooterText = "伸出=N / 缩回=N";
+                item.HasFault = false;
             }
             else
             {
-                item.StateText = "未知";
+                item.StateText = "状态未知";
                 item.StateLevel = "Secondary";
+                item.DetailText = "当前反馈不足以判断气缸端位";
+                item.FooterText = "伸出=" + BoolToShortText(isExtended) + " / 缩回=" + BoolToShortText(isRetracted);
+                item.HasFault = false;
             }
 
-            item.DetailText = "伸出=" + BoolToShortText(isExtended) + " / 缩回=" + BoolToShortText(isRetracted);
-            item.FooterText = "反馈：" + BoolToShortText(isExtended) + " / " + BoolToShortText(isRetracted);
             item.RuntimeUpdateTimeText = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
         }
 
@@ -553,24 +840,66 @@ namespace AM.ViewModel.ViewModels.Motion
             bool? isReleased = TryReadBoolResult(() => _vacuumService.IsReleased(item.Name));
             bool? hasWorkpiece = TryReadBoolResult(() => _vacuumService.HasWorkpiece(item.Name));
 
-            if (isBuilt == true)
+            item.PrimaryState = isBuilt;
+            item.SecondaryState = isReleased;
+            item.WorkpieceState = hasWorkpiece;
+
+            if (!item.PrimaryFeedbackBit.HasValue && !item.SecondaryFeedbackBit.HasValue)
             {
-                item.StateText = "已建压";
+                item.StateText = "未配反馈";
+                item.StateLevel = "Warning";
+                item.DetailText = "未配置建压/释放反馈位";
+                item.FooterText = "工件=" + BoolToShortText(hasWorkpiece);
+            }
+            else if (isBuilt == true && isReleased == true)
+            {
+                item.StateText = "反馈冲突";
+                item.StateLevel = "Danger";
+                item.DetailText = "建压与释放反馈同时成立";
+                item.FooterText = "建压=Y / 释放=Y";
+                item.HasFault = true;
+            }
+            else if (isBuilt == true && hasWorkpiece == true)
+            {
+                item.StateText = "已吸附";
                 item.StateLevel = "Success";
+                item.DetailText = "真空已建立，且已检测到工件";
+                item.FooterText = "建压=Y / 工件=Y";
+                item.HasFault = false;
+            }
+            else if (isBuilt == true)
+            {
+                item.StateText = "真空建立";
+                item.StateLevel = "Success";
+                item.DetailText = "真空已建立";
+                item.FooterText = "建压=Y / 工件=" + BoolToShortText(hasWorkpiece);
+                item.HasFault = false;
             }
             else if (isReleased == true)
             {
                 item.StateText = "已释放";
                 item.StateLevel = "Primary";
+                item.DetailText = "真空当前处于释放状态";
+                item.FooterText = "释放=Y / 工件=" + BoolToShortText(hasWorkpiece);
+                item.HasFault = false;
+            }
+            else if (isBuilt == false && isReleased == false)
+            {
+                item.StateText = "未建压";
+                item.StateLevel = "Secondary";
+                item.DetailText = "当前既未检测到建压，也未检测到释放到位";
+                item.FooterText = "建压=N / 释放=N";
+                item.HasFault = false;
             }
             else
             {
-                item.StateText = "未知";
+                item.StateText = "状态未知";
                 item.StateLevel = "Secondary";
+                item.DetailText = "当前反馈不足以判断真空状态";
+                item.FooterText = "工件=" + BoolToShortText(hasWorkpiece);
+                item.HasFault = false;
             }
 
-            item.DetailText = "建压=" + BoolToShortText(isBuilt) + " / 释放=" + BoolToShortText(isReleased);
-            item.FooterText = "工件：" + BoolToShortText(hasWorkpiece);
             item.RuntimeUpdateTimeText = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
         }
 
@@ -580,54 +909,128 @@ namespace AM.ViewModel.ViewModels.Motion
             bool? isOpened = TryReadBoolResult(() => _gripperService.IsOpened(item.Name));
             bool? hasWorkpiece = TryReadBoolResult(() => _gripperService.HasWorkpiece(item.Name));
 
-            if (isClosed == true)
+            item.PrimaryState = isClosed;
+            item.SecondaryState = isOpened;
+            item.WorkpieceState = hasWorkpiece;
+
+            if (!item.PrimaryFeedbackBit.HasValue && !item.SecondaryFeedbackBit.HasValue)
             {
-                item.StateText = "已夹紧";
+                item.StateText = "未配反馈";
+                item.StateLevel = "Warning";
+                item.DetailText = "未配置夹紧/打开反馈位";
+                item.FooterText = "工件=" + BoolToShortText(hasWorkpiece);
+            }
+            else if (isClosed == true && isOpened == true)
+            {
+                item.StateText = "反馈冲突";
+                item.StateLevel = "Danger";
+                item.DetailText = "夹紧与打开反馈同时成立";
+                item.FooterText = "夹紧=Y / 打开=Y";
+                item.HasFault = true;
+            }
+            else if (isClosed == true && hasWorkpiece == true)
+            {
+                item.StateText = "夹紧有料";
                 item.StateLevel = "Success";
+                item.DetailText = "夹爪夹紧到位，且已检测到工件";
+                item.FooterText = "夹紧=Y / 工件=Y";
+                item.HasFault = false;
+            }
+            else if (isClosed == true)
+            {
+                item.StateText = "夹紧到位";
+                item.StateLevel = "Success";
+                item.DetailText = "夹爪已夹紧到位";
+                item.FooterText = "夹紧=Y / 工件=" + BoolToShortText(hasWorkpiece);
+                item.HasFault = false;
             }
             else if (isOpened == true)
             {
-                item.StateText = "已打开";
+                item.StateText = "打开到位";
                 item.StateLevel = "Primary";
+                item.DetailText = "夹爪已打开到位";
+                item.FooterText = "打开=Y / 工件=" + BoolToShortText(hasWorkpiece);
+                item.HasFault = false;
+            }
+            else if (isClosed == false && isOpened == false)
+            {
+                item.StateText = "双未到位";
+                item.StateLevel = "Secondary";
+                item.DetailText = "夹紧与打开反馈均未到位";
+                item.FooterText = "夹紧=N / 打开=N";
+                item.HasFault = false;
             }
             else
             {
-                item.StateText = "未知";
+                item.StateText = "状态未知";
                 item.StateLevel = "Secondary";
+                item.DetailText = "当前反馈不足以判断夹爪状态";
+                item.FooterText = "工件=" + BoolToShortText(hasWorkpiece);
+                item.HasFault = false;
             }
 
-            item.DetailText = "夹紧=" + BoolToShortText(isClosed) + " / 打开=" + BoolToShortText(isOpened);
-            item.FooterText = "工件：" + BoolToShortText(hasWorkpiece);
             item.RuntimeUpdateTimeText = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
         }
 
         private void RefreshStackLightState(MotionActuatorDisplayItem item)
         {
-            var red = ReadDoState(item.PrimaryOutputText);
-            var yellow = ReadDoState(item.SecondaryOutputText);
-            var green = ReadDoState(item.PrimaryFeedbackText);
-            var blue = ReadDoState(item.SecondaryFeedbackText);
-            var buzzer = ReadDoState(item.WorkpieceText);
+            item.RedOn = ReadDoState(item.RedOutputBit);
+            item.YellowOn = ReadDoState(item.YellowOutputBit);
+            item.GreenOn = ReadDoState(item.GreenOutputBit);
+            item.BlueOn = ReadDoState(item.BlueOutputBit);
+            item.BuzzerOn = ReadDoState(item.BuzzerOutputBit);
 
             var onSegments = new List<string>();
-            if (red == true) onSegments.Add("红");
-            if (yellow == true) onSegments.Add("黄");
-            if (green == true) onSegments.Add("绿");
-            if (blue == true) onSegments.Add("蓝");
+            if (item.RedOn == true) onSegments.Add("红");
+            if (item.YellowOn == true) onSegments.Add("黄");
+            if (item.GreenOn == true) onSegments.Add("绿");
+            if (item.BlueOn == true) onSegments.Add("蓝");
 
-            if (onSegments.Count == 0)
+            if (!item.HasAnyStackLightOutput)
             {
-                item.StateText = "已关闭";
+                item.StateText = "未配输出";
+                item.StateLevel = "Warning";
+                item.DetailText = "未配置任何灯塔输出位";
+                item.FooterText = "亮段：—";
+                item.HasFault = false;
+            }
+            else if (onSegments.Count == 0 && item.BuzzerOn != true)
+            {
+                item.StateText = "全灭";
                 item.StateLevel = "Secondary";
+                item.DetailText = "当前所有灯段均关闭";
+                item.FooterText = "亮段：无 / 蜂鸣=N";
+                item.HasFault = false;
+            }
+            else if (onSegments.Count == 1)
+            {
+                item.StateText = onSegments[0] + (item.BuzzerOn == true ? "+蜂鸣" : "灯");
+                item.StateLevel = item.RedOn == true
+                    ? "Danger"
+                    : (item.YellowOn == true ? "Warning" : "Success");
+                item.DetailText = "红=" + BoolToShortText(item.RedOn)
+                    + " / 黄=" + BoolToShortText(item.YellowOn)
+                    + " / 绿=" + BoolToShortText(item.GreenOn)
+                    + " / 蓝=" + BoolToShortText(item.BlueOn)
+                    + " / 鸣=" + BoolToShortText(item.BuzzerOn);
+                item.FooterText = "亮段：" + onSegments[0] + " / 蜂鸣=" + BoolToShortText(item.BuzzerOn);
+                item.HasFault = false;
             }
             else
             {
-                item.StateText = string.Join("/", onSegments);
-                item.StateLevel = red == true ? "Danger" : (yellow == true ? "Warning" : "Success");
+                item.StateText = item.BuzzerOn == true ? "多段+蜂鸣" : "多段点亮";
+                item.StateLevel = item.RedOn == true
+                    ? "Danger"
+                    : (item.YellowOn == true ? "Warning" : "Primary");
+                item.DetailText = "红=" + BoolToShortText(item.RedOn)
+                    + " / 黄=" + BoolToShortText(item.YellowOn)
+                    + " / 绿=" + BoolToShortText(item.GreenOn)
+                    + " / 蓝=" + BoolToShortText(item.BlueOn)
+                    + " / 鸣=" + BoolToShortText(item.BuzzerOn);
+                item.FooterText = "亮段：" + string.Join("/", onSegments) + " / 蜂鸣=" + BoolToShortText(item.BuzzerOn);
+                item.HasFault = false;
             }
 
-            item.DetailText = "蜂鸣=" + BoolToShortText(buzzer);
-            item.FooterText = "亮段：" + (onSegments.Count == 0 ? "无" : string.Join("/", onSegments));
             item.RuntimeUpdateTimeText = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
         }
 
@@ -678,7 +1081,8 @@ namespace AM.ViewModel.ViewModels.Motion
                     (!string.IsNullOrWhiteSpace(x.TypeDisplay) && x.TypeDisplay.ToLowerInvariant().Contains(keyword)) ||
                     (!string.IsNullOrWhiteSpace(x.StateText) && x.StateText.ToLowerInvariant().Contains(keyword)) ||
                     (!string.IsNullOrWhiteSpace(x.CardLine1Text) && x.CardLine1Text.ToLowerInvariant().Contains(keyword)) ||
-                    (!string.IsNullOrWhiteSpace(x.CardLine2Text) && x.CardLine2Text.ToLowerInvariant().Contains(keyword)));
+                    (!string.IsNullOrWhiteSpace(x.CardLine2Text) && x.CardLine2Text.ToLowerInvariant().Contains(keyword)) ||
+                    (!string.IsNullOrWhiteSpace(x.LastActionMessage) && x.LastActionMessage.ToLowerInvariant().Contains(keyword)));
             }
 
             var list = query
@@ -708,6 +1112,7 @@ namespace AM.ViewModel.ViewModels.Motion
 
             SelectedItem = selected;
             OnPropertyChanged(nameof(HasItems));
+            NotifyActionCommandState();
 
             if (updateStatusText)
             {
@@ -733,6 +1138,13 @@ namespace AM.ViewModel.ViewModels.Motion
                 return;
             }
 
+            var validate = ValidatePrimaryAction();
+            if (!validate.Success)
+            {
+                ApplyActionResult(validate);
+                return;
+            }
+
             IsBusy = true;
 
             try
@@ -754,11 +1166,11 @@ namespace AM.ViewModel.ViewModels.Motion
                         break;
 
                     default:
-                        result = Result.Fail(-1, "当前对象不支持该操作");
+                        result = Result.Fail((int)MotionErrorCode.NotImplemented, "当前对象不支持该操作");
                         break;
                 }
 
-                StatusText = result.Message;
+                ApplyActionResult(result);
             }
             finally
             {
@@ -772,6 +1184,13 @@ namespace AM.ViewModel.ViewModels.Motion
         {
             if (SelectedItem == null)
             {
+                return;
+            }
+
+            var validate = ValidateSecondaryAction();
+            if (!validate.Success)
+            {
+                ApplyActionResult(validate);
                 return;
             }
 
@@ -796,11 +1215,11 @@ namespace AM.ViewModel.ViewModels.Motion
                         break;
 
                     default:
-                        result = Result.Fail(-1, "当前对象不支持该操作");
+                        result = Result.Fail((int)MotionErrorCode.NotImplemented, "当前对象不支持该操作");
                         break;
                 }
 
-                StatusText = result.Message;
+                ApplyActionResult(result);
             }
             finally
             {
@@ -814,6 +1233,13 @@ namespace AM.ViewModel.ViewModels.Motion
         {
             if (SelectedItem == null || SelectedItem.ActuatorType != "StackLight")
             {
+                return;
+            }
+
+            var validate = ValidateStackLightState(stateKey);
+            if (!validate.Success)
+            {
+                ApplyActionResult(validate);
                 return;
             }
 
@@ -845,11 +1271,11 @@ namespace AM.ViewModel.ViewModels.Motion
                         break;
 
                     default:
-                        result = Result.Fail(-1, "不支持的灯塔状态");
+                        result = Result.Fail((int)MotionErrorCode.InvalidIoBit, "不支持的灯塔状态");
                         break;
                 }
 
-                StatusText = result.Message;
+                ApplyActionResult(result);
             }
             finally
             {
@@ -857,6 +1283,256 @@ namespace AM.ViewModel.ViewModels.Motion
             }
 
             RefreshRuntimeStateAfterAction();
+        }
+
+        private Result ValidatePrimaryAction()
+        {
+            if (SelectedItem == null)
+            {
+                return Result.Fail((int)MotionErrorCode.InvalidIoBit, "请先选择执行器对象");
+            }
+
+            switch (SelectedItem.ActuatorType)
+            {
+                case "Cylinder":
+                    if (SelectedItem.PrimaryState == true && SelectedItem.SecondaryState != true)
+                    {
+                        return Result.Fail((int)MotionErrorCode.InvalidIoBit, "当前气缸已在伸出到位状态，无需重复伸出");
+                    }
+
+                    if (WaitFeedback)
+                    {
+                        if (!SelectedItem.UseFeedbackCheck)
+                        {
+                            return Result.Fail((int)MotionErrorCode.InvalidIoBit, "当前气缸未启用反馈校验，请取消“等待反馈”或调整配置");
+                        }
+
+                        if (!SelectedItem.PrimaryFeedbackBit.HasValue)
+                        {
+                            return Result.Fail((int)MotionErrorCode.IoMapNotFound, "当前气缸未配置伸出反馈位，无法等待伸出到位");
+                        }
+                    }
+
+                    return Result.Ok();
+
+                case "Vacuum":
+                    if (SelectedItem.PrimaryState == true && (!WaitWorkpiece || SelectedItem.WorkpieceState != false))
+                    {
+                        return Result.Fail((int)MotionErrorCode.InvalidIoBit, "当前真空已建立，无需重复吸真空");
+                    }
+
+                    if (WaitFeedback)
+                    {
+                        if (!SelectedItem.UseFeedbackCheck)
+                        {
+                            return Result.Fail((int)MotionErrorCode.InvalidIoBit, "当前真空未启用反馈校验，请取消“等待反馈”或调整配置");
+                        }
+
+                        if (!SelectedItem.PrimaryFeedbackBit.HasValue)
+                        {
+                            return Result.Fail((int)MotionErrorCode.IoMapNotFound, "当前真空未配置建压反馈位，无法等待真空建立");
+                        }
+                    }
+
+                    if (WaitWorkpiece)
+                    {
+                        if (!SelectedItem.UseWorkpieceCheck)
+                        {
+                            return Result.Fail((int)MotionErrorCode.InvalidIoBit, "当前真空未启用工件检测校验，请取消“等待工件检测”或调整配置");
+                        }
+
+                        if (!SelectedItem.WorkpieceBit.HasValue)
+                        {
+                            return Result.Fail((int)MotionErrorCode.IoMapNotFound, "当前真空未配置工件检测位，无法等待工件检测");
+                        }
+                    }
+
+                    return Result.Ok();
+
+                case "Gripper":
+                    if (SelectedItem.PrimaryState == true && (!WaitWorkpiece || SelectedItem.WorkpieceState != false))
+                    {
+                        return Result.Fail((int)MotionErrorCode.InvalidIoBit, "当前夹爪已在夹紧到位状态，无需重复夹紧");
+                    }
+
+                    if (WaitFeedback)
+                    {
+                        if (!SelectedItem.UseFeedbackCheck)
+                        {
+                            return Result.Fail((int)MotionErrorCode.InvalidIoBit, "当前夹爪未启用反馈校验，请取消“等待反馈”或调整配置");
+                        }
+
+                        if (!SelectedItem.PrimaryFeedbackBit.HasValue)
+                        {
+                            return Result.Fail((int)MotionErrorCode.IoMapNotFound, "当前夹爪未配置夹紧反馈位，无法等待夹紧到位");
+                        }
+                    }
+
+                    if (WaitWorkpiece)
+                    {
+                        if (!SelectedItem.UseWorkpieceCheck)
+                        {
+                            return Result.Fail((int)MotionErrorCode.InvalidIoBit, "当前夹爪未启用工件检测校验，请取消“等待工件检测”或调整配置");
+                        }
+
+                        if (!SelectedItem.WorkpieceBit.HasValue)
+                        {
+                            return Result.Fail((int)MotionErrorCode.IoMapNotFound, "当前夹爪未配置工件检测位，无法等待工件检测");
+                        }
+                    }
+
+                    return Result.Ok();
+
+                default:
+                    return Result.Fail((int)MotionErrorCode.NotImplemented, "当前对象不支持主动作");
+            }
+        }
+
+        private Result ValidateSecondaryAction()
+        {
+            if (SelectedItem == null)
+            {
+                return Result.Fail((int)MotionErrorCode.InvalidIoBit, "请先选择执行器对象");
+            }
+
+            switch (SelectedItem.ActuatorType)
+            {
+                case "Cylinder":
+                    if (SelectedItem.SecondaryState == true && SelectedItem.PrimaryState != true)
+                    {
+                        return Result.Fail((int)MotionErrorCode.InvalidIoBit, "当前气缸已在缩回到位状态，无需重复缩回");
+                    }
+
+                    if (WaitFeedback)
+                    {
+                        if (!SelectedItem.UseFeedbackCheck)
+                        {
+                            return Result.Fail((int)MotionErrorCode.InvalidIoBit, "当前气缸未启用反馈校验，请取消“等待反馈”或调整配置");
+                        }
+
+                        if (!SelectedItem.SecondaryFeedbackBit.HasValue)
+                        {
+                            return Result.Fail((int)MotionErrorCode.IoMapNotFound, "当前气缸未配置缩回反馈位，无法等待缩回到位");
+                        }
+                    }
+
+                    return Result.Ok();
+
+                case "Vacuum":
+                    if (SelectedItem.SecondaryState == true || SelectedItem.PrimaryState == false)
+                    {
+                        return Result.Fail((int)MotionErrorCode.InvalidIoBit, "当前真空已处于释放状态，无需重复关闭真空");
+                    }
+
+                    if (WaitFeedback)
+                    {
+                        if (!SelectedItem.UseFeedbackCheck)
+                        {
+                            return Result.Fail((int)MotionErrorCode.InvalidIoBit, "当前真空未启用反馈校验，请取消“等待反馈”或调整配置");
+                        }
+
+                        if (!SelectedItem.SecondaryFeedbackBit.HasValue && !SelectedItem.PrimaryFeedbackBit.HasValue)
+                        {
+                            return Result.Fail((int)MotionErrorCode.IoMapNotFound, "当前真空未配置释放反馈位或建压反馈位，无法等待真空释放");
+                        }
+                    }
+
+                    return Result.Ok();
+
+                case "Gripper":
+                    if (SelectedItem.SecondaryState == true && SelectedItem.PrimaryState != true)
+                    {
+                        return Result.Fail((int)MotionErrorCode.InvalidIoBit, "当前夹爪已在打开到位状态，无需重复打开");
+                    }
+
+                    if (WaitFeedback)
+                    {
+                        if (!SelectedItem.UseFeedbackCheck)
+                        {
+                            return Result.Fail((int)MotionErrorCode.InvalidIoBit, "当前夹爪未启用反馈校验，请取消“等待反馈”或调整配置");
+                        }
+
+                        if (!SelectedItem.SecondaryFeedbackBit.HasValue)
+                        {
+                            return Result.Fail((int)MotionErrorCode.IoMapNotFound, "当前夹爪未配置打开反馈位，无法等待打开到位");
+                        }
+                    }
+
+                    return Result.Ok();
+
+                default:
+                    return Result.Fail((int)MotionErrorCode.NotImplemented, "当前对象不支持副动作");
+            }
+        }
+
+        private Result ValidateStackLightState(string stateKey)
+        {
+            if (SelectedItem == null || SelectedItem.ActuatorType != "StackLight")
+            {
+                return Result.Fail((int)MotionErrorCode.InvalidIoBit, "请先选择灯塔对象");
+            }
+
+            if (!SelectedItem.HasAnyStackLightOutput)
+            {
+                return Result.Fail((int)MotionErrorCode.IoMapNotFound, "当前灯塔未配置任何输出位，无法执行状态切换");
+            }
+
+            StackLightState targetState;
+            if (!TryParseStackLightState(stateKey, out targetState))
+            {
+                return Result.Fail((int)MotionErrorCode.InvalidIoBit, "不支持的灯塔状态: " + stateKey);
+            }
+
+            if (IsStackLightAlreadyInTargetState(SelectedItem, targetState, StackLightWithBuzzer))
+            {
+                return Result.Fail((int)MotionErrorCode.InvalidIoBit, "当前灯塔已处于目标状态，无需重复切换");
+            }
+
+            return Result.Ok();
+        }
+
+        private void ApplyActionResult(Result result)
+        {
+            if (SelectedItem == null || result == null)
+            {
+                return;
+            }
+
+            var message = BuildLayeredActionMessage(result);
+            SelectedItem.LastActionMessage = message;
+            SelectedItem.LastActionLevel = result.Success ? "Success" : "Danger";
+            SelectedItem.HasFault = !result.Success;
+            StatusText = message;
+        }
+
+        private string BuildLayeredActionMessage(Result result)
+        {
+            if (result == null)
+            {
+                return "执行失败：未返回结果";
+            }
+
+            if (result.Success)
+            {
+                return "操作成功：" + result.Message;
+            }
+
+            if (result.Code == (int)MotionErrorCode.IoMapNotFound)
+            {
+                return "配置错误：" + result.Message;
+            }
+
+            if (result.Code == (int)MotionErrorCode.InvalidIoBit)
+            {
+                return "联锁限制：" + result.Message;
+            }
+
+            if (result.Code == (int)MotionErrorCode.HomeTimeout)
+            {
+                return "动作超时：" + result.Message;
+            }
+
+            return "执行失败：" + result.Message;
         }
 
         private void RefreshRuntimeStateAfterAction()
@@ -877,7 +1553,8 @@ namespace AM.ViewModel.ViewModels.Motion
         {
             return !IsBusy
                 && SelectedItem != null
-                && SelectedItem.ActuatorType != "StackLight";
+                && SelectedItem.ActuatorType != "StackLight"
+                && ValidatePrimaryAction().Success;
         }
 
         private bool CanExecuteSecondaryAction()
@@ -885,7 +1562,8 @@ namespace AM.ViewModel.ViewModels.Motion
             return !IsBusy
                 && SelectedItem != null
                 && SelectedItem.HasSecondaryAction
-                && SelectedItem.ActuatorType != "StackLight";
+                && SelectedItem.ActuatorType != "StackLight"
+                && ValidateSecondaryAction().Success;
         }
 
         private bool CanSetStackLightState(string stateKey)
@@ -893,7 +1571,8 @@ namespace AM.ViewModel.ViewModels.Motion
             return !IsBusy
                 && SelectedItem != null
                 && SelectedItem.ActuatorType == "StackLight"
-                && !string.IsNullOrWhiteSpace(stateKey);
+                && !string.IsNullOrWhiteSpace(stateKey)
+                && ValidateStackLightState(stateKey).Success;
         }
 
         private void RaiseSelectionChanged()
@@ -906,6 +1585,13 @@ namespace AM.ViewModel.ViewModels.Motion
             OnPropertyChanged(nameof(SelectedItemHeader));
             OnPropertyChanged(nameof(SelectedItemSubHeader));
 
+            RaiseActionUiTextChanged();
+            NotifyActionCommandState();
+        }
+
+        private void NotifyActionCommandState()
+        {
+            RaiseActionUiTextChanged();
             ExecutePrimaryActionCommand.NotifyCanExecuteChanged();
             ExecuteSecondaryActionCommand.NotifyCanExecuteChanged();
             SetStackLightStateCommand.NotifyCanExecuteChanged();
@@ -979,16 +1665,15 @@ namespace AM.ViewModel.ViewModels.Motion
             return result.Item;
         }
 
-        private static bool? ReadDoState(string ioText)
+        private static bool? ReadDoState(short? logicalBit)
         {
-            short logicalBit;
-            if (!TryParseLogicalBit(ioText, out logicalBit))
+            if (!logicalBit.HasValue)
             {
                 return null;
             }
 
             bool value;
-            if (!RuntimeContext.Instance.MotionIo.TryGetDO(logicalBit, out value))
+            if (!RuntimeContext.Instance.MotionIo.TryGetDO(logicalBit.Value, out value))
             {
                 return null;
             }
@@ -996,23 +1681,75 @@ namespace AM.ViewModel.ViewModels.Motion
             return value;
         }
 
-        private static bool TryParseLogicalBit(string text, out short logicalBit)
+        private static bool TryParseStackLightState(string stateKey, out StackLightState state)
         {
-            logicalBit = 0;
+            state = StackLightState.Off;
 
-            if (string.IsNullOrWhiteSpace(text))
+            switch (stateKey)
+            {
+                case "Off":
+                    state = StackLightState.Off;
+                    return true;
+                case "Idle":
+                    state = StackLightState.Idle;
+                    return true;
+                case "Running":
+                    state = StackLightState.Running;
+                    return true;
+                case "Warning":
+                    state = StackLightState.Warning;
+                    return true;
+                case "Alarm":
+                    state = StackLightState.Alarm;
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private static bool IsStackLightAlreadyInTargetState(
+            MotionActuatorDisplayItem item,
+            StackLightState targetState,
+            bool withBuzzer)
+        {
+            if (item == null)
             {
                 return false;
             }
 
-            var index = text.LastIndexOf("L#", StringComparison.OrdinalIgnoreCase);
-            if (index < 0)
+            switch (targetState)
             {
-                return false;
-            }
+                case StackLightState.Off:
+                    return item.RedOn != true
+                        && item.YellowOn != true
+                        && item.GreenOn != true
+                        && item.BlueOn != true
+                        && item.BuzzerOn != true;
 
-            var numberText = text.Substring(index + 2).Trim();
-            return short.TryParse(numberText, out logicalBit);
+                case StackLightState.Idle:
+                case StackLightState.Running:
+                    return item.GreenOn == true
+                        && item.RedOn != true
+                        && item.YellowOn != true
+                        && item.BlueOn != true;
+
+                case StackLightState.Warning:
+                    return item.YellowOn == true
+                        && item.RedOn != true
+                        && item.GreenOn != true
+                        && item.BlueOn != true
+                        && (withBuzzer ? item.BuzzerOn == true : true);
+
+                case StackLightState.Alarm:
+                    return item.RedOn == true
+                        && item.YellowOn != true
+                        && item.GreenOn != true
+                        && item.BlueOn != true
+                        && (withBuzzer ? item.BuzzerOn == true : true);
+
+                default:
+                    return false;
+            }
         }
     }
 
@@ -1026,6 +1763,9 @@ namespace AM.ViewModel.ViewModels.Motion
         private string _detailText;
         private string _footerText;
         private string _runtimeUpdateTimeText;
+        private string _lastActionMessage;
+        private string _lastActionLevel;
+        private bool _hasFault;
 
         public string ActuatorType { get; set; }
 
@@ -1044,6 +1784,42 @@ namespace AM.ViewModel.ViewModels.Motion
         public string Remark { get; set; }
 
         public string ControlModeText { get; set; }
+
+        public short? PrimaryOutputBit { get; set; }
+
+        public short? SecondaryOutputBit { get; set; }
+
+        public short? PrimaryFeedbackBit { get; set; }
+
+        public short? SecondaryFeedbackBit { get; set; }
+
+        public short? WorkpieceBit { get; set; }
+
+        public short? RedOutputBit { get; set; }
+
+        public short? YellowOutputBit { get; set; }
+
+        public short? GreenOutputBit { get; set; }
+
+        public short? BlueOutputBit { get; set; }
+
+        public short? BuzzerOutputBit { get; set; }
+
+        public bool? PrimaryState { get; set; }
+
+        public bool? SecondaryState { get; set; }
+
+        public bool? WorkpieceState { get; set; }
+
+        public bool? RedOn { get; set; }
+
+        public bool? YellowOn { get; set; }
+
+        public bool? GreenOn { get; set; }
+
+        public bool? BlueOn { get; set; }
+
+        public bool? BuzzerOn { get; set; }
 
         public string PrimaryOutputText { get; set; }
 
@@ -1070,6 +1846,18 @@ namespace AM.ViewModel.ViewModels.Motion
         public bool UseFeedbackCheck { get; set; }
 
         public bool UseWorkpieceCheck { get; set; }
+
+        public bool HasAnyStackLightOutput
+        {
+            get
+            {
+                return RedOutputBit.HasValue
+                    || YellowOutputBit.HasValue
+                    || GreenOutputBit.HasValue
+                    || BlueOutputBit.HasValue
+                    || BuzzerOutputBit.HasValue;
+            }
+        }
 
         public string DisplayTitle
         {
@@ -1112,6 +1900,24 @@ namespace AM.ViewModel.ViewModels.Motion
         {
             get { return _runtimeUpdateTimeText; }
             set { SetProperty(ref _runtimeUpdateTimeText, value); }
+        }
+
+        public string LastActionMessage
+        {
+            get { return _lastActionMessage; }
+            set { SetProperty(ref _lastActionMessage, value); }
+        }
+
+        public string LastActionLevel
+        {
+            get { return _lastActionLevel; }
+            set { SetProperty(ref _lastActionLevel, value); }
+        }
+
+        public bool HasFault
+        {
+            get { return _hasFault; }
+            set { SetProperty(ref _hasFault, value); }
         }
     }
 }
