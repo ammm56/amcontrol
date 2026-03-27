@@ -95,6 +95,7 @@
     <Compile Include="ViewModels\Motion\DIMonitorViewModel.cs" />
     <Compile Include="ViewModels\Motion\DOMonitorViewModel.cs" />
     <Compile Include="ViewModels\Motion\MotionAxisViewModel.cs" />
+    <Compile Include="ViewModels\Motion\MotionMonitorViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Base\" />

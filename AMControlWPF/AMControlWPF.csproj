@@ -189,6 +189,9 @@
     <Compile Include="Views\Motion\MotionAxisView.xaml.cs">
       <DependentUpon>MotionAxisView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Motion\MotionMonitorView.xaml.cs">
+      <DependentUpon>MotionMonitorView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Template\WorkAreaTemplateView.xaml.cs">
       <DependentUpon>WorkAreaTemplateView.xaml</DependentUpon>
     </Compile>
@@ -366,6 +369,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Motion\MotionAxisView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Motion\MotionMonitorView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

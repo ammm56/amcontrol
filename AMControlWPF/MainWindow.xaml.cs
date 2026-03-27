@@ -418,7 +418,7 @@ namespace AMControlWPF
                 case "Motion.DO":
                     return new DOMonitorView();
                 case "Motion.Monitor":
-                    return CreatePlaceholderPage("设备 / 多轴总览");
+                    return new MotionMonitorView();
                 case "Motion.Axis":
                     return new MotionAxisView();
                 case "Motion.Actuator":
