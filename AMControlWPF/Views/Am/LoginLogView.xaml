@@ -170,11 +170,11 @@
                                       ItemsSource="{Binding Logs}"
                                       SelectedItem="{Binding SelectedLog, Mode=TwoWay}">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="时间" Width="160" Binding="{Binding LoginTimeText}" />
-                                    <DataGridTextColumn Header="登录名" Width="100" Binding="{Binding LoginName}" />
-                                    <DataGridTextColumn Header="结果" Width="90" Binding="{Binding ResultText}" />
-                                    <DataGridTextColumn Header="程序版本" Width="120" Binding="{Binding AppVersionText}" />
-                                    <DataGridTextColumn Header="说明" Width="*" Binding="{Binding MessageText}" />
+                                    <DataGridTextColumn CellStyle="{StaticResource AMDataGridCellStyle}" Header="时间" Width="160" Binding="{Binding LoginTimeText}" />
+                                    <DataGridTextColumn CellStyle="{StaticResource AMDataGridCellStyle}" Header="登录名" Width="100" Binding="{Binding LoginName}" />
+                                    <DataGridTextColumn CellStyle="{StaticResource AMDataGridCellStyle}" Header="结果" Width="90" Binding="{Binding ResultText}" />
+                                    <DataGridTextColumn CellStyle="{StaticResource AMDataGridCellStyle}" Header="程序版本" Width="120" Binding="{Binding AppVersionText}" />
+                                    <DataGridTextColumn CellStyle="{StaticResource AMDataGridCellStyle}" Header="说明" Width="*" Binding="{Binding MessageText}" />
                                 </DataGrid.Columns>
                             </DataGrid>
                         </Grid>

@@ -8,10 +8,6 @@
              mc:Ignorable="d"
              Background="Transparent">
     <UserControl.Resources>
-        <Style x:Key="AMDataGridCellStyle" TargetType="DataGridCell" BasedOn="{StaticResource DataGridCellStyle}">
-            <Setter Property="hc:BorderElement.CornerRadius" Value="0" />
-            <Setter Property="HorizontalContentAlignment" Value="Center" />
-        </Style>
     </UserControl.Resources>
     <Grid Margin="10">
         <Grid.RowDefinitions>
