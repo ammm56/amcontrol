@@ -422,7 +422,7 @@ namespace AMControlWPF
                 case "Motion.Axis":
                     return new MotionAxisView();
                 case "Motion.Actuator":
-                    return CreatePlaceholderPage("设备 / 执行器控制");
+                    return new MotionActuatorView();
                 
                 // ── 生产 ──
                 case "Production.Order":

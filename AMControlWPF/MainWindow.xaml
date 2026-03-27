@@ -348,7 +348,7 @@
 
         <Border x:Name="BorderAlarmPanel"
                 Panel.ZIndex="20"
-                Width="560"
+                Width="760"
                 Margin="0,16,16,12"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Stretch"

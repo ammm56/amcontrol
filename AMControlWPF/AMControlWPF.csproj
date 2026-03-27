@@ -186,6 +186,9 @@
     <Compile Include="Views\Motion\DOMonitorView.xaml.cs">
       <DependentUpon>DOMonitorView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Motion\MotionActuatorView.xaml.cs">
+      <DependentUpon>MotionActuatorView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Motion\MotionAxisView.xaml.cs">
       <DependentUpon>MotionAxisView.xaml</DependentUpon>
     </Compile>
@@ -365,6 +368,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Motion\DOMonitorView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Motion\MotionActuatorView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
