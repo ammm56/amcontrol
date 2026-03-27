@@ -8,19 +8,6 @@
              Background="Transparent">
 
     <UserControl.Resources>
-        <Style x:Key="ActuatorFilterButtonStyle" TargetType="Button">
-            <Setter Property="Width" Value="52" />
-            <Setter Property="Height" Value="28" />
-            <Setter Property="Margin" Value="4,0,0,0" />
-            <Setter Property="Padding" Value="0" />
-        </Style>
-
-        <Style x:Key="ActuatorActionButtonStyle" TargetType="Button">
-            <Setter Property="MinWidth" Value="74" />
-            <Setter Property="Height" Value="32" />
-            <Setter Property="Margin" Value="0,0,8,0" />
-        </Style>
-
         <Style x:Key="ActuatorStateBadgeBorderStyle" TargetType="Border">
             <Setter Property="Background" Value="#607D8B" />
             <Style.Triggers>
@@ -77,11 +64,13 @@
                             Orientation="Horizontal"
                             VerticalAlignment="Center"
                             Margin="0,0,16,0">
-                    <Button Content="全部"
+                    <Button Width="46"
+                            Height="28"
+                            Content="全部"
                             Command="{Binding ChangeTypeFilterCommand}"
                             CommandParameter="All">
                         <Button.Style>
-                            <Style TargetType="Button" BasedOn="{StaticResource ActuatorFilterButtonStyle}">
+                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsFilterAll}" Value="True">
                                         <Setter Property="Background" Value="{DynamicResource SuccessBrush}" />
@@ -92,11 +81,14 @@
                         </Button.Style>
                     </Button>
 
-                    <Button Content="气缸"
+                    <Button Width="46"
+                            Height="28"
+                            Margin="4,0,0,0"
+                            Content="气缸"
                             Command="{Binding ChangeTypeFilterCommand}"
                             CommandParameter="Cylinder">
                         <Button.Style>
-                            <Style TargetType="Button" BasedOn="{StaticResource ActuatorFilterButtonStyle}">
+                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsFilterCylinder}" Value="True">
                                         <Setter Property="Background" Value="{DynamicResource PrimaryBrush}" />
@@ -107,11 +99,14 @@
                         </Button.Style>
                     </Button>
 
-                    <Button Content="真空"
+                    <Button Width="46"
+                            Height="28"
+                            Margin="4,0,0,0"
+                            Content="真空"
                             Command="{Binding ChangeTypeFilterCommand}"
                             CommandParameter="Vacuum">
                         <Button.Style>
-                            <Style TargetType="Button" BasedOn="{StaticResource ActuatorFilterButtonStyle}">
+                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsFilterVacuum}" Value="True">
                                         <Setter Property="Background" Value="#03A9F4" />
@@ -122,11 +117,14 @@
                         </Button.Style>
                     </Button>
 
-                    <Button Content="夹爪"
+                    <Button Width="46"
+                            Height="28"
+                            Margin="4,0,0,0"
+                            Content="夹爪"
                             Command="{Binding ChangeTypeFilterCommand}"
                             CommandParameter="Gripper">
                         <Button.Style>
-                            <Style TargetType="Button" BasedOn="{StaticResource ActuatorFilterButtonStyle}">
+                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsFilterGripper}" Value="True">
                                         <Setter Property="Background" Value="#9C27B0" />
@@ -137,11 +135,14 @@
                         </Button.Style>
                     </Button>
 
-                    <Button Content="灯塔"
+                    <Button Width="46"
+                            Height="28"
+                            Margin="4,0,0,0"
+                            Content="灯塔"
                             Command="{Binding ChangeTypeFilterCommand}"
                             CommandParameter="StackLight">
                         <Button.Style>
-                            <Style TargetType="Button" BasedOn="{StaticResource ActuatorFilterButtonStyle}">
+                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsFilterStackLight}" Value="True">
                                         <Setter Property="Background" Value="{DynamicResource WarningBrush}" />
@@ -310,7 +311,7 @@
 
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <Border Width="176"
+                                    <Border Width="154"
                                             Margin="5"
                                             Padding="9,8"
                                             CornerRadius="6"
@@ -516,10 +517,17 @@
                                         <CheckBox Content="等待反馈"
                                                   IsChecked="{Binding WaitFeedback, Mode=TwoWay}" />
                                         <WrapPanel Margin="0,8,0,0">
-                                            <Button Style="{StaticResource ActuatorActionButtonStyle}"
+                                            <Button MinWidth="74"
+                                                    Height="32"
+                                                    Margin="0,0,8,0"
+                                                    Background="{DynamicResource PrimaryBrush}"
+                                                    Foreground="White"
                                                     Command="{Binding ExecutePrimaryActionCommand}"
                                                     Content="伸出" />
-                                            <Button Style="{StaticResource ActuatorActionButtonStyle}"
+                                            <Button MinWidth="74"
+                                                    Height="32"
+                                                    Background="{DynamicResource InfoBrush}"
+                                                    Foreground="White"
                                                     Command="{Binding ExecuteSecondaryActionCommand}"
                                                     Content="缩回" />
                                         </WrapPanel>
@@ -549,10 +557,17 @@
                                                   Content="等待工件检测"
                                                   IsChecked="{Binding WaitWorkpiece, Mode=TwoWay}" />
                                         <WrapPanel Margin="0,8,0,0">
-                                            <Button Style="{StaticResource ActuatorActionButtonStyle}"
+                                            <Button MinWidth="74"
+                                                    Height="32"
+                                                    Margin="0,0,8,0"
+                                                    Background="#03A9F4"
+                                                    Foreground="White"
                                                     Command="{Binding ExecutePrimaryActionCommand}"
                                                     Content="吸真空" />
-                                            <Button Style="{StaticResource ActuatorActionButtonStyle}"
+                                            <Button MinWidth="74"
+                                                    Height="32"
+                                                    Background="{DynamicResource WarningBrush}"
+                                                    Foreground="White"
                                                     Command="{Binding ExecuteSecondaryActionCommand}"
                                                     Content="关闭真空" />
                                         </WrapPanel>
@@ -582,10 +597,17 @@
                                                   Content="等待工件检测"
                                                   IsChecked="{Binding WaitWorkpiece, Mode=TwoWay}" />
                                         <WrapPanel Margin="0,8,0,0">
-                                            <Button Style="{StaticResource ActuatorActionButtonStyle}"
+                                            <Button MinWidth="74"
+                                                    Height="32"
+                                                    Margin="0,0,8,0"
+                                                    Background="#9C27B0"
+                                                    Foreground="White"
                                                     Command="{Binding ExecutePrimaryActionCommand}"
                                                     Content="夹紧" />
-                                            <Button Style="{StaticResource ActuatorActionButtonStyle}"
+                                            <Button MinWidth="74"
+                                                    Height="32"
+                                                    Background="{DynamicResource SuccessBrush}"
+                                                    Foreground="White"
                                                     Command="{Binding ExecuteSecondaryActionCommand}"
                                                     Content="打开" />
                                         </WrapPanel>
@@ -612,23 +634,45 @@
                                         <CheckBox Content="蜂鸣器联动"
                                                   IsChecked="{Binding StackLightWithBuzzer, Mode=TwoWay}" />
                                         <WrapPanel Margin="0,8,0,0">
-                                            <Button Style="{StaticResource ActuatorActionButtonStyle}"
+                                            <Button MinWidth="60"
+                                                    Height="32"
+                                                    Margin="0,0,8,8"
                                                     Command="{Binding SetStackLightStateCommand}"
                                                     CommandParameter="Off"
                                                     Content="熄灭" />
-                                            <Button Style="{StaticResource ActuatorActionButtonStyle}"
+
+                                            <Button MinWidth="60"
+                                                    Height="32"
+                                                    Margin="0,0,8,8"
+                                                    Background="{DynamicResource SuccessBrush}"
+                                                    Foreground="White"
                                                     Command="{Binding SetStackLightStateCommand}"
                                                     CommandParameter="Idle"
                                                     Content="空闲" />
-                                            <Button Style="{StaticResource ActuatorActionButtonStyle}"
+
+                                            <Button MinWidth="60"
+                                                    Height="32"
+                                                    Margin="0,0,8,8"
+                                                    Background="{DynamicResource PrimaryBrush}"
+                                                    Foreground="White"
                                                     Command="{Binding SetStackLightStateCommand}"
                                                     CommandParameter="Running"
                                                     Content="运行" />
-                                            <Button Style="{StaticResource ActuatorActionButtonStyle}"
+
+                                            <Button MinWidth="60"
+                                                    Height="32"
+                                                    Margin="0,0,8,8"
+                                                    Background="{DynamicResource WarningBrush}"
+                                                    Foreground="White"
                                                     Command="{Binding SetStackLightStateCommand}"
                                                     CommandParameter="Warning"
                                                     Content="警告" />
-                                            <Button Style="{StaticResource ActuatorActionButtonStyle}"
+
+                                            <Button MinWidth="60"
+                                                    Height="32"
+                                                    Margin="0,0,0,8"
+                                                    Background="{DynamicResource DangerBrush}"
+                                                    Foreground="White"
                                                     Command="{Binding SetStackLightStateCommand}"
                                                     CommandParameter="Alarm"
                                                     Content="报警" />
