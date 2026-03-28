@@ -60,6 +60,8 @@
     <Compile Include="Common\ErrorDescriptor.cs" />
     <Compile Include="Common\IoScanState.cs" />
     <Compile Include="Common\ResultSource.cs" />
+    <Compile Include="Entity\Plc\PlcPointConfigEntity.cs" />
+    <Compile Include="Entity\Plc\PlcStationConfigEntity.cs" />
     <Compile Include="Model\LogModel.cs" />
     <Compile Include="Entity\Auth\SysLoginLogEntity.cs" />
     <Compile Include="Entity\Auth\SysPagePermissionEntity.cs" />
@@ -100,9 +102,6 @@
     <Compile Include="Interfaces\Runtime\IIoScanService.cs" />
     <Compile Include="Interfaces\Runtime\IRuntimeTaskManager.cs" />
     <Compile Include="Interfaces\Runtime\IRuntimeWorker.cs" />
-    <Compile Include="Model\Motion\MotionAxisDisplayItem.cs" />
-    <Compile Include="Model\Motion\MotionCardFilterItem.cs" />
-    <Compile Include="Model\Motion\MotionIoDisplayItem.cs" />
     <Compile Include="MotionCard\Actuator\ActuatorConfig.cs" />
     <Compile Include="MotionCard\Actuator\CylinderConfig.cs" />
     <Compile Include="MotionCard\Actuator\GripperConfig.cs" />
@@ -120,14 +119,23 @@
     <Compile Include="MotionCard\MotionCardConfig.cs" />
     <Compile Include="MotionCard\MotionErrorCode.cs" />
     <Compile Include="MotionCard\MotionIoBitMap.cs" />
+    <Compile Include="Motion\MotionAxisDisplayItem.cs" />
+    <Compile Include="Motion\MotionCardFilterItem.cs" />
+    <Compile Include="Motion\MotionIoDisplayItem.cs" />
+    <Compile Include="Plc\PlcConfig.cs" />
+    <Compile Include="Plc\PlcPointConfig.cs" />
+    <Compile Include="Plc\PlcReadBlockConfig.cs" />
+    <Compile Include="Plc\PlcStationConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Runtime\MotionAxisRuntimeState.cs" />
     <Compile Include="Runtime\MotionIoRuntimeState.cs" />
+    <Compile Include="Runtime\PlcPointRuntimeSnapshot.cs" />
+    <Compile Include="Runtime\PlcRuntimeState.cs" />
+    <Compile Include="Runtime\PlcStationRuntimeSnapshot.cs" />
     <Compile Include="Structs\AxisParam.cs" />
     <Compile Include="Structs\AxisStatus.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Entity\Plc\" />
     <Folder Include="Entity\Vision\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

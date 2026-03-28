@@ -1,6 +1,6 @@
 ﻿using AM.Core.Context;
 using AM.DBService.Services.Motion.Runtime;
-using AM.Model.Model.Motion;
+using AM.Model.Motion;
 using AM.Model.Runtime;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;

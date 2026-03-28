@@ -1,4 +1,4 @@
-﻿namespace AM.Model.Model.Motion
+﻿namespace AM.Model.Motion
 {
     /// <summary>
     /// Motion 页面控制卡筛选项。

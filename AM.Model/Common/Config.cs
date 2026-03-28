@@ -1,6 +1,7 @@
 ﻿using AM.Model.Model;
 using AM.Model.MotionCard;
 using AM.Model.MotionCard.Actuator;
+using AM.Model.Plc;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 
@@ -34,6 +35,13 @@ namespace AM.Model.Common
         /// </summary>
         [JsonIgnore]
         public ActuatorConfig ActuatorConfig { get; set; } = new ActuatorConfig();
+
+        /// <summary>
+        /// PLC 运行时配置聚合。
+        /// 运行时由数据库装载，不再写入 config.json。
+        /// </summary>
+        [JsonIgnore]
+        public PlcConfig PlcConfig { get; set; } = new PlcConfig();
 
         /// <summary>
         /// 运行时配置

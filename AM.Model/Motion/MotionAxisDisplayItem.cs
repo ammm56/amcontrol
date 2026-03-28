@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AM.Model.Model.Motion
+namespace AM.Model.Motion
 {
     /// <summary>
     /// 运动轴显示项。

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AM.Model.Model.Motion
+namespace AM.Model.Motion
 {
     /// <summary>
     /// Motion IO 监视显示项。

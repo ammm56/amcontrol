@@ -33,6 +33,11 @@ namespace AM.Core.Context
         public MotionAxisRuntimeState MotionAxis { get; } = new MotionAxisRuntimeState();
 
         /// <summary>
+        /// PLC 运行时状态。
+        /// </summary>
+        public PlcRuntimeState Plc { get; } = new PlcRuntimeState();
+
+        /// <summary>
         /// 预留：PLC 运行时状态。
         /// </summary>
         // public PlcRuntimeState Plc { get; } = new PlcRuntimeState();

@@ -1,7 +1,7 @@
 ﻿using AM.Core.Context;
 using AM.DBService.Services.Motion.Runtime;
 using AM.Model.Common;
-using AM.Model.Model.Motion;
+using AM.Model.Motion;
 using AM.Model.MotionCard;
 using AM.Model.Runtime;
 using CommunityToolkit.Mvvm.ComponentModel;

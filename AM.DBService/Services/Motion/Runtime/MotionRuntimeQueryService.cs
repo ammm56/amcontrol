@@ -1,7 +1,7 @@
 ﻿using AM.Core.Base;
 using AM.Core.Context;
 using AM.Model.Common;
-using AM.Model.Model.Motion;
+using AM.Model.Motion;
 using AM.Model.MotionCard;
 using AM.Model.Runtime;
 using System;
