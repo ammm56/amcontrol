@@ -39,9 +39,9 @@ namespace AMControlWPF.UserControls.Main
             DataContext = this;
         }
 
-        private void ContributorsMenuItem_OnClick(object sender, RoutedEventArgs e)
+        private void AboutMenuItem_OnClick(object sender, RoutedEventArgs e)
         {
-            NavigateRequested?.Invoke("Contributors");
+            NavigateRequested?.Invoke("About");
         }
 
         private void ProjectsMenuItem_OnClick(object sender, RoutedEventArgs e)

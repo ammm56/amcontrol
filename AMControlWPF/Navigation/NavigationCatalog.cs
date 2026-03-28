@@ -71,10 +71,10 @@ namespace AMControlWPF.Navigation
             D("Engineer",    "工程",       "Engineer.RawPlc",        "原始 PLC 参数",   "直接读写 PLC 原始内存地址，供底层调试使用。",            "Engineer,Am",          "高", 30),
             D("Engineer",    "工程",       "Engineer.RawCamera",     "原始相机参数",    "直接访问相机 SDK 底层参数，供底层调试使用。",            "Engineer,Am",          "高", 40),
 
-            // ── 维保 ──
-            D("Maintenance", "维保",       "Maintenance.Life",       "寿命管理",        "查看耗材与易损件运行寿命及更换预警。",                   "Engineer,Am",          "低", 10),
-            D("Maintenance", "维保",       "Maintenance.Plan",       "保养计划",        "查看与制定定期保养计划及执行时间表。",                   "Engineer,Am",          "低", 20),
-            D("Maintenance", "维保",       "Maintenance.Record",     "维保记录",        "记录历次维保操作、更换零件与维修信息。",                 "Operator,Engineer,Am", "低", 30),
+            // ── 维保（暂时不考虑） ──
+            //D("Maintenance", "维保",       "Maintenance.Life",       "寿命管理",        "查看耗材与易损件运行寿命及更换预警。",                   "Engineer,Am",          "低", 10),
+            //D("Maintenance", "维保",       "Maintenance.Plan",       "保养计划",        "查看与制定定期保养计划及执行时间表。",                   "Engineer,Am",          "低", 20),
+            //D("Maintenance", "维保",       "Maintenance.Record",     "维保记录",        "记录历次维保操作、更换零件与维修信息。",                 "Operator,Engineer,Am", "低", 30),
 
             // ── 报警与日志 ──
             D("AlarmLog",    "报警与日志", "AlarmLog.Current",       "当前报警",        "查看当前所有活动报警与处理入口。",                       "Operator,Engineer,Am", "低", 10),
@@ -85,7 +85,7 @@ namespace AMControlWPF.Navigation
             D("System",      "系统",       "System.User",            "用户管理",        "维护用户账户、角色与账号状态。",                         "Am",                   "高", 10),
             D("System",      "系统",       "System.Permission",      "权限分配",        "按用户分配页面级访问权限。",                             "Am",                   "高", 20),
             D("System",      "系统",       "System.LoginLog",        "登录日志",        "查看用户登录操作审计日志。",                             "Am",                   "中", 30),
-            D("System",      "系统",       "System.Backup",          "数据备份",        "执行数据库备份与配置文件导出操作。",                     "Am",                   "中", 40),
+            //D("System",      "系统",       "System.Backup",          "数据备份",        "执行数据库备份与配置文件导出操作。",                     "Am",                   "中", 40),
         };
 
         public static IReadOnlyList<NavPageDef> All => _all;

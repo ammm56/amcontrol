@@ -15,17 +15,18 @@
             <!-- 左侧：靠近窗口 icon 的导航（放 Icon 或小按钮） -->
             <StackPanel Orientation="Horizontal" VerticalAlignment="Stretch">
                 <Menu Margin="10,0,0,0" Background="Transparent">
-                    <MenuItem Height="29" Header="{DynamicResource RepositoryText}">
+                    <!--<MenuItem Height="29" Header="{DynamicResource RepositoryText}">
                         <MenuItem Command="hc:ControlCommands.OpenLink" CommandParameter="https://github.com/ammm56/amcontrol" Header="GitHub" />
+                    </MenuItem>-->
+
+                    <MenuItem Height="29" Header="{DynamicResource HelpText}">
+                        <MenuItem Command="hc:ControlCommands.OpenLink" CommandParameter="https://github.com/ammm56/amcontrol" Header="GitHub" />
+                        <MenuItem Header="{DynamicResource AboutText}" Click="AboutMenuItem_OnClick" />
                     </MenuItem>
 
-                    <MenuItem Height="29" Header="{DynamicResource AboutText}">
-                        <MenuItem Header="{DynamicResource ContributorsText}" Click="ContributorsMenuItem_OnClick" />
-                    </MenuItem>
-
-                    <MenuItem Height="29" Header="{DynamicResource RecommendationText}">
+                    <!--<MenuItem Height="29" Header="{DynamicResource RecommendationText}">
                         <MenuItem Header="{DynamicResource ProjectText}" Click="ProjectsMenuItem_OnClick" />
-                    </MenuItem>
+                    </MenuItem>-->
                 </Menu>
 
                 <Border Margin="10,0,0,0" Padding="10,4" VerticalAlignment="Center" CornerRadius="2" Background="{DynamicResource SecondaryRegionBrush}">

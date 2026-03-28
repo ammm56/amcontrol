@@ -2,6 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
     <sys:String x:Key="RepositoryText">Repository</sys:String>
+    <sys:String x:Key="HelpText">Help</sys:String>
     <sys:String x:Key="AboutText">About</sys:String>
     <sys:String x:Key="ContributorsText">Contributors</sys:String>
     <sys:String x:Key="RecommendationText">Recommendation</sys:String>
