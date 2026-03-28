@@ -89,6 +89,7 @@
     <Compile Include="Services\Plc\Config\PlcStationCrudService.cs" />
     <Compile Include="Services\Plc\Driver\NullPlcClient.cs" />
     <Compile Include="Services\Plc\Driver\PlcClientFactory.cs" />
+    <Compile Include="Services\Plc\Runtime\PlcOperationService.cs" />
     <Compile Include="Services\Plc\Runtime\PlcRuntimeQueryService.cs" />
     <Compile Include="Services\Plc\Runtime\PlcScanWorker.cs" />
     <Compile Include="Services\Runtime\IoScanWorker.cs" />
