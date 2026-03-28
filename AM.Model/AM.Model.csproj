@@ -62,9 +62,11 @@
     <Compile Include="Common\ResultSource.cs" />
     <Compile Include="Entity\Plc\PlcPointConfigEntity.cs" />
     <Compile Include="Entity\Plc\PlcStationConfigEntity.cs" />
+    <Compile Include="Interfaces\DB\Plc\App\IPlcConfigAppService.cs" />
     <Compile Include="Interfaces\DB\Plc\Config\IPlcPointCrudService.cs" />
     <Compile Include="Interfaces\DB\Plc\Config\IPlcStationCrudService.cs" />
     <Compile Include="Interfaces\Plc\IPlcClient.cs" />
+    <Compile Include="Interfaces\Plc\IPlcClientFactory.cs" />
     <Compile Include="Model\LogModel.cs" />
     <Compile Include="Entity\Auth\SysLoginLogEntity.cs" />
     <Compile Include="Entity\Auth\SysPagePermissionEntity.cs" />

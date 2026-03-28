@@ -38,11 +38,6 @@ namespace AM.Core.Context
         public PlcRuntimeState Plc { get; } = new PlcRuntimeState();
 
         /// <summary>
-        /// 预留：PLC 运行时状态。
-        /// </summary>
-        // public PlcRuntimeState Plc { get; } = new PlcRuntimeState();
-
-        /// <summary>
         /// 预留：视觉运行时状态。
         /// </summary>
         // public VisionRuntimeState Vision { get; } = new VisionRuntimeState();

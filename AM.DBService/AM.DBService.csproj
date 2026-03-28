@@ -85,6 +85,9 @@
     <Compile Include="Services\Motion\Topology\MotionIoMapCrudService.cs" />
     <Compile Include="Services\Plc\Config\PlcPointCrudService.cs" />
     <Compile Include="Services\Plc\Config\PlcStationCrudService.cs" />
+    <Compile Include="Services\Plc\Driver\NullPlcClient.cs" />
+    <Compile Include="Services\Plc\Driver\PlcClientFactory.cs" />
+    <Compile Include="Services\Plc\Driver\PlcConfigAppService.cs" />
     <Compile Include="Services\Runtime\IoScanWorker.cs" />
     <Compile Include="Services\Runtime\MotionAxisScanWorker.cs" />
     <Compile Include="Services\Runtime\RuntimeTaskManager.cs" />
