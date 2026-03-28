@@ -62,6 +62,9 @@
     <Compile Include="Common\ResultSource.cs" />
     <Compile Include="Entity\Plc\PlcPointConfigEntity.cs" />
     <Compile Include="Entity\Plc\PlcStationConfigEntity.cs" />
+    <Compile Include="Interfaces\DB\Plc\Config\IPlcPointCrudService.cs" />
+    <Compile Include="Interfaces\DB\Plc\Config\IPlcStationCrudService.cs" />
+    <Compile Include="Interfaces\Plc\IPlcClient.cs" />
     <Compile Include="Model\LogModel.cs" />
     <Compile Include="Entity\Auth\SysLoginLogEntity.cs" />
     <Compile Include="Entity\Auth\SysPagePermissionEntity.cs" />
@@ -124,6 +127,7 @@
     <Compile Include="Motion\MotionIoDisplayItem.cs" />
     <Compile Include="Plc\PlcConfig.cs" />
     <Compile Include="Plc\PlcPointConfig.cs" />
+    <Compile Include="Plc\PlcRawDataBlock.cs" />
     <Compile Include="Plc\PlcReadBlockConfig.cs" />
     <Compile Include="Plc\PlcStationConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

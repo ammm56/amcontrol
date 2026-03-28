@@ -1,4 +1,5 @@
 ﻿using AM.Model.Interfaces.MotionCard;
+using AM.Model.Interfaces.Plc;
 using AM.Model.MotionCard.Actuator;
 using System.Collections.Generic;
 
@@ -73,9 +74,11 @@ namespace AM.Core.Context
         public IDictionary<string, GripperConfig> Grippers { get; } = new Dictionary<string, GripperConfig>();
 
         /// <summary>
-        /// 预留：PLC 服务对象。
+        /// PLC 客户端运行时入口。
+        /// Key: PlcStationConfig.Name
         /// </summary>
-        // public IPLCService Plc { get; set; }
+        public IDictionary<string, IPlcClient> Plcs { get; } = new Dictionary<string, IPlcClient>();
+
 
         /// <summary>
         /// 预留：相机服务对象。
