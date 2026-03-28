@@ -1,4 +1,4 @@
-﻿using AM.Core.Base;
+using AM.Core.Base;
 using AM.Core.Context;
 using AM.Core.Reporter;
 using AM.DBService.DBase;
@@ -7,9 +7,9 @@ using AM.DBService.Services.Plc.Driver;
 using AM.Model.Common;
 using AM.Model.DB;
 using AM.Model.Entity.Plc;
-using AM.Model.Interfaces.DB.Plc.App;
-using AM.Model.Interfaces.DB.Plc.Config;
 using AM.Model.Interfaces.Plc;
+using AM.Model.Interfaces.Plc.App;
+using AM.Model.Interfaces.Plc.Config;
 using AM.Model.Plc;
 using SqlSugar;
 using System;
@@ -20,13 +20,15 @@ namespace AM.DBService.Services.Plc.App
 {
     /// <summary>
     /// PLC 配置应用服务。
-    /// 负责将数据库中的 PLC 站/点位配置装配成运行时配置，并同步到全局上下文。
+    /// 负责将数据库中的 PLC 站、点位与读块配置装配成运行时配置，并同步到全局上下文。
+    /// 该服务位于 App 层，体现“数据库配置 -> 运行时配置 -> 全局上下文”的聚合装配职责。
     /// </summary>
     public class PlcConfigAppService : ServiceBase, IPlcConfigAppService
     {
         private readonly DBContext _dbContext;
         private readonly IPlcStationCrudService _plcStationCrudService;
         private readonly IPlcPointCrudService _plcPointCrudService;
+        private readonly IPlcReadBlockCrudService _plcReadBlockCrudService;
         private readonly IPlcClientFactory _plcClientFactory;
 
         protected override string MessageSourceName
@@ -43,6 +45,7 @@ namespace AM.DBService.Services.Plc.App
             : this(
                 new PlcStationCrudService(),
                 new PlcPointCrudService(),
+                new PlcReadBlockCrudService(),
                 new PlcClientFactory(),
                 SystemContext.Instance.Reporter)
         {
@@ -51,6 +54,7 @@ namespace AM.DBService.Services.Plc.App
         public PlcConfigAppService(
             IPlcStationCrudService plcStationCrudService,
             IPlcPointCrudService plcPointCrudService,
+            IPlcReadBlockCrudService plcReadBlockCrudService,
             IPlcClientFactory plcClientFactory,
             IAppReporter reporter)
             : base(reporter)
@@ -58,9 +62,13 @@ namespace AM.DBService.Services.Plc.App
             _dbContext = new DBContext();
             _plcStationCrudService = plcStationCrudService;
             _plcPointCrudService = plcPointCrudService;
+            _plcReadBlockCrudService = plcReadBlockCrudService;
             _plcClientFactory = plcClientFactory;
         }
 
+        /// <summary>
+        /// 初始化 PLC 配置相关表与索引。
+        /// </summary>
         public Result EnsureTables()
         {
             try
@@ -69,7 +77,8 @@ namespace AM.DBService.Services.Plc.App
 
                 db.CodeFirst.InitTables(
                     typeof(PlcStationConfigEntity),
-                    typeof(PlcPointConfigEntity));
+                    typeof(PlcPointConfigEntity),
+                    typeof(PlcReadBlockConfigEntity));
 
                 EnsureIndexes(db);
 
@@ -81,6 +90,9 @@ namespace AM.DBService.Services.Plc.App
             }
         }
 
+        /// <summary>
+        /// 从数据库读取并装配全部 PLC 配置。
+        /// </summary>
         public Result<PlcConfig> QueryAll()
         {
             try
@@ -103,6 +115,12 @@ namespace AM.DBService.Services.Plc.App
                     return Fail<PlcConfig>(pointResult.Code, "读取 PLC 点位配置失败");
                 }
 
+                var readBlockResult = _plcReadBlockCrudService.QueryAll();
+                if (!readBlockResult.Success && readBlockResult.Code != (int)DbErrorCode.NotFound)
+                {
+                    return Fail<PlcConfig>(readBlockResult.Code, "读取 PLC 读块配置失败");
+                }
+
                 var stationEntities = stationResult.Success
                     ? stationResult.Items.Where(p => p != null && p.IsEnabled).ToList()
                     : new List<PlcStationConfigEntity>();
@@ -111,13 +129,17 @@ namespace AM.DBService.Services.Plc.App
                     ? pointResult.Items.Where(p => p != null && p.IsEnabled).ToList()
                     : new List<PlcPointConfigEntity>();
 
-                var validateResult = ValidateEntities(stationEntities, pointEntities);
+                var readBlockEntities = readBlockResult.Success
+                    ? readBlockResult.Items.Where(p => p != null && p.IsEnabled).ToList()
+                    : new List<PlcReadBlockConfigEntity>();
+
+                var validateResult = ValidateEntities(stationEntities, pointEntities, readBlockEntities);
                 if (!validateResult.Success)
                 {
                     return Fail<PlcConfig>(validateResult.Code, validateResult.Message);
                 }
 
-                var plcConfig = BuildPlcConfig(stationEntities, pointEntities);
+                var plcConfig = BuildPlcConfig(stationEntities, pointEntities, readBlockEntities);
 
                 return OkLogOnly(plcConfig, "读取数据库 PLC 配置成功");
             }
@@ -127,6 +149,9 @@ namespace AM.DBService.Services.Plc.App
             }
         }
 
+        /// <summary>
+        /// 从数据库重载 PLC 配置并同步到全局上下文。
+        /// </summary>
         public Result ReloadFromDatabase()
         {
             var queryResult = QueryAll();
@@ -136,11 +161,9 @@ namespace AM.DBService.Services.Plc.App
             }
 
             var plcConfig = queryResult.Item ?? new PlcConfig();
-
             ConfigContext.Instance.Config.PlcConfig = plcConfig;
 
             RebuildPlcs(plcConfig);
-
             RuntimeContext.Instance.Plc.Clear();
 
             return OkLogOnly("PLC 运行时配置重载成功");
@@ -164,11 +187,18 @@ namespace AM.DBService.Services.Plc.App
 
             db.Ado.ExecuteCommand(
                 "CREATE INDEX IF NOT EXISTS ix_plc_point_plcname_sortorder ON plc_point(PlcName, SortOrder)");
+
+            db.Ado.ExecuteCommand(
+                "CREATE UNIQUE INDEX IF NOT EXISTS ux_plc_read_block_plcname_blockname ON plc_read_block(PlcName, BlockName)");
+
+            db.Ado.ExecuteCommand(
+                "CREATE INDEX IF NOT EXISTS ix_plc_read_block_plcname_priority_sortorder ON plc_read_block(PlcName, Priority, SortOrder)");
         }
 
         private Result ValidateEntities(
             IList<PlcStationConfigEntity> stationEntities,
-            IList<PlcPointConfigEntity> pointEntities)
+            IList<PlcPointConfigEntity> pointEntities,
+            IList<PlcReadBlockConfigEntity> readBlockEntities)
         {
             var stationNameSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -208,12 +238,31 @@ namespace AM.DBService.Services.Plc.App
                 }
             }
 
+            foreach (var readBlock in readBlockEntities)
+            {
+                if (string.IsNullOrWhiteSpace(readBlock.PlcName))
+                {
+                    return Fail((int)DbErrorCode.InvalidArgument, "存在未关联 PLC 的读块配置: " + readBlock.BlockName);
+                }
+
+                if (!stationNameSet.Contains(readBlock.PlcName))
+                {
+                    return Fail((int)DbErrorCode.InvalidArgument, "读块所属 PLC 不存在或未启用: " + readBlock.PlcName + " / " + readBlock.BlockName);
+                }
+
+                if (readBlock.Length <= 0)
+                {
+                    return Fail((int)DbErrorCode.InvalidArgument, "读块长度必须大于 0: " + readBlock.BlockName);
+                }
+            }
+
             return OkSilent("PLC 配置校验通过");
         }
 
         private static PlcConfig BuildPlcConfig(
             IList<PlcStationConfigEntity> stationEntities,
-            IList<PlcPointConfigEntity> pointEntities)
+            IList<PlcPointConfigEntity> pointEntities,
+            IList<PlcReadBlockConfigEntity> readBlockEntities)
         {
             var stationList = stationEntities
                 .OrderBy(p => p.SortOrder)
@@ -231,11 +280,20 @@ namespace AM.DBService.Services.Plc.App
                 .Select(ToPointConfig)
                 .ToList();
 
+            var readBlockList = readBlockEntities
+                .Where(p => stationNameSet.Contains(p.PlcName))
+                .OrderBy(p => p.PlcName)
+                .ThenBy(p => p.Priority)
+                .ThenBy(p => p.SortOrder)
+                .ThenBy(p => p.BlockName)
+                .Select(ToReadBlockConfig)
+                .ToList();
+
             return new PlcConfig
             {
                 Stations = stationList,
                 Points = pointList,
-                ReadBlocks = new List<PlcReadBlockConfig>()
+                ReadBlocks = readBlockList
             };
         }
 
@@ -327,6 +385,27 @@ namespace AM.DBService.Services.Plc.App
                 ByteOrder = entity.ByteOrder,
                 WordOrder = entity.WordOrder,
                 StringEncoding = entity.StringEncoding,
+                IsEnabled = entity.IsEnabled,
+                SortOrder = entity.SortOrder,
+                Description = entity.Description,
+                Remark = entity.Remark
+            };
+        }
+
+        private static PlcReadBlockConfig ToReadBlockConfig(PlcReadBlockConfigEntity entity)
+        {
+            return new PlcReadBlockConfig
+            {
+                Id = entity.Id,
+                PlcName = entity.PlcName,
+                BlockName = entity.BlockName,
+                AreaType = entity.AreaType,
+                StartAddress = entity.StartAddress,
+                Length = entity.Length,
+                ReadUnit = entity.ReadUnit,
+                DataType = entity.DataType,
+                ReadMode = entity.ReadMode,
+                Priority = entity.Priority,
                 IsEnabled = entity.IsEnabled,
                 SortOrder = entity.SortOrder,
                 Description = entity.Description,

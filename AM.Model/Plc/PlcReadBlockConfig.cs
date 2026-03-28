@@ -18,14 +18,20 @@
 
         public int Length { get; set; }
 
+        public string ReadUnit { get; set; }
+
         public string DataType { get; set; }
 
         public string ReadMode { get; set; }
+
+        public int Priority { get; set; }
 
         public bool IsEnabled { get; set; }
 
         public int SortOrder { get; set; }
 
         public string Description { get; set; }
+
+        public string Remark { get; set; }
     }
 }

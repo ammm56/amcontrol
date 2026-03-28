@@ -105,6 +105,7 @@ AM.Model/
     Enums/
   Interfaces/
     Plc/
+      App/
       Config/
       Runtime/
   Runtime/
@@ -977,16 +978,19 @@ AM.Model/
       PlcAccessMode.cs
       PlcReadMode.cs
       PlcPointQuality.cs
-  Interfaces/Plc/
-    IPlcClient.cs
-    IPlcClientFactory.cs
-    Config/
-      IPlcStationCrudService.cs
-      IPlcPointCrudService.cs
-      IPlcReadBlockCrudService.cs
-    Runtime/
-      IPlcRuntimeService.cs
-      IPlcScanWorker.cs
+  Interfaces/
+    Plc/
+      IPlcClient.cs
+      IPlcClientFactory.cs
+      App/
+        IPlcConfigAppService.cs
+      Config/
+        IPlcStationCrudService.cs
+        IPlcPointCrudService.cs
+        IPlcReadBlockCrudService.cs
+      Runtime/
+        IPlcRuntimeService.cs
+        IPlcScanWorker.cs
   Runtime/
     PlcRuntimeState.cs
     PlcStationRuntimeSnapshot.cs

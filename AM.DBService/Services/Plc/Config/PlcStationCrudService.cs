@@ -5,7 +5,7 @@ using AM.DBService.DBase;
 using AM.Model.Common;
 using AM.Model.DB;
 using AM.Model.Entity.Plc;
-using AM.Model.Interfaces.DB.Plc.Config;
+using AM.Model.Interfaces.Plc.Config;
 using SqlSugar;
 using System;
 using System.Linq;

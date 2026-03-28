@@ -1,11 +1,12 @@
-﻿using AM.Model.Common;
+using AM.Model.Common;
 using AM.Model.Entity.Plc;
 
-namespace AM.Model.Interfaces.DB.Plc.Config
+namespace AM.Model.Interfaces.Plc.Config
 {
     /// <summary>
     /// PLC 站配置 CRUD 服务接口。
     /// 对应数据库表：`plc_station`
+    /// 接口放在 PLC 领域目录下，数据库实现由 DBService 承载。
     /// </summary>
     public interface IPlcStationCrudService
     {
