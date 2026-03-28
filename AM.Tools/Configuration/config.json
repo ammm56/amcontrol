@@ -11,7 +11,7 @@
 		"DBLogExec": false
 	},
 	"Sqlite": {
-		"Connection": "DataSource=W:\\db\\sqlite\\gsna",
+		"Connection": "DataSource=./DB/Sqlite/amctl",
 		"Enable": true
 	},
 	"IoScanConfig": {
