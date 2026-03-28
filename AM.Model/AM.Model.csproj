@@ -155,8 +155,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Entity\Vision\" />
-    <Folder Include="Interfaces\DB\Plc\App\" />
-    <Folder Include="Interfaces\DB\Plc\Config\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
