@@ -16,6 +16,8 @@
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Background" Value="#607D8B" />
             <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="ToolTipService.ShowOnDisabled" Value="True" />
+            <Setter Property="ToolTip" Value="{Binding DataContext.OperationHintText, RelativeSource={RelativeSource AncestorType=UserControl}}" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -395,7 +397,9 @@
                                                         Height="24"
                                                         Margin="8,0,0,0"
                                                         Command="{Binding ApplyVelocityCommand}"
-                                                        Content="应用速度" />
+                                                        Content="应用速度"
+                                                        ToolTip="{Binding OperationHintText}"
+                                                        ToolTipService.ShowOnDisabled="True" />
                                             </DockPanel>
 
                                             <TextBox Grid.Row="1"
@@ -431,7 +435,9 @@
                                                         Height="24"
                                                         Margin="8,0,0,0"
                                                         Command="{Binding MoveAbsoluteCommand}"
-                                                        Content="绝对定位" />
+                                                        Content="绝对定位"
+                                                        ToolTip="{Binding OperationHintText}"
+                                                        ToolTipService.ShowOnDisabled="True" />
                                             </DockPanel>
 
                                             <TextBox Grid.Row="1"
@@ -467,7 +473,9 @@
                                                         Height="24"
                                                         Margin="8,0,0,0"
                                                         Command="{Binding MoveRelativeCommand}"
-                                                        Content="相对移动" />
+                                                        Content="相对移动"
+                                                        ToolTip="{Binding OperationHintText}"
+                                                        ToolTipService.ShowOnDisabled="True" />
                                             </DockPanel>
 
                                             <TextBox Grid.Row="1"
@@ -570,8 +578,13 @@
                                 <hc:Shield Margin="0,0,0,6"
                                            HorizontalAlignment="Left"
                                            Subject="当前状态"
-                                           Status="{Binding SelectedAxisStatusText}"
+                                           Status="{Binding SelectedAxisStateDisplayText}"
                                            Color="#388E3C" />
+                                <hc:Shield Margin="0,0,0,6"
+                                           HorizontalAlignment="Left"
+                                           Subject="联锁说明"
+                                           Status="{Binding SelectedAxisInterlockText}"
+                                           Color="#D32F2F" />
                                 <hc:Shield Margin="0,0,0,6"
                                            HorizontalAlignment="Left"
                                            Subject="限位状态"
@@ -656,7 +669,7 @@
                            VerticalAlignment="Center"
                            Opacity="0.7"
                            Foreground="{DynamicResource PrimaryTextBrush}"
-                           Text="{Binding SelectedAxisHeader}" />
+                           Text="{Binding LastOperationText}" />
             </DockPanel>
         </Border>
     </Grid>
