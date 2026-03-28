@@ -2,6 +2,7 @@
 using AM.DBService.Services.Motion.Runtime;
 using AM.Model.Common;
 using AM.Model.Model.Motion;
+using AM.Model.MotionCard;
 using AM.Model.Runtime;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -32,6 +33,8 @@ namespace AM.ViewModel.ViewModels.Motion
         private string _moveDistanceMmText;
         private string _velocityMmText;
         private string _statusText;
+        private string _lastOperationText;
+        private string _operationHintText;
         private bool _isBusy;
         private bool _isRefreshingCardFilters;
         private bool _isDisposed;
@@ -51,20 +54,22 @@ namespace AM.ViewModel.ViewModels.Motion
             _moveDistanceMmText = "10";
             _velocityMmText = "10";
             _statusText = "请选择控制卡和轴";
+            _lastOperationText = "最近操作：未执行";
+            _operationHintText = "请选择轴后执行操作";
 
-            RefreshCommand = new AsyncRelayCommand(RefreshAsync, CanOperate);
-            ServoOnCommand = new AsyncRelayCommand(ServoOnAsync, CanOperateAxis);
-            ServoOffCommand = new AsyncRelayCommand(ServoOffAsync, CanOperateAxis);
-            StopCommand = new AsyncRelayCommand(StopAsync, CanOperateAxis);
-            EmergencyStopCommand = new AsyncRelayCommand(EmergencyStopAsync, CanOperateAxis);
-            HomeCommand = new AsyncRelayCommand(HomeAsync, CanOperateAxis);
-            ClearStatusCommand = new AsyncRelayCommand(ClearStatusAsync, CanOperateAxis);
-            JogNegativeCommand = new AsyncRelayCommand(JogNegativeAsync, CanOperateAxis);
-            JogStopCommand = new AsyncRelayCommand(JogStopAsync, CanOperateAxis);
-            JogPositiveCommand = new AsyncRelayCommand(JogPositiveAsync, CanOperateAxis);
-            MoveAbsoluteCommand = new AsyncRelayCommand(MoveAbsoluteAsync, CanOperateAxis);
-            MoveRelativeCommand = new AsyncRelayCommand(MoveRelativeAsync, CanOperateAxis);
-            ApplyVelocityCommand = new AsyncRelayCommand(ApplyVelocityAsync, CanOperateAxis);
+            RefreshCommand = new AsyncRelayCommand(RefreshAsync, CanRefresh);
+            ServoOnCommand = new AsyncRelayCommand(ServoOnAsync, CanServoOn);
+            ServoOffCommand = new AsyncRelayCommand(ServoOffAsync, CanServoOff);
+            StopCommand = new AsyncRelayCommand(StopAsync, CanStop);
+            EmergencyStopCommand = new AsyncRelayCommand(EmergencyStopAsync, CanEmergencyStop);
+            HomeCommand = new AsyncRelayCommand(HomeAsync, CanHome);
+            ClearStatusCommand = new AsyncRelayCommand(ClearStatusAsync, CanClearStatus);
+            JogNegativeCommand = new AsyncRelayCommand(JogNegativeAsync, CanJogNegative);
+            JogStopCommand = new AsyncRelayCommand(JogStopAsync, CanJogStop);
+            JogPositiveCommand = new AsyncRelayCommand(JogPositiveAsync, CanJogPositive);
+            MoveAbsoluteCommand = new AsyncRelayCommand(MoveAbsoluteAsync, CanMoveAbsolute);
+            MoveRelativeCommand = new AsyncRelayCommand(MoveRelativeAsync, CanMoveRelative);
+            ApplyVelocityCommand = new AsyncRelayCommand(ApplyVelocityAsync, CanApplyVelocity);
 
             RuntimeContext.Instance.MotionAxis.SnapshotChanged += MotionAxis_SnapshotChanged;
         }
@@ -139,7 +144,8 @@ namespace AM.ViewModel.ViewModels.Motion
                             : "10";
                     }
 
-                    RaiseSelectedAxisDisplayChanged();
+                    RefreshSelectedAxisRuntimeDisplay();
+                    UpdateOperationHint();
                     NotifyCommandState();
                 }
             }
@@ -215,6 +221,79 @@ namespace AM.ViewModel.ViewModels.Motion
             {
                 var snapshot = GetSelectedAxisRuntime();
                 return snapshot == null ? "—" : snapshot.StateText;
+            }
+        }
+
+        public string SelectedAxisStateDisplayText
+        {
+            get
+            {
+                var snapshot = GetSelectedAxisRuntime();
+                if (snapshot == null)
+                {
+                    return "运行态未建立";
+                }
+
+                if (snapshot.IsAlarm)
+                {
+                    return "报警中";
+                }
+
+                if (snapshot.IsMoving)
+                {
+                    return "运动中";
+                }
+
+                if (!snapshot.IsEnabled)
+                {
+                    return "未使能";
+                }
+
+                if (snapshot.IsDone)
+                {
+                    return "已使能待机";
+                }
+
+                return "空闲";
+            }
+        }
+
+        public string SelectedAxisInterlockText
+        {
+            get
+            {
+                var snapshot = GetSelectedAxisRuntime();
+                if (snapshot == null)
+                {
+                    return "运行态未建立，禁止操作";
+                }
+
+                if (snapshot.IsAlarm)
+                {
+                    return "当前轴报警中，请先清状态";
+                }
+
+                if (!snapshot.IsEnabled)
+                {
+                    return "当前轴未使能，运动前请先伺服上电";
+                }
+
+                if (snapshot.PositiveLimit || snapshot.NegativeLimit)
+                {
+                    return "当前存在限位约束，请确认方向后操作";
+                }
+
+                if (!snapshot.IsAtHome)
+                {
+                    return "当前轴未回原点，绝对定位前建议先回零";
+                }
+
+                if (snapshot.IsMoving)
+                {
+                    return "当前轴正在运动中，请避免重复下发运动命令";
+                }
+
+                return "当前轴允许操作";
             }
         }
 
@@ -331,10 +410,23 @@ namespace AM.ViewModel.ViewModels.Motion
             set { SetProperty(ref _statusText, value); }
         }
 
+        public string LastOperationText
+        {
+            get { return _lastOperationText; }
+            set { SetProperty(ref _lastOperationText, value); }
+        }
+
+        public string OperationHintText
+        {
+            get { return _operationHintText; }
+            set { SetProperty(ref _operationHintText, value); }
+        }
+
         public async Task LoadAsync()
         {
             await RefreshAsync();
             RefreshSelectedAxisRuntimeDisplay();
+            UpdateOperationHint();
         }
 
         /// <summary>
@@ -377,6 +469,7 @@ namespace AM.ViewModel.ViewModels.Motion
             finally
             {
                 _isBusy = false;
+                UpdateOperationHint();
                 NotifyCommandState();
             }
         }
@@ -414,6 +507,8 @@ namespace AM.ViewModel.ViewModels.Motion
                 }
 
                 RefreshSelectedAxisRuntimeDisplay();
+                UpdateOperationHint();
+                NotifyCommandState();
             }, null);
         }
 
@@ -430,6 +525,12 @@ namespace AM.ViewModel.ViewModels.Motion
                 : null;
         }
 
+        private bool TryGetSelectedAxisRuntime(out MotionAxisRuntimeSnapshot snapshot)
+        {
+            snapshot = GetSelectedAxisRuntime();
+            return snapshot != null;
+        }
+
         private void RefreshSelectedAxisRuntimeDisplay()
         {
             RaiseSelectedAxisDisplayChanged();
@@ -440,6 +541,8 @@ namespace AM.ViewModel.ViewModels.Motion
             OnPropertyChanged(nameof(SelectedAxisHeader));
             OnPropertyChanged(nameof(SelectedAxisCardText));
             OnPropertyChanged(nameof(SelectedAxisStatusText));
+            OnPropertyChanged(nameof(SelectedAxisStateDisplayText));
+            OnPropertyChanged(nameof(SelectedAxisInterlockText));
             OnPropertyChanged(nameof(SelectedAxisLimitText));
             OnPropertyChanged(nameof(SelectedAxisEnabledText));
             OnPropertyChanged(nameof(SelectedAxisHomeText));
@@ -455,28 +558,66 @@ namespace AM.ViewModel.ViewModels.Motion
 
         private async Task ServoOnAsync()
         {
-            await ExecuteOperationAsync(() => _operationService.Enable(SelectedAxisItem.LogicalAxis, true));
+            var validate = ValidateServoOnOperation();
+            if (!validate.Success)
+            {
+                ApplyValidationFailure(validate);
+                return;
+            }
+
+            await ExecuteOperationAsync(
+                () => _operationService.Enable(SelectedAxisItem.LogicalAxis, true),
+                "伺服上电");
         }
 
         private async Task ServoOffAsync()
         {
-            await ExecuteOperationAsync(() => _operationService.Enable(SelectedAxisItem.LogicalAxis, false));
+            var validate = ValidateServoOffOperation();
+            if (!validate.Success)
+            {
+                ApplyValidationFailure(validate);
+                return;
+            }
+
+            await ExecuteOperationAsync(
+                () => _operationService.Enable(SelectedAxisItem.LogicalAxis, false),
+                "伺服断电");
         }
 
         private async Task StopAsync()
         {
-            await ExecuteOperationAsync(() => _operationService.Stop(SelectedAxisItem.LogicalAxis, false));
+            var validate = ValidateStopOperation(false);
+            if (!validate.Success)
+            {
+                ApplyValidationFailure(validate);
+                return;
+            }
+
+            await ExecuteOperationAsync(
+                () => _operationService.Stop(SelectedAxisItem.LogicalAxis, false),
+                "普通停止");
         }
 
         private async Task EmergencyStopAsync()
         {
-            await ExecuteOperationAsync(() => _operationService.Stop(SelectedAxisItem.LogicalAxis, true));
+            var validate = ValidateStopOperation(true);
+            if (!validate.Success)
+            {
+                ApplyValidationFailure(validate);
+                return;
+            }
+
+            await ExecuteOperationAsync(
+                () => _operationService.Stop(SelectedAxisItem.LogicalAxis, true),
+                "急停");
         }
 
         private async Task HomeAsync()
         {
-            if (SelectedAxisItem == null)
+            var validate = ValidateHomeOperation();
+            if (!validate.Success)
             {
+                ApplyValidationFailure(validate);
                 return;
             }
 
@@ -486,11 +627,12 @@ namespace AM.ViewModel.ViewModels.Motion
             try
             {
                 var result = await _operationService.HomeAsync(SelectedAxisItem.LogicalAxis);
-                StatusText = result.Message;
+                ApplyOperationResult(result, "回零");
             }
             finally
             {
                 _isBusy = false;
+                UpdateOperationHint();
                 NotifyCommandState();
             }
 
@@ -499,38 +641,81 @@ namespace AM.ViewModel.ViewModels.Motion
 
         private async Task ClearStatusAsync()
         {
-            await ExecuteOperationAsync(() => _operationService.ClearStatus(SelectedAxisItem.LogicalAxis));
+            var validate = ValidateClearStatusOperation();
+            if (!validate.Success)
+            {
+                ApplyValidationFailure(validate);
+                return;
+            }
+
+            await ExecuteOperationAsync(
+                () => _operationService.ClearStatus(SelectedAxisItem.LogicalAxis),
+                "清状态");
         }
 
         private async Task JogNegativeAsync()
         {
+            var validate = ValidateJogOperation(false);
+            if (!validate.Success)
+            {
+                ApplyValidationFailure(validate);
+                return;
+            }
+
             double velocityMm;
             if (!TryParsePositiveNumber(VelocityMmText, "速度", out velocityMm))
             {
                 return;
             }
 
-            await ExecuteOperationAsync(() => _operationService.JogMove(SelectedAxisItem.LogicalAxis, false, velocityMm));
+            await ExecuteOperationAsync(
+                () => _operationService.JogMove(SelectedAxisItem.LogicalAxis, false, velocityMm),
+                "负向点动");
         }
 
         private async Task JogStopAsync()
         {
-            await ExecuteOperationAsync(() => _operationService.JogStop(SelectedAxisItem.LogicalAxis));
+            var validate = ValidateJogStopOperation();
+            if (!validate.Success)
+            {
+                ApplyValidationFailure(validate);
+                return;
+            }
+
+            await ExecuteOperationAsync(
+                () => _operationService.JogStop(SelectedAxisItem.LogicalAxis),
+                "点动停止");
         }
 
         private async Task JogPositiveAsync()
         {
+            var validate = ValidateJogOperation(true);
+            if (!validate.Success)
+            {
+                ApplyValidationFailure(validate);
+                return;
+            }
+
             double velocityMm;
             if (!TryParsePositiveNumber(VelocityMmText, "速度", out velocityMm))
             {
                 return;
             }
 
-            await ExecuteOperationAsync(() => _operationService.JogMove(SelectedAxisItem.LogicalAxis, true, velocityMm));
+            await ExecuteOperationAsync(
+                () => _operationService.JogMove(SelectedAxisItem.LogicalAxis, true, velocityMm),
+                "正向点动");
         }
 
         private async Task MoveAbsoluteAsync()
         {
+            var validate = ValidateMoveOperation(true);
+            if (!validate.Success)
+            {
+                ApplyValidationFailure(validate);
+                return;
+            }
+
             double positionMm;
             double velocityMm;
 
@@ -544,11 +729,20 @@ namespace AM.ViewModel.ViewModels.Motion
                 return;
             }
 
-            await ExecuteOperationAsync(() => _operationService.MoveAbsoluteMm(SelectedAxisItem.LogicalAxis, positionMm, velocityMm));
+            await ExecuteOperationAsync(
+                () => _operationService.MoveAbsoluteMm(SelectedAxisItem.LogicalAxis, positionMm, velocityMm),
+                "绝对定位");
         }
 
         private async Task MoveRelativeAsync()
         {
+            var validate = ValidateMoveOperation(false);
+            if (!validate.Success)
+            {
+                ApplyValidationFailure(validate);
+                return;
+            }
+
             double distanceMm;
             double velocityMm;
 
@@ -562,21 +756,32 @@ namespace AM.ViewModel.ViewModels.Motion
                 return;
             }
 
-            await ExecuteOperationAsync(() => _operationService.MoveRelativeMm(SelectedAxisItem.LogicalAxis, distanceMm, velocityMm));
+            await ExecuteOperationAsync(
+                () => _operationService.MoveRelativeMm(SelectedAxisItem.LogicalAxis, distanceMm, velocityMm),
+                "相对运动");
         }
 
         private async Task ApplyVelocityAsync()
         {
+            var validate = ValidateApplyVelocityOperation();
+            if (!validate.Success)
+            {
+                ApplyValidationFailure(validate);
+                return;
+            }
+
             double velocityMm;
             if (!TryParsePositiveNumber(VelocityMmText, "速度", out velocityMm))
             {
                 return;
             }
 
-            await ExecuteOperationAsync(() => _operationService.ApplyVelocityMm(SelectedAxisItem.LogicalAxis, velocityMm));
+            await ExecuteOperationAsync(
+                () => _operationService.ApplyVelocityMm(SelectedAxisItem.LogicalAxis, velocityMm),
+                "应用速度");
         }
 
-        private async Task ExecuteOperationAsync(Func<Result> action)
+        private async Task ExecuteOperationAsync(Func<Result> action, string operationName)
         {
             if (SelectedAxisItem == null)
             {
@@ -589,15 +794,338 @@ namespace AM.ViewModel.ViewModels.Motion
             try
             {
                 var result = await Task.Run(action);
-                StatusText = result.Message;
+                ApplyOperationResult(result, operationName);
             }
             finally
             {
                 _isBusy = false;
+                UpdateOperationHint();
                 NotifyCommandState();
             }
 
             RefreshSelectedAxisRuntimeDisplay();
+        }
+
+        private Result ValidateCommonAxisOperation()
+        {
+            if (SelectedAxisItem == null)
+            {
+                return Result.Fail((int)MotionErrorCode.InvalidAxisConfig, "请先选择轴");
+            }
+
+            if (_isBusy)
+            {
+                return Result.Fail((int)MotionErrorCode.InvalidAxisConfig, "当前命令执行中，请稍后");
+            }
+
+            MotionAxisRuntimeSnapshot snapshot;
+            if (!TryGetSelectedAxisRuntime(out snapshot))
+            {
+                return Result.Fail((int)MotionErrorCode.AxisMapNotFound, "当前轴运行态未建立");
+            }
+
+            return Result.Ok();
+        }
+
+        private Result ValidateMotionOperation()
+        {
+            var common = ValidateCommonAxisOperation();
+            if (!common.Success)
+            {
+                return common;
+            }
+
+            MotionAxisRuntimeSnapshot snapshot;
+            if (!TryGetSelectedAxisRuntime(out snapshot))
+            {
+                return Result.Fail((int)MotionErrorCode.AxisMapNotFound, "当前轴运行态未建立");
+            }
+
+            if (snapshot.IsAlarm)
+            {
+                return Result.Fail((int)MotionErrorCode.InvalidAxisConfig, "当前轴处于报警状态，请先清状态");
+            }
+
+            if (!snapshot.IsEnabled)
+            {
+                return Result.Fail((int)MotionErrorCode.InvalidAxisConfig, "当前轴未使能，请先伺服上电");
+            }
+
+            return Result.Ok();
+        }
+
+        private Result ValidateJogOperation(bool positiveDirection)
+        {
+            var motion = ValidateMotionOperation();
+            if (!motion.Success)
+            {
+                return motion;
+            }
+
+            MotionAxisRuntimeSnapshot snapshot;
+            if (!TryGetSelectedAxisRuntime(out snapshot))
+            {
+                return Result.Fail((int)MotionErrorCode.AxisMapNotFound, "当前轴运行态未建立");
+            }
+
+            if (snapshot.IsMoving)
+            {
+                return Result.Fail((int)MotionErrorCode.InvalidAxisConfig, "当前轴正在运动中，请先停止后再执行点动");
+            }
+
+            if (positiveDirection && snapshot.PositiveLimit)
+            {
+                return Result.Fail((int)MotionErrorCode.InvalidAxisConfig, "当前轴正限位触发，禁止继续正向点动");
+            }
+
+            if (!positiveDirection && snapshot.NegativeLimit)
+            {
+                return Result.Fail((int)MotionErrorCode.InvalidAxisConfig, "当前轴负限位触发，禁止继续负向点动");
+            }
+
+            return Result.Ok();
+        }
+
+        private Result ValidateMoveOperation(bool requireHome)
+        {
+            var motion = ValidateMotionOperation();
+            if (!motion.Success)
+            {
+                return motion;
+            }
+
+            MotionAxisRuntimeSnapshot snapshot;
+            if (!TryGetSelectedAxisRuntime(out snapshot))
+            {
+                return Result.Fail((int)MotionErrorCode.AxisMapNotFound, "当前轴运行态未建立");
+            }
+
+            if (snapshot.IsMoving)
+            {
+                return Result.Fail((int)MotionErrorCode.InvalidAxisConfig, "当前轴正在运动中，请先停止后再下发新命令");
+            }
+
+            if (requireHome && !snapshot.IsAtHome)
+            {
+                return Result.Fail((int)MotionErrorCode.HomeFailed, "当前轴未回原点，禁止执行绝对定位");
+            }
+
+            return Result.Ok();
+        }
+
+        private Result ValidateHomeOperation()
+        {
+            var motion = ValidateMotionOperation();
+            if (!motion.Success)
+            {
+                return motion;
+            }
+
+            MotionAxisRuntimeSnapshot snapshot;
+            if (!TryGetSelectedAxisRuntime(out snapshot))
+            {
+                return Result.Fail((int)MotionErrorCode.AxisMapNotFound, "当前轴运行态未建立");
+            }
+
+            if (snapshot.IsMoving)
+            {
+                return Result.Fail((int)MotionErrorCode.InvalidAxisConfig, "当前轴正在运动中，禁止重复执行回零");
+            }
+
+            if (snapshot.PositiveLimit || snapshot.NegativeLimit)
+            {
+                return Result.Fail((int)MotionErrorCode.InvalidAxisConfig, "当前轴存在限位触发，请确认后再执行回零");
+            }
+
+            return Result.Ok();
+        }
+
+        private Result ValidateServoOnOperation()
+        {
+            var common = ValidateCommonAxisOperation();
+            if (!common.Success)
+            {
+                return common;
+            }
+
+            MotionAxisRuntimeSnapshot snapshot;
+            if (!TryGetSelectedAxisRuntime(out snapshot))
+            {
+                return Result.Fail((int)MotionErrorCode.AxisMapNotFound, "当前轴运行态未建立");
+            }
+
+            if (snapshot.IsEnabled)
+            {
+                return Result.Fail((int)MotionErrorCode.InvalidAxisConfig, "当前轴已使能，无需重复上电");
+            }
+
+            return Result.Ok();
+        }
+
+        private Result ValidateServoOffOperation()
+        {
+            var common = ValidateCommonAxisOperation();
+            if (!common.Success)
+            {
+                return common;
+            }
+
+            MotionAxisRuntimeSnapshot snapshot;
+            if (!TryGetSelectedAxisRuntime(out snapshot))
+            {
+                return Result.Fail((int)MotionErrorCode.AxisMapNotFound, "当前轴运行态未建立");
+            }
+
+            if (!snapshot.IsEnabled)
+            {
+                return Result.Fail((int)MotionErrorCode.InvalidAxisConfig, "当前轴未使能，无需重复断电");
+            }
+
+            if (snapshot.IsMoving)
+            {
+                return Result.Fail((int)MotionErrorCode.InvalidAxisConfig, "当前轴正在运动中，禁止直接断电");
+            }
+
+            return Result.Ok();
+        }
+
+        private Result ValidateStopOperation(bool isEmergency)
+        {
+            var common = ValidateCommonAxisOperation();
+            if (!common.Success)
+            {
+                return common;
+            }
+
+            MotionAxisRuntimeSnapshot snapshot;
+            if (!TryGetSelectedAxisRuntime(out snapshot))
+            {
+                return Result.Fail((int)MotionErrorCode.AxisMapNotFound, "当前轴运行态未建立");
+            }
+
+            if (!snapshot.IsMoving && !isEmergency)
+            {
+                return Result.Fail((int)MotionErrorCode.InvalidAxisConfig, "当前轴未处于运动中，无需普通停止");
+            }
+
+            return Result.Ok();
+        }
+
+        private Result ValidateJogStopOperation()
+        {
+            return ValidateCommonAxisOperation();
+        }
+
+        private Result ValidateClearStatusOperation()
+        {
+            return ValidateCommonAxisOperation();
+        }
+
+        private Result ValidateApplyVelocityOperation()
+        {
+            var motion = ValidateMotionOperation();
+            if (!motion.Success)
+            {
+                return motion;
+            }
+
+            MotionAxisRuntimeSnapshot snapshot;
+            if (!TryGetSelectedAxisRuntime(out snapshot))
+            {
+                return Result.Fail((int)MotionErrorCode.AxisMapNotFound, "当前轴运行态未建立");
+            }
+
+            if (snapshot.IsMoving)
+            {
+                return Result.Fail((int)MotionErrorCode.InvalidAxisConfig, "当前轴正在运动中，禁止修改运行速度");
+            }
+
+            return Result.Ok();
+        }
+
+        private void ApplyValidationFailure(Result result)
+        {
+            if (result == null)
+            {
+                return;
+            }
+
+            StatusText = "联锁限制：" + result.Message;
+            LastOperationText = "最近操作：未执行 / " + result.Message;
+            OperationHintText = result.Message;
+            NotifyCommandState();
+        }
+
+        private void ApplyOperationResult(Result result, string operationName)
+        {
+            if (result == null)
+            {
+                StatusText = operationName + "失败";
+                LastOperationText = "最近操作：" + operationName + " / 未返回结果";
+                OperationHintText = "请检查当前轴状态后重试";
+                return;
+            }
+
+            if (result.Success)
+            {
+                StatusText = operationName + "成功：" + result.Message;
+                LastOperationText = "最近操作：" + operationName + " / 成功";
+                OperationHintText = "当前轴允许继续操作";
+            }
+            else
+            {
+                StatusText = operationName + "失败：" + result.Message;
+                LastOperationText = "最近操作：" + operationName + " / 失败";
+                OperationHintText = result.Message;
+            }
+        }
+
+        private void UpdateOperationHint()
+        {
+            if (SelectedAxisItem == null)
+            {
+                OperationHintText = "请选择轴后执行操作";
+                return;
+            }
+
+            MotionAxisRuntimeSnapshot snapshot;
+            if (!TryGetSelectedAxisRuntime(out snapshot))
+            {
+                OperationHintText = "当前轴运行态未建立";
+                return;
+            }
+
+            if (snapshot.IsAlarm)
+            {
+                OperationHintText = "当前轴报警中，请先清状态";
+                return;
+            }
+
+            if (!snapshot.IsEnabled)
+            {
+                OperationHintText = "当前轴未使能，运动前请先伺服上电";
+                return;
+            }
+
+            if (snapshot.IsMoving)
+            {
+                OperationHintText = "当前轴正在运动中，请避免重复下发运动命令";
+                return;
+            }
+
+            if (snapshot.PositiveLimit || snapshot.NegativeLimit)
+            {
+                OperationHintText = "当前存在限位约束，请确认方向后操作";
+                return;
+            }
+
+            if (!snapshot.IsAtHome)
+            {
+                OperationHintText = "当前轴未回原点，绝对定位前建议先回零";
+                return;
+            }
+
+            OperationHintText = "当前轴允许操作";
         }
 
         private void RefreshCardFilters(short? previousCardId)
@@ -690,6 +1218,7 @@ namespace AM.ViewModel.ViewModels.Motion
             if (!double.TryParse(text, NumberStyles.Any, CultureInfo.InvariantCulture, out value))
             {
                 StatusText = fieldName + " 请输入有效数值";
+                OperationHintText = fieldName + " 请输入有效数值";
                 return false;
             }
 
@@ -706,20 +1235,76 @@ namespace AM.ViewModel.ViewModels.Motion
             if (value <= 0)
             {
                 StatusText = fieldName + " 必须大于 0";
+                OperationHintText = fieldName + " 必须大于 0";
                 return false;
             }
 
             return true;
         }
 
-        private bool CanOperate()
+        private bool CanRefresh()
         {
-            return !_isBusy;
+            return !_isBusy && !_isDisposed;
         }
 
-        private bool CanOperateAxis()
+        private bool CanServoOn()
         {
-            return !_isBusy && SelectedAxisItem != null;
+            return ValidateServoOnOperation().Success;
+        }
+
+        private bool CanServoOff()
+        {
+            return ValidateServoOffOperation().Success;
+        }
+
+        private bool CanStop()
+        {
+            return ValidateStopOperation(false).Success;
+        }
+
+        private bool CanEmergencyStop()
+        {
+            return ValidateStopOperation(true).Success;
+        }
+
+        private bool CanHome()
+        {
+            return ValidateHomeOperation().Success;
+        }
+
+        private bool CanClearStatus()
+        {
+            return ValidateClearStatusOperation().Success;
+        }
+
+        private bool CanJogNegative()
+        {
+            return ValidateJogOperation(false).Success;
+        }
+
+        private bool CanJogStop()
+        {
+            return ValidateJogStopOperation().Success;
+        }
+
+        private bool CanJogPositive()
+        {
+            return ValidateJogOperation(true).Success;
+        }
+
+        private bool CanMoveAbsolute()
+        {
+            return ValidateMoveOperation(true).Success;
+        }
+
+        private bool CanMoveRelative()
+        {
+            return ValidateMoveOperation(false).Success;
+        }
+
+        private bool CanApplyVelocity()
+        {
+            return ValidateApplyVelocityOperation().Success;
         }
 
         private void NotifyCommandState()
