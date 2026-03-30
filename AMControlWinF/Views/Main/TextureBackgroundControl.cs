@@ -61,7 +61,7 @@ namespace AMControlWinF.Views.Main
         private void DrawBackground(Graphics g, Rectangle rect)
         {
             using (var brush = new SolidBrush(_isDarkMode
-                ? Color.FromArgb(24, 24, 24)
+                ? Color.FromArgb(31, 31, 31)
                 : Color.FromArgb(245, 247, 250)))
             {
                 g.FillRectangle(brush, rect);
@@ -71,11 +71,11 @@ namespace AMControlWinF.Views.Main
         private void DrawGrid(Graphics g, Rectangle rect)
         {
             var minorColor = _isDarkMode
-                ? Color.FromArgb(36, 36, 36)
+                ? Color.FromArgb(40, 40, 40)
                 : Color.FromArgb(228, 232, 238);
 
             var majorColor = _isDarkMode
-                ? Color.FromArgb(48, 48, 48)
+                ? Color.FromArgb(52, 52, 52)
                 : Color.FromArgb(214, 220, 228);
 
             const int minorStep = 16;

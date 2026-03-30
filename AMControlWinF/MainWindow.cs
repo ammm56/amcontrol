@@ -149,8 +149,7 @@ namespace AMControlWinF
                 menuPrimary.Items.Add(new MenuItem
                 {
                     Text = GetPrimaryText(item),
-                    Tag = item.Key,
-                    IconSvg = ResolvePrimaryIcon(item.Key)
+                    Tag = item.Key
                 });
             }
         }
@@ -566,32 +565,20 @@ namespace AMControlWinF
         {
             _isDarkMode = isDarkMode;
 
-            var windowBack = isDarkMode ? Color.FromArgb(24, 24, 24) : Color.FromArgb(245, 247, 250);
-            var cardBack = isDarkMode ? Color.FromArgb(36, 36, 36) : Color.White;
-            var primaryText = isDarkMode ? Color.Gainsboro : Color.FromArgb(24, 39, 58);
-            var secondaryText = isDarkMode ? Color.Silver : Color.Gray;
+            if (isDarkMode)
+            {
+                AntdUI.Config.IsDark = true;
+                BackColor = Color.FromArgb(31, 31, 31);
+                ForeColor = Color.White;
+            }
+            else
+            {
+                AntdUI.Config.IsLight = true;
+                BackColor = Color.White;
+                ForeColor = Color.Black;
+            }
 
-            BackColor = windowBack;
             textureBackgroundMain.SetTheme(isDarkMode);
-
-            panelLeftCard.Back = cardBack;
-            panelSecondaryNavCard.Back = cardBack;
-            panelWorkCard.Back = cardBack;
-            panelStatusCard.Back = cardBack;
-
-            //panelPrimaryNav.Back = Color.Transparent;
-            panelAvatarHost.Back = Color.Transparent;
-            panelWorkHeader.Back = Color.Transparent;
-            panelContent.Back = Color.Transparent;
-
-            labelPrimaryTitleValue.ForeColor = primaryText;
-            labelPageTitleValue.ForeColor = primaryText;
-            labelPageDescriptionValue.ForeColor = secondaryText;
-            labelStatusCaption.ForeColor = secondaryText;
-            labelStatusValue.ForeColor = primaryText;
-
-            buttonColorMode.Toggle = isDarkMode;
-
             userAvatarMenuControl.ApplyTheme(isDarkMode);
 
             foreach (var pair in _pageCache)
@@ -619,19 +606,16 @@ namespace AMControlWinF
                 return;
             }
 
-            var backColor = _isDarkMode ? Color.FromArgb(32, 32, 32) : Color.White;
-            var foreColor = _isDarkMode ? Color.Gainsboro : Color.DimGray;
-
             var antPanel = root as Panel;
             if (antPanel != null)
             {
-                antPanel.Back = backColor;
+                antPanel.Back = _isDarkMode ? Color.FromArgb(32, 32, 32) : Color.White;
             }
 
             var antLabel = root as Label;
             if (antLabel != null)
             {
-                antLabel.ForeColor = foreColor;
+                antLabel.ForeColor = _isDarkMode ? Color.Gainsboro : Color.DimGray;
             }
 
             foreach (Control child in root.Controls)
@@ -741,25 +725,6 @@ namespace AMControlWinF
             }
 
             return IsEnglishLanguage(GetCurrentLanguage()) ? item.PageKey : item.Description;
-        }
-
-        private static string ResolvePrimaryIcon(string moduleKey)
-        {
-            switch (moduleKey)
-            {
-                case "Home": return "HomeOutlined";
-                case "Motion": return "DashboardOutlined";
-                case "Production": return "DatabaseOutlined";
-                case "Vision": return "EyeOutlined";
-                case "PLC": return "ApiOutlined";
-                case "Peripheral": return "UsbOutlined";
-                case "MotionConfig": return "SettingOutlined";
-                case "SysConfig": return "ControlOutlined";
-                case "Engineer": return "ToolOutlined";
-                case "AlarmLog": return "AlertOutlined";
-                case "System": return "UserOutlined";
-                default: return "AppstoreOutlined";
-            }
         }
 
         private static string ResolveSecondaryIcon(string pageKey)
