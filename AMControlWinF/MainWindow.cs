@@ -17,12 +17,14 @@ using Panel = AntdUI.Panel;
 namespace AMControlWinF
 {
     /// <summary>
-    /// WinForms 主窗体。
-    /// 当前职责只负责：
-    /// 1. 导航菜单构建与切换；
-    /// 2. 页面缓存与工作区承载；
-    /// 3. 用户头像菜单协调；
-    /// 4. 主题与语言壳层同步。
+    /// WinForms 主窗体壳层。
+    /// 
+    /// 当前职责：
+    /// 1. 构建一级/二级导航；
+    /// 2. 承载右侧工作区与页面缓存；
+    /// 3. 协调用户头像菜单；
+    /// 4. 协调语言与主题切换；
+    /// 5. 不承载具体业务页面逻辑。
     /// </summary>
     public partial class MainWindow : AntdUI.Window
     {
@@ -44,6 +46,8 @@ namespace AMControlWinF
             InitializeShellState();
         }
 
+        #region 初始化
+
         /// <summary>
         /// 统一绑定主窗体事件。
         /// </summary>
@@ -64,20 +68,22 @@ namespace AMControlWinF
         }
 
         /// <summary>
-        /// 首次加载导航和默认页面。
+        /// 首次加载导航与默认页面。
         /// </summary>
         private void LoadModel()
         {
             _model.LoadNavigation();
+
             BuildPrimaryMenu();
             BuildSecondaryMenu();
+
             RefreshHeader();
             RefreshUserMenuControl();
             NavigateToSelectedPage();
         }
 
         /// <summary>
-        /// 从配置初始化主题与语言。
+        /// 从全局配置初始化语言和主题。
         /// </summary>
         private void InitializeShellState()
         {
@@ -103,8 +109,12 @@ namespace AMControlWinF
             }
         }
 
+        #endregion
+
+        #region Model 协调
+
         /// <summary>
-        /// 响应 `MainWindowModel` 的状态变化。
+        /// 统一处理页面模型状态变化。
         /// </summary>
         private void Model_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
@@ -137,8 +147,13 @@ namespace AMControlWinF
             }
         }
 
+        #endregion
+
+        #region 导航
+
         /// <summary>
-        /// 构建一级菜单。
+        /// 一级导航为窄栏文本导航。
+        /// 不显示图标，只显示短文本；较长文本主动换行。
         /// </summary>
         private void BuildPrimaryMenu()
         {
@@ -149,14 +164,14 @@ namespace AMControlWinF
                 menuPrimary.Items.Add(new MenuItem
                 {
                     Text = GetPrimaryText(item),
-                    Tag = item.Key
+                    Tag = item.Key,
+                    
                 });
             }
         }
 
         /// <summary>
-        /// 构建二级菜单。
-        /// 图标按页面类型映射，不再全部使用同一个图标。
+        /// 二级导航保留图标，图标按实际页面类型映射。
         /// </summary>
         private void BuildSecondaryMenu()
         {
@@ -231,7 +246,8 @@ namespace AMControlWinF
         }
 
         /// <summary>
-        /// 刷新大卡片头部文本。
+        /// 刷新右侧工作区头部。
+        /// 第三列是一个大卡片，内部再细分头部与内容区。
         /// </summary>
         private void RefreshHeader()
         {
@@ -243,7 +259,7 @@ namespace AMControlWinF
             }
             else
             {
-                labelPrimaryTitleValue.Text = GetPrimaryText(_model.SelectedPrimary);
+                labelPrimaryTitleValue.Text = GetPrimaryText(_model.SelectedPrimary).Replace("\n", "");
             }
 
             if (_model.SelectedSecondary == null)
@@ -263,22 +279,136 @@ namespace AMControlWinF
             }
         }
 
-        /// <summary>
-        /// 将当前用户信息同步到左下角头像控件。
-        /// </summary>
-        private void RefreshUserMenuControl()
+        private string GetPrimaryText(NavPrimaryDef item)
         {
-            userAvatarMenuControl.SetUserInfo(
-                _model.CurrentUserDisplayName,
-                GetCurrentRoleDisplayName());
+            if (item == null)
+            {
+                return string.Empty;
+            }
 
-            userAvatarMenuControl.ApplyLanguage(GetCurrentLanguage());
-            userAvatarMenuControl.ApplyTheme(_isDarkMode);
+            if (IsEnglishLanguage(GetCurrentLanguage()))
+            {
+                return item.Key;
+            }
+
+            // 一级导航窄栏只显示文字，不显示图标。
+            // 对较长中文名称主动换行，贴近当前 WPF 布局。
+            switch (item.Key)
+            {
+                case "MotionConfig":
+                    return "运控\n配置";
+                case "SysConfig":
+                    return "系统\n配置";
+                case "AlarmLog":
+                    return "报警\n日志";
+                default:
+                    return item.DisplayName;
+            }
         }
 
+        private string GetSecondaryText(NavPageDef item)
+        {
+            if (item == null)
+            {
+                return string.Empty;
+            }
+
+            if (!IsEnglishLanguage(GetCurrentLanguage()))
+            {
+                return item.DisplayName;
+            }
+
+            var pageKey = item.PageKey ?? string.Empty;
+            var index = pageKey.LastIndexOf('.');
+            return index >= 0 && index < pageKey.Length - 1
+                ? pageKey.Substring(index + 1)
+                : pageKey;
+        }
+
+        private string GetSecondaryDescription(NavPageDef item)
+        {
+            if (item == null)
+            {
+                return string.Empty;
+            }
+
+            return IsEnglishLanguage(GetCurrentLanguage())
+                ? item.PageKey
+                : item.Description;
+        }
+
+        private static string ResolveSecondaryIcon(string pageKey)
+        {
+            switch (pageKey)
+            {
+                case "Home.Overview": return "HomeOutlined";
+                case "Home.SysStatus": return "MonitorOutlined";
+
+                case "Motion.DI": return "ApiOutlined";
+                case "Motion.DO": return "SendOutlined";
+                case "Motion.Monitor": return "DashboardOutlined";
+                case "Motion.Axis": return "ControlOutlined";
+                case "Motion.Actuator": return "ThunderboltOutlined";
+
+                case "MotionConfig.Card": return "CreditCardOutlined";
+                case "MotionConfig.Axis": return "PartitionOutlined";
+                case "MotionConfig.IoMap": return "DeploymentUnitOutlined";
+                case "MotionConfig.AxisParam": return "SlidersOutlined";
+                case "MotionConfig.Actuator": return "ToolOutlined";
+
+                case "AlarmLog.Current": return "AlertOutlined";
+                case "AlarmLog.History": return "ProfileOutlined";
+                case "AlarmLog.RunLog": return "FileTextOutlined";
+
+                case "System.User": return "UserOutlined";
+                case "System.Permission": return "SafetyCertificateOutlined";
+                case "System.LoginLog": return "AuditOutlined";
+
+                case "Production.Order": return "ProfileOutlined";
+                case "Production.Recipe": return "BookOutlined";
+                case "Production.Data": return "BarChartOutlined";
+                case "Production.Report": return "LineChartOutlined";
+                case "Production.Trace": return "SearchOutlined";
+                case "Production.MesStatus": return "CloudServerOutlined";
+                case "Production.UploadLog": return "UploadOutlined";
+
+                case "Vision.Monitor": return "EyeOutlined";
+                case "Vision.Result": return "CheckCircleOutlined";
+                case "Vision.Calibrate": return "AimOutlined";
+
+                case "PLC.Monitor": return "ApiOutlined";
+                case "PLC.Register": return "DatabaseOutlined";
+                case "PLC.Status": return "WifiOutlined";
+                case "PLC.Write": return "EditOutlined";
+
+                case "Peripheral.Scanner": return "QrcodeOutlined";
+                case "Peripheral.ScanTest": return "PlayCircleOutlined";
+                case "Peripheral.Sensor": return "RadarChartOutlined";
+                case "Peripheral.SensorTrend": return "AreaChartOutlined";
+
+                case "SysConfig.Camera": return "CameraOutlined";
+                case "SysConfig.Plc": return "ApiOutlined";
+                case "SysConfig.Sensor": return "RadarChartOutlined";
+                case "SysConfig.Scanner": return "QrcodeOutlined";
+                case "SysConfig.Mes": return "CloudOutlined";
+                case "SysConfig.Runtime": return "SettingOutlined";
+
+                case "Engineer.Diagnostic": return "ToolOutlined";
+                case "Engineer.RawAxis": return "ControlOutlined";
+                case "Engineer.RawPlc": return "ApiOutlined";
+                case "Engineer.RawCamera": return "CameraOutlined";
+
+                default: return "AppstoreOutlined";
+            }
+        }
+
+        #endregion
+
+        #region 页面缓存与工作区
+
         /// <summary>
-        /// 导航到当前选中的页面。
-        /// 页面采用缓存模式，避免频繁创建销毁。
+        /// 导航到当前二级页面。
+        /// 页面使用缓存复用，避免频繁重建。
         /// </summary>
         private void NavigateToSelectedPage()
         {
@@ -356,7 +486,7 @@ namespace AMControlWinF
 
         /// <summary>
         /// 页面工厂。
-        /// 当前先保留占位页。
+        /// 当前阶段先保留占位页，后续逐页替换。
         /// </summary>
         private Control CreatePage(string pageKey)
         {
@@ -421,6 +551,10 @@ namespace AMControlWinF
             }
         }
 
+        /// <summary>
+        /// 占位页只承担壳层联调作用。
+        /// 颜色跟随当前主题。
+        /// </summary>
         private Control CreatePlaceholderPage(string text)
         {
             var panel = new Panel();
@@ -432,11 +566,40 @@ namespace AMControlWinF
             label.Dock = DockStyle.Fill;
             label.TextAlign = ContentAlignment.MiddleCenter;
             label.Font = new Font("Microsoft YaHei UI", 14F, FontStyle.Bold);
-            label.ForeColor = _isDarkMode ? Color.Gainsboro : Color.DimGray;
+            label.ForeColor = _isDarkMode ? Color.FromArgb(228, 228, 228) : Color.DimGray;
             label.Text = text;
 
             panel.Controls.Add(label);
             return panel;
+        }
+
+        private void RecreateAllCachedPages()
+        {
+            var keys = _pageCache.Keys.ToList();
+            foreach (var key in keys)
+            {
+                var control = _pageCache[key];
+                if (control != null && !control.IsDisposed)
+                {
+                    control.Dispose();
+                }
+
+                _pageCache.Remove(key);
+            }
+        }
+
+        #endregion
+
+        #region 用户菜单
+
+        private void RefreshUserMenuControl()
+        {
+            userAvatarMenuControl.SetUserInfo(
+                _model.CurrentUserDisplayName,
+                GetCurrentRoleDisplayName());
+
+            userAvatarMenuControl.ApplyLanguage(GetCurrentLanguage());
+            userAvatarMenuControl.ApplyTheme(_isDarkMode);
         }
 
         private void UserAvatarMenuControl_SwitchUserRequested(object sender, EventArgs e)
@@ -498,12 +661,9 @@ namespace AMControlWinF
                 MessageBoxIcon.Information);
         }
 
-        private void ButtonColorMode_Click(object sender, EventArgs e)
-        {
-            _isDarkMode = !_isDarkMode;
-            buttonColorMode.Toggle = _isDarkMode;
-            ApplyTheme(_isDarkMode, true);
-        }
+        #endregion
+
+        #region 语言
 
         private void DropdownTranslate_SelectedValueChanged(object sender, ObjectNEventArgs e)
         {
@@ -521,8 +681,8 @@ namespace AMControlWinF
         }
 
         /// <summary>
-        /// 应用语言。
-        /// 当前阶段英文导航使用 Key / PageKey 的简化映射。
+        /// 应用语言到壳层。
+        /// 当前阶段英文导航仍使用 Key / PageKey 简化映射。
         /// </summary>
         private void ApplyLanguage(string language, bool saveToConfig)
         {
@@ -557,14 +717,29 @@ namespace AMControlWinF
             }
         }
 
+        #endregion
+
+        #region 主题
+
+        private void ButtonColorMode_Click(object sender, EventArgs e)
+        {
+            _isDarkMode = !_isDarkMode;
+            buttonColorMode.Toggle = _isDarkMode;
+            ApplyTheme(_isDarkMode, true);
+        }
+
         /// <summary>
         /// 应用主题。
-        /// 这里只统一壳层卡片与背景，不强行接管 AntdUI 内部选中/悬停色。
+        /// 原则：
+        /// 1. 暗色模式优先沿用 AntdUI 默认主题；
+        /// 2. 主窗体只负责壳层卡片与自定义占位页同步；
+        /// 3. 不强行覆盖 AntdUI 菜单内部 hover/selected 状态色。
         /// </summary>
         private void ApplyTheme(bool isDarkMode, bool saveToConfig)
         {
             _isDarkMode = isDarkMode;
 
+            // AntdUI 全局主题开关
             if (isDarkMode)
             {
                 AntdUI.Config.IsDark = true;
@@ -578,9 +753,16 @@ namespace AMControlWinF
                 ForeColor = Color.Black;
             }
 
+            // 自定义背景纹理
             textureBackgroundMain.SetTheme(isDarkMode);
+
+            // 左下头像菜单控件
             userAvatarMenuControl.ApplyTheme(isDarkMode);
 
+            // 主壳层卡片同步
+            ApplyShellTheme();
+
+            // 缓存页最小同步
             foreach (var pair in _pageCache)
             {
                 if (pair.Value != null && !pair.Value.IsDisposed)
@@ -597,7 +779,41 @@ namespace AMControlWinF
         }
 
         /// <summary>
-        /// 对缓存页中自定义占位控件做最低限度的主题同步。
+        /// 统一同步主窗体壳层卡片颜色。
+        /// 只处理自定义壳层，不接管 AntdUI 控件内部状态色。
+        /// </summary>
+        private void ApplyShellTheme()
+        {
+            var cardBack = _isDarkMode
+                ? Color.FromArgb(39, 39, 39)
+                : Color.White;
+
+            var primaryText = _isDarkMode
+                ? Color.FromArgb(236, 236, 236)
+                : Color.FromArgb(24, 39, 58);
+
+            var secondaryText = _isDarkMode
+                ? Color.FromArgb(170, 170, 170)
+                : Color.FromArgb(120, 120, 120);
+
+            panelLeftCard.Back = cardBack;
+            panelSecondaryNavCard.Back = cardBack;
+            panelWorkCard.Back = cardBack;
+            panelStatusCard.Back = cardBack;
+
+            panelAvatarHost.Back = Color.Transparent;
+            panelWorkHeader.Back = Color.Transparent;
+            panelContent.Back = Color.Transparent;
+
+            labelPrimaryTitleValue.ForeColor = primaryText;
+            labelPageTitleValue.ForeColor = primaryText;
+            labelPageDescriptionValue.ForeColor = secondaryText;
+            labelStatusCaption.ForeColor = secondaryText;
+            labelStatusValue.ForeColor = primaryText;
+        }
+
+        /// <summary>
+        /// 对缓存页中的自定义占位控件做最低限度主题同步。
         /// </summary>
         private void ApplyThemeToControlTree(Control root)
         {
@@ -615,7 +831,9 @@ namespace AMControlWinF
             var antLabel = root as Label;
             if (antLabel != null)
             {
-                antLabel.ForeColor = _isDarkMode ? Color.Gainsboro : Color.DimGray;
+                antLabel.ForeColor = _isDarkMode
+                    ? Color.FromArgb(228, 228, 228)
+                    : Color.DimGray;
             }
 
             foreach (Control child in root.Controls)
@@ -624,23 +842,9 @@ namespace AMControlWinF
             }
         }
 
-        /// <summary>
-        /// 语言切换后重建缓存页，避免旧文本残留。
-        /// </summary>
-        private void RecreateAllCachedPages()
-        {
-            var keys = _pageCache.Keys.ToList();
-            foreach (var key in keys)
-            {
-                var control = _pageCache[key];
-                if (control != null && !control.IsDisposed)
-                {
-                    control.Dispose();
-                }
+        #endregion
 
-                _pageCache.Remove(key);
-            }
-        }
+        #region 辅助方法
 
         private string GetCurrentLanguage()
         {
@@ -688,110 +892,6 @@ namespace AMControlWinF
             return "用户";
         }
 
-        private string GetPrimaryText(NavPrimaryDef item)
-        {
-            if (item == null)
-            {
-                return string.Empty;
-            }
-
-            return IsEnglishLanguage(GetCurrentLanguage()) ? item.Key : item.DisplayName;
-        }
-
-        private string GetSecondaryText(NavPageDef item)
-        {
-            if (item == null)
-            {
-                return string.Empty;
-            }
-
-            if (!IsEnglishLanguage(GetCurrentLanguage()))
-            {
-                return item.DisplayName;
-            }
-
-            var pageKey = item.PageKey ?? string.Empty;
-            var index = pageKey.LastIndexOf('.');
-            return index >= 0 && index < pageKey.Length - 1
-                ? pageKey.Substring(index + 1)
-                : pageKey;
-        }
-
-        private string GetSecondaryDescription(NavPageDef item)
-        {
-            if (item == null)
-            {
-                return string.Empty;
-            }
-
-            return IsEnglishLanguage(GetCurrentLanguage()) ? item.PageKey : item.Description;
-        }
-
-        private static string ResolveSecondaryIcon(string pageKey)
-        {
-            switch (pageKey)
-            {
-                case "Home.Overview": return "HomeOutlined";
-                case "Home.SysStatus": return "MonitorOutlined";
-
-                case "Motion.DI": return "ApiOutlined";
-                case "Motion.DO": return "SendOutlined";
-                case "Motion.Monitor": return "DashboardOutlined";
-                case "Motion.Axis": return "ControlOutlined";
-                case "Motion.Actuator": return "ThunderboltOutlined";
-
-                case "MotionConfig.Card": return "CreditCardOutlined";
-                case "MotionConfig.Axis": return "PartitionOutlined";
-                case "MotionConfig.IoMap": return "DeploymentUnitOutlined";
-                case "MotionConfig.AxisParam": return "SlidersOutlined";
-                case "MotionConfig.Actuator": return "ToolOutlined";
-
-                case "AlarmLog.Current": return "AlertOutlined";
-                case "AlarmLog.History": return "ProfileOutlined";
-                case "AlarmLog.RunLog": return "FileTextOutlined";
-
-                case "System.User": return "UserOutlined";
-                case "System.Permission": return "SafetyCertificateOutlined";
-                case "System.LoginLog": return "AuditOutlined";
-
-                case "Production.Order": return "ProfileOutlined";
-                case "Production.Recipe": return "BookOutlined";
-                case "Production.Data": return "BarChartOutlined";
-                case "Production.Report": return "LineChartOutlined";
-                case "Production.Trace": return "SearchOutlined";
-                case "Production.MesStatus": return "CloudServerOutlined";
-                case "Production.UploadLog": return "UploadOutlined";
-
-                case "Vision.Monitor": return "EyeOutlined";
-                case "Vision.Result": return "CheckCircleOutlined";
-                case "Vision.Calibrate": return "AimOutlined";
-
-                case "PLC.Monitor": return "ApiOutlined";
-                case "PLC.Register": return "DatabaseOutlined";
-                case "PLC.Status": return "WifiOutlined";
-                case "PLC.Write": return "EditOutlined";
-
-                case "Peripheral.Scanner": return "QrcodeOutlined";
-                case "Peripheral.ScanTest": return "PlayCircleOutlined";
-                case "Peripheral.Sensor": return "RadarChartOutlined";
-                case "Peripheral.SensorTrend": return "AreaChartOutlined";
-
-                case "SysConfig.Camera": return "CameraOutlined";
-                case "SysConfig.Plc": return "ApiOutlined";
-                case "SysConfig.Sensor": return "RadarChartOutlined";
-                case "SysConfig.Scanner": return "QrcodeOutlined";
-                case "SysConfig.Mes": return "CloudOutlined";
-                case "SysConfig.Runtime": return "SettingOutlined";
-
-                case "Engineer.Diagnostic": return "ToolOutlined";
-                case "Engineer.RawAxis": return "ControlOutlined";
-                case "Engineer.RawPlc": return "ApiOutlined";
-                case "Engineer.RawCamera": return "CameraOutlined";
-
-                default: return "AppstoreOutlined";
-            }
-        }
-
         private static bool IsEnglishLanguage(string language)
         {
             return !string.IsNullOrWhiteSpace(language) &&
@@ -809,6 +909,10 @@ namespace AMControlWinF
                    string.Equals(theme, "Dark", StringComparison.OrdinalIgnoreCase);
         }
 
+        #endregion
+
+        #region 生命周期
+
         private void MainWindow_FormClosed(object sender, FormClosedEventArgs e)
         {
             foreach (var pair in _pageCache.ToList())
@@ -821,5 +925,7 @@ namespace AMControlWinF
 
             _pageCache.Clear();
         }
+
+        #endregion
     }
 }
