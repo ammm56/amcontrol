@@ -699,8 +699,8 @@ namespace AMControlWinF
             {
             }
 
-            titlebar.Text = "AMControl WinForms";
-            titlebar.SubText = IsEnglishLanguage(language) ? "Industrial Control" : "工业设备控制";
+            titlebar.Text = "AM运动控制";
+            titlebar.SubText = IsEnglishLanguage(language) ? "Version 0.0.1" : "版本 0.0.1";
             labelStatusCaption.Text = IsEnglishLanguage(language) ? "System Status:" : "系统状态：";
 
             BuildPrimaryMenu();

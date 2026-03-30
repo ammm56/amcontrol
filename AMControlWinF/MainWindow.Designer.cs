@@ -25,6 +25,7 @@
 
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
             this.titlebar = new AntdUI.PageHeader();
             this.dropdownTranslate = new AntdUI.Dropdown();
             this.buttonColorMode = new AntdUI.Button();
@@ -81,9 +82,9 @@
             this.titlebar.ShowButton = true;
             this.titlebar.ShowIcon = true;
             this.titlebar.Size = new System.Drawing.Size(1200, 48);
-            this.titlebar.SubText = "工业设备控制";
+            this.titlebar.SubText = "v0.0.1";
             this.titlebar.TabIndex = 0;
-            this.titlebar.Text = "AMControl WinForms";
+            this.titlebar.Text = "AM运动控制";
             // 
             // dropdownTranslate
             // 
@@ -388,10 +389,10 @@
             this.panelStatusHost.BackColor = System.Drawing.Color.Transparent;
             this.panelStatusHost.Controls.Add(this.panelStatusCard);
             this.panelStatusHost.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelStatusHost.Location = new System.Drawing.Point(12, 718);
-            this.panelStatusHost.Margin = new System.Windows.Forms.Padding(0, 12, 0, 0);
+            this.panelStatusHost.Location = new System.Drawing.Point(12, 710);
+            this.panelStatusHost.Margin = new System.Windows.Forms.Padding(0, 4, 0, 0);
             this.panelStatusHost.Name = "panelStatusHost";
-            this.panelStatusHost.Size = new System.Drawing.Size(1180, 28);
+            this.panelStatusHost.Size = new System.Drawing.Size(1180, 36);
             this.panelStatusHost.TabIndex = 1;
             // 
             // panelStatusCard
@@ -405,7 +406,7 @@
             this.panelStatusCard.Padding = new System.Windows.Forms.Padding(14, 0, 14, 0);
             this.panelStatusCard.Radius = 12;
             this.panelStatusCard.Shadow = 4;
-            this.panelStatusCard.Size = new System.Drawing.Size(1180, 28);
+            this.panelStatusCard.Size = new System.Drawing.Size(1180, 36);
             this.panelStatusCard.TabIndex = 0;
             // 
             // labelStatusValue
@@ -413,7 +414,7 @@
             this.labelStatusValue.Dock = System.Windows.Forms.DockStyle.Fill;
             this.labelStatusValue.Location = new System.Drawing.Point(107, 5);
             this.labelStatusValue.Name = "labelStatusValue";
-            this.labelStatusValue.Size = new System.Drawing.Size(1054, 18);
+            this.labelStatusValue.Size = new System.Drawing.Size(1054, 26);
             this.labelStatusValue.TabIndex = 1;
             this.labelStatusValue.Text = "系统就绪";
             // 
@@ -422,7 +423,7 @@
             this.labelStatusCaption.Dock = System.Windows.Forms.DockStyle.Left;
             this.labelStatusCaption.Location = new System.Drawing.Point(19, 5);
             this.labelStatusCaption.Name = "labelStatusCaption";
-            this.labelStatusCaption.Size = new System.Drawing.Size(88, 18);
+            this.labelStatusCaption.Size = new System.Drawing.Size(88, 26);
             this.labelStatusCaption.TabIndex = 0;
             this.labelStatusCaption.Text = "系统状态：";
             // 
@@ -433,6 +434,7 @@
             this.Controls.Add(this.textureBackgroundMain);
             this.Controls.Add(this.titlebar);
             this.Font = new System.Drawing.Font("Microsoft YaHei UI", 10F);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MinimumSize = new System.Drawing.Size(1200, 800);
             this.Name = "MainWindow";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -458,8 +460,6 @@
         }
 
         #endregion
-
-        private AntdUI.PageHeader titlebar;
         private AntdUI.Dropdown dropdownTranslate;
         private AntdUI.Button buttonColorMode;
         private AMControlWinF.Views.Main.TextureBackgroundControl textureBackgroundMain;
@@ -486,5 +486,6 @@
         private AntdUI.Panel panelStatusCard;
         private AntdUI.Label labelStatusCaption;
         private AntdUI.Label labelStatusValue;
+        private AntdUI.PageHeader titlebar;
     }
 }
