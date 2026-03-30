@@ -67,3 +67,7 @@
 
 ## 文档管理
 - 用户要求将解决方案级的详细规划文档统一放入 `Docs` 目录，并遵循 `Docs` 现有文件夹分层与 markdown 说明约定组织新文档。
+
+## 其他项目说明
+- 该项目为 .NET Framework 4.6.1 的 WinForms 工业设备控制软件；WinForms 使用 AntdUI，数据库使用 SqlSugar，同时支持 SQLite/Access/MySQL；配置分为 ConfigContext 的本地 config.json 与数据库；日志使用 NLog；核心领域包括运动控制卡、轴、IO、执行器、视觉与 PLC，并已完成用户权限与运动/IO/执行器数据结构及表定义。后续协作需先检查项目结构、层级、导航和设备软件架构，再在此基础上推进 WinForms 分支开发。
+- 用户确认 WinForms 公共页面中间层项目命名为 AM.PageModel，并要求按顺序推进：先修 Program.cs，再新建 AM.PageModel、抽取 NavigationCatalog、实现 LoginPageModel/LoginForm/MainWindowModel/MainWindow，随后迁移 DI/DO/Motion.Monitor。

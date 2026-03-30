@@ -58,6 +58,12 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Views\Auth\LoginForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\Auth\LoginForm.Designer.cs">
+      <DependentUpon>LoginForm.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </EmbeddedResource>
@@ -70,6 +76,9 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="Views\Auth\LoginForm.resx">
+      <DependentUpon>LoginForm.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -104,10 +113,15 @@
       <Project>{6ea470cf-d319-459d-b90a-8981c12d9f03}</Project>
       <Name>AM.MotionService</Name>
     </ProjectReference>
+    <ProjectReference Include="..\AM.PageModel\AM.PageModel.csproj">
+      <Project>{509b39c5-d68e-4f86-90bc-52a5a251f16e}</Project>
+      <Name>AM.PageModel</Name>
+    </ProjectReference>
     <ProjectReference Include="..\AM.Tools\AM.Tools.csproj">
       <Project>{c3fca058-3848-457d-82c6-bee3dba7ec76}</Project>
       <Name>AM.Tools</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.4.11620.152 stable
+VisualStudioVersion = 18.4.11620.152
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AMControlWinF", "AMControlWinF\AMControlWinF.csproj", "{29D06577-4910-4D70-843A-630FF701F930}"
 EndProject
@@ -16,6 +16,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AM.Core", "AM.Core\AM.Core.csproj", "{7B305EB1-7403-4C0C-82D4-C871B4C2D877}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AM.App", "AM.App\AM.App.csproj", "{58D771B4-94D2-4FBB-9960-962DD599BD05}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AM.PageModel", "AM.PageModel\AM.PageModel.csproj", "{509B39C5-D68E-4F86-90BC-52A5A251F16E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +53,10 @@ Global
 		{58D771B4-94D2-4FBB-9960-962DD599BD05}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{58D771B4-94D2-4FBB-9960-962DD599BD05}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{58D771B4-94D2-4FBB-9960-962DD599BD05}.Release|Any CPU.Build.0 = Release|Any CPU
+		{509B39C5-D68E-4F86-90BC-52A5A251F16E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{509B39C5-D68E-4F86-90BC-52A5A251F16E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{509B39C5-D68E-4F86-90BC-52A5A251F16E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{509B39C5-D68E-4F86-90BC-52A5A251F16E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
