@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AM.App.Bootstrap;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,7 +17,10 @@ namespace AMControlWinF
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+            Application.Run(new MainWindow());
+
+            AppBootstrap.Initialize();
+
         }
     }
 }

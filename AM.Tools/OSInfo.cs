@@ -27,10 +27,10 @@ namespace AM.Tools
                 {
                     Mem = proc.WorkingSet64,
                     CPU = proc.TotalProcessorTime,
-                    FrameworkDesc = RuntimeInformation.FrameworkDescription,
-                    OSDesc = RuntimeInformation.OSDescription,
+                    FrameworkDesc = "",
+                    OSDesc = "",
                     OSVersion = Environment.OSVersion.ToString(),
-                    OSArch = RuntimeInformation.OSArchitecture.ToString(),
+                    OSArch = "",
                     MachineName = Environment.MachineName,
                     UserDomainName = Environment.UserDomainName,
                     Drives = Environment.GetLogicalDrives().ToList(),

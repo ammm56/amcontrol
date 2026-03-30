@@ -54,6 +54,7 @@
     <Compile Include="Context\UserContext.cs" />
     <Compile Include="Logging\IAMLogger.cs" />
     <Compile Include="Messaging\IMessageBus.cs" />
+    <Compile Include="Messaging\MessageBus.cs" />
     <Compile Include="Messaging\SystemMessage.cs" />
     <Compile Include="Messaging\SystemMessageType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
