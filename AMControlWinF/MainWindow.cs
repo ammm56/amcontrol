@@ -18,11 +18,11 @@ namespace AMControlWinF
 {
     /// <summary>
     /// WinForms 主窗体。
-    /// 职责：
-    /// 1. 承载壳层布局（标题栏、导航卡片、内容区、状态栏）；
-    /// 2. 协调一级/二级导航与页面缓存；
-    /// 3. 协调主题、语言、用户菜单；
-    /// 4. 不承载具体业务页面逻辑。
+    /// 当前职责只负责：
+    /// 1. 导航菜单构建与切换；
+    /// 2. 页面缓存与工作区承载；
+    /// 3. 用户头像菜单协调；
+    /// 4. 主题与语言壳层同步。
     /// </summary>
     public partial class MainWindow : AntdUI.Window
     {
@@ -45,7 +45,7 @@ namespace AMControlWinF
         }
 
         /// <summary>
-        /// 统一绑定 UI 事件。
+        /// 统一绑定主窗体事件。
         /// </summary>
         private void BindEvents()
         {
@@ -64,7 +64,7 @@ namespace AMControlWinF
         }
 
         /// <summary>
-        /// 首次装载导航和默认页面。
+        /// 首次加载导航和默认页面。
         /// </summary>
         private void LoadModel()
         {
@@ -77,7 +77,7 @@ namespace AMControlWinF
         }
 
         /// <summary>
-        /// 从配置初始化语言、主题等壳层状态。
+        /// 从配置初始化主题与语言。
         /// </summary>
         private void InitializeShellState()
         {
@@ -104,7 +104,7 @@ namespace AMControlWinF
         }
 
         /// <summary>
-        /// Model 属性变化后的统一协调入口。
+        /// 响应 `MainWindowModel` 的状态变化。
         /// </summary>
         private void Model_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
@@ -138,7 +138,7 @@ namespace AMControlWinF
         }
 
         /// <summary>
-        /// 根据可见一级导航重建左侧主菜单。
+        /// 构建一级菜单。
         /// </summary>
         private void BuildPrimaryMenu()
         {
@@ -156,7 +156,8 @@ namespace AMControlWinF
         }
 
         /// <summary>
-        /// 根据当前选中的一级导航重建二级菜单。
+        /// 构建二级菜单。
+        /// 图标按页面类型映射，不再全部使用同一个图标。
         /// </summary>
         private void BuildSecondaryMenu()
         {
@@ -168,7 +169,7 @@ namespace AMControlWinF
                 {
                     Text = GetSecondaryText(item),
                     Tag = item.PageKey,
-                    IconSvg = "AppstoreOutlined"
+                    IconSvg = ResolveSecondaryIcon(item.PageKey)
                 });
             }
         }
@@ -231,7 +232,7 @@ namespace AMControlWinF
         }
 
         /// <summary>
-        /// 刷新页面头信息。
+        /// 刷新大卡片头部文本。
         /// </summary>
         private void RefreshHeader()
         {
@@ -264,7 +265,7 @@ namespace AMControlWinF
         }
 
         /// <summary>
-        /// 将当前用户信息同步到左下角头像菜单控件。
+        /// 将当前用户信息同步到左下角头像控件。
         /// </summary>
         private void RefreshUserMenuControl()
         {
@@ -277,8 +278,8 @@ namespace AMControlWinF
         }
 
         /// <summary>
-        /// 根据当前二级导航显示页面。
-        /// 页面采用缓存复用模式，避免反复销毁重建。
+        /// 导航到当前选中的页面。
+        /// 页面采用缓存模式，避免频繁创建销毁。
         /// </summary>
         private void NavigateToSelectedPage()
         {
@@ -356,7 +357,7 @@ namespace AMControlWinF
 
         /// <summary>
         /// 页面工厂。
-        /// 当前阶段先保留占位页，后续逐个替换为真实业务页面。
+        /// 当前先保留占位页。
         /// </summary>
         private Control CreatePage(string pageKey)
         {
@@ -521,8 +522,8 @@ namespace AMControlWinF
         }
 
         /// <summary>
-        /// 应用语言到壳层 UI。
-        /// 当前阶段导航英文先使用 Key / PageKey 简化映射。
+        /// 应用语言。
+        /// 当前阶段英文导航使用 Key / PageKey 的简化映射。
         /// </summary>
         private void ApplyLanguage(string language, bool saveToConfig)
         {
@@ -541,12 +542,6 @@ namespace AMControlWinF
 
             titlebar.Text = "AMControl WinForms";
             titlebar.SubText = IsEnglishLanguage(language) ? "Industrial Control" : "工业设备控制";
-
-            labelPrimaryNavTitle.Text = IsEnglishLanguage(language) ? "Primary Navigation" : "一级导航";
-            labelSecondaryNavTitle.Text = IsEnglishLanguage(language) ? "Secondary Navigation" : "二级导航";
-            labelPrimaryTitleTitle.Text = IsEnglishLanguage(language) ? "Module" : "当前模块";
-            labelPageTitleTitle.Text = IsEnglishLanguage(language) ? "Page" : "当前页面";
-            labelPageDescriptionTitle.Text = IsEnglishLanguage(language) ? "Description" : "页面说明";
             labelStatusCaption.Text = IsEnglishLanguage(language) ? "System Status:" : "系统状态：";
 
             BuildPrimaryMenu();
@@ -564,7 +559,8 @@ namespace AMControlWinF
         }
 
         /// <summary>
-        /// 应用主题到壳层与缓存页面。
+        /// 应用主题。
+        /// 这里只统一壳层卡片与背景，不强行接管 AntdUI 内部选中/悬停色。
         /// </summary>
         private void ApplyTheme(bool isDarkMode, bool saveToConfig)
         {
@@ -572,33 +568,24 @@ namespace AMControlWinF
 
             var windowBack = isDarkMode ? Color.FromArgb(24, 24, 24) : Color.FromArgb(245, 247, 250);
             var cardBack = isDarkMode ? Color.FromArgb(36, 36, 36) : Color.White;
-            var accentBack = isDarkMode ? Color.FromArgb(42, 42, 42) : Color.FromArgb(250, 250, 250);
             var primaryText = isDarkMode ? Color.Gainsboro : Color.FromArgb(24, 39, 58);
             var secondaryText = isDarkMode ? Color.Silver : Color.Gray;
 
             BackColor = windowBack;
-            layoutRoot.BackColor = windowBack;
-            panelStage.BackColor = windowBack;
-            layoutShell.BackColor = Color.Transparent;
-
             textureBackgroundMain.SetTheme(isDarkMode);
 
             panelLeftCard.Back = cardBack;
-            panelPrimaryNav.Back = cardBack;
-            panelAvatarHost.Back = cardBack;
             panelSecondaryNavCard.Back = cardBack;
-            panelHeaderCard.Back = cardBack;
-            panelContentCard.Back = cardBack;
-            panelContent.Back = cardBack;
-            panelStatusBar.Back = accentBack;
+            panelWorkCard.Back = cardBack;
+            panelStatusCard.Back = cardBack;
 
-            labelPrimaryNavTitle.ForeColor = primaryText;
-            labelSecondaryNavTitle.ForeColor = primaryText;
-            labelPrimaryTitleTitle.ForeColor = secondaryText;
+            //panelPrimaryNav.Back = Color.Transparent;
+            panelAvatarHost.Back = Color.Transparent;
+            panelWorkHeader.Back = Color.Transparent;
+            panelContent.Back = Color.Transparent;
+
             labelPrimaryTitleValue.ForeColor = primaryText;
-            labelPageTitleTitle.ForeColor = secondaryText;
             labelPageTitleValue.ForeColor = primaryText;
-            labelPageDescriptionTitle.ForeColor = secondaryText;
             labelPageDescriptionValue.ForeColor = secondaryText;
             labelStatusCaption.ForeColor = secondaryText;
             labelStatusValue.ForeColor = primaryText;
@@ -623,7 +610,7 @@ namespace AMControlWinF
         }
 
         /// <summary>
-        /// 对缓存页中的 AntdUI 容器/文本进行最低限度主题同步。
+        /// 对缓存页中自定义占位控件做最低限度的主题同步。
         /// </summary>
         private void ApplyThemeToControlTree(Control root)
         {
@@ -654,7 +641,7 @@ namespace AMControlWinF
         }
 
         /// <summary>
-        /// 语言切换后重建缓存页面，避免旧页面文本/颜色残留。
+        /// 语言切换后重建缓存页，避免旧文本残留。
         /// </summary>
         private void RecreateAllCachedPages()
         {
@@ -771,6 +758,71 @@ namespace AMControlWinF
                 case "Engineer": return "ToolOutlined";
                 case "AlarmLog": return "AlertOutlined";
                 case "System": return "UserOutlined";
+                default: return "AppstoreOutlined";
+            }
+        }
+
+        private static string ResolveSecondaryIcon(string pageKey)
+        {
+            switch (pageKey)
+            {
+                case "Home.Overview": return "HomeOutlined";
+                case "Home.SysStatus": return "MonitorOutlined";
+
+                case "Motion.DI": return "ApiOutlined";
+                case "Motion.DO": return "SendOutlined";
+                case "Motion.Monitor": return "DashboardOutlined";
+                case "Motion.Axis": return "ControlOutlined";
+                case "Motion.Actuator": return "ThunderboltOutlined";
+
+                case "MotionConfig.Card": return "CreditCardOutlined";
+                case "MotionConfig.Axis": return "PartitionOutlined";
+                case "MotionConfig.IoMap": return "DeploymentUnitOutlined";
+                case "MotionConfig.AxisParam": return "SlidersOutlined";
+                case "MotionConfig.Actuator": return "ToolOutlined";
+
+                case "AlarmLog.Current": return "AlertOutlined";
+                case "AlarmLog.History": return "ProfileOutlined";
+                case "AlarmLog.RunLog": return "FileTextOutlined";
+
+                case "System.User": return "UserOutlined";
+                case "System.Permission": return "SafetyCertificateOutlined";
+                case "System.LoginLog": return "AuditOutlined";
+
+                case "Production.Order": return "ProfileOutlined";
+                case "Production.Recipe": return "BookOutlined";
+                case "Production.Data": return "BarChartOutlined";
+                case "Production.Report": return "LineChartOutlined";
+                case "Production.Trace": return "SearchOutlined";
+                case "Production.MesStatus": return "CloudServerOutlined";
+                case "Production.UploadLog": return "UploadOutlined";
+
+                case "Vision.Monitor": return "EyeOutlined";
+                case "Vision.Result": return "CheckCircleOutlined";
+                case "Vision.Calibrate": return "AimOutlined";
+
+                case "PLC.Monitor": return "ApiOutlined";
+                case "PLC.Register": return "DatabaseOutlined";
+                case "PLC.Status": return "WifiOutlined";
+                case "PLC.Write": return "EditOutlined";
+
+                case "Peripheral.Scanner": return "QrcodeOutlined";
+                case "Peripheral.ScanTest": return "PlayCircleOutlined";
+                case "Peripheral.Sensor": return "RadarChartOutlined";
+                case "Peripheral.SensorTrend": return "AreaChartOutlined";
+
+                case "SysConfig.Camera": return "CameraOutlined";
+                case "SysConfig.Plc": return "ApiOutlined";
+                case "SysConfig.Sensor": return "RadarChartOutlined";
+                case "SysConfig.Scanner": return "QrcodeOutlined";
+                case "SysConfig.Mes": return "CloudOutlined";
+                case "SysConfig.Runtime": return "SettingOutlined";
+
+                case "Engineer.Diagnostic": return "ToolOutlined";
+                case "Engineer.RawAxis": return "ControlOutlined";
+                case "Engineer.RawPlc": return "ApiOutlined";
+                case "Engineer.RawCamera": return "CameraOutlined";
+
                 default: return "AppstoreOutlined";
             }
         }
