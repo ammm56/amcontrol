@@ -113,17 +113,25 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AM.DB\AM.DB.csproj">
+    <ProjectReference Include="..\AM.App\AM.App.csproj">
+      <Project>{58d771b4-94d2-4fbb-9960-962dd599bd05}</Project>
+      <Name>AM.App</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AM.Core\AM.Core.csproj">
+      <Project>{7b305eb1-7403-4c0c-82d4-c871b4c2d877}</Project>
+      <Name>AM.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AM.DBService\AM.DBService.csproj">
       <Project>{ebbe3fd7-29e4-4976-b182-2da541a363b5}</Project>
-      <Name>AM.DB</Name>
+      <Name>AM.DBService</Name>
     </ProjectReference>
     <ProjectReference Include="..\AM.Model\AM.Model.csproj">
       <Project>{22cf4793-f392-4421-98fd-0f2e07200689}</Project>
       <Name>AM.Model</Name>
     </ProjectReference>
-    <ProjectReference Include="..\AM.MotionCard\AM.MotionCard.csproj">
+    <ProjectReference Include="..\AM.MotionService\AM.MotionService.csproj">
       <Project>{6ea470cf-d319-459d-b90a-8981c12d9f03}</Project>
-      <Name>AM.MotionCard</Name>
+      <Name>AM.MotionService</Name>
     </ProjectReference>
     <ProjectReference Include="..\AM.Tools\AM.Tools.csproj">
       <Project>{c3fca058-3848-457d-82c6-bee3dba7ec76}</Project>

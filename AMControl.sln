@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 18
-VisualStudioVersion = 18.3.11520.95 d18.3
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.37027.11
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AMControl", "AMControl\AMControl.csproj", "{163C71DD-CEAF-4D0E-B3ED-B1A76FC72115}"
 EndProject
@@ -9,9 +9,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AM.Tools", "AM.Tools\AM.Too
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AM.Model", "AM.Model\AM.Model.csproj", "{22CF4793-F392-4421-98FD-0F2E07200689}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AM.DB", "AM.DB\AM.DB.csproj", "{EBBE3FD7-29E4-4976-B182-2DA541A363B5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AM.Core", "AM.Core\AM.Core.csproj", "{7B305EB1-7403-4C0C-82D4-C871B4C2D877}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AM.MotionCard", "AM.MotionCard\AM.MotionCard.csproj", "{6EA470CF-D319-459D-B90A-8981C12D9F03}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AM.DBService", "AM.DBService\AM.DBService.csproj", "{EBBE3FD7-29E4-4976-B182-2DA541A363B5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AM.MotionService", "AM.MotionService\AM.MotionService.csproj", "{6EA470CF-D319-459D-B90A-8981C12D9F03}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AM.App", "AM.App\AM.App.csproj", "{58D771B4-94D2-4FBB-9960-962DD599BD05}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,6 +35,10 @@ Global
 		{22CF4793-F392-4421-98FD-0F2E07200689}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{22CF4793-F392-4421-98FD-0F2E07200689}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{22CF4793-F392-4421-98FD-0F2E07200689}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7B305EB1-7403-4C0C-82D4-C871B4C2D877}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B305EB1-7403-4C0C-82D4-C871B4C2D877}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7B305EB1-7403-4C0C-82D4-C871B4C2D877}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7B305EB1-7403-4C0C-82D4-C871B4C2D877}.Release|Any CPU.Build.0 = Release|Any CPU
 		{EBBE3FD7-29E4-4976-B182-2DA541A363B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{EBBE3FD7-29E4-4976-B182-2DA541A363B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EBBE3FD7-29E4-4976-B182-2DA541A363B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -39,6 +47,10 @@ Global
 		{6EA470CF-D319-459D-B90A-8981C12D9F03}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6EA470CF-D319-459D-B90A-8981C12D9F03}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6EA470CF-D319-459D-B90A-8981C12D9F03}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58D771B4-94D2-4FBB-9960-962DD599BD05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58D771B4-94D2-4FBB-9960-962DD599BD05}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58D771B4-94D2-4FBB-9960-962DD599BD05}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58D771B4-94D2-4FBB-9960-962DD599BD05}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

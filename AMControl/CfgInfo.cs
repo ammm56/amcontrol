@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using AM.Core.Context;
 using AM.Tools;
 using Newtonsoft.Json;
 
@@ -21,7 +22,7 @@ namespace AMControl
 
         private void CfgInfo_Load(object sender, EventArgs e)
         {
-            string cfgstr = JsonConvert.SerializeObject(ConfigSingle.Instance.Config,Newtonsoft.Json.Formatting.Indented);
+            string cfgstr = JsonConvert.SerializeObject(ConfigContext.Instance.Config,Newtonsoft.Json.Formatting.Indented);
 
             lab_cfginfo.Text = cfgstr;
 
