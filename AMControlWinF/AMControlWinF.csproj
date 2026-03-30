@@ -64,6 +64,18 @@
     <Compile Include="Views\Auth\LoginForm.Designer.cs">
       <DependentUpon>LoginForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\Main\TextureBackgroundControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Views\Main\TextureBackgroundControl.Designer.cs">
+      <DependentUpon>TextureBackgroundControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Main\UserAvatarMenuControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Main\UserAvatarMenuControl.Designer.cs">
+      <DependentUpon>UserAvatarMenuControl.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </EmbeddedResource>
