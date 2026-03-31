@@ -532,7 +532,7 @@ namespace AMControlWinF
         {
             var panel = new Panel();
             panel.Dock = DockStyle.Fill;
-            panel.Back = _isDarkMode ? Color.FromArgb(32, 32, 32) : Color.White;
+            panel.Back = _isDarkMode ? Color.FromArgb(31, 31, 31) : Color.White;
             panel.Radius = 0;
 
             var label = new Label();
@@ -738,7 +738,7 @@ namespace AMControlWinF
         private void ApplyShellTheme()
         {
             var cardBack = _isDarkMode
-                ? Color.FromArgb(39, 39, 39)
+                ? Color.FromArgb(31, 31, 31)
                 : Color.White;
 
             var primaryText = _isDarkMode
@@ -799,7 +799,7 @@ namespace AMControlWinF
             var antPanel = root as Panel;
             if (antPanel != null)
             {
-                antPanel.Back = _isDarkMode ? Color.FromArgb(32, 32, 32) : Color.White;
+                antPanel.Back = _isDarkMode ? Color.FromArgb(31, 31, 31) : Color.White;
             }
 
             var antLabel = root as Label;
