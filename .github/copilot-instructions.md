@@ -51,6 +51,7 @@
 - 用户要求 `Motion.Monitor` 多轴总览页按 DI/DO 监视页思路实现：不是左侧列表选中再操作的三列布局，而是两列布局；左侧列表区与中间卡片区合并为一整列，在顶部选择控制卡后直接显示该卡下全部轴，右侧仅保留详情区。
 - 用户要求当前阶段先不要继续实现后续业务页面；`LoginForm` 与 `MainWindow` 需改为使用 AntdUI，并在视觉风格与布局上尽量接近现有 WPF 主界面。主界面布局优先使用 AntdUI 自带控件实现，样式和布局需尽量与 AntdUI Demo 保持统一。
 - WinForms 主界面重构时，页面显示内容必须保持完整不变；只允许将原有布局实现替换为 AntdUI 的 GridPanel 等控件，不能丢失三列布局和底部状态栏卡片。
+- 在 MainWindow 简化时，优先删除 ShellRefreshScope、Model_PropertyChanged 和 ConfigureShellLayout 这类额外抽象，直接保留最少的刷新与页面切换逻辑。
 
 ## PLC 接口设计
 - PLC 相关接口分层要重新整理，`DB` 目录只放数据库相关内容；PLC/Motion 领域接口应放到 `AM.Model.Interfaces.Plc` 下，而不是 `AM.Model.Interfaces.DB.Plc`，并要求代码与文档同步调整、目录和注释更清晰。

@@ -6,7 +6,6 @@ using AMControlWinF.Views.Auth;
 using AntdUI;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -18,28 +17,14 @@ namespace AMControlWinF
 {
     /// <summary>
     /// WinForms 主窗体壳层。
-    ///
-    /// 当前职责：
+    /// 仅负责：
     /// 1. 构建一级/二级导航；
     /// 2. 承载右侧工作区与页面缓存；
     /// 3. 协调用户头像菜单；
-    /// 4. 协调语言与主题切换；
-    /// 5. 不承载具体业务页面逻辑。
+    /// 4. 协调语言与主题切换。
     /// </summary>
     public partial class MainWindow : AntdUI.Window
     {
-        [Flags]
-        private enum ShellRefreshScope
-        {
-            None = 0,
-            PrimaryMenu = 1,
-            SecondaryMenu = 2,
-            Header = 4,
-            UserMenu = 8,
-            CurrentPage = 16,
-            All = PrimaryMenu | SecondaryMenu | Header | UserMenu | CurrentPage
-        }
-
         private readonly MainWindowModel _model;
         private readonly Dictionary<string, Control> _pageCache;
         private readonly Dictionary<string, Func<Control>> _pageFactories;
@@ -51,11 +36,12 @@ namespace AMControlWinF
         public MainWindow()
         {
             InitializeComponent();
-            ConfigureShellLayout();
 
-            SetStyle(ControlStyles.AllPaintingInWmPaint
-                     | ControlStyles.OptimizedDoubleBuffer
-                     | ControlStyles.ResizeRedraw, true);
+            SetStyle(
+                ControlStyles.AllPaintingInWmPaint |
+                ControlStyles.OptimizedDoubleBuffer |
+                ControlStyles.ResizeRedraw,
+                true);
             UpdateStyles();
 
             _model = new MainWindowModel();
@@ -75,8 +61,6 @@ namespace AMControlWinF
         /// </summary>
         private void BindEvents()
         {
-            _model.PropertyChanged += Model_PropertyChanged;
-
             menuPrimary.SelectChanged += MenuPrimary_SelectChanged;
             menuSecondary.SelectChanged += MenuSecondary_SelectChanged;
 
@@ -87,121 +71,6 @@ namespace AMControlWinF
             buttonColorMode.Click += ButtonColorMode_Click;
             dropdownTranslate.SelectedValueChanged += DropdownTranslate_SelectedValueChanged;
             FormClosed += MainWindow_FormClosed;
-        }
-
-        private void ConfigureShellLayout()
-        {
-            ConfigureLeftShell();
-            ConfigureSecondaryShell();
-            ConfigureWorkShell();
-            ConfigureStatusShell();
-        }
-
-        private void ConfigureLeftShell()
-        {
-            panelLeftCard.SuspendLayout();
-
-            try
-            {
-                panelLeftCard.Controls.Clear();
-
-                menuPrimary.Dock = DockStyle.Fill;
-                menuPrimary.Visible = true;
-
-                panelAvatarHost.Dock = DockStyle.Bottom;
-                panelAvatarHost.Height = 60;
-                panelAvatarHost.Visible = true;
-
-                userAvatarMenuControl.Dock = DockStyle.Fill;
-                userAvatarMenuControl.Visible = true;
-
-                panelLeftCard.Controls.Add(menuPrimary);
-                panelLeftCard.Controls.Add(panelAvatarHost);
-
-                menuPrimary.BringToFront();
-            }
-            finally
-            {
-                panelLeftCard.ResumeLayout(false);
-            }
-        }
-
-        private void ConfigureSecondaryShell()
-        {
-            panelSecondaryNavCard.SuspendLayout();
-
-            try
-            {
-                panelSecondaryNavCard.Controls.Clear();
-
-                panelSecondaryHeader.Dock = DockStyle.Top;
-                panelSecondaryHeader.Height = 56;
-                panelSecondaryHeader.Visible = true;
-
-                menuSecondary.Dock = DockStyle.Fill;
-                menuSecondary.Visible = true;
-
-                panelSecondaryNavCard.Controls.Add(menuSecondary);
-                panelSecondaryNavCard.Controls.Add(panelSecondaryHeader);
-
-                menuSecondary.BringToFront();
-            }
-            finally
-            {
-                panelSecondaryNavCard.ResumeLayout(false);
-            }
-        }
-
-        private void ConfigureWorkShell()
-        {
-            panelWorkCard.SuspendLayout();
-
-            try
-            {
-                panelWorkCard.Controls.Clear();
-
-                panelWorkHeader.Dock = DockStyle.Top;
-                panelWorkHeader.Height = 44;
-                panelWorkHeader.Visible = true;
-
-                panelContent.Dock = DockStyle.Fill;
-                panelContent.Visible = true;
-
-                panelWorkCard.Controls.Add(panelContent);
-                panelWorkCard.Controls.Add(panelWorkHeader);
-
-                panelContent.BringToFront();
-            }
-            finally
-            {
-                panelWorkCard.ResumeLayout(false);
-            }
-        }
-
-        private void ConfigureStatusShell()
-        {
-            panelStatusCard.SuspendLayout();
-
-            try
-            {
-                panelStatusCard.Controls.Clear();
-
-                labelStatusCaption.Dock = DockStyle.Left;
-                labelStatusCaption.Width = 88;
-                labelStatusCaption.Visible = true;
-
-                labelStatusValue.Dock = DockStyle.Fill;
-                labelStatusValue.Visible = true;
-
-                panelStatusCard.Controls.Add(labelStatusValue);
-                panelStatusCard.Controls.Add(labelStatusCaption);
-
-                labelStatusValue.BringToFront();
-            }
-            finally
-            {
-                panelStatusCard.ResumeLayout(false);
-            }
         }
 
         /// <summary>
@@ -237,46 +106,28 @@ namespace AMControlWinF
         private void LoadModel()
         {
             _model.LoadNavigation();
-            RefreshShell(ShellRefreshScope.All);
+            RefreshShell();
         }
 
         #endregion
 
-        #region Shell 刷新协调
+        #region 壳层刷新
 
         /// <summary>
-        /// 统一壳层刷新入口。
+        /// 直接刷新整个壳层。
+        /// 当前页面结构不复杂，优先保持实现简单清晰。
         /// </summary>
-        private void RefreshShell(ShellRefreshScope scope)
+        private void RefreshShell()
         {
             SuspendShellLayouts();
 
             try
             {
-                if ((scope & ShellRefreshScope.PrimaryMenu) == ShellRefreshScope.PrimaryMenu)
-                {
-                    BuildPrimaryMenu();
-                }
-
-                if ((scope & ShellRefreshScope.SecondaryMenu) == ShellRefreshScope.SecondaryMenu)
-                {
-                    BuildSecondaryMenu();
-                }
-
-                if ((scope & ShellRefreshScope.Header) == ShellRefreshScope.Header)
-                {
-                    RefreshHeader();
-                }
-
-                if ((scope & ShellRefreshScope.UserMenu) == ShellRefreshScope.UserMenu)
-                {
-                    RefreshUserMenuControl();
-                }
-
-                if ((scope & ShellRefreshScope.CurrentPage) == ShellRefreshScope.CurrentPage)
-                {
-                    NavigateToSelectedPage();
-                }
+                BuildPrimaryMenu();
+                BuildSecondaryMenu();
+                RefreshHeader();
+                RefreshUserMenuControl();
+                NavigateToSelectedPage();
             }
             finally
             {
@@ -286,46 +137,10 @@ namespace AMControlWinF
 
         #endregion
 
-        #region Model 协调
-
-        /// <summary>
-        /// 统一处理页面模型状态变化。
-        /// </summary>
-        private void Model_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(MainWindowModel.PrimaryItems))
-            {
-                RefreshShell(ShellRefreshScope.PrimaryMenu | ShellRefreshScope.Header);
-                return;
-            }
-
-            if (e.PropertyName == nameof(MainWindowModel.SecondaryItems))
-            {
-                RefreshShell(ShellRefreshScope.SecondaryMenu | ShellRefreshScope.Header);
-                return;
-            }
-
-            if (e.PropertyName == nameof(MainWindowModel.SelectedPrimary) ||
-                e.PropertyName == nameof(MainWindowModel.SelectedSecondary))
-            {
-                RefreshShell(ShellRefreshScope.Header | ShellRefreshScope.CurrentPage);
-                return;
-            }
-
-            if (e.PropertyName == nameof(MainWindowModel.CurrentUserDisplayName) ||
-                e.PropertyName == nameof(MainWindowModel.CurrentRoleDisplayName))
-            {
-                RefreshShell(ShellRefreshScope.UserMenu);
-            }
-        }
-
-        #endregion
-
         #region 导航
 
         /// <summary>
         /// 一级导航为窄栏文本导航。
-        /// 不显示图标，只显示短文本；较长文本主动换行。
         /// </summary>
         private void BuildPrimaryMenu()
         {
@@ -342,7 +157,7 @@ namespace AMControlWinF
         }
 
         /// <summary>
-        /// 二级导航保留图标，图标按实际页面类型映射。
+        /// 二级导航保留图标。
         /// </summary>
         private void BuildSecondaryMenu()
         {
@@ -384,7 +199,9 @@ namespace AMControlWinF
             _model.SelectedPrimary = selected;
             _model.LoadSecondaryItems(selected.Key);
 
-            RefreshShell(ShellRefreshScope.SecondaryMenu | ShellRefreshScope.Header | ShellRefreshScope.CurrentPage);
+            BuildSecondaryMenu();
+            RefreshHeader();
+            NavigateToSelectedPage();
         }
 
         private void MenuSecondary_SelectChanged(object sender, MenuSelectEventArgs e)
@@ -410,7 +227,8 @@ namespace AMControlWinF
             }
 
             _model.SelectedSecondary = selected;
-            RefreshShell(ShellRefreshScope.Header | ShellRefreshScope.CurrentPage);
+            RefreshHeader();
+            NavigateToSelectedPage();
         }
 
         /// <summary>
@@ -589,7 +407,6 @@ namespace AMControlWinF
 
         /// <summary>
         /// 导航到当前二级页面。
-        /// 页面使用缓存复用，避免频繁重建。
         /// </summary>
         private void NavigateToSelectedPage()
         {
@@ -611,6 +428,7 @@ namespace AMControlWinF
 
             var control = GetOrCreatePage(page.PageKey);
             ShowPage(control, false);
+
             labelStatusValue.Text = (IsEnglishLanguage(GetCurrentLanguage())
                 ? "Current Page: "
                 : "当前页面：") + page.PageKey;
@@ -726,7 +544,6 @@ namespace AMControlWinF
 
         /// <summary>
         /// 占位页只承担壳层联调作用。
-        /// 颜色跟随当前主题。
         /// </summary>
         private Control CreatePlaceholderPage(string text)
         {
@@ -851,7 +668,6 @@ namespace AMControlWinF
 
         /// <summary>
         /// 应用语言到壳层。
-        /// 当前阶段英文导航仍使用 Key / PageKey 简化映射。
         /// </summary>
         private void ApplyLanguage(string language, bool saveToConfig)
         {
@@ -875,7 +691,7 @@ namespace AMControlWinF
             labelStatusCaption.Text = IsEnglishLanguage(language) ? "System Status:" : "系统状态：";
 
             RecreateAllCachedPages();
-            RefreshShell(ShellRefreshScope.All);
+            RefreshShell();
 
             if (saveToConfig)
             {
@@ -894,10 +710,6 @@ namespace AMControlWinF
 
         /// <summary>
         /// 应用主题。
-        /// 原则：
-        /// 1. 暗色模式优先沿用 AntdUI 默认主题；
-        /// 2. 主窗体只负责壳层卡片与自定义占位页同步；
-        /// 3. 不强行覆盖 AntdUI 菜单内部 hover/selected 状态色。
         /// </summary>
         private void ApplyTheme(bool isDarkMode, bool saveToConfig)
         {
@@ -938,8 +750,7 @@ namespace AMControlWinF
         }
 
         /// <summary>
-        /// 统一同步主窗体壳层卡片颜色。
-        /// 只处理自定义壳层，不接管 AntdUI 控件内部状态色。
+        /// 同步壳层卡片颜色。
         /// </summary>
         private void ApplyShellTheme()
         {
