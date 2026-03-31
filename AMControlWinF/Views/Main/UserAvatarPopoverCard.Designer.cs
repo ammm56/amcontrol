@@ -72,6 +72,7 @@
             // 
             // buttonSwitchUser
             // 
+            this.buttonSwitchUser.Font = new System.Drawing.Font("宋体", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.buttonSwitchUser.Location = new System.Drawing.Point(16, 74);
             this.buttonSwitchUser.Margin = new System.Windows.Forms.Padding(0);
             this.buttonSwitchUser.Name = "buttonSwitchUser";
@@ -84,6 +85,7 @@
             // 
             // buttonChangePassword
             // 
+            this.buttonChangePassword.Font = new System.Drawing.Font("宋体", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.buttonChangePassword.Location = new System.Drawing.Point(134, 74);
             this.buttonChangePassword.Margin = new System.Windows.Forms.Padding(0);
             this.buttonChangePassword.Name = "buttonChangePassword";
@@ -96,7 +98,8 @@
             // 
             // buttonLogout
             // 
-            this.buttonLogout.Location = new System.Drawing.Point(16, 110);
+            this.buttonLogout.Font = new System.Drawing.Font("宋体", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.buttonLogout.Location = new System.Drawing.Point(16, 120);
             this.buttonLogout.Margin = new System.Windows.Forms.Padding(0);
             this.buttonLogout.Name = "buttonLogout";
             this.buttonLogout.Radius = 10;
@@ -118,7 +121,7 @@
             this.Controls.Add(this.avatarPopupUser);
             this.Margin = new System.Windows.Forms.Padding(0);
             this.Name = "UserAvatarPopoverCard";
-            this.Size = new System.Drawing.Size(250, 160);
+            this.Size = new System.Drawing.Size(260, 180);
             this.ResumeLayout(false);
 
         }

@@ -6,18 +6,13 @@ namespace AMControlWinF.Views.Main
 {
     /// <summary>
     /// 用户头像弹出操作卡片。
-    /// 使用最简单的 WinForms 布局，按钮使用 AntdUI。
+    /// 使用设计器中定义好的静态布局，不再做运行时尺寸和位置计算。
     /// </summary>
     public partial class UserAvatarPopoverCard : UserControl
     {
         private string _userDisplayName;
         private string _roleDisplayName;
         private string _language;
-
-        private int _topActionButtonHeight;
-        private int _bottomActionButtonHeight;
-        private int _sectionGapHeight;
-        private int _actionColumnGap;
 
         /// <summary>
         /// 防止同一个弹层在关闭过程中被重复点击。
@@ -32,23 +27,19 @@ namespace AMControlWinF.Views.Main
         {
             InitializeComponent();
 
-            SetStyle(ControlStyles.AllPaintingInWmPaint
-                     | ControlStyles.UserPaint
-                     | ControlStyles.OptimizedDoubleBuffer
-                     | ControlStyles.ResizeRedraw, true);
+            SetStyle(
+                ControlStyles.AllPaintingInWmPaint |
+                ControlStyles.UserPaint |
+                ControlStyles.OptimizedDoubleBuffer |
+                ControlStyles.ResizeRedraw,
+                true);
 
             _userDisplayName = "未登录";
             _roleDisplayName = "用户";
             _language = "zh-CN";
 
-            _topActionButtonHeight = 36;
-            _bottomActionButtonHeight = 36;
-            _sectionGapHeight = 18;
-            _actionColumnGap = 8;
-
             BindEvents();
             RefreshDisplay();
-            LayoutControlsCore();
         }
 
         public string UserDisplayName
@@ -56,7 +47,10 @@ namespace AMControlWinF.Views.Main
             get { return _userDisplayName; }
             set
             {
-                _userDisplayName = string.IsNullOrWhiteSpace(value) ? GetDefaultUserDisplayName() : value.Trim();
+                _userDisplayName = string.IsNullOrWhiteSpace(value)
+                    ? GetDefaultUserDisplayName()
+                    : value.Trim();
+
                 RefreshDisplay();
             }
         }
@@ -66,55 +60,24 @@ namespace AMControlWinF.Views.Main
             get { return _roleDisplayName; }
             set
             {
-                _roleDisplayName = string.IsNullOrWhiteSpace(value) ? GetDefaultRoleDisplayName() : value.Trim();
+                _roleDisplayName = string.IsNullOrWhiteSpace(value)
+                    ? GetDefaultRoleDisplayName()
+                    : value.Trim();
+
                 RefreshDisplay();
-            }
-        }
-
-        public int TopActionButtonHeight
-        {
-            get { return _topActionButtonHeight; }
-            set
-            {
-                _topActionButtonHeight = value < 28 ? 28 : value;
-                LayoutControlsCore();
-            }
-        }
-
-        public int BottomActionButtonHeight
-        {
-            get { return _bottomActionButtonHeight; }
-            set
-            {
-                _bottomActionButtonHeight = value < 28 ? 28 : value;
-                LayoutControlsCore();
-            }
-        }
-
-        public int SectionGapHeight
-        {
-            get { return _sectionGapHeight; }
-            set
-            {
-                _sectionGapHeight = value < 0 ? 0 : value;
-                LayoutControlsCore();
-            }
-        }
-
-        public int ActionColumnGap
-        {
-            get { return _actionColumnGap; }
-            set
-            {
-                _actionColumnGap = value < 0 ? 0 : value;
-                LayoutControlsCore();
             }
         }
 
         public void SetUserInfo(string userDisplayName, string roleDisplayName)
         {
-            _userDisplayName = string.IsNullOrWhiteSpace(userDisplayName) ? GetDefaultUserDisplayName() : userDisplayName.Trim();
-            _roleDisplayName = string.IsNullOrWhiteSpace(roleDisplayName) ? GetDefaultRoleDisplayName() : roleDisplayName.Trim();
+            _userDisplayName = string.IsNullOrWhiteSpace(userDisplayName)
+                ? GetDefaultUserDisplayName()
+                : userDisplayName.Trim();
+
+            _roleDisplayName = string.IsNullOrWhiteSpace(roleDisplayName)
+                ? GetDefaultRoleDisplayName()
+                : roleDisplayName.Trim();
+
             RefreshDisplay();
         }
 
@@ -134,104 +97,6 @@ namespace AMControlWinF.Views.Main
             buttonSwitchUser.Click += ButtonSwitchUser_Click;
             buttonChangePassword.Click += ButtonChangePassword_Click;
             buttonLogout.Click += ButtonLogout_Click;
-            Resize += UserAvatarPopoverCard_Resize;
-        }
-
-        private void UserAvatarPopoverCard_Resize(object sender, EventArgs e)
-        {
-            LayoutControlsCore();
-        }
-
-        private void LayoutControlsCore()
-        {
-            SuspendLayout();
-
-            try
-            {
-                const int paddingLeft = 16;
-                const int paddingTop = 14;
-                const int paddingRight = 16;
-                const int paddingBottom = 16;
-                const int avatarSize = 42;
-                const int avatarTextGap = 10;
-                const int userNameHeight = 22;
-                const int roleHeight = 18;
-
-                var contentWidth = Width - paddingLeft - paddingRight;
-                if (contentWidth < 180)
-                {
-                    contentWidth = 180;
-                }
-
-                var textX = paddingLeft + avatarSize + avatarTextGap;
-                var textWidth = contentWidth - avatarSize - avatarTextGap;
-                if (textWidth < 80)
-                {
-                    textWidth = 80;
-                }
-
-                avatarPopupUser.SetBounds(
-                    paddingLeft,
-                    paddingTop,
-                    avatarSize,
-                    avatarSize);
-
-                labelUserDisplayName.SetBounds(
-                    textX,
-                    paddingTop,
-                    textWidth,
-                    userNameHeight);
-
-                labelRoleDisplayName.SetBounds(
-                    textX,
-                    paddingTop + userNameHeight + 4,
-                    textWidth,
-                    roleHeight);
-
-                var buttonTopY = paddingTop + avatarSize + _sectionGapHeight;
-                var leftButtonWidth = (contentWidth - _actionColumnGap) / 2;
-                if (leftButtonWidth < 80)
-                {
-                    leftButtonWidth = 80;
-                }
-
-                var rightButtonX = paddingLeft + leftButtonWidth + _actionColumnGap;
-                var rightButtonWidth = contentWidth - leftButtonWidth - _actionColumnGap;
-                if (rightButtonWidth < 80)
-                {
-                    rightButtonWidth = 80;
-                }
-
-                buttonSwitchUser.SetBounds(
-                    paddingLeft,
-                    buttonTopY,
-                    leftButtonWidth,
-                    _topActionButtonHeight);
-
-                buttonChangePassword.SetBounds(
-                    rightButtonX,
-                    buttonTopY,
-                    rightButtonWidth,
-                    _topActionButtonHeight);
-
-                buttonLogout.SetBounds(
-                    paddingLeft,
-                    buttonTopY + _topActionButtonHeight + 8,
-                    leftButtonWidth,
-                    _bottomActionButtonHeight);
-
-                var totalHeight = buttonLogout.Bottom + paddingBottom;
-                if (Height != totalHeight)
-                {
-                    Height = totalHeight;
-                }
-
-                MinimumSize = new System.Drawing.Size(240, totalHeight);
-            }
-            finally
-            {
-                ResumeLayout();
-            }
         }
 
         private void ButtonSwitchUser_Click(object sender, EventArgs e)
@@ -251,7 +116,7 @@ namespace AMControlWinF.Views.Main
 
         /// <summary>
         /// 先关闭当前弹层，再在宿主窗体的下一轮消息中通知外层。
-        /// 避免在当前按钮点击/Popover 绘制链路中直接触发外层打开新对话框。
+        /// 避免在当前按钮点击链路中直接触发外层打开新对话框。
         /// </summary>
         private void ClosePopoverThenNotify(EventHandler handler)
         {
@@ -266,29 +131,26 @@ namespace AMControlWinF.Views.Main
             buttonChangePassword.Enabled = false;
             buttonLogout.Enabled = false;
 
-            var sender = this;
             var ownerForm = FindForm();
+
+            Visible = false;
+            Dispose();
+
+            if (handler == null)
+            {
+                return;
+            }
 
             if (ownerForm != null && !ownerForm.IsDisposed && ownerForm.IsHandleCreated)
             {
                 ownerForm.BeginInvoke(new Action(() =>
                 {
-                    if (handler != null)
-                    {
-                        handler(sender, EventArgs.Empty);
-                    }
+                    handler(this, EventArgs.Empty);
                 }));
-            }
-            else
-            {
-                if (handler != null)
-                {
-                    handler(sender, EventArgs.Empty);
-                }
+                return;
             }
 
-            Visible = false;
-            Dispose();
+            handler(this, EventArgs.Empty);
         }
 
         private void RefreshDisplay()
