@@ -33,8 +33,6 @@ namespace AMControlWinF
         private bool _isUpdatingUiState;
         private bool _isDarkMode;
 
-        internal bool ReopenRequested { get; private set; }
-
         public MainWindow()
         {
             InitializeComponent();
@@ -577,15 +575,7 @@ namespace AMControlWinF
 
         private void UserAvatarMenuControl_SwitchUserRequested(object sender, EventArgs e)
         {
-            using (var loginForm = new LoginForm())
-            {
-                var loginResult = loginForm.ShowDialog(this);
-                if (loginResult == DialogResult.OK && UserContext.Instance.IsLoggedIn)
-                {
-                    ReopenRequested = true;
-                    BeginInvoke(new Action(CloseCurrentWindow));
-                }
-            }
+            Program.SwitchUser();
         }
 
         private void UserAvatarMenuControl_ChangePasswordRequested(object sender, EventArgs e)
@@ -595,30 +585,7 @@ namespace AMControlWinF
 
         private void UserAvatarMenuControl_LogoutRequested(object sender, EventArgs e)
         {
-            UserContext.Instance.SignOut();
-
-            using (var loginForm = new LoginForm())
-            {
-                var loginResult = loginForm.ShowDialog(this);
-                if (loginResult == DialogResult.OK && UserContext.Instance.IsLoggedIn)
-                {
-                    ReopenRequested = true;
-                }
-                else
-                {
-                    ReopenRequested = false;
-                }
-            }
-
-            BeginInvoke(new Action(CloseCurrentWindow));
-        }
-
-        private void CloseCurrentWindow()
-        {
-            if (!IsDisposed)
-            {
-                Close();
-            }
+            Program.Logout();
         }
 
         private void ShowChangePasswordPlaceholder()
