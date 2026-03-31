@@ -29,6 +29,7 @@ namespace AMControlWinF.Views.Main
             _language = "zh-CN";
             _isDarkMode = false;
 
+            ConfigureAvatarLayout();
             BindEvents();
             RefreshAvatarText();
             ApplyLanguage(_language);
@@ -86,6 +87,27 @@ namespace AMControlWinF.Views.Main
         {
             avatarCurrentUser.Click += AvatarCurrentUser_Click;
             panelRoot.Click += AvatarCurrentUser_Click;
+            SizeChanged += UserAvatarMenuControl_SizeChanged;
+        }
+
+        private void ConfigureAvatarLayout()
+        {
+            panelRoot.Padding = new Padding(8);
+            avatarCurrentUser.Dock = DockStyle.Fill;
+            avatarCurrentUser.Margin = Padding.Empty;
+            avatarCurrentUser.ImageFit = TFit.Contain;
+            UpdateAvatarMetrics();
+        }
+
+        private void UserAvatarMenuControl_SizeChanged(object sender, EventArgs e)
+        {
+            UpdateAvatarMetrics();
+        }
+
+        private void UpdateAvatarMetrics()
+        {
+            var diameter = Math.Min(avatarCurrentUser.Width, avatarCurrentUser.Height);
+            avatarCurrentUser.Radius = diameter > 0 ? diameter / 2 : 0;
         }
 
         private void AvatarCurrentUser_Click(object sender, EventArgs e)
@@ -141,6 +163,12 @@ namespace AMControlWinF.Views.Main
 
         private void RefreshAvatarText()
         {
+            if (!string.IsNullOrWhiteSpace(avatarCurrentUser.ImageSvg))
+            {
+                avatarCurrentUser.Text = string.Empty;
+                return;
+            }
+
             var text = string.IsNullOrWhiteSpace(_userDisplayName) ? "A" : _userDisplayName;
             avatarCurrentUser.Text = text.Substring(0, 1).ToUpperInvariant();
         }

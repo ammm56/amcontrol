@@ -221,7 +221,7 @@
             this.userAvatarMenuControl.BackColor = System.Drawing.Color.Transparent;
             this.userAvatarMenuControl.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.userAvatarMenuControl.Location = new System.Drawing.Point(0, 0);
-            this.userAvatarMenuControl.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.userAvatarMenuControl.Margin = new System.Windows.Forms.Padding(0, 2, 0, 2);
             this.userAvatarMenuControl.Name = "userAvatarMenuControl";
             this.userAvatarMenuControl.RoleDisplayName = "用户";
             this.userAvatarMenuControl.Size = new System.Drawing.Size(60, 60);
