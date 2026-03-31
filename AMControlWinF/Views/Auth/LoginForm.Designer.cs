@@ -67,11 +67,13 @@
             // 
             // panelShell
             // 
+            this.panelShell.BackColor = System.Drawing.Color.Transparent;
             this.panelShell.Controls.Add(this.panelLogin);
             this.panelShell.Controls.Add(this.panelIntro);
             this.panelShell.Location = new System.Drawing.Point(24, 24);
             this.panelShell.Margin = new System.Windows.Forms.Padding(0);
             this.panelShell.Name = "panelShell";
+            this.panelShell.Padding = new System.Windows.Forms.Padding(12);
             this.panelShell.Radius = 16;
             this.panelShell.Shadow = 8;
             this.panelShell.Size = new System.Drawing.Size(832, 472);
@@ -91,17 +93,17 @@
             this.panelLogin.Controls.Add(this.labelLoginName);
             this.panelLogin.Controls.Add(this.labelLoginTitle);
             this.panelLogin.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelLogin.Location = new System.Drawing.Point(437, 0);
+            this.panelLogin.Location = new System.Drawing.Point(449, 24);
             this.panelLogin.Margin = new System.Windows.Forms.Padding(0);
             this.panelLogin.Name = "panelLogin";
-            this.panelLogin.Padding = new System.Windows.Forms.Padding(36, 28, 36, 28);
             this.panelLogin.Radius = 0;
-            this.panelLogin.Size = new System.Drawing.Size(395, 472);
+            this.panelLogin.Size = new System.Drawing.Size(359, 424);
             this.panelLogin.TabIndex = 1;
             // 
             // labelStatusValue
             // 
-            this.labelStatusValue.Location = new System.Drawing.Point(36, 304);
+            this.labelStatusValue.BackColor = System.Drawing.Color.Transparent;
+            this.labelStatusValue.Location = new System.Drawing.Point(36, 322);
             this.labelStatusValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelStatusValue.Name = "labelStatusValue";
             this.labelStatusValue.Size = new System.Drawing.Size(323, 24);
@@ -111,11 +113,11 @@
             // buttonLogin
             // 
             this.buttonLogin.IconSvg = "LoginOutlined";
-            this.buttonLogin.Location = new System.Drawing.Point(223, 252);
+            this.buttonLogin.Location = new System.Drawing.Point(223, 266);
             this.buttonLogin.Margin = new System.Windows.Forms.Padding(0);
             this.buttonLogin.Name = "buttonLogin";
             this.buttonLogin.Radius = 8;
-            this.buttonLogin.Size = new System.Drawing.Size(136, 38);
+            this.buttonLogin.Size = new System.Drawing.Size(136, 40);
             this.buttonLogin.TabIndex = 3;
             this.buttonLogin.Text = "登录";
             this.buttonLogin.Type = AntdUI.TTypeMini.Primary;
@@ -123,23 +125,24 @@
             // 
             // buttonCancel
             // 
-            this.buttonCancel.IconSvg = "CloseOutlined";
-            this.buttonCancel.Location = new System.Drawing.Point(36, 252);
+            this.buttonCancel.Location = new System.Drawing.Point(36, 266);
             this.buttonCancel.Margin = new System.Windows.Forms.Padding(0);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Radius = 8;
-            this.buttonCancel.Size = new System.Drawing.Size(136, 38);
+            this.buttonCancel.Size = new System.Drawing.Size(136, 40);
             this.buttonCancel.TabIndex = 2;
             this.buttonCancel.Text = "取消";
             this.buttonCancel.WaveSize = 0;
             // 
             // labelErrorValue
             // 
-            this.labelErrorValue.Location = new System.Drawing.Point(36, 206);
+            this.labelErrorValue.BackColor = System.Drawing.Color.Transparent;
+            this.labelErrorValue.Location = new System.Drawing.Point(36, 208);
             this.labelErrorValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelErrorValue.Name = "labelErrorValue";
-            this.labelErrorValue.Size = new System.Drawing.Size(323, 28);
+            this.labelErrorValue.Size = new System.Drawing.Size(323, 36);
             this.labelErrorValue.TabIndex = 9;
+            this.labelErrorValue.Text = "";
             // 
             // textBoxPassword
             // 
@@ -147,23 +150,25 @@
             this.textBoxPassword.Margin = new System.Windows.Forms.Padding(0);
             this.textBoxPassword.Name = "textBoxPassword";
             this.textBoxPassword.PasswordChar = '●';
-            this.textBoxPassword.Size = new System.Drawing.Size(275, 36);
+            this.textBoxPassword.Size = new System.Drawing.Size(275, 38);
             this.textBoxPassword.TabIndex = 1;
+            this.textBoxPassword.Text = "am123";
             // 
             // buttonPasswordIcon
             // 
+            this.buttonPasswordIcon.Ghost = true;
             this.buttonPasswordIcon.IconSvg = "LockOutlined";
             this.buttonPasswordIcon.Location = new System.Drawing.Point(36, 152);
             this.buttonPasswordIcon.Margin = new System.Windows.Forms.Padding(0);
             this.buttonPasswordIcon.Name = "buttonPasswordIcon";
             this.buttonPasswordIcon.Radius = 8;
-            this.buttonPasswordIcon.Size = new System.Drawing.Size(40, 36);
+            this.buttonPasswordIcon.Size = new System.Drawing.Size(40, 38);
             this.buttonPasswordIcon.TabIndex = 8;
-            this.buttonPasswordIcon.Text = "";
             this.buttonPasswordIcon.WaveSize = 0;
             // 
             // labelPassword
             // 
+            this.labelPassword.BackColor = System.Drawing.Color.Transparent;
             this.labelPassword.Location = new System.Drawing.Point(36, 122);
             this.labelPassword.Margin = new System.Windows.Forms.Padding(0);
             this.labelPassword.Name = "labelPassword";
@@ -176,23 +181,25 @@
             this.textBoxLoginName.Location = new System.Drawing.Point(84, 84);
             this.textBoxLoginName.Margin = new System.Windows.Forms.Padding(0);
             this.textBoxLoginName.Name = "textBoxLoginName";
-            this.textBoxLoginName.Size = new System.Drawing.Size(275, 36);
+            this.textBoxLoginName.Size = new System.Drawing.Size(275, 38);
             this.textBoxLoginName.TabIndex = 0;
+            this.textBoxLoginName.Text = "am";
             // 
             // buttonLoginNameIcon
             // 
+            this.buttonLoginNameIcon.Ghost = true;
             this.buttonLoginNameIcon.IconSvg = "UserOutlined";
             this.buttonLoginNameIcon.Location = new System.Drawing.Point(36, 84);
             this.buttonLoginNameIcon.Margin = new System.Windows.Forms.Padding(0);
             this.buttonLoginNameIcon.Name = "buttonLoginNameIcon";
             this.buttonLoginNameIcon.Radius = 8;
-            this.buttonLoginNameIcon.Size = new System.Drawing.Size(40, 36);
+            this.buttonLoginNameIcon.Size = new System.Drawing.Size(40, 38);
             this.buttonLoginNameIcon.TabIndex = 5;
-            this.buttonLoginNameIcon.Text = "";
             this.buttonLoginNameIcon.WaveSize = 0;
             // 
             // labelLoginName
             // 
+            this.labelLoginName.BackColor = System.Drawing.Color.Transparent;
             this.labelLoginName.Location = new System.Drawing.Point(36, 54);
             this.labelLoginName.Margin = new System.Windows.Forms.Padding(0);
             this.labelLoginName.Name = "labelLoginName";
@@ -202,8 +209,9 @@
             // 
             // labelLoginTitle
             // 
+            this.labelLoginTitle.BackColor = System.Drawing.Color.Transparent;
             this.labelLoginTitle.Font = new System.Drawing.Font("Microsoft YaHei UI", 18F, System.Drawing.FontStyle.Bold);
-            this.labelLoginTitle.Location = new System.Drawing.Point(36, 0);
+            this.labelLoginTitle.Location = new System.Drawing.Point(36, 24);
             this.labelLoginTitle.Margin = new System.Windows.Forms.Padding(0);
             this.labelLoginTitle.Name = "labelLoginTitle";
             this.labelLoginTitle.Size = new System.Drawing.Size(120, 36);
@@ -217,18 +225,17 @@
             this.panelIntro.Controls.Add(this.labelIntroSubtitle);
             this.panelIntro.Controls.Add(this.labelIntroTitle);
             this.panelIntro.Dock = System.Windows.Forms.DockStyle.Left;
-            this.panelIntro.Location = new System.Drawing.Point(0, 0);
+            this.panelIntro.Location = new System.Drawing.Point(24, 24);
             this.panelIntro.Margin = new System.Windows.Forms.Padding(0);
             this.panelIntro.Name = "panelIntro";
-            this.panelIntro.Padding = new System.Windows.Forms.Padding(28);
             this.panelIntro.Radius = 0;
-            this.panelIntro.Size = new System.Drawing.Size(437, 472);
+            this.panelIntro.Size = new System.Drawing.Size(425, 424);
             this.panelIntro.TabIndex = 0;
             // 
             // labelIntroBottom
             // 
-            this.labelIntroBottom.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Bottom)));
-            this.labelIntroBottom.Location = new System.Drawing.Point(28, 416);
+            this.labelIntroBottom.BackColor = System.Drawing.Color.Transparent;
+            this.labelIntroBottom.Location = new System.Drawing.Point(28, 394);
             this.labelIntroBottom.Margin = new System.Windows.Forms.Padding(0);
             this.labelIntroBottom.Name = "labelIntroBottom";
             this.labelIntroBottom.Size = new System.Drawing.Size(220, 22);
@@ -241,17 +248,18 @@
             this.panelIntroCard.Controls.Add(this.labelIntroEngineer);
             this.panelIntroCard.Controls.Add(this.labelIntroOperator);
             this.panelIntroCard.Controls.Add(this.labelIntroCardTitle);
-            this.panelIntroCard.Location = new System.Drawing.Point(28, 122);
+            this.panelIntroCard.Location = new System.Drawing.Point(28, 154);
             this.panelIntroCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelIntroCard.Name = "panelIntroCard";
             this.panelIntroCard.Padding = new System.Windows.Forms.Padding(16);
-            this.panelIntroCard.Radius = 10;
-            this.panelIntroCard.Size = new System.Drawing.Size(348, 160);
+            this.panelIntroCard.Radius = 12;
+            this.panelIntroCard.Size = new System.Drawing.Size(348, 168);
             this.panelIntroCard.TabIndex = 2;
             // 
             // labelIntroAdmin
             // 
-            this.labelIntroAdmin.Location = new System.Drawing.Point(16, 114);
+            this.labelIntroAdmin.BackColor = System.Drawing.Color.Transparent;
+            this.labelIntroAdmin.Location = new System.Drawing.Point(16, 116);
             this.labelIntroAdmin.Margin = new System.Windows.Forms.Padding(0);
             this.labelIntroAdmin.Name = "labelIntroAdmin";
             this.labelIntroAdmin.Size = new System.Drawing.Size(300, 22);
@@ -260,7 +268,8 @@
             // 
             // labelIntroEngineer
             // 
-            this.labelIntroEngineer.Location = new System.Drawing.Point(16, 86);
+            this.labelIntroEngineer.BackColor = System.Drawing.Color.Transparent;
+            this.labelIntroEngineer.Location = new System.Drawing.Point(16, 88);
             this.labelIntroEngineer.Margin = new System.Windows.Forms.Padding(0);
             this.labelIntroEngineer.Name = "labelIntroEngineer";
             this.labelIntroEngineer.Size = new System.Drawing.Size(300, 22);
@@ -269,7 +278,8 @@
             // 
             // labelIntroOperator
             // 
-            this.labelIntroOperator.Location = new System.Drawing.Point(16, 58);
+            this.labelIntroOperator.BackColor = System.Drawing.Color.Transparent;
+            this.labelIntroOperator.Location = new System.Drawing.Point(16, 60);
             this.labelIntroOperator.Margin = new System.Windows.Forms.Padding(0);
             this.labelIntroOperator.Name = "labelIntroOperator";
             this.labelIntroOperator.Size = new System.Drawing.Size(300, 22);
@@ -278,6 +288,7 @@
             // 
             // labelIntroCardTitle
             // 
+            this.labelIntroCardTitle.BackColor = System.Drawing.Color.Transparent;
             this.labelIntroCardTitle.Font = new System.Drawing.Font("Microsoft YaHei UI", 10F, System.Drawing.FontStyle.Bold);
             this.labelIntroCardTitle.Location = new System.Drawing.Point(16, 16);
             this.labelIntroCardTitle.Margin = new System.Windows.Forms.Padding(0);
@@ -288,17 +299,19 @@
             // 
             // labelIntroSubtitle
             // 
-            this.labelIntroSubtitle.Location = new System.Drawing.Point(28, 72);
+            this.labelIntroSubtitle.BackColor = System.Drawing.Color.Transparent;
+            this.labelIntroSubtitle.Location = new System.Drawing.Point(28, 92);
             this.labelIntroSubtitle.Margin = new System.Windows.Forms.Padding(0);
             this.labelIntroSubtitle.Name = "labelIntroSubtitle";
-            this.labelIntroSubtitle.Size = new System.Drawing.Size(260, 24);
+            this.labelIntroSubtitle.Size = new System.Drawing.Size(300, 24);
             this.labelIntroSubtitle.TabIndex = 1;
             this.labelIntroSubtitle.Text = "设备控制 · 用户登录 · 权限访问";
             // 
             // labelIntroTitle
             // 
+            this.labelIntroTitle.BackColor = System.Drawing.Color.Transparent;
             this.labelIntroTitle.Font = new System.Drawing.Font("Microsoft YaHei UI", 24F, System.Drawing.FontStyle.Bold);
-            this.labelIntroTitle.Location = new System.Drawing.Point(28, 28);
+            this.labelIntroTitle.Location = new System.Drawing.Point(28, 48);
             this.labelIntroTitle.Margin = new System.Windows.Forms.Padding(0);
             this.labelIntroTitle.Name = "labelIntroTitle";
             this.labelIntroTitle.Size = new System.Drawing.Size(260, 40);

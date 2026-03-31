@@ -1,7 +1,6 @@
 ﻿using AM.Core.Context;
 using AM.PageModel.Auth;
 using System;
-using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -9,14 +8,13 @@ namespace AMControlWinF.Views.Auth
 {
     /// <summary>
     /// WinForms 登录窗体。
-    /// 结构参考 WPF 版登录页，但视觉优先对齐当前 AMControlWinF。
-    /// 背景纹理复用 MainWindow 同款 TextureBackgroundControl。
+    /// 布局、静态文案、默认初始显示均在 Designer 中定义，
+    /// 运行时仅保留最小绑定、交互与主题同步逻辑。
     /// </summary>
     public partial class LoginForm : AntdUI.Window
     {
         private readonly LoginPageModel _model;
         private readonly BindingSource _bindingSource;
-        private bool _isDarkMode;
 
         public LoginForm()
         {
@@ -27,12 +25,12 @@ namespace AMControlWinF.Views.Auth
 
             InitializeBindings();
             InitializeDefaultCredentials();
-            BindEvents();
             ApplyThemeFromConfig();
+            BindEvents();
         }
 
         /// <summary>
-        /// 绑定视图与页面模型。
+        /// 仅绑定动态内容。
         /// </summary>
         private void InitializeBindings()
         {
@@ -44,13 +42,38 @@ namespace AMControlWinF.Views.Auth
         }
 
         /// <summary>
-        /// 默认管理员账户与 WPF 版保持一致。
+        /// 默认管理员账户与系统约定一致。
+        /// 保持与 Designer 中的初始显示一致，避免设计期与运行期割裂。
         /// </summary>
         private void InitializeDefaultCredentials()
         {
             _model.LoginName = "am";
             _model.Password = "am123";
+            textBoxLoginName.Text = _model.LoginName;
             textBoxPassword.Text = _model.Password;
+        }
+
+        /// <summary>
+        /// 登录窗体只做最小主题同步：
+        /// 1. 同步 AntdUI 默认亮/暗主题；
+        /// 2. 同步纹理背景主题。
+        /// 不在这里逐个控件手动改色。
+        /// </summary>
+        private void ApplyThemeFromConfig()
+        {
+            var theme = ConfigContext.Instance.Config.Setting.Theme;
+            var isDarkMode = IsDarkTheme(theme);
+
+            if (isDarkMode)
+            {
+                AntdUI.Config.IsDark = true;
+            }
+            else
+            {
+                AntdUI.Config.IsLight = true;
+            }
+
+            textureBackgroundLogin.SetTheme(isDarkMode);
         }
 
         /// <summary>
@@ -60,95 +83,13 @@ namespace AMControlWinF.Views.Auth
         {
             buttonLogin.Click += async (sender, e) => await LoginAsync();
             buttonCancel.Click += ButtonCancel_Click;
-
             textBoxPassword.TextChanged += TextBoxPassword_TextChanged;
 
             Shown += LoginForm_Shown;
             FormClosing += LoginForm_FormClosing;
+
             KeyPreview = true;
             KeyDown += LoginForm_KeyDown;
-        }
-
-        /// <summary>
-        /// 从全局配置读取主题，保持与主窗体一致。
-        /// </summary>
-        private void ApplyThemeFromConfig()
-        {
-            var theme = ConfigContext.Instance.Config.Setting.Theme;
-            _isDarkMode = IsDarkTheme(theme);
-            ApplyTheme(_isDarkMode);
-        }
-
-        /// <summary>
-        /// 应用登录窗体主题。
-        /// 背景纹理与卡片层次对齐当前 WinForms 主界面。
-        /// </summary>
-        private void ApplyTheme(bool isDarkMode)
-        {
-            _isDarkMode = isDarkMode;
-            textureBackgroundLogin.SetTheme(isDarkMode);
-
-            BackColor = isDarkMode
-                ? Color.FromArgb(31, 31, 31)
-                : Color.FromArgb(245, 247, 250);
-
-            panelShell.Back = isDarkMode
-                ? Color.FromArgb(39, 39, 39)
-                : Color.White;
-
-            panelIntro.Back = isDarkMode
-                ? Color.FromArgb(46, 46, 46)
-                : Color.FromArgb(250, 251, 253);
-
-            panelIntroCard.Back = isDarkMode
-                ? Color.FromArgb(56, 56, 56)
-                : Color.White;
-
-            panelLogin.Back = isDarkMode
-                ? Color.FromArgb(39, 39, 39)
-                : Color.White;
-
-            var primaryText = isDarkMode
-                ? Color.FromArgb(236, 236, 236)
-                : Color.FromArgb(24, 39, 58);
-
-            var secondaryText = isDarkMode
-                ? Color.FromArgb(188, 188, 188)
-                : Color.FromArgb(98, 108, 122);
-
-            labelIntroTitle.ForeColor = isDarkMode
-                ? Color.FromArgb(110, 180, 255)
-                : Color.FromArgb(22, 119, 255);
-
-            labelLoginTitle.ForeColor = primaryText;
-            labelIntroSubtitle.ForeColor = secondaryText;
-            labelIntroBottom.ForeColor = secondaryText;
-            labelIntroCardTitle.ForeColor = primaryText;
-            labelIntroOperator.ForeColor = primaryText;
-            labelIntroEngineer.ForeColor = primaryText;
-            labelIntroAdmin.ForeColor = primaryText;
-            labelLoginName.ForeColor = primaryText;
-            labelPassword.ForeColor = primaryText;
-            labelStatusValue.ForeColor = secondaryText;
-            labelErrorValue.ForeColor = isDarkMode
-                ? Color.FromArgb(255, 138, 138)
-                : Color.Firebrick;
-
-            buttonLoginNameIcon.BackColor = isDarkMode
-                ? Color.FromArgb(56, 56, 56)
-                : Color.White;
-
-            buttonPasswordIcon.BackColor = isDarkMode
-                ? Color.FromArgb(56, 56, 56)
-                : Color.White;
-
-            textBoxLoginName.BackColor = isDarkMode
-                ? Color.FromArgb(56, 56, 56)
-                : Color.White;
-
-            textBoxPassword.BackColor = isDarkMode
-                ? Color.FromArgb(56, 56, 56)
-                : Color.White;
         }
 
         private void ButtonCancel_Click(object sender, EventArgs e)
@@ -180,7 +121,6 @@ namespace AMControlWinF.Views.Auth
         }
 
         /// <summary>
-        /// 与 WPF 版一致：
         /// Esc 取消，Enter 登录。
         /// </summary>
         private async void LoginForm_KeyDown(object sender, KeyEventArgs e)
@@ -201,6 +141,7 @@ namespace AMControlWinF.Views.Auth
 
         /// <summary>
         /// 执行登录。
+        /// 登录时仅更新模型状态与按钮可用性，不做额外重绘逻辑。
         /// </summary>
         private async Task LoginAsync()
         {

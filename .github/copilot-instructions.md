@@ -49,8 +49,8 @@
 - 用户要求对页面在主窗口缓存复用场景下的生命周期实现方式形成统一规则并长期遵循：被 MainWindow 页面缓存复用的页面，不应在 Unloaded 中释放会断开实时订阅的 ViewModel/运行态绑定；此类页面的首次加载应用 布尔标记控制，而不是 Loaded 后解绑事件；实现代码中需补充明确注释说明原因，避免后续页面重复出现相同问题。
 - 用户要求 `Motion.Monitor` 页面在卡片区直接沿用 DI/DO 页的实现方式与稳定布局，不额外改成其他滚动/布局方案；同时要求将多轴卡片中的冗余信息替换为更有价值的运行信息。
 - 用户要求 `Motion.Monitor` 多轴总览页按 DI/DO 监视页思路实现：不是左侧列表选中再操作的三列布局，而是两列布局；左侧列表区与中间卡片区合并为一整列，在顶部选择控制卡后直接显示该卡下全部轴，右侧仅保留详情区。
-- 用户要求当前阶段先不要继续实现后续业务页面；`LoginForm` 与 `MainWindow` 需改为使用 AntdUI，并在视觉风格与布局上尽量接近现有 WPF 主界面。主界面布局优先使用 AntdUI 自带控件实现，样式和布局需尽量与 AntdUI Demo 保持统一。
-- WinForms 主界面重构时，页面显示内容必须保持完整不变；只允许将原有布局实现替换为 AntdUI 的 GridPanel 等控件，不能丢失三列布局和底部状态栏卡片。
+- 用户要求当前阶段先不要继续实现后续业务页面；`LoginForm` 需在参考 WPF 登录页结构的基础上，更贴合当前 AMControlWinF 的样式与颜色；背景使用与 MainWindow 相同的 TextureBackgroundControl，并支持根据配置主题切换。
+- WinForms 主界面重构时，页面显示内容必须保持完整不变；只允许将原有布局实现替换为 AntdUI 的 GridPanel 等控件，不能丢失三列布局和底部状态栏卡片。 
 - 在 MainWindow 简化时，优先删除 ShellRefreshScope、Model_PropertyChanged 和 ConfigureShellLayout 这类额外抽象，直接保留最少的刷新与页面切换逻辑。
 
 ## PLC 接口设计
@@ -74,3 +74,4 @@
 ## 其他项目说明
 - 该项目为 .NET Framework 4.6.1 的 WinForms 工业设备控制软件；WinForms 使用 AntdUI，数据库使用 SqlSugar，同时支持 SQLite/Access/MySQL；配置分为 ConfigContext 的本地 config.json 与数据库；日志使用 NLog；核心领域包括运动控制卡、轴、IO、执行器、视觉与 PLC，并已完成用户权限与运动/IO/执行器数据结构及表定义。后续协作需先检查项目结构、层级、导航和设备软件架构，再在此基础上推进 WinForms 分支开发。
 - 用户确认 WinForms 公共页面中间层项目命名为 AM.PageModel，并要求按顺序推进：先修 Program.cs，再新建 AM.PageModel、抽取 NavigationCatalog、实现 LoginPageModel/LoginForm/MainWindowModel/MainWindow，随后迁移 DI/DO/Motion.Monitor。
+- `LoginForm` 需在参考 WPF 登录页结构的基础上，更贴合当前 AMControlWinF 的样式与颜色；背景使用与 MainWindow 相同的 TextureBackgroundControl，并支持根据配置主题切换。
