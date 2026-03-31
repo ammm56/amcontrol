@@ -249,18 +249,9 @@ namespace AMControlWinF
 
             if (_model.SelectedSecondary == null)
             {
-                labelPageTitleValue.Text = IsEnglishLanguage(GetCurrentLanguage())
-                    ? "No page available"
-                    : "无可用页面";
-
-                labelPageDescriptionValue.Text = IsEnglishLanguage(GetCurrentLanguage())
-                    ? "The current user has no accessible pages."
-                    : "当前用户没有可访问页面";
             }
             else
             {
-                labelPageTitleValue.Text = GetSecondaryText(_model.SelectedSecondary);
-                labelPageDescriptionValue.Text = GetSecondaryDescription(_model.SelectedSecondary);
             }
         }
 
@@ -419,19 +410,11 @@ namespace AMControlWinF
                             ? "No accessible page"
                             : "当前用户没有可访问页面"),
                     true);
-
-                labelStatusValue.Text = IsEnglishLanguage(GetCurrentLanguage())
-                    ? "No page available"
-                    : "无可用页面";
                 return;
             }
 
             var control = GetOrCreatePage(page.PageKey);
             ShowPage(control, false);
-
-            labelStatusValue.Text = (IsEnglishLanguage(GetCurrentLanguage())
-                ? "Current Page: "
-                : "当前页面：") + page.PageKey;
         }
 
         private Control GetOrCreatePage(string pageKey)
@@ -688,7 +671,7 @@ namespace AMControlWinF
 
             titlebar.Text = IsEnglishLanguage(language) ? "AM Motion Control" : "AM运动控制";
             titlebar.SubText = IsEnglishLanguage(language) ? "Version 0.0.1" : "版本 0.0.1";
-            labelStatusCaption.Text = IsEnglishLanguage(language) ? "System Status:" : "系统状态：";
+            labelStatusCaption.Text = IsEnglishLanguage(language) ? "System Ready" : "系统就绪";
 
             RecreateAllCachedPages();
             RefreshShell();
@@ -776,10 +759,7 @@ namespace AMControlWinF
             panelContent.Back = Color.Transparent;
 
             labelPrimaryTitleValue.ForeColor = primaryText;
-            labelPageTitleValue.ForeColor = primaryText;
-            labelPageDescriptionValue.ForeColor = secondaryText;
             labelStatusCaption.ForeColor = secondaryText;
-            labelStatusValue.ForeColor = primaryText;
         }
 
         private void SuspendShellLayouts()
