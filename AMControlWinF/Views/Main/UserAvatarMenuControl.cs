@@ -24,6 +24,11 @@ namespace AMControlWinF.Views.Main
         {
             InitializeComponent();
 
+            SetStyle(ControlStyles.AllPaintingInWmPaint
+                     | ControlStyles.UserPaint
+                     | ControlStyles.OptimizedDoubleBuffer
+                     | ControlStyles.ResizeRedraw, true);
+
             _userDisplayName = "未登录";
             _roleDisplayName = "用户";
             _language = "zh-CN";
@@ -88,11 +93,12 @@ namespace AMControlWinF.Views.Main
             avatarCurrentUser.Click += AvatarCurrentUser_Click;
             panelRoot.Click += AvatarCurrentUser_Click;
             SizeChanged += UserAvatarMenuControl_SizeChanged;
+            panelRoot.SizeChanged += UserAvatarMenuControl_SizeChanged;
         }
 
         private void ConfigureAvatarLayout()
         {
-            panelRoot.Padding = new Padding(8);
+            panelRoot.Padding = new Padding(4);
             avatarCurrentUser.Dock = DockStyle.Fill;
             avatarCurrentUser.Margin = Padding.Empty;
             avatarCurrentUser.ImageFit = TFit.Contain;
@@ -107,6 +113,9 @@ namespace AMControlWinF.Views.Main
         private void UpdateAvatarMetrics()
         {
             var diameter = Math.Min(avatarCurrentUser.Width, avatarCurrentUser.Height);
+            var innerPadding = diameter >= 56 ? 6 : Math.Max(3, diameter / 8);
+
+            avatarCurrentUser.Padding = new Padding(innerPadding);
             avatarCurrentUser.Radius = diameter > 0 ? diameter / 2 : 0;
         }
 

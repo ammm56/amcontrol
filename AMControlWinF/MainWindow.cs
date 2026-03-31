@@ -51,6 +51,12 @@ namespace AMControlWinF
         public MainWindow()
         {
             InitializeComponent();
+            ConfigureShellLayout();
+
+            SetStyle(ControlStyles.AllPaintingInWmPaint
+                     | ControlStyles.OptimizedDoubleBuffer
+                     | ControlStyles.ResizeRedraw, true);
+            UpdateStyles();
 
             _model = new MainWindowModel();
             _pageCache = new Dictionary<string, Control>(StringComparer.OrdinalIgnoreCase);
@@ -81,6 +87,121 @@ namespace AMControlWinF
             buttonColorMode.Click += ButtonColorMode_Click;
             dropdownTranslate.SelectedValueChanged += DropdownTranslate_SelectedValueChanged;
             FormClosed += MainWindow_FormClosed;
+        }
+
+        private void ConfigureShellLayout()
+        {
+            ConfigureLeftShell();
+            ConfigureSecondaryShell();
+            ConfigureWorkShell();
+            ConfigureStatusShell();
+        }
+
+        private void ConfigureLeftShell()
+        {
+            panelLeftCard.SuspendLayout();
+
+            try
+            {
+                panelLeftCard.Controls.Clear();
+
+                menuPrimary.Dock = DockStyle.Fill;
+                menuPrimary.Visible = true;
+
+                panelAvatarHost.Dock = DockStyle.Bottom;
+                panelAvatarHost.Height = 60;
+                panelAvatarHost.Visible = true;
+
+                userAvatarMenuControl.Dock = DockStyle.Fill;
+                userAvatarMenuControl.Visible = true;
+
+                panelLeftCard.Controls.Add(menuPrimary);
+                panelLeftCard.Controls.Add(panelAvatarHost);
+
+                menuPrimary.BringToFront();
+            }
+            finally
+            {
+                panelLeftCard.ResumeLayout(false);
+            }
+        }
+
+        private void ConfigureSecondaryShell()
+        {
+            panelSecondaryNavCard.SuspendLayout();
+
+            try
+            {
+                panelSecondaryNavCard.Controls.Clear();
+
+                panelSecondaryHeader.Dock = DockStyle.Top;
+                panelSecondaryHeader.Height = 56;
+                panelSecondaryHeader.Visible = true;
+
+                menuSecondary.Dock = DockStyle.Fill;
+                menuSecondary.Visible = true;
+
+                panelSecondaryNavCard.Controls.Add(menuSecondary);
+                panelSecondaryNavCard.Controls.Add(panelSecondaryHeader);
+
+                menuSecondary.BringToFront();
+            }
+            finally
+            {
+                panelSecondaryNavCard.ResumeLayout(false);
+            }
+        }
+
+        private void ConfigureWorkShell()
+        {
+            panelWorkCard.SuspendLayout();
+
+            try
+            {
+                panelWorkCard.Controls.Clear();
+
+                panelWorkHeader.Dock = DockStyle.Top;
+                panelWorkHeader.Height = 44;
+                panelWorkHeader.Visible = true;
+
+                panelContent.Dock = DockStyle.Fill;
+                panelContent.Visible = true;
+
+                panelWorkCard.Controls.Add(panelContent);
+                panelWorkCard.Controls.Add(panelWorkHeader);
+
+                panelContent.BringToFront();
+            }
+            finally
+            {
+                panelWorkCard.ResumeLayout(false);
+            }
+        }
+
+        private void ConfigureStatusShell()
+        {
+            panelStatusCard.SuspendLayout();
+
+            try
+            {
+                panelStatusCard.Controls.Clear();
+
+                labelStatusCaption.Dock = DockStyle.Left;
+                labelStatusCaption.Width = 88;
+                labelStatusCaption.Visible = true;
+
+                labelStatusValue.Dock = DockStyle.Fill;
+                labelStatusValue.Visible = true;
+
+                panelStatusCard.Controls.Add(labelStatusValue);
+                panelStatusCard.Controls.Add(labelStatusCaption);
+
+                labelStatusValue.BringToFront();
+            }
+            finally
+            {
+                panelStatusCard.ResumeLayout(false);
+            }
         }
 
         /// <summary>
@@ -128,29 +249,38 @@ namespace AMControlWinF
         /// </summary>
         private void RefreshShell(ShellRefreshScope scope)
         {
-            if ((scope & ShellRefreshScope.PrimaryMenu) == ShellRefreshScope.PrimaryMenu)
-            {
-                BuildPrimaryMenu();
-            }
+            SuspendShellLayouts();
 
-            if ((scope & ShellRefreshScope.SecondaryMenu) == ShellRefreshScope.SecondaryMenu)
+            try
             {
-                BuildSecondaryMenu();
-            }
+                if ((scope & ShellRefreshScope.PrimaryMenu) == ShellRefreshScope.PrimaryMenu)
+                {
+                    BuildPrimaryMenu();
+                }
 
-            if ((scope & ShellRefreshScope.Header) == ShellRefreshScope.Header)
-            {
-                RefreshHeader();
-            }
+                if ((scope & ShellRefreshScope.SecondaryMenu) == ShellRefreshScope.SecondaryMenu)
+                {
+                    BuildSecondaryMenu();
+                }
 
-            if ((scope & ShellRefreshScope.UserMenu) == ShellRefreshScope.UserMenu)
-            {
-                RefreshUserMenuControl();
-            }
+                if ((scope & ShellRefreshScope.Header) == ShellRefreshScope.Header)
+                {
+                    RefreshHeader();
+                }
 
-            if ((scope & ShellRefreshScope.CurrentPage) == ShellRefreshScope.CurrentPage)
+                if ((scope & ShellRefreshScope.UserMenu) == ShellRefreshScope.UserMenu)
+                {
+                    RefreshUserMenuControl();
+                }
+
+                if ((scope & ShellRefreshScope.CurrentPage) == ShellRefreshScope.CurrentPage)
+                {
+                    NavigateToSelectedPage();
+                }
+            }
+            finally
             {
-                NavigateToSelectedPage();
+                ResumeShellLayouts(true);
             }
         }
 
@@ -472,11 +602,18 @@ namespace AMControlWinF
                             ? "No accessible page"
                             : "当前用户没有可访问页面"),
                     true);
+
+                labelStatusValue.Text = IsEnglishLanguage(GetCurrentLanguage())
+                    ? "No page available"
+                    : "无可用页面";
                 return;
             }
 
             var control = GetOrCreatePage(page.PageKey);
             ShowPage(control, false);
+            labelStatusValue.Text = (IsEnglishLanguage(GetCurrentLanguage())
+                ? "Current Page: "
+                : "当前页面：") + page.PageKey;
         }
 
         private Control GetOrCreatePage(string pageKey)
@@ -501,6 +638,7 @@ namespace AMControlWinF
                 return;
             }
 
+            ApplyThemeToControlTree(page);
             panelContent.SuspendLayout();
 
             try
@@ -732,9 +870,9 @@ namespace AMControlWinF
             {
             }
 
-            titlebar.Text = IsEnglishLanguage(language) ? "AM Motion Contorl" : "AM运动控制";
+            titlebar.Text = IsEnglishLanguage(language) ? "AM Motion Control" : "AM运动控制";
             titlebar.SubText = IsEnglishLanguage(language) ? "Version 0.0.1" : "版本 0.0.1";
-            labelStatusCaption.Text = IsEnglishLanguage(language) ? "System Ready" : "系统就绪";
+            labelStatusCaption.Text = IsEnglishLanguage(language) ? "System Status:" : "系统状态：";
 
             RecreateAllCachedPages();
             RefreshShell(ShellRefreshScope.All);
@@ -785,11 +923,11 @@ namespace AMControlWinF
 
             ApplyShellTheme();
 
-            foreach (var pair in _pageCache)
+            foreach (Control control in panelContent.Controls.OfType<Control>().ToList())
             {
-                if (pair.Value != null && !pair.Value.IsDisposed)
+                if (control != null && !control.IsDisposed)
                 {
-                    ApplyThemeToControlTree(pair.Value);
+                    ApplyThemeToControlTree(control);
                 }
             }
 
@@ -830,6 +968,31 @@ namespace AMControlWinF
             labelPageTitleValue.ForeColor = primaryText;
             labelPageDescriptionValue.ForeColor = secondaryText;
             labelStatusCaption.ForeColor = secondaryText;
+            labelStatusValue.ForeColor = primaryText;
+        }
+
+        private void SuspendShellLayouts()
+        {
+            SuspendLayout();
+            textureBackgroundMain.SuspendLayout();
+            gridMainHost.SuspendLayout();
+            panelLeftCard.SuspendLayout();
+            panelSecondaryNavCard.SuspendLayout();
+            panelWorkCard.SuspendLayout();
+            panelWorkHeader.SuspendLayout();
+            panelContent.SuspendLayout();
+        }
+
+        private void ResumeShellLayouts(bool performLayout)
+        {
+            panelContent.ResumeLayout(performLayout);
+            panelWorkHeader.ResumeLayout(performLayout);
+            panelWorkCard.ResumeLayout(performLayout);
+            panelSecondaryNavCard.ResumeLayout(performLayout);
+            panelLeftCard.ResumeLayout(performLayout);
+            gridMainHost.ResumeLayout(performLayout);
+            textureBackgroundMain.ResumeLayout(performLayout);
+            ResumeLayout(performLayout);
         }
 
         /// <summary>
