@@ -51,6 +51,7 @@ namespace AMControlWinF.Views.Auth
             _model.Password = "am123";
             textBoxLoginName.Text = _model.LoginName;
             textBoxPassword.Text = _model.Password;
+            labelErrorValue.Text = "";
         }
 
         /// <summary>
