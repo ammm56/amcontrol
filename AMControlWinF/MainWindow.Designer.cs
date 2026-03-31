@@ -120,7 +120,6 @@
             this.gridMainHost.Controls.Add(this.panelSecondaryNavCard);
             this.gridMainHost.Controls.Add(this.panelLeftCard);
             this.gridMainHost.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gridMainHost.Gap = 2;
             this.gridMainHost.Location = new System.Drawing.Point(0, 0);
             this.gridMainHost.Name = "gridMainHost";
             this.gridMainHost.Padding = new System.Windows.Forms.Padding(8);
@@ -135,13 +134,13 @@
             this.panelStatusCard.Controls.Add(this.labelStatusValue);
             this.panelStatusCard.Controls.Add(this.labelStatusCaption);
             this.panelStatusCard.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelStatusCard.Location = new System.Drawing.Point(11, 687);
+            this.panelStatusCard.Location = new System.Drawing.Point(8, 684);
             this.panelStatusCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelStatusCard.Name = "panelStatusCard";
             this.panelStatusCard.Padding = new System.Windows.Forms.Padding(14, 0, 14, 0);
             this.panelStatusCard.Radius = 12;
             this.panelStatusCard.Shadow = 4;
-            this.panelStatusCard.Size = new System.Drawing.Size(1178, 54);
+            this.panelStatusCard.Size = new System.Drawing.Size(1184, 60);
             this.panelStatusCard.TabIndex = 3;
             // 
             // labelStatusValue
@@ -150,7 +149,7 @@
             this.labelStatusValue.Location = new System.Drawing.Point(108, 6);
             this.labelStatusValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelStatusValue.Name = "labelStatusValue";
-            this.labelStatusValue.Size = new System.Drawing.Size(1050, 42);
+            this.labelStatusValue.Size = new System.Drawing.Size(1056, 48);
             this.labelStatusValue.TabIndex = 1;
             this.labelStatusValue.Text = "当前页面：-";
             // 
@@ -160,7 +159,7 @@
             this.labelStatusCaption.Location = new System.Drawing.Point(20, 6);
             this.labelStatusCaption.Margin = new System.Windows.Forms.Padding(0);
             this.labelStatusCaption.Name = "labelStatusCaption";
-            this.labelStatusCaption.Size = new System.Drawing.Size(88, 42);
+            this.labelStatusCaption.Size = new System.Drawing.Size(88, 48);
             this.labelStatusCaption.TabIndex = 0;
             this.labelStatusCaption.Text = "系统状态：";
             // 
@@ -170,13 +169,13 @@
             this.panelWorkCard.Controls.Add(this.panelContent);
             this.panelWorkCard.Controls.Add(this.panelWorkHeader);
             this.panelWorkCard.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelWorkCard.Location = new System.Drawing.Point(485, 11);
+            this.panelWorkCard.Location = new System.Drawing.Point(482, 8);
             this.panelWorkCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelWorkCard.Name = "panelWorkCard";
             this.panelWorkCard.Padding = new System.Windows.Forms.Padding(10);
             this.panelWorkCard.Radius = 16;
             this.panelWorkCard.Shadow = 8;
-            this.panelWorkCard.Size = new System.Drawing.Size(704, 670);
+            this.panelWorkCard.Size = new System.Drawing.Size(710, 676);
             this.panelWorkCard.TabIndex = 2;
             // 
             // panelContent
@@ -187,7 +186,7 @@
             this.panelContent.Margin = new System.Windows.Forms.Padding(0);
             this.panelContent.Name = "panelContent";
             this.panelContent.Radius = 0;
-            this.panelContent.Size = new System.Drawing.Size(660, 582);
+            this.panelContent.Size = new System.Drawing.Size(666, 588);
             this.panelContent.TabIndex = 1;
             // 
             // panelWorkHeader
@@ -201,7 +200,7 @@
             this.panelWorkHeader.Name = "panelWorkHeader";
             this.panelWorkHeader.Padding = new System.Windows.Forms.Padding(16, 0, 16, 0);
             this.panelWorkHeader.Radius = 0;
-            this.panelWorkHeader.Size = new System.Drawing.Size(660, 44);
+            this.panelWorkHeader.Size = new System.Drawing.Size(666, 44);
             this.panelWorkHeader.TabIndex = 0;
             // 
             // labelPageTitleValue
@@ -211,7 +210,7 @@
             this.labelPageTitleValue.Location = new System.Drawing.Point(16, 0);
             this.labelPageTitleValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelPageTitleValue.Name = "labelPageTitleValue";
-            this.labelPageTitleValue.Size = new System.Drawing.Size(308, 44);
+            this.labelPageTitleValue.Size = new System.Drawing.Size(314, 44);
             this.labelPageTitleValue.TabIndex = 0;
             this.labelPageTitleValue.Text = "首页";
             // 
@@ -219,7 +218,7 @@
             // 
             this.labelPageDescriptionValue.Dock = System.Windows.Forms.DockStyle.Right;
             this.labelPageDescriptionValue.Font = new System.Drawing.Font("Microsoft YaHei UI", 9.5F);
-            this.labelPageDescriptionValue.Location = new System.Drawing.Point(324, 0);
+            this.labelPageDescriptionValue.Location = new System.Drawing.Point(330, 0);
             this.labelPageDescriptionValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelPageDescriptionValue.Name = "labelPageDescriptionValue";
             this.labelPageDescriptionValue.Size = new System.Drawing.Size(320, 44);
@@ -233,13 +232,13 @@
             this.panelSecondaryNavCard.Controls.Add(this.menuSecondary);
             this.panelSecondaryNavCard.Controls.Add(this.panelSecondaryHeader);
             this.panelSecondaryNavCard.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelSecondaryNavCard.Location = new System.Drawing.Point(140, 11);
+            this.panelSecondaryNavCard.Location = new System.Drawing.Point(137, 8);
             this.panelSecondaryNavCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelSecondaryNavCard.Name = "panelSecondaryNavCard";
             this.panelSecondaryNavCard.Padding = new System.Windows.Forms.Padding(7);
             this.panelSecondaryNavCard.Radius = 14;
             this.panelSecondaryNavCard.Shadow = 6;
-            this.panelSecondaryNavCard.Size = new System.Drawing.Size(339, 670);
+            this.panelSecondaryNavCard.Size = new System.Drawing.Size(345, 676);
             this.panelSecondaryNavCard.TabIndex = 1;
             // 
             // menuSecondary
@@ -251,7 +250,7 @@
             this.menuSecondary.Margin = new System.Windows.Forms.Padding(0);
             this.menuSecondary.Name = "menuSecondary";
             this.menuSecondary.Padding = new System.Windows.Forms.Padding(0, 2, 0, 2);
-            this.menuSecondary.Size = new System.Drawing.Size(307, 582);
+            this.menuSecondary.Size = new System.Drawing.Size(313, 588);
             this.menuSecondary.TabIndex = 1;
             this.menuSecondary.Unique = true;
             // 
@@ -265,7 +264,7 @@
             this.panelSecondaryHeader.Name = "panelSecondaryHeader";
             this.panelSecondaryHeader.Padding = new System.Windows.Forms.Padding(18, 0, 18, 0);
             this.panelSecondaryHeader.Radius = 0;
-            this.panelSecondaryHeader.Size = new System.Drawing.Size(307, 56);
+            this.panelSecondaryHeader.Size = new System.Drawing.Size(313, 56);
             this.panelSecondaryHeader.TabIndex = 0;
             // 
             // labelPrimaryTitleValue
@@ -274,7 +273,7 @@
             this.labelPrimaryTitleValue.Font = new System.Drawing.Font("Microsoft YaHei UI", 16F, System.Drawing.FontStyle.Bold);
             this.labelPrimaryTitleValue.Location = new System.Drawing.Point(18, 0);
             this.labelPrimaryTitleValue.Name = "labelPrimaryTitleValue";
-            this.labelPrimaryTitleValue.Size = new System.Drawing.Size(271, 56);
+            this.labelPrimaryTitleValue.Size = new System.Drawing.Size(277, 56);
             this.labelPrimaryTitleValue.TabIndex = 0;
             this.labelPrimaryTitleValue.Text = "首页";
             // 
@@ -284,13 +283,13 @@
             this.panelLeftCard.Controls.Add(this.menuPrimary);
             this.panelLeftCard.Controls.Add(this.panelAvatarHost);
             this.panelLeftCard.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelLeftCard.Location = new System.Drawing.Point(11, 11);
+            this.panelLeftCard.Location = new System.Drawing.Point(8, 8);
             this.panelLeftCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelLeftCard.Name = "panelLeftCard";
             this.panelLeftCard.Padding = new System.Windows.Forms.Padding(8, 9, 8, 9);
             this.panelLeftCard.Radius = 14;
             this.panelLeftCard.Shadow = 6;
-            this.panelLeftCard.Size = new System.Drawing.Size(123, 670);
+            this.panelLeftCard.Size = new System.Drawing.Size(129, 676);
             this.panelLeftCard.TabIndex = 0;
             // 
             // menuPrimary
@@ -302,7 +301,7 @@
             this.menuPrimary.Margin = new System.Windows.Forms.Padding(0);
             this.menuPrimary.Name = "menuPrimary";
             this.menuPrimary.Padding = new System.Windows.Forms.Padding(0, 2, 0, 2);
-            this.menuPrimary.Size = new System.Drawing.Size(89, 592);
+            this.menuPrimary.Size = new System.Drawing.Size(95, 598);
             this.menuPrimary.TabIndex = 0;
             this.menuPrimary.Unique = true;
             // 
@@ -311,12 +310,12 @@
             this.panelAvatarHost.Back = System.Drawing.Color.Transparent;
             this.panelAvatarHost.Controls.Add(this.userAvatarMenuControl);
             this.panelAvatarHost.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panelAvatarHost.Location = new System.Drawing.Point(17, 610);
+            this.panelAvatarHost.Location = new System.Drawing.Point(17, 616);
             this.panelAvatarHost.Margin = new System.Windows.Forms.Padding(0);
             this.panelAvatarHost.Name = "panelAvatarHost";
             this.panelAvatarHost.Padding = new System.Windows.Forms.Padding(0, 2, 0, 2);
             this.panelAvatarHost.Radius = 0;
-            this.panelAvatarHost.Size = new System.Drawing.Size(89, 42);
+            this.panelAvatarHost.Size = new System.Drawing.Size(95, 42);
             this.panelAvatarHost.TabIndex = 1;
             // 
             // userAvatarMenuControl
@@ -328,7 +327,7 @@
             this.userAvatarMenuControl.Margin = new System.Windows.Forms.Padding(0);
             this.userAvatarMenuControl.Name = "userAvatarMenuControl";
             this.userAvatarMenuControl.RoleDisplayName = "用户";
-            this.userAvatarMenuControl.Size = new System.Drawing.Size(89, 38);
+            this.userAvatarMenuControl.Size = new System.Drawing.Size(95, 38);
             this.userAvatarMenuControl.TabIndex = 0;
             this.userAvatarMenuControl.UserDisplayName = "未登录";
             // 
