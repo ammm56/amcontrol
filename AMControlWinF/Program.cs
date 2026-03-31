@@ -132,6 +132,12 @@ namespace AMControlWinF
             private PendingAction _pendingAction = PendingAction.None;
 
             /// <summary>
+            /// 登录/登出切换流程重入保护。
+            /// 避免头像菜单连续点击时重复弹登录框或重复关窗。
+            /// </summary>
+            private bool _isAuthTransitioning;
+
+            /// <summary>
             /// 首次打开主窗体。
             /// 启动阶段此时不存在旧主窗体，可直接创建。
             /// </summary>
@@ -145,8 +151,8 @@ namespace AMControlWinF
             /// <summary>
             /// 切换用户。
             /// 注意：
-            /// 这里不会先创建新主窗体。
-            /// 只有再次登录成功后，才进入“关闭旧窗体 -> 关闭完成后打开新窗体”的流程。
+            /// 不在当前头像弹层点击事件链中立即弹登录框，
+            /// 而是延后到主窗体消息循环尾部执行，避免控件仍在使用中。
             /// </summary>
             public void SwitchUser()
             {
@@ -156,13 +162,21 @@ namespace AMControlWinF
                     return;
                 }
 
-                // 切换用户取消时，保持当前主窗体继续运行。
-                if (!ShowLoginDialog(currentWindow))
+                RunAuthFlow(currentWindow, new Action(() =>
                 {
-                    return;
-                }
+                    if (currentWindow.IsDisposed || !ReferenceEquals(MainForm, currentWindow))
+                    {
+                        return;
+                    }
 
-                CloseCurrentMainWindow(currentWindow, PendingAction.ReopenMainWindow);
+                    // 切换用户取消时，保持当前主窗体继续运行。
+                    if (!ShowLoginDialog(currentWindow))
+                    {
+                        return;
+                    }
+
+                    CloseCurrentMainWindow(currentWindow, PendingAction.ReopenMainWindow);
+                }));
             }
 
             /// <summary>
@@ -177,30 +191,71 @@ namespace AMControlWinF
             {
                 var currentWindow = MainForm as MainWindow;
 
-                UserContext.Instance.SignOut();
-
-                var loginSuccess = currentWindow != null && !currentWindow.IsDisposed
-                    ? ShowLoginDialog(currentWindow)
-                    : ShowLoginDialog(null);
-
-                if (currentWindow == null || currentWindow.IsDisposed)
+                RunAuthFlow(currentWindow, new Action(() =>
                 {
-                    if (loginSuccess)
+                    UserContext.Instance.SignOut();
+
+                    var activeWindow = MainForm as MainWindow;
+                    var loginOwner = activeWindow != null && !activeWindow.IsDisposed
+                        ? (IWin32Window)activeWindow
+                        : null;
+
+                    var loginSuccess = ShowLoginDialog(loginOwner);
+
+                    if (activeWindow == null || activeWindow.IsDisposed)
                     {
-                        OpenFirstMainWindow();
-                    }
-                    else
-                    {
-                        ExitThread();
-                        Environment.Exit(0);
+                        if (loginSuccess)
+                        {
+                            OpenFirstMainWindow();
+                        }
+                        else
+                        {
+                            ExitApplication();
+                        }
+
+                        return;
                     }
 
+                    CloseCurrentMainWindow(
+                        activeWindow,
+                        loginSuccess ? PendingAction.ReopenMainWindow : PendingAction.ExitApplication);
+                }));
+            }
+
+            /// <summary>
+            /// 将认证相关 UI 流程延后到当前消息循环尾部执行，
+            /// 避免在头像弹层/按钮点击事件链中直接打开模态窗体。
+            /// </summary>
+            private void RunAuthFlow(MainWindow currentWindow, Action action)
+            {
+                if (action == null || _isAuthTransitioning)
+                {
                     return;
                 }
 
-                CloseCurrentMainWindow(
-                    currentWindow,
-                    loginSuccess ? PendingAction.ReopenMainWindow : PendingAction.ExitApplication);
+                _isAuthTransitioning = true;
+
+                var execute = new Action(() =>
+                {
+                    try
+                    {
+                        action();
+                    }
+                    finally
+                    {
+                        _isAuthTransitioning = false;
+                    }
+                });
+
+                if (currentWindow != null &&
+                    !currentWindow.IsDisposed &&
+                    currentWindow.IsHandleCreated)
+                {
+                    currentWindow.BeginInvoke(execute);
+                    return;
+                }
+
+                execute();
             }
 
             /// <summary>
@@ -265,10 +320,15 @@ namespace AMControlWinF
                         break;
 
                     case PendingAction.ExitApplication:
-                        ExitThread();
-                        Environment.Exit(0);
+                        ExitApplication();
                         break;
                 }
+            }
+
+            private void ExitApplication()
+            {
+                ExitThread();
+                Environment.Exit(0);
             }
 
             /// <summary>

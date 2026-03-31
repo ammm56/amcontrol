@@ -19,6 +19,11 @@ namespace AMControlWinF.Views.Main
         private int _sectionGapHeight;
         private int _actionColumnGap;
 
+        /// <summary>
+        /// 防止同一个弹层在关闭过程中被重复点击。
+        /// </summary>
+        private bool _isClosing;
+
         public event EventHandler SwitchUserRequested;
         public event EventHandler ChangePasswordRequested;
         public event EventHandler LogoutRequested;
@@ -231,34 +236,58 @@ namespace AMControlWinF.Views.Main
 
         private void ButtonSwitchUser_Click(object sender, EventArgs e)
         {
-            var handler = SwitchUserRequested;
-            if (handler != null)
-            {
-                handler(this, EventArgs.Empty);
-            }
-
-            Dispose();
+            ClosePopoverThenNotify(SwitchUserRequested);
         }
 
         private void ButtonChangePassword_Click(object sender, EventArgs e)
         {
-            var handler = ChangePasswordRequested;
-            if (handler != null)
-            {
-                handler(this, EventArgs.Empty);
-            }
-
-            Dispose();
+            ClosePopoverThenNotify(ChangePasswordRequested);
         }
 
         private void ButtonLogout_Click(object sender, EventArgs e)
         {
-            var handler = LogoutRequested;
-            if (handler != null)
+            ClosePopoverThenNotify(LogoutRequested);
+        }
+
+        /// <summary>
+        /// 先关闭当前弹层，再在宿主窗体的下一轮消息中通知外层。
+        /// 避免在当前按钮点击/Popover 绘制链路中直接触发外层打开新对话框。
+        /// </summary>
+        private void ClosePopoverThenNotify(EventHandler handler)
+        {
+            if (_isClosing)
             {
-                handler(this, EventArgs.Empty);
+                return;
             }
 
+            _isClosing = true;
+
+            buttonSwitchUser.Enabled = false;
+            buttonChangePassword.Enabled = false;
+            buttonLogout.Enabled = false;
+
+            var sender = this;
+            var ownerForm = FindForm();
+
+            if (ownerForm != null && !ownerForm.IsDisposed && ownerForm.IsHandleCreated)
+            {
+                ownerForm.BeginInvoke(new Action(() =>
+                {
+                    if (handler != null)
+                    {
+                        handler(sender, EventArgs.Empty);
+                    }
+                }));
+            }
+            else
+            {
+                if (handler != null)
+                {
+                    handler(sender, EventArgs.Empty);
+                }
+            }
+
+            Visible = false;
             Dispose();
         }
 
