@@ -33,6 +33,8 @@ namespace AMControlWinF
         private bool _isUpdatingUiState;
         private bool _isDarkMode;
 
+        internal bool ReopenRequested { get; private set; }
+
         public MainWindow()
         {
             InitializeComponent();
@@ -575,7 +577,15 @@ namespace AMControlWinF
 
         private void UserAvatarMenuControl_SwitchUserRequested(object sender, EventArgs e)
         {
-            ReopenMainWindowByLogin(false, false);
+            using (var loginForm = new LoginForm())
+            {
+                var loginResult = loginForm.ShowDialog(this);
+                if (loginResult == DialogResult.OK && UserContext.Instance.IsLoggedIn)
+                {
+                    ReopenRequested = true;
+                    BeginInvoke(new Action(CloseCurrentWindow));
+                }
+            }
         }
 
         private void UserAvatarMenuControl_ChangePasswordRequested(object sender, EventArgs e)
@@ -585,32 +595,27 @@ namespace AMControlWinF
 
         private void UserAvatarMenuControl_LogoutRequested(object sender, EventArgs e)
         {
-            ReopenMainWindowByLogin(true, true);
-        }
-
-        /// <summary>
-        /// 统一处理切换用户/退出登录后的重新登录流程。
-        /// </summary>
-        private void ReopenMainWindowByLogin(bool signOutFirst, bool closeCurrentWindowWhenLoginCanceled)
-        {
-            if (signOutFirst)
-            {
-                UserContext.Instance.SignOut();
-            }
+            UserContext.Instance.SignOut();
 
             using (var loginForm = new LoginForm())
             {
-                var loginResult = loginForm.ShowDialog();
+                var loginResult = loginForm.ShowDialog(this);
                 if (loginResult == DialogResult.OK && UserContext.Instance.IsLoggedIn)
                 {
-                    var newMainWindow = new MainWindow();
-                    newMainWindow.Show();
-                    Close();
-                    return;
+                    ReopenRequested = true;
+                }
+                else
+                {
+                    ReopenRequested = false;
                 }
             }
 
-            if (closeCurrentWindowWhenLoginCanceled)
+            BeginInvoke(new Action(CloseCurrentWindow));
+        }
+
+        private void CloseCurrentWindow()
+        {
+            if (!IsDisposed)
             {
                 Close();
             }

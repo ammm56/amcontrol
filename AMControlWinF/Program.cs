@@ -37,15 +37,34 @@ namespace AMControlWinF
                 // 权限目录同步失败不阻断主流程，避免迁移阶段无法进入登录页。
             }
 
-            using (var loginForm = new LoginForm())
+            if (!ShowLoginDialog())
             {
-                if (loginForm.ShowDialog() != DialogResult.OK || !UserContext.Instance.IsLoggedIn)
-                {
-                    return;
-                }
+                return;
             }
 
-            Application.Run(new MainWindow());
+            while (true)
+            {
+                using (var mainWindow = new MainWindow())
+                {
+                    Application.Run(mainWindow);
+
+                    if (mainWindow.ReopenRequested)
+                    {
+                        continue;
+                    }
+
+                    break;
+                }
+            }
+        }
+
+        private static bool ShowLoginDialog()
+        {
+            using (var loginForm = new LoginForm())
+            {
+                return loginForm.ShowDialog() == DialogResult.OK
+                    && UserContext.Instance.IsLoggedIn;
+            }
         }
     }
 }
