@@ -116,15 +116,15 @@
             // 
             this.gridMainHost.BackColor = System.Drawing.Color.Transparent;
             this.gridMainHost.Controls.Add(this.panelStatusCard);
-            this.gridMainHost.Controls.Add(this.panelWorkCard);
-            this.gridMainHost.Controls.Add(this.panelSecondaryNavCard);
             this.gridMainHost.Controls.Add(this.panelLeftCard);
+            this.gridMainHost.Controls.Add(this.panelSecondaryNavCard);
+            this.gridMainHost.Controls.Add(this.panelWorkCard);
             this.gridMainHost.Dock = System.Windows.Forms.DockStyle.Fill;
             this.gridMainHost.Location = new System.Drawing.Point(0, 0);
             this.gridMainHost.Name = "gridMainHost";
             this.gridMainHost.Padding = new System.Windows.Forms.Padding(8);
             this.gridMainHost.Size = new System.Drawing.Size(1200, 752);
-            this.gridMainHost.Span = "86 230 100%;100%-100% 40";
+            this.gridMainHost.Span = "100% 230 86 ;100%-100% 40";
             this.gridMainHost.TabIndex = 0;
             this.gridMainHost.Text = "gridMainHost";
             // 
@@ -169,14 +169,14 @@
             this.panelWorkCard.Controls.Add(this.panelContent);
             this.panelWorkCard.Controls.Add(this.panelWorkHeader);
             this.panelWorkCard.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelWorkCard.Location = new System.Drawing.Point(482, 8);
+            this.panelWorkCard.Location = new System.Drawing.Point(8, 8);
             this.panelWorkCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelWorkCard.Name = "panelWorkCard";
             this.panelWorkCard.Padding = new System.Windows.Forms.Padding(10);
             this.panelWorkCard.Radius = 16;
             this.panelWorkCard.Shadow = 8;
             this.panelWorkCard.Size = new System.Drawing.Size(710, 676);
-            this.panelWorkCard.TabIndex = 2;
+            this.panelWorkCard.TabIndex = 0;
             // 
             // panelContent
             // 
@@ -232,7 +232,7 @@
             this.panelSecondaryNavCard.Controls.Add(this.menuSecondary);
             this.panelSecondaryNavCard.Controls.Add(this.panelSecondaryHeader);
             this.panelSecondaryNavCard.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelSecondaryNavCard.Location = new System.Drawing.Point(137, 8);
+            this.panelSecondaryNavCard.Location = new System.Drawing.Point(718, 8);
             this.panelSecondaryNavCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelSecondaryNavCard.Name = "panelSecondaryNavCard";
             this.panelSecondaryNavCard.Padding = new System.Windows.Forms.Padding(7);
@@ -283,14 +283,14 @@
             this.panelLeftCard.Controls.Add(this.menuPrimary);
             this.panelLeftCard.Controls.Add(this.panelAvatarHost);
             this.panelLeftCard.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelLeftCard.Location = new System.Drawing.Point(8, 8);
+            this.panelLeftCard.Location = new System.Drawing.Point(1063, 8);
             this.panelLeftCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelLeftCard.Name = "panelLeftCard";
             this.panelLeftCard.Padding = new System.Windows.Forms.Padding(8, 9, 8, 9);
             this.panelLeftCard.Radius = 14;
             this.panelLeftCard.Shadow = 6;
             this.panelLeftCard.Size = new System.Drawing.Size(129, 676);
-            this.panelLeftCard.TabIndex = 0;
+            this.panelLeftCard.TabIndex = 2;
             // 
             // menuPrimary
             // 
