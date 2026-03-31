@@ -48,7 +48,6 @@
             // 
             this.avatarCurrentUser.Cursor = System.Windows.Forms.Cursors.Hand;
             this.avatarCurrentUser.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.avatarCurrentUser.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(128)))));
             this.avatarCurrentUser.ImageSvg = resources.GetString("avatarCurrentUser.ImageSvg");
             this.avatarCurrentUser.Location = new System.Drawing.Point(4, 4);
             this.avatarCurrentUser.Margin = new System.Windows.Forms.Padding(0);

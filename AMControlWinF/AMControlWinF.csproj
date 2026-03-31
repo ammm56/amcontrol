@@ -76,6 +76,12 @@
     <Compile Include="Views\Main\UserAvatarMenuControl.Designer.cs">
       <DependentUpon>UserAvatarMenuControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\Main\UserAvatarPopoverCard.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Main\UserAvatarPopoverCard.Designer.cs">
+      <DependentUpon>UserAvatarPopoverCard.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </EmbeddedResource>
@@ -93,6 +99,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Views\Main\UserAvatarMenuControl.resx">
       <DependentUpon>UserAvatarMenuControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\Main\UserAvatarPopoverCard.resx">
+      <DependentUpon>UserAvatarPopoverCard.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

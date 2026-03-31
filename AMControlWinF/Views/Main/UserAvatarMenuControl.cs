@@ -1,20 +1,19 @@
 ﻿using AntdUI;
 using System;
-using System.Drawing;
 using System.Windows.Forms;
 
 namespace AMControlWinF.Views.Main
 {
     /// <summary>
     /// 左下角用户头像菜单控件。
-    /// 仅显示头像，点击后弹出用户操作菜单。
+    /// 仅显示头像，点击后弹出用户操作卡片。
+    /// 使用 AntdUI 默认原生样式，自动跟随主题切换。
     /// </summary>
     public partial class UserAvatarMenuControl : UserControl
     {
         private string _userDisplayName;
         private string _roleDisplayName;
         private string _language;
-        private bool _isDarkMode;
 
         public event EventHandler SwitchUserRequested;
         public event EventHandler ChangePasswordRequested;
@@ -32,13 +31,12 @@ namespace AMControlWinF.Views.Main
             _userDisplayName = "未登录";
             _roleDisplayName = "用户";
             _language = "zh-CN";
-            _isDarkMode = false;
 
             ConfigureAvatarLayout();
             BindEvents();
             RefreshAvatarText();
             ApplyLanguage(_language);
-            ApplyTheme(_isDarkMode);
+            ApplyTheme(false);
         }
 
         public string UserDisplayName
@@ -74,18 +72,8 @@ namespace AMControlWinF.Views.Main
 
         public void ApplyTheme(bool isDarkMode)
         {
-            _isDarkMode = isDarkMode;
-
-            panelRoot.Back = Color.Transparent;
-            BackColor = Color.Transparent;
-
-            avatarCurrentUser.BackColor = isDarkMode
-                ? Color.FromArgb(56, 56, 56)
-                : Color.White;
-
-            avatarCurrentUser.ForeColor = isDarkMode
-                ? Color.Gainsboro
-                : Color.FromArgb(24, 39, 58);
+            // 不做任何手动颜色覆盖。
+            // 由 AntdUI 原生主题系统自动接管头像颜色与样式。
         }
 
         private void BindEvents()
@@ -121,53 +109,51 @@ namespace AMControlWinF.Views.Main
 
         private void AvatarCurrentUser_Click(object sender, EventArgs e)
         {
-            var switchUserText = IsEnglishLanguage(_language) ? "Switch User" : "切换用户";
-            var changePasswordText = IsEnglishLanguage(_language) ? "Change Password" : "修改密码";
-            var logoutText = IsEnglishLanguage(_language) ? "Logout" : "退出登录";
+            ShowUserPopoverCard();
+        }
 
-            var items = new IContextMenuStripItem[]
+        private void ShowUserPopoverCard()
+        {
+            var card = new UserAvatarPopoverCard();
+            card.SetUserInfo(_userDisplayName, _roleDisplayName);
+            card.ApplyLanguage(_language);
+
+            card.SwitchUserRequested += Card_SwitchUserRequested;
+            card.ChangePasswordRequested += Card_ChangePasswordRequested;
+            card.LogoutRequested += Card_LogoutRequested;
+
+            Popover.open(new Popover.Config(avatarCurrentUser, card)
             {
-                new ContextMenuStripItem(switchUserText) { IconSvg = "SwapOutlined" },
-                new ContextMenuStripItem(changePasswordText) { IconSvg = "LockOutlined" },
-                new ContextMenuStripItem(logoutText) { IconSvg = "LogoutOutlined" }
-            };
+                ArrowAlign = TAlign.Left,
+                ArrowSize = 10
+            });
+        }
 
-            AntdUI.ContextMenuStrip.open(avatarCurrentUser, item =>
+        private void Card_SwitchUserRequested(object sender, EventArgs e)
+        {
+            var handler = SwitchUserRequested;
+            if (handler != null)
             {
-                if (item == null || string.IsNullOrWhiteSpace(item.Text))
-                {
-                    return;
-                }
+                handler(this, EventArgs.Empty);
+            }
+        }
 
-                if (string.Equals(item.Text, switchUserText, StringComparison.Ordinal))
-                {
-                    var handler = SwitchUserRequested;
-                    if (handler != null)
-                    {
-                        handler(this, EventArgs.Empty);
-                    }
-                    return;
-                }
+        private void Card_ChangePasswordRequested(object sender, EventArgs e)
+        {
+            var handler = ChangePasswordRequested;
+            if (handler != null)
+            {
+                handler(this, EventArgs.Empty);
+            }
+        }
 
-                if (string.Equals(item.Text, changePasswordText, StringComparison.Ordinal))
-                {
-                    var handler = ChangePasswordRequested;
-                    if (handler != null)
-                    {
-                        handler(this, EventArgs.Empty);
-                    }
-                    return;
-                }
-
-                if (string.Equals(item.Text, logoutText, StringComparison.Ordinal))
-                {
-                    var handler = LogoutRequested;
-                    if (handler != null)
-                    {
-                        handler(this, EventArgs.Empty);
-                    }
-                }
-            }, items);
+        private void Card_LogoutRequested(object sender, EventArgs e)
+        {
+            var handler = LogoutRequested;
+            if (handler != null)
+            {
+                handler(this, EventArgs.Empty);
+            }
         }
 
         private void RefreshAvatarText()
@@ -180,12 +166,6 @@ namespace AMControlWinF.Views.Main
 
             var text = string.IsNullOrWhiteSpace(_userDisplayName) ? "A" : _userDisplayName;
             avatarCurrentUser.Text = text.Substring(0, 1).ToUpperInvariant();
-        }
-
-        private static bool IsEnglishLanguage(string language)
-        {
-            return !string.IsNullOrWhiteSpace(language)
-                && language.StartsWith("en", StringComparison.OrdinalIgnoreCase);
         }
     }
 }
