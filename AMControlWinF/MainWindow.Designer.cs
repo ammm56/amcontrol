@@ -51,7 +51,6 @@
             this.panelContent = new AntdUI.Panel();
             this.panelStatusHost = new System.Windows.Forms.Panel();
             this.panelStatusCard = new AntdUI.Panel();
-            this.labelStatusValue = new AntdUI.Label();
             this.labelStatusCaption = new AntdUI.Label();
             this.titlebar.SuspendLayout();
             this.textureBackgroundMain.SuspendLayout();
@@ -220,6 +219,7 @@
             // userAvatarMenuControl
             // 
             this.userAvatarMenuControl.BackColor = System.Drawing.Color.Transparent;
+            this.userAvatarMenuControl.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.userAvatarMenuControl.Location = new System.Drawing.Point(0, 0);
             this.userAvatarMenuControl.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.userAvatarMenuControl.Name = "userAvatarMenuControl";
@@ -334,6 +334,7 @@
             this.panelWorkHeader.Radius = 0;
             this.panelWorkHeader.Size = new System.Drawing.Size(844, 44);
             this.panelWorkHeader.TabIndex = 0;
+            this.panelWorkHeader.Visible = false;
             // 
             // layoutHeader
             // 
@@ -398,7 +399,6 @@
             // panelStatusCard
             // 
             this.panelStatusCard.Back = System.Drawing.Color.White;
-            this.panelStatusCard.Controls.Add(this.labelStatusValue);
             this.panelStatusCard.Controls.Add(this.labelStatusCaption);
             this.panelStatusCard.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelStatusCard.Location = new System.Drawing.Point(0, 0);
@@ -408,15 +408,6 @@
             this.panelStatusCard.Shadow = 4;
             this.panelStatusCard.Size = new System.Drawing.Size(1180, 36);
             this.panelStatusCard.TabIndex = 0;
-            // 
-            // labelStatusValue
-            // 
-            this.labelStatusValue.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.labelStatusValue.Location = new System.Drawing.Point(107, 5);
-            this.labelStatusValue.Name = "labelStatusValue";
-            this.labelStatusValue.Size = new System.Drawing.Size(1054, 26);
-            this.labelStatusValue.TabIndex = 1;
-            this.labelStatusValue.Text = "系统就绪";
             // 
             // labelStatusCaption
             // 
@@ -485,7 +476,6 @@
         private System.Windows.Forms.Panel panelStatusHost;
         private AntdUI.Panel panelStatusCard;
         private AntdUI.Label labelStatusCaption;
-        private AntdUI.Label labelStatusValue;
         private AntdUI.PageHeader titlebar;
     }
 }

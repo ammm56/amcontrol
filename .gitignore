@@ -10,6 +10,9 @@
 # 排除 Visual Studio 自动生成的缓存和设置目录
 .vs/
 
+# 排除示例项目和代码
+Demo/
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/

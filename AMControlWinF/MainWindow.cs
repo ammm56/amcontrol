@@ -18,7 +18,7 @@ namespace AMControlWinF
 {
     /// <summary>
     /// WinForms 主窗体壳层。
-    /// 
+    ///
     /// 当前职责：
     /// 1. 构建一级/二级导航；
     /// 2. 承载右侧工作区与页面缓存；
@@ -28,8 +28,22 @@ namespace AMControlWinF
     /// </summary>
     public partial class MainWindow : AntdUI.Window
     {
+        [Flags]
+        private enum ShellRefreshScope
+        {
+            None = 0,
+            PrimaryMenu = 1,
+            SecondaryMenu = 2,
+            Header = 4,
+            UserMenu = 8,
+            CurrentPage = 16,
+            All = PrimaryMenu | SecondaryMenu | Header | UserMenu | CurrentPage
+        }
+
         private readonly MainWindowModel _model;
         private readonly Dictionary<string, Control> _pageCache;
+        private readonly Dictionary<string, Func<Control>> _pageFactories;
+        private readonly Dictionary<string, string> _secondaryIcons;
 
         private bool _isUpdatingUiState;
         private bool _isDarkMode;
@@ -40,10 +54,12 @@ namespace AMControlWinF
 
             _model = new MainWindowModel();
             _pageCache = new Dictionary<string, Control>(StringComparer.OrdinalIgnoreCase);
+            _pageFactories = CreatePageFactories();
+            _secondaryIcons = CreateSecondaryIconMap();
 
             BindEvents();
-            LoadModel();
             InitializeShellState();
+            LoadModel();
         }
 
         #region 初始化
@@ -65,21 +81,6 @@ namespace AMControlWinF
             buttonColorMode.Click += ButtonColorMode_Click;
             dropdownTranslate.SelectedValueChanged += DropdownTranslate_SelectedValueChanged;
             FormClosed += MainWindow_FormClosed;
-        }
-
-        /// <summary>
-        /// 首次加载导航与默认页面。
-        /// </summary>
-        private void LoadModel()
-        {
-            _model.LoadNavigation();
-
-            BuildPrimaryMenu();
-            BuildSecondaryMenu();
-
-            RefreshHeader();
-            RefreshUserMenuControl();
-            NavigateToSelectedPage();
         }
 
         /// <summary>
@@ -109,6 +110,50 @@ namespace AMControlWinF
             }
         }
 
+        /// <summary>
+        /// 首次加载导航与默认页面。
+        /// </summary>
+        private void LoadModel()
+        {
+            _model.LoadNavigation();
+            RefreshShell(ShellRefreshScope.All);
+        }
+
+        #endregion
+
+        #region Shell 刷新协调
+
+        /// <summary>
+        /// 统一壳层刷新入口。
+        /// </summary>
+        private void RefreshShell(ShellRefreshScope scope)
+        {
+            if ((scope & ShellRefreshScope.PrimaryMenu) == ShellRefreshScope.PrimaryMenu)
+            {
+                BuildPrimaryMenu();
+            }
+
+            if ((scope & ShellRefreshScope.SecondaryMenu) == ShellRefreshScope.SecondaryMenu)
+            {
+                BuildSecondaryMenu();
+            }
+
+            if ((scope & ShellRefreshScope.Header) == ShellRefreshScope.Header)
+            {
+                RefreshHeader();
+            }
+
+            if ((scope & ShellRefreshScope.UserMenu) == ShellRefreshScope.UserMenu)
+            {
+                RefreshUserMenuControl();
+            }
+
+            if ((scope & ShellRefreshScope.CurrentPage) == ShellRefreshScope.CurrentPage)
+            {
+                NavigateToSelectedPage();
+            }
+        }
+
         #endregion
 
         #region Model 协调
@@ -120,30 +165,27 @@ namespace AMControlWinF
         {
             if (e.PropertyName == nameof(MainWindowModel.PrimaryItems))
             {
-                BuildPrimaryMenu();
-                RefreshHeader();
+                RefreshShell(ShellRefreshScope.PrimaryMenu | ShellRefreshScope.Header);
                 return;
             }
 
             if (e.PropertyName == nameof(MainWindowModel.SecondaryItems))
             {
-                BuildSecondaryMenu();
-                RefreshHeader();
+                RefreshShell(ShellRefreshScope.SecondaryMenu | ShellRefreshScope.Header);
                 return;
             }
 
             if (e.PropertyName == nameof(MainWindowModel.SelectedPrimary) ||
                 e.PropertyName == nameof(MainWindowModel.SelectedSecondary))
             {
-                RefreshHeader();
-                NavigateToSelectedPage();
+                RefreshShell(ShellRefreshScope.Header | ShellRefreshScope.CurrentPage);
                 return;
             }
 
             if (e.PropertyName == nameof(MainWindowModel.CurrentUserDisplayName) ||
                 e.PropertyName == nameof(MainWindowModel.CurrentRoleDisplayName))
             {
-                RefreshUserMenuControl();
+                RefreshShell(ShellRefreshScope.UserMenu);
             }
         }
 
@@ -164,8 +206,7 @@ namespace AMControlWinF
                 menuPrimary.Items.Add(new MenuItem
                 {
                     Text = GetPrimaryText(item),
-                    Tag = item.Key,
-                    
+                    Tag = item.Key
                 });
             }
         }
@@ -190,12 +231,12 @@ namespace AMControlWinF
 
         private void MenuPrimary_SelectChanged(object sender, MenuSelectEventArgs e)
         {
-            if (e == null || e.Value == null || e.Value.Tag == null)
+            var key = GetMenuItemTag(e);
+            if (string.IsNullOrWhiteSpace(key))
             {
                 return;
             }
 
-            var key = e.Value.Tag.ToString();
             var selected = _model.PrimaryItems.FirstOrDefault(x =>
                 string.Equals(x.Key, key, StringComparison.OrdinalIgnoreCase));
 
@@ -213,19 +254,17 @@ namespace AMControlWinF
             _model.SelectedPrimary = selected;
             _model.LoadSecondaryItems(selected.Key);
 
-            BuildSecondaryMenu();
-            RefreshHeader();
-            NavigateToSelectedPage();
+            RefreshShell(ShellRefreshScope.SecondaryMenu | ShellRefreshScope.Header | ShellRefreshScope.CurrentPage);
         }
 
         private void MenuSecondary_SelectChanged(object sender, MenuSelectEventArgs e)
         {
-            if (e == null || e.Value == null || e.Value.Tag == null)
+            var pageKey = GetMenuItemTag(e);
+            if (string.IsNullOrWhiteSpace(pageKey))
             {
                 return;
             }
 
-            var pageKey = e.Value.Tag.ToString();
             var selected = _model.SecondaryItems.FirstOrDefault(x =>
                 string.Equals(x.PageKey, pageKey, StringComparison.OrdinalIgnoreCase));
 
@@ -241,13 +280,11 @@ namespace AMControlWinF
             }
 
             _model.SelectedSecondary = selected;
-            RefreshHeader();
-            NavigateToSelectedPage();
+            RefreshShell(ShellRefreshScope.Header | ShellRefreshScope.CurrentPage);
         }
 
         /// <summary>
         /// 刷新右侧工作区头部。
-        /// 第三列是一个大卡片，内部再细分头部与内容区。
         /// </summary>
         private void RefreshHeader()
         {
@@ -259,7 +296,7 @@ namespace AMControlWinF
             }
             else
             {
-                labelPrimaryTitleValue.Text = GetPrimaryText(_model.SelectedPrimary).Replace("\n", "");
+                labelPrimaryTitleValue.Text = GetPrimaryText(_model.SelectedPrimary).Replace("\n", string.Empty);
             }
 
             if (_model.SelectedSecondary == null)
@@ -291,8 +328,6 @@ namespace AMControlWinF
                 return item.Key;
             }
 
-            // 一级导航窄栏只显示文字，不显示图标。
-            // 对较长中文名称主动换行，贴近当前 WPF 布局。
             switch (item.Key)
             {
                 case "MotionConfig":
@@ -337,69 +372,85 @@ namespace AMControlWinF
                 : item.Description;
         }
 
-        private static string ResolveSecondaryIcon(string pageKey)
+        private string ResolveSecondaryIcon(string pageKey)
         {
-            switch (pageKey)
+            string icon;
+            return _secondaryIcons.TryGetValue(pageKey ?? string.Empty, out icon)
+                ? icon
+                : "AppstoreOutlined";
+        }
+
+        private static string GetMenuItemTag(MenuSelectEventArgs e)
+        {
+            if (e == null || e.Value == null || e.Value.Tag == null)
             {
-                case "Home.Overview": return "HomeOutlined";
-                case "Home.SysStatus": return "MonitorOutlined";
-
-                case "Motion.DI": return "ApiOutlined";
-                case "Motion.DO": return "SendOutlined";
-                case "Motion.Monitor": return "DashboardOutlined";
-                case "Motion.Axis": return "ControlOutlined";
-                case "Motion.Actuator": return "ThunderboltOutlined";
-
-                case "MotionConfig.Card": return "CreditCardOutlined";
-                case "MotionConfig.Axis": return "PartitionOutlined";
-                case "MotionConfig.IoMap": return "DeploymentUnitOutlined";
-                case "MotionConfig.AxisParam": return "SlidersOutlined";
-                case "MotionConfig.Actuator": return "ToolOutlined";
-
-                case "AlarmLog.Current": return "AlertOutlined";
-                case "AlarmLog.History": return "ProfileOutlined";
-                case "AlarmLog.RunLog": return "FileTextOutlined";
-
-                case "System.User": return "UserOutlined";
-                case "System.Permission": return "SafetyCertificateOutlined";
-                case "System.LoginLog": return "AuditOutlined";
-
-                case "Production.Order": return "ProfileOutlined";
-                case "Production.Recipe": return "BookOutlined";
-                case "Production.Data": return "BarChartOutlined";
-                case "Production.Report": return "LineChartOutlined";
-                case "Production.Trace": return "SearchOutlined";
-                case "Production.MesStatus": return "CloudServerOutlined";
-                case "Production.UploadLog": return "UploadOutlined";
-
-                case "Vision.Monitor": return "EyeOutlined";
-                case "Vision.Result": return "CheckCircleOutlined";
-                case "Vision.Calibrate": return "AimOutlined";
-
-                case "PLC.Monitor": return "ApiOutlined";
-                case "PLC.Register": return "DatabaseOutlined";
-                case "PLC.Status": return "WifiOutlined";
-                case "PLC.Write": return "EditOutlined";
-
-                case "Peripheral.Scanner": return "QrcodeOutlined";
-                case "Peripheral.ScanTest": return "PlayCircleOutlined";
-                case "Peripheral.Sensor": return "RadarChartOutlined";
-                case "Peripheral.SensorTrend": return "AreaChartOutlined";
-
-                case "SysConfig.Camera": return "CameraOutlined";
-                case "SysConfig.Plc": return "ApiOutlined";
-                case "SysConfig.Sensor": return "RadarChartOutlined";
-                case "SysConfig.Scanner": return "QrcodeOutlined";
-                case "SysConfig.Mes": return "CloudOutlined";
-                case "SysConfig.Runtime": return "SettingOutlined";
-
-                case "Engineer.Diagnostic": return "ToolOutlined";
-                case "Engineer.RawAxis": return "ControlOutlined";
-                case "Engineer.RawPlc": return "ApiOutlined";
-                case "Engineer.RawCamera": return "CameraOutlined";
-
-                default: return "AppstoreOutlined";
+                return string.Empty;
             }
+
+            return e.Value.Tag.ToString();
+        }
+
+        private Dictionary<string, string> CreateSecondaryIconMap()
+        {
+            return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "Home.Overview", "HomeOutlined" },
+                { "Home.SysStatus", "MonitorOutlined" },
+
+                { "Motion.DI", "ApiOutlined" },
+                { "Motion.DO", "SendOutlined" },
+                { "Motion.Monitor", "DashboardOutlined" },
+                { "Motion.Axis", "ControlOutlined" },
+                { "Motion.Actuator", "ThunderboltOutlined" },
+
+                { "MotionConfig.Card", "CreditCardOutlined" },
+                { "MotionConfig.Axis", "PartitionOutlined" },
+                { "MotionConfig.IoMap", "DeploymentUnitOutlined" },
+                { "MotionConfig.AxisParam", "SlidersOutlined" },
+                { "MotionConfig.Actuator", "ToolOutlined" },
+
+                { "AlarmLog.Current", "AlertOutlined" },
+                { "AlarmLog.History", "ProfileOutlined" },
+                { "AlarmLog.RunLog", "FileTextOutlined" },
+
+                { "System.User", "UserOutlined" },
+                { "System.Permission", "SafetyCertificateOutlined" },
+                { "System.LoginLog", "AuditOutlined" },
+
+                { "Production.Order", "ProfileOutlined" },
+                { "Production.Recipe", "BookOutlined" },
+                { "Production.Data", "BarChartOutlined" },
+                { "Production.Report", "LineChartOutlined" },
+                { "Production.Trace", "SearchOutlined" },
+                { "Production.MesStatus", "CloudServerOutlined" },
+                { "Production.UploadLog", "UploadOutlined" },
+
+                { "Vision.Monitor", "EyeOutlined" },
+                { "Vision.Result", "CheckCircleOutlined" },
+                { "Vision.Calibrate", "AimOutlined" },
+
+                { "PLC.Monitor", "ApiOutlined" },
+                { "PLC.Register", "DatabaseOutlined" },
+                { "PLC.Status", "WifiOutlined" },
+                { "PLC.Write", "EditOutlined" },
+
+                { "Peripheral.Scanner", "QrcodeOutlined" },
+                { "Peripheral.ScanTest", "PlayCircleOutlined" },
+                { "Peripheral.Sensor", "RadarChartOutlined" },
+                { "Peripheral.SensorTrend", "AreaChartOutlined" },
+
+                { "SysConfig.Camera", "CameraOutlined" },
+                { "SysConfig.Plc", "ApiOutlined" },
+                { "SysConfig.Sensor", "RadarChartOutlined" },
+                { "SysConfig.Scanner", "QrcodeOutlined" },
+                { "SysConfig.Mes", "CloudOutlined" },
+                { "SysConfig.Runtime", "SettingOutlined" },
+
+                { "Engineer.Diagnostic", "ToolOutlined" },
+                { "Engineer.RawAxis", "ControlOutlined" },
+                { "Engineer.RawPlc", "ApiOutlined" },
+                { "Engineer.RawCamera", "CameraOutlined" }
+            };
         }
 
         #endregion
@@ -415,20 +466,17 @@ namespace AMControlWinF
             var page = _model.SelectedSecondary;
             if (page == null)
             {
-                ShowPage(CreatePlaceholderPage(
-                    IsEnglishLanguage(GetCurrentLanguage())
-                        ? "No accessible page"
-                        : "当前用户没有可访问页面"), false);
-
-                labelStatusValue.Text = IsEnglishLanguage(GetCurrentLanguage())
-                    ? "No page available"
-                    : "无可用页面";
+                ShowPage(
+                    CreatePlaceholderPage(
+                        IsEnglishLanguage(GetCurrentLanguage())
+                            ? "No accessible page"
+                            : "当前用户没有可访问页面"),
+                    true);
                 return;
             }
 
             var control = GetOrCreatePage(page.PageKey);
-            ShowPage(control, true);
-            labelStatusValue.Text = (IsEnglishLanguage(GetCurrentLanguage()) ? "Current Page: " : "当前页面：") + page.PageKey;
+            ShowPage(control, false);
         }
 
         private Control GetOrCreatePage(string pageKey)
@@ -446,7 +494,7 @@ namespace AMControlWinF
             return page;
         }
 
-        private void ShowPage(Control page, bool useCache)
+        private void ShowPage(Control page, bool disposeRemovedControls)
         {
             if (page == null)
             {
@@ -459,14 +507,16 @@ namespace AMControlWinF
             {
                 foreach (Control control in panelContent.Controls.OfType<Control>().ToList())
                 {
-                    if (!ReferenceEquals(control, page))
+                    if (ReferenceEquals(control, page))
                     {
-                        panelContent.Controls.Remove(control);
+                        continue;
+                    }
 
-                        if (!useCache)
-                        {
-                            control.Dispose();
-                        }
+                    panelContent.Controls.Remove(control);
+
+                    if (disposeRemovedControls)
+                    {
+                        control.Dispose();
                     }
                 }
 
@@ -490,65 +540,50 @@ namespace AMControlWinF
         /// </summary>
         private Control CreatePage(string pageKey)
         {
-            switch (pageKey)
+            Func<Control> factory;
+            if (_pageFactories.TryGetValue(pageKey ?? string.Empty, out factory))
             {
-                case "Home.Overview":
-                    return CreatePlaceholderPage("首页 / 总览看板");
-
-                case "Home.SysStatus":
-                    return CreatePlaceholderPage("首页 / 系统状态");
-
-                case "Motion.DI":
-                    return CreatePlaceholderPage("设备 / DI 监视\r\n\r\n后续接入 DIMonitorPage");
-
-                case "Motion.DO":
-                    return CreatePlaceholderPage("设备 / DO 监视\r\n\r\n后续接入 DOMonitorPage");
-
-                case "Motion.Monitor":
-                    return CreatePlaceholderPage("设备 / 多轴总览\r\n\r\n后续接入 MotionMonitorPage");
-
-                case "Motion.Axis":
-                    return CreatePlaceholderPage("设备 / 轴控制");
-
-                case "Motion.Actuator":
-                    return CreatePlaceholderPage("设备 / 执行器控制");
-
-                case "MotionConfig.Card":
-                    return CreatePlaceholderPage("运控配置 / 控制卡配置");
-
-                case "MotionConfig.Axis":
-                    return CreatePlaceholderPage("运控配置 / 轴拓扑配置");
-
-                case "MotionConfig.IoMap":
-                    return CreatePlaceholderPage("运控配置 / IO 映射配置");
-
-                case "MotionConfig.AxisParam":
-                    return CreatePlaceholderPage("运控配置 / 轴运行参数");
-
-                case "MotionConfig.Actuator":
-                    return CreatePlaceholderPage("运控配置 / 执行器配置");
-
-                case "AlarmLog.Current":
-                    return CreatePlaceholderPage("报警与日志 / 当前报警");
-
-                case "AlarmLog.History":
-                    return CreatePlaceholderPage("报警与日志 / 报警历史");
-
-                case "AlarmLog.RunLog":
-                    return CreatePlaceholderPage("报警与日志 / 运行日志");
-
-                case "System.User":
-                    return CreatePlaceholderPage("系统 / 用户管理");
-
-                case "System.Permission":
-                    return CreatePlaceholderPage("系统 / 权限分配");
-
-                case "System.LoginLog":
-                    return CreatePlaceholderPage("系统 / 登录日志");
-
-                default:
-                    return CreatePlaceholderPage("未实现页面：\r\n\r\n" + pageKey);
+                return factory();
             }
+
+            return CreatePlaceholderPage(
+                IsEnglishLanguage(GetCurrentLanguage())
+                    ? "Page not implemented:\r\n\r\n" + pageKey
+                    : "未实现页面：\r\n\r\n" + pageKey);
+        }
+
+        private Dictionary<string, Func<Control>> CreatePageFactories()
+        {
+            return new Dictionary<string, Func<Control>>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "Home.Overview", () => CreatePagePlaceholder("首页 / 总览看板", "Home / Overview") },
+                { "Home.SysStatus", () => CreatePagePlaceholder("首页 / 系统状态", "Home / System Status") },
+
+                { "Motion.DI", () => CreatePagePlaceholder("设备 / DI 监视\r\n\r\n后续接入 DIMonitorPage", "Motion / DI Monitor\r\n\r\nDIMonitorPage will be connected next.") },
+                { "Motion.DO", () => CreatePagePlaceholder("设备 / DO 监视\r\n\r\n后续接入 DOMonitorPage", "Motion / DO Monitor\r\n\r\nDOMonitorPage will be connected next.") },
+                { "Motion.Monitor", () => CreatePagePlaceholder("设备 / 多轴总览\r\n\r\n后续接入 MotionMonitorPage", "Motion / Axis Monitor\r\n\r\nMotionMonitorPage will be connected next.") },
+                { "Motion.Axis", () => CreatePagePlaceholder("设备 / 轴控制", "Motion / Axis Control") },
+                { "Motion.Actuator", () => CreatePagePlaceholder("设备 / 执行器控制", "Motion / Actuator Control") },
+
+                { "MotionConfig.Card", () => CreatePagePlaceholder("运控配置 / 控制卡配置", "Motion Config / Card") },
+                { "MotionConfig.Axis", () => CreatePagePlaceholder("运控配置 / 轴拓扑配置", "Motion Config / Axis") },
+                { "MotionConfig.IoMap", () => CreatePagePlaceholder("运控配置 / IO 映射配置", "Motion Config / IO Map") },
+                { "MotionConfig.AxisParam", () => CreatePagePlaceholder("运控配置 / 轴运行参数", "Motion Config / Axis Parameters") },
+                { "MotionConfig.Actuator", () => CreatePagePlaceholder("运控配置 / 执行器配置", "Motion Config / Actuator") },
+
+                { "AlarmLog.Current", () => CreatePagePlaceholder("报警与日志 / 当前报警", "Alarm / Current") },
+                { "AlarmLog.History", () => CreatePagePlaceholder("报警与日志 / 报警历史", "Alarm / History") },
+                { "AlarmLog.RunLog", () => CreatePagePlaceholder("报警与日志 / 运行日志", "Alarm / Run Log") },
+
+                { "System.User", () => CreatePagePlaceholder("系统 / 用户管理", "System / User") },
+                { "System.Permission", () => CreatePagePlaceholder("系统 / 权限分配", "System / Permission") },
+                { "System.LoginLog", () => CreatePagePlaceholder("系统 / 登录日志", "System / Login Log") }
+            };
+        }
+
+        private Control CreatePagePlaceholder(string zhText, string enText)
+        {
+            return CreatePlaceholderPage(IsEnglishLanguage(GetCurrentLanguage()) ? enText : zhText);
         }
 
         /// <summary>
@@ -575,17 +610,15 @@ namespace AMControlWinF
 
         private void RecreateAllCachedPages()
         {
-            var keys = _pageCache.Keys.ToList();
-            foreach (var key in keys)
+            foreach (var pair in _pageCache.ToList())
             {
-                var control = _pageCache[key];
-                if (control != null && !control.IsDisposed)
+                if (pair.Value != null && !pair.Value.IsDisposed)
                 {
-                    control.Dispose();
+                    pair.Value.Dispose();
                 }
-
-                _pageCache.Remove(key);
             }
+
+            _pageCache.Clear();
         }
 
         #endregion
@@ -604,7 +637,7 @@ namespace AMControlWinF
 
         private void UserAvatarMenuControl_SwitchUserRequested(object sender, EventArgs e)
         {
-            ShowLoginForSwitchUser();
+            ReopenMainWindowByLogin(false, false);
         }
 
         private void UserAvatarMenuControl_ChangePasswordRequested(object sender, EventArgs e)
@@ -614,26 +647,18 @@ namespace AMControlWinF
 
         private void UserAvatarMenuControl_LogoutRequested(object sender, EventArgs e)
         {
-            LogoutAndReturnToLogin();
+            ReopenMainWindowByLogin(true, true);
         }
 
-        private void ShowLoginForSwitchUser()
+        /// <summary>
+        /// 统一处理切换用户/退出登录后的重新登录流程。
+        /// </summary>
+        private void ReopenMainWindowByLogin(bool signOutFirst, bool closeCurrentWindowWhenLoginCanceled)
         {
-            using (var loginForm = new LoginForm())
+            if (signOutFirst)
             {
-                var loginResult = loginForm.ShowDialog();
-                if (loginResult == DialogResult.OK && UserContext.Instance.IsLoggedIn)
-                {
-                    var newMainWindow = new MainWindow();
-                    newMainWindow.Show();
-                    Close();
-                }
+                UserContext.Instance.SignOut();
             }
-        }
-
-        private void LogoutAndReturnToLogin()
-        {
-            UserContext.Instance.SignOut();
 
             using (var loginForm = new LoginForm())
             {
@@ -647,7 +672,10 @@ namespace AMControlWinF
                 }
             }
 
-            Close();
+            if (closeCurrentWindowWhenLoginCanceled)
+            {
+                Close();
+            }
         }
 
         private void ShowChangePasswordPlaceholder()
@@ -672,7 +700,10 @@ namespace AMControlWinF
                 return;
             }
 
-            var value = e == null || e.Value == null ? string.Empty : e.Value.ToString();
+            var value = e == null || e.Value == null
+                ? string.Empty
+                : e.Value.ToString();
+
             var language = string.Equals(value, "English", StringComparison.OrdinalIgnoreCase)
                 ? "en-US"
                 : "zh-CN";
@@ -691,6 +722,8 @@ namespace AMControlWinF
                 language = "zh-CN";
             }
 
+            ConfigContext.Instance.Config.Setting.Language = language;
+
             try
             {
                 Localization.SetLanguage(language);
@@ -699,20 +732,15 @@ namespace AMControlWinF
             {
             }
 
-            titlebar.Text = "AM运动控制";
+            titlebar.Text = IsEnglishLanguage(language) ? "AM Motion Contorl" : "AM运动控制";
             titlebar.SubText = IsEnglishLanguage(language) ? "Version 0.0.1" : "版本 0.0.1";
-            labelStatusCaption.Text = IsEnglishLanguage(language) ? "System Status:" : "系统状态：";
+            labelStatusCaption.Text = IsEnglishLanguage(language) ? "System Ready" : "系统就绪";
 
-            BuildPrimaryMenu();
-            BuildSecondaryMenu();
-            RefreshHeader();
-            RefreshUserMenuControl();
             RecreateAllCachedPages();
-            NavigateToSelectedPage();
+            RefreshShell(ShellRefreshScope.All);
 
             if (saveToConfig)
             {
-                ConfigContext.Instance.Config.Setting.Language = language;
                 Tools.SaveConfig("config.json", ConfigContext.Instance.Config);
             }
         }
@@ -723,9 +751,7 @@ namespace AMControlWinF
 
         private void ButtonColorMode_Click(object sender, EventArgs e)
         {
-            _isDarkMode = !_isDarkMode;
-            buttonColorMode.Toggle = _isDarkMode;
-            ApplyTheme(_isDarkMode, true);
+            ApplyTheme(!_isDarkMode, true);
         }
 
         /// <summary>
@@ -738,8 +764,9 @@ namespace AMControlWinF
         private void ApplyTheme(bool isDarkMode, bool saveToConfig)
         {
             _isDarkMode = isDarkMode;
+            buttonColorMode.Toggle = isDarkMode;
+            ConfigContext.Instance.Config.Setting.Theme = isDarkMode ? "SkinDark" : "SkinDefault";
 
-            // AntdUI 全局主题开关
             if (isDarkMode)
             {
                 AntdUI.Config.IsDark = true;
@@ -753,16 +780,11 @@ namespace AMControlWinF
                 ForeColor = Color.Black;
             }
 
-            // 自定义背景纹理
             textureBackgroundMain.SetTheme(isDarkMode);
-
-            // 左下头像菜单控件
             userAvatarMenuControl.ApplyTheme(isDarkMode);
 
-            // 主壳层卡片同步
             ApplyShellTheme();
 
-            // 缓存页最小同步
             foreach (var pair in _pageCache)
             {
                 if (pair.Value != null && !pair.Value.IsDisposed)
@@ -773,7 +795,6 @@ namespace AMControlWinF
 
             if (saveToConfig)
             {
-                ConfigContext.Instance.Config.Setting.Theme = isDarkMode ? "SkinDark" : "SkinDefault";
                 Tools.SaveConfig("config.json", ConfigContext.Instance.Config);
             }
         }
@@ -809,7 +830,6 @@ namespace AMControlWinF
             labelPageTitleValue.ForeColor = primaryText;
             labelPageDescriptionValue.ForeColor = secondaryText;
             labelStatusCaption.ForeColor = secondaryText;
-            labelStatusValue.ForeColor = primaryText;
         }
 
         /// <summary>
@@ -915,15 +935,7 @@ namespace AMControlWinF
 
         private void MainWindow_FormClosed(object sender, FormClosedEventArgs e)
         {
-            foreach (var pair in _pageCache.ToList())
-            {
-                if (pair.Value != null && !pair.Value.IsDisposed)
-                {
-                    pair.Value.Dispose();
-                }
-            }
-
-            _pageCache.Clear();
+            RecreateAllCachedPages();
         }
 
         #endregion
