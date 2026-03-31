@@ -2,7 +2,6 @@
 using AM.PageModel.Main;
 using AM.PageModel.Navigation;
 using AM.Tools;
-using AMControlWinF.Views.Auth;
 using AntdUI;
 using System;
 using System.Collections.Generic;
