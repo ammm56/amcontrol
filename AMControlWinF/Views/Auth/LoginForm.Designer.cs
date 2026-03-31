@@ -17,217 +17,340 @@
             {
                 components.Dispose();
             }
+
             base.Dispose(disposing);
         }
 
         #region Windows Form Designer generated code
 
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
-            this.panelRoot = new System.Windows.Forms.TableLayoutPanel();
-            this.labelTitle = new System.Windows.Forms.Label();
-            this.labelLoginName = new System.Windows.Forms.Label();
-            this.textBoxLoginName = new System.Windows.Forms.TextBox();
-            this.labelPassword = new System.Windows.Forms.Label();
-            this.textBoxPassword = new System.Windows.Forms.TextBox();
-            this.labelStatusTitle = new System.Windows.Forms.Label();
-            this.labelStatusValue = new System.Windows.Forms.Label();
-            this.labelErrorTitle = new System.Windows.Forms.Label();
-            this.labelErrorValue = new System.Windows.Forms.Label();
-            this.panelButtons = new System.Windows.Forms.FlowLayoutPanel();
-            this.buttonCancel = new System.Windows.Forms.Button();
-            this.buttonLogin = new System.Windows.Forms.Button();
-            this.panelRoot.SuspendLayout();
-            this.panelButtons.SuspendLayout();
+            this.textureBackgroundLogin = new AMControlWinF.Views.Main.TextureBackgroundControl();
+            this.panelShell = new AntdUI.Panel();
+            this.panelLogin = new AntdUI.Panel();
+            this.labelStatusValue = new AntdUI.Label();
+            this.buttonLogin = new AntdUI.Button();
+            this.buttonCancel = new AntdUI.Button();
+            this.labelErrorValue = new AntdUI.Label();
+            this.textBoxPassword = new AntdUI.Input();
+            this.buttonPasswordIcon = new AntdUI.Button();
+            this.labelPassword = new AntdUI.Label();
+            this.textBoxLoginName = new AntdUI.Input();
+            this.buttonLoginNameIcon = new AntdUI.Button();
+            this.labelLoginName = new AntdUI.Label();
+            this.labelLoginTitle = new AntdUI.Label();
+            this.panelIntro = new AntdUI.Panel();
+            this.labelIntroBottom = new AntdUI.Label();
+            this.panelIntroCard = new AntdUI.Panel();
+            this.labelIntroAdmin = new AntdUI.Label();
+            this.labelIntroEngineer = new AntdUI.Label();
+            this.labelIntroOperator = new AntdUI.Label();
+            this.labelIntroCardTitle = new AntdUI.Label();
+            this.labelIntroSubtitle = new AntdUI.Label();
+            this.labelIntroTitle = new AntdUI.Label();
+            this.textureBackgroundLogin.SuspendLayout();
+            this.panelShell.SuspendLayout();
+            this.panelLogin.SuspendLayout();
+            this.panelIntro.SuspendLayout();
+            this.panelIntroCard.SuspendLayout();
             this.SuspendLayout();
             // 
-            // panelRoot
+            // textureBackgroundLogin
             // 
-            this.panelRoot.ColumnCount = 2;
-            this.panelRoot.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 100F));
-            this.panelRoot.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.panelRoot.Controls.Add(this.labelTitle, 0, 0);
-            this.panelRoot.Controls.Add(this.labelLoginName, 0, 1);
-            this.panelRoot.Controls.Add(this.textBoxLoginName, 1, 1);
-            this.panelRoot.Controls.Add(this.labelPassword, 0, 2);
-            this.panelRoot.Controls.Add(this.textBoxPassword, 1, 2);
-            this.panelRoot.Controls.Add(this.labelStatusTitle, 0, 3);
-            this.panelRoot.Controls.Add(this.labelStatusValue, 1, 3);
-            this.panelRoot.Controls.Add(this.labelErrorTitle, 0, 4);
-            this.panelRoot.Controls.Add(this.labelErrorValue, 1, 4);
-            this.panelRoot.Controls.Add(this.panelButtons, 0, 5);
-            this.panelRoot.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelRoot.Location = new System.Drawing.Point(12, 12);
-            this.panelRoot.Name = "panelRoot";
-            this.panelRoot.RowCount = 6;
-            this.panelRoot.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 48F));
-            this.panelRoot.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
-            this.panelRoot.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
-            this.panelRoot.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 34F));
-            this.panelRoot.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 44F));
-            this.panelRoot.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.panelRoot.Size = new System.Drawing.Size(456, 254);
-            this.panelRoot.TabIndex = 0;
+            this.textureBackgroundLogin.Controls.Add(this.panelShell);
+            this.textureBackgroundLogin.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textureBackgroundLogin.Location = new System.Drawing.Point(0, 0);
+            this.textureBackgroundLogin.Margin = new System.Windows.Forms.Padding(0);
+            this.textureBackgroundLogin.Name = "textureBackgroundLogin";
+            this.textureBackgroundLogin.Size = new System.Drawing.Size(880, 520);
+            this.textureBackgroundLogin.TabIndex = 0;
             // 
-            // labelTitle
+            // panelShell
             // 
-            this.panelRoot.SetColumnSpan(this.labelTitle, 2);
-            this.labelTitle.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.labelTitle.Font = new System.Drawing.Font("Microsoft YaHei UI", 14F, System.Drawing.FontStyle.Bold);
-            this.labelTitle.Location = new System.Drawing.Point(3, 0);
-            this.labelTitle.Name = "labelTitle";
-            this.labelTitle.Size = new System.Drawing.Size(450, 48);
-            this.labelTitle.TabIndex = 0;
-            this.labelTitle.Text = "AMControl 登录";
-            this.labelTitle.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.panelShell.Controls.Add(this.panelLogin);
+            this.panelShell.Controls.Add(this.panelIntro);
+            this.panelShell.Location = new System.Drawing.Point(24, 24);
+            this.panelShell.Margin = new System.Windows.Forms.Padding(0);
+            this.panelShell.Name = "panelShell";
+            this.panelShell.Radius = 16;
+            this.panelShell.Shadow = 8;
+            this.panelShell.Size = new System.Drawing.Size(832, 472);
+            this.panelShell.TabIndex = 0;
             // 
-            // labelLoginName
+            // panelLogin
             // 
-            this.labelLoginName.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.labelLoginName.Location = new System.Drawing.Point(3, 48);
-            this.labelLoginName.Name = "labelLoginName";
-            this.labelLoginName.Size = new System.Drawing.Size(94, 40);
-            this.labelLoginName.TabIndex = 1;
-            this.labelLoginName.Text = "登录名";
-            this.labelLoginName.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // textBoxLoginName
-            // 
-            this.textBoxLoginName.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBoxLoginName.Location = new System.Drawing.Point(103, 58);
-            this.textBoxLoginName.Margin = new System.Windows.Forms.Padding(3, 10, 3, 3);
-            this.textBoxLoginName.Name = "textBoxLoginName";
-            this.textBoxLoginName.Size = new System.Drawing.Size(350, 21);
-            this.textBoxLoginName.TabIndex = 0;
-            // 
-            // labelPassword
-            // 
-            this.labelPassword.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.labelPassword.Location = new System.Drawing.Point(3, 88);
-            this.labelPassword.Name = "labelPassword";
-            this.labelPassword.Size = new System.Drawing.Size(94, 40);
-            this.labelPassword.TabIndex = 3;
-            this.labelPassword.Text = "密码";
-            this.labelPassword.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // textBoxPassword
-            // 
-            this.textBoxPassword.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBoxPassword.Location = new System.Drawing.Point(103, 98);
-            this.textBoxPassword.Margin = new System.Windows.Forms.Padding(3, 10, 3, 3);
-            this.textBoxPassword.Name = "textBoxPassword";
-            this.textBoxPassword.Size = new System.Drawing.Size(350, 21);
-            this.textBoxPassword.TabIndex = 1;
-            this.textBoxPassword.UseSystemPasswordChar = true;
-            // 
-            // labelStatusTitle
-            // 
-            this.labelStatusTitle.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.labelStatusTitle.Location = new System.Drawing.Point(3, 128);
-            this.labelStatusTitle.Name = "labelStatusTitle";
-            this.labelStatusTitle.Size = new System.Drawing.Size(94, 34);
-            this.labelStatusTitle.TabIndex = 5;
-            this.labelStatusTitle.Text = "状态";
-            this.labelStatusTitle.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.panelLogin.Controls.Add(this.labelStatusValue);
+            this.panelLogin.Controls.Add(this.buttonLogin);
+            this.panelLogin.Controls.Add(this.buttonCancel);
+            this.panelLogin.Controls.Add(this.labelErrorValue);
+            this.panelLogin.Controls.Add(this.textBoxPassword);
+            this.panelLogin.Controls.Add(this.buttonPasswordIcon);
+            this.panelLogin.Controls.Add(this.labelPassword);
+            this.panelLogin.Controls.Add(this.textBoxLoginName);
+            this.panelLogin.Controls.Add(this.buttonLoginNameIcon);
+            this.panelLogin.Controls.Add(this.labelLoginName);
+            this.panelLogin.Controls.Add(this.labelLoginTitle);
+            this.panelLogin.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelLogin.Location = new System.Drawing.Point(437, 0);
+            this.panelLogin.Margin = new System.Windows.Forms.Padding(0);
+            this.panelLogin.Name = "panelLogin";
+            this.panelLogin.Padding = new System.Windows.Forms.Padding(36, 28, 36, 28);
+            this.panelLogin.Radius = 0;
+            this.panelLogin.Size = new System.Drawing.Size(395, 472);
+            this.panelLogin.TabIndex = 1;
             // 
             // labelStatusValue
             // 
-            this.labelStatusValue.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.labelStatusValue.Location = new System.Drawing.Point(103, 128);
+            this.labelStatusValue.Location = new System.Drawing.Point(36, 304);
+            this.labelStatusValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelStatusValue.Name = "labelStatusValue";
-            this.labelStatusValue.Size = new System.Drawing.Size(350, 34);
-            this.labelStatusValue.TabIndex = 6;
+            this.labelStatusValue.Size = new System.Drawing.Size(323, 24);
+            this.labelStatusValue.TabIndex = 10;
             this.labelStatusValue.Text = "请输入登录信息";
-            this.labelStatusValue.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // labelErrorTitle
-            // 
-            this.labelErrorTitle.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.labelErrorTitle.Location = new System.Drawing.Point(3, 162);
-            this.labelErrorTitle.Name = "labelErrorTitle";
-            this.labelErrorTitle.Size = new System.Drawing.Size(94, 44);
-            this.labelErrorTitle.TabIndex = 7;
-            this.labelErrorTitle.Text = "错误";
-            this.labelErrorTitle.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // labelErrorValue
-            // 
-            this.labelErrorValue.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.labelErrorValue.ForeColor = System.Drawing.Color.Firebrick;
-            this.labelErrorValue.Location = new System.Drawing.Point(103, 162);
-            this.labelErrorValue.Name = "labelErrorValue";
-            this.labelErrorValue.Size = new System.Drawing.Size(350, 44);
-            this.labelErrorValue.TabIndex = 8;
-            this.labelErrorValue.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // panelButtons
-            // 
-            this.panelRoot.SetColumnSpan(this.panelButtons, 2);
-            this.panelButtons.Controls.Add(this.buttonCancel);
-            this.panelButtons.Controls.Add(this.buttonLogin);
-            this.panelButtons.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelButtons.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
-            this.panelButtons.Location = new System.Drawing.Point(3, 209);
-            this.panelButtons.Name = "panelButtons";
-            this.panelButtons.Size = new System.Drawing.Size(450, 42);
-            this.panelButtons.TabIndex = 9;
-            // 
-            // buttonCancel
-            // 
-            this.buttonCancel.Location = new System.Drawing.Point(372, 3);
-            this.buttonCancel.Name = "buttonCancel";
-            this.buttonCancel.Size = new System.Drawing.Size(75, 30);
-            this.buttonCancel.TabIndex = 3;
-            this.buttonCancel.Text = "取消";
-            this.buttonCancel.UseVisualStyleBackColor = true;
             // 
             // buttonLogin
             // 
-            this.buttonLogin.Location = new System.Drawing.Point(291, 3);
+            this.buttonLogin.IconSvg = "LoginOutlined";
+            this.buttonLogin.Location = new System.Drawing.Point(223, 252);
+            this.buttonLogin.Margin = new System.Windows.Forms.Padding(0);
             this.buttonLogin.Name = "buttonLogin";
-            this.buttonLogin.Size = new System.Drawing.Size(75, 30);
-            this.buttonLogin.TabIndex = 2;
+            this.buttonLogin.Radius = 8;
+            this.buttonLogin.Size = new System.Drawing.Size(136, 38);
+            this.buttonLogin.TabIndex = 3;
             this.buttonLogin.Text = "登录";
-            this.buttonLogin.UseVisualStyleBackColor = true;
+            this.buttonLogin.Type = AntdUI.TTypeMini.Primary;
+            this.buttonLogin.WaveSize = 0;
+            // 
+            // buttonCancel
+            // 
+            this.buttonCancel.IconSvg = "CloseOutlined";
+            this.buttonCancel.Location = new System.Drawing.Point(36, 252);
+            this.buttonCancel.Margin = new System.Windows.Forms.Padding(0);
+            this.buttonCancel.Name = "buttonCancel";
+            this.buttonCancel.Radius = 8;
+            this.buttonCancel.Size = new System.Drawing.Size(136, 38);
+            this.buttonCancel.TabIndex = 2;
+            this.buttonCancel.Text = "取消";
+            this.buttonCancel.WaveSize = 0;
+            // 
+            // labelErrorValue
+            // 
+            this.labelErrorValue.Location = new System.Drawing.Point(36, 206);
+            this.labelErrorValue.Margin = new System.Windows.Forms.Padding(0);
+            this.labelErrorValue.Name = "labelErrorValue";
+            this.labelErrorValue.Size = new System.Drawing.Size(323, 28);
+            this.labelErrorValue.TabIndex = 9;
+            // 
+            // textBoxPassword
+            // 
+            this.textBoxPassword.Location = new System.Drawing.Point(84, 152);
+            this.textBoxPassword.Margin = new System.Windows.Forms.Padding(0);
+            this.textBoxPassword.Name = "textBoxPassword";
+            this.textBoxPassword.PasswordChar = '●';
+            this.textBoxPassword.Size = new System.Drawing.Size(275, 36);
+            this.textBoxPassword.TabIndex = 1;
+            // 
+            // buttonPasswordIcon
+            // 
+            this.buttonPasswordIcon.IconSvg = "LockOutlined";
+            this.buttonPasswordIcon.Location = new System.Drawing.Point(36, 152);
+            this.buttonPasswordIcon.Margin = new System.Windows.Forms.Padding(0);
+            this.buttonPasswordIcon.Name = "buttonPasswordIcon";
+            this.buttonPasswordIcon.Radius = 8;
+            this.buttonPasswordIcon.Size = new System.Drawing.Size(40, 36);
+            this.buttonPasswordIcon.TabIndex = 8;
+            this.buttonPasswordIcon.Text = "";
+            this.buttonPasswordIcon.WaveSize = 0;
+            // 
+            // labelPassword
+            // 
+            this.labelPassword.Location = new System.Drawing.Point(36, 122);
+            this.labelPassword.Margin = new System.Windows.Forms.Padding(0);
+            this.labelPassword.Name = "labelPassword";
+            this.labelPassword.Size = new System.Drawing.Size(72, 22);
+            this.labelPassword.TabIndex = 7;
+            this.labelPassword.Text = "密码";
+            // 
+            // textBoxLoginName
+            // 
+            this.textBoxLoginName.Location = new System.Drawing.Point(84, 84);
+            this.textBoxLoginName.Margin = new System.Windows.Forms.Padding(0);
+            this.textBoxLoginName.Name = "textBoxLoginName";
+            this.textBoxLoginName.Size = new System.Drawing.Size(275, 36);
+            this.textBoxLoginName.TabIndex = 0;
+            // 
+            // buttonLoginNameIcon
+            // 
+            this.buttonLoginNameIcon.IconSvg = "UserOutlined";
+            this.buttonLoginNameIcon.Location = new System.Drawing.Point(36, 84);
+            this.buttonLoginNameIcon.Margin = new System.Windows.Forms.Padding(0);
+            this.buttonLoginNameIcon.Name = "buttonLoginNameIcon";
+            this.buttonLoginNameIcon.Radius = 8;
+            this.buttonLoginNameIcon.Size = new System.Drawing.Size(40, 36);
+            this.buttonLoginNameIcon.TabIndex = 5;
+            this.buttonLoginNameIcon.Text = "";
+            this.buttonLoginNameIcon.WaveSize = 0;
+            // 
+            // labelLoginName
+            // 
+            this.labelLoginName.Location = new System.Drawing.Point(36, 54);
+            this.labelLoginName.Margin = new System.Windows.Forms.Padding(0);
+            this.labelLoginName.Name = "labelLoginName";
+            this.labelLoginName.Size = new System.Drawing.Size(72, 22);
+            this.labelLoginName.TabIndex = 4;
+            this.labelLoginName.Text = "登录名";
+            // 
+            // labelLoginTitle
+            // 
+            this.labelLoginTitle.Font = new System.Drawing.Font("Microsoft YaHei UI", 18F, System.Drawing.FontStyle.Bold);
+            this.labelLoginTitle.Location = new System.Drawing.Point(36, 0);
+            this.labelLoginTitle.Margin = new System.Windows.Forms.Padding(0);
+            this.labelLoginTitle.Name = "labelLoginTitle";
+            this.labelLoginTitle.Size = new System.Drawing.Size(120, 36);
+            this.labelLoginTitle.TabIndex = 0;
+            this.labelLoginTitle.Text = "登录";
+            // 
+            // panelIntro
+            // 
+            this.panelIntro.Controls.Add(this.labelIntroBottom);
+            this.panelIntro.Controls.Add(this.panelIntroCard);
+            this.panelIntro.Controls.Add(this.labelIntroSubtitle);
+            this.panelIntro.Controls.Add(this.labelIntroTitle);
+            this.panelIntro.Dock = System.Windows.Forms.DockStyle.Left;
+            this.panelIntro.Location = new System.Drawing.Point(0, 0);
+            this.panelIntro.Margin = new System.Windows.Forms.Padding(0);
+            this.panelIntro.Name = "panelIntro";
+            this.panelIntro.Padding = new System.Windows.Forms.Padding(28);
+            this.panelIntro.Radius = 0;
+            this.panelIntro.Size = new System.Drawing.Size(437, 472);
+            this.panelIntro.TabIndex = 0;
+            // 
+            // labelIntroBottom
+            // 
+            this.labelIntroBottom.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Bottom)));
+            this.labelIntroBottom.Location = new System.Drawing.Point(28, 416);
+            this.labelIntroBottom.Margin = new System.Windows.Forms.Padding(0);
+            this.labelIntroBottom.Name = "labelIntroBottom";
+            this.labelIntroBottom.Size = new System.Drawing.Size(220, 22);
+            this.labelIntroBottom.TabIndex = 3;
+            this.labelIntroBottom.Text = "请使用有效账户登录系统";
+            // 
+            // panelIntroCard
+            // 
+            this.panelIntroCard.Controls.Add(this.labelIntroAdmin);
+            this.panelIntroCard.Controls.Add(this.labelIntroEngineer);
+            this.panelIntroCard.Controls.Add(this.labelIntroOperator);
+            this.panelIntroCard.Controls.Add(this.labelIntroCardTitle);
+            this.panelIntroCard.Location = new System.Drawing.Point(28, 122);
+            this.panelIntroCard.Margin = new System.Windows.Forms.Padding(0);
+            this.panelIntroCard.Name = "panelIntroCard";
+            this.panelIntroCard.Padding = new System.Windows.Forms.Padding(16);
+            this.panelIntroCard.Radius = 10;
+            this.panelIntroCard.Size = new System.Drawing.Size(348, 160);
+            this.panelIntroCard.TabIndex = 2;
+            // 
+            // labelIntroAdmin
+            // 
+            this.labelIntroAdmin.Location = new System.Drawing.Point(16, 114);
+            this.labelIntroAdmin.Margin = new System.Windows.Forms.Padding(0);
+            this.labelIntroAdmin.Name = "labelIntroAdmin";
+            this.labelIntroAdmin.Size = new System.Drawing.Size(300, 22);
+            this.labelIntroAdmin.TabIndex = 3;
+            this.labelIntroAdmin.Text = "• 管理员：增加配置与系统管理能力";
+            // 
+            // labelIntroEngineer
+            // 
+            this.labelIntroEngineer.Location = new System.Drawing.Point(16, 86);
+            this.labelIntroEngineer.Margin = new System.Windows.Forms.Padding(0);
+            this.labelIntroEngineer.Name = "labelIntroEngineer";
+            this.labelIntroEngineer.Size = new System.Drawing.Size(300, 22);
+            this.labelIntroEngineer.TabIndex = 2;
+            this.labelIntroEngineer.Text = "• 工程师：增加视觉、PLC、工程调试";
+            // 
+            // labelIntroOperator
+            // 
+            this.labelIntroOperator.Location = new System.Drawing.Point(16, 58);
+            this.labelIntroOperator.Margin = new System.Windows.Forms.Padding(0);
+            this.labelIntroOperator.Name = "labelIntroOperator";
+            this.labelIntroOperator.Size = new System.Drawing.Size(300, 22);
+            this.labelIntroOperator.TabIndex = 1;
+            this.labelIntroOperator.Text = "• 操作员：生产、运动、IO、报警日志";
+            // 
+            // labelIntroCardTitle
+            // 
+            this.labelIntroCardTitle.Font = new System.Drawing.Font("Microsoft YaHei UI", 10F, System.Drawing.FontStyle.Bold);
+            this.labelIntroCardTitle.Location = new System.Drawing.Point(16, 16);
+            this.labelIntroCardTitle.Margin = new System.Windows.Forms.Padding(0);
+            this.labelIntroCardTitle.Name = "labelIntroCardTitle";
+            this.labelIntroCardTitle.Size = new System.Drawing.Size(316, 28);
+            this.labelIntroCardTitle.TabIndex = 0;
+            this.labelIntroCardTitle.Text = "登录后将根据用户角色显示不同工作区";
+            // 
+            // labelIntroSubtitle
+            // 
+            this.labelIntroSubtitle.Location = new System.Drawing.Point(28, 72);
+            this.labelIntroSubtitle.Margin = new System.Windows.Forms.Padding(0);
+            this.labelIntroSubtitle.Name = "labelIntroSubtitle";
+            this.labelIntroSubtitle.Size = new System.Drawing.Size(260, 24);
+            this.labelIntroSubtitle.TabIndex = 1;
+            this.labelIntroSubtitle.Text = "设备控制 · 用户登录 · 权限访问";
+            // 
+            // labelIntroTitle
+            // 
+            this.labelIntroTitle.Font = new System.Drawing.Font("Microsoft YaHei UI", 24F, System.Drawing.FontStyle.Bold);
+            this.labelIntroTitle.Location = new System.Drawing.Point(28, 28);
+            this.labelIntroTitle.Margin = new System.Windows.Forms.Padding(0);
+            this.labelIntroTitle.Name = "labelIntroTitle";
+            this.labelIntroTitle.Size = new System.Drawing.Size(260, 40);
+            this.labelIntroTitle.TabIndex = 0;
+            this.labelIntroTitle.Text = "AM运动控制";
             // 
             // LoginForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(480, 278);
-            this.Controls.Add(this.panelRoot);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
+            this.ClientSize = new System.Drawing.Size(880, 520);
+            this.ControlBox = false;
+            this.Controls.Add(this.textureBackgroundLogin);
+            this.Font = new System.Drawing.Font("Microsoft YaHei UI", 10F);
+            this.Margin = new System.Windows.Forms.Padding(0);
+            this.MaximumSize = new System.Drawing.Size(880, 520);
+            this.MinimumSize = new System.Drawing.Size(880, 520);
             this.Name = "LoginForm";
-            this.Padding = new System.Windows.Forms.Padding(12);
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "登录";
-            this.panelRoot.ResumeLayout(false);
-            this.panelRoot.PerformLayout();
-            this.panelButtons.ResumeLayout(false);
+            this.Text = "用户登录";
+            this.textureBackgroundLogin.ResumeLayout(false);
+            this.panelShell.ResumeLayout(false);
+            this.panelLogin.ResumeLayout(false);
+            this.panelIntro.ResumeLayout(false);
+            this.panelIntroCard.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private System.Windows.Forms.TableLayoutPanel panelRoot;
-        private System.Windows.Forms.Label labelTitle;
-        private System.Windows.Forms.Label labelLoginName;
-        private System.Windows.Forms.TextBox textBoxLoginName;
-        private System.Windows.Forms.Label labelPassword;
-        private System.Windows.Forms.TextBox textBoxPassword;
-        private System.Windows.Forms.Label labelStatusTitle;
-        private System.Windows.Forms.Label labelStatusValue;
-        private System.Windows.Forms.Label labelErrorTitle;
-        private System.Windows.Forms.Label labelErrorValue;
-        private System.Windows.Forms.FlowLayoutPanel panelButtons;
-        private System.Windows.Forms.Button buttonCancel;
-        private System.Windows.Forms.Button buttonLogin;
+        private AMControlWinF.Views.Main.TextureBackgroundControl textureBackgroundLogin;
+        private AntdUI.Panel panelShell;
+        private AntdUI.Panel panelIntro;
+        private AntdUI.Label labelIntroTitle;
+        private AntdUI.Label labelIntroSubtitle;
+        private AntdUI.Panel panelIntroCard;
+        private AntdUI.Label labelIntroCardTitle;
+        private AntdUI.Label labelIntroOperator;
+        private AntdUI.Label labelIntroEngineer;
+        private AntdUI.Label labelIntroAdmin;
+        private AntdUI.Label labelIntroBottom;
+        private AntdUI.Panel panelLogin;
+        private AntdUI.Label labelLoginTitle;
+        private AntdUI.Label labelLoginName;
+        private AntdUI.Button buttonLoginNameIcon;
+        private AntdUI.Input textBoxLoginName;
+        private AntdUI.Label labelPassword;
+        private AntdUI.Button buttonPasswordIcon;
+        private AntdUI.Input textBoxPassword;
+        private AntdUI.Label labelErrorValue;
+        private AntdUI.Button buttonCancel;
+        private AntdUI.Button buttonLogin;
+        private AntdUI.Label labelStatusValue;
     }
 }
