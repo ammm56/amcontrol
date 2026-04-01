@@ -100,58 +100,57 @@
             // 
             // gridMainHost
             // 
+            this.gridMainHost.Back = System.Drawing.Color.Transparent;
             this.gridMainHost.BackColor = System.Drawing.Color.Transparent;
             this.gridMainHost.Controls.Add(this.panelStatusCard);
             this.gridMainHost.Controls.Add(this.panelLeftCard);
             this.gridMainHost.Controls.Add(this.panelSecondaryNavCard);
             this.gridMainHost.Controls.Add(this.panelWorkCard);
             this.gridMainHost.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gridMainHost.Gap = 2;
+            this.gridMainHost.Gap = 8;
             this.gridMainHost.Location = new System.Drawing.Point(0, 0);
             this.gridMainHost.Name = "gridMainHost";
             this.gridMainHost.Padding = new System.Windows.Forms.Padding(8);
             this.gridMainHost.Size = new System.Drawing.Size(1200, 752);
             this.gridMainHost.Span = "100% 230 86 ;100%-100% 40";
             this.gridMainHost.TabIndex = 0;
-            this.gridMainHost.Text = "gridMainHost";
             // 
             // panelStatusCard
             // 
-            this.panelStatusCard.Back = System.Drawing.Color.Transparent;
             this.panelStatusCard.Controls.Add(this.labelStatusValue);
             this.panelStatusCard.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelStatusCard.Location = new System.Drawing.Point(10, 706);
+            this.panelStatusCard.Location = new System.Drawing.Point(16, 712);
             this.panelStatusCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelStatusCard.Name = "panelStatusCard";
             this.panelStatusCard.Padding = new System.Windows.Forms.Padding(14, 0, 14, 0);
             this.panelStatusCard.Radius = 12;
             this.panelStatusCard.Shadow = 4;
-            this.panelStatusCard.Size = new System.Drawing.Size(1180, 36);
+            this.panelStatusCard.Size = new System.Drawing.Size(1168, 24);
             this.panelStatusCard.TabIndex = 3;
             // 
             // labelStatusValue
             // 
+            this.labelStatusValue.BackColor = System.Drawing.Color.Transparent;
             this.labelStatusValue.Dock = System.Windows.Forms.DockStyle.Fill;
             this.labelStatusValue.Location = new System.Drawing.Point(18, 4);
             this.labelStatusValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelStatusValue.Name = "labelStatusValue";
-            this.labelStatusValue.Size = new System.Drawing.Size(1144, 28);
+            this.labelStatusValue.Size = new System.Drawing.Size(1132, 16);
             this.labelStatusValue.TabIndex = 0;
             this.labelStatusValue.Text = "应用已启动，等待操作。";
             // 
             // panelLeftCard
             // 
-            this.panelLeftCard.Back = System.Drawing.Color.Transparent;
+            this.panelLeftCard.BackColor = System.Drawing.Color.Transparent;
             this.panelLeftCard.Controls.Add(this.menuPrimary);
             this.panelLeftCard.Controls.Add(this.panelAvatarHost);
             this.panelLeftCard.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelLeftCard.Location = new System.Drawing.Point(1108, 10);
+            this.panelLeftCard.Location = new System.Drawing.Point(1114, 16);
             this.panelLeftCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelLeftCard.Name = "panelLeftCard";
-            this.panelLeftCard.Padding = new System.Windows.Forms.Padding(8, 9, 8, 9);
-            this.panelLeftCard.Radius = 14;
-            this.panelLeftCard.Shadow = 6;
-            this.panelLeftCard.Size = new System.Drawing.Size(82, 692);
+            this.panelLeftCard.Radius = 16;
+            this.panelLeftCard.Shadow = 8;
+            this.panelLeftCard.Size = new System.Drawing.Size(70, 680);
             this.panelLeftCard.TabIndex = 2;
             // 
             // menuPrimary
@@ -159,11 +158,11 @@
             this.menuPrimary.Dock = System.Windows.Forms.DockStyle.Fill;
             this.menuPrimary.Font = new System.Drawing.Font("Microsoft YaHei UI", 10F);
             this.menuPrimary.Indent = true;
-            this.menuPrimary.Location = new System.Drawing.Point(14, 15);
+            this.menuPrimary.Location = new System.Drawing.Point(8, 8);
             this.menuPrimary.Margin = new System.Windows.Forms.Padding(0);
             this.menuPrimary.Name = "menuPrimary";
             this.menuPrimary.Padding = new System.Windows.Forms.Padding(0, 2, 0, 2);
-            this.menuPrimary.Size = new System.Drawing.Size(54, 620);
+            this.menuPrimary.Size = new System.Drawing.Size(54, 622);
             this.menuPrimary.TabIndex = 0;
             this.menuPrimary.Unique = true;
             // 
@@ -172,7 +171,7 @@
             this.panelAvatarHost.Back = System.Drawing.Color.Transparent;
             this.panelAvatarHost.Controls.Add(this.userAvatarMenuControl);
             this.panelAvatarHost.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panelAvatarHost.Location = new System.Drawing.Point(14, 635);
+            this.panelAvatarHost.Location = new System.Drawing.Point(8, 630);
             this.panelAvatarHost.Margin = new System.Windows.Forms.Padding(0);
             this.panelAvatarHost.Name = "panelAvatarHost";
             this.panelAvatarHost.Padding = new System.Windows.Forms.Padding(0, 2, 0, 2);
@@ -195,17 +194,16 @@
             // 
             // panelSecondaryNavCard
             // 
-            this.panelSecondaryNavCard.Back = System.Drawing.Color.Transparent;
             this.panelSecondaryNavCard.Controls.Add(this.menuSecondary);
             this.panelSecondaryNavCard.Controls.Add(this.panelSecondaryHeader);
             this.panelSecondaryNavCard.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelSecondaryNavCard.Location = new System.Drawing.Point(878, 10);
+            this.panelSecondaryNavCard.Location = new System.Drawing.Point(884, 16);
             this.panelSecondaryNavCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelSecondaryNavCard.Name = "panelSecondaryNavCard";
             this.panelSecondaryNavCard.Padding = new System.Windows.Forms.Padding(7);
-            this.panelSecondaryNavCard.Radius = 14;
-            this.panelSecondaryNavCard.Shadow = 6;
-            this.panelSecondaryNavCard.Size = new System.Drawing.Size(226, 692);
+            this.panelSecondaryNavCard.Radius = 16;
+            this.panelSecondaryNavCard.Shadow = 8;
+            this.panelSecondaryNavCard.Size = new System.Drawing.Size(214, 680);
             this.panelSecondaryNavCard.TabIndex = 1;
             // 
             // menuSecondary
@@ -213,11 +211,11 @@
             this.menuSecondary.Dock = System.Windows.Forms.DockStyle.Fill;
             this.menuSecondary.Font = new System.Drawing.Font("Microsoft YaHei UI", 10F);
             this.menuSecondary.Indent = true;
-            this.menuSecondary.Location = new System.Drawing.Point(13, 69);
+            this.menuSecondary.Location = new System.Drawing.Point(15, 71);
             this.menuSecondary.Margin = new System.Windows.Forms.Padding(0);
             this.menuSecondary.Name = "menuSecondary";
             this.menuSecondary.Padding = new System.Windows.Forms.Padding(0, 2, 0, 2);
-            this.menuSecondary.Size = new System.Drawing.Size(200, 610);
+            this.menuSecondary.Size = new System.Drawing.Size(184, 594);
             this.menuSecondary.TabIndex = 1;
             this.menuSecondary.Unique = true;
             // 
@@ -226,12 +224,12 @@
             this.panelSecondaryHeader.Back = System.Drawing.Color.Transparent;
             this.panelSecondaryHeader.Controls.Add(this.labelPrimaryTitleValue);
             this.panelSecondaryHeader.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panelSecondaryHeader.Location = new System.Drawing.Point(13, 13);
+            this.panelSecondaryHeader.Location = new System.Drawing.Point(15, 15);
             this.panelSecondaryHeader.Margin = new System.Windows.Forms.Padding(0);
             this.panelSecondaryHeader.Name = "panelSecondaryHeader";
             this.panelSecondaryHeader.Padding = new System.Windows.Forms.Padding(18, 0, 18, 0);
             this.panelSecondaryHeader.Radius = 0;
-            this.panelSecondaryHeader.Size = new System.Drawing.Size(200, 56);
+            this.panelSecondaryHeader.Size = new System.Drawing.Size(184, 56);
             this.panelSecondaryHeader.TabIndex = 0;
             // 
             // labelPrimaryTitleValue
@@ -241,33 +239,31 @@
             this.labelPrimaryTitleValue.Font = new System.Drawing.Font("Microsoft YaHei UI", 16F, System.Drawing.FontStyle.Bold);
             this.labelPrimaryTitleValue.Location = new System.Drawing.Point(18, 0);
             this.labelPrimaryTitleValue.Name = "labelPrimaryTitleValue";
-            this.labelPrimaryTitleValue.Size = new System.Drawing.Size(164, 56);
+            this.labelPrimaryTitleValue.Size = new System.Drawing.Size(148, 56);
             this.labelPrimaryTitleValue.TabIndex = 0;
             this.labelPrimaryTitleValue.Text = "首页";
             // 
             // panelWorkCard
             // 
-            this.panelWorkCard.Back = System.Drawing.Color.Transparent;
             this.panelWorkCard.Controls.Add(this.panelContent);
             this.panelWorkCard.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelWorkCard.Location = new System.Drawing.Point(10, 10);
+            this.panelWorkCard.Location = new System.Drawing.Point(16, 16);
             this.panelWorkCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelWorkCard.Name = "panelWorkCard";
             this.panelWorkCard.Padding = new System.Windows.Forms.Padding(10);
             this.panelWorkCard.Radius = 16;
             this.panelWorkCard.Shadow = 8;
-            this.panelWorkCard.Size = new System.Drawing.Size(864, 692);
+            this.panelWorkCard.Size = new System.Drawing.Size(852, 680);
             this.panelWorkCard.TabIndex = 0;
             // 
             // panelContent
             // 
-            this.panelContent.Back = System.Drawing.Color.Transparent;
             this.panelContent.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelContent.Location = new System.Drawing.Point(18, 18);
             this.panelContent.Margin = new System.Windows.Forms.Padding(0);
             this.panelContent.Name = "panelContent";
             this.panelContent.Radius = 0;
-            this.panelContent.Size = new System.Drawing.Size(828, 656);
+            this.panelContent.Size = new System.Drawing.Size(816, 644);
             this.panelContent.TabIndex = 0;
             // 
             // MainWindow

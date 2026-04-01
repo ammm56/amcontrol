@@ -4,7 +4,6 @@ using AM.PageModel.Main;
 using AM.PageModel.Navigation;
 using AM.Tools;
 using AMControlWinF.Tools;
-using AMControlWinF.Views.Am;
 using AMControlWinF.Views.Main;
 using AntdUI;
 using System;
@@ -29,8 +28,8 @@ namespace AMControlWinF
     /// 主题切换策略（参考 AntdUI Demo ThemeHelper）：
     ///   - 统一委托 AppThemeHelper.Apply() → 原生 AntdUI 控件全局自动跟随；
     ///   - 悬浮卡片通过 AppThemeHelper.ApplyCardPanel() 同时更新 Back 与 BackColor；
-    ///   - BackColor 作为 WinForms 继承链起点，自动传递给子页面内的卡片控件；
-    ///   - 实现 IPageTheme 的页面在切换/首次加载时额外通知。
+    ///   - BackColor 作为 WinForms 继承链起点，自动传递给子页面内的卡片控件，
+    ///     无需子页面实现任何主题接口。
     /// </summary>
     public partial class MainWindow : AntdUI.Window
     {
@@ -392,11 +391,6 @@ namespace AMControlWinF
             page.Dock = DockStyle.Fill;
             _pageCache[pageKey] = page;
 
-            // 新页面立即应用当前主题（可能在暗色模式下首次打开）
-            var themeAware = page as AMControlWinF.Tools.IPageTheme;
-            if (themeAware != null)
-                themeAware.OnThemeChanged(_isDarkMode);
-
             return page;
         }
 
@@ -465,7 +459,7 @@ namespace AMControlWinF
                 { "AlarmLog.History",       () => CreatePlaceholderPage("报警与日志 / 报警历史") },
                 { "AlarmLog.RunLog",        () => CreatePlaceholderPage("报警与日志 / 运行日志") },
 
-                { "System.User",            () => new UserManagementPage() },
+                { "System.User",            () => CreatePlaceholderPage("系统 / 用户管理") },
                 { "System.Permission",      () => CreatePlaceholderPage("系统 / 权限分配") },
                 { "System.LoginLog",        () => CreatePlaceholderPage("系统 / 登录日志") }
             };
@@ -700,16 +694,16 @@ namespace AMControlWinF
         }
 
         /// <summary>
-        /// 切换明/暗主题。
+        /// 切换明/暗主题（参考 AntdUI Demo ThemeHelper.SetColorMode）。
+        ///
         /// 步骤：
-        ///   1. AppThemeHelper.Apply() → AntdUI 全局 + Window 基础色（与 Demo ThemeHelper 一致）；
-        ///   2. TextureBackgroundControl（自定义控件）手动同步；
-        ///   3. ApplyCardPanel() → 同时更新 Back（AntdUI 自绘）+ BackColor（WinForms 继承链），
-        ///      BackColor 通过父→子继承链传递给页面内未显式设色的 AntdUI.Panel，
-        ///      使 UserManagementPage 等子页面的 stat 卡片自动获得正确底色；
-        ///   4. 通知实现 IPageTheme 的已缓存页面（针对 BackColor 链无法覆盖的嵌套场景）；
-        ///   5. 状态栏语义色独立维护；
-        ///   6. 持久化。
+        ///   1. AppThemeHelper.Apply()      → AntdUI 全局 Config + Window 基础色；
+        ///   2. TextureBackgroundControl     → 自定义纹理背景同步；
+        ///   3. AppThemeHelper.ApplyCardPanel → 4 张悬浮卡片的 Back（自绘填充）
+        ///      + BackColor（WinForms 继承链向子页面传播，自动覆盖子页面内
+        ///        未显式设色的 Panel/控件，无需逐页实现主题接口）；
+        ///   4. 状态栏语义色独立维护；
+        ///   5. 持久化。
         /// </summary>
         private void ApplyTheme(bool isDarkMode, bool saveToConfig)
         {
@@ -721,37 +715,21 @@ namespace AMControlWinF
             // 2. 自定义纹理背景
             textureBackgroundMain.SetTheme(isDarkMode);
 
-            // 3. 悬浮卡片 Back + BackColor 双属性同步
+            // 3. 悬浮卡片 Back + BackColor（BackColor 向子页面自动传播）
             AppThemeHelper.ApplyCardPanel(panelWorkCard, isDarkMode);
             AppThemeHelper.ApplyCardPanel(panelSecondaryNavCard, isDarkMode);
             AppThemeHelper.ApplyCardPanel(panelLeftCard, isDarkMode);
             AppThemeHelper.ApplyCardPanel(panelStatusCard, isDarkMode);
 
-            // 4. 通知已缓存页面
-            NotifyCachedPagesThemeChanged(isDarkMode);
-
-            // 5. 状态栏语义色
+            // 4. 状态栏语义色
             labelStatusValue.ForeColor = GetStatusTextColor(_lastStatusMessageType);
 
-            // 6. 持久化
+            // 5. 持久化
             buttonColorMode.Toggle = isDarkMode;
             ConfigContext.Instance.Config.Setting.Theme = isDarkMode ? "SkinDark" : "SkinDefault";
 
             if (saveToConfig)
                 AM.Tools.Tools.SaveConfig("config.json", ConfigContext.Instance.Config);
-        }
-
-        private void NotifyCachedPagesThemeChanged(bool isDarkMode)
-        {
-            foreach (var pair in _pageCache)
-            {
-                if (pair.Value == null || pair.Value.IsDisposed)
-                    continue;
-
-                var themeAware = pair.Value as AMControlWinF.Tools.IPageTheme;
-                if (themeAware != null)
-                    themeAware.OnThemeChanged(isDarkMode);
-            }
         }
 
         #endregion
