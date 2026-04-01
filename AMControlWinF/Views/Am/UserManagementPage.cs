@@ -1,5 +1,6 @@
 ﻿using AM.Model.Auth;
 using AM.PageModel.Am;
+using AMControlWinF.Tools;
 using AntdUI;
 using System;
 using System.Threading.Tasks;
@@ -10,8 +11,10 @@ namespace AMControlWinF.Views.Am
     /// <summary>
     /// 用户管理页。
     /// 被 MainWindow 缓存复用，因此使用首次加载标记控制初始化。
+    /// 实现 IPageTheme：页面内含多个带 Shadow 的 AntdUI.Panel（stat 卡片、表格卡片、操作栏），
+    /// 需在主题切换时同步其 Back 属性。
     /// </summary>
-    public partial class UserManagementPage : UserControl
+    public partial class UserManagementPage : UserControl, IPageTheme
     {
         private readonly UserManagementPageModel _model;
         private AntList<UserTableRow> _tableRows;
@@ -27,6 +30,21 @@ namespace AMControlWinF.Views.Am
             InitTableColumns();
             BindEvents();
             UpdateActionButtons();
+        }
+
+        /// <summary>
+        /// 主题切换时由 MainWindow 统一调用（含首次创建时）。
+        /// 页面内带 Shadow 的 AntdUI.Panel 的 Back 属性为显式存储，不参与 AntdUI 自动主题，
+        /// 必须手动同步；颜色统一从 AppThemeHelper 读取，不在页面内定义魔法数字。
+        /// </summary>
+        public void OnThemeChanged(bool isDarkMode)
+        {
+            var cardBack = AppThemeHelper.CurrentCardBack;
+            panelTotalCard.Back = cardBack;
+            panelEnabledCard.Back = cardBack;
+            panelDisabledCard.Back = cardBack;
+            panelTableCard.Back = cardBack;
+            panelActionCard.Back = cardBack;
         }
 
         private void InitTableColumns()
