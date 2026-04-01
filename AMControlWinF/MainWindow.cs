@@ -924,7 +924,6 @@ namespace AMControlWinF
             panelStatusCard.Back = cardBack;
 
             panelAvatarHost.Back = Color.Transparent;
-            panelWorkHeader.Back = Color.Transparent;
             panelContent.Back = Color.Transparent;
 
             labelPrimaryTitleValue.ForeColor = primaryText;
@@ -939,14 +938,12 @@ namespace AMControlWinF
             panelLeftCard.SuspendLayout();
             panelSecondaryNavCard.SuspendLayout();
             panelWorkCard.SuspendLayout();
-            panelWorkHeader.SuspendLayout();
             panelContent.SuspendLayout();
         }
 
         private void ResumeShellLayouts(bool performLayout)
         {
             panelContent.ResumeLayout(performLayout);
-            panelWorkHeader.ResumeLayout(performLayout);
             panelWorkCard.ResumeLayout(performLayout);
             panelSecondaryNavCard.ResumeLayout(performLayout);
             panelLeftCard.ResumeLayout(performLayout);

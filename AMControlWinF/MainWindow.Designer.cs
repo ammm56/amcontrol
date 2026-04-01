@@ -43,7 +43,6 @@
             this.labelPrimaryTitleValue = new AntdUI.Label();
             this.panelWorkCard = new AntdUI.Panel();
             this.panelContent = new AntdUI.Panel();
-            this.panelWorkHeader = new AntdUI.Panel();
             this.titlebar.SuspendLayout();
             this.textureBackgroundMain.SuspendLayout();
             this.gridMainHost.SuspendLayout();
@@ -258,7 +257,6 @@
             // 
             this.panelWorkCard.Back = System.Drawing.Color.White;
             this.panelWorkCard.Controls.Add(this.panelContent);
-            this.panelWorkCard.Controls.Add(this.panelWorkHeader);
             this.panelWorkCard.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelWorkCard.Location = new System.Drawing.Point(8, 8);
             this.panelWorkCard.Margin = new System.Windows.Forms.Padding(0);
@@ -273,24 +271,12 @@
             // 
             this.panelContent.Back = System.Drawing.Color.Transparent;
             this.panelContent.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelContent.Location = new System.Drawing.Point(18, 62);
+            this.panelContent.Location = new System.Drawing.Point(18, 18);
             this.panelContent.Margin = new System.Windows.Forms.Padding(0);
             this.panelContent.Name = "panelContent";
             this.panelContent.Radius = 0;
-            this.panelContent.Size = new System.Drawing.Size(832, 616);
+            this.panelContent.Size = new System.Drawing.Size(832, 660);
             this.panelContent.TabIndex = 1;
-            // 
-            // panelWorkHeader
-            // 
-            this.panelWorkHeader.Back = System.Drawing.Color.Transparent;
-            this.panelWorkHeader.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panelWorkHeader.Location = new System.Drawing.Point(18, 18);
-            this.panelWorkHeader.Margin = new System.Windows.Forms.Padding(0);
-            this.panelWorkHeader.Name = "panelWorkHeader";
-            this.panelWorkHeader.Padding = new System.Windows.Forms.Padding(16, 0, 16, 0);
-            this.panelWorkHeader.Radius = 0;
-            this.panelWorkHeader.Size = new System.Drawing.Size(832, 44);
-            this.panelWorkHeader.TabIndex = 0;
             // 
             // MainWindow
             // 
@@ -328,7 +314,6 @@
         private AntdUI.Label labelStatusValue;
         private AntdUI.Panel panelWorkCard;
         private AntdUI.Panel panelContent;
-        private AntdUI.Panel panelWorkHeader;
         private AntdUI.Panel panelSecondaryNavCard;
         private AntdUI.Menu menuSecondary;
         private AntdUI.Panel panelSecondaryHeader;
