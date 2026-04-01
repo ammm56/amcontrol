@@ -694,37 +694,25 @@ namespace AMControlWinF
         }
 
         /// <summary>
-        /// 切换明/暗主题（参考 AntdUI Demo ThemeHelper.SetColorMode）。
+        /// 切换明/暗主题（与 LoginForm.ApplyThemeFromConfig 同一策略）。
         ///
-        /// 步骤：
-        ///   1. AppThemeHelper.Apply()      → AntdUI 全局 Config + Window 基础色；
-        ///   2. TextureBackgroundControl     → 自定义纹理背景同步；
-        ///   3. AppThemeHelper.ApplyCardPanel → 4 张悬浮卡片的 Back（自绘填充）
-        ///      + BackColor（WinForms 继承链向子页面传播，自动覆盖子页面内
-        ///        未显式设色的 Panel/控件，无需逐页实现主题接口）；
-        ///   4. 状态栏语义色独立维护；
-        ///   5. 持久化。
+        /// AntdUI.Panel 带 Shadow 时原生主题渲染已包含正确的卡片背景、边界和阴影，
+        /// 不再手动设置 Back/BackColor，完全交由 AntdUI 原生处理。
         /// </summary>
         private void ApplyTheme(bool isDarkMode, bool saveToConfig)
         {
             _isDarkMode = isDarkMode;
 
-            // 1. AntdUI 全局 + Window 基础色
+            // 1. AntdUI 全局 + Window 基础色（titlebar 等非纹理区域）
             AppThemeHelper.Apply(this, isDarkMode);
 
             // 2. 自定义纹理背景
             textureBackgroundMain.SetTheme(isDarkMode);
 
-            // 3. 悬浮卡片 Back + BackColor（BackColor 向子页面自动传播）
-            AppThemeHelper.ApplyCardPanel(panelWorkCard, isDarkMode);
-            AppThemeHelper.ApplyCardPanel(panelSecondaryNavCard, isDarkMode);
-            AppThemeHelper.ApplyCardPanel(panelLeftCard, isDarkMode);
-            AppThemeHelper.ApplyCardPanel(panelStatusCard, isDarkMode);
-
-            // 4. 状态栏语义色
+            // 3. 状态栏语义色
             labelStatusValue.ForeColor = GetStatusTextColor(_lastStatusMessageType);
 
-            // 5. 持久化
+            // 4. 持久化
             buttonColorMode.Toggle = isDarkMode;
             ConfigContext.Instance.Config.Setting.Theme = isDarkMode ? "SkinDark" : "SkinDefault";
 
