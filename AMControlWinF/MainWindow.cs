@@ -1,4 +1,5 @@
 ﻿using AM.Core.Context;
+using AM.Core.Messaging;
 using AM.PageModel.Main;
 using AM.PageModel.Navigation;
 using AM.Tools;
@@ -31,6 +32,7 @@ namespace AMControlWinF
 
         private bool _isUpdatingUiState;
         private bool _isDarkMode;
+        private SystemMessageType _lastStatusMessageType = SystemMessageType.Status;
 
         public MainWindow()
         {
@@ -106,6 +108,8 @@ namespace AMControlWinF
         {
             _model.LoadNavigation();
             RefreshShell();
+            SubscribeSystemMessages();
+            SetDefaultStatusMessage();
         }
 
         #endregion
@@ -560,6 +564,160 @@ namespace AMControlWinF
 
         #endregion
 
+        #region 系统消息
+        private void SubscribeSystemMessages()
+        {
+            var bus = SystemContext.Instance.MessageBus;
+            if (bus == null)
+            {
+                return;
+            }
+
+            bus.Unsubscribe(this);
+            bus.Subscribe(this, OnSystemMessageReceived);
+        }
+
+        private void OnSystemMessageReceived(SystemMessage message)
+        {
+            if (message == null || IsDisposed)
+            {
+                return;
+            }
+
+            if (InvokeRequired)
+            {
+                try
+                {
+                    BeginInvoke(new Action(() => OnSystemMessageReceived(message)));
+                }
+                catch
+                {
+                }
+
+                return;
+            }
+
+            UpdateStatusMessage(message);
+            ShowMessageNotification(message);
+        }
+
+        private void SetDefaultStatusMessage()
+        {
+            _lastStatusMessageType = SystemMessageType.Status;
+            labelStatusValue.Text = IsEnglishLanguage(GetCurrentLanguage())
+                ? "Application ready."
+                : "应用已启动，等待操作。";
+            labelStatusValue.ForeColor = GetStatusTextColor(_lastStatusMessageType);
+        }
+
+        private void UpdateStatusMessage(SystemMessage message)
+        {
+            if (message == null)
+            {
+                return;
+            }
+
+            _lastStatusMessageType = message.Type;
+            labelStatusValue.Text = BuildStatusText(message);
+            labelStatusValue.ForeColor = GetStatusTextColor(message.Type);
+        }
+
+        private void ShowMessageNotification(SystemMessage message)
+        {
+            if (message == null || string.IsNullOrWhiteSpace(message.Message) || !Visible)
+            {
+                return;
+            }
+
+            AntdUI.Message.open(new AntdUI.Message.Config(
+                this,
+                BuildNotificationText(message),
+                GetNoticeType(message.Type))
+            {
+                Align = TAlignFrom.BL,
+                AutoClose = GetNoticeAutoClose(message.Type)
+            });
+        }
+
+        private static string BuildNotificationText(SystemMessage message)
+        {
+            var prefix = string.IsNullOrWhiteSpace(message.Source)
+                ? string.Empty
+                : "[" + message.Source + "] ";
+
+            var code = string.IsNullOrWhiteSpace(message.Code)
+                ? string.Empty
+                : " [" + message.Code + "]";
+
+            return prefix + message.Message + code;
+        }
+
+        private static string BuildStatusText(SystemMessage message)
+        {
+            var timeText = message.Time.ToString("yyyy-MM-dd HH:mm:ss");
+            var prefix = string.IsNullOrWhiteSpace(message.Source)
+                ? string.Empty
+                : "[" + message.Source + "] ";
+
+            var code = string.IsNullOrWhiteSpace(message.Code)
+                ? string.Empty
+                : " [" + message.Code + "]";
+
+            return "[" + timeText + "] " + "  " + prefix + message.Message + code;
+        }
+
+        private Color GetStatusTextColor(SystemMessageType type)
+        {
+            switch (type)
+            {
+                case SystemMessageType.Warning:
+                    return Color.FromArgb(230, 145, 56);
+
+                case SystemMessageType.Error:
+                case SystemMessageType.Alarm:
+                    return Color.FromArgb(220, 84, 84);
+
+                default:
+                    return _isDarkMode
+                        ? Color.FromArgb(228, 228, 228)
+                        : Color.FromArgb(90, 90, 90);
+            }
+        }
+
+        private static TType GetNoticeType(SystemMessageType type)
+        {
+            switch (type)
+            {
+                case SystemMessageType.Warning:
+                case SystemMessageType.Alarm:
+                    return TType.Warn;
+
+                case SystemMessageType.Error:
+                    return TType.Error;
+
+                default:
+                    return TType.Info;
+            }
+        }
+
+        private static int GetNoticeAutoClose(SystemMessageType type)
+        {
+            switch (type)
+            {
+                case SystemMessageType.Error:
+                case SystemMessageType.Alarm:
+                    return 6;
+
+                case SystemMessageType.Warning:
+                    return 5;
+
+                default:
+                    return 3;
+            }
+        }
+
+        #endregion
+
         #region 用户菜单
 
         private void RefreshUserMenuControl()
@@ -642,10 +800,14 @@ namespace AMControlWinF
 
             titlebar.Text = IsEnglishLanguage(language) ? "AM Motion Control" : "AM运动控制";
             titlebar.SubText = IsEnglishLanguage(language) ? "Version 0.0.1" : "版本 0.0.1";
-            labelStatusCaption.Text = IsEnglishLanguage(language) ? "System Ready" : "系统就绪";
 
             RecreateAllCachedPages();
             RefreshShell();
+
+            if (string.IsNullOrWhiteSpace(labelStatusValue.Text))
+            {
+                SetDefaultStatusMessage();
+            }
 
             if (saveToConfig)
             {
@@ -730,7 +892,7 @@ namespace AMControlWinF
             panelContent.Back = Color.Transparent;
 
             labelPrimaryTitleValue.ForeColor = primaryText;
-            labelStatusCaption.ForeColor = secondaryText;
+            labelStatusValue.ForeColor = GetStatusTextColor(_lastStatusMessageType);
         }
 
         private void SuspendShellLayouts()
@@ -860,6 +1022,7 @@ namespace AMControlWinF
 
         private void MainWindow_FormClosed(object sender, FormClosedEventArgs e)
         {
+            SystemContext.Instance.MessageBus?.Unsubscribe(this);
             RecreateAllCachedPages();
         }
 
