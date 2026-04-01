@@ -4,6 +4,7 @@ using AM.PageModel.Main;
 using AM.PageModel.Navigation;
 using AM.Tools;
 using AMControlWinF.Tools;
+using AMControlWinF.Views.Auth;
 using AMControlWinF.Views.Main;
 using AntdUI;
 using System;
@@ -22,14 +23,13 @@ namespace AMControlWinF
     /// 仅负责：
     /// 1. 构建一级/二级导航；
     /// 2. 承载右侧工作区与页面缓存；
-    /// 3. 协调用户头像菜单；
+    /// 3. 协调用户头像菜单（切换用户 / 退出登录）；
     /// 4. 协调语言与主题切换。
     ///
-    /// 主题切换策略（参考 AntdUI Demo ThemeHelper）：
-    ///   - 统一委托 AppThemeHelper.Apply() → 原生 AntdUI 控件全局自动跟随；
-    ///   - 悬浮卡片通过 AppThemeHelper.ApplyCardPanel() 同时更新 Back 与 BackColor；
-    ///   - BackColor 作为 WinForms 继承链起点，自动传递给子页面内的卡片控件，
-    ///     无需子页面实现任何主题接口。
+    /// 主题切换策略（与 LoginForm 一致）：
+
+    ///   - AppThemeHelper.Apply() → AntdUI 全局自动跟随；
+    ///   - TextureBackground.SetTheme() → 自定义纹理背景同步。
     /// </summary>
     public partial class MainWindow : AntdUI.Window
     {
@@ -41,6 +41,12 @@ namespace AMControlWinF
         private bool _isDarkMode;
         private bool _isUpdatingUiState;
         private SystemMessageType _lastStatusMessageType = SystemMessageType.Status;
+
+        /// <summary>
+        /// 关闭原因，供 Program.cs 主循环读取。
+        /// 默认为 Exit（正常关闭 → 退出程序）。
+        /// </summary>
+        public MainWindowExitReason ExitReason { get; private set; }
 
         public MainWindow()
         {
@@ -161,7 +167,7 @@ namespace AMControlWinF
                 menuPrimary.Items.Add(new MenuItem
                 {
                     Text = GetPrimaryText(item),
-                    Tag = item.Key,
+                    Tag = item.Key
                 });
             }
         }
@@ -465,9 +471,6 @@ namespace AMControlWinF
             };
         }
 
-        /// <summary>
-        /// 占位页：不手动设置任何颜色，由 AntdUI 原生主题系统自动适配明/暗色。
-        /// </summary>
         private static Control CreatePlaceholderPage(string text)
         {
             var panel = new Panel { Dock = DockStyle.Fill, Radius = 0 };
@@ -482,7 +485,7 @@ namespace AMControlWinF
             return panel;
         }
 
-        private void RecreateAllCachedPages()
+        private void DisposeAllCachedPages()
         {
             foreach (var pair in _pageCache.ToList())
             {
@@ -620,22 +623,28 @@ namespace AMControlWinF
 
         #region 用户菜单
 
+        /// <summary>
+        /// 切换用户：在当前主窗体上弹出模态登录框。
+        /// - 登录成功：设置 ExitReason 并关闭，Program 主循环会创建新 MainWindow；
+        /// - 登录取消：保持当前主窗体不变。
+        /// </summary>
         private void UserAvatarMenuControl_SwitchUserRequested(object sender, EventArgs e)
         {
-            Program.SwitchUser();
+            bool loginOk;
+            using (var loginForm = new LoginForm())
+            {
+                loginOk = loginForm.ShowDialog(this) == DialogResult.OK
+                    && UserContext.Instance.IsLoggedIn;
+            }
+
+            if (!loginOk)
+                return;
+
+            ExitReason = MainWindowExitReason.SwitchUser;
+            Close();
         }
 
         private void UserAvatarMenuControl_ChangePasswordRequested(object sender, EventArgs e)
-        {
-            ShowChangePasswordPlaceholder();
-        }
-
-        private void UserAvatarMenuControl_LogoutRequested(object sender, EventArgs e)
-        {
-            Program.Logout();
-        }
-
-        private void ShowChangePasswordPlaceholder()
         {
             var isEn = IsEnglishLanguage(GetCurrentLanguage());
             MessageBox.Show(
@@ -643,6 +652,15 @@ namespace AMControlWinF
                 isEn ? "Info" : "提示",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
+        }
+
+        /// <summary>
+        /// 退出登录：直接关闭主窗体，Program 主循环会执行 SignOut + 弹登录框。
+        /// </summary>
+        private void UserAvatarMenuControl_LogoutRequested(object sender, EventArgs e)
+        {
+            ExitReason = MainWindowExitReason.Logout;
+            Close();
         }
 
         #endregion
@@ -674,7 +692,7 @@ namespace AMControlWinF
             titlebar.Text = IsEnglishLanguage(language) ? "AM Motion Control" : "AM运动控制";
             titlebar.SubText = IsEnglishLanguage(language) ? "Version 0.0.1" : "版本 0.0.1";
 
-            RecreateAllCachedPages();
+            DisposeAllCachedPages();
             RefreshShell();
 
             if (string.IsNullOrWhiteSpace(labelStatusValue.Text))
@@ -695,24 +713,17 @@ namespace AMControlWinF
 
         /// <summary>
         /// 切换明/暗主题（与 LoginForm.ApplyThemeFromConfig 同一策略）。
-        ///
         /// AntdUI.Panel 带 Shadow 时原生主题渲染已包含正确的卡片背景、边界和阴影，
-        /// 不再手动设置 Back/BackColor，完全交由 AntdUI 原生处理。
+        /// 完全交由 AntdUI 原生处理。
         /// </summary>
         private void ApplyTheme(bool isDarkMode, bool saveToConfig)
         {
             _isDarkMode = isDarkMode;
 
-            // 1. AntdUI 全局 + Window 基础色（titlebar 等非纹理区域）
             AppThemeHelper.Apply(this, isDarkMode);
-
-            // 2. 自定义纹理背景
             textureBackgroundMain.SetTheme(isDarkMode);
-
-            // 3. 状态栏语义色
             labelStatusValue.ForeColor = GetStatusTextColor(_lastStatusMessageType);
 
-            // 4. 持久化
             buttonColorMode.Toggle = isDarkMode;
             ConfigContext.Instance.Config.Setting.Theme = isDarkMode ? "SkinDark" : "SkinDefault";
 
@@ -766,7 +777,7 @@ namespace AMControlWinF
         private void MainWindow_FormClosed(object sender, FormClosedEventArgs e)
         {
             SystemContext.Instance.MessageBus?.Unsubscribe(this);
-            RecreateAllCachedPages();
+            DisposeAllCachedPages();
         }
 
         #endregion

@@ -115,15 +115,13 @@ namespace AMControlWinF.Views.Main
         }
 
         /// <summary>
-        /// 先关闭当前弹层，再在宿主窗体的下一轮消息中通知外层。
-        /// 避免在当前按钮点击链路中直接触发外层打开新对话框。
+        /// 先关闭弹层，再在宿主窗体的下一轮消息中通知外层。
+        /// 避免在当前按钮点击链路中直接触发模态对话框。
         /// </summary>
         private void ClosePopoverThenNotify(EventHandler handler)
         {
             if (_isClosing)
-            {
                 return;
-            }
 
             _isClosing = true;
 
@@ -131,26 +129,19 @@ namespace AMControlWinF.Views.Main
             buttonChangePassword.Enabled = false;
             buttonLogout.Enabled = false;
 
+            // 必须在 Dispose 之前获取宿主窗体引用。
             var ownerForm = FindForm();
 
+            // 隐藏 + 释放卡片内容，触发 AntdUI Popover 关闭浮层。
             Visible = false;
             Dispose();
 
-            if (handler == null)
+            // 延迟到下一轮消息通知，确保弹层完全关闭后再执行后续逻辑。
+            // 不传 this（已释放），sender 传 null — 下游事件链不依赖 sender。
+            if (handler != null && ownerForm != null && !ownerForm.IsDisposed && ownerForm.IsHandleCreated)
             {
-                return;
+                ownerForm.BeginInvoke(new Action(() => handler(null, EventArgs.Empty)));
             }
-
-            if (ownerForm != null && !ownerForm.IsDisposed && ownerForm.IsHandleCreated)
-            {
-                ownerForm.BeginInvoke(new Action(() =>
-                {
-                    handler(this, EventArgs.Empty);
-                }));
-                return;
-            }
-
-            handler(this, EventArgs.Empty);
         }
 
         private void RefreshDisplay()
