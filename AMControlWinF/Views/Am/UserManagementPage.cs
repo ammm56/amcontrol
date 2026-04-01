@@ -72,7 +72,6 @@ namespace AMControlWinF.Views.Am
             Load += UserManagementPage_Load;
 
             buttonSearch.Click += ButtonSearch_Click;
-            buttonClear.Click += ButtonClear_Click;
             buttonRefresh.Click += async (sender, e) => await ReloadAsync(GetSelectedUserId());
             buttonAdd.Click += async (sender, e) => await AddUserAsync();
 
@@ -149,14 +148,6 @@ namespace AMControlWinF.Views.Am
         private void ButtonSearch_Click(object sender, EventArgs e)
         {
             _model.SearchText = inputKeyword.Text == null ? string.Empty : inputKeyword.Text.Trim();
-            _model.ApplyFilter(GetSelectedUserId());
-            BindTable();
-        }
-
-        private void ButtonClear_Click(object sender, EventArgs e)
-        {
-            inputKeyword.Text = string.Empty;
-            _model.SearchText = string.Empty;
             _model.ApplyFilter(GetSelectedUserId());
             BindTable();
         }
