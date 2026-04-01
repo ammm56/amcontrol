@@ -1,5 +1,6 @@
 ﻿using AM.Model.Auth;
 using System;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace AMControlWinF.Views.Am
@@ -26,6 +27,10 @@ namespace AMControlWinF.Views.Am
         private void InitData()
         {
             labelLoginNameValue.Text = _user == null ? "-" : _user.LoginName;
+
+            Size = new Size(620, 320);
+            MinimumSize = Size;
+            MaximumSize = Size;
         }
 
         private void buttonCancel_Click(object sender, EventArgs e)

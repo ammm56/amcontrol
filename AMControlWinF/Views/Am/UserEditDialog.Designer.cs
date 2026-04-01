@@ -21,8 +21,8 @@
             this.buttonSubmit = new AntdUI.Button();
             this.buttonCancel = new AntdUI.Button();
             this.panelForm = new AntdUI.Panel();
-            this.textBoxRemark = new System.Windows.Forms.TextBox();
-            this.checkBoxEnabled = new System.Windows.Forms.CheckBox();
+            this.inputRemark = new AntdUI.Input();
+            this.dropdownEnabled = new AntdUI.Dropdown();
             this.dropdownRole = new AntdUI.Dropdown();
             this.inputPassword = new AntdUI.Input();
             this.inputUserName = new AntdUI.Input();
@@ -42,7 +42,6 @@
             // 
             // panelRoot
             // 
-            this.panelRoot.Back = System.Drawing.Color.White;
             this.panelRoot.Controls.Add(this.panelForm);
             this.panelRoot.Controls.Add(this.panelButtons);
             this.panelRoot.Controls.Add(this.labelMessage);
@@ -52,7 +51,7 @@
             this.panelRoot.Name = "panelRoot";
             this.panelRoot.Padding = new System.Windows.Forms.Padding(18);
             this.panelRoot.Radius = 16;
-            this.panelRoot.Size = new System.Drawing.Size(704, 521);
+            this.panelRoot.Size = new System.Drawing.Size(744, 391);
             this.panelRoot.TabIndex = 0;
             // 
             // panelButtons
@@ -61,16 +60,16 @@
             this.panelButtons.Controls.Add(this.buttonSubmit);
             this.panelButtons.Controls.Add(this.buttonCancel);
             this.panelButtons.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panelButtons.Location = new System.Drawing.Point(24, 449);
+            this.panelButtons.Location = new System.Drawing.Point(24, 319);
             this.panelButtons.Name = "panelButtons";
             this.panelButtons.Radius = 0;
-            this.panelButtons.Size = new System.Drawing.Size(656, 48);
+            this.panelButtons.Size = new System.Drawing.Size(696, 48);
             this.panelButtons.TabIndex = 2;
             // 
             // buttonSubmit
             // 
             this.buttonSubmit.Dock = System.Windows.Forms.DockStyle.Right;
-            this.buttonSubmit.Location = new System.Drawing.Point(416, 0);
+            this.buttonSubmit.Location = new System.Drawing.Point(456, 0);
             this.buttonSubmit.Name = "buttonSubmit";
             this.buttonSubmit.Size = new System.Drawing.Size(120, 48);
             this.buttonSubmit.TabIndex = 1;
@@ -82,7 +81,7 @@
             // buttonCancel
             // 
             this.buttonCancel.Dock = System.Windows.Forms.DockStyle.Right;
-            this.buttonCancel.Location = new System.Drawing.Point(536, 0);
+            this.buttonCancel.Location = new System.Drawing.Point(576, 0);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(120, 48);
             this.buttonCancel.TabIndex = 0;
@@ -93,8 +92,8 @@
             // panelForm
             // 
             this.panelForm.Back = System.Drawing.Color.Transparent;
-            this.panelForm.Controls.Add(this.textBoxRemark);
-            this.panelForm.Controls.Add(this.checkBoxEnabled);
+            this.panelForm.Controls.Add(this.inputRemark);
+            this.panelForm.Controls.Add(this.dropdownEnabled);
             this.panelForm.Controls.Add(this.dropdownRole);
             this.panelForm.Controls.Add(this.inputPassword);
             this.panelForm.Controls.Add(this.inputUserName);
@@ -106,64 +105,60 @@
             this.panelForm.Controls.Add(this.labelUserName);
             this.panelForm.Controls.Add(this.labelLoginName);
             this.panelForm.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelForm.Location = new System.Drawing.Point(24, 62);
+            this.panelForm.Location = new System.Drawing.Point(24, 70);
             this.panelForm.Name = "panelForm";
             this.panelForm.Radius = 0;
-            this.panelForm.Size = new System.Drawing.Size(656, 435);
+            this.panelForm.Size = new System.Drawing.Size(696, 297);
             this.panelForm.TabIndex = 1;
             // 
-            // textBoxRemark
+            // inputRemark
             // 
-            this.textBoxRemark.Location = new System.Drawing.Point(124, 249);
-            this.textBoxRemark.Multiline = true;
-            this.textBoxRemark.Name = "textBoxRemark";
-            this.textBoxRemark.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBoxRemark.Size = new System.Drawing.Size(500, 120);
-            this.textBoxRemark.TabIndex = 11;
+            this.inputRemark.Location = new System.Drawing.Point(132, 210);
+            this.inputRemark.Name = "inputRemark";
+            this.inputRemark.Size = new System.Drawing.Size(532, 38);
+            this.inputRemark.TabIndex = 11;
             // 
-            // checkBoxEnabled
+            // dropdownEnabled
             // 
-            this.checkBoxEnabled.AutoSize = true;
-            this.checkBoxEnabled.Location = new System.Drawing.Point(124, 208);
-            this.checkBoxEnabled.Name = "checkBoxEnabled";
-            this.checkBoxEnabled.Size = new System.Drawing.Size(91, 24);
-            this.checkBoxEnabled.TabIndex = 10;
-            this.checkBoxEnabled.Text = "启用用户";
-            this.checkBoxEnabled.UseVisualStyleBackColor = true;
+            this.dropdownEnabled.Location = new System.Drawing.Point(132, 159);
+            this.dropdownEnabled.Name = "dropdownEnabled";
+            this.dropdownEnabled.Placement = AntdUI.TAlignFrom.BL;
+            this.dropdownEnabled.Size = new System.Drawing.Size(532, 38);
+            this.dropdownEnabled.TabIndex = 10;
             // 
             // dropdownRole
             // 
-            this.dropdownRole.Location = new System.Drawing.Point(124, 154);
+            this.dropdownRole.Location = new System.Drawing.Point(132, 108);
             this.dropdownRole.Name = "dropdownRole";
             this.dropdownRole.Placement = AntdUI.TAlignFrom.BL;
-            this.dropdownRole.Size = new System.Drawing.Size(500, 38);
+            this.dropdownRole.Size = new System.Drawing.Size(532, 38);
             this.dropdownRole.TabIndex = 9;
             // 
             // inputPassword
             // 
-            this.inputPassword.Location = new System.Drawing.Point(124, 103);
+            this.inputPassword.Location = new System.Drawing.Point(132, 57);
             this.inputPassword.Name = "inputPassword";
             this.inputPassword.PasswordChar = '●';
-            this.inputPassword.Size = new System.Drawing.Size(500, 38);
+            this.inputPassword.Size = new System.Drawing.Size(532, 38);
             this.inputPassword.TabIndex = 8;
             // 
             // inputUserName
             // 
-            this.inputUserName.Location = new System.Drawing.Point(124, 52);
+            this.inputUserName.Location = new System.Drawing.Point(132, 6);
             this.inputUserName.Name = "inputUserName";
-            this.inputUserName.Size = new System.Drawing.Size(500, 38);
+            this.inputUserName.Size = new System.Drawing.Size(532, 38);
             this.inputUserName.TabIndex = 7;
             // 
             // inputLoginName
             // 
-            this.inputLoginName.Location = new System.Drawing.Point(124, 1);
+            this.inputLoginName.Location = new System.Drawing.Point(132, -45);
             this.inputLoginName.Name = "inputLoginName";
-            this.inputLoginName.Size = new System.Drawing.Size(500, 38);
+            this.inputLoginName.Size = new System.Drawing.Size(532, 38);
             this.inputLoginName.TabIndex = 6;
             // 
             // labelRemark
             // 
-            this.labelRemark.Location = new System.Drawing.Point(0, 249);
+            this.labelRemark.Location = new System.Drawing.Point(0, 214);
             this.labelRemark.Name = "labelRemark";
             this.labelRemark.Size = new System.Drawing.Size(108, 30);
             this.labelRemark.TabIndex = 5;
@@ -171,7 +166,7 @@
             // 
             // labelEnabled
             // 
-            this.labelEnabled.Location = new System.Drawing.Point(0, 206);
+            this.labelEnabled.Location = new System.Drawing.Point(0, 163);
             this.labelEnabled.Name = "labelEnabled";
             this.labelEnabled.Size = new System.Drawing.Size(108, 30);
             this.labelEnabled.TabIndex = 4;
@@ -179,7 +174,7 @@
             // 
             // labelRole
             // 
-            this.labelRole.Location = new System.Drawing.Point(0, 156);
+            this.labelRole.Location = new System.Drawing.Point(0, 112);
             this.labelRole.Name = "labelRole";
             this.labelRole.Size = new System.Drawing.Size(108, 30);
             this.labelRole.TabIndex = 3;
@@ -187,7 +182,7 @@
             // 
             // labelPassword
             // 
-            this.labelPassword.Location = new System.Drawing.Point(0, 105);
+            this.labelPassword.Location = new System.Drawing.Point(0, 61);
             this.labelPassword.Name = "labelPassword";
             this.labelPassword.Size = new System.Drawing.Size(108, 30);
             this.labelPassword.TabIndex = 2;
@@ -195,7 +190,7 @@
             // 
             // labelUserName
             // 
-            this.labelUserName.Location = new System.Drawing.Point(0, 54);
+            this.labelUserName.Location = new System.Drawing.Point(0, 10);
             this.labelUserName.Name = "labelUserName";
             this.labelUserName.Size = new System.Drawing.Size(108, 30);
             this.labelUserName.TabIndex = 1;
@@ -203,7 +198,7 @@
             // 
             // labelLoginName
             // 
-            this.labelLoginName.Location = new System.Drawing.Point(0, 3);
+            this.labelLoginName.Location = new System.Drawing.Point(0, -41);
             this.labelLoginName.Name = "labelLoginName";
             this.labelLoginName.Size = new System.Drawing.Size(108, 30);
             this.labelLoginName.TabIndex = 0;
@@ -213,9 +208,9 @@
             // 
             this.labelMessage.Dock = System.Windows.Forms.DockStyle.Top;
             this.labelMessage.ForeColor = System.Drawing.Color.IndianRed;
-            this.labelMessage.Location = new System.Drawing.Point(24, 34);
+            this.labelMessage.Location = new System.Drawing.Point(24, 42);
             this.labelMessage.Name = "labelMessage";
-            this.labelMessage.Size = new System.Drawing.Size(656, 28);
+            this.labelMessage.Size = new System.Drawing.Size(696, 28);
             this.labelMessage.TabIndex = 3;
             // 
             // labelTitle
@@ -224,13 +219,13 @@
             this.labelTitle.Font = new System.Drawing.Font("Microsoft YaHei UI", 16F, System.Drawing.FontStyle.Bold);
             this.labelTitle.Location = new System.Drawing.Point(24, 24);
             this.labelTitle.Name = "labelTitle";
-            this.labelTitle.Size = new System.Drawing.Size(656, 10);
+            this.labelTitle.Size = new System.Drawing.Size(696, 18);
             this.labelTitle.TabIndex = 0;
             this.labelTitle.Text = "新增用户";
             // 
             // UserEditDialog
             // 
-            this.ClientSize = new System.Drawing.Size(704, 521);
+            this.ClientSize = new System.Drawing.Size(744, 391);
             this.ControlBox = false;
             this.Controls.Add(this.panelRoot);
             this.Font = new System.Drawing.Font("Microsoft YaHei UI", 10F);
@@ -240,7 +235,6 @@
             this.panelRoot.ResumeLayout(false);
             this.panelButtons.ResumeLayout(false);
             this.panelForm.ResumeLayout(false);
-            this.panelForm.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -262,7 +256,7 @@
         private AntdUI.Input inputUserName;
         private AntdUI.Input inputPassword;
         private AntdUI.Dropdown dropdownRole;
-        private System.Windows.Forms.CheckBox checkBoxEnabled;
-        private System.Windows.Forms.TextBox textBoxRemark;
+        private AntdUI.Dropdown dropdownEnabled;
+        private AntdUI.Input inputRemark;
     }
 }

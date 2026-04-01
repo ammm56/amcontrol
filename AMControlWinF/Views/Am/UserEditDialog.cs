@@ -1,5 +1,6 @@
 ﻿using AM.Model.Auth;
 using System;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace AMControlWinF.Views.Am
@@ -15,7 +16,7 @@ namespace AMControlWinF.Views.Am
         {
             _isEditMode = false;
             InitializeComponent();
-            InitRoleDropdown();
+            InitDropdowns();
             ApplyAddMode();
         }
 
@@ -23,7 +24,7 @@ namespace AMControlWinF.Views.Am
         {
             _isEditMode = true;
             InitializeComponent();
-            InitRoleDropdown();
+            InitDropdowns();
             ApplyEditMode(user);
         }
 
@@ -66,15 +67,22 @@ namespace AMControlWinF.Views.Am
 
         public bool IsEnabledUser
         {
-            get { return checkBoxEnabled.Checked; }
+            get
+            {
+                var value = dropdownEnabled.SelectedValue == null
+                    ? string.Empty
+                    : dropdownEnabled.SelectedValue.ToString();
+
+                return string.Equals(value, "启用", StringComparison.OrdinalIgnoreCase);
+            }
         }
 
         public string Remark
         {
-            get { return textBoxRemark.Text == null ? string.Empty : textBoxRemark.Text.Trim(); }
+            get { return inputRemark.Text == null ? string.Empty : inputRemark.Text.Trim(); }
         }
 
-        private void InitRoleDropdown()
+        private void InitDropdowns()
         {
             dropdownRole.Items.Clear();
             dropdownRole.Items.AddRange(new object[]
@@ -83,6 +91,13 @@ namespace AMControlWinF.Views.Am
                 "工程师",
                 "管理员"
             });
+
+            dropdownEnabled.Items.Clear();
+            dropdownEnabled.Items.AddRange(new object[]
+            {
+                "启用",
+                "禁用"
+            });
         }
 
         private void ApplyAddMode()
@@ -90,9 +105,9 @@ namespace AMControlWinF.Views.Am
             Text = "新增用户";
             labelTitle.Text = "新增用户";
             dropdownRole.SelectedValue = "操作员";
-            checkBoxEnabled.Checked = true;
+            dropdownEnabled.SelectedValue = "启用";
 
-            Size = new System.Drawing.Size(720, 560);
+            Size = new Size(760, 430);
             MinimumSize = Size;
             MaximumSize = Size;
         }
@@ -110,8 +125,9 @@ namespace AMControlWinF.Views.Am
                 inputLoginName.Text = user.LoginName;
                 inputLoginName.Enabled = false;
                 inputUserName.Text = user.UserName;
-                textBoxRemark.Text = user.Remark;
-                checkBoxEnabled.Checked = user.IsEnabled;
+                inputRemark.Text = user.Remark;
+
+                dropdownEnabled.SelectedValue = user.IsEnabled ? "启用" : "禁用";
 
                 if (string.Equals(user.RoleCode, "Am", StringComparison.OrdinalIgnoreCase))
                 {
@@ -127,7 +143,7 @@ namespace AMControlWinF.Views.Am
                 }
             }
 
-            Size = new System.Drawing.Size(640, 470);
+            Size = new Size(680, 360);
             MinimumSize = Size;
             MaximumSize = Size;
         }

@@ -36,7 +36,6 @@
             // 
             // panelRoot
             // 
-            this.panelRoot.Back = System.Drawing.Color.White;
             this.panelRoot.Controls.Add(this.panelForm);
             this.panelRoot.Controls.Add(this.panelButtons);
             this.panelRoot.Controls.Add(this.labelMessage);
@@ -46,7 +45,7 @@
             this.panelRoot.Name = "panelRoot";
             this.panelRoot.Padding = new System.Windows.Forms.Padding(18);
             this.panelRoot.Radius = 16;
-            this.panelRoot.Size = new System.Drawing.Size(560, 320);
+            this.panelRoot.Size = new System.Drawing.Size(604, 281);
             this.panelRoot.TabIndex = 0;
             // 
             // panelButtons
@@ -55,16 +54,16 @@
             this.panelButtons.Controls.Add(this.buttonSubmit);
             this.panelButtons.Controls.Add(this.buttonCancel);
             this.panelButtons.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panelButtons.Location = new System.Drawing.Point(24, 248);
+            this.panelButtons.Location = new System.Drawing.Point(24, 209);
             this.panelButtons.Name = "panelButtons";
             this.panelButtons.Radius = 0;
-            this.panelButtons.Size = new System.Drawing.Size(512, 48);
+            this.panelButtons.Size = new System.Drawing.Size(556, 48);
             this.panelButtons.TabIndex = 2;
             // 
             // buttonSubmit
             // 
             this.buttonSubmit.Dock = System.Windows.Forms.DockStyle.Right;
-            this.buttonSubmit.Location = new System.Drawing.Point(272, 0);
+            this.buttonSubmit.Location = new System.Drawing.Point(316, 0);
             this.buttonSubmit.Name = "buttonSubmit";
             this.buttonSubmit.Size = new System.Drawing.Size(120, 48);
             this.buttonSubmit.TabIndex = 1;
@@ -76,7 +75,7 @@
             // buttonCancel
             // 
             this.buttonCancel.Dock = System.Windows.Forms.DockStyle.Right;
-            this.buttonCancel.Location = new System.Drawing.Point(392, 0);
+            this.buttonCancel.Location = new System.Drawing.Point(436, 0);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(120, 48);
             this.buttonCancel.TabIndex = 0;
@@ -94,49 +93,49 @@
             this.panelForm.Controls.Add(this.labelLoginNameValue);
             this.panelForm.Controls.Add(this.labelLoginNameTitle);
             this.panelForm.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelForm.Location = new System.Drawing.Point(24, 62);
+            this.panelForm.Location = new System.Drawing.Point(24, 70);
             this.panelForm.Name = "panelForm";
             this.panelForm.Radius = 0;
-            this.panelForm.Size = new System.Drawing.Size(512, 234);
+            this.panelForm.Size = new System.Drawing.Size(556, 187);
             this.panelForm.TabIndex = 1;
             // 
             // inputConfirmPassword
             // 
-            this.inputConfirmPassword.Location = new System.Drawing.Point(116, 109);
+            this.inputConfirmPassword.Location = new System.Drawing.Point(124, 109);
             this.inputConfirmPassword.Name = "inputConfirmPassword";
             this.inputConfirmPassword.PasswordChar = '●';
-            this.inputConfirmPassword.Size = new System.Drawing.Size(376, 38);
+            this.inputConfirmPassword.Size = new System.Drawing.Size(400, 38);
             this.inputConfirmPassword.TabIndex = 5;
             // 
             // inputNewPassword
             // 
-            this.inputNewPassword.Location = new System.Drawing.Point(116, 57);
+            this.inputNewPassword.Location = new System.Drawing.Point(124, 57);
             this.inputNewPassword.Name = "inputNewPassword";
             this.inputNewPassword.PasswordChar = '●';
-            this.inputNewPassword.Size = new System.Drawing.Size(376, 38);
+            this.inputNewPassword.Size = new System.Drawing.Size(400, 38);
             this.inputNewPassword.TabIndex = 4;
             // 
             // labelConfirmPassword
             // 
-            this.labelConfirmPassword.Location = new System.Drawing.Point(0, 112);
+            this.labelConfirmPassword.Location = new System.Drawing.Point(0, 113);
             this.labelConfirmPassword.Name = "labelConfirmPassword";
-            this.labelConfirmPassword.Size = new System.Drawing.Size(100, 30);
+            this.labelConfirmPassword.Size = new System.Drawing.Size(108, 30);
             this.labelConfirmPassword.TabIndex = 3;
             this.labelConfirmPassword.Text = "确认密码";
             // 
             // labelNewPassword
             // 
-            this.labelNewPassword.Location = new System.Drawing.Point(0, 60);
+            this.labelNewPassword.Location = new System.Drawing.Point(0, 61);
             this.labelNewPassword.Name = "labelNewPassword";
-            this.labelNewPassword.Size = new System.Drawing.Size(100, 30);
+            this.labelNewPassword.Size = new System.Drawing.Size(108, 30);
             this.labelNewPassword.TabIndex = 2;
             this.labelNewPassword.Text = "新密码";
             // 
             // labelLoginNameValue
             // 
-            this.labelLoginNameValue.Location = new System.Drawing.Point(116, 9);
+            this.labelLoginNameValue.Location = new System.Drawing.Point(124, 9);
             this.labelLoginNameValue.Name = "labelLoginNameValue";
-            this.labelLoginNameValue.Size = new System.Drawing.Size(376, 30);
+            this.labelLoginNameValue.Size = new System.Drawing.Size(400, 30);
             this.labelLoginNameValue.TabIndex = 1;
             this.labelLoginNameValue.Text = "-";
             // 
@@ -144,7 +143,7 @@
             // 
             this.labelLoginNameTitle.Location = new System.Drawing.Point(0, 9);
             this.labelLoginNameTitle.Name = "labelLoginNameTitle";
-            this.labelLoginNameTitle.Size = new System.Drawing.Size(100, 30);
+            this.labelLoginNameTitle.Size = new System.Drawing.Size(108, 30);
             this.labelLoginNameTitle.TabIndex = 0;
             this.labelLoginNameTitle.Text = "用户";
             // 
@@ -152,9 +151,9 @@
             // 
             this.labelMessage.Dock = System.Windows.Forms.DockStyle.Top;
             this.labelMessage.ForeColor = System.Drawing.Color.IndianRed;
-            this.labelMessage.Location = new System.Drawing.Point(24, 34);
+            this.labelMessage.Location = new System.Drawing.Point(24, 42);
             this.labelMessage.Name = "labelMessage";
-            this.labelMessage.Size = new System.Drawing.Size(512, 28);
+            this.labelMessage.Size = new System.Drawing.Size(556, 28);
             this.labelMessage.TabIndex = 3;
             // 
             // labelTitle
@@ -163,13 +162,13 @@
             this.labelTitle.Font = new System.Drawing.Font("Microsoft YaHei UI", 16F, System.Drawing.FontStyle.Bold);
             this.labelTitle.Location = new System.Drawing.Point(24, 24);
             this.labelTitle.Name = "labelTitle";
-            this.labelTitle.Size = new System.Drawing.Size(512, 10);
+            this.labelTitle.Size = new System.Drawing.Size(556, 18);
             this.labelTitle.TabIndex = 0;
             this.labelTitle.Text = "重置密码";
             // 
             // ResetUserPasswordDialog
             // 
-            this.ClientSize = new System.Drawing.Size(560, 320);
+            this.ClientSize = new System.Drawing.Size(604, 281);
             this.ControlBox = false;
             this.Controls.Add(this.panelRoot);
             this.Font = new System.Drawing.Font("Microsoft YaHei UI", 10F);

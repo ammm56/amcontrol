@@ -2,9 +2,6 @@
 using AM.PageModel.Am;
 using AntdUI;
 using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -12,14 +9,13 @@ namespace AMControlWinF.Views.Am
 {
     /// <summary>
     /// 用户管理页。
-    /// 被 MainWindow 缓存复用，因此仅首次加载时初始化数据。
+    /// 被 MainWindow 缓存复用，因此使用首次加载标记控制初始化。
     /// </summary>
     public partial class UserManagementPage : UserControl
     {
         private readonly UserManagementPageModel _model;
         private AntList<UserTableRow> _tableRows;
         private bool _isInitialized;
-        private int _selectedUserId;
 
         public UserManagementPage()
         {
@@ -30,6 +26,7 @@ namespace AMControlWinF.Views.Am
 
             InitTableColumns();
             BindEvents();
+            UpdateActionButtons();
         }
 
         private void InitTableColumns()
@@ -85,7 +82,6 @@ namespace AMControlWinF.Views.Am
             buttonPermission.Click += ButtonPermission_Click;
 
             tableUsers.CellClick += TableUsers_CellClick;
-            tableUsers.SetRowStyle += TableUsers_SetRowStyle;
         }
 
         private async void UserManagementPage_Load(object sender, EventArgs e)
@@ -113,17 +109,15 @@ namespace AMControlWinF.Views.Am
         private void BindTable()
         {
             _tableRows = new AntList<UserTableRow>();
+
             foreach (var user in _model.Users)
             {
                 _tableRows.Add(new UserTableRow(user));
             }
 
             tableUsers.Binding(_tableRows);
-
-            _selectedUserId = _model.SelectedUser == null ? 0 : _model.SelectedUser.Id;
             UpdateSummary();
-            UpdateDetail();
-            tableUsers.Invalidate();
+            UpdateActionButtons();
         }
 
         private void UpdateSummary()
@@ -133,31 +127,18 @@ namespace AMControlWinF.Views.Am
             labelDisabledValue.Text = _model.DisabledUserCount.ToString();
         }
 
-        private void UpdateDetail()
+        private void UpdateActionButtons()
         {
-            var user = _model.SelectedUser;
+            var hasUser = _model.SelectedUser != null;
 
-            labelDetailUserNameValue.Text = user == null ? "-" : user.DisplayName;
-            labelDetailLoginNameValue.Text = user == null ? "-" : user.LoginName;
-            labelDetailRoleValue.Text = user == null ? "-" : user.RoleDisplayName;
-            labelDetailStateValue.Text = user == null ? "-" : user.StateText;
-            labelDetailLastLoginValue.Text = user == null ? "-" : user.LastLoginTimeText;
-            labelDetailRemarkValue.Text = user == null || string.IsNullOrWhiteSpace(user.Remark) ? "-" : user.Remark;
+            buttonEdit.Enabled = hasUser;
+            buttonToggleEnabled.Enabled = hasUser;
+            buttonResetPassword.Enabled = hasUser;
+            buttonPermission.Enabled = hasUser;
 
-            var enabled = user != null;
-            buttonEdit.Enabled = enabled;
-            buttonToggleEnabled.Enabled = enabled;
-            buttonResetPassword.Enabled = enabled;
-            buttonPermission.Enabled = enabled;
-
-            if (user == null)
-            {
-                buttonToggleEnabled.Text = "启用/禁用";
-            }
-            else
-            {
-                buttonToggleEnabled.Text = user.IsEnabled ? "禁用用户" : "启用用户";
-            }
+            buttonToggleEnabled.Text = hasUser && _model.SelectedUser.IsEnabled
+                ? "禁用用户"
+                : "启用用户";
         }
 
         private int? GetSelectedUserId()
@@ -188,42 +169,8 @@ namespace AMControlWinF.Views.Am
                 return;
             }
 
-            _selectedUserId = row.Id;
             _model.SelectedUser = row.User;
-            UpdateDetail();
-            tableUsers.Invalidate();
-        }
-
-        private AntdUI.Table.CellStyleInfo TableUsers_SetRowStyle(object sender, TableSetRowStyleEventArgs e)
-        {
-            if (e.RowIndex < 0 || e.RowIndex >= _tableRows.Count)
-            {
-                return null;
-            }
-
-            var row = _tableRows[e.RowIndex];
-            if (row == null)
-            {
-                return null;
-            }
-
-            if (row.Id == _selectedUserId)
-            {
-                return new AntdUI.Table.CellStyleInfo
-                {
-                    BackColor = Color.FromArgb(232, 242, 255)
-                };
-            }
-
-            if (e.RowIndex % 2 == 1)
-            {
-                return new AntdUI.Table.CellStyleInfo
-                {
-                    BackColor = Color.FromArgb(250, 250, 250)
-                };
-            }
-
-            return null;
+            UpdateActionButtons();
         }
 
         private async Task AddUserAsync()
@@ -371,7 +318,6 @@ namespace AMControlWinF.Views.Am
             public UserTableRow(UserSummary user)
             {
                 User = user;
-                Id = user.Id;
                 LoginName = user.LoginName;
                 DisplayName = user.DisplayName;
                 LastLoginTimeText = user.LastLoginTimeText;
@@ -384,8 +330,6 @@ namespace AMControlWinF.Views.Am
                     user.IsEnabled ? TState.Success : TState.Error,
                     user.IsEnabled ? "已启用" : "已禁用");
             }
-
-            public int Id { get; private set; }
 
             public string LoginName { get; private set; }
 
