@@ -3,6 +3,7 @@ using AM.Core.Messaging;
 using AM.PageModel.Main;
 using AM.PageModel.Navigation;
 using AM.Tools;
+using AMControlWinF.Views.Am;
 using AntdUI;
 using System;
 using System.Collections.Generic;
@@ -395,6 +396,41 @@ namespace AMControlWinF
             };
         }
 
+        public void NavigateToPage(string pageKey)
+        {
+            if (string.IsNullOrWhiteSpace(pageKey))
+            {
+                return;
+            }
+
+            var targetPage = NavigationCatalog.All.FirstOrDefault(x =>
+                string.Equals(x.PageKey, pageKey, StringComparison.OrdinalIgnoreCase));
+            if (targetPage == null)
+            {
+                return;
+            }
+
+            var targetPrimary = _model.PrimaryItems.FirstOrDefault(x =>
+                string.Equals(x.Key, targetPage.ModuleKey, StringComparison.OrdinalIgnoreCase));
+            if (targetPrimary == null)
+            {
+                return;
+            }
+
+            _model.SelectedPrimary = targetPrimary;
+            _model.LoadSecondaryItems(targetPrimary.Key);
+
+            var targetSecondary = _model.SecondaryItems.FirstOrDefault(x =>
+                string.Equals(x.PageKey, pageKey, StringComparison.OrdinalIgnoreCase));
+            if (targetSecondary == null)
+            {
+                return;
+            }
+
+            _model.SelectedSecondary = targetSecondary;
+            RefreshShell();
+        }
+
         #endregion
 
         #region 页面缓存与工作区
@@ -517,7 +553,7 @@ namespace AMControlWinF
                 { "AlarmLog.History", () => CreatePagePlaceholder("报警与日志 / 报警历史", "Alarm / History") },
                 { "AlarmLog.RunLog", () => CreatePagePlaceholder("报警与日志 / 运行日志", "Alarm / Run Log") },
 
-                { "System.User", () => CreatePagePlaceholder("系统 / 用户管理", "System / User") },
+                { "System.User", () => new UserManagementPage() },
                 { "System.Permission", () => CreatePagePlaceholder("系统 / 权限分配", "System / Permission") },
                 { "System.LoginLog", () => CreatePagePlaceholder("系统 / 登录日志", "System / Login Log") }
             };
