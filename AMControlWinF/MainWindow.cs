@@ -4,6 +4,7 @@ using AM.PageModel.Main;
 using AM.PageModel.Navigation;
 using AM.Tools;
 using AMControlWinF.Tools;
+using AMControlWinF.Views.Am;
 using AMControlWinF.Views.Auth;
 using AMControlWinF.Views.Main;
 using AntdUI;
@@ -465,7 +466,7 @@ namespace AMControlWinF
                 { "AlarmLog.History",       () => CreatePlaceholderPage("报警与日志 / 报警历史") },
                 { "AlarmLog.RunLog",        () => CreatePlaceholderPage("报警与日志 / 运行日志") },
 
-                { "System.User",            () => CreatePlaceholderPage("系统 / 用户管理") },
+                { "System.User",            () => new UserManagementPage() },
                 { "System.Permission",      () => CreatePlaceholderPage("系统 / 权限分配") },
                 { "System.LoginLog",        () => CreatePlaceholderPage("系统 / 登录日志") }
             };

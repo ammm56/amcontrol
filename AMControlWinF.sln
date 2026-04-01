@@ -19,6 +19,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AM.App", "AM.App\AM.App.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AM.PageModel", "AM.PageModel\AM.PageModel.csproj", "{509B39C5-D68E-4F86-90BC-52A5A251F16E}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Demo", "Demo", "{3AC73340-1AF9-48D3-B50B-59948CBBD8D8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AntdUI-Demo", "AntdUI-Demo", "{775B872A-2010-4C0C-AA4E-F893C9DD549D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AntdUIDemo", "Demo\AntdUI-Demo\AntdUIDemo.csproj", "{8E8D90F1-1945-88A4-B41A-904999BEDAA8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,9 +63,17 @@ Global
 		{509B39C5-D68E-4F86-90BC-52A5A251F16E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{509B39C5-D68E-4F86-90BC-52A5A251F16E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{509B39C5-D68E-4F86-90BC-52A5A251F16E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E8D90F1-1945-88A4-B41A-904999BEDAA8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E8D90F1-1945-88A4-B41A-904999BEDAA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E8D90F1-1945-88A4-B41A-904999BEDAA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E8D90F1-1945-88A4-B41A-904999BEDAA8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{775B872A-2010-4C0C-AA4E-F893C9DD549D} = {3AC73340-1AF9-48D3-B50B-59948CBBD8D8}
+		{8E8D90F1-1945-88A4-B41A-904999BEDAA8} = {775B872A-2010-4C0C-AA4E-F893C9DD549D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C883A67B-CAA1-4715-A64C-2A2FCEFE6818}

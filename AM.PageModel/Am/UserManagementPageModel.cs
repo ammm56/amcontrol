@@ -161,6 +161,11 @@ namespace AM.PageModel.Am
             return await Task.Run(() => _authService.SetUserEnabled(userId, isEnabled));
         }
 
+        public async Task<Result> DeleteUserAsync(int userId)
+        {
+            return await Task.Run(() => _authService.DeleteUser(userId));
+        }
+
         public async Task<Result> ResetUserPasswordAsync(int userId, string newPassword)
         {
             return await Task.Run(() => _authService.ResetUserPassword(userId, newPassword));
