@@ -162,7 +162,7 @@
             this.menuPrimary.Location = new System.Drawing.Point(16, 16);
             this.menuPrimary.Margin = new System.Windows.Forms.Padding(0);
             this.menuPrimary.Name = "menuPrimary";
-            this.menuPrimary.Padding = new System.Windows.Forms.Padding(2);
+            this.menuPrimary.Padding = new System.Windows.Forms.Padding(5);
             this.menuPrimary.Size = new System.Drawing.Size(64, 626);
             this.menuPrimary.TabIndex = 0;
             this.menuPrimary.Unique = true;
@@ -215,7 +215,7 @@
             this.menuSecondary.Location = new System.Drawing.Point(16, 72);
             this.menuSecondary.Margin = new System.Windows.Forms.Padding(0);
             this.menuSecondary.Name = "menuSecondary";
-            this.menuSecondary.Padding = new System.Windows.Forms.Padding(0, 2, 0, 2);
+            this.menuSecondary.Padding = new System.Windows.Forms.Padding(2);
             this.menuSecondary.Size = new System.Drawing.Size(198, 612);
             this.menuSecondary.TabIndex = 1;
             this.menuSecondary.Unique = true;

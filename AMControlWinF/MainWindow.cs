@@ -161,7 +161,7 @@ namespace AMControlWinF
                 menuPrimary.Items.Add(new MenuItem
                 {
                     Text = GetPrimaryText(item),
-                    Tag = item.Key
+                    Tag = item.Key,
                 });
             }
         }
