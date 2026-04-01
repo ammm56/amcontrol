@@ -34,6 +34,15 @@
 
 ---
 
+## AMControlWinF 功能文档
+
+| 文件 | 说明 |
+|------|------|
+| [winf-auth-login.md](winf-auth-login.md) | WinForms 用户认证与登录（角色体系、LoginForm、切换用户/退出登录流程、PopoverCard 安全关闭） |
+| [winf-mainwindow-shell.md](winf-mainwindow-shell.md) | WinForms 主窗体壳层（布局结构、主题/语言切换、系统消息、用户菜单交互） |
+
+---
+
 ## 相关文档
 
 - [架构设计](../01-architecture/README.md)
