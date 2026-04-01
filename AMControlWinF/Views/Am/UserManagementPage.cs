@@ -1,8 +1,9 @@
 ﻿using AM.Model.Auth;
 using AM.PageModel.Am;
+using AntdUI;
 using System;
 using System.Collections.Generic;
-using System.Data;
+using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -21,15 +22,16 @@ namespace AMControlWinF.Views.Am
         private readonly UserManagementPageModel _model;
         private bool _isFirstLoad;
         private bool _isBusy;
-        private List<UserSummary> _visibleUsers;
+        private AntList<UserTableRow> _tableRows;
 
         public UserManagementPage()
         {
             InitializeComponent();
 
             _model = new UserManagementPageModel();
-            _visibleUsers = new List<UserSummary>();
+            _tableRows = new AntList<UserTableRow>();
 
+            InitializeTableColumns();
             BindEvents();
             RefreshActionButtons();
         }
@@ -46,6 +48,51 @@ namespace AMControlWinF.Views.Am
             buttonAddUser.Click += async (s, e) => await AddUserAsync();
 
             tableUsers.CellClick += TableUsers_CellClick;
+        }
+
+        private void InitializeTableColumns()
+        {
+            tableUsers.Columns = new ColumnCollection()
+            {
+                new Column("", "序号", ColumnAlign.Center)
+                {
+                    Width = "60",
+                    Fixed = true,
+                    Render = (value, record, rowindex) => rowindex + 1
+                },
+                new Column("LoginName", "登录名", ColumnAlign.Center)
+                {
+                    Width = "120"
+                },
+                new Column("DisplayName", "用户名", ColumnAlign.Left)
+                {
+                    Width = "140",
+                    Fixed = true
+                },
+                new Column("RoleTag", "角色", ColumnAlign.Center)
+                {
+                    Width = "110"
+                },
+                new Column("StateTag", "状态", ColumnAlign.Center)
+                {
+                    Width = "110"
+                },
+                new Column("LastLoginText", "最后登录时间", ColumnAlign.Center)
+                {
+                    Width = "180"
+                },
+                new Column("RemarkText", "备注", ColumnAlign.Left)
+                {
+                    LineBreak = true
+                }
+            };
+
+            tableUsers.StackedHeaderRows = new StackedHeaderRow[]
+            {
+                new StackedHeaderRow(
+                    new StackedColumn("LoginName,DisplayName,RoleTag", "用户信息"),
+                    new StackedColumn("StateTag,LastLoginText,RemarkText", "状态与说明"))
+            };
         }
 
         private async void UserManagementPage_Load(object sender, EventArgs e)
@@ -113,39 +160,58 @@ namespace AMControlWinF.Views.Am
 
         private void RebindTable()
         {
-            _visibleUsers = _model.Users.ToList();
+            _tableRows = new AntList<UserTableRow>();
 
-            var table = new DataTable();
-            table.Columns.Add("登录名");
-            table.Columns.Add("用户名");
-            table.Columns.Add("角色");
-            table.Columns.Add("状态");
-            table.Columns.Add("最后登录时间");
-            table.Columns.Add("备注");
-
-            foreach (var user in _visibleUsers)
+            foreach (var user in _model.Users)
             {
-                table.Rows.Add(
-                    user.LoginName ?? string.Empty,
-                    user.DisplayName ?? string.Empty,
-                    user.RoleDisplayName ?? string.Empty,
-                    user.StateText ?? string.Empty,
-                    user.LastLoginTimeText ?? string.Empty,
-                    user.Remark ?? string.Empty);
+                _tableRows.Add(new UserTableRow
+                {
+                    User = user,
+                    LoginName = user.LoginName ?? string.Empty,
+                    DisplayName = new CellText(user.DisplayName ?? string.Empty),
+                    RoleTag = BuildRoleTag(user),
+                    StateTag = new CellTag(
+                        user.IsEnabled ? "已启用" : "已禁用",
+                        user.IsEnabled ? TTypeMini.Success : TTypeMini.Error),
+                    LastLoginText = new CellText(user.LastLoginTimeText ?? "-"),
+                    RemarkText = new CellText(string.IsNullOrWhiteSpace(user.Remark) ? "-" : user.Remark)
+                });
             }
 
-            tableUsers.DataSource = table;
+            tableUsers.Binding(_tableRows);
         }
 
-        private void TableUsers_CellClick(object sender, AntdUI.TableClickEventArgs e)
+        private static CellTag BuildRoleTag(UserSummary user)
+        {
+            var roleCode = user == null || string.IsNullOrWhiteSpace(user.RoleCode)
+                ? string.Empty
+                : user.RoleCode.Trim();
+
+            switch (roleCode)
+            {
+                case "Am":
+                    return new CellTag("管理员", TTypeMini.Error);
+                case "Engineer":
+                    return new CellTag("工程师", TTypeMini.Warn);
+                case "Operator":
+                    return new CellTag("操作员", TTypeMini.Primary);
+                default:
+                    return new CellTag(
+                        string.IsNullOrWhiteSpace(user == null ? null : user.RoleDisplayName) ? "未分配" : user.RoleDisplayName,
+                        TTypeMini.Default);
+            }
+        }
+
+        private void TableUsers_CellClick(object sender, TableClickEventArgs e)
         {
             if (e == null)
                 return;
 
-            if (e.RowIndex < 0 || e.RowIndex >= _visibleUsers.Count)
+            var row = e.Record as UserTableRow;
+            if (row == null || row.User == null)
                 return;
 
-            _model.SelectedUser = _visibleUsers[e.RowIndex];
+            _model.SelectedUser = row.User;
             RefreshActionButtons();
         }
 
@@ -302,6 +368,23 @@ namespace AMControlWinF.Views.Am
             }
 
             await ReloadAsync(null);
+        }
+
+        private sealed class UserTableRow
+        {
+            public UserSummary User { get; set; }
+
+            public string LoginName { get; set; }
+
+            public CellText DisplayName { get; set; }
+
+            public CellTag RoleTag { get; set; }
+
+            public CellTag StateTag { get; set; }
+
+            public CellText LastLoginText { get; set; }
+
+            public CellText RemarkText { get; set; }
         }
     }
 }

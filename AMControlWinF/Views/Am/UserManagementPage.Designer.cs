@@ -20,15 +20,15 @@
             this.panelTableCard = new AntdUI.Panel();
             this.tableUsers = new AntdUI.Table();
             this.flowStats = new AntdUI.FlowPanel();
-            this.panelTotalCard = new AntdUI.Panel();
-            this.labelTotalCount = new AntdUI.Label();
-            this.labelTotalTitle = new AntdUI.Label();
-            this.panelEnabledCard = new AntdUI.Panel();
-            this.labelEnabledCount = new AntdUI.Label();
-            this.labelEnabledTitle = new AntdUI.Label();
             this.panelDisabledCard = new AntdUI.Panel();
             this.labelDisabledCount = new AntdUI.Label();
             this.labelDisabledTitle = new AntdUI.Label();
+            this.panelEnabledCard = new AntdUI.Panel();
+            this.labelEnabledCount = new AntdUI.Label();
+            this.labelEnabledTitle = new AntdUI.Label();
+            this.panelTotalCard = new AntdUI.Panel();
+            this.labelTotalCount = new AntdUI.Label();
+            this.labelTotalTitle = new AntdUI.Label();
             this.panelToolbar = new AntdUI.Panel();
             this.flowActions = new AntdUI.FlowPanel();
             this.buttonAddUser = new AntdUI.Button();
@@ -39,9 +39,9 @@
             this.panelRoot.SuspendLayout();
             this.panelTableCard.SuspendLayout();
             this.flowStats.SuspendLayout();
-            this.panelTotalCard.SuspendLayout();
-            this.panelEnabledCard.SuspendLayout();
             this.panelDisabledCard.SuspendLayout();
+            this.panelEnabledCard.SuspendLayout();
+            this.panelTotalCard.SuspendLayout();
             this.panelToolbar.SuspendLayout();
             this.flowActions.SuspendLayout();
             this.SuspendLayout();
@@ -75,13 +75,20 @@
             // 
             // tableUsers
             // 
+            this.tableUsers.AutoSizeColumnsMode = AntdUI.ColumnsMode.Fill;
             this.tableUsers.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableUsers.Gap = 12;
+            this.tableUsers.EmptyHeader = true;
+            this.tableUsers.FixedHeader = true;
+            this.tableUsers.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
+            this.tableUsers.Gap = 8;
             this.tableUsers.Location = new System.Drawing.Point(12, 12);
             this.tableUsers.Margin = new System.Windows.Forms.Padding(0);
             this.tableUsers.Name = "tableUsers";
+            this.tableUsers.ShowTip = false;
             this.tableUsers.Size = new System.Drawing.Size(786, 504);
             this.tableUsers.TabIndex = 0;
+            this.tableUsers.Text = "tableUsers";
+            this.tableUsers.VisibleHeader = true;
             // 
             // flowStats
             // 
@@ -96,39 +103,41 @@
             this.flowStats.Size = new System.Drawing.Size(810, 76);
             this.flowStats.TabIndex = 1;
             // 
-            // panelTotalCard
+            // panelDisabledCard
             // 
-            this.panelTotalCard.BackColor = System.Drawing.Color.Transparent;
-            this.panelTotalCard.Controls.Add(this.labelTotalCount);
-            this.panelTotalCard.Controls.Add(this.labelTotalTitle);
-            this.panelTotalCard.Location = new System.Drawing.Point(376, 0);
-            this.panelTotalCard.Margin = new System.Windows.Forms.Padding(0);
-            this.panelTotalCard.Name = "panelTotalCard";
-            this.panelTotalCard.Padding = new System.Windows.Forms.Padding(12);
-            this.panelTotalCard.Radius = 12;
-            this.panelTotalCard.Shadow = 4;
-            this.panelTotalCard.Size = new System.Drawing.Size(180, 72);
-            this.panelTotalCard.TabIndex = 0;
+            this.panelDisabledCard.BackColor = System.Drawing.Color.Transparent;
+            this.panelDisabledCard.Controls.Add(this.labelDisabledCount);
+            this.panelDisabledCard.Controls.Add(this.labelDisabledTitle);
+            this.panelDisabledCard.Location = new System.Drawing.Point(376, 0);
+            this.panelDisabledCard.Margin = new System.Windows.Forms.Padding(0);
+            this.panelDisabledCard.Name = "panelDisabledCard";
+            this.panelDisabledCard.Padding = new System.Windows.Forms.Padding(12);
+            this.panelDisabledCard.Radius = 12;
+            this.panelDisabledCard.Shadow = 4;
+            this.panelDisabledCard.Size = new System.Drawing.Size(180, 72);
+            this.panelDisabledCard.TabIndex = 2;
             // 
-            // labelTotalCount
+            // labelDisabledCount
             // 
-            this.labelTotalCount.Dock = System.Windows.Forms.DockStyle.Right;
-            this.labelTotalCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 18F, System.Drawing.FontStyle.Bold);
-            this.labelTotalCount.Location = new System.Drawing.Point(104, 16);
-            this.labelTotalCount.Name = "labelTotalCount";
-            this.labelTotalCount.Size = new System.Drawing.Size(60, 40);
-            this.labelTotalCount.TabIndex = 1;
-            this.labelTotalCount.Text = "0";
+            this.labelDisabledCount.Dock = System.Windows.Forms.DockStyle.Right;
+            this.labelDisabledCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 18F, System.Drawing.FontStyle.Bold);
+            this.labelDisabledCount.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(108)))), ((int)(((byte)(108)))));
+            this.labelDisabledCount.Location = new System.Drawing.Point(100, 16);
+            this.labelDisabledCount.Name = "labelDisabledCount";
+            this.labelDisabledCount.Size = new System.Drawing.Size(64, 40);
+            this.labelDisabledCount.TabIndex = 1;
+            this.labelDisabledCount.Text = "0";
             // 
-            // labelTotalTitle
+            // labelDisabledTitle
             // 
-            this.labelTotalTitle.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labelTotalTitle.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
-            this.labelTotalTitle.Location = new System.Drawing.Point(16, 16);
-            this.labelTotalTitle.Name = "labelTotalTitle";
-            this.labelTotalTitle.Size = new System.Drawing.Size(72, 40);
-            this.labelTotalTitle.TabIndex = 0;
-            this.labelTotalTitle.Text = "用户总数";
+            this.labelDisabledTitle.Dock = System.Windows.Forms.DockStyle.Left;
+            this.labelDisabledTitle.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
+            this.labelDisabledTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(108)))), ((int)(((byte)(108)))));
+            this.labelDisabledTitle.Location = new System.Drawing.Point(16, 16);
+            this.labelDisabledTitle.Name = "labelDisabledTitle";
+            this.labelDisabledTitle.Size = new System.Drawing.Size(78, 40);
+            this.labelDisabledTitle.TabIndex = 0;
+            this.labelDisabledTitle.Text = "禁用用户";
             // 
             // panelEnabledCard
             // 
@@ -166,41 +175,39 @@
             this.labelEnabledTitle.TabIndex = 0;
             this.labelEnabledTitle.Text = "启用用户";
             // 
-            // panelDisabledCard
+            // panelTotalCard
             // 
-            this.panelDisabledCard.BackColor = System.Drawing.Color.Transparent;
-            this.panelDisabledCard.Controls.Add(this.labelDisabledCount);
-            this.panelDisabledCard.Controls.Add(this.labelDisabledTitle);
-            this.panelDisabledCard.Location = new System.Drawing.Point(0, 0);
-            this.panelDisabledCard.Margin = new System.Windows.Forms.Padding(0);
-            this.panelDisabledCard.Name = "panelDisabledCard";
-            this.panelDisabledCard.Padding = new System.Windows.Forms.Padding(12);
-            this.panelDisabledCard.Radius = 12;
-            this.panelDisabledCard.Shadow = 4;
-            this.panelDisabledCard.Size = new System.Drawing.Size(180, 72);
-            this.panelDisabledCard.TabIndex = 2;
+            this.panelTotalCard.BackColor = System.Drawing.Color.Transparent;
+            this.panelTotalCard.Controls.Add(this.labelTotalCount);
+            this.panelTotalCard.Controls.Add(this.labelTotalTitle);
+            this.panelTotalCard.Location = new System.Drawing.Point(0, 0);
+            this.panelTotalCard.Margin = new System.Windows.Forms.Padding(0);
+            this.panelTotalCard.Name = "panelTotalCard";
+            this.panelTotalCard.Padding = new System.Windows.Forms.Padding(12);
+            this.panelTotalCard.Radius = 12;
+            this.panelTotalCard.Shadow = 4;
+            this.panelTotalCard.Size = new System.Drawing.Size(180, 72);
+            this.panelTotalCard.TabIndex = 0;
             // 
-            // labelDisabledCount
+            // labelTotalCount
             // 
-            this.labelDisabledCount.Dock = System.Windows.Forms.DockStyle.Right;
-            this.labelDisabledCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 18F, System.Drawing.FontStyle.Bold);
-            this.labelDisabledCount.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(108)))), ((int)(((byte)(108)))));
-            this.labelDisabledCount.Location = new System.Drawing.Point(100, 16);
-            this.labelDisabledCount.Name = "labelDisabledCount";
-            this.labelDisabledCount.Size = new System.Drawing.Size(64, 40);
-            this.labelDisabledCount.TabIndex = 1;
-            this.labelDisabledCount.Text = "0";
+            this.labelTotalCount.Dock = System.Windows.Forms.DockStyle.Right;
+            this.labelTotalCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 18F, System.Drawing.FontStyle.Bold);
+            this.labelTotalCount.Location = new System.Drawing.Point(104, 16);
+            this.labelTotalCount.Name = "labelTotalCount";
+            this.labelTotalCount.Size = new System.Drawing.Size(60, 40);
+            this.labelTotalCount.TabIndex = 1;
+            this.labelTotalCount.Text = "0";
             // 
-            // labelDisabledTitle
+            // labelTotalTitle
             // 
-            this.labelDisabledTitle.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labelDisabledTitle.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
-            this.labelDisabledTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(108)))), ((int)(((byte)(108)))));
-            this.labelDisabledTitle.Location = new System.Drawing.Point(16, 16);
-            this.labelDisabledTitle.Name = "labelDisabledTitle";
-            this.labelDisabledTitle.Size = new System.Drawing.Size(78, 40);
-            this.labelDisabledTitle.TabIndex = 0;
-            this.labelDisabledTitle.Text = "禁用用户";
+            this.labelTotalTitle.Dock = System.Windows.Forms.DockStyle.Left;
+            this.labelTotalTitle.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
+            this.labelTotalTitle.Location = new System.Drawing.Point(16, 16);
+            this.labelTotalTitle.Name = "labelTotalTitle";
+            this.labelTotalTitle.Size = new System.Drawing.Size(72, 40);
+            this.labelTotalTitle.TabIndex = 0;
+            this.labelTotalTitle.Text = "用户总数";
             // 
             // panelToolbar
             // 
@@ -289,6 +296,7 @@
             this.inputSearch.PlaceholderText = "搜索登录名 / 用户名 / 角色 / 备注";
             this.inputSearch.Size = new System.Drawing.Size(280, 36);
             this.inputSearch.TabIndex = 0;
+            this.inputSearch.WaveSize = 0;
             // 
             // UserManagementPage
             // 
@@ -298,9 +306,9 @@
             this.panelRoot.ResumeLayout(false);
             this.panelTableCard.ResumeLayout(false);
             this.flowStats.ResumeLayout(false);
-            this.panelTotalCard.ResumeLayout(false);
-            this.panelEnabledCard.ResumeLayout(false);
             this.panelDisabledCard.ResumeLayout(false);
+            this.panelEnabledCard.ResumeLayout(false);
+            this.panelTotalCard.ResumeLayout(false);
             this.panelToolbar.ResumeLayout(false);
             this.flowActions.ResumeLayout(false);
             this.ResumeLayout(false);
