@@ -62,8 +62,8 @@
             // 
             // panelShell
             // 
-            this.panelShell.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.panelShell.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panelShell.BackColor = System.Drawing.Color.Transparent;
             this.panelShell.Controls.Add(this.panelBody);
@@ -86,7 +86,7 @@
             this.panelBody.Margin = new System.Windows.Forms.Padding(0);
             this.panelBody.Name = "panelBody";
             this.panelBody.Radius = 0;
-            this.panelBody.Size = new System.Drawing.Size(796, 353);
+            this.panelBody.Size = new System.Drawing.Size(796, 364);
             this.panelBody.TabIndex = 1;
             // 
             // panelScrollHost
@@ -97,7 +97,7 @@
             this.panelScrollHost.Location = new System.Drawing.Point(0, 0);
             this.panelScrollHost.Margin = new System.Windows.Forms.Padding(0);
             this.panelScrollHost.Name = "panelScrollHost";
-            this.panelScrollHost.Size = new System.Drawing.Size(796, 353);
+            this.panelScrollHost.Size = new System.Drawing.Size(796, 364);
             this.panelScrollHost.TabIndex = 0;
             // 
             // panelFormBody
@@ -118,7 +118,6 @@
             this.panelFormBody.Location = new System.Drawing.Point(0, 0);
             this.panelFormBody.Margin = new System.Windows.Forms.Padding(0);
             this.panelFormBody.Name = "panelFormBody";
-            this.panelFormBody.Padding = new System.Windows.Forms.Padding(0);
             this.panelFormBody.Radius = 0;
             this.panelFormBody.Size = new System.Drawing.Size(779, 420);
             this.panelFormBody.TabIndex = 0;
@@ -148,7 +147,7 @@
             this.checkEnabled.CheckState = System.Windows.Forms.CheckState.Checked;
             this.checkEnabled.Location = new System.Drawing.Point(24, 258);
             this.checkEnabled.Name = "checkEnabled";
-            this.checkEnabled.Size = new System.Drawing.Size(59, 24);
+            this.checkEnabled.Size = new System.Drawing.Size(56, 24);
             this.checkEnabled.TabIndex = 9;
             this.checkEnabled.Text = "启用";
             this.checkEnabled.UseVisualStyleBackColor = true;
@@ -188,7 +187,6 @@
             this.dropdownRole.Name = "dropdownRole";
             this.dropdownRole.Size = new System.Drawing.Size(640, 34);
             this.dropdownRole.TabIndex = 5;
-            this.dropdownRole.Trigger = AntdUI.Trigger.Click;
             // 
             // labelRole
             // 
@@ -240,29 +238,29 @@
             // 
             this.panelFooter.Controls.Add(this.flowFooterButtons);
             this.panelFooter.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panelFooter.Location = new System.Drawing.Point(20, 457);
+            this.panelFooter.Location = new System.Drawing.Point(20, 468);
             this.panelFooter.Margin = new System.Windows.Forms.Padding(0);
             this.panelFooter.Name = "panelFooter";
             this.panelFooter.Padding = new System.Windows.Forms.Padding(0, 12, 0, 0);
             this.panelFooter.Radius = 0;
-            this.panelFooter.Size = new System.Drawing.Size(796, 76);
+            this.panelFooter.Size = new System.Drawing.Size(796, 65);
             this.panelFooter.TabIndex = 2;
             // 
             // flowFooterButtons
             // 
-            this.flowFooterButtons.Controls.Add(this.buttonCancel);
+            this.flowFooterButtons.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.flowFooterButtons.Controls.Add(this.buttonOk);
-            this.flowFooterButtons.Dock = System.Windows.Forms.DockStyle.Right;
+            this.flowFooterButtons.Controls.Add(this.buttonCancel);
             this.flowFooterButtons.Gap = 10;
-            this.flowFooterButtons.Location = new System.Drawing.Point(526, 12);
+            this.flowFooterButtons.Location = new System.Drawing.Point(488, 12);
             this.flowFooterButtons.Margin = new System.Windows.Forms.Padding(0);
             this.flowFooterButtons.Name = "flowFooterButtons";
-            this.flowFooterButtons.Size = new System.Drawing.Size(270, 64);
+            this.flowFooterButtons.Size = new System.Drawing.Size(308, 50);
             this.flowFooterButtons.TabIndex = 0;
             // 
             // buttonCancel
             // 
-            this.buttonCancel.Location = new System.Drawing.Point(0, 0);
+            this.buttonCancel.Location = new System.Drawing.Point(134, 0);
             this.buttonCancel.Margin = new System.Windows.Forms.Padding(0);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Radius = 8;
@@ -273,7 +271,7 @@
             // 
             // buttonOk
             // 
-            this.buttonOk.Location = new System.Drawing.Point(134, 0);
+            this.buttonOk.Location = new System.Drawing.Point(0, 0);
             this.buttonOk.Margin = new System.Windows.Forms.Padding(0);
             this.buttonOk.Name = "buttonOk";
             this.buttonOk.Radius = 8;

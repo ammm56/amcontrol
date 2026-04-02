@@ -116,6 +116,9 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="Views\Am\UserEditDialog.resx">
+      <DependentUpon>UserEditDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Views\Am\UserManagementPage.resx">
       <DependentUpon>UserManagementPage.cs</DependentUpon>
     </EmbeddedResource>
