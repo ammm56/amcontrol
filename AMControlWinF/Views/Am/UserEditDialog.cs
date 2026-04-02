@@ -1,6 +1,5 @@
 ﻿using AM.Core.Context;
 using System;
-using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -11,9 +10,9 @@ namespace AMControlWinF.Views.Am
     /// 布局参考 LoginForm：
     /// - 纹理背景
     /// - 中央大卡片
-    /// - 顶部固定标题说明
-    /// - 中间可滚动表单区
-    /// - 底部固定按钮栏
+    /// - 顶部固定标题说明（单行左右结构）
+    /// - 中间 StackPanel 滚动表单区
+    /// - 底部固定右对齐按钮栏
     /// </summary>
     public partial class UserEditDialog : AntdUI.Window
     {
@@ -138,92 +137,25 @@ namespace AMControlWinF.Views.Am
                 Text = "新增用户";
                 labelDialogTitle.Text = "新增用户";
                 labelDialogDescription.Text = "创建用户账号并设置角色、状态和备注信息。";
-                Size = new Size(900, 640);
-                MinimumSize = new Size(760, 560);
+
+                Size = new System.Drawing.Size(560, 650);
+
+                panelRowPassword.Visible = true;
                 inputLoginName.Enabled = true;
                 checkEnabled.Checked = true;
+                buttonOk.Text = "保存";
             }
             else
             {
                 Text = "编辑用户";
                 labelDialogTitle.Text = "编辑用户";
-                labelDialogDescription.Text = "修改用户显示信息、角色和启用状态。";
-                Size = new Size(820, 560);
-                MinimumSize = new Size(700, 500);
+                labelDialogDescription.Text = "修改用户显示信息、角色、状态和备注信息。";
+
+                Size = new System.Drawing.Size(560, 580);
+
+                panelRowPassword.Visible = false;
                 inputLoginName.Enabled = false;
-            }
-
-            RelayoutFormBody();
-        }
-
-        private void RelayoutFormBody()
-        {
-            var left = 24;
-            var top = 20;
-            var labelWidth = 100;
-            var inputLeft = 24;
-            var inputWidth = Math.Max(560, panelFormBody.Width - 48);
-            var controlHeight = 40;
-            var labelGap = 22;
-            var rowGap = 18;
-
-            LayoutRow(labelLoginName, inputLoginName, ref top, inputLeft, inputWidth, labelGap, controlHeight, rowGap);
-            LayoutRow(labelUserName, inputUserName, ref top, inputLeft, inputWidth, labelGap, controlHeight, rowGap);
-            LayoutRow(labelRole, dropdownRole, ref top, inputLeft, inputWidth, labelGap, controlHeight, rowGap);
-
-            if (_isCreateMode)
-            {
-                labelPassword.Visible = true;
-                inputPassword.Visible = true;
-                LayoutRow(labelPassword, inputPassword, ref top, inputLeft, inputWidth, labelGap, controlHeight, rowGap);
-            }
-            else
-            {
-                labelPassword.Visible = false;
-                inputPassword.Visible = false;
-            }
-
-            labelEnabled.Location = new Point(left, top);
-            labelEnabled.Size = new Size(labelWidth, labelGap);
-            checkEnabled.Location = new Point(inputLeft, top + labelGap);
-            checkEnabled.Size = new Size(100, 24);
-            top += labelGap + 24 + rowGap;
-
-            labelRemark.Location = new Point(left, top);
-            labelRemark.Size = new Size(labelWidth, labelGap);
-            inputRemark.Location = new Point(inputLeft, top + labelGap);
-            inputRemark.Size = new Size(inputWidth, 88);
-            inputRemark.Multiline = true;
-            top += labelGap + 88 + 24;
-
-            panelFormBody.Height = top;
-        }
-
-        private static void LayoutRow(
-            Control label,
-            Control input,
-            ref int top,
-            int inputLeft,
-            int inputWidth,
-            int labelGap,
-            int controlHeight,
-            int rowGap)
-        {
-            label.Location = new Point(24, top);
-            label.Size = new Size(100, labelGap);
-
-            input.Location = new Point(inputLeft, top + labelGap);
-            input.Size = new Size(inputWidth, controlHeight);
-
-            top += labelGap + controlHeight + rowGap;
-        }
-
-        protected override void OnResize(EventArgs e)
-        {
-            base.OnResize(e);
-            if (panelFormBody != null && !panelFormBody.IsDisposed)
-            {
-                RelayoutFormBody();
+                buttonOk.Text = "保存";
             }
         }
 
@@ -328,7 +260,6 @@ namespace AMControlWinF.Views.Am
             }
 
             public string Code { get; private set; }
-
             public string DisplayName { get; private set; }
         }
     }

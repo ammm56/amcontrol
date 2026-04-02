@@ -37,6 +37,7 @@
             this.buttonEditUser = new AntdUI.Button();
             this.buttonDeleteUser = new AntdUI.Button();
             this.buttonToggleEnabled = new AntdUI.Button();
+            this.buttonResetPwd = new AntdUI.Button();
             this.panelRoot.SuspendLayout();
             this.panelTableCard.SuspendLayout();
             this.flowStats.SuspendLayout();
@@ -258,6 +259,7 @@
             // 
             this.flowActionsRight.Controls.Add(this.buttonAddUser);
             this.flowActionsRight.Controls.Add(this.buttonEditUser);
+            this.flowActionsRight.Controls.Add(this.buttonResetPwd);
             this.flowActionsRight.Controls.Add(this.buttonDeleteUser);
             this.flowActionsRight.Controls.Add(this.buttonToggleEnabled);
             this.flowActionsRight.Dock = System.Windows.Forms.DockStyle.Right;
@@ -271,11 +273,11 @@
             // buttonAddUser
             // 
             this.buttonAddUser.IconSvg = "PlusOutlined";
-            this.buttonAddUser.Location = new System.Drawing.Point(340, 0);
+            this.buttonAddUser.Location = new System.Drawing.Point(358, 0);
             this.buttonAddUser.Margin = new System.Windows.Forms.Padding(0);
             this.buttonAddUser.Name = "buttonAddUser";
             this.buttonAddUser.Radius = 8;
-            this.buttonAddUser.Size = new System.Drawing.Size(100, 36);
+            this.buttonAddUser.Size = new System.Drawing.Size(80, 36);
             this.buttonAddUser.TabIndex = 3;
             this.buttonAddUser.Text = "新增用户";
             this.buttonAddUser.Type = AntdUI.TTypeMini.Primary;
@@ -285,11 +287,11 @@
             // 
             this.buttonEditUser.Enabled = false;
             this.buttonEditUser.IconSvg = "EditOutlined";
-            this.buttonEditUser.Location = new System.Drawing.Point(232, 0);
+            this.buttonEditUser.Location = new System.Drawing.Point(270, 0);
             this.buttonEditUser.Margin = new System.Windows.Forms.Padding(0);
             this.buttonEditUser.Name = "buttonEditUser";
             this.buttonEditUser.Radius = 8;
-            this.buttonEditUser.Size = new System.Drawing.Size(100, 36);
+            this.buttonEditUser.Size = new System.Drawing.Size(80, 36);
             this.buttonEditUser.TabIndex = 0;
             this.buttonEditUser.Text = "编辑用户";
             this.buttonEditUser.WaveSize = 0;
@@ -298,11 +300,11 @@
             // 
             this.buttonDeleteUser.Enabled = false;
             this.buttonDeleteUser.IconSvg = "DeleteOutlined";
-            this.buttonDeleteUser.Location = new System.Drawing.Point(124, 0);
+            this.buttonDeleteUser.Location = new System.Drawing.Point(94, 0);
             this.buttonDeleteUser.Margin = new System.Windows.Forms.Padding(0);
             this.buttonDeleteUser.Name = "buttonDeleteUser";
             this.buttonDeleteUser.Radius = 8;
-            this.buttonDeleteUser.Size = new System.Drawing.Size(100, 36);
+            this.buttonDeleteUser.Size = new System.Drawing.Size(80, 36);
             this.buttonDeleteUser.TabIndex = 2;
             this.buttonDeleteUser.Text = "删除用户";
             this.buttonDeleteUser.WaveSize = 0;
@@ -315,10 +317,23 @@
             this.buttonToggleEnabled.Margin = new System.Windows.Forms.Padding(0);
             this.buttonToggleEnabled.Name = "buttonToggleEnabled";
             this.buttonToggleEnabled.Radius = 8;
-            this.buttonToggleEnabled.Size = new System.Drawing.Size(116, 36);
+            this.buttonToggleEnabled.Size = new System.Drawing.Size(86, 36);
             this.buttonToggleEnabled.TabIndex = 1;
             this.buttonToggleEnabled.Text = "启用/禁用";
             this.buttonToggleEnabled.WaveSize = 0;
+            // 
+            // buttonResetPwd
+            // 
+            this.buttonResetPwd.Enabled = false;
+            this.buttonResetPwd.IconSvg = "ReloadOutlined";
+            this.buttonResetPwd.Location = new System.Drawing.Point(182, 0);
+            this.buttonResetPwd.Margin = new System.Windows.Forms.Padding(0);
+            this.buttonResetPwd.Name = "buttonResetPwd";
+            this.buttonResetPwd.Radius = 8;
+            this.buttonResetPwd.Size = new System.Drawing.Size(80, 36);
+            this.buttonResetPwd.TabIndex = 2;
+            this.buttonResetPwd.Text = "重置密码";
+            this.buttonResetPwd.WaveSize = 0;
             // 
             // UserManagementPage
             // 
@@ -361,5 +376,6 @@
         private AntdUI.Panel panelTableCard;
         private AntdUI.Table tableUsers;
         private AntdUI.FlowPanel flowActionsLeft;
+        private AntdUI.Button buttonResetPwd;
     }
 }
