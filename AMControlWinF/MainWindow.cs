@@ -8,6 +8,7 @@ using AMControlWinF.Tools;
 using AMControlWinF.Views.Am;
 using AMControlWinF.Views.Auth;
 using AMControlWinF.Views.Main;
+using AMControlWinF.Views.MotionConfig;
 using AntdUI;
 using System;
 using System.Collections.Generic;
@@ -463,7 +464,7 @@ namespace AMControlWinF
                 { "Motion.Axis",            () => CreatePlaceholderPage("设备 / 轴控制") },
                 { "Motion.Actuator",        () => CreatePlaceholderPage("设备 / 执行器控制") },
 
-                { "MotionConfig.Card",      () => CreatePlaceholderPage("运控配置 / 控制卡配置") },
+                { "MotionConfig.Card",      () => new MotionCardManagementPage() },
                 { "MotionConfig.Axis",      () => CreatePlaceholderPage("运控配置 / 轴拓扑配置") },
                 { "MotionConfig.IoMap",     () => CreatePlaceholderPage("运控配置 / IO 映射配置") },
                 { "MotionConfig.AxisParam", () => CreatePlaceholderPage("运控配置 / 轴运行参数") },

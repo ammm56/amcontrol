@@ -129,6 +129,18 @@
     <Compile Include="Views\Main\UserAvatarPopoverCard.Designer.cs">
       <DependentUpon>UserAvatarPopoverCard.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\MotionConfig\MotionCardControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionCardControl.Designer.cs">
+      <DependentUpon>MotionCardControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionCardManagementPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionCardManagementPage.Designer.cs">
+      <DependentUpon>MotionCardManagementPage.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </EmbeddedResource>
@@ -170,6 +182,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Views\Main\UserAvatarPopoverCard.resx">
       <DependentUpon>UserAvatarPopoverCard.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\MotionCardControl.resx">
+      <DependentUpon>MotionCardControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\MotionCardManagementPage.resx">
+      <DependentUpon>MotionCardManagementPage.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.manifest" />
     <None Include="Properties\Settings.settings">
