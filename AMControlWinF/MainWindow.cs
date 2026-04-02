@@ -1,5 +1,6 @@
 ﻿using AM.Core.Context;
 using AM.Core.Messaging;
+using AM.DBService.Services.Auth;
 using AM.PageModel.Main;
 using AM.PageModel.Navigation;
 using AM.Tools;
@@ -647,12 +648,22 @@ namespace AMControlWinF
 
         private void UserAvatarMenuControl_ChangePasswordRequested(object sender, EventArgs e)
         {
-            var isEn = IsEnglishLanguage(GetCurrentLanguage());
-            MessageBox.Show(
-                isEn ? "Change password dialog will be added next." : "修改密码弹窗下一步接入。",
-                isEn ? "Info" : "提示",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
+            var currentUser = UserContext.Instance.CurrentUser;
+            if (currentUser == null)
+                return;
+
+            using (var resetPwdForm = new ResetUserPasswordDialog())
+            {
+                resetPwdForm.Text = IsEnglishLanguage(GetCurrentLanguage()) ? "Change Password" : "修改密码";
+                resetPwdForm.TargetLoginName = currentUser.LoginName;
+                resetPwdForm.TargetDisplayName = currentUser.UserName;
+
+                if (resetPwdForm.ShowDialog(this) != DialogResult.OK)
+                    return;
+
+                var authService = new AuthService();
+                authService.ResetUserPassword(currentUser.Id, resetPwdForm.NewPassword);
+            }
         }
 
         /// <summary>
