@@ -30,12 +30,13 @@
             this.labelTotalCount = new AntdUI.Label();
             this.labelTotalTitle = new AntdUI.Label();
             this.panelToolbar = new AntdUI.Panel();
-            this.flowActions = new AntdUI.FlowPanel();
+            this.flowActionsLeft = new AntdUI.FlowPanel();
+            this.inputSearch = new AntdUI.Input();
+            this.flowActionsRight = new AntdUI.FlowPanel();
             this.buttonAddUser = new AntdUI.Button();
             this.buttonEditUser = new AntdUI.Button();
             this.buttonDeleteUser = new AntdUI.Button();
             this.buttonToggleEnabled = new AntdUI.Button();
-            this.inputSearch = new AntdUI.Input();
             this.panelRoot.SuspendLayout();
             this.panelTableCard.SuspendLayout();
             this.flowStats.SuspendLayout();
@@ -43,7 +44,8 @@
             this.panelEnabledCard.SuspendLayout();
             this.panelTotalCard.SuspendLayout();
             this.panelToolbar.SuspendLayout();
-            this.flowActions.SuspendLayout();
+            this.flowActionsLeft.SuspendLayout();
+            this.flowActionsRight.SuspendLayout();
             this.SuspendLayout();
             // 
             // panelRoot
@@ -64,13 +66,13 @@
             this.panelTableCard.BackColor = System.Drawing.Color.Transparent;
             this.panelTableCard.Controls.Add(this.tableUsers);
             this.panelTableCard.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelTableCard.Location = new System.Drawing.Point(8, 128);
+            this.panelTableCard.Location = new System.Drawing.Point(8, 140);
             this.panelTableCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelTableCard.Name = "panelTableCard";
             this.panelTableCard.Padding = new System.Windows.Forms.Padding(8);
             this.panelTableCard.Radius = 12;
             this.panelTableCard.Shadow = 4;
-            this.panelTableCard.Size = new System.Drawing.Size(810, 528);
+            this.panelTableCard.Size = new System.Drawing.Size(810, 516);
             this.panelTableCard.TabIndex = 2;
             // 
             // tableUsers
@@ -78,17 +80,16 @@
             this.tableUsers.AutoSizeColumnsMode = AntdUI.ColumnsMode.Fill;
             this.tableUsers.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableUsers.EmptyHeader = true;
-            this.tableUsers.FixedHeader = true;
             this.tableUsers.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
             this.tableUsers.Gap = 8;
+            this.tableUsers.Gaps = new System.Drawing.Size(8, 8);
             this.tableUsers.Location = new System.Drawing.Point(12, 12);
             this.tableUsers.Margin = new System.Windows.Forms.Padding(0);
             this.tableUsers.Name = "tableUsers";
             this.tableUsers.ShowTip = false;
-            this.tableUsers.Size = new System.Drawing.Size(786, 504);
+            this.tableUsers.Size = new System.Drawing.Size(786, 492);
             this.tableUsers.TabIndex = 0;
             this.tableUsers.Text = "tableUsers";
-            this.tableUsers.VisibleHeader = true;
             // 
             // flowStats
             // 
@@ -100,20 +101,24 @@
             this.flowStats.Location = new System.Drawing.Point(8, 52);
             this.flowStats.Margin = new System.Windows.Forms.Padding(0);
             this.flowStats.Name = "flowStats";
-            this.flowStats.Size = new System.Drawing.Size(810, 76);
+            this.flowStats.Padding = new System.Windows.Forms.Padding(4, 6, 4, 6);
+            this.flowStats.Size = new System.Drawing.Size(810, 88);
             this.flowStats.TabIndex = 1;
             // 
             // panelDisabledCard
             // 
             this.panelDisabledCard.BackColor = System.Drawing.Color.Transparent;
+            this.panelDisabledCard.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(225)))), ((int)(((byte)(229)))), ((int)(((byte)(235)))));
             this.panelDisabledCard.Controls.Add(this.labelDisabledCount);
             this.panelDisabledCard.Controls.Add(this.labelDisabledTitle);
-            this.panelDisabledCard.Location = new System.Drawing.Point(376, 0);
+            this.panelDisabledCard.Location = new System.Drawing.Point(380, 6);
             this.panelDisabledCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelDisabledCard.Name = "panelDisabledCard";
             this.panelDisabledCard.Padding = new System.Windows.Forms.Padding(12);
             this.panelDisabledCard.Radius = 12;
             this.panelDisabledCard.Shadow = 4;
+            this.panelDisabledCard.ShadowOpacity = 0.2F;
+            this.panelDisabledCard.ShadowOpacityAnimation = true;
             this.panelDisabledCard.Size = new System.Drawing.Size(180, 72);
             this.panelDisabledCard.TabIndex = 2;
             // 
@@ -142,14 +147,17 @@
             // panelEnabledCard
             // 
             this.panelEnabledCard.BackColor = System.Drawing.Color.Transparent;
+            this.panelEnabledCard.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(225)))), ((int)(((byte)(229)))), ((int)(((byte)(235)))));
             this.panelEnabledCard.Controls.Add(this.labelEnabledCount);
             this.panelEnabledCard.Controls.Add(this.labelEnabledTitle);
-            this.panelEnabledCard.Location = new System.Drawing.Point(188, 0);
+            this.panelEnabledCard.Location = new System.Drawing.Point(192, 6);
             this.panelEnabledCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelEnabledCard.Name = "panelEnabledCard";
             this.panelEnabledCard.Padding = new System.Windows.Forms.Padding(12);
             this.panelEnabledCard.Radius = 12;
             this.panelEnabledCard.Shadow = 4;
+            this.panelEnabledCard.ShadowOpacity = 0.2F;
+            this.panelEnabledCard.ShadowOpacityAnimation = true;
             this.panelEnabledCard.Size = new System.Drawing.Size(180, 72);
             this.panelEnabledCard.TabIndex = 1;
             // 
@@ -178,14 +186,17 @@
             // panelTotalCard
             // 
             this.panelTotalCard.BackColor = System.Drawing.Color.Transparent;
+            this.panelTotalCard.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(225)))), ((int)(((byte)(229)))), ((int)(((byte)(235)))));
             this.panelTotalCard.Controls.Add(this.labelTotalCount);
             this.panelTotalCard.Controls.Add(this.labelTotalTitle);
-            this.panelTotalCard.Location = new System.Drawing.Point(0, 0);
+            this.panelTotalCard.Location = new System.Drawing.Point(4, 6);
             this.panelTotalCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelTotalCard.Name = "panelTotalCard";
             this.panelTotalCard.Padding = new System.Windows.Forms.Padding(12);
             this.panelTotalCard.Radius = 12;
             this.panelTotalCard.Shadow = 4;
+            this.panelTotalCard.ShadowOpacity = 0.2F;
+            this.panelTotalCard.ShadowOpacityAnimation = true;
             this.panelTotalCard.Size = new System.Drawing.Size(180, 72);
             this.panelTotalCard.TabIndex = 0;
             // 
@@ -211,30 +222,51 @@
             // 
             // panelToolbar
             // 
-            this.panelToolbar.Controls.Add(this.flowActions);
-            this.panelToolbar.Controls.Add(this.inputSearch);
+            this.panelToolbar.Controls.Add(this.flowActionsLeft);
+            this.panelToolbar.Controls.Add(this.flowActionsRight);
             this.panelToolbar.Dock = System.Windows.Forms.DockStyle.Top;
             this.panelToolbar.Location = new System.Drawing.Point(8, 8);
             this.panelToolbar.Margin = new System.Windows.Forms.Padding(0);
             this.panelToolbar.Name = "panelToolbar";
-            this.panelToolbar.Padding = new System.Windows.Forms.Padding(0, 0, 0, 8);
+            this.panelToolbar.Padding = new System.Windows.Forms.Padding(4);
             this.panelToolbar.Radius = 0;
             this.panelToolbar.Size = new System.Drawing.Size(810, 44);
             this.panelToolbar.TabIndex = 0;
             // 
-            // flowActions
+            // flowActionsLeft
             // 
-            this.flowActions.Controls.Add(this.buttonAddUser);
-            this.flowActions.Controls.Add(this.buttonEditUser);
-            this.flowActions.Controls.Add(this.buttonDeleteUser);
-            this.flowActions.Controls.Add(this.buttonToggleEnabled);
-            this.flowActions.Dock = System.Windows.Forms.DockStyle.Right;
-            this.flowActions.Gap = 8;
-            this.flowActions.Location = new System.Drawing.Point(370, 0);
-            this.flowActions.Margin = new System.Windows.Forms.Padding(0);
-            this.flowActions.Name = "flowActions";
-            this.flowActions.Size = new System.Drawing.Size(440, 36);
-            this.flowActions.TabIndex = 1;
+            this.flowActionsLeft.Controls.Add(this.inputSearch);
+            this.flowActionsLeft.Dock = System.Windows.Forms.DockStyle.Left;
+            this.flowActionsLeft.Gap = 8;
+            this.flowActionsLeft.Location = new System.Drawing.Point(4, 4);
+            this.flowActionsLeft.Name = "flowActionsLeft";
+            this.flowActionsLeft.Size = new System.Drawing.Size(345, 36);
+            this.flowActionsLeft.TabIndex = 2;
+            this.flowActionsLeft.Text = "flowPanel1";
+            // 
+            // inputSearch
+            // 
+            this.inputSearch.Location = new System.Drawing.Point(4, 0);
+            this.inputSearch.Margin = new System.Windows.Forms.Padding(4, 0, 0, 0);
+            this.inputSearch.Name = "inputSearch";
+            this.inputSearch.PlaceholderText = "搜索登录名 / 用户名 / 角色 / 备注";
+            this.inputSearch.Size = new System.Drawing.Size(280, 36);
+            this.inputSearch.TabIndex = 0;
+            this.inputSearch.WaveSize = 0;
+            // 
+            // flowActionsRight
+            // 
+            this.flowActionsRight.Controls.Add(this.buttonAddUser);
+            this.flowActionsRight.Controls.Add(this.buttonEditUser);
+            this.flowActionsRight.Controls.Add(this.buttonDeleteUser);
+            this.flowActionsRight.Controls.Add(this.buttonToggleEnabled);
+            this.flowActionsRight.Dock = System.Windows.Forms.DockStyle.Right;
+            this.flowActionsRight.Gap = 8;
+            this.flowActionsRight.Location = new System.Drawing.Point(366, 4);
+            this.flowActionsRight.Margin = new System.Windows.Forms.Padding(0);
+            this.flowActionsRight.Name = "flowActionsRight";
+            this.flowActionsRight.Size = new System.Drawing.Size(440, 36);
+            this.flowActionsRight.TabIndex = 1;
             // 
             // buttonAddUser
             // 
@@ -288,16 +320,6 @@
             this.buttonToggleEnabled.Text = "启用/禁用";
             this.buttonToggleEnabled.WaveSize = 0;
             // 
-            // inputSearch
-            // 
-            this.inputSearch.Location = new System.Drawing.Point(0, 0);
-            this.inputSearch.Margin = new System.Windows.Forms.Padding(0);
-            this.inputSearch.Name = "inputSearch";
-            this.inputSearch.PlaceholderText = "搜索登录名 / 用户名 / 角色 / 备注";
-            this.inputSearch.Size = new System.Drawing.Size(280, 36);
-            this.inputSearch.TabIndex = 0;
-            this.inputSearch.WaveSize = 0;
-            // 
             // UserManagementPage
             // 
             this.Controls.Add(this.panelRoot);
@@ -310,7 +332,8 @@
             this.panelEnabledCard.ResumeLayout(false);
             this.panelTotalCard.ResumeLayout(false);
             this.panelToolbar.ResumeLayout(false);
-            this.flowActions.ResumeLayout(false);
+            this.flowActionsLeft.ResumeLayout(false);
+            this.flowActionsRight.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -319,7 +342,7 @@
 
         private AntdUI.Panel panelRoot;
         private AntdUI.Panel panelToolbar;
-        private AntdUI.FlowPanel flowActions;
+        private AntdUI.FlowPanel flowActionsRight;
         private AntdUI.Input inputSearch;
         private AntdUI.Button buttonEditUser;
         private AntdUI.Button buttonToggleEnabled;
@@ -337,5 +360,6 @@
         private AntdUI.Label labelDisabledTitle;
         private AntdUI.Panel panelTableCard;
         private AntdUI.Table tableUsers;
+        private AntdUI.FlowPanel flowActionsLeft;
     }
 }
