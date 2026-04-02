@@ -1,4 +1,6 @@
 ﻿using AM.Core.Context;
+using AMControlWinF.Tools;
+using AntdUI;
 using System;
 using System.Linq;
 using System.Windows.Forms;
@@ -194,28 +196,28 @@ namespace AMControlWinF.Views.Am
         {
             if (_isCreateMode && string.IsNullOrWhiteSpace(LoginName))
             {
-                MessageBox.Show("登录名不能为空。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                PageDialogHelper.ShowWarn(this, "输入提示", "登录名不能为空。");
                 inputLoginName.Focus();
                 return false;
             }
 
             if (string.IsNullOrWhiteSpace(UserDisplayName))
             {
-                MessageBox.Show("用户名不能为空。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                PageDialogHelper.ShowWarn(this, "输入提示", "用户名不能为空。");
                 inputUserName.Focus();
                 return false;
             }
 
             if (string.IsNullOrWhiteSpace(RoleCode))
             {
-                MessageBox.Show("角色不能为空。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                PageDialogHelper.ShowWarn(this, "输入提示", "角色不能为空。");
                 dropdownRole.Focus();
                 return false;
             }
 
             if (_isCreateMode && string.IsNullOrWhiteSpace(Password))
             {
-                MessageBox.Show("初始密码不能为空。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                PageDialogHelper.ShowWarn(this, "输入提示", "初始密码不能为空。");
                 inputPassword.Focus();
                 return false;
             }

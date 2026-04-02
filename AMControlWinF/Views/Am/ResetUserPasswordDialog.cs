@@ -1,4 +1,6 @@
 ﻿using AM.Core.Context;
+using AMControlWinF.Tools;
+using AntdUI;
 using System;
 using System.Windows.Forms;
 
@@ -98,14 +100,14 @@ namespace AMControlWinF.Views.Am
 
             if (string.IsNullOrWhiteSpace(newPassword))
             {
-                MessageBox.Show("新密码不能为空。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                PageDialogHelper.ShowWarn(this, "输入提示", "新密码不能为空。");
                 inputNewPassword.Focus();
                 return false;
             }
 
             if (!string.Equals(newPassword, confirmPassword, StringComparison.Ordinal))
             {
-                MessageBox.Show("两次输入的新密码不一致。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                PageDialogHelper.ShowWarn(this, "输入提示", "两次输入的新密码不一致。");
                 inputConfirmPassword.Focus();
                 return false;
             }

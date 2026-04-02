@@ -1,9 +1,8 @@
 ﻿using AM.Model.Auth;
 using AM.PageModel.Am;
+using AMControlWinF.Tools;
 using AntdUI;
 using System;
-using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -16,6 +15,8 @@ namespace AMControlWinF.Views.Am
     /// 被 MainWindow 页面缓存复用：
     /// - 不在离开页面时释放 ViewModel；
     /// - 首次加载使用布尔标记控制，避免重复初始化。
+    /// - 数据处理成功/失败提示由系统消息总线统一负责；
+    /// - 页面仅保留必要的交互确认类对话框。
     /// </summary>
     public partial class UserManagementPage : UserControl
     {
@@ -114,13 +115,14 @@ namespace AMControlWinF.Views.Am
             try
             {
                 var result = await _model.LoadAsync(preferredUserId);
+
+                // 加载失败消息由系统消息总线统一负责，这里不再重复弹页面对话框。
                 if (!result.Success)
                 {
-                    MessageBox.Show(
-                        result.Message,
-                        "加载失败",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
+                    RefreshStatCards();
+                    RebindTable();
+                    RefreshActionButtons();
+                    return;
                 }
 
                 RefreshStatCards();
@@ -258,17 +260,9 @@ namespace AMControlWinF.Views.Am
                     dialog.IsEnabled,
                     dialog.Remark);
 
-                if (!result.Success)
-                {
-                    MessageBox.Show(
-                        result.Message,
-                        "新增用户失败",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
-                    return;
-                }
-
-                await ReloadAsync(null);
+                // 成功/失败均由系统消息总线统一提示。
+                if (result.Success)
+                    await ReloadAsync(null);
             }
         }
 
@@ -298,17 +292,9 @@ namespace AMControlWinF.Views.Am
                     dialog.IsEnabled,
                     dialog.Remark);
 
-                if (!result.Success)
-                {
-                    MessageBox.Show(
-                        result.Message,
-                        "编辑用户失败",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
-                    return;
-                }
-
-                await ReloadAsync(selected.Id);
+                // 成功/失败均由系统消息总线统一提示。
+                if (result.Success)
+                    await ReloadAsync(selected.Id);
             }
         }
 
@@ -327,22 +313,9 @@ namespace AMControlWinF.Views.Am
                 if (dialog.ShowDialog(FindForm()) != DialogResult.OK)
                     return;
 
-                var result = await _model.ResetUserPasswordAsync(selected.Id, dialog.NewPassword);
-                if (!result.Success)
-                {
-                    MessageBox.Show(
-                        result.Message,
-                        "重置密码失败",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
-                    return;
-                }
+                await _model.ResetUserPasswordAsync(selected.Id, dialog.NewPassword);
 
-                MessageBox.Show(
-                    result.Message,
-                    "提示",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
+                // 重置密码结果由系统消息总线统一提示。
             }
         }
 
@@ -355,27 +328,20 @@ namespace AMControlWinF.Views.Am
             var newEnabled = !selected.IsEnabled;
             var actionText = newEnabled ? "启用" : "禁用";
 
-            var confirm = MessageBox.Show(
-                "确定要" + actionText + "用户“" + selected.LoginName + "”吗？",
+            if (!PageDialogHelper.Confirm(
+                this,
                 actionText + "用户",
-                MessageBoxButtons.OKCancel,
-                MessageBoxIcon.Question);
-
-            if (confirm != DialogResult.OK)
-                return;
-
-            var result = await _model.SetUserEnabledAsync(selected.Id, newEnabled);
-            if (!result.Success)
+                "确定要" + actionText + "用户“" + selected.LoginName + "”吗？",
+                TType.Warn))
             {
-                MessageBox.Show(
-                    result.Message,
-                    actionText + "用户失败",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
                 return;
             }
 
-            await ReloadAsync(selected.Id);
+            var result = await _model.SetUserEnabledAsync(selected.Id, newEnabled);
+
+            // 执行结果由系统消息总线统一提示。
+            if (result.Success)
+                await ReloadAsync(selected.Id);
         }
 
         private async Task DeleteUserAsync()
@@ -384,27 +350,20 @@ namespace AMControlWinF.Views.Am
             if (selected == null)
                 return;
 
-            var confirm = MessageBox.Show(
-                "确定要删除用户“" + selected.LoginName + "”吗？\r\n此操作不可恢复。",
+            if (!PageDialogHelper.Confirm(
+                this,
                 "删除用户",
-                MessageBoxButtons.OKCancel,
-                MessageBoxIcon.Warning);
-
-            if (confirm != DialogResult.OK)
-                return;
-
-            var result = await _model.DeleteUserAsync(selected.Id);
-            if (!result.Success)
+                "确定要删除用户“" + selected.LoginName + "”吗？\r\n此操作不可恢复。",
+                TType.Error))
             {
-                MessageBox.Show(
-                    result.Message,
-                    "删除用户失败",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
                 return;
             }
 
-            await ReloadAsync(null);
+            var result = await _model.DeleteUserAsync(selected.Id);
+
+            // 执行结果由系统消息总线统一提示。
+            if (result.Success)
+                await ReloadAsync(null);
         }
 
         private sealed class UserTableRow
