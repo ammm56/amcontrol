@@ -475,7 +475,7 @@ namespace AMControlWinF
 
                 { "System.User",            () => new UserManagementPage() },
                 { "System.Permission",      () => new UserPermissionPage() },
-                { "System.LoginLog",        () => CreatePlaceholderPage("系统 / 登录日志") }
+                { "System.LoginLog",        () => new LoginLogPage() }
             };
         }
 

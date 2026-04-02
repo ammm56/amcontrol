@@ -63,6 +63,12 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tools\AppThemeHelper.cs" />
     <Compile Include="Tools\PageDialogHelper.cs" />
+    <Compile Include="Views\Am\LoginLogPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Am\LoginLogPage.Designer.cs">
+      <DependentUpon>LoginLogPage.cs</DependentUpon>
+    </Compile>
     <Compile Include="Views\Am\ResetUserPasswordDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -135,6 +141,9 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="Views\Am\LoginLogPage.resx">
+      <DependentUpon>LoginLogPage.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Views\Am\ResetUserPasswordDialog.resx">
       <DependentUpon>ResetUserPasswordDialog.cs</DependentUpon>
     </EmbeddedResource>
