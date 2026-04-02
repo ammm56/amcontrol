@@ -19,6 +19,8 @@
             this.panelRoot = new AntdUI.Panel();
             this.panelTableCard = new AntdUI.Panel();
             this.tableLogs = new AntdUI.Table();
+            this.panelTableFooter = new AntdUI.Panel();
+            this.paginationLogs = new AntdUI.Pagination();
             this.flowStats = new AntdUI.FlowPanel();
             this.panelFailedCard = new AntdUI.Panel();
             this.labelFailedCount = new AntdUI.Label();
@@ -42,6 +44,7 @@
             this.buttonAll = new AntdUI.Button();
             this.panelRoot.SuspendLayout();
             this.panelTableCard.SuspendLayout();
+            this.panelTableFooter.SuspendLayout();
             this.flowStats.SuspendLayout();
             this.panelFailedCard.SuspendLayout();
             this.panelSuccessCard.SuspendLayout();
@@ -68,6 +71,7 @@
             // 
             this.panelTableCard.BackColor = System.Drawing.Color.Transparent;
             this.panelTableCard.Controls.Add(this.tableLogs);
+            this.panelTableCard.Controls.Add(this.panelTableFooter);
             this.panelTableCard.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelTableCard.Location = new System.Drawing.Point(8, 140);
             this.panelTableCard.Margin = new System.Windows.Forms.Padding(0);
@@ -75,6 +79,8 @@
             this.panelTableCard.Padding = new System.Windows.Forms.Padding(8);
             this.panelTableCard.Radius = 12;
             this.panelTableCard.Shadow = 4;
+            this.panelTableCard.ShadowOpacity = 0F;
+            this.panelTableCard.ShadowOpacityHover = 0F;
             this.panelTableCard.Size = new System.Drawing.Size(834, 532);
             this.panelTableCard.TabIndex = 2;
             // 
@@ -90,9 +96,33 @@
             this.tableLogs.Margin = new System.Windows.Forms.Padding(0);
             this.tableLogs.Name = "tableLogs";
             this.tableLogs.ShowTip = false;
-            this.tableLogs.Size = new System.Drawing.Size(810, 508);
+            this.tableLogs.Size = new System.Drawing.Size(810, 458);
             this.tableLogs.TabIndex = 0;
             this.tableLogs.Text = "tableLogs";
+            // 
+            // panelTableFooter
+            // 
+            this.panelTableFooter.Controls.Add(this.paginationLogs);
+            this.panelTableFooter.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.panelTableFooter.Location = new System.Drawing.Point(12, 470);
+            this.panelTableFooter.Margin = new System.Windows.Forms.Padding(0);
+            this.panelTableFooter.Name = "panelTableFooter";
+            this.panelTableFooter.Padding = new System.Windows.Forms.Padding(0, 8, 0, 0);
+            this.panelTableFooter.Radius = 0;
+            this.panelTableFooter.Size = new System.Drawing.Size(810, 50);
+            this.panelTableFooter.TabIndex = 1;
+            // 
+            // paginationLogs
+            // 
+            this.paginationLogs.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.paginationLogs.Location = new System.Drawing.Point(0, 8);
+            this.paginationLogs.Margin = new System.Windows.Forms.Padding(0);
+            this.paginationLogs.Name = "paginationLogs";
+            this.paginationLogs.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+            this.paginationLogs.Size = new System.Drawing.Size(810, 42);
+            this.paginationLogs.SizeChangerWidth = 72;
+            this.paginationLogs.TabIndex = 0;
+            this.paginationLogs.Text = "paginationLogs";
             // 
             // flowStats
             // 
@@ -246,7 +276,7 @@
             this.flowActionsLeft.Gap = 8;
             this.flowActionsLeft.Location = new System.Drawing.Point(4, 4);
             this.flowActionsLeft.Name = "flowActionsLeft";
-            this.flowActionsLeft.Size = new System.Drawing.Size(470, 36);
+            this.flowActionsLeft.Size = new System.Drawing.Size(475, 36);
             this.flowActionsLeft.TabIndex = 0;
             this.flowActionsLeft.Text = "flowActionsLeft";
             // 
@@ -297,10 +327,10 @@
             this.flowActionsRight.Controls.Add(this.buttonAll);
             this.flowActionsRight.Dock = System.Windows.Forms.DockStyle.Right;
             this.flowActionsRight.Gap = 8;
-            this.flowActionsRight.Location = new System.Drawing.Point(508, 4);
+            this.flowActionsRight.Location = new System.Drawing.Point(503, 4);
             this.flowActionsRight.Margin = new System.Windows.Forms.Padding(0);
             this.flowActionsRight.Name = "flowActionsRight";
-            this.flowActionsRight.Size = new System.Drawing.Size(322, 36);
+            this.flowActionsRight.Size = new System.Drawing.Size(327, 36);
             this.flowActionsRight.TabIndex = 1;
             this.flowActionsRight.Text = "flowActionsRight";
             // 
@@ -356,6 +386,7 @@
             this.Size = new System.Drawing.Size(850, 680);
             this.panelRoot.ResumeLayout(false);
             this.panelTableCard.ResumeLayout(false);
+            this.panelTableFooter.ResumeLayout(false);
             this.flowStats.ResumeLayout(false);
             this.panelFailedCard.ResumeLayout(false);
             this.panelSuccessCard.ResumeLayout(false);
@@ -393,5 +424,7 @@
         private AntdUI.Label labelFailedTitle;
         private AntdUI.Panel panelTableCard;
         private AntdUI.Table tableLogs;
+        private AntdUI.Panel panelTableFooter;
+        private AntdUI.Pagination paginationLogs;
     }
 }

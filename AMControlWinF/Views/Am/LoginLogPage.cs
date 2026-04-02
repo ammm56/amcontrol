@@ -18,6 +18,8 @@ namespace AMControlWinF.Views.Am
         private readonly LoginLogPageModel _model;
         private bool _isFirstLoad;
         private bool _isBusy;
+        private bool _isUpdatingPagination;
+        private bool _isTodayMode;
         private AntList<LoginLogTableRow> _tableRows;
 
         public LoginLogPage()
@@ -29,6 +31,7 @@ namespace AMControlWinF.Views.Am
 
             InitializeTableColumns();
             BindEvents();
+            InitializePagination();
             UpdateFilterButtons();
         }
 
@@ -36,13 +39,29 @@ namespace AMControlWinF.Views.Am
         {
             Load += LoginLogPage_Load;
 
-            inputSearch.TextChanged += async (s, e) => await ApplyFiltersAsync();
+            inputSearch.TextChanged += InputSearch_TextChanged;
+            inputSearch.KeyDown += InputSearch_KeyDown;
+
             buttonAll.Click += async (s, e) => await ShowAllAsync();
             buttonSuccess.Click += async (s, e) => await ShowSuccessAsync();
             buttonFailed.Click += async (s, e) => await ShowFailedAsync();
             buttonToday.Click += async (s, e) => await ShowTodayAsync();
+            buttonQuery.Click += async (s, e) => await QueryAsync(true);
 
-            buttonQuery.Click += async (s, e) => await ApplyFiltersAsync();
+            paginationLogs.ValueChanged += PaginationLogs_ValueChanged;
+        }
+
+        private void InitializePagination()
+        {
+            paginationLogs.Current = 1;
+            paginationLogs.Total = 0;
+            paginationLogs.PageSize = 50;
+            paginationLogs.PageSizeOptions = new int[] { 10, 20, 50, 100, 200 };
+            paginationLogs.ShowSizeChanger = true;
+            paginationLogs.SizeChangerWidth = 72;
+            paginationLogs.RightToLeft = RightToLeft.Yes;
+            paginationLogs.Gap = 8;
+            paginationLogs.Radius = 8;
         }
 
         private void InitializeTableColumns()
@@ -53,7 +72,10 @@ namespace AMControlWinF.Views.Am
                 {
                     Width = "60",
                     Fixed = true,
-                    Render = (value, record, rowindex) => rowindex + 1
+                    Render = (value, record, rowindex) =>
+                    {
+                        return ((_model.PageIndex - 1) * _model.PageSize) + rowindex + 1;
+                    }
                 },
                 new Column("LoginName", "登录名", ColumnAlign.Center)
                 {
@@ -97,30 +119,58 @@ namespace AMControlWinF.Views.Am
 
         private async Task InitializePageAsync()
         {
-            pickerStart.Value = DateTime.Today;
-            pickerEnd.Value = DateTime.Today;
-            _model.SetTodayFilter();
+            _model.SetAllFilter();
+            _isTodayMode = false;
+            ClearDatePickers();
+            UpdateFilterButtons();
 
+            await ReloadAsync();
+        }
+
+        private void InputSearch_TextChanged(object sender, EventArgs e)
+        {
+            _model.SearchText = inputSearch.Text;
+        }
+
+        private async void InputSearch_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode != Keys.Enter)
+                return;
+
+            e.SuppressKeyPress = true;
+            await QueryAsync(true);
+        }
+
+        private async void PaginationLogs_ValueChanged(object sender, PagePageEventArgs e)
+        {
+            if (_isUpdatingPagination || _isBusy || e == null)
+                return;
+
+            _model.SetPage(e.Current, e.PageSize);
             await ReloadAsync();
         }
 
         private async Task ShowAllAsync()
         {
-            _model.IsSuccessFilter = null;
+            _model.SetAllFilter();
+            _isTodayMode = false;
+            ClearDatePickers();
             UpdateFilterButtons();
             await ReloadAsync();
         }
 
         private async Task ShowSuccessAsync()
         {
-            _model.IsSuccessFilter = true;
+            _model.SetSuccessFilter();
+            _isTodayMode = false;
             UpdateFilterButtons();
             await ReloadAsync();
         }
 
         private async Task ShowFailedAsync()
         {
-            _model.IsSuccessFilter = false;
+            _model.SetFailedFilter();
+            _isTodayMode = false;
             UpdateFilterButtons();
             await ReloadAsync();
         }
@@ -128,17 +178,24 @@ namespace AMControlWinF.Views.Am
         private async Task ShowTodayAsync()
         {
             _model.SetTodayFilter();
+            _isTodayMode = true;
             pickerStart.Value = _model.StartDate;
             pickerEnd.Value = _model.EndDate;
+            UpdateFilterButtons();
             await ReloadAsync();
         }
 
-        private async Task ApplyFiltersAsync()
+        private async Task QueryAsync(bool resetPage)
         {
             _model.SearchText = inputSearch.Text;
             _model.StartDate = pickerStart.Value;
             _model.EndDate = pickerEnd.Value;
 
+            if (resetPage)
+                _model.ResetToFirstPage();
+
+            _isTodayMode = false;
+            UpdateFilterButtons();
             await ReloadAsync();
         }
 
@@ -151,15 +208,13 @@ namespace AMControlWinF.Views.Am
             try
             {
                 var result = await _model.LoadAsync();
-                if (!result.Success)
-                {
-                    RefreshStatCards();
-                    RebindTable();
-                    return;
-                }
 
                 RefreshStatCards();
                 RebindTable();
+                SyncPagination();
+
+                if (!result.Success)
+                    return;
             }
             finally
             {
@@ -179,14 +234,15 @@ namespace AMControlWinF.Views.Am
             buttonSuccess.Enabled = !isBusy;
             buttonFailed.Enabled = !isBusy;
             buttonToday.Enabled = !isBusy;
+            paginationLogs.Enabled = !isBusy;
         }
 
         private void UpdateFilterButtons()
         {
-            buttonAll.Type = _model.IsSuccessFilter == null ? TTypeMini.Primary : TTypeMini.Default;
-            buttonSuccess.Type = _model.IsSuccessFilter == true ? TTypeMini.Primary : TTypeMini.Default;
-            buttonFailed.Type = _model.IsSuccessFilter == false ? TTypeMini.Primary : TTypeMini.Default;
-            buttonToday.Type = TTypeMini.Default;
+            buttonAll.Type = !_isTodayMode && _model.IsSuccessFilter == null ? TTypeMini.Primary : TTypeMini.Default;
+            buttonSuccess.Type = !_isTodayMode && _model.IsSuccessFilter == true ? TTypeMini.Primary : TTypeMini.Default;
+            buttonFailed.Type = !_isTodayMode && _model.IsSuccessFilter == false ? TTypeMini.Primary : TTypeMini.Default;
+            buttonToday.Type = _isTodayMode ? TTypeMini.Primary : TTypeMini.Default;
         }
 
         private void RefreshStatCards()
@@ -194,6 +250,27 @@ namespace AMControlWinF.Views.Am
             labelTotalCount.Text = _model.TotalCount.ToString();
             labelSuccessCount.Text = _model.SuccessCount.ToString();
             labelFailedCount.Text = _model.FailedCount.ToString();
+        }
+
+        private void SyncPagination()
+        {
+            _isUpdatingPagination = true;
+            try
+            {
+                paginationLogs.Current = _model.PageIndex;
+                paginationLogs.Total = _model.TotalCount;
+                paginationLogs.PageSize = _model.PageSize;
+            }
+            finally
+            {
+                _isUpdatingPagination = false;
+            }
+        }
+
+        private void ClearDatePickers()
+        {
+            pickerStart.Value = null;
+            pickerEnd.Value = null;
         }
 
         private void RebindTable()

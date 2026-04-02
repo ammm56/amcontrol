@@ -14,6 +14,8 @@ namespace AM.PageModel.Am
     /// </summary>
     public class LoginLogPageModel : BindableBase
     {
+        private static readonly DateTime DefaultStartDate = new DateTime(1970, 1, 1);
+
         private readonly AuthService _authService;
         private List<LoginLogSummary> _logs;
         private string _searchText;
@@ -23,6 +25,7 @@ namespace AM.PageModel.Am
         private int _totalCount;
         private int _successCount;
         private int _failedCount;
+        private int _pageIndex;
         private int _pageSize;
 
         public LoginLogPageModel()
@@ -30,7 +33,8 @@ namespace AM.PageModel.Am
             _authService = new AuthService();
             _logs = new List<LoginLogSummary>();
             _searchText = string.Empty;
-            _pageSize = 200;
+            _pageIndex = 1;
+            _pageSize = 50;
         }
 
         public IList<LoginLogSummary> Logs
@@ -80,6 +84,71 @@ namespace AM.PageModel.Am
             private set { SetProperty(ref _failedCount, value); }
         }
 
+        public int PageIndex
+        {
+            get { return _pageIndex; }
+            private set { SetProperty(ref _pageIndex, value <= 0 ? 1 : value); }
+        }
+
+        public int PageSize
+        {
+            get { return _pageSize; }
+            private set { SetProperty(ref _pageSize, value <= 0 ? 50 : value); }
+        }
+
+        public int TotalPages
+        {
+            get
+            {
+                if (PageSize <= 0)
+                    return 1;
+
+                var pages = (int)Math.Ceiling(TotalCount / (double)PageSize);
+                return pages <= 0 ? 1 : pages;
+            }
+        }
+
+        public void ResetToFirstPage()
+        {
+            PageIndex = 1;
+        }
+
+        public void SetPage(int pageIndex, int pageSize)
+        {
+            PageIndex = pageIndex <= 0 ? 1 : pageIndex;
+            PageSize = pageSize <= 0 ? PageSize : pageSize;
+            OnPropertyChanged(nameof(TotalPages));
+        }
+
+        public void SetAllFilter()
+        {
+            IsSuccessFilter = null;
+            StartDate = null;
+            EndDate = null;
+            ResetToFirstPage();
+        }
+
+        public void SetSuccessFilter()
+        {
+            IsSuccessFilter = true;
+            ResetToFirstPage();
+        }
+
+        public void SetFailedFilter()
+        {
+            IsSuccessFilter = false;
+            ResetToFirstPage();
+        }
+
+        public void SetTodayFilter()
+        {
+            var today = DateTime.Today;
+            StartDate = today;
+            EndDate = today;
+            IsSuccessFilter = null;
+            ResetToFirstPage();
+        }
+
         public async Task<Result> LoadAsync()
         {
             return await Task.Run(() =>
@@ -88,13 +157,23 @@ namespace AM.PageModel.Am
                 int successCount;
                 int failedCount;
 
+                var startDate = StartDate ?? DefaultStartDate;
+                var endDate = EndDate ?? DateTime.Now;
+
+                if (endDate < startDate)
+                {
+                    var temp = startDate;
+                    startDate = endDate;
+                    endDate = temp;
+                }
+
                 var result = _authService.GetLoginLogSummaries(
                     SearchText,
                     IsSuccessFilter,
-                    StartDate,
-                    EndDate,
-                    1,
-                    _pageSize,
+                    startDate,
+                    endDate,
+                    PageIndex,
+                    PageSize,
                     out totalCount,
                     out successCount,
                     out failedCount);
@@ -106,6 +185,7 @@ namespace AM.PageModel.Am
                     SuccessCount = 0;
                     FailedCount = 0;
                     OnPropertyChanged(nameof(Logs));
+                    OnPropertyChanged(nameof(TotalPages));
                     return Result.Fail(result.Code, result.Message, result.Source);
                 }
 
@@ -117,22 +197,16 @@ namespace AM.PageModel.Am
                 SuccessCount = successCount;
                 FailedCount = failedCount;
 
+                if (TotalPages > 0 && PageIndex > TotalPages)
+                {
+                    PageIndex = TotalPages;
+                }
+
                 OnPropertyChanged(nameof(Logs));
+                OnPropertyChanged(nameof(TotalPages));
+
                 return Result.Ok("加载登录日志成功");
             });
-        }
-
-        public void SetTodayFilter()
-        {
-            var today = DateTime.Today;
-            StartDate = today;
-            EndDate = today;
-        }
-
-        public void ClearDateFilter()
-        {
-            StartDate = null;
-            EndDate = null;
         }
     }
 }
