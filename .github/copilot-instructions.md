@@ -55,6 +55,7 @@
 - 在 MainWindow 简化时，优先删除 ShellRefreshScope、Model_PropertyChanged 和 ConfigureShellLayout 这类额外抽象，直接保留最少的刷新与页面切换逻辑。
 - 用户管理页偏好三行布局：第一行左侧搜索框、右侧操作按钮，第二行统计卡片，第三行使用 AntdUI Table；优先使用 AntdUI 的 FlowPanel 和 Panel，并保持 AMControlWinF 主题风格。
 - 页面内校验/页面信息提示不优先使用 AntdUI.Message；系统消息通知与 reporter 已负责消息弹出。页面级信息更倾向使用 AntdUI.Modal 这类对话框，与系统通知链路区分。
+- 涉及数据处理的成功/错误结果由系统消息总线统一负责展示，用户管理页这类页面不再额外弹出成功或失败对话框；页面只保留必要的交互确认类对话框。
 
 ## PLC 接口设计
 - PLC 相关接口分层要重新整理，`DB` 目录只放数据库相关内容；PLC/Motion 领域接口应放到 `AM.Model.Interfaces.Plc` 下，而不是 `AM.Model.Interfaces.DB.Plc`，并要求代码与文档同步调整、目录和注释更清晰。
