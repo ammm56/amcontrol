@@ -24,6 +24,7 @@ namespace AMControlWinF.Views.Am
         private bool _isFirstLoad;
         private bool _isBusy;
         private AntList<UserTableRow> _tableRows;
+        private bool _selectionMode;
 
         public UserManagementPage()
         {
@@ -35,6 +36,13 @@ namespace AMControlWinF.Views.Am
             InitializeTableColumns();
             BindEvents();
             RefreshActionButtons();
+
+            ApplySelectionMode();
+        }
+
+        public UserSummary SelectedUserSummary
+        {
+            get { return _model.SelectedUser; }
         }
 
         private void BindEvents()
@@ -364,6 +372,21 @@ namespace AMControlWinF.Views.Am
             // 执行结果由系统消息总线统一提示。
             if (result.Success)
                 await ReloadAsync(null);
+        }
+
+        public void SetSelectionMode(bool selectionMode)
+        {
+            _selectionMode = selectionMode;
+            ApplySelectionMode();
+        }
+
+        private void ApplySelectionMode()
+        {
+            if (flowStats == null || flowActionsRight == null)
+                return;
+
+            flowStats.Visible = !_selectionMode;
+            flowActionsRight.Visible = !_selectionMode;
         }
 
         private sealed class UserTableRow

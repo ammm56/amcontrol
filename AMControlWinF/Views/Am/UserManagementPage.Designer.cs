@@ -35,9 +35,9 @@
             this.flowActionsRight = new AntdUI.FlowPanel();
             this.buttonAddUser = new AntdUI.Button();
             this.buttonEditUser = new AntdUI.Button();
+            this.buttonResetPwd = new AntdUI.Button();
             this.buttonDeleteUser = new AntdUI.Button();
             this.buttonToggleEnabled = new AntdUI.Button();
-            this.buttonResetPwd = new AntdUI.Button();
             this.panelRoot.SuspendLayout();
             this.panelTableCard.SuspendLayout();
             this.flowStats.SuspendLayout();
@@ -59,7 +59,7 @@
             this.panelRoot.Name = "panelRoot";
             this.panelRoot.Padding = new System.Windows.Forms.Padding(8);
             this.panelRoot.Radius = 0;
-            this.panelRoot.Size = new System.Drawing.Size(826, 664);
+            this.panelRoot.Size = new System.Drawing.Size(850, 680);
             this.panelRoot.TabIndex = 0;
             // 
             // panelTableCard
@@ -73,7 +73,7 @@
             this.panelTableCard.Padding = new System.Windows.Forms.Padding(8);
             this.panelTableCard.Radius = 12;
             this.panelTableCard.Shadow = 4;
-            this.panelTableCard.Size = new System.Drawing.Size(810, 516);
+            this.panelTableCard.Size = new System.Drawing.Size(834, 532);
             this.panelTableCard.TabIndex = 2;
             // 
             // tableUsers
@@ -88,7 +88,7 @@
             this.tableUsers.Margin = new System.Windows.Forms.Padding(0);
             this.tableUsers.Name = "tableUsers";
             this.tableUsers.ShowTip = false;
-            this.tableUsers.Size = new System.Drawing.Size(786, 492);
+            this.tableUsers.Size = new System.Drawing.Size(810, 508);
             this.tableUsers.TabIndex = 0;
             this.tableUsers.Text = "tableUsers";
             // 
@@ -103,7 +103,7 @@
             this.flowStats.Margin = new System.Windows.Forms.Padding(0);
             this.flowStats.Name = "flowStats";
             this.flowStats.Padding = new System.Windows.Forms.Padding(4, 6, 4, 6);
-            this.flowStats.Size = new System.Drawing.Size(810, 88);
+            this.flowStats.Size = new System.Drawing.Size(834, 88);
             this.flowStats.TabIndex = 1;
             // 
             // panelDisabledCard
@@ -231,7 +231,7 @@
             this.panelToolbar.Name = "panelToolbar";
             this.panelToolbar.Padding = new System.Windows.Forms.Padding(4);
             this.panelToolbar.Radius = 0;
-            this.panelToolbar.Size = new System.Drawing.Size(810, 44);
+            this.panelToolbar.Size = new System.Drawing.Size(834, 44);
             this.panelToolbar.TabIndex = 0;
             // 
             // flowActionsLeft
@@ -264,7 +264,7 @@
             this.flowActionsRight.Controls.Add(this.buttonToggleEnabled);
             this.flowActionsRight.Dock = System.Windows.Forms.DockStyle.Right;
             this.flowActionsRight.Gap = 8;
-            this.flowActionsRight.Location = new System.Drawing.Point(366, 4);
+            this.flowActionsRight.Location = new System.Drawing.Point(390, 4);
             this.flowActionsRight.Margin = new System.Windows.Forms.Padding(0);
             this.flowActionsRight.Name = "flowActionsRight";
             this.flowActionsRight.Size = new System.Drawing.Size(440, 36);
@@ -296,6 +296,19 @@
             this.buttonEditUser.Text = "编辑用户";
             this.buttonEditUser.WaveSize = 0;
             // 
+            // buttonResetPwd
+            // 
+            this.buttonResetPwd.Enabled = false;
+            this.buttonResetPwd.IconSvg = "ReloadOutlined";
+            this.buttonResetPwd.Location = new System.Drawing.Point(182, 0);
+            this.buttonResetPwd.Margin = new System.Windows.Forms.Padding(0);
+            this.buttonResetPwd.Name = "buttonResetPwd";
+            this.buttonResetPwd.Radius = 8;
+            this.buttonResetPwd.Size = new System.Drawing.Size(80, 36);
+            this.buttonResetPwd.TabIndex = 2;
+            this.buttonResetPwd.Text = "重置密码";
+            this.buttonResetPwd.WaveSize = 0;
+            // 
             // buttonDeleteUser
             // 
             this.buttonDeleteUser.Enabled = false;
@@ -322,24 +335,11 @@
             this.buttonToggleEnabled.Text = "启用/禁用";
             this.buttonToggleEnabled.WaveSize = 0;
             // 
-            // buttonResetPwd
-            // 
-            this.buttonResetPwd.Enabled = false;
-            this.buttonResetPwd.IconSvg = "ReloadOutlined";
-            this.buttonResetPwd.Location = new System.Drawing.Point(182, 0);
-            this.buttonResetPwd.Margin = new System.Windows.Forms.Padding(0);
-            this.buttonResetPwd.Name = "buttonResetPwd";
-            this.buttonResetPwd.Radius = 8;
-            this.buttonResetPwd.Size = new System.Drawing.Size(80, 36);
-            this.buttonResetPwd.TabIndex = 2;
-            this.buttonResetPwd.Text = "重置密码";
-            this.buttonResetPwd.WaveSize = 0;
-            // 
             // UserManagementPage
             // 
             this.Controls.Add(this.panelRoot);
             this.Name = "UserManagementPage";
-            this.Size = new System.Drawing.Size(826, 664);
+            this.Size = new System.Drawing.Size(850, 680);
             this.panelRoot.ResumeLayout(false);
             this.panelTableCard.ResumeLayout(false);
             this.flowStats.ResumeLayout(false);

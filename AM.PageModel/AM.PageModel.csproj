@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Am\UserManagementPageModel.cs" />
+    <Compile Include="Am\UserPermissionPageModel.cs" />
     <Compile Include="Auth\LoginPageModel.cs" />
     <Compile Include="Common\BindableBase.cs" />
     <Compile Include="Main\MainWindowExitReason.cs" />

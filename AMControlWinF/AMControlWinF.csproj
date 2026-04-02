@@ -81,6 +81,18 @@
     <Compile Include="Views\Am\UserManagementPage.Designer.cs">
       <DependentUpon>UserManagementPage.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\Am\UserPermissionPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Am\UserPermissionPage.Designer.cs">
+      <DependentUpon>UserPermissionPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Am\UserPermissionUserSelectDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\Am\UserPermissionUserSelectDialog.Designer.cs">
+      <DependentUpon>UserPermissionUserSelectDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Views\Auth\LoginForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -125,6 +137,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Views\Am\UserManagementPage.resx">
       <DependentUpon>UserManagementPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\Am\UserPermissionPage.resx">
+      <DependentUpon>UserPermissionPage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\Auth\LoginForm.resx">
       <DependentUpon>LoginForm.cs</DependentUpon>

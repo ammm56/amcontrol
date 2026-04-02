@@ -259,6 +259,12 @@ namespace AMControlWinF
             RefreshShell();
         }
 
+        public void RefreshNavigationByCurrentUser()
+        {
+            _model.LoadNavigation();
+            RefreshShell();
+        }
+
         private string GetPrimaryText(NavPrimaryDef item)
         {
             if (item == null)
@@ -468,7 +474,7 @@ namespace AMControlWinF
                 { "AlarmLog.RunLog",        () => CreatePlaceholderPage("报警与日志 / 运行日志") },
 
                 { "System.User",            () => new UserManagementPage() },
-                { "System.Permission",      () => CreatePlaceholderPage("系统 / 权限分配") },
+                { "System.Permission",      () => new UserPermissionPage() },
                 { "System.LoginLog",        () => CreatePlaceholderPage("系统 / 登录日志") }
             };
         }
