@@ -38,13 +38,13 @@
             this.textureBackgroundDialog.Location = new System.Drawing.Point(0, 0);
             this.textureBackgroundDialog.Margin = new System.Windows.Forms.Padding(0);
             this.textureBackgroundDialog.Name = "textureBackgroundDialog";
-            this.textureBackgroundDialog.Size = new System.Drawing.Size(980, 720);
+            this.textureBackgroundDialog.Size = new System.Drawing.Size(850, 680);
             this.textureBackgroundDialog.TabIndex = 0;
             // 
             // panelShell
             // 
-            this.panelShell.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.panelShell.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panelShell.BackColor = System.Drawing.Color.Transparent;
             this.panelShell.Controls.Add(this.panelContentHost);
@@ -56,7 +56,7 @@
             this.panelShell.Padding = new System.Windows.Forms.Padding(12);
             this.panelShell.Radius = 16;
             this.panelShell.Shadow = 8;
-            this.panelShell.Size = new System.Drawing.Size(932, 672);
+            this.panelShell.Size = new System.Drawing.Size(802, 632);
             this.panelShell.TabIndex = 0;
             // 
             // panelContentHost
@@ -66,19 +66,19 @@
             this.panelContentHost.Margin = new System.Windows.Forms.Padding(0);
             this.panelContentHost.Name = "panelContentHost";
             this.panelContentHost.Radius = 0;
-            this.panelContentHost.Size = new System.Drawing.Size(892, 519);
+            this.panelContentHost.Size = new System.Drawing.Size(762, 479);
             this.panelContentHost.TabIndex = 1;
             // 
             // panelFooter
             // 
             this.panelFooter.Controls.Add(this.flowFooterButtons);
             this.panelFooter.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panelFooter.Location = new System.Drawing.Point(20, 595);
+            this.panelFooter.Location = new System.Drawing.Point(20, 555);
             this.panelFooter.Margin = new System.Windows.Forms.Padding(0);
             this.panelFooter.Name = "panelFooter";
             this.panelFooter.Padding = new System.Windows.Forms.Padding(4, 10, 4, 0);
             this.panelFooter.Radius = 0;
-            this.panelFooter.Size = new System.Drawing.Size(892, 57);
+            this.panelFooter.Size = new System.Drawing.Size(762, 57);
             this.panelFooter.TabIndex = 2;
             // 
             // flowFooterButtons
@@ -87,7 +87,7 @@
             this.flowFooterButtons.Controls.Add(this.buttonCancel);
             this.flowFooterButtons.Dock = System.Windows.Forms.DockStyle.Right;
             this.flowFooterButtons.Gap = 10;
-            this.flowFooterButtons.Location = new System.Drawing.Point(644, 10);
+            this.flowFooterButtons.Location = new System.Drawing.Point(514, 10);
             this.flowFooterButtons.Margin = new System.Windows.Forms.Padding(0);
             this.flowFooterButtons.Name = "flowFooterButtons";
             this.flowFooterButtons.Size = new System.Drawing.Size(244, 47);
@@ -96,7 +96,7 @@
             // 
             // buttonOk
             // 
-            this.buttonOk.Location = new System.Drawing.Point(0, 0);
+            this.buttonOk.Location = new System.Drawing.Point(126, 0);
             this.buttonOk.Margin = new System.Windows.Forms.Padding(0);
             this.buttonOk.Name = "buttonOk";
             this.buttonOk.Radius = 8;
@@ -108,7 +108,7 @@
             // 
             // buttonCancel
             // 
-            this.buttonCancel.Location = new System.Drawing.Point(126, 0);
+            this.buttonCancel.Location = new System.Drawing.Point(0, 0);
             this.buttonCancel.Margin = new System.Windows.Forms.Padding(0);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Radius = 8;
@@ -127,7 +127,7 @@
             this.panelHeader.Name = "panelHeader";
             this.panelHeader.Padding = new System.Windows.Forms.Padding(4, 0, 4, 8);
             this.panelHeader.Radius = 0;
-            this.panelHeader.Size = new System.Drawing.Size(892, 56);
+            this.panelHeader.Size = new System.Drawing.Size(762, 56);
             this.panelHeader.TabIndex = 0;
             // 
             // labelDialogDescription
@@ -136,7 +136,7 @@
             this.labelDialogDescription.Location = new System.Drawing.Point(4, 38);
             this.labelDialogDescription.Margin = new System.Windows.Forms.Padding(0);
             this.labelDialogDescription.Name = "labelDialogDescription";
-            this.labelDialogDescription.Size = new System.Drawing.Size(884, 18);
+            this.labelDialogDescription.Size = new System.Drawing.Size(754, 18);
             this.labelDialogDescription.TabIndex = 1;
             this.labelDialogDescription.Text = "在列表中选择目标用户。";
             // 
@@ -147,13 +147,13 @@
             this.labelDialogTitle.Location = new System.Drawing.Point(4, 0);
             this.labelDialogTitle.Margin = new System.Windows.Forms.Padding(0);
             this.labelDialogTitle.Name = "labelDialogTitle";
-            this.labelDialogTitle.Size = new System.Drawing.Size(884, 38);
+            this.labelDialogTitle.Size = new System.Drawing.Size(754, 38);
             this.labelDialogTitle.TabIndex = 0;
             this.labelDialogTitle.Text = "选择用户";
             // 
             // UserPermissionUserSelectDialog
             // 
-            this.ClientSize = new System.Drawing.Size(980, 720);
+            this.ClientSize = new System.Drawing.Size(850, 680);
             this.Controls.Add(this.textureBackgroundDialog);
             this.Name = "UserPermissionUserSelectDialog";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
