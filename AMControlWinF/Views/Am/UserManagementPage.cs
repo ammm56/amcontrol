@@ -46,6 +46,7 @@ namespace AMControlWinF.Views.Am
             buttonToggleEnabled.Click += async (s, e) => await ToggleUserEnabledAsync();
             buttonDeleteUser.Click += async (s, e) => await DeleteUserAsync();
             buttonAddUser.Click += async (s, e) => await AddUserAsync();
+            buttonResetPwd.Click += async (s, e) => await ResetUserPasswordAsync();
 
             tableUsers.CellClick += TableUsers_CellClick;
         }
@@ -140,6 +141,7 @@ namespace AMControlWinF.Views.Am
             buttonEditUser.Enabled = !isBusy && _model.SelectedUser != null;
             buttonToggleEnabled.Enabled = !isBusy && _model.SelectedUser != null;
             buttonDeleteUser.Enabled = !isBusy && _model.SelectedUser != null;
+            buttonResetPwd.Enabled = !isBusy && _model.SelectedUser != null;
             buttonAddUser.Enabled = !isBusy;
         }
 
@@ -223,6 +225,7 @@ namespace AMControlWinF.Views.Am
             buttonEditUser.Enabled = !_isBusy && hasSelection;
             buttonToggleEnabled.Enabled = !_isBusy && hasSelection;
             buttonDeleteUser.Enabled = !_isBusy && hasSelection;
+            buttonResetPwd.Enabled = !_isBusy && hasSelection;
             buttonAddUser.Enabled = !_isBusy;
 
             if (hasSelection)
@@ -306,6 +309,40 @@ namespace AMControlWinF.Views.Am
                 }
 
                 await ReloadAsync(selected.Id);
+            }
+        }
+
+        private async Task ResetUserPasswordAsync()
+        {
+            var selected = _model.SelectedUser;
+            if (selected == null)
+                return;
+
+            using (var dialog = new ResetUserPasswordDialog())
+            {
+                dialog.Text = "重置用户密码";
+                dialog.TargetLoginName = selected.LoginName;
+                dialog.TargetDisplayName = selected.DisplayName;
+
+                if (dialog.ShowDialog(FindForm()) != DialogResult.OK)
+                    return;
+
+                var result = await _model.ResetUserPasswordAsync(selected.Id, dialog.NewPassword);
+                if (!result.Success)
+                {
+                    MessageBox.Show(
+                        result.Message,
+                        "重置密码失败",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                    return;
+                }
+
+                MessageBox.Show(
+                    result.Message,
+                    "提示",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
             }
         }
 

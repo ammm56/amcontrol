@@ -1,18 +1,17 @@
 ﻿using AM.Core.Context;
 using System;
-using System.Drawing;
 using System.Windows.Forms;
 
 namespace AMControlWinF.Views.Am
 {
     /// <summary>
     /// 管理员重置用户密码对话框。
-    /// 布局与 LoginForm / UserEditDialog 一致：
+    /// 布局与 UserEditDialog 一致：
     /// - 纹理背景
-    /// - 中央卡片
-    /// - 顶部说明
-    /// - 中间表单
-    /// - 底部右对齐按钮
+    /// - 中央大卡片
+    /// - 顶部固定标题说明（单行左右结构）
+    /// - 中间 StackPanel 表单区
+    /// - 底部固定右对齐按钮栏
     /// </summary>
     public partial class ResetUserPasswordDialog : AntdUI.Window
     {
@@ -21,7 +20,12 @@ namespace AMControlWinF.Views.Am
             InitializeComponent();
             BindEvents();
             ApplyThemeFromConfig();
+            ApplyHeaderText();
         }
+
+        public string TargetLoginName { get; set; }
+
+        public string TargetDisplayName { get; set; }
 
         public string NewPassword
         {
@@ -41,8 +45,19 @@ namespace AMControlWinF.Views.Am
 
         private void ResetUserPasswordDialog_Shown(object sender, EventArgs e)
         {
+            ApplyHeaderText();
             inputNewPassword.Focus();
             inputNewPassword.SelectAll();
+        }
+
+        private void ApplyHeaderText()
+        {
+            labelDialogTitle.Text = "重置用户密码";
+
+            var loginName = string.IsNullOrWhiteSpace(TargetLoginName) ? "-" : TargetLoginName;
+            var displayName = string.IsNullOrWhiteSpace(TargetDisplayName) ? "-" : TargetDisplayName;
+
+            labelDialogDescription.Text = "目标用户：" + loginName + " / " + displayName;
         }
 
         private void ButtonOk_Click(object sender, EventArgs e)
