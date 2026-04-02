@@ -39,7 +39,6 @@
             // 
             this.panelCard.BackColor = System.Drawing.Color.Transparent;
             this.panelCard.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(225)))), ((int)(((byte)(229)))), ((int)(((byte)(235)))));
-            this.panelCard.BorderWidth = 1F;
             this.panelCard.Controls.Add(this.panelBody);
             this.panelCard.Controls.Add(this.panelFooter);
             this.panelCard.Controls.Add(this.panelHeader);
@@ -52,7 +51,7 @@
             this.panelCard.Shadow = 4;
             this.panelCard.ShadowOpacity = 0.2F;
             this.panelCard.ShadowOpacityAnimation = true;
-            this.panelCard.Size = new System.Drawing.Size(228, 168);
+            this.panelCard.Size = new System.Drawing.Size(190, 150);
             this.panelCard.TabIndex = 0;
             // 
             // panelBody
@@ -60,21 +59,21 @@
             this.panelBody.Controls.Add(this.labelRecommendedRoles);
             this.panelBody.Controls.Add(this.labelDescription);
             this.panelBody.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelBody.Location = new System.Drawing.Point(17, 45);
+            this.panelBody.Location = new System.Drawing.Point(16, 44);
             this.panelBody.Margin = new System.Windows.Forms.Padding(0);
             this.panelBody.Name = "panelBody";
             this.panelBody.Padding = new System.Windows.Forms.Padding(0, 2, 0, 0);
             this.panelBody.Radius = 0;
-            this.panelBody.Size = new System.Drawing.Size(194, 72);
+            this.panelBody.Size = new System.Drawing.Size(158, 56);
             this.panelBody.TabIndex = 1;
             // 
             // labelRecommendedRoles
             // 
             this.labelRecommendedRoles.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.labelRecommendedRoles.Location = new System.Drawing.Point(0, 44);
+            this.labelRecommendedRoles.Location = new System.Drawing.Point(0, 28);
             this.labelRecommendedRoles.Margin = new System.Windows.Forms.Padding(0);
             this.labelRecommendedRoles.Name = "labelRecommendedRoles";
-            this.labelRecommendedRoles.Size = new System.Drawing.Size(194, 28);
+            this.labelRecommendedRoles.Size = new System.Drawing.Size(158, 28);
             this.labelRecommendedRoles.TabIndex = 1;
             this.labelRecommendedRoles.Text = "建议角色：-";
             this.labelRecommendedRoles.Visible = false;
@@ -85,7 +84,7 @@
             this.labelDescription.Location = new System.Drawing.Point(0, 2);
             this.labelDescription.Margin = new System.Windows.Forms.Padding(0);
             this.labelDescription.Name = "labelDescription";
-            this.labelDescription.Size = new System.Drawing.Size(194, 70);
+            this.labelDescription.Size = new System.Drawing.Size(158, 54);
             this.labelDescription.TabIndex = 0;
             this.labelDescription.Text = "暂无说明。";
             // 
@@ -93,12 +92,12 @@
             // 
             this.panelFooter.Controls.Add(this.flowFooter);
             this.panelFooter.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panelFooter.Location = new System.Drawing.Point(17, 117);
+            this.panelFooter.Location = new System.Drawing.Point(16, 100);
             this.panelFooter.Margin = new System.Windows.Forms.Padding(0);
             this.panelFooter.Name = "panelFooter";
             this.panelFooter.Padding = new System.Windows.Forms.Padding(0, 6, 0, 0);
             this.panelFooter.Radius = 0;
-            this.panelFooter.Size = new System.Drawing.Size(194, 34);
+            this.panelFooter.Size = new System.Drawing.Size(158, 34);
             this.panelFooter.TabIndex = 2;
             // 
             // flowFooter
@@ -129,11 +128,11 @@
             this.panelHeader.Controls.Add(this.labelTitle);
             this.panelHeader.Controls.Add(this.checkPermission);
             this.panelHeader.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panelHeader.Location = new System.Drawing.Point(17, 17);
+            this.panelHeader.Location = new System.Drawing.Point(16, 16);
             this.panelHeader.Margin = new System.Windows.Forms.Padding(0);
             this.panelHeader.Name = "panelHeader";
             this.panelHeader.Radius = 0;
-            this.panelHeader.Size = new System.Drawing.Size(194, 28);
+            this.panelHeader.Size = new System.Drawing.Size(158, 28);
             this.panelHeader.TabIndex = 0;
             // 
             // labelTitle
@@ -143,7 +142,7 @@
             this.labelTitle.Location = new System.Drawing.Point(0, 0);
             this.labelTitle.Margin = new System.Windows.Forms.Padding(0);
             this.labelTitle.Name = "labelTitle";
-            this.labelTitle.Size = new System.Drawing.Size(166, 28);
+            this.labelTitle.Size = new System.Drawing.Size(130, 28);
             this.labelTitle.TabIndex = 0;
             this.labelTitle.Text = "权限标题";
             // 
@@ -151,7 +150,7 @@
             // 
             this.checkPermission.AutoSizeMode = AntdUI.TAutoSize.Auto;
             this.checkPermission.Dock = System.Windows.Forms.DockStyle.Right;
-            this.checkPermission.Location = new System.Drawing.Point(166, 0);
+            this.checkPermission.Location = new System.Drawing.Point(130, 0);
             this.checkPermission.Margin = new System.Windows.Forms.Padding(0);
             this.checkPermission.Name = "checkPermission";
             this.checkPermission.Size = new System.Drawing.Size(28, 28);
@@ -164,7 +163,7 @@
             this.Controls.Add(this.panelCard);
             this.Margin = new System.Windows.Forms.Padding(0);
             this.Name = "UserPermissionCardControl";
-            this.Size = new System.Drawing.Size(228, 168);
+            this.Size = new System.Drawing.Size(190, 150);
             this.panelCard.ResumeLayout(false);
             this.panelBody.ResumeLayout(false);
             this.panelFooter.ResumeLayout(false);

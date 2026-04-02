@@ -70,7 +70,7 @@
             this.flowPermissionCards.Align = AntdUI.TAlignFlow.Left;
             this.flowPermissionCards.AutoScroll = true;
             this.flowPermissionCards.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flowPermissionCards.Gap = 12;
+            this.flowPermissionCards.Gap = 8;
             this.flowPermissionCards.Location = new System.Drawing.Point(12, 48);
             this.flowPermissionCards.Margin = new System.Windows.Forms.Padding(0);
             this.flowPermissionCards.Name = "flowPermissionCards";
