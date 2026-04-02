@@ -1,4 +1,6 @@
-﻿using System;
+﻿using AM.Core.Context;
+using System;
+using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -6,7 +8,12 @@ namespace AMControlWinF.Views.Am
 {
     /// <summary>
     /// 用户新增/编辑共用对话框。
-    /// 新增模式窗口更大，编辑模式更紧凑。
+    /// 布局参考 LoginForm：
+    /// - 纹理背景
+    /// - 中央大卡片
+    /// - 顶部固定标题说明
+    /// - 中间可滚动表单区
+    /// - 底部固定按钮栏
     /// </summary>
     public partial class UserEditDialog : AntdUI.Window
     {
@@ -24,6 +31,7 @@ namespace AMControlWinF.Views.Am
             InitializeComponent();
             InitializeRoleDropdown();
             BindEvents();
+            ApplyThemeFromConfig();
             ApplyMode();
         }
 
@@ -103,26 +111,119 @@ namespace AMControlWinF.Views.Am
             buttonOk.Click += ButtonOk_Click;
             buttonCancel.Click += ButtonCancel_Click;
 
+            Shown += UserEditDialog_Shown;
+
             KeyPreview = true;
             KeyDown += UserEditDialog_KeyDown;
+        }
+
+        private void UserEditDialog_Shown(object sender, EventArgs e)
+        {
+            if (_isCreateMode)
+            {
+                inputLoginName.Focus();
+                inputLoginName.SelectAll();
+            }
+            else
+            {
+                inputUserName.Focus();
+                inputUserName.SelectAll();
+            }
         }
 
         private void ApplyMode()
         {
             if (_isCreateMode)
             {
-                Height = 430;
+                Text = "新增用户";
+                labelDialogTitle.Text = "新增用户";
+                labelDialogDescription.Text = "创建用户账号并设置角色、状态和备注信息。";
+                Size = new Size(900, 640);
+                MinimumSize = new Size(760, 560);
                 inputLoginName.Enabled = true;
-                labelPassword.Visible = true;
-                inputPassword.Visible = true;
                 checkEnabled.Checked = true;
             }
             else
             {
-                Height = 360;
+                Text = "编辑用户";
+                labelDialogTitle.Text = "编辑用户";
+                labelDialogDescription.Text = "修改用户显示信息、角色和启用状态。";
+                Size = new Size(820, 560);
+                MinimumSize = new Size(700, 500);
                 inputLoginName.Enabled = false;
+            }
+
+            RelayoutFormBody();
+        }
+
+        private void RelayoutFormBody()
+        {
+            var left = 24;
+            var top = 20;
+            var labelWidth = 100;
+            var inputLeft = 24;
+            var inputWidth = Math.Max(560, panelFormBody.Width - 48);
+            var controlHeight = 40;
+            var labelGap = 22;
+            var rowGap = 18;
+
+            LayoutRow(labelLoginName, inputLoginName, ref top, inputLeft, inputWidth, labelGap, controlHeight, rowGap);
+            LayoutRow(labelUserName, inputUserName, ref top, inputLeft, inputWidth, labelGap, controlHeight, rowGap);
+            LayoutRow(labelRole, dropdownRole, ref top, inputLeft, inputWidth, labelGap, controlHeight, rowGap);
+
+            if (_isCreateMode)
+            {
+                labelPassword.Visible = true;
+                inputPassword.Visible = true;
+                LayoutRow(labelPassword, inputPassword, ref top, inputLeft, inputWidth, labelGap, controlHeight, rowGap);
+            }
+            else
+            {
                 labelPassword.Visible = false;
                 inputPassword.Visible = false;
+            }
+
+            labelEnabled.Location = new Point(left, top);
+            labelEnabled.Size = new Size(labelWidth, labelGap);
+            checkEnabled.Location = new Point(inputLeft, top + labelGap);
+            checkEnabled.Size = new Size(100, 24);
+            top += labelGap + 24 + rowGap;
+
+            labelRemark.Location = new Point(left, top);
+            labelRemark.Size = new Size(labelWidth, labelGap);
+            inputRemark.Location = new Point(inputLeft, top + labelGap);
+            inputRemark.Size = new Size(inputWidth, 88);
+            inputRemark.Multiline = true;
+            top += labelGap + 88 + 24;
+
+            panelFormBody.Height = top;
+        }
+
+        private static void LayoutRow(
+            Control label,
+            Control input,
+            ref int top,
+            int inputLeft,
+            int inputWidth,
+            int labelGap,
+            int controlHeight,
+            int rowGap)
+        {
+            label.Location = new Point(24, top);
+            label.Size = new Size(100, labelGap);
+
+            input.Location = new Point(inputLeft, top + labelGap);
+            input.Size = new Size(inputWidth, controlHeight);
+
+            top += labelGap + controlHeight + rowGap;
+        }
+
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+            if (panelFormBody != null && !panelFormBody.IsDisposed)
+            {
+                RelayoutFormBody();
             }
         }
 
@@ -150,7 +251,7 @@ namespace AMControlWinF.Views.Am
                 return;
             }
 
-            if (e.KeyCode == Keys.Enter)
+            if (e.KeyCode == Keys.Enter && !(ActiveControl is TextBoxBase))
             {
                 e.SuppressKeyPress = true;
                 ButtonOk_Click(sender, EventArgs.Empty);
@@ -190,6 +291,34 @@ namespace AMControlWinF.Views.Am
             return true;
         }
 
+        private void ApplyThemeFromConfig()
+        {
+            var theme = ConfigContext.Instance.Config.Setting.Theme;
+            var isDarkMode = IsDarkTheme(theme);
+
+            if (isDarkMode)
+            {
+                AntdUI.Config.IsDark = true;
+            }
+            else
+            {
+                AntdUI.Config.IsLight = true;
+            }
+
+            textureBackgroundDialog.SetTheme(isDarkMode);
+        }
+
+        private static bool IsDarkTheme(string theme)
+        {
+            if (string.IsNullOrWhiteSpace(theme))
+            {
+                return false;
+            }
+
+            return string.Equals(theme, "SkinDark", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(theme, "Dark", StringComparison.OrdinalIgnoreCase);
+        }
+
         private sealed class RoleItem
         {
             public RoleItem(string code, string displayName)
@@ -199,6 +328,7 @@ namespace AMControlWinF.Views.Am
             }
 
             public string Code { get; private set; }
+
             public string DisplayName { get; private set; }
         }
     }

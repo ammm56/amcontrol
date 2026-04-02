@@ -1,28 +1,48 @@
-﻿using System;
+﻿using AM.Core.Context;
+using System;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace AMControlWinF.Views.Am
 {
     /// <summary>
     /// 管理员重置用户密码对话框。
-    /// 当前页面工具栏未接入按钮，但对话框可直接复用。
+    /// 布局与 LoginForm / UserEditDialog 一致：
+    /// - 纹理背景
+    /// - 中央卡片
+    /// - 顶部说明
+    /// - 中间表单
+    /// - 底部右对齐按钮
     /// </summary>
     public partial class ResetUserPasswordDialog : AntdUI.Window
     {
         public ResetUserPasswordDialog()
         {
             InitializeComponent();
-
-            buttonOk.Click += ButtonOk_Click;
-            buttonCancel.Click += ButtonCancel_Click;
-
-            KeyPreview = true;
-            KeyDown += ResetUserPasswordDialog_KeyDown;
+            BindEvents();
+            ApplyThemeFromConfig();
         }
 
         public string NewPassword
         {
             get { return inputNewPassword.Text ?? string.Empty; }
+        }
+
+        private void BindEvents()
+        {
+            buttonOk.Click += ButtonOk_Click;
+            buttonCancel.Click += ButtonCancel_Click;
+
+            Shown += ResetUserPasswordDialog_Shown;
+
+            KeyPreview = true;
+            KeyDown += ResetUserPasswordDialog_KeyDown;
+        }
+
+        private void ResetUserPasswordDialog_Shown(object sender, EventArgs e)
+        {
+            inputNewPassword.Focus();
+            inputNewPassword.SelectAll();
         }
 
         private void ButtonOk_Click(object sender, EventArgs e)
@@ -49,7 +69,7 @@ namespace AMControlWinF.Views.Am
                 return;
             }
 
-            if (e.KeyCode == Keys.Enter)
+            if (e.KeyCode == Keys.Enter && !(ActiveControl is TextBoxBase))
             {
                 e.SuppressKeyPress = true;
                 ButtonOk_Click(sender, EventArgs.Empty);
@@ -76,6 +96,34 @@ namespace AMControlWinF.Views.Am
             }
 
             return true;
+        }
+
+        private void ApplyThemeFromConfig()
+        {
+            var theme = ConfigContext.Instance.Config.Setting.Theme;
+            var isDarkMode = IsDarkTheme(theme);
+
+            if (isDarkMode)
+            {
+                AntdUI.Config.IsDark = true;
+            }
+            else
+            {
+                AntdUI.Config.IsLight = true;
+            }
+
+            textureBackgroundDialog.SetTheme(isDarkMode);
+        }
+
+        private static bool IsDarkTheme(string theme)
+        {
+            if (string.IsNullOrWhiteSpace(theme))
+            {
+                return false;
+            }
+
+            return string.Equals(theme, "SkinDark", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(theme, "Dark", StringComparison.OrdinalIgnoreCase);
         }
     }
 }
