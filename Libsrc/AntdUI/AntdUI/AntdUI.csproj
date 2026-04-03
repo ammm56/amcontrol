@@ -1,0 +1,104 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>Library</OutputType>
+		<TargetFrameworks>net10.0-windows;net48;net46;net40</TargetFrameworks>
+		<Nullable>enable</Nullable>
+		<UseWindowsForms>true</UseWindowsForms>
+		<NoWarn>$(NoWarn);CS0108;CS0618;CS8600;CS8601;CS8602;CS8603;CS8604;CS8618;CS8625;CS8629;CS8619;CS8622;CS8765;CS8073;CA2022</NoWarn>
+		<Authors>Tom,Am</Authors>
+		<Company></Company>
+		<Copyright>Copyright © Tom 2024-2030</Copyright>
+		<Product>AntdUIX</Product>
+		<AssemblyTitle>Ant Design Winform UI X</AssemblyTitle>
+		<Description>基于 Ant Design 设计语言的 Winform 界面库</Description>
+		<AssemblyVersion>$(Version)</AssemblyVersion>
+		<FileVersion>$(Version)</FileVersion>
+		<Version>0.2.3.6</Version>
+		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+		<LangVersion>9.0</LangVersion>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+		<ForceDesignerDpiUnaware>true</ForceDesignerDpiUnaware>
+		<RepositoryUrl>https://github.com/AntdUI/AntdUI</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags></PackageTags>
+		<PackageIcon></PackageIcon>
+		<PackageProjectUrl>https://github.com/AntdUI</PackageProjectUrl>
+		<WarningLevel>0</WarningLevel>
+		<EnableNETAnalyzers>false</EnableNETAnalyzers>
+		<TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+		<AssemblyName>$(MSBuildProjectName)</AssemblyName>
+	</PropertyGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net40' OR '$(TargetFramework)' == 'net46' OR '$(TargetFramework)' == 'net48'">
+		<Reference Include="System.Design" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Update="Properties\Resources.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>Resources.resx</DependentUpon>
+		</Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Update="Properties\Resources.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+			<LastGenOutput>Resources.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
+	</ItemGroup>
+
+	<PropertyGroup Condition="'$(Pack)' == 'true'">
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<SignAssembly>True</SignAssembly>
+		<AssemblyOriginatorKeyFile>../../key.snk</AssemblyOriginatorKeyFile>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net48|AnyCPU'">
+	  <WarningLevel>1</WarningLevel>
+	  <NoWarn>$(NoWarn);1701;1702</NoWarn>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net48|AnyCPU'">
+	  <WarningLevel>1</WarningLevel>
+	  <NoWarn>$(NoWarn);1701;1702</NoWarn>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net46|AnyCPU'">
+	  <WarningLevel>1</WarningLevel>
+	  <NoWarn>$(NoWarn);1701;1702</NoWarn>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net46|AnyCPU'">
+	  <WarningLevel>1</WarningLevel>
+	  <NoWarn>$(NoWarn);1701;1702</NoWarn>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net40|AnyCPU'">
+	  <WarningLevel>1</WarningLevel>
+	  <NoWarn>$(NoWarn);1701;1702</NoWarn>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net40|AnyCPU'">
+	  <WarningLevel>1</WarningLevel>
+	  <NoWarn>$(NoWarn);1701;1702</NoWarn>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-windows|AnyCPU'">
+	  <NoWarn>$(NoWarn);1701;1702</NoWarn>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net10.0-windows|AnyCPU'">
+	  <NoWarn>$(NoWarn);1701;1702</NoWarn>
+	</PropertyGroup>
+
+	<ItemGroup Condition="'$(Pack)' == 'true'">
+		<None Include="../../doc/wiki/README.md">
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
+	</ItemGroup>
+
+</Project>

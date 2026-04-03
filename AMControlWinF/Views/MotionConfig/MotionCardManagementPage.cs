@@ -1,8 +1,8 @@
 ﻿using AM.DBService.Services.Motion.Topology;
 using AM.Model.Entity.Motion.Topology;
 using AM.PageModel.MotionConfig;
+using AMControlWinF.Tools;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -83,7 +83,7 @@ namespace AMControlWinF.Views.MotionConfig
             flowCards.SuspendLayout();
             try
             {
-                flowCards.Controls.Clear();
+                ControlDisposeHelper.ClearControlsSafely(flowCards);
 
                 foreach (var item in _model.Cards)
                 {

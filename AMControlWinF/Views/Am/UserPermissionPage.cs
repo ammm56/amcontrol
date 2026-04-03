@@ -1,5 +1,6 @@
 ﻿using AM.Model.Auth;
 using AM.PageModel.Am;
+using AMControlWinF.Tools;
 using AntdUI;
 using System;
 using System.Drawing;
@@ -199,7 +200,7 @@ namespace AMControlWinF.Views.Am
             flowModules.SuspendLayout();
             try
             {
-                flowModules.Controls.Clear();
+                ControlDisposeHelper.ClearControlsSafely(flowModules);
 
                 var btnLength = 56;
                 var btnMaxLength = 85;
@@ -250,7 +251,7 @@ namespace AMControlWinF.Views.Am
             flowPermissionCards.SuspendLayout();
             try
             {
-                flowPermissionCards.Controls.Clear();
+                ControlDisposeHelper.ClearControlsSafely(flowPermissionCards);
 
                 foreach (var item in _model.VisiblePermissions)
                 {

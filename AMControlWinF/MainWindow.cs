@@ -417,14 +417,17 @@ namespace AMControlWinF
             panelContent.SuspendLayout();
             try
             {
+                var removedControls = new List<Control>();
+
                 foreach (Control control in panelContent.Controls.OfType<Control>().ToList())
                 {
                     if (ReferenceEquals(control, page))
                         continue;
 
                     panelContent.Controls.Remove(control);
+
                     if (disposeRemovedControls)
-                        control.Dispose();
+                        removedControls.Add(control);
                 }
 
                 if (!panelContent.Controls.Contains(page))
@@ -432,6 +435,9 @@ namespace AMControlWinF
 
                 page.Dock = DockStyle.Fill;
                 page.BringToFront();
+
+                if (disposeRemovedControls && removedControls.Count > 0)
+                    ControlDisposeHelper.DisposeControlsDeferred(this, removedControls);
             }
             finally
             {
@@ -496,13 +502,27 @@ namespace AMControlWinF
 
         private void DisposeAllCachedPages()
         {
-            foreach (var pair in _pageCache.ToList())
+            var controls = _pageCache.Values
+                .Where(x => x != null && !x.IsDisposed)
+                .Distinct()
+                .ToList();
+
+            foreach (var control in controls)
             {
-                if (pair.Value != null && !pair.Value.IsDisposed)
-                    pair.Value.Dispose();
+                try
+                {
+                    if (control.Parent != null)
+                        control.Parent.Controls.Remove(control);
+                }
+                catch
+                {
+                }
             }
 
             _pageCache.Clear();
+
+            if (controls.Count > 0)
+                ControlDisposeHelper.DisposeControlsDeferred(this, controls);
         }
 
         #endregion
