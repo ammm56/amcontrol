@@ -89,8 +89,8 @@
             this.panelShell.Padding = new System.Windows.Forms.Padding(12);
             this.panelShell.Radius = 16;
             this.panelShell.Shadow = 16;
-            this.panelShell.ShadowOpacity = 0.2F;
             this.panelShell.ShadowOpacityAnimation = true;
+            this.panelShell.ShadowOpacityHover = 0.2F;
             this.panelShell.Size = new System.Drawing.Size(560, 600);
             this.panelShell.TabIndex = 0;
             // 

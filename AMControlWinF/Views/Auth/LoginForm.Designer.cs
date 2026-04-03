@@ -71,13 +71,16 @@
             this.panelShell.BackColor = System.Drawing.Color.Transparent;
             this.panelShell.Controls.Add(this.panelLogin);
             this.panelShell.Controls.Add(this.panelIntro);
-            this.panelShell.Location = new System.Drawing.Point(24, 24);
+            this.panelShell.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelShell.Location = new System.Drawing.Point(0, 0);
             this.panelShell.Margin = new System.Windows.Forms.Padding(0);
             this.panelShell.Name = "panelShell";
             this.panelShell.Padding = new System.Windows.Forms.Padding(12);
             this.panelShell.Radius = 16;
-            this.panelShell.Shadow = 8;
-            this.panelShell.Size = new System.Drawing.Size(832, 472);
+            this.panelShell.Shadow = 16;
+            this.panelShell.ShadowOpacityAnimation = true;
+            this.panelShell.ShadowOpacityHover = 0.2F;
+            this.panelShell.Size = new System.Drawing.Size(880, 520);
             this.panelShell.TabIndex = 0;
             // 
             // panelLogin
@@ -94,11 +97,11 @@
             this.panelLogin.Controls.Add(this.labelLoginName);
             this.panelLogin.Controls.Add(this.labelLoginTitle);
             this.panelLogin.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelLogin.Location = new System.Drawing.Point(445, 20);
+            this.panelLogin.Location = new System.Drawing.Point(453, 28);
             this.panelLogin.Margin = new System.Windows.Forms.Padding(0);
             this.panelLogin.Name = "panelLogin";
             this.panelLogin.Radius = 0;
-            this.panelLogin.Size = new System.Drawing.Size(367, 432);
+            this.panelLogin.Size = new System.Drawing.Size(399, 464);
             this.panelLogin.TabIndex = 1;
             // 
             // labelStatusValue
@@ -227,11 +230,11 @@
             this.panelIntro.Controls.Add(this.labelIntroSubtitle);
             this.panelIntro.Controls.Add(this.labelIntroTitle);
             this.panelIntro.Dock = System.Windows.Forms.DockStyle.Left;
-            this.panelIntro.Location = new System.Drawing.Point(20, 20);
+            this.panelIntro.Location = new System.Drawing.Point(28, 28);
             this.panelIntro.Margin = new System.Windows.Forms.Padding(0);
             this.panelIntro.Name = "panelIntro";
             this.panelIntro.Radius = 0;
-            this.panelIntro.Size = new System.Drawing.Size(425, 432);
+            this.panelIntro.Size = new System.Drawing.Size(425, 464);
             this.panelIntro.TabIndex = 0;
             // 
             // labelIntroBottom

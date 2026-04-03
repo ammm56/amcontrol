@@ -15,10 +15,10 @@ namespace AMControlWinF.Views.MotionConfig
     {
         private static readonly CardTypeItem[] CardTypes = new[]
         {
-            new CardTypeItem(10, "GOOGO"),
-            new CardTypeItem(20, "LEISAI"),
-            new CardTypeItem(90, "VIRTUAL"),
-            new CardTypeItem(99, "OTHER")
+            new CardTypeItem(10, "GOOGO（固高）"),
+            new CardTypeItem(20, "LEISAI（雷赛）"),
+            new CardTypeItem(90, "VIRTUAL（虚拟）"),
+            new CardTypeItem(99, "OTHER（其他）")
         };
 
         private readonly bool _isAdd;
@@ -63,8 +63,16 @@ namespace AMControlWinF.Views.MotionConfig
 
         private void MotionCardEditDialog_Shown(object sender, EventArgs e)
         {
-            inputCardId.Focus();
-            inputCardId.SelectAll();
+            if (_isAdd)
+            {
+                inputCardId.Focus();
+                inputCardId.SelectAll();
+            }
+            else
+            {
+                inputName.Focus();
+                inputName.SelectAll();
+            }
         }
 
         private void ApplyMode()
@@ -72,9 +80,10 @@ namespace AMControlWinF.Views.MotionConfig
             Text = _isAdd ? "新增控制卡" : "编辑控制卡";
             labelDialogTitle.Text = _isAdd ? "新增控制卡" : "编辑控制卡";
             labelDialogDescription.Text = _isAdd
-                ? "填写控制卡基础信息、初始化参数和说明信息。"
-                : "修改控制卡基础信息、初始化参数和说明信息。";
+                ? "填写控制卡信息。"
+                : "修改控制卡信息。";
 
+            Size = new System.Drawing.Size(640, 760);
             buttonOk.Text = "保存";
         }
 
@@ -122,11 +131,18 @@ namespace AMControlWinF.Views.MotionConfig
 
         private void MotionCardEditDialog_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode != Keys.Escape)
+            if (e.KeyCode == Keys.Escape)
+            {
+                DialogResult = DialogResult.Cancel;
+                Close();
                 return;
+            }
 
-            DialogResult = DialogResult.Cancel;
-            Close();
+            if (e.KeyCode == Keys.Enter && !(ActiveControl is TextBoxBase))
+            {
+                e.SuppressKeyPress = true;
+                ButtonOk_Click(sender, EventArgs.Empty);
+            }
         }
 
         private bool TryBuildEntity(out MotionCardEntity entity)
@@ -136,7 +152,7 @@ namespace AMControlWinF.Views.MotionConfig
             short cardId;
             if (!short.TryParse((inputCardId.Text ?? string.Empty).Trim(), out cardId) || cardId < 0)
             {
-                PageDialogHelper.ShowWarn(this, "输入提示", "控制卡卡号必须为非负整数。");
+                PageDialogHelper.ShowWarn(this, "输入提示", "硬件卡号（Card Id）必须为非负整数。");
                 inputCardId.Focus();
                 return false;
             }
@@ -152,7 +168,7 @@ namespace AMControlWinF.Views.MotionConfig
             int coreNumber;
             if (!int.TryParse((inputCoreNumber.Text ?? string.Empty).Trim(), out coreNumber) || coreNumber <= 0)
             {
-                PageDialogHelper.ShowWarn(this, "输入提示", "核数必须大于 0。");
+                PageDialogHelper.ShowWarn(this, "输入提示", "内核数量必须大于 0。");
                 inputCoreNumber.Focus();
                 return false;
             }
@@ -160,7 +176,7 @@ namespace AMControlWinF.Views.MotionConfig
             short axisCount;
             if (!short.TryParse((inputAxisCount.Text ?? string.Empty).Trim(), out axisCount) || axisCount < 0)
             {
-                PageDialogHelper.ShowWarn(this, "输入提示", "轴数必须为非负整数。");
+                PageDialogHelper.ShowWarn(this, "输入提示", "支持轴总数必须为非负整数。");
                 inputAxisCount.Focus();
                 return false;
             }
@@ -168,7 +184,7 @@ namespace AMControlWinF.Views.MotionConfig
             short modeParam;
             if (!short.TryParse((inputModeParam.Text ?? string.Empty).Trim(), out modeParam))
             {
-                PageDialogHelper.ShowWarn(this, "输入提示", "模式参数格式无效。");
+                PageDialogHelper.ShowWarn(this, "输入提示", "打开模式参数格式无效，请输入整数。");
                 inputModeParam.Focus();
                 return false;
             }
