@@ -38,7 +38,6 @@ namespace AMControlWinF.Views.MotionConfig
 
             buttonRefresh.Click += async (s, e) => await ReloadAsync();
             buttonAddCard.Click += async (s, e) => await AddCardAsync();
-            flowCards.SizeChanged += FlowCards_SizeChanged;
         }
 
         private async void MotionCardManagementPage_Load(object sender, EventArgs e)
@@ -79,11 +78,6 @@ namespace AMControlWinF.Views.MotionConfig
             buttonAddCard.Enabled = !_isBusy;
         }
 
-        private void FlowCards_SizeChanged(object sender, EventArgs e)
-        {
-            ResizeCardWidths();
-        }
-
         private void BuildCards()
         {
             flowCards.SuspendLayout();
@@ -100,25 +94,11 @@ namespace AMControlWinF.Views.MotionConfig
                     card.DeleteRequested += async (s, e) => await DeleteCardAsync(card.CardItem);
                     flowCards.Controls.Add(card);
                 }
-
-                ResizeCardWidths();
             }
             finally
             {
                 flowCards.ResumeLayout();
             }
-        }
-
-        private void ResizeCardWidths()
-        {
-            //var width = flowCards.ClientSize.Width - SystemInformation.VerticalScrollBarWidth - 8;
-            //if (width < 420)
-            //    width = 420;
-
-            //foreach (var card in flowCards.Controls.OfType<MotionCardControl>())
-            //{
-            //    card.Width = width;
-            //}
         }
 
         private async Task AddCardAsync()
