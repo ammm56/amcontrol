@@ -48,6 +48,8 @@ namespace AMControlWinF.Views.MotionConfig
 
             KeyPreview = true;
             KeyDown += MotionCardDetailDialog_KeyDown;
+
+            buttonCancel.Click += ButtonCancel_Click;
         }
 
         private void MotionCardDetailDialog_Shown(object sender, EventArgs e)
@@ -77,6 +79,12 @@ namespace AMControlWinF.Views.MotionConfig
             if (e.KeyCode != Keys.Escape)
                 return;
 
+            DialogResult = DialogResult.Cancel;
+            Close();
+        }
+
+        private void ButtonCancel_Click(object sender, EventArgs e)
+        {
             DialogResult = DialogResult.Cancel;
             Close();
         }

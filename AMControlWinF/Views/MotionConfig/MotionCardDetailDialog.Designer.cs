@@ -21,10 +21,15 @@
             this.panelHeader = new AntdUI.Panel();
             this.labelDialogDescription = new AntdUI.Label();
             this.labelDialogTitle = new AntdUI.Label();
+            this.panelFooter = new AntdUI.Panel();
+            this.flowFooterButtons = new AntdUI.FlowPanel();
+            this.buttonCancel = new AntdUI.Button();
             this.textureBackgroundDialog.SuspendLayout();
             this.panelShell.SuspendLayout();
             this.panelContentHost.SuspendLayout();
             this.panelHeader.SuspendLayout();
+            this.panelFooter.SuspendLayout();
+            this.flowFooterButtons.SuspendLayout();
             this.SuspendLayout();
             // 
             // textureBackgroundDialog
@@ -55,6 +60,7 @@
             // 
             // panelContentHost
             // 
+            this.panelContentHost.Controls.Add(this.panelFooter);
             this.panelContentHost.Controls.Add(this.motionCardDetailControl);
             this.panelContentHost.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelContentHost.Location = new System.Drawing.Point(28, 84);
@@ -108,6 +114,38 @@
             this.labelDialogTitle.TabIndex = 0;
             this.labelDialogTitle.Text = "控制卡详情";
             // 
+            // panelFooter
+            // 
+            this.panelFooter.Controls.Add(this.flowFooterButtons);
+            this.panelFooter.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.panelFooter.Location = new System.Drawing.Point(0, 482);
+            this.panelFooter.Name = "panelFooter";
+            this.panelFooter.Size = new System.Drawing.Size(744, 56);
+            this.panelFooter.TabIndex = 1;
+            this.panelFooter.Text = "panel1";
+            // 
+            // flowFooterButtons
+            // 
+            this.flowFooterButtons.Align = AntdUI.TAlignFlow.Right;
+            this.flowFooterButtons.Controls.Add(this.buttonCancel);
+            this.flowFooterButtons.Dock = System.Windows.Forms.DockStyle.Right;
+            this.flowFooterButtons.Location = new System.Drawing.Point(485, 0);
+            this.flowFooterButtons.Name = "flowFooterButtons";
+            this.flowFooterButtons.Size = new System.Drawing.Size(259, 56);
+            this.flowFooterButtons.TabIndex = 0;
+            this.flowFooterButtons.Text = "flowPanel1";
+            // 
+            // buttonCancel
+            // 
+            this.buttonCancel.Location = new System.Drawing.Point(143, 0);
+            this.buttonCancel.Margin = new System.Windows.Forms.Padding(0);
+            this.buttonCancel.Name = "buttonCancel";
+            this.buttonCancel.Radius = 8;
+            this.buttonCancel.Size = new System.Drawing.Size(116, 38);
+            this.buttonCancel.TabIndex = 1;
+            this.buttonCancel.Text = "取消";
+            this.buttonCancel.WaveSize = 0;
+            // 
             // MotionCardDetailDialog
             // 
             this.ClientSize = new System.Drawing.Size(800, 650);
@@ -120,6 +158,8 @@
             this.panelShell.ResumeLayout(false);
             this.panelContentHost.ResumeLayout(false);
             this.panelHeader.ResumeLayout(false);
+            this.panelFooter.ResumeLayout(false);
+            this.flowFooterButtons.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -131,5 +171,8 @@
         private AntdUI.Label labelDialogDescription;
         private AntdUI.Panel panelContentHost;
         private MotionCardDetailControl motionCardDetailControl;
+        private AntdUI.Panel panelFooter;
+        private AntdUI.FlowPanel flowFooterButtons;
+        private AntdUI.Button buttonCancel;
     }
 }
