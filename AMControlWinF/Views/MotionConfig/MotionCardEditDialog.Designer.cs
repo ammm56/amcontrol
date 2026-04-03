@@ -29,11 +29,11 @@
             this.labelSortOrder = new AntdUI.Label();
             this.checkIsEnabled = new AntdUI.Checkbox();
             this.labelStateFlags = new AntdUI.Label();
-            this.labelSectionState = new AntdUI.Label();
             this.inputInitOrder = new AntdUI.Input();
             this.labelInitOrder = new AntdUI.Label();
             this.inputAxisCount = new AntdUI.Input();
             this.labelAxisCount = new AntdUI.Label();
+            this.labelSectionInit_right = new AntdUI.Label();
             this.stackSectionInitLeft = new AntdUI.StackPanel();
             this.checkUseExtModule = new AntdUI.Checkbox();
             this.labelInitFlags = new AntdUI.Label();
@@ -65,7 +65,6 @@
             this.labelDialogDescription = new AntdUI.Label();
             this.flowHeaderLeft = new AntdUI.FlowPanel();
             this.labelDialogTitle = new AntdUI.Label();
-            this.labelSectionInit_right = new AntdUI.Label();
             this.textureBackgroundDialog.SuspendLayout();
             this.panelShell.SuspendLayout();
             this.panelContent.SuspendLayout();
@@ -211,7 +210,6 @@
             this.stackSectionInitRight.Controls.Add(this.labelSortOrder);
             this.stackSectionInitRight.Controls.Add(this.checkIsEnabled);
             this.stackSectionInitRight.Controls.Add(this.labelStateFlags);
-            this.stackSectionInitRight.Controls.Add(this.labelSectionState);
             this.stackSectionInitRight.Controls.Add(this.inputInitOrder);
             this.stackSectionInitRight.Controls.Add(this.labelInitOrder);
             this.stackSectionInitRight.Controls.Add(this.inputAxisCount);
@@ -229,7 +227,7 @@
             // 
             // inputSortOrder
             // 
-            this.inputSortOrder.Location = new System.Drawing.Point(4, 278);
+            this.inputSortOrder.Location = new System.Drawing.Point(4, 248);
             this.inputSortOrder.Margin = new System.Windows.Forms.Padding(0);
             this.inputSortOrder.Name = "inputSortOrder";
             this.inputSortOrder.PlaceholderText = "请输入排序号";
@@ -239,7 +237,7 @@
             // 
             // labelSortOrder
             // 
-            this.labelSortOrder.Location = new System.Drawing.Point(4, 252);
+            this.labelSortOrder.Location = new System.Drawing.Point(4, 222);
             this.labelSortOrder.Margin = new System.Windows.Forms.Padding(0);
             this.labelSortOrder.Name = "labelSortOrder";
             this.labelSortOrder.Size = new System.Drawing.Size(159, 22);
@@ -251,7 +249,7 @@
             this.checkIsEnabled.AutoSizeMode = AntdUI.TAutoSize.Auto;
             this.checkIsEnabled.Checked = true;
             this.checkIsEnabled.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkIsEnabled.Location = new System.Drawing.Point(4, 214);
+            this.checkIsEnabled.Location = new System.Drawing.Point(4, 184);
             this.checkIsEnabled.Margin = new System.Windows.Forms.Padding(0);
             this.checkIsEnabled.Name = "checkIsEnabled";
             this.checkIsEnabled.Size = new System.Drawing.Size(114, 34);
@@ -260,22 +258,12 @@
             // 
             // labelStateFlags
             // 
-            this.labelStateFlags.Location = new System.Drawing.Point(4, 188);
+            this.labelStateFlags.Location = new System.Drawing.Point(4, 158);
             this.labelStateFlags.Margin = new System.Windows.Forms.Padding(0);
             this.labelStateFlags.Name = "labelStateFlags";
             this.labelStateFlags.Size = new System.Drawing.Size(159, 22);
             this.labelStateFlags.TabIndex = 5;
             this.labelStateFlags.Text = "启用状态";
-            // 
-            // labelSectionState
-            // 
-            this.labelSectionState.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Bold);
-            this.labelSectionState.Location = new System.Drawing.Point(4, 158);
-            this.labelSectionState.Margin = new System.Windows.Forms.Padding(0);
-            this.labelSectionState.Name = "labelSectionState";
-            this.labelSectionState.Size = new System.Drawing.Size(159, 26);
-            this.labelSectionState.TabIndex = 4;
-            this.labelSectionState.Text = "状态与排序";
             // 
             // inputInitOrder
             // 
@@ -308,12 +296,22 @@
             // 
             // labelAxisCount
             // 
-            this.labelAxisCount.Location = new System.Drawing.Point(4, 4);
+            this.labelAxisCount.Location = new System.Drawing.Point(4, 34);
             this.labelAxisCount.Margin = new System.Windows.Forms.Padding(0);
             this.labelAxisCount.Name = "labelAxisCount";
             this.labelAxisCount.Size = new System.Drawing.Size(159, 22);
             this.labelAxisCount.TabIndex = 0;
             this.labelAxisCount.Text = "支持轴总数";
+            // 
+            // labelSectionInit_right
+            // 
+            this.labelSectionInit_right.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Bold);
+            this.labelSectionInit_right.Location = new System.Drawing.Point(4, 4);
+            this.labelSectionInit_right.Margin = new System.Windows.Forms.Padding(0);
+            this.labelSectionInit_right.Name = "labelSectionInit_right";
+            this.labelSectionInit_right.Size = new System.Drawing.Size(159, 26);
+            this.labelSectionInit_right.TabIndex = 0;
+            this.labelSectionInit_right.Text = "";
             // 
             // stackSectionInitLeft
             // 
@@ -421,7 +419,7 @@
             this.labelSectionInit.Name = "labelSectionInit";
             this.labelSectionInit.Size = new System.Drawing.Size(159, 26);
             this.labelSectionInit.TabIndex = 0;
-            this.labelSectionInit.Text = "初始化参数（左侧）";
+            this.labelSectionInit.Text = "初始化参数";
             // 
             // stackSectionBasic
             // 
@@ -654,16 +652,6 @@
             this.labelDialogTitle.TabIndex = 0;
             this.labelDialogTitle.Text = "新增控制卡";
             // 
-            // labelSectionInit_right
-            // 
-            this.labelSectionInit_right.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Bold);
-            this.labelSectionInit_right.Location = new System.Drawing.Point(4, 30);
-            this.labelSectionInit_right.Margin = new System.Windows.Forms.Padding(0);
-            this.labelSectionInit_right.Name = "labelSectionInit_right";
-            this.labelSectionInit_right.Size = new System.Drawing.Size(159, 26);
-            this.labelSectionInit_right.TabIndex = 0;
-            this.labelSectionInit_right.Text = "初始化参数（右侧）";
-            // 
             // MotionCardEditDialog
             // 
             this.ClientSize = new System.Drawing.Size(900, 600);
@@ -734,7 +722,6 @@
         private AntdUI.Input inputAxisCount;
         private AntdUI.Label labelInitOrder;
         private AntdUI.Input inputInitOrder;
-        private AntdUI.Label labelSectionState;
         private AntdUI.Label labelStateFlags;
         private AntdUI.Checkbox checkIsEnabled;
         private AntdUI.Label labelSortOrder;
