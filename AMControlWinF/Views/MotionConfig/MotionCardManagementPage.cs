@@ -1,5 +1,8 @@
-﻿using AM.PageModel.MotionConfig;
+﻿using AM.DBService.Services.Motion.Topology;
+using AM.Model.Entity.Motion.Topology;
+using AM.PageModel.MotionConfig;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -14,6 +17,7 @@ namespace AMControlWinF.Views.MotionConfig
     public partial class MotionCardManagementPage : UserControl
     {
         private readonly MotionCardManagementPageModel _model;
+        private readonly MotionCardCrudService _cardService;
         private bool _isFirstLoad;
         private bool _isBusy;
 
@@ -22,6 +26,7 @@ namespace AMControlWinF.Views.MotionConfig
             InitializeComponent();
 
             _model = new MotionCardManagementPageModel();
+            _cardService = new MotionCardCrudService();
 
             BindEvents();
             UpdateActionButtons();
@@ -32,7 +37,8 @@ namespace AMControlWinF.Views.MotionConfig
             Load += MotionCardManagementPage_Load;
 
             buttonRefresh.Click += async (s, e) => await ReloadAsync();
-            buttonAddCard.Click += ButtonAddCard_Click;
+            buttonAddCard.Click += async (s, e) => await AddCardAsync();
+            flowCards.SizeChanged += FlowCards_SizeChanged;
         }
 
         private async void MotionCardManagementPage_Load(object sender, EventArgs e)
@@ -52,7 +58,7 @@ namespace AMControlWinF.Views.MotionConfig
             SetBusyState(true);
             try
             {
-                var result = await _model.LoadAsync();
+                await _model.LoadAsync();
                 BuildCards();
             }
             finally
@@ -73,6 +79,11 @@ namespace AMControlWinF.Views.MotionConfig
             buttonAddCard.Enabled = !_isBusy;
         }
 
+        private void FlowCards_SizeChanged(object sender, EventArgs e)
+        {
+            ResizeCardWidths();
+        }
+
         private void BuildCards()
         {
             flowCards.SuspendLayout();
@@ -84,8 +95,13 @@ namespace AMControlWinF.Views.MotionConfig
                 {
                     var card = new MotionCardControl();
                     card.Bind(item);
+                    card.Margin = new Padding(0);
+                    card.EditRequested += async (s, e) => await EditCardAsync(card.CardItem);
+                    card.DeleteRequested += async (s, e) => await DeleteCardAsync(card.CardItem);
                     flowCards.Controls.Add(card);
                 }
+
+                ResizeCardWidths();
             }
             finally
             {
@@ -93,9 +109,104 @@ namespace AMControlWinF.Views.MotionConfig
             }
         }
 
-        private void ButtonAddCard_Click(object sender, EventArgs e)
+        private void ResizeCardWidths()
         {
-            // 下一步接 MotionCardEditDialog。
+            //var width = flowCards.ClientSize.Width - SystemInformation.VerticalScrollBarWidth - 8;
+            //if (width < 420)
+            //    width = 420;
+
+            //foreach (var card in flowCards.Controls.OfType<MotionCardControl>())
+            //{
+            //    card.Width = width;
+            //}
+        }
+
+        private async Task AddCardAsync()
+        {
+            if (_isBusy)
+                return;
+
+            var entity = CreateDefaultCardEntity();
+
+            using (var dialog = new MotionCardEditDialog(entity, true))
+            {
+                if (dialog.ShowDialog(FindForm()) != DialogResult.OK)
+                    return;
+
+                var result = await Task.Run(() => _cardService.Save(dialog.ResultEntity));
+                if (!result.Success)
+                    return;
+
+                await ReloadAsync();
+            }
+        }
+
+        private async Task EditCardAsync(MotionCardManagementPageModel.MotionCardViewItem item)
+        {
+            if (_isBusy || item == null)
+                return;
+
+            var queryResult = await Task.Run(() => _cardService.QueryByCardId(item.CardId));
+            if (!queryResult.Success || queryResult.Item == null)
+                return;
+
+            using (var dialog = new MotionCardEditDialog(queryResult.Item, false))
+            {
+                if (dialog.ShowDialog(FindForm()) != DialogResult.OK)
+                    return;
+
+                var saveResult = await Task.Run(() => _cardService.Save(dialog.ResultEntity));
+                if (!saveResult.Success)
+                    return;
+
+                await ReloadAsync();
+            }
+        }
+
+        private async Task DeleteCardAsync(MotionCardManagementPageModel.MotionCardViewItem item)
+        {
+            if (_isBusy || item == null)
+                return;
+
+            using (var dialog = new MotionCardDeleteConfirmDialog())
+            {
+                dialog.TargetCardId = item.CardId;
+                dialog.TargetDisplayName = item.DisplayName;
+                dialog.TargetName = item.Name;
+
+                if (dialog.ShowDialog(FindForm()) != DialogResult.OK)
+                    return;
+            }
+
+            var result = await Task.Run(() => _cardService.DeleteByCardId(item.CardId));
+            if (!result.Success)
+                return;
+
+            await ReloadAsync();
+        }
+
+        private static MotionCardEntity CreateDefaultCardEntity()
+        {
+            return new MotionCardEntity
+            {
+                CardId = 0,
+                CardType = 90,
+                Name = string.Empty,
+                DisplayName = string.Empty,
+                DriverKey = "Virtual.Basic",
+                ModeParam = 0,
+                OpenConfig = string.Empty,
+                CoreNumber = 2,
+                AxisCountNumber = 16,
+                UseExtModule = false,
+                InitOrder = 1,
+                IsEnabled = true,
+                SortOrder = 1,
+                Description = string.Empty,
+                Remark = string.Empty,
+                CreateTime = DateTime.Now,
+                UpdateTime = DateTime.Now
+            };
         }
     }
 }

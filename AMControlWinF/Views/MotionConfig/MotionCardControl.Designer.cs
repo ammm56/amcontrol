@@ -85,7 +85,7 @@
             this.panelCard.Shadow = 4;
             this.panelCard.ShadowOpacity = 0.2F;
             this.panelCard.ShadowOpacityAnimation = true;
-            this.panelCard.Size = new System.Drawing.Size(400, 360);
+            this.panelCard.Size = new System.Drawing.Size(385, 360);
             this.panelCard.TabIndex = 0;
             // 
             // panelBottom
@@ -96,7 +96,7 @@
             this.panelBottom.Location = new System.Drawing.Point(16, 300);
             this.panelBottom.Name = "panelBottom";
             this.panelBottom.Padding = new System.Windows.Forms.Padding(4);
-            this.panelBottom.Size = new System.Drawing.Size(368, 44);
+            this.panelBottom.Size = new System.Drawing.Size(353, 44);
             this.panelBottom.TabIndex = 2;
             this.panelBottom.Text = "panel1";
             // 
@@ -105,7 +105,7 @@
             this.flowBottomRight.Align = AntdUI.TAlignFlow.Right;
             this.flowBottomRight.Controls.Add(this.buttonStatusTag);
             this.flowBottomRight.Dock = System.Windows.Forms.DockStyle.Right;
-            this.flowBottomRight.Location = new System.Drawing.Point(264, 4);
+            this.flowBottomRight.Location = new System.Drawing.Point(249, 4);
             this.flowBottomRight.Name = "flowBottomRight";
             this.flowBottomRight.Size = new System.Drawing.Size(100, 36);
             this.flowBottomRight.TabIndex = 0;
@@ -183,7 +183,7 @@
             this.panelBody.Name = "panelBody";
             this.panelBody.Padding = new System.Windows.Forms.Padding(0, 4, 0, 0);
             this.panelBody.Radius = 0;
-            this.panelBody.Size = new System.Drawing.Size(368, 284);
+            this.panelBody.Size = new System.Drawing.Size(353, 284);
             this.panelBody.TabIndex = 1;
             // 
             // panelRight
@@ -199,7 +199,7 @@
             this.panelRight.Controls.Add(this.labelValueModeParam);
             this.panelRight.Controls.Add(this.labelModeParam);
             this.panelRight.Dock = System.Windows.Forms.DockStyle.Right;
-            this.panelRight.Location = new System.Drawing.Point(183, 4);
+            this.panelRight.Location = new System.Drawing.Point(168, 4);
             this.panelRight.Margin = new System.Windows.Forms.Padding(0);
             this.panelRight.Name = "panelRight";
             this.panelRight.Padding = new System.Windows.Forms.Padding(8, 0, 0, 0);
@@ -474,7 +474,7 @@
             this.panelHeader.Name = "panelHeader";
             this.panelHeader.Padding = new System.Windows.Forms.Padding(0, 4, 0, 4);
             this.panelHeader.Radius = 0;
-            this.panelHeader.Size = new System.Drawing.Size(368, 44);
+            this.panelHeader.Size = new System.Drawing.Size(353, 44);
             this.panelHeader.TabIndex = 0;
             // 
             // flowHeaderRight
@@ -483,7 +483,7 @@
             this.flowHeaderRight.Controls.Add(this.buttonDelete);
             this.flowHeaderRight.Dock = System.Windows.Forms.DockStyle.Right;
             this.flowHeaderRight.Gap = 8;
-            this.flowHeaderRight.Location = new System.Drawing.Point(200, 4);
+            this.flowHeaderRight.Location = new System.Drawing.Point(185, 4);
             this.flowHeaderRight.Margin = new System.Windows.Forms.Padding(0);
             this.flowHeaderRight.Name = "flowHeaderRight";
             this.flowHeaderRight.Size = new System.Drawing.Size(168, 36);
@@ -557,7 +557,7 @@
             this.Controls.Add(this.panelCard);
             this.Margin = new System.Windows.Forms.Padding(0);
             this.Name = "MotionCardControl";
-            this.Size = new System.Drawing.Size(400, 360);
+            this.Size = new System.Drawing.Size(385, 360);
             this.panelCard.ResumeLayout(false);
             this.panelBottom.ResumeLayout(false);
             this.flowBottomRight.ResumeLayout(false);
