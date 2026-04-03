@@ -172,11 +172,9 @@ namespace AMControlWinF.Views.MotionConfig
             if (item == null)
                 return;
 
-            using (var detail = new MotionCardDetailControl())
+            using (var dialog = new MotionCardDetailDialog(item))
             {
-                detail.Bind(item);
-
-                PageDialogHelper.ShowPanel(this, "控制卡详情", detail, 900);
+                dialog.ShowDialog(FindForm());
             }
         }
 
