@@ -26,7 +26,8 @@
             this.labelValueCore = new AntdUI.Label();
             this.labelCore = new AntdUI.Label();
             this.panelBody = new AntdUI.Panel();
-            this.panelRight = new AntdUI.Panel();
+            this.gridBodyMain = new AntdUI.GridPanel();
+            this.stackBodyRight = new AntdUI.StackPanel();
             this.labelDescription = new AntdUI.Label();
             this.labelDescriptionTitle = new AntdUI.Label();
             this.labelValueRemark = new AntdUI.Label();
@@ -37,11 +38,9 @@
             this.labelOpenConfig = new AntdUI.Label();
             this.labelValueModeParam = new AntdUI.Label();
             this.labelModeParam = new AntdUI.Label();
-            this.panelLeft = new AntdUI.Panel();
+            this.stackBodyLeft = new AntdUI.StackPanel();
             this.labelValueUpdateTime = new AntdUI.Label();
             this.labelUpdateTime = new AntdUI.Label();
-            this.labelValueStatus = new AntdUI.Label();
-            this.labelStatus = new AntdUI.Label();
             this.labelValueDriverKey = new AntdUI.Label();
             this.labelDriverKey = new AntdUI.Label();
             this.labelValueName = new AntdUI.Label();
@@ -57,13 +56,16 @@
             this.flowHeaderLeft = new AntdUI.FlowPanel();
             this.labelTitle = new AntdUI.Label();
             this.buttonTypeTag = new AntdUI.Button();
+            this.labelValueStatus = new AntdUI.Label();
+            this.labelStatus = new AntdUI.Label();
             this.panelCard.SuspendLayout();
             this.panelBottom.SuspendLayout();
             this.flowBottomRight.SuspendLayout();
             this.flowBottomLeft.SuspendLayout();
             this.panelBody.SuspendLayout();
-            this.panelRight.SuspendLayout();
-            this.panelLeft.SuspendLayout();
+            this.gridBodyMain.SuspendLayout();
+            this.stackBodyRight.SuspendLayout();
+            this.stackBodyLeft.SuspendLayout();
             this.panelHeader.SuspendLayout();
             this.flowHeaderRight.SuspendLayout();
             this.flowHeaderLeft.SuspendLayout();
@@ -94,11 +96,13 @@
             this.panelBottom.Controls.Add(this.flowBottomLeft);
             this.panelBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.panelBottom.Location = new System.Drawing.Point(16, 300);
+            this.panelBottom.Margin = new System.Windows.Forms.Padding(0);
             this.panelBottom.Name = "panelBottom";
             this.panelBottom.Padding = new System.Windows.Forms.Padding(4);
+            this.panelBottom.Radius = 0;
             this.panelBottom.Size = new System.Drawing.Size(353, 44);
             this.panelBottom.TabIndex = 2;
-            this.panelBottom.Text = "panel1";
+            this.panelBottom.Text = "panelBottom";
             // 
             // flowBottomRight
             // 
@@ -106,9 +110,10 @@
             this.flowBottomRight.Controls.Add(this.buttonStatusTag);
             this.flowBottomRight.Dock = System.Windows.Forms.DockStyle.Right;
             this.flowBottomRight.Location = new System.Drawing.Point(249, 4);
+            this.flowBottomRight.Margin = new System.Windows.Forms.Padding(0);
             this.flowBottomRight.Name = "flowBottomRight";
             this.flowBottomRight.Size = new System.Drawing.Size(100, 36);
-            this.flowBottomRight.TabIndex = 0;
+            this.flowBottomRight.TabIndex = 1;
             this.flowBottomRight.Text = "flowBottomRight";
             // 
             // buttonStatusTag
@@ -131,6 +136,7 @@
             this.flowBottomLeft.Controls.Add(this.labelCore);
             this.flowBottomLeft.Dock = System.Windows.Forms.DockStyle.Left;
             this.flowBottomLeft.Location = new System.Drawing.Point(4, 4);
+            this.flowBottomLeft.Margin = new System.Windows.Forms.Padding(0);
             this.flowBottomLeft.Name = "flowBottomLeft";
             this.flowBottomLeft.Size = new System.Drawing.Size(200, 36);
             this.flowBottomLeft.TabIndex = 0;
@@ -138,7 +144,6 @@
             // 
             // labelValueAxisCount
             // 
-            this.labelValueAxisCount.Dock = System.Windows.Forms.DockStyle.Top;
             this.labelValueAxisCount.Location = new System.Drawing.Point(118, 0);
             this.labelValueAxisCount.Margin = new System.Windows.Forms.Padding(0);
             this.labelValueAxisCount.Name = "labelValueAxisCount";
@@ -175,292 +180,259 @@
             // 
             // panelBody
             // 
-            this.panelBody.Controls.Add(this.panelRight);
-            this.panelBody.Controls.Add(this.panelLeft);
+            this.panelBody.Controls.Add(this.gridBodyMain);
             this.panelBody.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelBody.Location = new System.Drawing.Point(16, 60);
             this.panelBody.Margin = new System.Windows.Forms.Padding(0);
             this.panelBody.Name = "panelBody";
-            this.panelBody.Padding = new System.Windows.Forms.Padding(0, 4, 0, 0);
             this.panelBody.Radius = 0;
             this.panelBody.Size = new System.Drawing.Size(353, 284);
             this.panelBody.TabIndex = 1;
             // 
-            // panelRight
+            // gridBodyMain
             // 
-            this.panelRight.Controls.Add(this.labelDescription);
-            this.panelRight.Controls.Add(this.labelDescriptionTitle);
-            this.panelRight.Controls.Add(this.labelValueRemark);
-            this.panelRight.Controls.Add(this.labelRemark);
-            this.panelRight.Controls.Add(this.labelValueExtModule);
-            this.panelRight.Controls.Add(this.labelExtModule);
-            this.panelRight.Controls.Add(this.labelValueOpenConfig);
-            this.panelRight.Controls.Add(this.labelOpenConfig);
-            this.panelRight.Controls.Add(this.labelValueModeParam);
-            this.panelRight.Controls.Add(this.labelModeParam);
-            this.panelRight.Dock = System.Windows.Forms.DockStyle.Right;
-            this.panelRight.Location = new System.Drawing.Point(168, 4);
-            this.panelRight.Margin = new System.Windows.Forms.Padding(0);
-            this.panelRight.Name = "panelRight";
-            this.panelRight.Padding = new System.Windows.Forms.Padding(8, 0, 0, 0);
-            this.panelRight.Radius = 0;
-            this.panelRight.Size = new System.Drawing.Size(185, 280);
-            this.panelRight.TabIndex = 1;
+            this.gridBodyMain.Controls.Add(this.stackBodyRight);
+            this.gridBodyMain.Controls.Add(this.stackBodyLeft);
+            this.gridBodyMain.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.gridBodyMain.Location = new System.Drawing.Point(0, 0);
+            this.gridBodyMain.Margin = new System.Windows.Forms.Padding(0);
+            this.gridBodyMain.Name = "gridBodyMain";
+            this.gridBodyMain.Padding = new System.Windows.Forms.Padding(4);
+            this.gridBodyMain.Size = new System.Drawing.Size(353, 284);
+            this.gridBodyMain.Span = "50% 50%";
+            this.gridBodyMain.TabIndex = 0;
+            this.gridBodyMain.Text = "gridBodyMain";
+            // 
+            // stackBodyRight
+            // 
+            this.stackBodyRight.AutoScroll = true;
+            this.stackBodyRight.Controls.Add(this.labelDescription);
+            this.stackBodyRight.Controls.Add(this.labelDescriptionTitle);
+            this.stackBodyRight.Controls.Add(this.labelValueRemark);
+            this.stackBodyRight.Controls.Add(this.labelRemark);
+            this.stackBodyRight.Controls.Add(this.labelValueExtModule);
+            this.stackBodyRight.Controls.Add(this.labelExtModule);
+            this.stackBodyRight.Controls.Add(this.labelValueOpenConfig);
+            this.stackBodyRight.Controls.Add(this.labelOpenConfig);
+            this.stackBodyRight.Controls.Add(this.labelValueModeParam);
+            this.stackBodyRight.Controls.Add(this.labelModeParam);
+            this.stackBodyRight.Location = new System.Drawing.Point(176, 4);
+            this.stackBodyRight.Margin = new System.Windows.Forms.Padding(0);
+            this.stackBodyRight.Name = "stackBodyRight";
+            this.stackBodyRight.Size = new System.Drawing.Size(172, 276);
+            this.stackBodyRight.TabIndex = 1;
+            this.stackBodyRight.Text = "stackBodyRight";
+            this.stackBodyRight.Vertical = true;
             // 
             // labelDescription
             // 
-            this.labelDescription.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelDescription.Location = new System.Drawing.Point(8, 206);
+            this.labelDescription.Location = new System.Drawing.Point(0, 198);
             this.labelDescription.Margin = new System.Windows.Forms.Padding(0);
             this.labelDescription.Name = "labelDescription";
-            this.labelDescription.Size = new System.Drawing.Size(177, 50);
-            this.labelDescription.TabIndex = 13;
+            this.labelDescription.Size = new System.Drawing.Size(172, 50);
+            this.labelDescription.TabIndex = 9;
             this.labelDescription.Text = "-";
             this.labelDescription.TextAlign = System.Drawing.ContentAlignment.TopLeft;
             // 
             // labelDescriptionTitle
             // 
-            this.labelDescriptionTitle.Dock = System.Windows.Forms.DockStyle.Top;
             this.labelDescriptionTitle.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Bold);
-            this.labelDescriptionTitle.Location = new System.Drawing.Point(8, 184);
+            this.labelDescriptionTitle.Location = new System.Drawing.Point(0, 176);
             this.labelDescriptionTitle.Margin = new System.Windows.Forms.Padding(0);
             this.labelDescriptionTitle.Name = "labelDescriptionTitle";
-            this.labelDescriptionTitle.Size = new System.Drawing.Size(177, 22);
-            this.labelDescriptionTitle.TabIndex = 12;
+            this.labelDescriptionTitle.Size = new System.Drawing.Size(172, 22);
+            this.labelDescriptionTitle.TabIndex = 8;
             this.labelDescriptionTitle.Text = "描述";
             // 
             // labelValueRemark
             // 
-            this.labelValueRemark.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelValueRemark.Location = new System.Drawing.Point(8, 160);
+            this.labelValueRemark.Location = new System.Drawing.Point(0, 154);
             this.labelValueRemark.Margin = new System.Windows.Forms.Padding(0);
             this.labelValueRemark.Name = "labelValueRemark";
-            this.labelValueRemark.Size = new System.Drawing.Size(177, 24);
-            this.labelValueRemark.TabIndex = 11;
+            this.labelValueRemark.Size = new System.Drawing.Size(172, 22);
+            this.labelValueRemark.TabIndex = 7;
             this.labelValueRemark.Text = "-";
             // 
             // labelRemark
             // 
-            this.labelRemark.Dock = System.Windows.Forms.DockStyle.Top;
             this.labelRemark.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Bold);
-            this.labelRemark.Location = new System.Drawing.Point(8, 138);
+            this.labelRemark.Location = new System.Drawing.Point(0, 132);
             this.labelRemark.Margin = new System.Windows.Forms.Padding(0);
             this.labelRemark.Name = "labelRemark";
-            this.labelRemark.Size = new System.Drawing.Size(177, 22);
-            this.labelRemark.TabIndex = 10;
+            this.labelRemark.Size = new System.Drawing.Size(172, 22);
+            this.labelRemark.TabIndex = 6;
             this.labelRemark.Text = "备注";
             // 
             // labelValueExtModule
             // 
-            this.labelValueExtModule.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelValueExtModule.Location = new System.Drawing.Point(8, 114);
+            this.labelValueExtModule.Location = new System.Drawing.Point(0, 110);
             this.labelValueExtModule.Margin = new System.Windows.Forms.Padding(0);
             this.labelValueExtModule.Name = "labelValueExtModule";
-            this.labelValueExtModule.Size = new System.Drawing.Size(177, 24);
-            this.labelValueExtModule.TabIndex = 9;
+            this.labelValueExtModule.Size = new System.Drawing.Size(172, 22);
+            this.labelValueExtModule.TabIndex = 5;
             this.labelValueExtModule.Text = "-";
             // 
             // labelExtModule
             // 
-            this.labelExtModule.Dock = System.Windows.Forms.DockStyle.Top;
             this.labelExtModule.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Bold);
-            this.labelExtModule.Location = new System.Drawing.Point(8, 92);
+            this.labelExtModule.Location = new System.Drawing.Point(0, 88);
             this.labelExtModule.Margin = new System.Windows.Forms.Padding(0);
             this.labelExtModule.Name = "labelExtModule";
-            this.labelExtModule.Size = new System.Drawing.Size(177, 22);
-            this.labelExtModule.TabIndex = 8;
+            this.labelExtModule.Size = new System.Drawing.Size(172, 22);
+            this.labelExtModule.TabIndex = 4;
             this.labelExtModule.Text = "扩展模块";
             // 
             // labelValueOpenConfig
             // 
-            this.labelValueOpenConfig.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelValueOpenConfig.Location = new System.Drawing.Point(8, 68);
+            this.labelValueOpenConfig.Location = new System.Drawing.Point(0, 66);
             this.labelValueOpenConfig.Margin = new System.Windows.Forms.Padding(0);
             this.labelValueOpenConfig.Name = "labelValueOpenConfig";
-            this.labelValueOpenConfig.Size = new System.Drawing.Size(177, 24);
-            this.labelValueOpenConfig.TabIndex = 7;
+            this.labelValueOpenConfig.Size = new System.Drawing.Size(172, 22);
+            this.labelValueOpenConfig.TabIndex = 3;
             this.labelValueOpenConfig.Text = "-";
             // 
             // labelOpenConfig
             // 
-            this.labelOpenConfig.Dock = System.Windows.Forms.DockStyle.Top;
             this.labelOpenConfig.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Bold);
-            this.labelOpenConfig.Location = new System.Drawing.Point(8, 46);
+            this.labelOpenConfig.Location = new System.Drawing.Point(0, 44);
             this.labelOpenConfig.Margin = new System.Windows.Forms.Padding(0);
             this.labelOpenConfig.Name = "labelOpenConfig";
-            this.labelOpenConfig.Size = new System.Drawing.Size(177, 22);
-            this.labelOpenConfig.TabIndex = 6;
+            this.labelOpenConfig.Size = new System.Drawing.Size(172, 22);
+            this.labelOpenConfig.TabIndex = 2;
             this.labelOpenConfig.Text = "初始化参数";
             // 
             // labelValueModeParam
             // 
-            this.labelValueModeParam.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelValueModeParam.Location = new System.Drawing.Point(8, 22);
+            this.labelValueModeParam.Location = new System.Drawing.Point(0, 22);
             this.labelValueModeParam.Margin = new System.Windows.Forms.Padding(0);
             this.labelValueModeParam.Name = "labelValueModeParam";
-            this.labelValueModeParam.Size = new System.Drawing.Size(177, 24);
-            this.labelValueModeParam.TabIndex = 5;
+            this.labelValueModeParam.Size = new System.Drawing.Size(172, 22);
+            this.labelValueModeParam.TabIndex = 1;
             this.labelValueModeParam.Text = "-";
             // 
             // labelModeParam
             // 
-            this.labelModeParam.Dock = System.Windows.Forms.DockStyle.Top;
             this.labelModeParam.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Bold);
-            this.labelModeParam.Location = new System.Drawing.Point(8, 0);
+            this.labelModeParam.Location = new System.Drawing.Point(0, 0);
             this.labelModeParam.Margin = new System.Windows.Forms.Padding(0);
             this.labelModeParam.Name = "labelModeParam";
-            this.labelModeParam.Size = new System.Drawing.Size(177, 22);
-            this.labelModeParam.TabIndex = 4;
+            this.labelModeParam.Size = new System.Drawing.Size(172, 22);
+            this.labelModeParam.TabIndex = 0;
             this.labelModeParam.Text = "模式参数";
             // 
-            // panelLeft
+            // stackBodyLeft
             // 
-            this.panelLeft.Controls.Add(this.labelValueUpdateTime);
-            this.panelLeft.Controls.Add(this.labelUpdateTime);
-            this.panelLeft.Controls.Add(this.labelValueStatus);
-            this.panelLeft.Controls.Add(this.labelStatus);
-            this.panelLeft.Controls.Add(this.labelValueDriverKey);
-            this.panelLeft.Controls.Add(this.labelDriverKey);
-            this.panelLeft.Controls.Add(this.labelValueName);
-            this.panelLeft.Controls.Add(this.labelName);
-            this.panelLeft.Controls.Add(this.labelValueDisplayName);
-            this.panelLeft.Controls.Add(this.labelDisplayName);
-            this.panelLeft.Controls.Add(this.labelValueCardId);
-            this.panelLeft.Controls.Add(this.labelCardId);
-            this.panelLeft.Dock = System.Windows.Forms.DockStyle.Left;
-            this.panelLeft.Location = new System.Drawing.Point(0, 4);
-            this.panelLeft.Margin = new System.Windows.Forms.Padding(0);
-            this.panelLeft.Name = "panelLeft";
-            this.panelLeft.Padding = new System.Windows.Forms.Padding(0, 0, 8, 0);
-            this.panelLeft.Radius = 0;
-            this.panelLeft.Size = new System.Drawing.Size(185, 280);
-            this.panelLeft.TabIndex = 0;
+            this.stackBodyLeft.AutoScroll = true;
+            this.stackBodyLeft.Controls.Add(this.labelValueUpdateTime);
+            this.stackBodyLeft.Controls.Add(this.labelUpdateTime);
+            this.stackBodyLeft.Controls.Add(this.labelValueDriverKey);
+            this.stackBodyLeft.Controls.Add(this.labelDriverKey);
+            this.stackBodyLeft.Controls.Add(this.labelValueName);
+            this.stackBodyLeft.Controls.Add(this.labelName);
+            this.stackBodyLeft.Controls.Add(this.labelValueDisplayName);
+            this.stackBodyLeft.Controls.Add(this.labelDisplayName);
+            this.stackBodyLeft.Controls.Add(this.labelValueCardId);
+            this.stackBodyLeft.Controls.Add(this.labelCardId);
+            this.stackBodyLeft.Location = new System.Drawing.Point(4, 4);
+            this.stackBodyLeft.Margin = new System.Windows.Forms.Padding(0);
+            this.stackBodyLeft.Name = "stackBodyLeft";
+            this.stackBodyLeft.Size = new System.Drawing.Size(172, 276);
+            this.stackBodyLeft.TabIndex = 0;
+            this.stackBodyLeft.Text = "stackBodyLeft";
+            this.stackBodyLeft.Vertical = true;
             // 
             // labelValueUpdateTime
             // 
-            this.labelValueUpdateTime.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelValueUpdateTime.Location = new System.Drawing.Point(0, 208);
+            this.labelValueUpdateTime.Location = new System.Drawing.Point(0, 198);
             this.labelValueUpdateTime.Margin = new System.Windows.Forms.Padding(0);
             this.labelValueUpdateTime.Name = "labelValueUpdateTime";
-            this.labelValueUpdateTime.Size = new System.Drawing.Size(177, 24);
-            this.labelValueUpdateTime.TabIndex = 11;
+            this.labelValueUpdateTime.Size = new System.Drawing.Size(172, 22);
+            this.labelValueUpdateTime.TabIndex = 9;
             this.labelValueUpdateTime.Text = "-";
             // 
             // labelUpdateTime
             // 
-            this.labelUpdateTime.Dock = System.Windows.Forms.DockStyle.Top;
             this.labelUpdateTime.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Bold);
-            this.labelUpdateTime.Location = new System.Drawing.Point(0, 186);
+            this.labelUpdateTime.Location = new System.Drawing.Point(0, 176);
             this.labelUpdateTime.Margin = new System.Windows.Forms.Padding(0);
             this.labelUpdateTime.Name = "labelUpdateTime";
-            this.labelUpdateTime.Size = new System.Drawing.Size(177, 22);
-            this.labelUpdateTime.TabIndex = 10;
+            this.labelUpdateTime.Size = new System.Drawing.Size(172, 22);
+            this.labelUpdateTime.TabIndex = 8;
             this.labelUpdateTime.Text = "更新时间";
-            // 
-            // labelValueStatus
-            // 
-            this.labelValueStatus.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelValueStatus.Location = new System.Drawing.Point(0, 162);
-            this.labelValueStatus.Margin = new System.Windows.Forms.Padding(0);
-            this.labelValueStatus.Name = "labelValueStatus";
-            this.labelValueStatus.Size = new System.Drawing.Size(177, 24);
-            this.labelValueStatus.TabIndex = 9;
-            this.labelValueStatus.Text = "-";
-            this.labelValueStatus.Visible = false;
-            // 
-            // labelStatus
-            // 
-            this.labelStatus.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelStatus.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Bold);
-            this.labelStatus.Location = new System.Drawing.Point(0, 140);
-            this.labelStatus.Margin = new System.Windows.Forms.Padding(0);
-            this.labelStatus.Name = "labelStatus";
-            this.labelStatus.Size = new System.Drawing.Size(177, 22);
-            this.labelStatus.TabIndex = 8;
-            this.labelStatus.Text = "状态";
-            this.labelStatus.Visible = false;
             // 
             // labelValueDriverKey
             // 
-            this.labelValueDriverKey.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelValueDriverKey.Location = new System.Drawing.Point(0, 116);
+            this.labelValueDriverKey.Location = new System.Drawing.Point(0, 154);
             this.labelValueDriverKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelValueDriverKey.Name = "labelValueDriverKey";
-            this.labelValueDriverKey.Size = new System.Drawing.Size(177, 24);
+            this.labelValueDriverKey.Size = new System.Drawing.Size(172, 22);
             this.labelValueDriverKey.TabIndex = 7;
             this.labelValueDriverKey.Text = "-";
             // 
             // labelDriverKey
             // 
-            this.labelDriverKey.Dock = System.Windows.Forms.DockStyle.Top;
             this.labelDriverKey.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Bold);
-            this.labelDriverKey.Location = new System.Drawing.Point(0, 94);
+            this.labelDriverKey.Location = new System.Drawing.Point(0, 132);
             this.labelDriverKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelDriverKey.Name = "labelDriverKey";
-            this.labelDriverKey.Size = new System.Drawing.Size(177, 22);
+            this.labelDriverKey.Size = new System.Drawing.Size(172, 22);
             this.labelDriverKey.TabIndex = 6;
-            this.labelDriverKey.Text = "内部名称";
+            this.labelDriverKey.Text = "驱动识别键";
             // 
             // labelValueName
             // 
-            this.labelValueName.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelValueName.Location = new System.Drawing.Point(0, 70);
+            this.labelValueName.Location = new System.Drawing.Point(0, 110);
             this.labelValueName.Margin = new System.Windows.Forms.Padding(0);
             this.labelValueName.Name = "labelValueName";
-            this.labelValueName.Size = new System.Drawing.Size(177, 24);
+            this.labelValueName.Size = new System.Drawing.Size(172, 22);
             this.labelValueName.TabIndex = 5;
             this.labelValueName.Text = "-";
             // 
             // labelName
             // 
-            this.labelName.Dock = System.Windows.Forms.DockStyle.Top;
             this.labelName.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Bold);
-            this.labelName.Location = new System.Drawing.Point(0, 48);
+            this.labelName.Location = new System.Drawing.Point(0, 88);
             this.labelName.Margin = new System.Windows.Forms.Padding(0);
             this.labelName.Name = "labelName";
-            this.labelName.Size = new System.Drawing.Size(177, 22);
+            this.labelName.Size = new System.Drawing.Size(172, 22);
             this.labelName.TabIndex = 4;
             this.labelName.Text = "名称";
             // 
             // labelValueDisplayName
             // 
-            this.labelValueDisplayName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelValueDisplayName.Location = new System.Drawing.Point(66, 162);
+            this.labelValueDisplayName.Location = new System.Drawing.Point(0, 66);
             this.labelValueDisplayName.Margin = new System.Windows.Forms.Padding(0);
             this.labelValueDisplayName.Name = "labelValueDisplayName";
-            this.labelValueDisplayName.Size = new System.Drawing.Size(96, 24);
+            this.labelValueDisplayName.Size = new System.Drawing.Size(172, 22);
             this.labelValueDisplayName.TabIndex = 3;
             this.labelValueDisplayName.Text = "-";
-            this.labelValueDisplayName.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.labelValueDisplayName.Visible = false;
             // 
             // labelDisplayName
             // 
-            this.labelDisplayName.Location = new System.Drawing.Point(66, 136);
+            this.labelDisplayName.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Bold);
+            this.labelDisplayName.Location = new System.Drawing.Point(0, 44);
             this.labelDisplayName.Margin = new System.Windows.Forms.Padding(0);
             this.labelDisplayName.Name = "labelDisplayName";
-            this.labelDisplayName.Size = new System.Drawing.Size(100, 24);
+            this.labelDisplayName.Size = new System.Drawing.Size(172, 22);
             this.labelDisplayName.TabIndex = 2;
             this.labelDisplayName.Text = "显示名称";
-            this.labelDisplayName.Visible = false;
             // 
             // labelValueCardId
             // 
-            this.labelValueCardId.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelValueCardId.Location = new System.Drawing.Point(0, 24);
+            this.labelValueCardId.Location = new System.Drawing.Point(0, 22);
             this.labelValueCardId.Margin = new System.Windows.Forms.Padding(0);
             this.labelValueCardId.Name = "labelValueCardId";
-            this.labelValueCardId.Size = new System.Drawing.Size(177, 24);
+            this.labelValueCardId.Size = new System.Drawing.Size(172, 22);
             this.labelValueCardId.TabIndex = 1;
             this.labelValueCardId.Text = "-";
             // 
             // labelCardId
             // 
-            this.labelCardId.Dock = System.Windows.Forms.DockStyle.Top;
+            this.labelCardId.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Bold);
             this.labelCardId.Location = new System.Drawing.Point(0, 0);
             this.labelCardId.Margin = new System.Windows.Forms.Padding(0);
             this.labelCardId.Name = "labelCardId";
-            this.labelCardId.Size = new System.Drawing.Size(177, 24);
+            this.labelCardId.Size = new System.Drawing.Size(172, 22);
             this.labelCardId.TabIndex = 0;
             this.labelCardId.Text = "卡号";
             // 
@@ -540,7 +512,7 @@
             // 
             // buttonTypeTag
             // 
-            this.buttonTypeTag.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.buttonTypeTag.Font = new System.Drawing.Font("宋体", 9F);
             this.buttonTypeTag.Location = new System.Drawing.Point(0, 6);
             this.buttonTypeTag.Margin = new System.Windows.Forms.Padding(0, 6, 0, 0);
             this.buttonTypeTag.Name = "buttonTypeTag";
@@ -550,6 +522,27 @@
             this.buttonTypeTag.Text = "VIRTUAL";
             this.buttonTypeTag.Type = AntdUI.TTypeMini.Primary;
             this.buttonTypeTag.WaveSize = 0;
+            // 
+            // labelValueStatus
+            // 
+            this.labelValueStatus.Location = new System.Drawing.Point(0, 0);
+            this.labelValueStatus.Margin = new System.Windows.Forms.Padding(0);
+            this.labelValueStatus.Name = "labelValueStatus";
+            this.labelValueStatus.Size = new System.Drawing.Size(176, 24);
+            this.labelValueStatus.TabIndex = 11;
+            this.labelValueStatus.Text = "-";
+            this.labelValueStatus.Visible = false;
+            // 
+            // labelStatus
+            // 
+            this.labelStatus.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Bold);
+            this.labelStatus.Location = new System.Drawing.Point(0, 0);
+            this.labelStatus.Margin = new System.Windows.Forms.Padding(0);
+            this.labelStatus.Name = "labelStatus";
+            this.labelStatus.Size = new System.Drawing.Size(176, 22);
+            this.labelStatus.TabIndex = 10;
+            this.labelStatus.Text = "状态";
+            this.labelStatus.Visible = false;
             // 
             // MotionCardControl
             // 
@@ -563,8 +556,9 @@
             this.flowBottomRight.ResumeLayout(false);
             this.flowBottomLeft.ResumeLayout(false);
             this.panelBody.ResumeLayout(false);
-            this.panelRight.ResumeLayout(false);
-            this.panelLeft.ResumeLayout(false);
+            this.gridBodyMain.ResumeLayout(false);
+            this.stackBodyRight.ResumeLayout(false);
+            this.stackBodyLeft.ResumeLayout(false);
             this.panelHeader.ResumeLayout(false);
             this.flowHeaderRight.ResumeLayout(false);
             this.flowHeaderLeft.ResumeLayout(false);
@@ -582,7 +576,9 @@
         private AntdUI.Button buttonTypeTag;
         private AntdUI.Label labelTitle;
         private AntdUI.Panel panelBody;
-        private AntdUI.Panel panelLeft;
+        private AntdUI.GridPanel gridBodyMain;
+        private AntdUI.StackPanel stackBodyLeft;
+        private AntdUI.StackPanel stackBodyRight;
         private AntdUI.Label labelCardId;
         private AntdUI.Label labelValueCardId;
         private AntdUI.Label labelDisplayName;
@@ -595,7 +591,6 @@
         private AntdUI.Label labelValueStatus;
         private AntdUI.Label labelUpdateTime;
         private AntdUI.Label labelValueUpdateTime;
-        private AntdUI.Panel panelRight;
         private AntdUI.Label labelCore;
         private AntdUI.Label labelValueCore;
         private AntdUI.Label labelAxisCount;
