@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<OutputType>Library</OutputType>
-		<TargetFrameworks>net10.0-windows;net48;net46;net40</TargetFrameworks>
+		<TargetFrameworks>net40</TargetFrameworks>
 		<Nullable>enable</Nullable>
 		<UseWindowsForms>true</UseWindowsForms>
 		<NoWarn>$(NoWarn);CS0108;CS0618;CS8600;CS8601;CS8602;CS8603;CS8604;CS8618;CS8625;CS8629;CS8619;CS8622;CS8765;CS8073;CA2022</NoWarn>
