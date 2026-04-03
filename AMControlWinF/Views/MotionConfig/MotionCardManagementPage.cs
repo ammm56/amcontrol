@@ -3,6 +3,7 @@ using AM.Model.Entity.Motion.Topology;
 using AM.PageModel.MotionConfig;
 using AMControlWinF.Tools;
 using System;
+using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -92,6 +93,7 @@ namespace AMControlWinF.Views.MotionConfig
                     card.Margin = new Padding(0);
                     card.EditRequested += async (s, e) => await EditCardAsync(card.CardItem);
                     card.DeleteRequested += async (s, e) => await DeleteCardAsync(card.CardItem);
+                    card.DetailRequested += (s, e) => ShowDetail(card.CardItem);
                     flowCards.Controls.Add(card);
                 }
             }
@@ -163,6 +165,19 @@ namespace AMControlWinF.Views.MotionConfig
                 return;
 
             await ReloadAsync();
+        }
+
+        private void ShowDetail(MotionCardManagementPageModel.MotionCardViewItem item)
+        {
+            if (item == null)
+                return;
+
+            using (var detail = new MotionCardDetailControl())
+            {
+                detail.Bind(item);
+
+                PageDialogHelper.ShowPanel(this, "控制卡详情", detail, 900);
+            }
         }
 
         private static MotionCardEntity CreateDefaultCardEntity()

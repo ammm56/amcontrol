@@ -139,6 +139,12 @@
     <Compile Include="Views\MotionConfig\MotionCardDeleteConfirmDialog.Designer.cs">
       <DependentUpon>MotionCardDeleteConfirmDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\MotionConfig\MotionCardDetailControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionCardDetailControl.Designer.cs">
+      <DependentUpon>MotionCardDetailControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="Views\MotionConfig\MotionCardEditDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -198,6 +204,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Views\MotionConfig\MotionCardDeleteConfirmDialog.resx">
       <DependentUpon>MotionCardDeleteConfirmDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\MotionCardDetailControl.resx">
+      <DependentUpon>MotionCardDetailControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\MotionConfig\MotionCardEditDialog.resx">
       <DependentUpon>MotionCardEditDialog.cs</DependentUpon>

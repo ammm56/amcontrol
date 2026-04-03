@@ -35,6 +35,54 @@ namespace AMControlWinF.Tools
         }
 
         /// <summary>
+        /// 弹出自定义详情面板。
+        /// </summary>
+        public static DialogResult ShowPanel(
+            Control owner,
+            string title,
+            Control content,
+            int width = 900)
+        {
+            title = string.IsNullOrWhiteSpace(title) ? "详情" : title;
+            if (content == null)
+                return DialogResult.None;
+
+            content.Margin = new Padding(0);
+
+            var window = ResolveOwnerWindow(owner);
+            if (window == null)
+            {
+                return AntdUI.Modal.open(new AntdUI.Modal.Config(title, content)
+                {
+                    Width = width,
+                    BtnHeight = 0,
+                    CloseIcon = true,
+                    Keyboard = true,
+                    MaskClosable = true,
+                    Draggable = true,
+                    Padding = new Size(20, 16),
+                    ContentPadding = new Size(0, 0),
+                    UseIconPadding = false,
+                    DefaultFocus = false
+                });
+            }
+
+            return AntdUI.Modal.open(new AntdUI.Modal.Config(window, title, (object)content)
+            {
+                Width = width,
+                BtnHeight = 0,
+                CloseIcon = true,
+                Keyboard = true,
+                MaskClosable = true,
+                Draggable = true,
+                Padding = new Size(20, 16),
+                ContentPadding = new Size(0, 0),
+                UseIconPadding = false,
+                DefaultFocus = false
+            });
+        }
+
+        /// <summary>
         /// 页面确认框，返回是否点击确定。
         /// </summary>
         public static bool Confirm(
