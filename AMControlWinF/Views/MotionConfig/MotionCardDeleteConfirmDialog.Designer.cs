@@ -32,8 +32,8 @@
             this.labelCardIdTitle = new AntdUI.Label();
             this.panelFooter = new AntdUI.Panel();
             this.flowFooterButtons = new AntdUI.FlowPanel();
-            this.buttonCancel = new AntdUI.Button();
             this.buttonOk = new AntdUI.Button();
+            this.buttonCancel = new AntdUI.Button();
             this.panelHeader = new AntdUI.Panel();
             this.flowHeaderRight = new AntdUI.FlowPanel();
             this.labelDialogDescription = new AntdUI.Label();
@@ -66,32 +66,32 @@
             // 
             // panelShell
             // 
-            this.panelShell.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.panelShell.BackColor = System.Drawing.Color.Transparent;
             this.panelShell.Controls.Add(this.panelContent);
             this.panelShell.Controls.Add(this.panelFooter);
             this.panelShell.Controls.Add(this.panelHeader);
-            this.panelShell.Location = new System.Drawing.Point(24, 24);
+            this.panelShell.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelShell.Location = new System.Drawing.Point(0, 0);
             this.panelShell.Margin = new System.Windows.Forms.Padding(0);
             this.panelShell.Name = "panelShell";
             this.panelShell.Padding = new System.Windows.Forms.Padding(12);
             this.panelShell.Radius = 16;
-            this.panelShell.Shadow = 8;
-            this.panelShell.Size = new System.Drawing.Size(512, 372);
+            this.panelShell.Shadow = 16;
+            this.panelShell.ShadowOpacity = 0.2F;
+            this.panelShell.ShadowOpacityAnimation = true;
+            this.panelShell.Size = new System.Drawing.Size(560, 420);
             this.panelShell.TabIndex = 0;
             // 
             // panelContent
             // 
             this.panelContent.Controls.Add(this.stackRows);
             this.panelContent.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelContent.Location = new System.Drawing.Point(20, 76);
+            this.panelContent.Location = new System.Drawing.Point(28, 84);
             this.panelContent.Margin = new System.Windows.Forms.Padding(0);
             this.panelContent.Name = "panelContent";
             this.panelContent.Padding = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.panelContent.Radius = 0;
-            this.panelContent.Size = new System.Drawing.Size(472, 219);
+            this.panelContent.Size = new System.Drawing.Size(504, 251);
             this.panelContent.TabIndex = 1;
             // 
             // stackRows
@@ -105,7 +105,7 @@
             this.stackRows.Location = new System.Drawing.Point(4, 0);
             this.stackRows.Margin = new System.Windows.Forms.Padding(0);
             this.stackRows.Name = "stackRows";
-            this.stackRows.Size = new System.Drawing.Size(464, 219);
+            this.stackRows.Size = new System.Drawing.Size(496, 251);
             this.stackRows.TabIndex = 0;
             this.stackRows.Text = "stackRows";
             this.stackRows.Vertical = true;
@@ -118,7 +118,7 @@
             this.panelRowHint.Margin = new System.Windows.Forms.Padding(0);
             this.panelRowHint.Name = "panelRowHint";
             this.panelRowHint.Radius = 0;
-            this.panelRowHint.Size = new System.Drawing.Size(464, 48);
+            this.panelRowHint.Size = new System.Drawing.Size(496, 48);
             this.panelRowHint.TabIndex = 3;
             // 
             // labelHintValue
@@ -127,7 +127,7 @@
             this.labelHintValue.Location = new System.Drawing.Point(0, 22);
             this.labelHintValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelHintValue.Name = "labelHintValue";
-            this.labelHintValue.Size = new System.Drawing.Size(464, 26);
+            this.labelHintValue.Size = new System.Drawing.Size(496, 26);
             this.labelHintValue.TabIndex = 1;
             this.labelHintValue.Text = "-";
             // 
@@ -137,7 +137,7 @@
             this.labelHintTitle.Location = new System.Drawing.Point(0, 0);
             this.labelHintTitle.Margin = new System.Windows.Forms.Padding(0);
             this.labelHintTitle.Name = "labelHintTitle";
-            this.labelHintTitle.Size = new System.Drawing.Size(464, 22);
+            this.labelHintTitle.Size = new System.Drawing.Size(496, 22);
             this.labelHintTitle.TabIndex = 0;
             this.labelHintTitle.Text = "操作提示";
             // 
@@ -149,7 +149,7 @@
             this.panelRowInternalName.Margin = new System.Windows.Forms.Padding(0);
             this.panelRowInternalName.Name = "panelRowInternalName";
             this.panelRowInternalName.Radius = 0;
-            this.panelRowInternalName.Size = new System.Drawing.Size(464, 52);
+            this.panelRowInternalName.Size = new System.Drawing.Size(496, 52);
             this.panelRowInternalName.TabIndex = 2;
             // 
             // labelInternalNameValue
@@ -158,7 +158,7 @@
             this.labelInternalNameValue.Location = new System.Drawing.Point(0, 22);
             this.labelInternalNameValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelInternalNameValue.Name = "labelInternalNameValue";
-            this.labelInternalNameValue.Size = new System.Drawing.Size(464, 30);
+            this.labelInternalNameValue.Size = new System.Drawing.Size(496, 30);
             this.labelInternalNameValue.TabIndex = 1;
             this.labelInternalNameValue.Text = "-";
             // 
@@ -168,7 +168,7 @@
             this.labelInternalNameTitle.Location = new System.Drawing.Point(0, 0);
             this.labelInternalNameTitle.Margin = new System.Windows.Forms.Padding(0);
             this.labelInternalNameTitle.Name = "labelInternalNameTitle";
-            this.labelInternalNameTitle.Size = new System.Drawing.Size(464, 22);
+            this.labelInternalNameTitle.Size = new System.Drawing.Size(496, 22);
             this.labelInternalNameTitle.TabIndex = 0;
             this.labelInternalNameTitle.Text = "内部名称";
             // 
@@ -180,7 +180,7 @@
             this.panelRowDisplayName.Margin = new System.Windows.Forms.Padding(0);
             this.panelRowDisplayName.Name = "panelRowDisplayName";
             this.panelRowDisplayName.Radius = 0;
-            this.panelRowDisplayName.Size = new System.Drawing.Size(464, 52);
+            this.panelRowDisplayName.Size = new System.Drawing.Size(496, 52);
             this.panelRowDisplayName.TabIndex = 1;
             // 
             // labelDisplayNameValue
@@ -189,7 +189,7 @@
             this.labelDisplayNameValue.Location = new System.Drawing.Point(0, 22);
             this.labelDisplayNameValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelDisplayNameValue.Name = "labelDisplayNameValue";
-            this.labelDisplayNameValue.Size = new System.Drawing.Size(464, 30);
+            this.labelDisplayNameValue.Size = new System.Drawing.Size(496, 30);
             this.labelDisplayNameValue.TabIndex = 1;
             this.labelDisplayNameValue.Text = "-";
             // 
@@ -199,7 +199,7 @@
             this.labelDisplayNameTitle.Location = new System.Drawing.Point(0, 0);
             this.labelDisplayNameTitle.Margin = new System.Windows.Forms.Padding(0);
             this.labelDisplayNameTitle.Name = "labelDisplayNameTitle";
-            this.labelDisplayNameTitle.Size = new System.Drawing.Size(464, 22);
+            this.labelDisplayNameTitle.Size = new System.Drawing.Size(496, 22);
             this.labelDisplayNameTitle.TabIndex = 0;
             this.labelDisplayNameTitle.Text = "显示名称";
             // 
@@ -211,7 +211,7 @@
             this.panelRowCardId.Margin = new System.Windows.Forms.Padding(0);
             this.panelRowCardId.Name = "panelRowCardId";
             this.panelRowCardId.Radius = 0;
-            this.panelRowCardId.Size = new System.Drawing.Size(464, 52);
+            this.panelRowCardId.Size = new System.Drawing.Size(496, 52);
             this.panelRowCardId.TabIndex = 0;
             // 
             // labelCardIdValue
@@ -220,7 +220,7 @@
             this.labelCardIdValue.Location = new System.Drawing.Point(0, 22);
             this.labelCardIdValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelCardIdValue.Name = "labelCardIdValue";
-            this.labelCardIdValue.Size = new System.Drawing.Size(464, 30);
+            this.labelCardIdValue.Size = new System.Drawing.Size(496, 30);
             this.labelCardIdValue.TabIndex = 1;
             this.labelCardIdValue.Text = "-";
             // 
@@ -230,7 +230,7 @@
             this.labelCardIdTitle.Location = new System.Drawing.Point(0, 0);
             this.labelCardIdTitle.Margin = new System.Windows.Forms.Padding(0);
             this.labelCardIdTitle.Name = "labelCardIdTitle";
-            this.labelCardIdTitle.Size = new System.Drawing.Size(464, 22);
+            this.labelCardIdTitle.Size = new System.Drawing.Size(496, 22);
             this.labelCardIdTitle.TabIndex = 0;
             this.labelCardIdTitle.Text = "卡号";
             // 
@@ -238,12 +238,12 @@
             // 
             this.panelFooter.Controls.Add(this.flowFooterButtons);
             this.panelFooter.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panelFooter.Location = new System.Drawing.Point(20, 295);
+            this.panelFooter.Location = new System.Drawing.Point(28, 335);
             this.panelFooter.Margin = new System.Windows.Forms.Padding(0);
             this.panelFooter.Name = "panelFooter";
             this.panelFooter.Padding = new System.Windows.Forms.Padding(4, 10, 4, 0);
             this.panelFooter.Radius = 0;
-            this.panelFooter.Size = new System.Drawing.Size(472, 57);
+            this.panelFooter.Size = new System.Drawing.Size(504, 57);
             this.panelFooter.TabIndex = 2;
             // 
             // flowFooterButtons
@@ -252,27 +252,16 @@
             this.flowFooterButtons.Controls.Add(this.buttonCancel);
             this.flowFooterButtons.Dock = System.Windows.Forms.DockStyle.Right;
             this.flowFooterButtons.Gap = 10;
-            this.flowFooterButtons.Location = new System.Drawing.Point(224, 10);
+            this.flowFooterButtons.Location = new System.Drawing.Point(256, 10);
             this.flowFooterButtons.Margin = new System.Windows.Forms.Padding(0);
             this.flowFooterButtons.Name = "flowFooterButtons";
             this.flowFooterButtons.Size = new System.Drawing.Size(244, 47);
             this.flowFooterButtons.TabIndex = 0;
             this.flowFooterButtons.Text = "flowFooterButtons";
             // 
-            // buttonCancel
-            // 
-            this.buttonCancel.Location = new System.Drawing.Point(126, 0);
-            this.buttonCancel.Margin = new System.Windows.Forms.Padding(0);
-            this.buttonCancel.Name = "buttonCancel";
-            this.buttonCancel.Radius = 8;
-            this.buttonCancel.Size = new System.Drawing.Size(116, 38);
-            this.buttonCancel.TabIndex = 0;
-            this.buttonCancel.Text = "取消";
-            this.buttonCancel.WaveSize = 0;
-            // 
             // buttonOk
             // 
-            this.buttonOk.Location = new System.Drawing.Point(0, 0);
+            this.buttonOk.Location = new System.Drawing.Point(126, 0);
             this.buttonOk.Margin = new System.Windows.Forms.Padding(0);
             this.buttonOk.Name = "buttonOk";
             this.buttonOk.Radius = 8;
@@ -282,24 +271,35 @@
             this.buttonOk.Type = AntdUI.TTypeMini.Error;
             this.buttonOk.WaveSize = 0;
             // 
+            // buttonCancel
+            // 
+            this.buttonCancel.Location = new System.Drawing.Point(0, 0);
+            this.buttonCancel.Margin = new System.Windows.Forms.Padding(0);
+            this.buttonCancel.Name = "buttonCancel";
+            this.buttonCancel.Radius = 8;
+            this.buttonCancel.Size = new System.Drawing.Size(116, 38);
+            this.buttonCancel.TabIndex = 0;
+            this.buttonCancel.Text = "取消";
+            this.buttonCancel.WaveSize = 0;
+            // 
             // panelHeader
             // 
             this.panelHeader.Controls.Add(this.flowHeaderRight);
             this.panelHeader.Controls.Add(this.flowHeaderLeft);
             this.panelHeader.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panelHeader.Location = new System.Drawing.Point(20, 20);
+            this.panelHeader.Location = new System.Drawing.Point(28, 28);
             this.panelHeader.Margin = new System.Windows.Forms.Padding(0);
             this.panelHeader.Name = "panelHeader";
             this.panelHeader.Padding = new System.Windows.Forms.Padding(4, 0, 4, 8);
             this.panelHeader.Radius = 0;
-            this.panelHeader.Size = new System.Drawing.Size(472, 56);
+            this.panelHeader.Size = new System.Drawing.Size(504, 56);
             this.panelHeader.TabIndex = 0;
             // 
             // flowHeaderRight
             // 
             this.flowHeaderRight.Controls.Add(this.labelDialogDescription);
             this.flowHeaderRight.Dock = System.Windows.Forms.DockStyle.Right;
-            this.flowHeaderRight.Location = new System.Drawing.Point(188, 0);
+            this.flowHeaderRight.Location = new System.Drawing.Point(220, 0);
             this.flowHeaderRight.Margin = new System.Windows.Forms.Padding(0);
             this.flowHeaderRight.Name = "flowHeaderRight";
             this.flowHeaderRight.Size = new System.Drawing.Size(280, 48);
@@ -323,7 +323,7 @@
             this.flowHeaderLeft.Location = new System.Drawing.Point(4, 0);
             this.flowHeaderLeft.Margin = new System.Windows.Forms.Padding(0);
             this.flowHeaderLeft.Name = "flowHeaderLeft";
-            this.flowHeaderLeft.Size = new System.Drawing.Size(220, 48);
+            this.flowHeaderLeft.Size = new System.Drawing.Size(173, 48);
             this.flowHeaderLeft.TabIndex = 0;
             this.flowHeaderLeft.Text = "flowHeaderLeft";
             // 
@@ -333,7 +333,7 @@
             this.labelDialogTitle.Location = new System.Drawing.Point(0, 0);
             this.labelDialogTitle.Margin = new System.Windows.Forms.Padding(0);
             this.labelDialogTitle.Name = "labelDialogTitle";
-            this.labelDialogTitle.Size = new System.Drawing.Size(220, 38);
+            this.labelDialogTitle.Size = new System.Drawing.Size(173, 48);
             this.labelDialogTitle.TabIndex = 0;
             this.labelDialogTitle.Text = "删除控制卡";
             // 

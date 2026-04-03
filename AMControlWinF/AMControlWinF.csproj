@@ -198,6 +198,9 @@
     <EmbeddedResource Include="Views\MotionConfig\MotionCardControl.resx">
       <DependentUpon>MotionCardControl.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\MotionCardDeleteConfirmDialog.resx">
+      <DependentUpon>MotionCardDeleteConfirmDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Views\MotionConfig\MotionCardEditDialog.resx">
       <DependentUpon>MotionCardEditDialog.cs</DependentUpon>
     </EmbeddedResource>

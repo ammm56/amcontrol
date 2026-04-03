@@ -43,42 +43,42 @@
             // 
             // panelShell
             // 
-            this.panelShell.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.panelShell.BackColor = System.Drawing.Color.Transparent;
             this.panelShell.Controls.Add(this.panelContentHost);
             this.panelShell.Controls.Add(this.panelFooter);
             this.panelShell.Controls.Add(this.panelHeader);
-            this.panelShell.Location = new System.Drawing.Point(24, 24);
+            this.panelShell.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelShell.Location = new System.Drawing.Point(0, 0);
             this.panelShell.Margin = new System.Windows.Forms.Padding(0);
             this.panelShell.Name = "panelShell";
             this.panelShell.Padding = new System.Windows.Forms.Padding(12);
             this.panelShell.Radius = 16;
-            this.panelShell.Shadow = 8;
-            this.panelShell.Size = new System.Drawing.Size(802, 632);
+            this.panelShell.Shadow = 16;
+            this.panelShell.ShadowOpacity = 0.2F;
+            this.panelShell.ShadowOpacityAnimation = true;
+            this.panelShell.Size = new System.Drawing.Size(850, 680);
             this.panelShell.TabIndex = 0;
             // 
             // panelContentHost
             // 
             this.panelContentHost.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelContentHost.Location = new System.Drawing.Point(20, 76);
+            this.panelContentHost.Location = new System.Drawing.Point(28, 84);
             this.panelContentHost.Margin = new System.Windows.Forms.Padding(0);
             this.panelContentHost.Name = "panelContentHost";
             this.panelContentHost.Radius = 0;
-            this.panelContentHost.Size = new System.Drawing.Size(762, 479);
+            this.panelContentHost.Size = new System.Drawing.Size(794, 511);
             this.panelContentHost.TabIndex = 1;
             // 
             // panelFooter
             // 
             this.panelFooter.Controls.Add(this.flowFooterButtons);
             this.panelFooter.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panelFooter.Location = new System.Drawing.Point(20, 555);
+            this.panelFooter.Location = new System.Drawing.Point(28, 595);
             this.panelFooter.Margin = new System.Windows.Forms.Padding(0);
             this.panelFooter.Name = "panelFooter";
             this.panelFooter.Padding = new System.Windows.Forms.Padding(4, 10, 4, 0);
             this.panelFooter.Radius = 0;
-            this.panelFooter.Size = new System.Drawing.Size(762, 57);
+            this.panelFooter.Size = new System.Drawing.Size(794, 57);
             this.panelFooter.TabIndex = 2;
             // 
             // flowFooterButtons
@@ -87,7 +87,7 @@
             this.flowFooterButtons.Controls.Add(this.buttonCancel);
             this.flowFooterButtons.Dock = System.Windows.Forms.DockStyle.Right;
             this.flowFooterButtons.Gap = 10;
-            this.flowFooterButtons.Location = new System.Drawing.Point(514, 10);
+            this.flowFooterButtons.Location = new System.Drawing.Point(546, 10);
             this.flowFooterButtons.Margin = new System.Windows.Forms.Padding(0);
             this.flowFooterButtons.Name = "flowFooterButtons";
             this.flowFooterButtons.Size = new System.Drawing.Size(244, 47);
@@ -122,12 +122,12 @@
             this.panelHeader.Controls.Add(this.labelDialogDescription);
             this.panelHeader.Controls.Add(this.labelDialogTitle);
             this.panelHeader.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panelHeader.Location = new System.Drawing.Point(20, 20);
+            this.panelHeader.Location = new System.Drawing.Point(28, 28);
             this.panelHeader.Margin = new System.Windows.Forms.Padding(0);
             this.panelHeader.Name = "panelHeader";
             this.panelHeader.Padding = new System.Windows.Forms.Padding(4, 0, 4, 8);
             this.panelHeader.Radius = 0;
-            this.panelHeader.Size = new System.Drawing.Size(762, 56);
+            this.panelHeader.Size = new System.Drawing.Size(794, 56);
             this.panelHeader.TabIndex = 0;
             // 
             // labelDialogDescription
@@ -136,7 +136,7 @@
             this.labelDialogDescription.Location = new System.Drawing.Point(4, 38);
             this.labelDialogDescription.Margin = new System.Windows.Forms.Padding(0);
             this.labelDialogDescription.Name = "labelDialogDescription";
-            this.labelDialogDescription.Size = new System.Drawing.Size(754, 18);
+            this.labelDialogDescription.Size = new System.Drawing.Size(786, 18);
             this.labelDialogDescription.TabIndex = 1;
             this.labelDialogDescription.Text = "在列表中选择目标用户。";
             // 
@@ -147,7 +147,7 @@
             this.labelDialogTitle.Location = new System.Drawing.Point(4, 0);
             this.labelDialogTitle.Margin = new System.Windows.Forms.Padding(0);
             this.labelDialogTitle.Name = "labelDialogTitle";
-            this.labelDialogTitle.Size = new System.Drawing.Size(754, 38);
+            this.labelDialogTitle.Size = new System.Drawing.Size(786, 38);
             this.labelDialogTitle.TabIndex = 0;
             this.labelDialogTitle.Text = "选择用户";
             // 

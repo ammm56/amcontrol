@@ -109,32 +109,32 @@
             // 
             // panelShell
             // 
-            this.panelShell.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.panelShell.BackColor = System.Drawing.Color.Transparent;
             this.panelShell.Controls.Add(this.panelContent);
             this.panelShell.Controls.Add(this.panelFooter);
             this.panelShell.Controls.Add(this.panelHeader);
-            this.panelShell.Location = new System.Drawing.Point(24, 24);
+            this.panelShell.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelShell.Location = new System.Drawing.Point(0, 0);
             this.panelShell.Margin = new System.Windows.Forms.Padding(0);
             this.panelShell.Name = "panelShell";
             this.panelShell.Padding = new System.Windows.Forms.Padding(12);
             this.panelShell.Radius = 16;
-            this.panelShell.Shadow = 8;
-            this.panelShell.Size = new System.Drawing.Size(592, 712);
+            this.panelShell.Shadow = 16;
+            this.panelShell.ShadowOpacity = 0.2F;
+            this.panelShell.ShadowOpacityAnimation = true;
+            this.panelShell.Size = new System.Drawing.Size(640, 760);
             this.panelShell.TabIndex = 0;
             // 
             // panelContent
             // 
             this.panelContent.Controls.Add(this.stackFormRows);
             this.panelContent.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelContent.Location = new System.Drawing.Point(20, 76);
+            this.panelContent.Location = new System.Drawing.Point(28, 84);
             this.panelContent.Margin = new System.Windows.Forms.Padding(0);
             this.panelContent.Name = "panelContent";
             this.panelContent.Padding = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.panelContent.Radius = 0;
-            this.panelContent.Size = new System.Drawing.Size(552, 559);
+            this.panelContent.Size = new System.Drawing.Size(584, 591);
             this.panelContent.TabIndex = 1;
             // 
             // stackFormRows
@@ -159,7 +159,7 @@
             this.stackFormRows.Location = new System.Drawing.Point(4, 0);
             this.stackFormRows.Margin = new System.Windows.Forms.Padding(0);
             this.stackFormRows.Name = "stackFormRows";
-            this.stackFormRows.Size = new System.Drawing.Size(544, 559);
+            this.stackFormRows.Size = new System.Drawing.Size(576, 591);
             this.stackFormRows.TabIndex = 0;
             this.stackFormRows.Text = "stackFormRows";
             this.stackFormRows.Vertical = true;
@@ -172,7 +172,7 @@
             this.panelRowRemark.Margin = new System.Windows.Forms.Padding(0);
             this.panelRowRemark.Name = "panelRowRemark";
             this.panelRowRemark.Radius = 0;
-            this.panelRowRemark.Size = new System.Drawing.Size(544, 76);
+            this.panelRowRemark.Size = new System.Drawing.Size(576, 76);
             this.panelRowRemark.TabIndex = 13;
             // 
             // inputRemark
@@ -183,7 +183,7 @@
             this.inputRemark.Multiline = true;
             this.inputRemark.Name = "inputRemark";
             this.inputRemark.PlaceholderText = "请输入备注";
-            this.inputRemark.Size = new System.Drawing.Size(544, 50);
+            this.inputRemark.Size = new System.Drawing.Size(576, 50);
             this.inputRemark.TabIndex = 1;
             this.inputRemark.WaveSize = 0;
             // 
@@ -193,7 +193,7 @@
             this.labelRemark.Location = new System.Drawing.Point(0, 0);
             this.labelRemark.Margin = new System.Windows.Forms.Padding(0);
             this.labelRemark.Name = "labelRemark";
-            this.labelRemark.Size = new System.Drawing.Size(544, 22);
+            this.labelRemark.Size = new System.Drawing.Size(576, 22);
             this.labelRemark.TabIndex = 0;
             this.labelRemark.Text = "备注";
             // 
@@ -205,7 +205,7 @@
             this.panelRowDescription.Margin = new System.Windows.Forms.Padding(0);
             this.panelRowDescription.Name = "panelRowDescription";
             this.panelRowDescription.Radius = 0;
-            this.panelRowDescription.Size = new System.Drawing.Size(544, 76);
+            this.panelRowDescription.Size = new System.Drawing.Size(576, 76);
             this.panelRowDescription.TabIndex = 12;
             // 
             // inputDescription
@@ -216,7 +216,7 @@
             this.inputDescription.Multiline = true;
             this.inputDescription.Name = "inputDescription";
             this.inputDescription.PlaceholderText = "请输入描述";
-            this.inputDescription.Size = new System.Drawing.Size(544, 50);
+            this.inputDescription.Size = new System.Drawing.Size(576, 50);
             this.inputDescription.TabIndex = 1;
             this.inputDescription.WaveSize = 0;
             // 
@@ -226,7 +226,7 @@
             this.labelDescription.Location = new System.Drawing.Point(0, 0);
             this.labelDescription.Margin = new System.Windows.Forms.Padding(0);
             this.labelDescription.Name = "labelDescription";
-            this.labelDescription.Size = new System.Drawing.Size(544, 22);
+            this.labelDescription.Size = new System.Drawing.Size(576, 22);
             this.labelDescription.TabIndex = 0;
             this.labelDescription.Text = "描述";
             // 
@@ -238,7 +238,7 @@
             this.panelRowOpenConfig.Margin = new System.Windows.Forms.Padding(0);
             this.panelRowOpenConfig.Name = "panelRowOpenConfig";
             this.panelRowOpenConfig.Radius = 0;
-            this.panelRowOpenConfig.Size = new System.Drawing.Size(544, 76);
+            this.panelRowOpenConfig.Size = new System.Drawing.Size(576, 76);
             this.panelRowOpenConfig.TabIndex = 11;
             // 
             // inputOpenConfig
@@ -249,7 +249,7 @@
             this.inputOpenConfig.Multiline = true;
             this.inputOpenConfig.Name = "inputOpenConfig";
             this.inputOpenConfig.PlaceholderText = "请输入初始化参数";
-            this.inputOpenConfig.Size = new System.Drawing.Size(544, 50);
+            this.inputOpenConfig.Size = new System.Drawing.Size(576, 50);
             this.inputOpenConfig.TabIndex = 1;
             this.inputOpenConfig.WaveSize = 0;
             // 
@@ -259,7 +259,7 @@
             this.labelOpenConfig.Location = new System.Drawing.Point(0, 0);
             this.labelOpenConfig.Margin = new System.Windows.Forms.Padding(0);
             this.labelOpenConfig.Name = "labelOpenConfig";
-            this.labelOpenConfig.Size = new System.Drawing.Size(544, 22);
+            this.labelOpenConfig.Size = new System.Drawing.Size(576, 22);
             this.labelOpenConfig.TabIndex = 0;
             this.labelOpenConfig.Text = "初始化参数";
             // 
@@ -271,7 +271,7 @@
             this.panelRowFlags.Margin = new System.Windows.Forms.Padding(0);
             this.panelRowFlags.Name = "panelRowFlags";
             this.panelRowFlags.Radius = 0;
-            this.panelRowFlags.Size = new System.Drawing.Size(544, 48);
+            this.panelRowFlags.Size = new System.Drawing.Size(576, 48);
             this.panelRowFlags.TabIndex = 10;
             // 
             // flowFlags
@@ -283,7 +283,7 @@
             this.flowFlags.Location = new System.Drawing.Point(0, 22);
             this.flowFlags.Margin = new System.Windows.Forms.Padding(0);
             this.flowFlags.Name = "flowFlags";
-            this.flowFlags.Size = new System.Drawing.Size(544, 26);
+            this.flowFlags.Size = new System.Drawing.Size(576, 26);
             this.flowFlags.TabIndex = 1;
             this.flowFlags.Text = "flowFlags";
             // 
@@ -315,7 +315,7 @@
             this.labelFlags.Location = new System.Drawing.Point(0, 0);
             this.labelFlags.Margin = new System.Windows.Forms.Padding(0);
             this.labelFlags.Name = "labelFlags";
-            this.labelFlags.Size = new System.Drawing.Size(544, 22);
+            this.labelFlags.Size = new System.Drawing.Size(576, 22);
             this.labelFlags.TabIndex = 0;
             this.labelFlags.Text = "状态配置";
             // 
@@ -327,7 +327,7 @@
             this.panelRowSortOrder.Margin = new System.Windows.Forms.Padding(0);
             this.panelRowSortOrder.Name = "panelRowSortOrder";
             this.panelRowSortOrder.Radius = 0;
-            this.panelRowSortOrder.Size = new System.Drawing.Size(544, 52);
+            this.panelRowSortOrder.Size = new System.Drawing.Size(576, 52);
             this.panelRowSortOrder.TabIndex = 9;
             // 
             // inputSortOrder
@@ -337,7 +337,7 @@
             this.inputSortOrder.Margin = new System.Windows.Forms.Padding(0);
             this.inputSortOrder.Name = "inputSortOrder";
             this.inputSortOrder.PlaceholderText = "请输入排序号";
-            this.inputSortOrder.Size = new System.Drawing.Size(544, 32);
+            this.inputSortOrder.Size = new System.Drawing.Size(576, 32);
             this.inputSortOrder.TabIndex = 1;
             this.inputSortOrder.WaveSize = 0;
             // 
@@ -347,7 +347,7 @@
             this.labelSortOrder.Location = new System.Drawing.Point(0, 0);
             this.labelSortOrder.Margin = new System.Windows.Forms.Padding(0);
             this.labelSortOrder.Name = "labelSortOrder";
-            this.labelSortOrder.Size = new System.Drawing.Size(544, 22);
+            this.labelSortOrder.Size = new System.Drawing.Size(576, 22);
             this.labelSortOrder.TabIndex = 0;
             this.labelSortOrder.Text = "排序号";
             // 
@@ -359,7 +359,7 @@
             this.panelRowInitOrder.Margin = new System.Windows.Forms.Padding(0);
             this.panelRowInitOrder.Name = "panelRowInitOrder";
             this.panelRowInitOrder.Radius = 0;
-            this.panelRowInitOrder.Size = new System.Drawing.Size(544, 52);
+            this.panelRowInitOrder.Size = new System.Drawing.Size(576, 52);
             this.panelRowInitOrder.TabIndex = 8;
             // 
             // inputInitOrder
@@ -369,7 +369,7 @@
             this.inputInitOrder.Margin = new System.Windows.Forms.Padding(0);
             this.inputInitOrder.Name = "inputInitOrder";
             this.inputInitOrder.PlaceholderText = "请输入初始化顺序";
-            this.inputInitOrder.Size = new System.Drawing.Size(544, 32);
+            this.inputInitOrder.Size = new System.Drawing.Size(576, 32);
             this.inputInitOrder.TabIndex = 1;
             this.inputInitOrder.WaveSize = 0;
             // 
@@ -379,7 +379,7 @@
             this.labelInitOrder.Location = new System.Drawing.Point(0, 0);
             this.labelInitOrder.Margin = new System.Windows.Forms.Padding(0);
             this.labelInitOrder.Name = "labelInitOrder";
-            this.labelInitOrder.Size = new System.Drawing.Size(544, 22);
+            this.labelInitOrder.Size = new System.Drawing.Size(576, 22);
             this.labelInitOrder.TabIndex = 0;
             this.labelInitOrder.Text = "初始化顺序";
             // 
@@ -391,7 +391,7 @@
             this.panelRowModeParam.Margin = new System.Windows.Forms.Padding(0);
             this.panelRowModeParam.Name = "panelRowModeParam";
             this.panelRowModeParam.Radius = 0;
-            this.panelRowModeParam.Size = new System.Drawing.Size(544, 52);
+            this.panelRowModeParam.Size = new System.Drawing.Size(576, 52);
             this.panelRowModeParam.TabIndex = 7;
             // 
             // inputModeParam
@@ -401,7 +401,7 @@
             this.inputModeParam.Margin = new System.Windows.Forms.Padding(0);
             this.inputModeParam.Name = "inputModeParam";
             this.inputModeParam.PlaceholderText = "请输入模式参数";
-            this.inputModeParam.Size = new System.Drawing.Size(544, 32);
+            this.inputModeParam.Size = new System.Drawing.Size(576, 32);
             this.inputModeParam.TabIndex = 1;
             this.inputModeParam.WaveSize = 0;
             // 
@@ -411,7 +411,7 @@
             this.labelModeParam.Location = new System.Drawing.Point(0, 0);
             this.labelModeParam.Margin = new System.Windows.Forms.Padding(0);
             this.labelModeParam.Name = "labelModeParam";
-            this.labelModeParam.Size = new System.Drawing.Size(544, 22);
+            this.labelModeParam.Size = new System.Drawing.Size(576, 22);
             this.labelModeParam.TabIndex = 0;
             this.labelModeParam.Text = "模式参数";
             // 
@@ -423,7 +423,7 @@
             this.panelRowAxisCount.Margin = new System.Windows.Forms.Padding(0);
             this.panelRowAxisCount.Name = "panelRowAxisCount";
             this.panelRowAxisCount.Radius = 0;
-            this.panelRowAxisCount.Size = new System.Drawing.Size(544, 52);
+            this.panelRowAxisCount.Size = new System.Drawing.Size(576, 52);
             this.panelRowAxisCount.TabIndex = 6;
             // 
             // inputAxisCount
@@ -433,7 +433,7 @@
             this.inputAxisCount.Margin = new System.Windows.Forms.Padding(0);
             this.inputAxisCount.Name = "inputAxisCount";
             this.inputAxisCount.PlaceholderText = "请输入轴数";
-            this.inputAxisCount.Size = new System.Drawing.Size(544, 32);
+            this.inputAxisCount.Size = new System.Drawing.Size(576, 32);
             this.inputAxisCount.TabIndex = 1;
             this.inputAxisCount.WaveSize = 0;
             // 
@@ -443,7 +443,7 @@
             this.labelAxisCount.Location = new System.Drawing.Point(0, 0);
             this.labelAxisCount.Margin = new System.Windows.Forms.Padding(0);
             this.labelAxisCount.Name = "labelAxisCount";
-            this.labelAxisCount.Size = new System.Drawing.Size(544, 22);
+            this.labelAxisCount.Size = new System.Drawing.Size(576, 22);
             this.labelAxisCount.TabIndex = 0;
             this.labelAxisCount.Text = "轴数";
             // 
@@ -455,7 +455,7 @@
             this.panelRowCoreNumber.Margin = new System.Windows.Forms.Padding(0);
             this.panelRowCoreNumber.Name = "panelRowCoreNumber";
             this.panelRowCoreNumber.Radius = 0;
-            this.panelRowCoreNumber.Size = new System.Drawing.Size(544, 52);
+            this.panelRowCoreNumber.Size = new System.Drawing.Size(576, 52);
             this.panelRowCoreNumber.TabIndex = 5;
             // 
             // inputCoreNumber
@@ -465,7 +465,7 @@
             this.inputCoreNumber.Margin = new System.Windows.Forms.Padding(0);
             this.inputCoreNumber.Name = "inputCoreNumber";
             this.inputCoreNumber.PlaceholderText = "请输入核数";
-            this.inputCoreNumber.Size = new System.Drawing.Size(544, 32);
+            this.inputCoreNumber.Size = new System.Drawing.Size(576, 32);
             this.inputCoreNumber.TabIndex = 1;
             this.inputCoreNumber.WaveSize = 0;
             // 
@@ -475,7 +475,7 @@
             this.labelCoreNumber.Location = new System.Drawing.Point(0, 0);
             this.labelCoreNumber.Margin = new System.Windows.Forms.Padding(0);
             this.labelCoreNumber.Name = "labelCoreNumber";
-            this.labelCoreNumber.Size = new System.Drawing.Size(544, 22);
+            this.labelCoreNumber.Size = new System.Drawing.Size(576, 22);
             this.labelCoreNumber.TabIndex = 0;
             this.labelCoreNumber.Text = "核数";
             // 
@@ -487,7 +487,7 @@
             this.panelRowDriverKey.Margin = new System.Windows.Forms.Padding(0);
             this.panelRowDriverKey.Name = "panelRowDriverKey";
             this.panelRowDriverKey.Radius = 0;
-            this.panelRowDriverKey.Size = new System.Drawing.Size(544, 52);
+            this.panelRowDriverKey.Size = new System.Drawing.Size(576, 52);
             this.panelRowDriverKey.TabIndex = 4;
             // 
             // inputDriverKey
@@ -497,7 +497,7 @@
             this.inputDriverKey.Margin = new System.Windows.Forms.Padding(0);
             this.inputDriverKey.Name = "inputDriverKey";
             this.inputDriverKey.PlaceholderText = "请输入驱动识别键";
-            this.inputDriverKey.Size = new System.Drawing.Size(544, 32);
+            this.inputDriverKey.Size = new System.Drawing.Size(576, 32);
             this.inputDriverKey.TabIndex = 1;
             this.inputDriverKey.WaveSize = 0;
             // 
@@ -507,7 +507,7 @@
             this.labelDriverKey.Location = new System.Drawing.Point(0, 0);
             this.labelDriverKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelDriverKey.Name = "labelDriverKey";
-            this.labelDriverKey.Size = new System.Drawing.Size(544, 22);
+            this.labelDriverKey.Size = new System.Drawing.Size(576, 22);
             this.labelDriverKey.TabIndex = 0;
             this.labelDriverKey.Text = "驱动识别键";
             // 
@@ -519,7 +519,7 @@
             this.panelRowDisplayName.Margin = new System.Windows.Forms.Padding(0);
             this.panelRowDisplayName.Name = "panelRowDisplayName";
             this.panelRowDisplayName.Radius = 0;
-            this.panelRowDisplayName.Size = new System.Drawing.Size(544, 52);
+            this.panelRowDisplayName.Size = new System.Drawing.Size(576, 52);
             this.panelRowDisplayName.TabIndex = 3;
             // 
             // inputDisplayName
@@ -529,7 +529,7 @@
             this.inputDisplayName.Margin = new System.Windows.Forms.Padding(0);
             this.inputDisplayName.Name = "inputDisplayName";
             this.inputDisplayName.PlaceholderText = "请输入显示名称";
-            this.inputDisplayName.Size = new System.Drawing.Size(544, 32);
+            this.inputDisplayName.Size = new System.Drawing.Size(576, 32);
             this.inputDisplayName.TabIndex = 1;
             this.inputDisplayName.WaveSize = 0;
             // 
@@ -539,7 +539,7 @@
             this.labelDisplayName.Location = new System.Drawing.Point(0, 0);
             this.labelDisplayName.Margin = new System.Windows.Forms.Padding(0);
             this.labelDisplayName.Name = "labelDisplayName";
-            this.labelDisplayName.Size = new System.Drawing.Size(544, 22);
+            this.labelDisplayName.Size = new System.Drawing.Size(576, 22);
             this.labelDisplayName.TabIndex = 0;
             this.labelDisplayName.Text = "显示名称";
             // 
@@ -551,7 +551,7 @@
             this.panelRowName.Margin = new System.Windows.Forms.Padding(0);
             this.panelRowName.Name = "panelRowName";
             this.panelRowName.Radius = 0;
-            this.panelRowName.Size = new System.Drawing.Size(544, 52);
+            this.panelRowName.Size = new System.Drawing.Size(576, 52);
             this.panelRowName.TabIndex = 2;
             // 
             // inputName
@@ -561,7 +561,7 @@
             this.inputName.Margin = new System.Windows.Forms.Padding(0);
             this.inputName.Name = "inputName";
             this.inputName.PlaceholderText = "请输入内部名称";
-            this.inputName.Size = new System.Drawing.Size(544, 32);
+            this.inputName.Size = new System.Drawing.Size(576, 32);
             this.inputName.TabIndex = 1;
             this.inputName.WaveSize = 0;
             // 
@@ -571,7 +571,7 @@
             this.labelName.Location = new System.Drawing.Point(0, 0);
             this.labelName.Margin = new System.Windows.Forms.Padding(0);
             this.labelName.Name = "labelName";
-            this.labelName.Size = new System.Drawing.Size(544, 22);
+            this.labelName.Size = new System.Drawing.Size(576, 22);
             this.labelName.TabIndex = 0;
             this.labelName.Text = "内部名称";
             // 
@@ -583,7 +583,7 @@
             this.panelRowCardType.Margin = new System.Windows.Forms.Padding(0);
             this.panelRowCardType.Name = "panelRowCardType";
             this.panelRowCardType.Radius = 0;
-            this.panelRowCardType.Size = new System.Drawing.Size(544, 52);
+            this.panelRowCardType.Size = new System.Drawing.Size(576, 52);
             this.panelRowCardType.TabIndex = 1;
             // 
             // dropdownCardType
@@ -592,7 +592,7 @@
             this.dropdownCardType.Location = new System.Drawing.Point(0, 20);
             this.dropdownCardType.Margin = new System.Windows.Forms.Padding(0);
             this.dropdownCardType.Name = "dropdownCardType";
-            this.dropdownCardType.Size = new System.Drawing.Size(544, 32);
+            this.dropdownCardType.Size = new System.Drawing.Size(576, 32);
             this.dropdownCardType.TabIndex = 1;
             this.dropdownCardType.WaveSize = 0;
             // 
@@ -602,7 +602,7 @@
             this.labelCardType.Location = new System.Drawing.Point(0, 0);
             this.labelCardType.Margin = new System.Windows.Forms.Padding(0);
             this.labelCardType.Name = "labelCardType";
-            this.labelCardType.Size = new System.Drawing.Size(544, 22);
+            this.labelCardType.Size = new System.Drawing.Size(576, 22);
             this.labelCardType.TabIndex = 0;
             this.labelCardType.Text = "控制卡类型";
             // 
@@ -614,7 +614,7 @@
             this.panelRowCardId.Margin = new System.Windows.Forms.Padding(0);
             this.panelRowCardId.Name = "panelRowCardId";
             this.panelRowCardId.Radius = 0;
-            this.panelRowCardId.Size = new System.Drawing.Size(544, 50);
+            this.panelRowCardId.Size = new System.Drawing.Size(576, 50);
             this.panelRowCardId.TabIndex = 0;
             // 
             // inputCardId
@@ -624,7 +624,7 @@
             this.inputCardId.Margin = new System.Windows.Forms.Padding(0);
             this.inputCardId.Name = "inputCardId";
             this.inputCardId.PlaceholderText = "请输入控制卡卡号";
-            this.inputCardId.Size = new System.Drawing.Size(544, 32);
+            this.inputCardId.Size = new System.Drawing.Size(576, 32);
             this.inputCardId.TabIndex = 1;
             this.inputCardId.WaveSize = 0;
             // 
@@ -634,7 +634,7 @@
             this.labelCardId.Location = new System.Drawing.Point(0, 0);
             this.labelCardId.Margin = new System.Windows.Forms.Padding(0);
             this.labelCardId.Name = "labelCardId";
-            this.labelCardId.Size = new System.Drawing.Size(544, 22);
+            this.labelCardId.Size = new System.Drawing.Size(576, 22);
             this.labelCardId.TabIndex = 0;
             this.labelCardId.Text = "卡号";
             // 
@@ -642,12 +642,12 @@
             // 
             this.panelFooter.Controls.Add(this.flowFooterButtons);
             this.panelFooter.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panelFooter.Location = new System.Drawing.Point(20, 635);
+            this.panelFooter.Location = new System.Drawing.Point(28, 675);
             this.panelFooter.Margin = new System.Windows.Forms.Padding(0);
             this.panelFooter.Name = "panelFooter";
             this.panelFooter.Padding = new System.Windows.Forms.Padding(4, 10, 4, 0);
             this.panelFooter.Radius = 0;
-            this.panelFooter.Size = new System.Drawing.Size(552, 57);
+            this.panelFooter.Size = new System.Drawing.Size(584, 57);
             this.panelFooter.TabIndex = 2;
             // 
             // flowFooterButtons
@@ -656,7 +656,7 @@
             this.flowFooterButtons.Controls.Add(this.buttonCancel);
             this.flowFooterButtons.Dock = System.Windows.Forms.DockStyle.Right;
             this.flowFooterButtons.Gap = 10;
-            this.flowFooterButtons.Location = new System.Drawing.Point(304, 10);
+            this.flowFooterButtons.Location = new System.Drawing.Point(336, 10);
             this.flowFooterButtons.Margin = new System.Windows.Forms.Padding(0);
             this.flowFooterButtons.Name = "flowFooterButtons";
             this.flowFooterButtons.Size = new System.Drawing.Size(244, 47);
@@ -691,22 +691,22 @@
             this.panelHeader.Controls.Add(this.flowHeaderRight);
             this.panelHeader.Controls.Add(this.flowHeaderLeft);
             this.panelHeader.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panelHeader.Location = new System.Drawing.Point(20, 20);
+            this.panelHeader.Location = new System.Drawing.Point(28, 28);
             this.panelHeader.Margin = new System.Windows.Forms.Padding(0);
             this.panelHeader.Name = "panelHeader";
             this.panelHeader.Padding = new System.Windows.Forms.Padding(4, 0, 4, 8);
             this.panelHeader.Radius = 0;
-            this.panelHeader.Size = new System.Drawing.Size(552, 56);
+            this.panelHeader.Size = new System.Drawing.Size(584, 56);
             this.panelHeader.TabIndex = 0;
             // 
             // flowHeaderRight
             // 
             this.flowHeaderRight.Controls.Add(this.labelDialogDescription);
             this.flowHeaderRight.Dock = System.Windows.Forms.DockStyle.Right;
-            this.flowHeaderRight.Location = new System.Drawing.Point(272, 0);
+            this.flowHeaderRight.Location = new System.Drawing.Point(267, 0);
             this.flowHeaderRight.Margin = new System.Windows.Forms.Padding(0);
             this.flowHeaderRight.Name = "flowHeaderRight";
-            this.flowHeaderRight.Size = new System.Drawing.Size(276, 48);
+            this.flowHeaderRight.Size = new System.Drawing.Size(313, 48);
             this.flowHeaderRight.TabIndex = 1;
             this.flowHeaderRight.Text = "flowHeaderRight";
             // 
@@ -715,7 +715,7 @@
             this.labelDialogDescription.Location = new System.Drawing.Point(0, 0);
             this.labelDialogDescription.Margin = new System.Windows.Forms.Padding(0);
             this.labelDialogDescription.Name = "labelDialogDescription";
-            this.labelDialogDescription.Size = new System.Drawing.Size(276, 48);
+            this.labelDialogDescription.Size = new System.Drawing.Size(311, 48);
             this.labelDialogDescription.TabIndex = 0;
             this.labelDialogDescription.Text = "填写控制卡基础信息、初始化参数和说明信息。";
             this.labelDialogDescription.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -737,7 +737,7 @@
             this.labelDialogTitle.Location = new System.Drawing.Point(0, 0);
             this.labelDialogTitle.Margin = new System.Windows.Forms.Padding(0);
             this.labelDialogTitle.Name = "labelDialogTitle";
-            this.labelDialogTitle.Size = new System.Drawing.Size(220, 38);
+            this.labelDialogTitle.Size = new System.Drawing.Size(220, 48);
             this.labelDialogTitle.TabIndex = 0;
             this.labelDialogTitle.Text = "新增控制卡";
             // 

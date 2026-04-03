@@ -28,8 +28,8 @@
             this.labelConfirmPassword = new AntdUI.Label();
             this.panelFooter = new AntdUI.Panel();
             this.flowFooterButtons = new AntdUI.FlowPanel();
-            this.buttonCancel = new AntdUI.Button();
             this.buttonOk = new AntdUI.Button();
+            this.buttonCancel = new AntdUI.Button();
             this.panelHeader = new AntdUI.Panel();
             this.flowHeaderRight = new AntdUI.FlowPanel();
             this.labelDialogDescription = new AntdUI.Label();
@@ -60,32 +60,32 @@
             // 
             // panelShell
             // 
-            this.panelShell.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.panelShell.BackColor = System.Drawing.Color.Transparent;
             this.panelShell.Controls.Add(this.panelContent);
             this.panelShell.Controls.Add(this.panelFooter);
             this.panelShell.Controls.Add(this.panelHeader);
-            this.panelShell.Location = new System.Drawing.Point(24, 24);
+            this.panelShell.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelShell.Location = new System.Drawing.Point(0, 0);
             this.panelShell.Margin = new System.Windows.Forms.Padding(0);
             this.panelShell.Name = "panelShell";
             this.panelShell.Padding = new System.Windows.Forms.Padding(12);
             this.panelShell.Radius = 16;
-            this.panelShell.Shadow = 8;
-            this.panelShell.Size = new System.Drawing.Size(512, 412);
+            this.panelShell.Shadow = 16;
+            this.panelShell.ShadowOpacity = 0.2F;
+            this.panelShell.ShadowOpacityAnimation = true;
+            this.panelShell.Size = new System.Drawing.Size(560, 460);
             this.panelShell.TabIndex = 0;
             // 
             // panelContent
             // 
             this.panelContent.Controls.Add(this.stackFormRows);
             this.panelContent.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelContent.Location = new System.Drawing.Point(20, 76);
+            this.panelContent.Location = new System.Drawing.Point(28, 84);
             this.panelContent.Margin = new System.Windows.Forms.Padding(0);
             this.panelContent.Name = "panelContent";
             this.panelContent.Padding = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.panelContent.Radius = 0;
-            this.panelContent.Size = new System.Drawing.Size(472, 249);
+            this.panelContent.Size = new System.Drawing.Size(504, 281);
             this.panelContent.TabIndex = 1;
             // 
             // stackFormRows
@@ -98,7 +98,7 @@
             this.stackFormRows.Location = new System.Drawing.Point(4, 0);
             this.stackFormRows.Margin = new System.Windows.Forms.Padding(0);
             this.stackFormRows.Name = "stackFormRows";
-            this.stackFormRows.Size = new System.Drawing.Size(464, 249);
+            this.stackFormRows.Size = new System.Drawing.Size(496, 281);
             this.stackFormRows.TabIndex = 0;
             this.stackFormRows.Text = "stackFormRows";
             this.stackFormRows.Vertical = true;
@@ -111,7 +111,7 @@
             this.panelRowNewPassword.Margin = new System.Windows.Forms.Padding(0);
             this.panelRowNewPassword.Name = "panelRowNewPassword";
             this.panelRowNewPassword.Radius = 0;
-            this.panelRowNewPassword.Size = new System.Drawing.Size(464, 60);
+            this.panelRowNewPassword.Size = new System.Drawing.Size(496, 60);
             this.panelRowNewPassword.TabIndex = 0;
             // 
             // inputNewPassword
@@ -122,7 +122,7 @@
             this.inputNewPassword.Name = "inputNewPassword";
             this.inputNewPassword.PasswordChar = '●';
             this.inputNewPassword.PlaceholderText = "请输入新密码";
-            this.inputNewPassword.Size = new System.Drawing.Size(464, 36);
+            this.inputNewPassword.Size = new System.Drawing.Size(496, 36);
             this.inputNewPassword.TabIndex = 1;
             this.inputNewPassword.WaveSize = 0;
             // 
@@ -132,7 +132,7 @@
             this.labelNewPassword.Location = new System.Drawing.Point(0, 0);
             this.labelNewPassword.Margin = new System.Windows.Forms.Padding(0);
             this.labelNewPassword.Name = "labelNewPassword";
-            this.labelNewPassword.Size = new System.Drawing.Size(464, 22);
+            this.labelNewPassword.Size = new System.Drawing.Size(496, 22);
             this.labelNewPassword.TabIndex = 0;
             this.labelNewPassword.Text = "新密码";
             // 
@@ -144,7 +144,7 @@
             this.panelRowConfirmPassword.Margin = new System.Windows.Forms.Padding(0);
             this.panelRowConfirmPassword.Name = "panelRowConfirmPassword";
             this.panelRowConfirmPassword.Radius = 0;
-            this.panelRowConfirmPassword.Size = new System.Drawing.Size(464, 60);
+            this.panelRowConfirmPassword.Size = new System.Drawing.Size(496, 60);
             this.panelRowConfirmPassword.TabIndex = 1;
             // 
             // inputConfirmPassword
@@ -155,7 +155,7 @@
             this.inputConfirmPassword.Name = "inputConfirmPassword";
             this.inputConfirmPassword.PasswordChar = '●';
             this.inputConfirmPassword.PlaceholderText = "请再次输入新密码";
-            this.inputConfirmPassword.Size = new System.Drawing.Size(464, 36);
+            this.inputConfirmPassword.Size = new System.Drawing.Size(496, 36);
             this.inputConfirmPassword.TabIndex = 1;
             this.inputConfirmPassword.WaveSize = 0;
             // 
@@ -165,7 +165,7 @@
             this.labelConfirmPassword.Location = new System.Drawing.Point(0, 0);
             this.labelConfirmPassword.Margin = new System.Windows.Forms.Padding(0);
             this.labelConfirmPassword.Name = "labelConfirmPassword";
-            this.labelConfirmPassword.Size = new System.Drawing.Size(464, 22);
+            this.labelConfirmPassword.Size = new System.Drawing.Size(496, 22);
             this.labelConfirmPassword.TabIndex = 0;
             this.labelConfirmPassword.Text = "确认密码";
             // 
@@ -173,12 +173,12 @@
             // 
             this.panelFooter.Controls.Add(this.flowFooterButtons);
             this.panelFooter.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panelFooter.Location = new System.Drawing.Point(20, 325);
+            this.panelFooter.Location = new System.Drawing.Point(28, 365);
             this.panelFooter.Margin = new System.Windows.Forms.Padding(0);
             this.panelFooter.Name = "panelFooter";
             this.panelFooter.Padding = new System.Windows.Forms.Padding(4, 10, 4, 0);
             this.panelFooter.Radius = 0;
-            this.panelFooter.Size = new System.Drawing.Size(472, 67);
+            this.panelFooter.Size = new System.Drawing.Size(504, 67);
             this.panelFooter.TabIndex = 2;
             // 
             // flowFooterButtons
@@ -187,27 +187,16 @@
             this.flowFooterButtons.Controls.Add(this.buttonCancel);
             this.flowFooterButtons.Dock = System.Windows.Forms.DockStyle.Right;
             this.flowFooterButtons.Gap = 10;
-            this.flowFooterButtons.Location = new System.Drawing.Point(224, 10);
+            this.flowFooterButtons.Location = new System.Drawing.Point(256, 10);
             this.flowFooterButtons.Margin = new System.Windows.Forms.Padding(0);
             this.flowFooterButtons.Name = "flowFooterButtons";
             this.flowFooterButtons.Size = new System.Drawing.Size(244, 57);
             this.flowFooterButtons.TabIndex = 0;
             this.flowFooterButtons.Text = "flowFooterButtons";
             // 
-            // buttonCancel
-            // 
-            this.buttonCancel.Location = new System.Drawing.Point(126, 0);
-            this.buttonCancel.Margin = new System.Windows.Forms.Padding(0);
-            this.buttonCancel.Name = "buttonCancel";
-            this.buttonCancel.Radius = 8;
-            this.buttonCancel.Size = new System.Drawing.Size(116, 38);
-            this.buttonCancel.TabIndex = 0;
-            this.buttonCancel.Text = "取消";
-            this.buttonCancel.WaveSize = 0;
-            // 
             // buttonOk
             // 
-            this.buttonOk.Location = new System.Drawing.Point(0, 0);
+            this.buttonOk.Location = new System.Drawing.Point(126, 0);
             this.buttonOk.Margin = new System.Windows.Forms.Padding(0);
             this.buttonOk.Name = "buttonOk";
             this.buttonOk.Radius = 8;
@@ -217,24 +206,35 @@
             this.buttonOk.Type = AntdUI.TTypeMini.Primary;
             this.buttonOk.WaveSize = 0;
             // 
+            // buttonCancel
+            // 
+            this.buttonCancel.Location = new System.Drawing.Point(0, 0);
+            this.buttonCancel.Margin = new System.Windows.Forms.Padding(0);
+            this.buttonCancel.Name = "buttonCancel";
+            this.buttonCancel.Radius = 8;
+            this.buttonCancel.Size = new System.Drawing.Size(116, 38);
+            this.buttonCancel.TabIndex = 0;
+            this.buttonCancel.Text = "取消";
+            this.buttonCancel.WaveSize = 0;
+            // 
             // panelHeader
             // 
             this.panelHeader.Controls.Add(this.flowHeaderRight);
             this.panelHeader.Controls.Add(this.flowHeaderLeft);
             this.panelHeader.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panelHeader.Location = new System.Drawing.Point(20, 20);
+            this.panelHeader.Location = new System.Drawing.Point(28, 28);
             this.panelHeader.Margin = new System.Windows.Forms.Padding(0);
             this.panelHeader.Name = "panelHeader";
             this.panelHeader.Padding = new System.Windows.Forms.Padding(4, 0, 4, 8);
             this.panelHeader.Radius = 0;
-            this.panelHeader.Size = new System.Drawing.Size(472, 56);
+            this.panelHeader.Size = new System.Drawing.Size(504, 56);
             this.panelHeader.TabIndex = 0;
             // 
             // flowHeaderRight
             // 
             this.flowHeaderRight.Controls.Add(this.labelDialogDescription);
             this.flowHeaderRight.Dock = System.Windows.Forms.DockStyle.Right;
-            this.flowHeaderRight.Location = new System.Drawing.Point(179, 0);
+            this.flowHeaderRight.Location = new System.Drawing.Point(211, 0);
             this.flowHeaderRight.Margin = new System.Windows.Forms.Padding(0);
             this.flowHeaderRight.Name = "flowHeaderRight";
             this.flowHeaderRight.Size = new System.Drawing.Size(289, 48);
