@@ -83,7 +83,7 @@ namespace AMControlWinF.Views.MotionConfig
                 ? "填写控制卡信息。"
                 : "修改控制卡信息。";
 
-            Size = new System.Drawing.Size(640, 760);
+            //Size = new System.Drawing.Size(640, 760);
             buttonOk.Text = "保存";
         }
 
