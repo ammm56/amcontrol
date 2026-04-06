@@ -56,7 +56,7 @@ namespace AM.PageModel.MotionConfig
             _allItems = new List<AxisParamViewItem>();
             _items = new List<AxisParamViewItem>();
             _groups = new List<AxisParamGroupItem>();
-            _selectedGroupKey = GroupAll;
+            _selectedGroupKey = GroupHardware;
         }
 
         public IList<AxisSummaryItem> Axes
@@ -156,6 +156,11 @@ namespace AM.PageModel.MotionConfig
                     _selectedLogicalAxis = null;
                 }
 
+                if (!_selectedLogicalAxis.HasValue && _axes.Count > 0)
+                {
+                    _selectedLogicalAxis = _axes[0].LogicalAxis;
+                }
+
                 if (!_selectedLogicalAxis.HasValue)
                 {
                     _allItems = new List<AxisParamViewItem>();
@@ -178,7 +183,7 @@ namespace AM.PageModel.MotionConfig
         public async Task<Result> SelectAxisAsync(short logicalAxis)
         {
             SelectedLogicalAxis = logicalAxis;
-            SelectedGroupKey = GroupAll;
+            SelectedGroupKey = GroupHardware;
 
             return await Task.Run(() => LoadParamsCore());
         }

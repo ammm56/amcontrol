@@ -124,6 +124,7 @@ namespace AMControlWinF.Views.MotionConfig
             card.Dock = DockStyle.Fill;
             card.Margin = new Padding(0);
             card.Bind(item);
+            HideCardActions(card);
 
             BindClickRecursive(wrapper, clickHandler);
             BindClickRecursive(card, clickHandler);
@@ -142,6 +143,32 @@ namespace AMControlWinF.Views.MotionConfig
             foreach (Control child in control.Controls)
             {
                 BindClickRecursive(child, handler);
+            }
+        }
+
+        private static void HideCardActions(Control root)
+        {
+            if (root == null)
+                return;
+
+            HideControlByName(root, "buttonEdit");
+            HideControlByName(root, "buttonDelete");
+            HideControlByName(root, "buttonDetail");
+        }
+
+        private static void HideControlByName(Control root, string controlName)
+        {
+            if (root == null || string.IsNullOrWhiteSpace(controlName))
+                return;
+
+            var controls = root.Controls.Find(controlName, true);
+            if (controls == null || controls.Length == 0)
+                return;
+
+            foreach (var control in controls.OfType<Control>())
+            {
+                control.Visible = false;
+                control.Enabled = false;
             }
         }
 
