@@ -17,19 +17,25 @@ namespace AM.PageModel.MotionConfig
         private readonly MotionIoMapCrudService _ioMapService;
         private readonly MotionCardCrudService _cardService;
 
+        private List<MotionIoMapViewItem> _allItems;
         private List<MotionIoMapViewItem> _items;
         private List<MotionCardEntity> _cards;
         private short? _selectedCardId;
         private string _selectedIoType;
+        private int _currentPage;
+        private int _pageSize;
 
         public MotionIoMapManagementPageModel()
         {
             _ioMapService = new MotionIoMapCrudService();
             _cardService = new MotionCardCrudService();
 
+            _allItems = new List<MotionIoMapViewItem>();
             _items = new List<MotionIoMapViewItem>();
             _cards = new List<MotionCardEntity>();
             _selectedIoType = "All";
+            _currentPage = 1;
+            _pageSize = 9;
         }
 
         public IList<MotionIoMapViewItem> Items
@@ -40,6 +46,45 @@ namespace AM.PageModel.MotionConfig
         public IList<MotionCardEntity> Cards
         {
             get { return _cards; }
+        }
+
+        public int CurrentPage
+        {
+            get { return _currentPage; }
+        }
+
+        public int PageSize
+        {
+            get { return _pageSize; }
+        }
+
+        public int TotalCount
+        {
+            get { return _allItems.Count; }
+        }
+
+        public int PageCount
+        {
+            get
+            {
+                if (TotalCount <= 0 || _pageSize <= 0)
+                    return 1;
+
+                return (int)Math.Ceiling(TotalCount * 1.0 / _pageSize);
+            }
+        }
+
+        public string PageSummaryText
+        {
+            get
+            {
+                if (TotalCount <= 0)
+                    return "共 0 项";
+
+                var start = (_currentPage - 1) * _pageSize + 1;
+                var end = Math.Min(_currentPage * _pageSize, TotalCount);
+                return "第 " + start + " - " + end + " 项，共 " + TotalCount + " 项";
+            }
         }
 
         public short? SelectedCardId
@@ -97,10 +142,11 @@ namespace AM.PageModel.MotionConfig
                 if (!cardResult.Success)
                 {
                     _cards = new List<MotionCardEntity>();
+                    _allItems = new List<MotionIoMapViewItem>();
                     _items = new List<MotionIoMapViewItem>();
 
                     OnPropertyChanged(nameof(Cards));
-                    OnPropertyChanged(nameof(Items));
+                    RaisePagingChanged();
                     OnPropertyChanged(nameof(SelectedCardText));
 
                     return Result.Fail(cardResult.Code, cardResult.Message, cardResult.Source);
@@ -117,10 +163,11 @@ namespace AM.PageModel.MotionConfig
                 var ioMapResult = _ioMapService.QueryAll();
                 if (!ioMapResult.Success)
                 {
+                    _allItems = new List<MotionIoMapViewItem>();
                     _items = new List<MotionIoMapViewItem>();
 
                     OnPropertyChanged(nameof(Cards));
-                    OnPropertyChanged(nameof(Items));
+                    RaisePagingChanged();
                     OnPropertyChanged(nameof(SelectedCardText));
 
                     return Result.Fail(ioMapResult.Code, ioMapResult.Message, ioMapResult.Source);
@@ -138,15 +185,17 @@ namespace AM.PageModel.MotionConfig
                     query = query.Where(x => string.Equals(x.IoType, _selectedIoType, StringComparison.OrdinalIgnoreCase));
                 }
 
-                _items = query
+                _allItems = query
                     .OrderBy(x => x.SortOrder)
                     .ThenBy(x => x.IoType)
                     .ThenBy(x => x.LogicalBit)
                     .Select(ToViewItem)
                     .ToList();
 
+                NormalizePage();
+                RebuildPageItems();
+
                 OnPropertyChanged(nameof(Cards));
-                OnPropertyChanged(nameof(Items));
                 OnPropertyChanged(nameof(SelectedCardText));
 
                 return Result.Ok("IO 映射列表加载成功");
@@ -170,7 +219,7 @@ namespace AM.PageModel.MotionConfig
                 ? _selectedIoType
                 : "DI";
 
-            var candidates = _items
+            var candidates = _allItems
                 .Where(x => string.Equals(x.IoType, nowIoType, StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
@@ -191,9 +240,52 @@ namespace AM.PageModel.MotionConfig
                 IsExtModule = false,
                 HardwareBit = 0,
                 IsEnabled = true,
-                SortOrder = _items.Count + 1,
+                SortOrder = _allItems.Count + 1,
                 Remark = string.Empty
             };
+        }
+
+        public void ChangePage(int currentPage, int pageSize)
+        {
+            if (pageSize <= 0)
+                pageSize = 9;
+
+            _pageSize = pageSize;
+            _currentPage = currentPage <= 0 ? 1 : currentPage;
+
+            NormalizePage();
+            RebuildPageItems();
+        }
+
+        private void NormalizePage()
+        {
+            if (_currentPage <= 0)
+                _currentPage = 1;
+
+            var pageCount = PageCount;
+            if (_currentPage > pageCount)
+                _currentPage = pageCount;
+        }
+
+        private void RebuildPageItems()
+        {
+            var skip = (_currentPage - 1) * _pageSize;
+            _items = _allItems
+                .Skip(skip)
+                .Take(_pageSize)
+                .ToList();
+
+            RaisePagingChanged();
+        }
+
+        private void RaisePagingChanged()
+        {
+            OnPropertyChanged(nameof(Items));
+            OnPropertyChanged(nameof(CurrentPage));
+            OnPropertyChanged(nameof(PageSize));
+            OnPropertyChanged(nameof(TotalCount));
+            OnPropertyChanged(nameof(PageCount));
+            OnPropertyChanged(nameof(PageSummaryText));
         }
 
         private MotionIoMapViewItem ToViewItem(MotionIoMapEntity entity)

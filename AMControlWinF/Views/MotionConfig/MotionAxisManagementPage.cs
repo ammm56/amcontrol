@@ -1,5 +1,6 @@
 ﻿using AM.PageModel.MotionConfig;
 using AMControlWinF.Tools;
+using AntdUI;
 using System;
 using System.Drawing;
 using System.Linq;
@@ -19,6 +20,7 @@ namespace AMControlWinF.Views.MotionConfig
         private readonly MotionAxisManagementPageModel _model;
         private bool _isFirstLoad;
         private bool _isBusy;
+        private bool _isUpdatingPagination;
 
         public MotionAxisManagementPage()
         {
@@ -37,6 +39,7 @@ namespace AMControlWinF.Views.MotionConfig
             buttonRefresh.Click += async (s, e) => await ReloadAsync();
             buttonSelectCard.Click += ButtonSelectCard_Click;
             buttonAddAxis.Click += async (s, e) => await AddAxisAsync();
+            paginationCards.ValueChanged += PaginationCards_ValueChanged;
         }
 
         private async void MotionAxisManagementPage_Load(object sender, EventArgs e)
@@ -58,11 +61,38 @@ namespace AMControlWinF.Views.MotionConfig
             {
                 await _model.LoadAsync();
                 labelSelectedCard.Text = _model.SelectedCardText;
+                RefreshPaginationUi();
                 BuildCards();
             }
             finally
             {
                 SetBusyState(false);
+            }
+        }
+
+        private void PaginationCards_ValueChanged(object sender, PagePageEventArgs e)
+        {
+            if (_isUpdatingPagination || _isBusy)
+                return;
+
+            _model.ChangePage(e.Current, e.PageSize);
+            RefreshPaginationUi();
+            BuildCards();
+        }
+
+        private void RefreshPaginationUi()
+        {
+            _isUpdatingPagination = true;
+            try
+            {
+                paginationCards.Total = _model.TotalCount;
+                paginationCards.PageSize = _model.PageSize;
+                paginationCards.Current = _model.CurrentPage;
+                labelPageSummary.Text = _model.PageSummaryText;
+            }
+            finally
+            {
+                _isUpdatingPagination = false;
             }
         }
 
@@ -77,6 +107,7 @@ namespace AMControlWinF.Views.MotionConfig
             buttonRefresh.Enabled = !_isBusy;
             buttonAddAxis.Enabled = !_isBusy;
             buttonSelectCard.Enabled = !_isBusy;
+            paginationCards.Enabled = !_isBusy;
         }
 
         private void BuildCards()
@@ -191,7 +222,6 @@ namespace AMControlWinF.Views.MotionConfig
             detail.Bind(item);
 
             PageDialogHelper.ShowDetailPopover(this, anchorControl, detail, new Size(500, 460));
-
         }
     }
 }

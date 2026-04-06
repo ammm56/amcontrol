@@ -15,17 +15,62 @@ namespace AM.PageModel.MotionConfig
     public class MotionCardManagementPageModel : BindableBase
     {
         private readonly MotionCardCrudService _cardService;
+        private List<MotionCardViewItem> _allCards;
         private List<MotionCardViewItem> _cards;
+        private int _currentPage;
+        private int _pageSize;
 
         public MotionCardManagementPageModel()
         {
             _cardService = new MotionCardCrudService();
+            _allCards = new List<MotionCardViewItem>();
             _cards = new List<MotionCardViewItem>();
+            _currentPage = 1;
+            _pageSize = 9;
         }
 
         public IList<MotionCardViewItem> Cards
         {
             get { return _cards; }
+        }
+
+        public int CurrentPage
+        {
+            get { return _currentPage; }
+        }
+
+        public int PageSize
+        {
+            get { return _pageSize; }
+        }
+
+        public int TotalCount
+        {
+            get { return _allCards.Count; }
+        }
+
+        public int PageCount
+        {
+            get
+            {
+                if (TotalCount <= 0 || _pageSize <= 0)
+                    return 1;
+
+                return (int)Math.Ceiling(TotalCount * 1.0 / _pageSize);
+            }
+        }
+
+        public string PageSummaryText
+        {
+            get
+            {
+                if (TotalCount <= 0)
+                    return "共 0 项";
+
+                var start = (_currentPage - 1) * _pageSize + 1;
+                var end = Math.Min(_currentPage * _pageSize, TotalCount);
+                return "第 " + start + " - " + end + " 项，共 " + TotalCount + " 项";
+            }
         }
 
         public async Task<Result> LoadAsync()
@@ -35,12 +80,13 @@ namespace AM.PageModel.MotionConfig
                 var result = _cardService.QueryAll();
                 if (!result.Success)
                 {
+                    _allCards = new List<MotionCardViewItem>();
                     _cards = new List<MotionCardViewItem>();
-                    OnPropertyChanged(nameof(Cards));
+                    RaisePagingChanged();
                     return Result.Fail(result.Code, result.Message, result.Source);
                 }
 
-                _cards = result.Items == null
+                _allCards = result.Items == null
                     ? new List<MotionCardViewItem>()
                     : result.Items
                         .OrderBy(x => x.InitOrder)
@@ -49,9 +95,59 @@ namespace AM.PageModel.MotionConfig
                         .Select(ToViewItem)
                         .ToList();
 
-                OnPropertyChanged(nameof(Cards));
+                NormalizePage();
+                RebuildPageItems();
+
                 return Result.Ok("控制卡列表加载成功");
             });
+        }
+
+        public void ChangePage(int currentPage, int pageSize)
+        {
+            if (pageSize <= 0)
+                pageSize = 9;
+
+            _pageSize = pageSize;
+            _currentPage = currentPage <= 0 ? 1 : currentPage;
+
+            NormalizePage();
+            RebuildPageItems();
+        }
+
+        public short GetDefaultCardId()
+        {
+            return _allCards.Count > 0 ? _allCards[0].CardId : (short)0;
+        }
+
+        private void NormalizePage()
+        {
+            if (_currentPage <= 0)
+                _currentPage = 1;
+
+            var pageCount = PageCount;
+            if (_currentPage > pageCount)
+                _currentPage = pageCount;
+        }
+
+        private void RebuildPageItems()
+        {
+            var skip = (_currentPage - 1) * _pageSize;
+            _cards = _allCards
+                .Skip(skip)
+                .Take(_pageSize)
+                .ToList();
+
+            RaisePagingChanged();
+        }
+
+        private void RaisePagingChanged()
+        {
+            OnPropertyChanged(nameof(Cards));
+            OnPropertyChanged(nameof(CurrentPage));
+            OnPropertyChanged(nameof(PageSize));
+            OnPropertyChanged(nameof(TotalCount));
+            OnPropertyChanged(nameof(PageCount));
+            OnPropertyChanged(nameof(PageSummaryText));
         }
 
         private static MotionCardViewItem ToViewItem(MotionCardEntity entity)

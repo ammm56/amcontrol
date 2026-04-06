@@ -17,17 +17,23 @@ namespace AM.PageModel.MotionConfig
         private readonly MotionAxisCrudService _axisService;
         private readonly MotionCardCrudService _cardService;
 
+        private List<MotionAxisViewItem> _allItems;
         private List<MotionAxisViewItem> _items;
         private List<MotionCardEntity> _cards;
         private short? _selectedCardId;
+        private int _currentPage;
+        private int _pageSize;
 
         public MotionAxisManagementPageModel()
         {
             _axisService = new MotionAxisCrudService();
             _cardService = new MotionCardCrudService();
 
+            _allItems = new List<MotionAxisViewItem>();
             _items = new List<MotionAxisViewItem>();
             _cards = new List<MotionCardEntity>();
+            _currentPage = 1;
+            _pageSize = 9;
         }
 
         public IList<MotionAxisViewItem> Items
@@ -38,6 +44,45 @@ namespace AM.PageModel.MotionConfig
         public IList<MotionCardEntity> Cards
         {
             get { return _cards; }
+        }
+
+        public int CurrentPage
+        {
+            get { return _currentPage; }
+        }
+
+        public int PageSize
+        {
+            get { return _pageSize; }
+        }
+
+        public int TotalCount
+        {
+            get { return _allItems.Count; }
+        }
+
+        public int PageCount
+        {
+            get
+            {
+                if (TotalCount <= 0 || _pageSize <= 0)
+                    return 1;
+
+                return (int)Math.Ceiling(TotalCount * 1.0 / _pageSize);
+            }
+        }
+
+        public string PageSummaryText
+        {
+            get
+            {
+                if (TotalCount <= 0)
+                    return "共 0 项";
+
+                var start = (_currentPage - 1) * _pageSize + 1;
+                var end = Math.Min(_currentPage * _pageSize, TotalCount);
+                return "第 " + start + " - " + end + " 项，共 " + TotalCount + " 项";
+            }
         }
 
         public short? SelectedCardId
@@ -81,10 +126,11 @@ namespace AM.PageModel.MotionConfig
                 if (!cardResult.Success)
                 {
                     _cards = new List<MotionCardEntity>();
+                    _allItems = new List<MotionAxisViewItem>();
                     _items = new List<MotionAxisViewItem>();
 
                     OnPropertyChanged(nameof(Cards));
-                    OnPropertyChanged(nameof(Items));
+                    RaisePagingChanged();
                     OnPropertyChanged(nameof(SelectedCardText));
 
                     return Result.Fail(cardResult.Code, cardResult.Message, cardResult.Source);
@@ -101,10 +147,11 @@ namespace AM.PageModel.MotionConfig
                 var axisResult = _axisService.QueryAll();
                 if (!axisResult.Success)
                 {
+                    _allItems = new List<MotionAxisViewItem>();
                     _items = new List<MotionAxisViewItem>();
 
                     OnPropertyChanged(nameof(Cards));
-                    OnPropertyChanged(nameof(Items));
+                    RaisePagingChanged();
                     OnPropertyChanged(nameof(SelectedCardText));
 
                     return Result.Fail(axisResult.Code, axisResult.Message, axisResult.Source);
@@ -116,14 +163,16 @@ namespace AM.PageModel.MotionConfig
                     query = query.Where(x => x.CardId == _selectedCardId.Value);
                 }
 
-                _items = query
+                _allItems = query
                     .OrderBy(x => x.SortOrder)
                     .ThenBy(x => x.LogicalAxis)
                     .Select(ToViewItem)
                     .ToList();
 
+                NormalizePage();
+                RebuildPageItems();
+
                 OnPropertyChanged(nameof(Cards));
-                OnPropertyChanged(nameof(Items));
                 OnPropertyChanged(nameof(SelectedCardText));
 
                 return Result.Ok("轴拓扑列表加载成功");
@@ -142,9 +191,9 @@ namespace AM.PageModel.MotionConfig
 
         public MotionAxisEntity CreateDefaultEntity()
         {
-            var nextLogicalAxis = _items.Count == 0
+            var nextLogicalAxis = _allItems.Count == 0
                 ? (short)101
-                : (short)(_items.Max(x => x.LogicalAxis) + 1);
+                : (short)(_allItems.Max(x => x.LogicalAxis) + 1);
 
             var defaultCardId = SelectedCardId
                 ?? (_cards.Count > 0 ? _cards[0].CardId : (short)0);
@@ -162,12 +211,55 @@ namespace AM.PageModel.MotionConfig
                 PhysicalCore = 1,
                 PhysicalAxis = 0,
                 IsEnabled = true,
-                SortOrder = _items.Count + 1,
+                SortOrder = _allItems.Count + 1,
                 Description = "新建轴拓扑配置",
                 Remark = string.Empty,
                 CreateTime = now,
                 UpdateTime = now
             };
+        }
+
+        public void ChangePage(int currentPage, int pageSize)
+        {
+            if (pageSize <= 0)
+                pageSize = 9;
+
+            _pageSize = pageSize;
+            _currentPage = currentPage <= 0 ? 1 : currentPage;
+
+            NormalizePage();
+            RebuildPageItems();
+        }
+
+        private void NormalizePage()
+        {
+            if (_currentPage <= 0)
+                _currentPage = 1;
+
+            var pageCount = PageCount;
+            if (_currentPage > pageCount)
+                _currentPage = pageCount;
+        }
+
+        private void RebuildPageItems()
+        {
+            var skip = (_currentPage - 1) * _pageSize;
+            _items = _allItems
+                .Skip(skip)
+                .Take(_pageSize)
+                .ToList();
+
+            RaisePagingChanged();
+        }
+
+        private void RaisePagingChanged()
+        {
+            OnPropertyChanged(nameof(Items));
+            OnPropertyChanged(nameof(CurrentPage));
+            OnPropertyChanged(nameof(PageSize));
+            OnPropertyChanged(nameof(TotalCount));
+            OnPropertyChanged(nameof(PageCount));
+            OnPropertyChanged(nameof(PageSummaryText));
         }
 
         private MotionAxisViewItem ToViewItem(MotionAxisEntity entity)

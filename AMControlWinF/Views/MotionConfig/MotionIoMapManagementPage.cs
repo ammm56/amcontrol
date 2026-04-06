@@ -1,5 +1,6 @@
 ﻿using AM.PageModel.MotionConfig;
 using AMControlWinF.Tools;
+using AntdUI;
 using System;
 using System.Drawing;
 using System.Linq;
@@ -19,6 +20,7 @@ namespace AMControlWinF.Views.MotionConfig
         private readonly MotionIoMapManagementPageModel _model;
         private bool _isFirstLoad;
         private bool _isBusy;
+        private bool _isUpdatingPagination;
 
         public MotionIoMapManagementPage()
         {
@@ -41,6 +43,7 @@ namespace AMControlWinF.Views.MotionConfig
             buttonFilterDI.Click += ButtonFilterDI_Click;
             buttonFilterDO.Click += ButtonFilterDO_Click;
             buttonAddIoMap.Click += async (s, e) => await AddIoMapAsync();
+            paginationCards.ValueChanged += PaginationCards_ValueChanged;
         }
 
         private async void MotionIoMapManagementPage_Load(object sender, EventArgs e)
@@ -63,11 +66,38 @@ namespace AMControlWinF.Views.MotionConfig
                 await _model.LoadAsync();
                 labelSelectedCard.Text = _model.SelectedCardText;
                 UpdateIoTypeButtons();
+                RefreshPaginationUi();
                 BuildCards();
             }
             finally
             {
                 SetBusyState(false);
+            }
+        }
+
+        private void PaginationCards_ValueChanged(object sender, PagePageEventArgs e)
+        {
+            if (_isUpdatingPagination || _isBusy)
+                return;
+
+            _model.ChangePage(e.Current, e.PageSize);
+            RefreshPaginationUi();
+            BuildCards();
+        }
+
+        private void RefreshPaginationUi()
+        {
+            _isUpdatingPagination = true;
+            try
+            {
+                paginationCards.Total = _model.TotalCount;
+                paginationCards.PageSize = _model.PageSize;
+                paginationCards.Current = _model.CurrentPage;
+                labelPageSummary.Text = _model.PageSummaryText;
+            }
+            finally
+            {
+                _isUpdatingPagination = false;
             }
         }
 
@@ -85,21 +115,22 @@ namespace AMControlWinF.Views.MotionConfig
             buttonFilterAll.Enabled = !_isBusy;
             buttonFilterDI.Enabled = !_isBusy;
             buttonFilterDO.Enabled = !_isBusy;
+            paginationCards.Enabled = !_isBusy;
         }
 
         private void UpdateIoTypeButtons()
         {
             buttonFilterAll.Type = string.Equals(_model.SelectedIoType, "All", StringComparison.OrdinalIgnoreCase)
-                ? AntdUI.TTypeMini.Primary
-                : AntdUI.TTypeMini.Default;
+                ? TTypeMini.Primary
+                : TTypeMini.Default;
 
             buttonFilterDI.Type = string.Equals(_model.SelectedIoType, "DI", StringComparison.OrdinalIgnoreCase)
-                ? AntdUI.TTypeMini.Primary
-                : AntdUI.TTypeMini.Default;
+                ? TTypeMini.Primary
+                : TTypeMini.Default;
 
             buttonFilterDO.Type = string.Equals(_model.SelectedIoType, "DO", StringComparison.OrdinalIgnoreCase)
-                ? AntdUI.TTypeMini.Primary
-                : AntdUI.TTypeMini.Default;
+                ? TTypeMini.Primary
+                : TTypeMini.Default;
         }
 
         private void BuildCards()

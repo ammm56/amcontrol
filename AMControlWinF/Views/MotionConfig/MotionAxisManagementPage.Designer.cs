@@ -19,6 +19,9 @@
             this.panelRoot = new AntdUI.Panel();
             this.panelCardsHost = new AntdUI.Panel();
             this.flowCards = new AntdUI.FlowPanel();
+            this.panelPagination = new AntdUI.Panel();
+            this.paginationCards = new AntdUI.Pagination();
+            this.labelPageSummary = new AntdUI.Label();
             this.labelCardsTitle = new AntdUI.Label();
             this.panelPlaceholder = new AntdUI.Panel();
             this.panelToolbar = new AntdUI.Panel();
@@ -30,6 +33,7 @@
             this.buttonSelectCard = new AntdUI.Button();
             this.panelRoot.SuspendLayout();
             this.panelCardsHost.SuspendLayout();
+            this.panelPagination.SuspendLayout();
             this.panelToolbar.SuspendLayout();
             this.flowToolbarRight.SuspendLayout();
             this.flowToolbarLeft.SuspendLayout();
@@ -53,6 +57,7 @@
             // 
             this.panelCardsHost.BackColor = System.Drawing.Color.Transparent;
             this.panelCardsHost.Controls.Add(this.flowCards);
+            this.panelCardsHost.Controls.Add(this.panelPagination);
             this.panelCardsHost.Controls.Add(this.labelCardsTitle);
             this.panelCardsHost.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelCardsHost.Location = new System.Drawing.Point(8, 62);
@@ -72,9 +77,47 @@
             this.flowCards.Location = new System.Drawing.Point(12, 48);
             this.flowCards.Margin = new System.Windows.Forms.Padding(0);
             this.flowCards.Name = "flowCards";
-            this.flowCards.Size = new System.Drawing.Size(810, 550);
+            this.flowCards.Size = new System.Drawing.Size(810, 502);
             this.flowCards.TabIndex = 1;
             this.flowCards.Text = "flowCards";
+            // 
+            // panelPagination
+            // 
+            this.panelPagination.Controls.Add(this.paginationCards);
+            this.panelPagination.Controls.Add(this.labelPageSummary);
+            this.panelPagination.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.panelPagination.Location = new System.Drawing.Point(12, 550);
+            this.panelPagination.Margin = new System.Windows.Forms.Padding(0);
+            this.panelPagination.Name = "panelPagination";
+            this.panelPagination.Padding = new System.Windows.Forms.Padding(4, 8, 4, 0);
+            this.panelPagination.Radius = 0;
+            this.panelPagination.Size = new System.Drawing.Size(810, 48);
+            this.panelPagination.TabIndex = 2;
+            this.panelPagination.Text = "panelPagination";
+            // 
+            // paginationCards
+            // 
+            this.paginationCards.Dock = System.Windows.Forms.DockStyle.Right;
+            this.paginationCards.Location = new System.Drawing.Point(244, 8);
+            this.paginationCards.Margin = new System.Windows.Forms.Padding(0);
+            this.paginationCards.Name = "paginationCards";
+            this.paginationCards.PageSize = 9;
+            this.paginationCards.PageSizeOptions = new int[] { 3, 6, 9, 12, 24, 36 };
+            this.paginationCards.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+            this.paginationCards.ShowSizeChanger = true;
+            this.paginationCards.Size = new System.Drawing.Size(562, 40);
+            this.paginationCards.TabIndex = 1;
+            this.paginationCards.Text = "paginationCards";
+            // 
+            // labelPageSummary
+            // 
+            this.labelPageSummary.Dock = System.Windows.Forms.DockStyle.Left;
+            this.labelPageSummary.Location = new System.Drawing.Point(4, 8);
+            this.labelPageSummary.Margin = new System.Windows.Forms.Padding(0);
+            this.labelPageSummary.Name = "labelPageSummary";
+            this.labelPageSummary.Size = new System.Drawing.Size(240, 40);
+            this.labelPageSummary.TabIndex = 0;
+            this.labelPageSummary.Text = "共 0 项";
             // 
             // labelCardsTitle
             // 
@@ -197,6 +240,7 @@
             this.Size = new System.Drawing.Size(850, 680);
             this.panelRoot.ResumeLayout(false);
             this.panelCardsHost.ResumeLayout(false);
+            this.panelPagination.ResumeLayout(false);
             this.panelToolbar.ResumeLayout(false);
             this.flowToolbarRight.ResumeLayout(false);
             this.flowToolbarLeft.ResumeLayout(false);
@@ -216,5 +260,8 @@
         private AntdUI.Panel panelCardsHost;
         private AntdUI.Label labelCardsTitle;
         private AntdUI.FlowPanel flowCards;
+        private AntdUI.Panel panelPagination;
+        private AntdUI.Label labelPageSummary;
+        private AntdUI.Pagination paginationCards;
     }
 }

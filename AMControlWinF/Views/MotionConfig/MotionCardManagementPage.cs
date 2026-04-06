@@ -2,6 +2,7 @@
 using AM.Model.Entity.Motion.Topology;
 using AM.PageModel.MotionConfig;
 using AMControlWinF.Tools;
+using AntdUI;
 using System;
 using System.Drawing;
 using System.Threading.Tasks;
@@ -21,6 +22,7 @@ namespace AMControlWinF.Views.MotionConfig
         private readonly MotionCardCrudService _cardService;
         private bool _isFirstLoad;
         private bool _isBusy;
+        private bool _isUpdatingPagination;
 
         public MotionCardManagementPage()
         {
@@ -39,6 +41,7 @@ namespace AMControlWinF.Views.MotionConfig
 
             buttonRefresh.Click += async (s, e) => await ReloadAsync();
             buttonAddCard.Click += async (s, e) => await AddCardAsync();
+            paginationCards.ValueChanged += PaginationCards_ValueChanged;
         }
 
         private async void MotionCardManagementPage_Load(object sender, EventArgs e)
@@ -59,11 +62,38 @@ namespace AMControlWinF.Views.MotionConfig
             try
             {
                 await _model.LoadAsync();
+                RefreshPaginationUi();
                 BuildCards();
             }
             finally
             {
                 SetBusyState(false);
+            }
+        }
+
+        private void PaginationCards_ValueChanged(object sender, PagePageEventArgs e)
+        {
+            if (_isUpdatingPagination || _isBusy)
+                return;
+
+            _model.ChangePage(e.Current, e.PageSize);
+            RefreshPaginationUi();
+            BuildCards();
+        }
+
+        private void RefreshPaginationUi()
+        {
+            _isUpdatingPagination = true;
+            try
+            {
+                paginationCards.Total = _model.TotalCount;
+                paginationCards.PageSize = _model.PageSize;
+                paginationCards.Current = _model.CurrentPage;
+                labelPageSummary.Text = _model.PageSummaryText;
+            }
+            finally
+            {
+                _isUpdatingPagination = false;
             }
         }
 
@@ -77,6 +107,7 @@ namespace AMControlWinF.Views.MotionConfig
         {
             buttonRefresh.Enabled = !_isBusy;
             buttonAddCard.Enabled = !_isBusy;
+            paginationCards.Enabled = !_isBusy;
         }
 
         private void BuildCards()
@@ -109,6 +140,7 @@ namespace AMControlWinF.Views.MotionConfig
                 return;
 
             var entity = CreateDefaultCardEntity();
+            entity.CardId = _model.GetDefaultCardId();
 
             using (var dialog = new MotionCardEditDialog(entity, true))
             {

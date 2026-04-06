@@ -19,6 +19,9 @@
             this.panelRoot = new AntdUI.Panel();
             this.panelCardsHost = new AntdUI.Panel();
             this.flowCards = new AntdUI.FlowPanel();
+            this.panelPagination = new AntdUI.Panel();
+            this.paginationCards = new AntdUI.Pagination();
+            this.labelPageSummary = new AntdUI.Label();
             this.labelCardsTitle = new AntdUI.Label();
             this.panelPlaceholder = new AntdUI.Panel();
             this.panelToolbar = new AntdUI.Panel();
@@ -26,13 +29,14 @@
             this.buttonAddIoMap = new AntdUI.Button();
             this.buttonRefresh = new AntdUI.Button();
             this.flowToolbarLeft = new AntdUI.FlowPanel();
-            this.labelSelectedCard = new AntdUI.Label();
             this.buttonFilterDO = new AntdUI.Button();
             this.buttonFilterDI = new AntdUI.Button();
             this.buttonFilterAll = new AntdUI.Button();
+            this.labelSelectedCard = new AntdUI.Label();
             this.buttonSelectCard = new AntdUI.Button();
             this.panelRoot.SuspendLayout();
             this.panelCardsHost.SuspendLayout();
+            this.panelPagination.SuspendLayout();
             this.panelToolbar.SuspendLayout();
             this.flowToolbarRight.SuspendLayout();
             this.flowToolbarLeft.SuspendLayout();
@@ -56,6 +60,7 @@
             // 
             this.panelCardsHost.BackColor = System.Drawing.Color.Transparent;
             this.panelCardsHost.Controls.Add(this.flowCards);
+            this.panelCardsHost.Controls.Add(this.panelPagination);
             this.panelCardsHost.Controls.Add(this.labelCardsTitle);
             this.panelCardsHost.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelCardsHost.Location = new System.Drawing.Point(8, 62);
@@ -75,9 +80,47 @@
             this.flowCards.Location = new System.Drawing.Point(12, 48);
             this.flowCards.Margin = new System.Windows.Forms.Padding(0);
             this.flowCards.Name = "flowCards";
-            this.flowCards.Size = new System.Drawing.Size(810, 550);
+            this.flowCards.Size = new System.Drawing.Size(810, 502);
             this.flowCards.TabIndex = 1;
             this.flowCards.Text = "flowCards";
+            // 
+            // panelPagination
+            // 
+            this.panelPagination.Controls.Add(this.paginationCards);
+            this.panelPagination.Controls.Add(this.labelPageSummary);
+            this.panelPagination.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.panelPagination.Location = new System.Drawing.Point(12, 550);
+            this.panelPagination.Margin = new System.Windows.Forms.Padding(0);
+            this.panelPagination.Name = "panelPagination";
+            this.panelPagination.Padding = new System.Windows.Forms.Padding(4, 8, 4, 0);
+            this.panelPagination.Radius = 0;
+            this.panelPagination.Size = new System.Drawing.Size(810, 48);
+            this.panelPagination.TabIndex = 2;
+            this.panelPagination.Text = "panelPagination";
+            // 
+            // paginationCards
+            // 
+            this.paginationCards.Dock = System.Windows.Forms.DockStyle.Right;
+            this.paginationCards.Location = new System.Drawing.Point(244, 8);
+            this.paginationCards.Margin = new System.Windows.Forms.Padding(0);
+            this.paginationCards.Name = "paginationCards";
+            this.paginationCards.PageSize = 9;
+            this.paginationCards.PageSizeOptions = new int[] { 3, 6, 9, 12, 24, 36 };
+            this.paginationCards.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+            this.paginationCards.ShowSizeChanger = true;
+            this.paginationCards.Size = new System.Drawing.Size(562, 40);
+            this.paginationCards.TabIndex = 1;
+            this.paginationCards.Text = "paginationCards";
+            // 
+            // labelPageSummary
+            // 
+            this.labelPageSummary.Dock = System.Windows.Forms.DockStyle.Left;
+            this.labelPageSummary.Location = new System.Drawing.Point(4, 8);
+            this.labelPageSummary.Margin = new System.Windows.Forms.Padding(0);
+            this.labelPageSummary.Name = "labelPageSummary";
+            this.labelPageSummary.Size = new System.Drawing.Size(240, 40);
+            this.labelPageSummary.TabIndex = 0;
+            this.labelPageSummary.Text = "共 0 项";
             // 
             // labelCardsTitle
             // 
@@ -158,7 +201,6 @@
             // 
             // flowToolbarLeft
             // 
-            
             this.flowToolbarLeft.Controls.Add(this.buttonFilterDO);
             this.flowToolbarLeft.Controls.Add(this.buttonFilterDI);
             this.flowToolbarLeft.Controls.Add(this.buttonFilterAll);
@@ -173,18 +215,9 @@
             this.flowToolbarLeft.TabIndex = 0;
             this.flowToolbarLeft.Text = "flowToolbarLeft";
             // 
-            // labelSelectedCard
-            // 
-            this.labelSelectedCard.Location = new System.Drawing.Point(412, 0);
-            this.labelSelectedCard.Margin = new System.Windows.Forms.Padding(0);
-            this.labelSelectedCard.Name = "labelSelectedCard";
-            this.labelSelectedCard.Size = new System.Drawing.Size(148, 36);
-            this.labelSelectedCard.TabIndex = 4;
-            this.labelSelectedCard.Text = "当前：全部控制卡";
-            // 
             // buttonFilterDO
             // 
-            this.buttonFilterDO.Location = new System.Drawing.Point(324, 0);
+            this.buttonFilterDO.Location = new System.Drawing.Point(480, 0);
             this.buttonFilterDO.Margin = new System.Windows.Forms.Padding(0);
             this.buttonFilterDO.Name = "buttonFilterDO";
             this.buttonFilterDO.Radius = 8;
@@ -195,7 +228,7 @@
             // 
             // buttonFilterDI
             // 
-            this.buttonFilterDI.Location = new System.Drawing.Point(236, 0);
+            this.buttonFilterDI.Location = new System.Drawing.Point(392, 0);
             this.buttonFilterDI.Margin = new System.Windows.Forms.Padding(0);
             this.buttonFilterDI.Name = "buttonFilterDI";
             this.buttonFilterDI.Radius = 8;
@@ -206,7 +239,7 @@
             // 
             // buttonFilterAll
             // 
-            this.buttonFilterAll.Location = new System.Drawing.Point(148, 0);
+            this.buttonFilterAll.Location = new System.Drawing.Point(304, 0);
             this.buttonFilterAll.Margin = new System.Windows.Forms.Padding(0);
             this.buttonFilterAll.Name = "buttonFilterAll";
             this.buttonFilterAll.Radius = 8;
@@ -215,6 +248,15 @@
             this.buttonFilterAll.Text = "全部";
             this.buttonFilterAll.Type = AntdUI.TTypeMini.Primary;
             this.buttonFilterAll.WaveSize = 0;
+            // 
+            // labelSelectedCard
+            // 
+            this.labelSelectedCard.Location = new System.Drawing.Point(148, 0);
+            this.labelSelectedCard.Margin = new System.Windows.Forms.Padding(0);
+            this.labelSelectedCard.Name = "labelSelectedCard";
+            this.labelSelectedCard.Size = new System.Drawing.Size(148, 36);
+            this.labelSelectedCard.TabIndex = 4;
+            this.labelSelectedCard.Text = "当前：全部控制卡";
             // 
             // buttonSelectCard
             // 
@@ -238,6 +280,7 @@
             this.Size = new System.Drawing.Size(850, 680);
             this.panelRoot.ResumeLayout(false);
             this.panelCardsHost.ResumeLayout(false);
+            this.panelPagination.ResumeLayout(false);
             this.panelToolbar.ResumeLayout(false);
             this.flowToolbarRight.ResumeLayout(false);
             this.flowToolbarLeft.ResumeLayout(false);
@@ -260,5 +303,8 @@
         private AntdUI.Panel panelCardsHost;
         private AntdUI.Label labelCardsTitle;
         private AntdUI.FlowPanel flowCards;
+        private AntdUI.Panel panelPagination;
+        private AntdUI.Label labelPageSummary;
+        private AntdUI.Pagination paginationCards;
     }
 }
