@@ -83,6 +83,61 @@ namespace AMControlWinF.Tools
         }
 
         /// <summary>
+        /// 统一弹出页面详情 Popover。
+        /// 包含：内容尺寸设置、DPI 适配、方向计算、关闭释放。
+        /// </summary>
+        public static Form ShowDetailPopover(
+            Control owner,
+            Control anchorControl,
+            Control content,
+            Size contentSize)
+        {
+            return ShowPopoverPanel(owner, anchorControl, content, contentSize);
+        }
+
+        /// <summary>
+        /// 统一弹出 Popover 面板。
+        /// </summary>
+        public static Form ShowPopoverPanel(
+            Control owner,
+            Control anchorControl,
+            Control content,
+            Size contentSize,
+            int radius = 10,
+            int gap = 6,
+            bool focus = false)
+        {
+            if (anchorControl == null || content == null)
+                return null;
+
+            content.Margin = new Padding(0);
+            content.Size = contentSize;
+            content.MinimumSize = contentSize;
+
+            var window = ResolveOwnerWindow(owner) ?? ResolveOwnerWindow(anchorControl);
+            if (window != null)
+            {
+                window.AutoDpi(content);
+            }
+
+            var align = ResolvePopoverAlign(owner, anchorControl, content.Size);
+
+            return AntdUI.Popover.open(new AntdUI.Popover.Config(anchorControl, content)
+            {
+                ArrowAlign = align,
+                Radius = radius,
+                Padding = new Size(16, 16),
+                Gap = gap,
+                Focus = focus,
+                OnClosing = (s, e) =>
+                {
+                    if (content != null && !content.IsDisposed)
+                        content.Dispose();
+                }
+            });
+        }
+
+        /// <summary>
         /// 页面确认框，返回是否点击确定。
         /// </summary>
         public static bool Confirm(
@@ -169,6 +224,58 @@ namespace AMControlWinF.Tools
                 Draggable = true,
                 Padding = new Size(24, 20)
             });
+        }
+
+        /// <summary>
+        /// 计算 Popover 最合适的箭头方向。
+        /// 规则：优先落在可用空间更大的象限。
+        /// </summary>
+        private static TAlign ResolvePopoverAlign(Control owner, Control anchorControl, Size popupSize)
+        {
+            var host = ResolveHostForm(owner, anchorControl);
+            if (host == null || anchorControl == null)
+                return TAlign.LT;
+
+            var anchorScreenRect = anchorControl.RectangleToScreen(anchorControl.ClientRectangle);
+            var anchorRect = new Rectangle(
+                host.PointToClient(anchorScreenRect.Location),
+                anchorScreenRect.Size);
+
+            var hostClientRect = host.ClientRectangle;
+
+            var spaceLeft = anchorRect.Left;
+            var spaceRight = hostClientRect.Width - anchorRect.Right;
+            var spaceTop = anchorRect.Top;
+            var spaceBottom = hostClientRect.Height - anchorRect.Bottom;
+
+            var showOnRight = spaceRight >= popupSize.Width || spaceRight >= spaceLeft;
+            var showBelow = spaceBottom >= popupSize.Height || spaceBottom >= spaceTop;
+
+            if (showOnRight && showBelow)
+                return TAlign.LT;
+
+            if (showOnRight && !showBelow)
+                return TAlign.LB;
+
+            if (!showOnRight && showBelow)
+                return TAlign.RT;
+
+            return TAlign.RB;
+        }
+
+        private static Form ResolveHostForm(Control owner, Control anchorControl)
+        {
+            if (owner != null)
+            {
+                var ownerForm = owner.FindForm();
+                if (ownerForm != null)
+                    return ownerForm;
+            }
+
+            if (anchorControl != null)
+                return anchorControl.FindForm();
+
+            return null;
         }
 
         private static AntdUI.Window ResolveOwnerWindow(Control owner)
