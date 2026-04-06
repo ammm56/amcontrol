@@ -15,21 +15,34 @@ namespace AMControlWinF.Views.MotionConfig
     public partial class MotionCardSelectDialog : AntdUI.Window
     {
         private readonly MotionCardManagementPageModel _model;
+        private readonly short? _initialSelectedCardId;
         private bool _isFirstLoad;
         private short? _selectedCardId;
 
         public MotionCardSelectDialog()
+            : this(null)
+        {
+        }
+
+        public MotionCardSelectDialog(short? selectedCardId)
         {
             InitializeComponent();
 
             _model = new MotionCardManagementPageModel();
+            _initialSelectedCardId = selectedCardId;
+            _selectedCardId = selectedCardId;
 
             BindEvents();
             ApplyThemeFromConfig();
             UpdateSelectionUi();
         }
 
-        public short SelectedCardId { get; private set; }
+        /// <summary>
+        /// 选择结果。
+        /// null 表示全部控制卡；
+        /// 其余值（包括 0）表示具体控制卡 CardId。
+        /// </summary>
+        public short? SelectedCardId { get; private set; }
 
         private void BindEvents()
         {
@@ -60,6 +73,12 @@ namespace AMControlWinF.Views.MotionConfig
             try
             {
                 await _model.LoadAsync();
+
+                if (!_selectedCardId.HasValue && _initialSelectedCardId.HasValue)
+                {
+                    _selectedCardId = _initialSelectedCardId;
+                }
+
                 BuildCards();
                 UpdateSelectionUi();
             }
@@ -149,7 +168,10 @@ namespace AMControlWinF.Views.MotionConfig
                 var selected = _model.Cards.FirstOrDefault(x => x.CardId == _selectedCardId.Value);
                 if (selected != null)
                 {
-                    var name = string.IsNullOrWhiteSpace(selected.DisplayName) ? selected.Name : selected.DisplayName;
+                    var name = string.IsNullOrWhiteSpace(selected.DisplayName)
+                        ? selected.Name
+                        : selected.DisplayName;
+
                     labelCurrentSelection.Text = "当前选择：" + name + " (#" + selected.CardId + ")";
                 }
                 else
@@ -177,7 +199,7 @@ namespace AMControlWinF.Views.MotionConfig
 
         private void ButtonOk_Click(object sender, EventArgs e)
         {
-            SelectedCardId = _selectedCardId ?? (short)0;
+            SelectedCardId = _selectedCardId;
             DialogResult = DialogResult.OK;
             Close();
         }

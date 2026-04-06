@@ -108,14 +108,12 @@ namespace AMControlWinF.Views.MotionConfig
             if (_isBusy)
                 return;
 
-            using (var dialog = new MotionCardSelectDialog())
+            using (var dialog = new MotionCardSelectDialog(_model.SelectedCardId))
             {
                 if (dialog.ShowDialog(FindForm()) != DialogResult.OK)
                     return;
 
-                _model.SelectedCardId = dialog.SelectedCardId > 0
-                    ? (short?)dialog.SelectedCardId
-                    : null;
+                _model.SelectedCardId = dialog.SelectedCardId;
 
                 await ReloadAsync();
             }

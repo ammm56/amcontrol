@@ -48,6 +48,7 @@ namespace AMControlWinF.Views.MotionConfig
             labelSubTitle.Text = name;
 
             buttonTypeTag.Text = cardTypeText;
+            //buttonTypeTag.Type = ResolveCardTypeTagType(item == null ? 99 : item.CardType);
             labelValueCardId.Text = "#" + cardIdText;
 
             labelValueCore.Text = "核: " + coreText;

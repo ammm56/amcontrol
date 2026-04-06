@@ -148,6 +148,12 @@ namespace AMControlWinF.Views.MotionConfig
                 ? card.CoreNumber
                 : 1;
 
+            if (axisMax <= 0)
+                axisMax = 1;
+
+            if (coreMax <= 0)
+                coreMax = 1;
+
             var axisOptions = BuildShortRange(0, axisMax - 1);
             var coreOptions = BuildShortRange(1, coreMax);
             var physicalAxisOptions = BuildShortRange(0, axisMax - 1);
