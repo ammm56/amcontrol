@@ -184,9 +184,11 @@ namespace AMControlWinF.Views.MotionConfig
                 window.AutoDpi(detail);
             }
 
+            var align = ResolveDetailPopoverAlign(anchorControl, detail.Size);
+
             AntdUI.Popover.open(new AntdUI.Popover.Config(anchorControl, detail)
             {
-                ArrowAlign = AntdUI.TAlign.LT,
+                ArrowAlign = align,
                 Radius = 10,
                 Padding = new Size(16, 16),
                 Gap = 6,
@@ -196,6 +198,39 @@ namespace AMControlWinF.Views.MotionConfig
                     detail.Dispose();
                 }
             });
+        }
+
+        private AntdUI.TAlign ResolveDetailPopoverAlign(Control anchorControl, Size popupSize)
+        {
+            var host = FindForm();
+            if (host == null || anchorControl == null)
+                return AntdUI.TAlign.LT;
+
+            var anchorScreenRect = anchorControl.RectangleToScreen(anchorControl.ClientRectangle);
+            var hostClientRect = host.RectangleToClient(host.RectangleToScreen(host.ClientRectangle));
+
+            var anchorRect = new Rectangle(
+                host.PointToClient(anchorScreenRect.Location),
+                anchorScreenRect.Size);
+
+            var spaceLeft = anchorRect.Left;
+            var spaceRight = hostClientRect.Width - anchorRect.Right;
+            var spaceTop = anchorRect.Top;
+            var spaceBottom = hostClientRect.Height - anchorRect.Bottom;
+
+            var showOnRight = spaceRight >= popupSize.Width || spaceRight >= spaceLeft;
+            var showBelow = spaceBottom >= popupSize.Height || spaceBottom >= spaceTop;
+
+            if (showOnRight && showBelow)
+                return AntdUI.TAlign.LT; // 气泡在按钮右下，箭头在左上
+
+            if (showOnRight && !showBelow)
+                return AntdUI.TAlign.LB; // 气泡在按钮右上，箭头在左下
+
+            if (!showOnRight && showBelow)
+                return AntdUI.TAlign.RT; // 气泡在按钮左下，箭头在右上
+
+            return AntdUI.TAlign.RB; // 气泡在按钮左上，箭头在右下
         }
 
         private static MotionCardEntity CreateDefaultCardEntity()
