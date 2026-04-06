@@ -80,8 +80,8 @@ namespace AMControlWinF.Views.MotionConfig
             Text = _isAdd ? "新增控制卡" : "编辑控制卡";
             labelDialogTitle.Text = _isAdd ? "新增控制卡" : "编辑控制卡";
             labelDialogDescription.Text = _isAdd
-                ? "填写控制卡信息。"
-                : "修改控制卡信息。";
+                ? "填写控制卡信息"
+                : "修改控制卡信息";
 
             //Size = new System.Drawing.Size(640, 760);
             buttonOk.Text = "保存";

@@ -228,22 +228,23 @@
             // 
             // labelDialogDescription
             // 
-            this.labelDialogDescription.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelDialogDescription.Location = new System.Drawing.Point(4, 38);
+            this.labelDialogDescription.Dock = System.Windows.Forms.DockStyle.Right;
+            this.labelDialogDescription.Location = new System.Drawing.Point(573, 0);
             this.labelDialogDescription.Margin = new System.Windows.Forms.Padding(0);
             this.labelDialogDescription.Name = "labelDialogDescription";
-            this.labelDialogDescription.Size = new System.Drawing.Size(836, 18);
+            this.labelDialogDescription.Size = new System.Drawing.Size(267, 48);
             this.labelDialogDescription.TabIndex = 1;
-            this.labelDialogDescription.Text = "在列表中选择目标控制卡。";
+            this.labelDialogDescription.Text = "在列表中选择目标控制卡";
+            this.labelDialogDescription.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // labelDialogTitle
             // 
-            this.labelDialogTitle.Dock = System.Windows.Forms.DockStyle.Top;
+            this.labelDialogTitle.Dock = System.Windows.Forms.DockStyle.Left;
             this.labelDialogTitle.Font = new System.Drawing.Font("Microsoft YaHei UI", 18F, System.Drawing.FontStyle.Bold);
             this.labelDialogTitle.Location = new System.Drawing.Point(4, 0);
             this.labelDialogTitle.Margin = new System.Windows.Forms.Padding(0);
             this.labelDialogTitle.Name = "labelDialogTitle";
-            this.labelDialogTitle.Size = new System.Drawing.Size(836, 38);
+            this.labelDialogTitle.Size = new System.Drawing.Size(339, 48);
             this.labelDialogTitle.TabIndex = 0;
             this.labelDialogTitle.Text = "选择控制卡";
             // 

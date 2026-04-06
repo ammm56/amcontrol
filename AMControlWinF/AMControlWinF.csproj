@@ -193,6 +193,30 @@
     <Compile Include="Views\MotionConfig\MotionCardSelectDialog.Designer.cs">
       <DependentUpon>MotionCardSelectDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\MotionConfig\MotionIoMapCardControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionIoMapCardControl.Designer.cs">
+      <DependentUpon>MotionIoMapCardControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionIoMapDetailControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionIoMapDetailControl.Designer.cs">
+      <DependentUpon>MotionIoMapDetailControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionIoMapEditDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionIoMapEditDialog.Designer.cs">
+      <DependentUpon>MotionIoMapEditDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionIoMapManagementPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionIoMapManagementPage.Designer.cs">
+      <DependentUpon>MotionIoMapManagementPage.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </EmbeddedResource>
@@ -241,6 +265,9 @@
     <EmbeddedResource Include="Views\MotionConfig\MotionAxisDetailControl.resx">
       <DependentUpon>MotionAxisDetailControl.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\MotionAxisEditDialog.resx">
+      <DependentUpon>MotionAxisEditDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Views\MotionConfig\MotionAxisManagementPage.resx">
       <DependentUpon>MotionAxisManagementPage.cs</DependentUpon>
     </EmbeddedResource>
@@ -261,6 +288,18 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Views\MotionConfig\MotionCardManagementPage.resx">
       <DependentUpon>MotionCardManagementPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\MotionCardSelectDialog.resx">
+      <DependentUpon>MotionCardSelectDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\MotionIoMapCardControl.resx">
+      <DependentUpon>MotionIoMapCardControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\MotionIoMapDetailControl.resx">
+      <DependentUpon>MotionIoMapDetailControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\MotionIoMapEditDialog.resx">
+      <DependentUpon>MotionIoMapEditDialog.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.manifest" />
     <None Include="Properties\Settings.settings">

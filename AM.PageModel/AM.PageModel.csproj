@@ -51,6 +51,7 @@
     <Compile Include="Main\MainWindowModel.cs" />
     <Compile Include="MotionConfig\MotionAxisManagementPageModel.cs" />
     <Compile Include="MotionConfig\MotionCardManagementPageModel.cs" />
+    <Compile Include="MotionConfig\MotionIoMapManagementPageModel.cs" />
     <Compile Include="Navigation\NavigationCatalog.cs" />
     <Compile Include="Navigation\NavPageDef.cs" />
     <Compile Include="Navigation\NavPrimaryDef.cs" />

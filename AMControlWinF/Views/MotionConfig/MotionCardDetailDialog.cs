@@ -35,8 +35,8 @@ namespace AMControlWinF.Views.MotionConfig
             Text = "控制卡详情";
             labelDialogTitle.Text = "控制卡详情";
             labelDialogDescription.Text = item == null
-                ? "查看控制卡详细信息。"
-                : "查看控制卡【" + (string.IsNullOrWhiteSpace(item.DisplayName) ? item.Name : item.DisplayName) + "】的详细信息。";
+                ? "查看控制卡详细信息"
+                : "查看控制卡【" + (string.IsNullOrWhiteSpace(item.DisplayName) ? item.Name : item.DisplayName) + "】的详细信息";
 
             motionCardDetailControl.Bind(item);
         }

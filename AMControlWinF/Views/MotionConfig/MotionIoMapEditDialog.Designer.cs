@@ -1,6 +1,6 @@
 ﻿namespace AMControlWinF.Views.MotionConfig
 {
-    partial class MotionAxisEditDialog
+    partial class MotionIoMapEditDialog
     {
         private System.ComponentModel.IContainer components = null;
 
@@ -21,34 +21,30 @@
             this.stackSectionRemark = new AntdUI.StackPanel();
             this.inputRemark = new AntdUI.Input();
             this.labelRemark = new AntdUI.Label();
-            this.inputDescription = new AntdUI.Input();
-            this.labelDescription = new AntdUI.Label();
             this.labelSectionRemark = new AntdUI.Label();
             this.stackSectionRuntime = new AntdUI.StackPanel();
             this.inputSortOrder = new AntdUI.Input();
             this.labelSortOrder = new AntdUI.Label();
             this.checkIsEnabled = new AntdUI.Checkbox();
             this.labelEnabled = new AntdUI.Label();
-            this.dropdownPhysicalAxis = new AntdUI.Select();
-            this.labelPhysicalAxis = new AntdUI.Label();
-            this.dropdownPhysicalCore = new AntdUI.Select();
-            this.labelPhysicalCore = new AntdUI.Label();
+            this.checkIsExtModule = new AntdUI.Checkbox();
+            this.labelIsExtModule = new AntdUI.Label();
             this.labelSectionRuntime = new AntdUI.Label();
             this.stackSectionMapping = new AntdUI.StackPanel();
-            this.dropdownAxisId = new AntdUI.Select();
-            this.labelAxisId = new AntdUI.Label();
+            this.inputHardwareBit = new AntdUI.Input();
+            this.labelHardwareBit = new AntdUI.Label();
+            this.dropdownCore = new AntdUI.Select();
+            this.labelCore = new AntdUI.Label();
             this.dropdownCardId = new AntdUI.Select();
             this.labelCardId = new AntdUI.Label();
-            this.dropdownAxisCategory = new AntdUI.Select();
-            this.labelAxisCategory = new AntdUI.Label();
             this.labelSectionMapping = new AntdUI.Label();
             this.stackSectionBasic = new AntdUI.StackPanel();
-            this.inputDisplayName = new AntdUI.Input();
-            this.labelDisplayName = new AntdUI.Label();
             this.inputName = new AntdUI.Input();
             this.labelName = new AntdUI.Label();
-            this.inputLogicalAxis = new AntdUI.Input();
-            this.labelLogicalAxis = new AntdUI.Label();
+            this.inputLogicalBit = new AntdUI.Input();
+            this.labelLogicalBit = new AntdUI.Label();
+            this.dropdownIoType = new AntdUI.Select();
+            this.labelIoType = new AntdUI.Label();
             this.labelSectionBasic = new AntdUI.Label();
             this.panelFooter = new AntdUI.Panel();
             this.flowFooterButtons = new AntdUI.FlowPanel();
@@ -77,7 +73,7 @@
             this.textureBackgroundDialog.Location = new System.Drawing.Point(0, 0);
             this.textureBackgroundDialog.Margin = new System.Windows.Forms.Padding(0);
             this.textureBackgroundDialog.Name = "textureBackgroundDialog";
-            this.textureBackgroundDialog.Size = new System.Drawing.Size(900, 600);
+            this.textureBackgroundDialog.Size = new System.Drawing.Size(860, 520);
             this.textureBackgroundDialog.TabIndex = 0;
             // 
             // panelShell
@@ -94,7 +90,7 @@
             this.panelShell.Radius = 16;
             this.panelShell.Shadow = 16;
             this.panelShell.ShadowOpacity = 0.2F;
-            this.panelShell.Size = new System.Drawing.Size(900, 600);
+            this.panelShell.Size = new System.Drawing.Size(860, 520);
             this.panelShell.TabIndex = 0;
             // 
             // panelContent
@@ -106,7 +102,7 @@
             this.panelContent.Name = "panelContent";
             this.panelContent.Padding = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.panelContent.Radius = 0;
-            this.panelContent.Size = new System.Drawing.Size(844, 431);
+            this.panelContent.Size = new System.Drawing.Size(804, 351);
             this.panelContent.TabIndex = 1;
             // 
             // gridMainSections
@@ -119,8 +115,8 @@
             this.gridMainSections.Location = new System.Drawing.Point(4, 0);
             this.gridMainSections.Margin = new System.Windows.Forms.Padding(0);
             this.gridMainSections.Name = "gridMainSections";
-            this.gridMainSections.Size = new System.Drawing.Size(836, 431);
-            this.gridMainSections.Span = "30% 20% 20% 30%";
+            this.gridMainSections.Size = new System.Drawing.Size(796, 351);
+            this.gridMainSections.Span = "28% 24% 20% 28%";
             this.gridMainSections.TabIndex = 0;
             this.gridMainSections.Text = "gridMainSections";
             // 
@@ -129,58 +125,36 @@
             this.stackSectionRemark.AutoScroll = true;
             this.stackSectionRemark.Controls.Add(this.inputRemark);
             this.stackSectionRemark.Controls.Add(this.labelRemark);
-            this.stackSectionRemark.Controls.Add(this.inputDescription);
-            this.stackSectionRemark.Controls.Add(this.labelDescription);
             this.stackSectionRemark.Controls.Add(this.labelSectionRemark);
             this.stackSectionRemark.Gap = 4;
-            this.stackSectionRemark.Location = new System.Drawing.Point(585, 0);
+            this.stackSectionRemark.Location = new System.Drawing.Point(573, 0);
             this.stackSectionRemark.Margin = new System.Windows.Forms.Padding(0);
             this.stackSectionRemark.Name = "stackSectionRemark";
             this.stackSectionRemark.Padding = new System.Windows.Forms.Padding(4);
-            this.stackSectionRemark.Size = new System.Drawing.Size(251, 431);
+            this.stackSectionRemark.Size = new System.Drawing.Size(223, 351);
             this.stackSectionRemark.TabIndex = 3;
             this.stackSectionRemark.Text = "stackSectionRemark";
             this.stackSectionRemark.Vertical = true;
             // 
             // inputRemark
             // 
-            this.inputRemark.Location = new System.Drawing.Point(4, 150);
+            this.inputRemark.Location = new System.Drawing.Point(4, 60);
             this.inputRemark.Margin = new System.Windows.Forms.Padding(0);
             this.inputRemark.Multiline = true;
             this.inputRemark.Name = "inputRemark";
             this.inputRemark.PlaceholderText = "请输入备注";
-            this.inputRemark.Size = new System.Drawing.Size(243, 70);
-            this.inputRemark.TabIndex = 4;
+            this.inputRemark.Size = new System.Drawing.Size(215, 80);
+            this.inputRemark.TabIndex = 2;
             this.inputRemark.WaveSize = 0;
             // 
             // labelRemark
             // 
-            this.labelRemark.Location = new System.Drawing.Point(4, 124);
+            this.labelRemark.Location = new System.Drawing.Point(4, 34);
             this.labelRemark.Margin = new System.Windows.Forms.Padding(0);
             this.labelRemark.Name = "labelRemark";
-            this.labelRemark.Size = new System.Drawing.Size(243, 22);
-            this.labelRemark.TabIndex = 3;
+            this.labelRemark.Size = new System.Drawing.Size(215, 22);
+            this.labelRemark.TabIndex = 1;
             this.labelRemark.Text = "备注";
-            // 
-            // inputDescription
-            // 
-            this.inputDescription.Location = new System.Drawing.Point(4, 60);
-            this.inputDescription.Margin = new System.Windows.Forms.Padding(0);
-            this.inputDescription.Multiline = true;
-            this.inputDescription.Name = "inputDescription";
-            this.inputDescription.PlaceholderText = "请输入描述";
-            this.inputDescription.Size = new System.Drawing.Size(243, 60);
-            this.inputDescription.TabIndex = 2;
-            this.inputDescription.WaveSize = 0;
-            // 
-            // labelDescription
-            // 
-            this.labelDescription.Location = new System.Drawing.Point(4, 34);
-            this.labelDescription.Margin = new System.Windows.Forms.Padding(0);
-            this.labelDescription.Name = "labelDescription";
-            this.labelDescription.Size = new System.Drawing.Size(243, 22);
-            this.labelDescription.TabIndex = 1;
-            this.labelDescription.Text = "描述";
             // 
             // labelSectionRemark
             // 
@@ -188,9 +162,9 @@
             this.labelSectionRemark.Location = new System.Drawing.Point(4, 4);
             this.labelSectionRemark.Margin = new System.Windows.Forms.Padding(0);
             this.labelSectionRemark.Name = "labelSectionRemark";
-            this.labelSectionRemark.Size = new System.Drawing.Size(243, 26);
+            this.labelSectionRemark.Size = new System.Drawing.Size(215, 26);
             this.labelSectionRemark.TabIndex = 0;
-            this.labelSectionRemark.Text = "说明与备注";
+            this.labelSectionRemark.Text = "备注信息";
             // 
             // stackSectionRuntime
             // 
@@ -199,38 +173,36 @@
             this.stackSectionRuntime.Controls.Add(this.labelSortOrder);
             this.stackSectionRuntime.Controls.Add(this.checkIsEnabled);
             this.stackSectionRuntime.Controls.Add(this.labelEnabled);
-            this.stackSectionRuntime.Controls.Add(this.dropdownPhysicalAxis);
-            this.stackSectionRuntime.Controls.Add(this.labelPhysicalAxis);
-            this.stackSectionRuntime.Controls.Add(this.dropdownPhysicalCore);
-            this.stackSectionRuntime.Controls.Add(this.labelPhysicalCore);
+            this.stackSectionRuntime.Controls.Add(this.checkIsExtModule);
+            this.stackSectionRuntime.Controls.Add(this.labelIsExtModule);
             this.stackSectionRuntime.Controls.Add(this.labelSectionRuntime);
             this.stackSectionRuntime.Gap = 4;
-            this.stackSectionRuntime.Location = new System.Drawing.Point(418, 0);
+            this.stackSectionRuntime.Location = new System.Drawing.Point(414, 0);
             this.stackSectionRuntime.Margin = new System.Windows.Forms.Padding(0);
             this.stackSectionRuntime.Name = "stackSectionRuntime";
             this.stackSectionRuntime.Padding = new System.Windows.Forms.Padding(4);
-            this.stackSectionRuntime.Size = new System.Drawing.Size(167, 431);
+            this.stackSectionRuntime.Size = new System.Drawing.Size(159, 351);
             this.stackSectionRuntime.TabIndex = 2;
             this.stackSectionRuntime.Text = "stackSectionRuntime";
             this.stackSectionRuntime.Vertical = true;
             // 
             // inputSortOrder
             // 
-            this.inputSortOrder.Location = new System.Drawing.Point(4, 242);
+            this.inputSortOrder.Location = new System.Drawing.Point(4, 176);
             this.inputSortOrder.Margin = new System.Windows.Forms.Padding(0);
             this.inputSortOrder.Name = "inputSortOrder";
             this.inputSortOrder.PlaceholderText = "请输入排序号";
-            this.inputSortOrder.Size = new System.Drawing.Size(159, 32);
-            this.inputSortOrder.TabIndex = 8;
+            this.inputSortOrder.Size = new System.Drawing.Size(151, 32);
+            this.inputSortOrder.TabIndex = 6;
             this.inputSortOrder.WaveSize = 0;
             // 
             // labelSortOrder
             // 
-            this.labelSortOrder.Location = new System.Drawing.Point(4, 216);
+            this.labelSortOrder.Location = new System.Drawing.Point(4, 150);
             this.labelSortOrder.Margin = new System.Windows.Forms.Padding(0);
             this.labelSortOrder.Name = "labelSortOrder";
-            this.labelSortOrder.Size = new System.Drawing.Size(159, 22);
-            this.labelSortOrder.TabIndex = 7;
+            this.labelSortOrder.Size = new System.Drawing.Size(151, 22);
+            this.labelSortOrder.TabIndex = 5;
             this.labelSortOrder.Text = "排序号";
             // 
             // checkIsEnabled
@@ -238,57 +210,40 @@
             this.checkIsEnabled.AutoSizeMode = AntdUI.TAutoSize.Auto;
             this.checkIsEnabled.Checked = true;
             this.checkIsEnabled.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkIsEnabled.Location = new System.Drawing.Point(4, 184);
+            this.checkIsEnabled.Location = new System.Drawing.Point(4, 118);
             this.checkIsEnabled.Margin = new System.Windows.Forms.Padding(0);
             this.checkIsEnabled.Name = "checkIsEnabled";
-            this.checkIsEnabled.Size = new System.Drawing.Size(76, 28);
-            this.checkIsEnabled.TabIndex = 6;
-            this.checkIsEnabled.Text = "启用此轴";
+            this.checkIsEnabled.Size = new System.Drawing.Size(88, 28);
+            this.checkIsEnabled.TabIndex = 4;
+            this.checkIsEnabled.Text = "启用此点位";
             // 
             // labelEnabled
             // 
-            this.labelEnabled.Location = new System.Drawing.Point(4, 158);
+            this.labelEnabled.Location = new System.Drawing.Point(4, 92);
             this.labelEnabled.Margin = new System.Windows.Forms.Padding(0);
             this.labelEnabled.Name = "labelEnabled";
-            this.labelEnabled.Size = new System.Drawing.Size(159, 22);
-            this.labelEnabled.TabIndex = 5;
+            this.labelEnabled.Size = new System.Drawing.Size(151, 22);
+            this.labelEnabled.TabIndex = 3;
             this.labelEnabled.Text = "启用状态";
             // 
-            // dropdownPhysicalAxis
+            // checkIsExtModule
             // 
-            this.dropdownPhysicalAxis.Location = new System.Drawing.Point(4, 122);
-            this.dropdownPhysicalAxis.Margin = new System.Windows.Forms.Padding(0);
-            this.dropdownPhysicalAxis.Name = "dropdownPhysicalAxis";
-            this.dropdownPhysicalAxis.Size = new System.Drawing.Size(159, 32);
-            this.dropdownPhysicalAxis.TabIndex = 4;
-            this.dropdownPhysicalAxis.WaveSize = 0;
+            this.checkIsExtModule.AutoSizeMode = AntdUI.TAutoSize.Auto;
+            this.checkIsExtModule.Location = new System.Drawing.Point(4, 60);
+            this.checkIsExtModule.Margin = new System.Windows.Forms.Padding(0);
+            this.checkIsExtModule.Name = "checkIsExtModule";
+            this.checkIsExtModule.Size = new System.Drawing.Size(94, 28);
+            this.checkIsExtModule.TabIndex = 2;
+            this.checkIsExtModule.Text = "扩展模块 IO";
             // 
-            // labelPhysicalAxis
+            // labelIsExtModule
             // 
-            this.labelPhysicalAxis.Location = new System.Drawing.Point(4, 96);
-            this.labelPhysicalAxis.Margin = new System.Windows.Forms.Padding(0);
-            this.labelPhysicalAxis.Name = "labelPhysicalAxis";
-            this.labelPhysicalAxis.Size = new System.Drawing.Size(159, 22);
-            this.labelPhysicalAxis.TabIndex = 3;
-            this.labelPhysicalAxis.Text = "物理轴号";
-            // 
-            // dropdownPhysicalCore
-            // 
-            this.dropdownPhysicalCore.Location = new System.Drawing.Point(4, 60);
-            this.dropdownPhysicalCore.Margin = new System.Windows.Forms.Padding(0);
-            this.dropdownPhysicalCore.Name = "dropdownPhysicalCore";
-            this.dropdownPhysicalCore.Size = new System.Drawing.Size(159, 32);
-            this.dropdownPhysicalCore.TabIndex = 2;
-            this.dropdownPhysicalCore.WaveSize = 0;
-            // 
-            // labelPhysicalCore
-            // 
-            this.labelPhysicalCore.Location = new System.Drawing.Point(4, 34);
-            this.labelPhysicalCore.Margin = new System.Windows.Forms.Padding(0);
-            this.labelPhysicalCore.Name = "labelPhysicalCore";
-            this.labelPhysicalCore.Size = new System.Drawing.Size(159, 22);
-            this.labelPhysicalCore.TabIndex = 1;
-            this.labelPhysicalCore.Text = "物理内核号";
+            this.labelIsExtModule.Location = new System.Drawing.Point(4, 34);
+            this.labelIsExtModule.Margin = new System.Windows.Forms.Padding(0);
+            this.labelIsExtModule.Name = "labelIsExtModule";
+            this.labelIsExtModule.Size = new System.Drawing.Size(151, 22);
+            this.labelIsExtModule.TabIndex = 1;
+            this.labelIsExtModule.Text = "板载 / 扩展";
             // 
             // labelSectionRuntime
             // 
@@ -296,83 +251,84 @@
             this.labelSectionRuntime.Location = new System.Drawing.Point(4, 4);
             this.labelSectionRuntime.Margin = new System.Windows.Forms.Padding(0);
             this.labelSectionRuntime.Name = "labelSectionRuntime";
-            this.labelSectionRuntime.Size = new System.Drawing.Size(159, 26);
+            this.labelSectionRuntime.Size = new System.Drawing.Size(151, 26);
             this.labelSectionRuntime.TabIndex = 0;
-            this.labelSectionRuntime.Text = "运行与排序";
+            this.labelSectionRuntime.Text = "状态与属性";
             // 
             // stackSectionMapping
             // 
             this.stackSectionMapping.AutoScroll = true;
-            this.stackSectionMapping.Controls.Add(this.dropdownAxisId);
-            this.stackSectionMapping.Controls.Add(this.labelAxisId);
+            this.stackSectionMapping.Controls.Add(this.inputHardwareBit);
+            this.stackSectionMapping.Controls.Add(this.labelHardwareBit);
+            this.stackSectionMapping.Controls.Add(this.dropdownCore);
+            this.stackSectionMapping.Controls.Add(this.labelCore);
             this.stackSectionMapping.Controls.Add(this.dropdownCardId);
             this.stackSectionMapping.Controls.Add(this.labelCardId);
-            this.stackSectionMapping.Controls.Add(this.dropdownAxisCategory);
-            this.stackSectionMapping.Controls.Add(this.labelAxisCategory);
             this.stackSectionMapping.Controls.Add(this.labelSectionMapping);
             this.stackSectionMapping.Gap = 4;
-            this.stackSectionMapping.Location = new System.Drawing.Point(251, 0);
+            this.stackSectionMapping.Location = new System.Drawing.Point(223, 0);
             this.stackSectionMapping.Margin = new System.Windows.Forms.Padding(0);
             this.stackSectionMapping.Name = "stackSectionMapping";
             this.stackSectionMapping.Padding = new System.Windows.Forms.Padding(4);
-            this.stackSectionMapping.Size = new System.Drawing.Size(167, 431);
+            this.stackSectionMapping.Size = new System.Drawing.Size(191, 351);
             this.stackSectionMapping.TabIndex = 1;
             this.stackSectionMapping.Text = "stackSectionMapping";
             this.stackSectionMapping.Vertical = true;
             // 
-            // dropdownAxisId
+            // inputHardwareBit
             // 
-            this.dropdownAxisId.Location = new System.Drawing.Point(4, 184);
-            this.dropdownAxisId.Margin = new System.Windows.Forms.Padding(0);
-            this.dropdownAxisId.Name = "dropdownAxisId";
-            this.dropdownAxisId.Size = new System.Drawing.Size(159, 32);
-            this.dropdownAxisId.TabIndex = 6;
-            this.dropdownAxisId.WaveSize = 0;
+            this.inputHardwareBit.Location = new System.Drawing.Point(4, 184);
+            this.inputHardwareBit.Margin = new System.Windows.Forms.Padding(0);
+            this.inputHardwareBit.Name = "inputHardwareBit";
+            this.inputHardwareBit.PlaceholderText = "请输入硬件位号";
+            this.inputHardwareBit.Size = new System.Drawing.Size(183, 32);
+            this.inputHardwareBit.TabIndex = 6;
+            this.inputHardwareBit.WaveSize = 0;
             // 
-            // labelAxisId
+            // labelHardwareBit
             // 
-            this.labelAxisId.Location = new System.Drawing.Point(4, 158);
-            this.labelAxisId.Margin = new System.Windows.Forms.Padding(0);
-            this.labelAxisId.Name = "labelAxisId";
-            this.labelAxisId.Size = new System.Drawing.Size(159, 22);
-            this.labelAxisId.TabIndex = 5;
-            this.labelAxisId.Text = "卡内轴号（AxisId）";
+            this.labelHardwareBit.Location = new System.Drawing.Point(4, 158);
+            this.labelHardwareBit.Margin = new System.Windows.Forms.Padding(0);
+            this.labelHardwareBit.Name = "labelHardwareBit";
+            this.labelHardwareBit.Size = new System.Drawing.Size(183, 22);
+            this.labelHardwareBit.TabIndex = 5;
+            this.labelHardwareBit.Text = "硬件位号";
+            // 
+            // dropdownCore
+            // 
+            this.dropdownCore.Location = new System.Drawing.Point(4, 122);
+            this.dropdownCore.Margin = new System.Windows.Forms.Padding(0);
+            this.dropdownCore.Name = "dropdownCore";
+            this.dropdownCore.Size = new System.Drawing.Size(183, 32);
+            this.dropdownCore.TabIndex = 4;
+            this.dropdownCore.WaveSize = 0;
+            // 
+            // labelCore
+            // 
+            this.labelCore.Location = new System.Drawing.Point(4, 96);
+            this.labelCore.Margin = new System.Windows.Forms.Padding(0);
+            this.labelCore.Name = "labelCore";
+            this.labelCore.Size = new System.Drawing.Size(183, 22);
+            this.labelCore.TabIndex = 3;
+            this.labelCore.Text = "所属内核";
             // 
             // dropdownCardId
             // 
-            this.dropdownCardId.Location = new System.Drawing.Point(4, 122);
+            this.dropdownCardId.Location = new System.Drawing.Point(4, 60);
             this.dropdownCardId.Margin = new System.Windows.Forms.Padding(0);
             this.dropdownCardId.Name = "dropdownCardId";
-            this.dropdownCardId.Size = new System.Drawing.Size(159, 32);
-            this.dropdownCardId.TabIndex = 4;
+            this.dropdownCardId.Size = new System.Drawing.Size(183, 32);
+            this.dropdownCardId.TabIndex = 2;
             this.dropdownCardId.WaveSize = 0;
             // 
             // labelCardId
             // 
-            this.labelCardId.Location = new System.Drawing.Point(4, 96);
+            this.labelCardId.Location = new System.Drawing.Point(4, 34);
             this.labelCardId.Margin = new System.Windows.Forms.Padding(0);
             this.labelCardId.Name = "labelCardId";
-            this.labelCardId.Size = new System.Drawing.Size(159, 22);
-            this.labelCardId.TabIndex = 3;
+            this.labelCardId.Size = new System.Drawing.Size(183, 22);
+            this.labelCardId.TabIndex = 1;
             this.labelCardId.Text = "所属控制卡";
-            // 
-            // dropdownAxisCategory
-            // 
-            this.dropdownAxisCategory.Location = new System.Drawing.Point(4, 60);
-            this.dropdownAxisCategory.Margin = new System.Windows.Forms.Padding(0);
-            this.dropdownAxisCategory.Name = "dropdownAxisCategory";
-            this.dropdownAxisCategory.Size = new System.Drawing.Size(159, 32);
-            this.dropdownAxisCategory.TabIndex = 2;
-            this.dropdownAxisCategory.WaveSize = 0;
-            // 
-            // labelAxisCategory
-            // 
-            this.labelAxisCategory.Location = new System.Drawing.Point(4, 34);
-            this.labelAxisCategory.Margin = new System.Windows.Forms.Padding(0);
-            this.labelAxisCategory.Name = "labelAxisCategory";
-            this.labelAxisCategory.Size = new System.Drawing.Size(159, 22);
-            this.labelAxisCategory.TabIndex = 1;
-            this.labelAxisCategory.Text = "轴分类";
             // 
             // labelSectionMapping
             // 
@@ -380,86 +336,85 @@
             this.labelSectionMapping.Location = new System.Drawing.Point(4, 4);
             this.labelSectionMapping.Margin = new System.Windows.Forms.Padding(0);
             this.labelSectionMapping.Name = "labelSectionMapping";
-            this.labelSectionMapping.Size = new System.Drawing.Size(159, 26);
+            this.labelSectionMapping.Size = new System.Drawing.Size(183, 26);
             this.labelSectionMapping.TabIndex = 0;
             this.labelSectionMapping.Text = "归属与映射";
             // 
             // stackSectionBasic
             // 
             this.stackSectionBasic.AutoScroll = true;
-            this.stackSectionBasic.Controls.Add(this.inputDisplayName);
-            this.stackSectionBasic.Controls.Add(this.labelDisplayName);
             this.stackSectionBasic.Controls.Add(this.inputName);
             this.stackSectionBasic.Controls.Add(this.labelName);
-            this.stackSectionBasic.Controls.Add(this.inputLogicalAxis);
-            this.stackSectionBasic.Controls.Add(this.labelLogicalAxis);
+            this.stackSectionBasic.Controls.Add(this.inputLogicalBit);
+            this.stackSectionBasic.Controls.Add(this.labelLogicalBit);
+            this.stackSectionBasic.Controls.Add(this.dropdownIoType);
+            this.stackSectionBasic.Controls.Add(this.labelIoType);
             this.stackSectionBasic.Controls.Add(this.labelSectionBasic);
             this.stackSectionBasic.Gap = 4;
             this.stackSectionBasic.Location = new System.Drawing.Point(0, 0);
             this.stackSectionBasic.Margin = new System.Windows.Forms.Padding(0);
             this.stackSectionBasic.Name = "stackSectionBasic";
             this.stackSectionBasic.Padding = new System.Windows.Forms.Padding(4);
-            this.stackSectionBasic.Size = new System.Drawing.Size(251, 431);
+            this.stackSectionBasic.Size = new System.Drawing.Size(223, 351);
             this.stackSectionBasic.TabIndex = 0;
             this.stackSectionBasic.Text = "stackSectionBasic";
             this.stackSectionBasic.Vertical = true;
             // 
-            // inputDisplayName
-            // 
-            this.inputDisplayName.Location = new System.Drawing.Point(4, 184);
-            this.inputDisplayName.Margin = new System.Windows.Forms.Padding(0);
-            this.inputDisplayName.Name = "inputDisplayName";
-            this.inputDisplayName.PlaceholderText = "请输入显示名称";
-            this.inputDisplayName.Size = new System.Drawing.Size(243, 32);
-            this.inputDisplayName.TabIndex = 6;
-            this.inputDisplayName.WaveSize = 0;
-            // 
-            // labelDisplayName
-            // 
-            this.labelDisplayName.Location = new System.Drawing.Point(4, 158);
-            this.labelDisplayName.Margin = new System.Windows.Forms.Padding(0);
-            this.labelDisplayName.Name = "labelDisplayName";
-            this.labelDisplayName.Size = new System.Drawing.Size(243, 22);
-            this.labelDisplayName.TabIndex = 5;
-            this.labelDisplayName.Text = "显示名称";
-            // 
             // inputName
             // 
-            this.inputName.Location = new System.Drawing.Point(4, 122);
+            this.inputName.Location = new System.Drawing.Point(4, 184);
             this.inputName.Margin = new System.Windows.Forms.Padding(0);
             this.inputName.Name = "inputName";
-            this.inputName.PlaceholderText = "请输入内部名称";
-            this.inputName.Size = new System.Drawing.Size(243, 32);
-            this.inputName.TabIndex = 4;
+            this.inputName.PlaceholderText = "请输入名称";
+            this.inputName.Size = new System.Drawing.Size(215, 32);
+            this.inputName.TabIndex = 6;
             this.inputName.WaveSize = 0;
             // 
             // labelName
             // 
-            this.labelName.Location = new System.Drawing.Point(4, 96);
+            this.labelName.Location = new System.Drawing.Point(4, 158);
             this.labelName.Margin = new System.Windows.Forms.Padding(0);
             this.labelName.Name = "labelName";
-            this.labelName.Size = new System.Drawing.Size(243, 22);
-            this.labelName.TabIndex = 3;
-            this.labelName.Text = "内部名称";
+            this.labelName.Size = new System.Drawing.Size(215, 22);
+            this.labelName.TabIndex = 5;
+            this.labelName.Text = "名称";
             // 
-            // inputLogicalAxis
+            // inputLogicalBit
             // 
-            this.inputLogicalAxis.Location = new System.Drawing.Point(4, 60);
-            this.inputLogicalAxis.Margin = new System.Windows.Forms.Padding(0);
-            this.inputLogicalAxis.Name = "inputLogicalAxis";
-            this.inputLogicalAxis.PlaceholderText = "请输入逻辑轴号";
-            this.inputLogicalAxis.Size = new System.Drawing.Size(243, 32);
-            this.inputLogicalAxis.TabIndex = 2;
-            this.inputLogicalAxis.WaveSize = 0;
+            this.inputLogicalBit.Location = new System.Drawing.Point(4, 122);
+            this.inputLogicalBit.Margin = new System.Windows.Forms.Padding(0);
+            this.inputLogicalBit.Name = "inputLogicalBit";
+            this.inputLogicalBit.PlaceholderText = "请输入逻辑位号";
+            this.inputLogicalBit.Size = new System.Drawing.Size(215, 32);
+            this.inputLogicalBit.TabIndex = 4;
+            this.inputLogicalBit.WaveSize = 0;
             // 
-            // labelLogicalAxis
+            // labelLogicalBit
             // 
-            this.labelLogicalAxis.Location = new System.Drawing.Point(4, 34);
-            this.labelLogicalAxis.Margin = new System.Windows.Forms.Padding(0);
-            this.labelLogicalAxis.Name = "labelLogicalAxis";
-            this.labelLogicalAxis.Size = new System.Drawing.Size(243, 22);
-            this.labelLogicalAxis.TabIndex = 1;
-            this.labelLogicalAxis.Text = "逻辑轴号";
+            this.labelLogicalBit.Location = new System.Drawing.Point(4, 96);
+            this.labelLogicalBit.Margin = new System.Windows.Forms.Padding(0);
+            this.labelLogicalBit.Name = "labelLogicalBit";
+            this.labelLogicalBit.Size = new System.Drawing.Size(215, 22);
+            this.labelLogicalBit.TabIndex = 3;
+            this.labelLogicalBit.Text = "逻辑位号";
+            // 
+            // dropdownIoType
+            // 
+            this.dropdownIoType.Location = new System.Drawing.Point(4, 60);
+            this.dropdownIoType.Margin = new System.Windows.Forms.Padding(0);
+            this.dropdownIoType.Name = "dropdownIoType";
+            this.dropdownIoType.Size = new System.Drawing.Size(215, 32);
+            this.dropdownIoType.TabIndex = 2;
+            this.dropdownIoType.WaveSize = 0;
+            // 
+            // labelIoType
+            // 
+            this.labelIoType.Location = new System.Drawing.Point(4, 34);
+            this.labelIoType.Margin = new System.Windows.Forms.Padding(0);
+            this.labelIoType.Name = "labelIoType";
+            this.labelIoType.Size = new System.Drawing.Size(215, 22);
+            this.labelIoType.TabIndex = 1;
+            this.labelIoType.Text = "IO 类型";
             // 
             // labelSectionBasic
             // 
@@ -467,7 +422,7 @@
             this.labelSectionBasic.Location = new System.Drawing.Point(4, 4);
             this.labelSectionBasic.Margin = new System.Windows.Forms.Padding(0);
             this.labelSectionBasic.Name = "labelSectionBasic";
-            this.labelSectionBasic.Size = new System.Drawing.Size(243, 26);
+            this.labelSectionBasic.Size = new System.Drawing.Size(215, 26);
             this.labelSectionBasic.TabIndex = 0;
             this.labelSectionBasic.Text = "基础标识";
             // 
@@ -475,12 +430,12 @@
             // 
             this.panelFooter.Controls.Add(this.flowFooterButtons);
             this.panelFooter.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panelFooter.Location = new System.Drawing.Point(28, 515);
+            this.panelFooter.Location = new System.Drawing.Point(28, 435);
             this.panelFooter.Margin = new System.Windows.Forms.Padding(0);
             this.panelFooter.Name = "panelFooter";
             this.panelFooter.Padding = new System.Windows.Forms.Padding(4, 10, 4, 0);
             this.panelFooter.Radius = 0;
-            this.panelFooter.Size = new System.Drawing.Size(844, 57);
+            this.panelFooter.Size = new System.Drawing.Size(804, 57);
             this.panelFooter.TabIndex = 2;
             // 
             // flowFooterButtons
@@ -489,7 +444,7 @@
             this.flowFooterButtons.Controls.Add(this.buttonCancel);
             this.flowFooterButtons.Dock = System.Windows.Forms.DockStyle.Right;
             this.flowFooterButtons.Gap = 10;
-            this.flowFooterButtons.Location = new System.Drawing.Point(596, 10);
+            this.flowFooterButtons.Location = new System.Drawing.Point(556, 10);
             this.flowFooterButtons.Margin = new System.Windows.Forms.Padding(0);
             this.flowFooterButtons.Name = "flowFooterButtons";
             this.flowFooterButtons.Size = new System.Drawing.Size(244, 47);
@@ -529,18 +484,18 @@
             this.panelHeader.Name = "panelHeader";
             this.panelHeader.Padding = new System.Windows.Forms.Padding(4, 0, 4, 8);
             this.panelHeader.Radius = 0;
-            this.panelHeader.Size = new System.Drawing.Size(844, 56);
+            this.panelHeader.Size = new System.Drawing.Size(804, 56);
             this.panelHeader.TabIndex = 0;
             // 
             // labelDialogDescription
             // 
             this.labelDialogDescription.Dock = System.Windows.Forms.DockStyle.Right;
-            this.labelDialogDescription.Location = new System.Drawing.Point(529, 0);
+            this.labelDialogDescription.Location = new System.Drawing.Point(477, 0);
             this.labelDialogDescription.Margin = new System.Windows.Forms.Padding(0);
             this.labelDialogDescription.Name = "labelDialogDescription";
-            this.labelDialogDescription.Size = new System.Drawing.Size(311, 48);
+            this.labelDialogDescription.Size = new System.Drawing.Size(323, 48);
             this.labelDialogDescription.TabIndex = 1;
-            this.labelDialogDescription.Text = "填写轴拓扑配置";
+            this.labelDialogDescription.Text = "填写 IO 映射配置";
             this.labelDialogDescription.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // labelDialogTitle
@@ -550,17 +505,17 @@
             this.labelDialogTitle.Location = new System.Drawing.Point(4, 0);
             this.labelDialogTitle.Margin = new System.Windows.Forms.Padding(0);
             this.labelDialogTitle.Name = "labelDialogTitle";
-            this.labelDialogTitle.Size = new System.Drawing.Size(325, 48);
+            this.labelDialogTitle.Size = new System.Drawing.Size(352, 48);
             this.labelDialogTitle.TabIndex = 0;
-            this.labelDialogTitle.Text = "新增轴拓扑";
+            this.labelDialogTitle.Text = "新增 IO 映射";
             // 
-            // MotionAxisEditDialog
+            // MotionIoMapEditDialog
             // 
-            this.ClientSize = new System.Drawing.Size(900, 600);
+            this.ClientSize = new System.Drawing.Size(860, 520);
             this.Controls.Add(this.textureBackgroundDialog);
-            this.Name = "MotionAxisEditDialog";
+            this.Name = "MotionIoMapEditDialog";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "轴拓扑编辑";
+            this.Text = "IO 映射编辑";
             this.textureBackgroundDialog.ResumeLayout(false);
             this.panelShell.ResumeLayout(false);
             this.panelContent.ResumeLayout(false);
@@ -581,42 +536,44 @@
         private AntdUI.Panel panelShell;
         private AntdUI.Panel panelContent;
         private AntdUI.GridPanel gridMainSections;
+
         private AntdUI.StackPanel stackSectionBasic;
         private AntdUI.Label labelSectionBasic;
-        private AntdUI.Label labelLogicalAxis;
-        private AntdUI.Input inputLogicalAxis;
+        private AntdUI.Label labelIoType;
+        private AntdUI.Select dropdownIoType;
+        private AntdUI.Label labelLogicalBit;
+        private AntdUI.Input inputLogicalBit;
         private AntdUI.Label labelName;
         private AntdUI.Input inputName;
-        private AntdUI.Label labelDisplayName;
-        private AntdUI.Input inputDisplayName;
+
         private AntdUI.StackPanel stackSectionMapping;
         private AntdUI.Label labelSectionMapping;
-        private AntdUI.Label labelAxisCategory;
-        private AntdUI.Select dropdownAxisCategory;
         private AntdUI.Label labelCardId;
         private AntdUI.Select dropdownCardId;
-        private AntdUI.Label labelAxisId;
-        private AntdUI.Select dropdownAxisId;
+        private AntdUI.Label labelCore;
+        private AntdUI.Select dropdownCore;
+        private AntdUI.Label labelHardwareBit;
+        private AntdUI.Input inputHardwareBit;
+
         private AntdUI.StackPanel stackSectionRuntime;
         private AntdUI.Label labelSectionRuntime;
-        private AntdUI.Label labelPhysicalCore;
-        private AntdUI.Select dropdownPhysicalCore;
-        private AntdUI.Label labelPhysicalAxis;
-        private AntdUI.Select dropdownPhysicalAxis;
+        private AntdUI.Label labelIsExtModule;
+        private AntdUI.Checkbox checkIsExtModule;
         private AntdUI.Label labelEnabled;
         private AntdUI.Checkbox checkIsEnabled;
         private AntdUI.Label labelSortOrder;
         private AntdUI.Input inputSortOrder;
+
         private AntdUI.StackPanel stackSectionRemark;
         private AntdUI.Label labelSectionRemark;
-        private AntdUI.Label labelDescription;
-        private AntdUI.Input inputDescription;
         private AntdUI.Label labelRemark;
         private AntdUI.Input inputRemark;
+
         private AntdUI.Panel panelFooter;
         private AntdUI.FlowPanel flowFooterButtons;
         private AntdUI.Button buttonOk;
         private AntdUI.Button buttonCancel;
+
         private AntdUI.Panel panelHeader;
         private AntdUI.Label labelDialogDescription;
         private AntdUI.Label labelDialogTitle;

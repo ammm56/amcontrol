@@ -472,7 +472,7 @@ namespace AMControlWinF
 
                 { "MotionConfig.Card",      () => new MotionCardManagementPage() },
                 { "MotionConfig.Axis",      () => new MotionAxisManagementPage() },
-                { "MotionConfig.IoMap",     () => CreatePlaceholderPage("运控配置 / IO 映射配置") },
+                { "MotionConfig.IoMap",     () => new MotionIoMapManagementPage() },
                 { "MotionConfig.AxisParam", () => CreatePlaceholderPage("运控配置 / 轴运行参数") },
                 { "MotionConfig.Actuator",  () => CreatePlaceholderPage("运控配置 / 执行器配置") },
 

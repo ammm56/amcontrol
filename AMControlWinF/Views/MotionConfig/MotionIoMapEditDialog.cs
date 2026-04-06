@@ -10,33 +10,29 @@ using System.Windows.Forms;
 namespace AMControlWinF.Views.MotionConfig
 {
     /// <summary>
-    /// 轴拓扑新增/编辑对话框。
+    /// IO 映射新增/编辑对话框。
     /// </summary>
-    public partial class MotionAxisEditDialog : AntdUI.Window
+    public partial class MotionIoMapEditDialog : AntdUI.Window
     {
-        private static readonly AxisCategoryItem[] AxisCategories = new[]
+        private static readonly IoTypeItem[] IoTypes = new[]
         {
-            new AxisCategoryItem("Linear", "Linear（直线轴）"),
-            new AxisCategoryItem("Rotary", "Rotary（旋转轴）"),
-            new AxisCategoryItem("GantryMaster", "GantryMaster（龙门主轴）"),
-            new AxisCategoryItem("GantrySlave", "GantrySlave（龙门从轴）"),
-            new AxisCategoryItem("Virtual", "Virtual（虚拟轴）"),
-            new AxisCategoryItem("Other", "Other（其他）")
+            new IoTypeItem("DI", "DI（数字输入）"),
+            new IoTypeItem("DO", "DO（数字输出）")
         };
 
         private readonly bool _isAdd;
-        private readonly MotionAxisEntity _sourceEntity;
+        private readonly MotionIoMapEntity _sourceEntity;
         private readonly List<MotionCardEntity> _availableCards;
 
-        public MotionAxisEditDialog(MotionAxisEntity entity, bool isAdd, List<MotionCardEntity> availableCards)
+        public MotionIoMapEditDialog(MotionIoMapEntity entity, bool isAdd, List<MotionCardEntity> availableCards)
         {
             InitializeComponent();
 
-            _sourceEntity = entity ?? new MotionAxisEntity();
+            _sourceEntity = entity ?? new MotionIoMapEntity();
             _isAdd = isAdd;
             _availableCards = availableCards ?? new List<MotionCardEntity>();
 
-            InitializeAxisCategoryDropdown();
+            InitializeIoTypeDropdown();
             InitializeCardDropdown();
             BindEvents();
             ApplyThemeFromConfig();
@@ -44,16 +40,16 @@ namespace AMControlWinF.Views.MotionConfig
             LoadEntity();
         }
 
-        public MotionAxisEntity ResultEntity { get; private set; }
+        public MotionIoMapEntity ResultEntity { get; private set; }
 
-        private void InitializeAxisCategoryDropdown()
+        private void InitializeIoTypeDropdown()
         {
-            dropdownAxisCategory.Items.Clear();
-            dropdownAxisCategory.Items.AddRange(AxisCategories.Select(x => (object)x.DisplayName).ToArray());
+            dropdownIoType.Items.Clear();
+            dropdownIoType.Items.AddRange(IoTypes.Select(x => (object)x.DisplayName).ToArray());
 
-            if (AxisCategories.Length > 0)
+            if (IoTypes.Length > 0)
             {
-                dropdownAxisCategory.SelectedValue = AxisCategories[0].DisplayName;
+                dropdownIoType.SelectedValue = IoTypes[0].DisplayName;
             }
         }
 
@@ -73,18 +69,18 @@ namespace AMControlWinF.Views.MotionConfig
             dropdownCardId.SelectedValueChanged += DropdownCardId_SelectedValueChanged;
             buttonOk.Click += ButtonOk_Click;
             buttonCancel.Click += ButtonCancel_Click;
-            Shown += MotionAxisEditDialog_Shown;
+            Shown += MotionIoMapEditDialog_Shown;
 
             KeyPreview = true;
-            KeyDown += MotionAxisEditDialog_KeyDown;
+            KeyDown += MotionIoMapEditDialog_KeyDown;
         }
 
-        private void MotionAxisEditDialog_Shown(object sender, EventArgs e)
+        private void MotionIoMapEditDialog_Shown(object sender, EventArgs e)
         {
             if (_isAdd)
             {
-                inputLogicalAxis.Focus();
-                inputLogicalAxis.SelectAll();
+                inputLogicalBit.Focus();
+                inputLogicalBit.SelectAll();
             }
             else
             {
@@ -95,91 +91,70 @@ namespace AMControlWinF.Views.MotionConfig
 
         private void ApplyMode()
         {
-            Text = _isAdd ? "新增轴拓扑" : "编辑轴拓扑";
-            labelDialogTitle.Text = _isAdd ? "新增轴拓扑" : "编辑轴拓扑";
+            Text = _isAdd ? "新增 IO 映射" : "编辑 IO 映射";
+            labelDialogTitle.Text = _isAdd ? "新增 IO 映射" : "编辑 IO 映射";
             labelDialogDescription.Text = _isAdd
-                ? "填写轴拓扑配置"
-                : "修改轴拓扑配置";
+                ? "填写 IO 映射配置"
+                : "修改 IO 映射配置";
 
             buttonOk.Text = "保存";
         }
 
         private void LoadEntity()
         {
-            inputLogicalAxis.Text = _sourceEntity.LogicalAxis.ToString();
-            inputLogicalAxis.Enabled = _isAdd;
+            var selectedIoType = IoTypes.FirstOrDefault(x =>
+                string.Equals(x.Value, _sourceEntity.IoType ?? "DI", StringComparison.OrdinalIgnoreCase));
+
+            dropdownIoType.SelectedValue = selectedIoType == null
+                ? IoTypes[0].DisplayName
+                : selectedIoType.DisplayName;
+
+            dropdownIoType.Enabled = _isAdd;
+
+            inputLogicalBit.Text = _sourceEntity.LogicalBit.ToString();
+            inputLogicalBit.Enabled = _isAdd;
 
             inputName.Text = _sourceEntity.Name ?? string.Empty;
-            inputDisplayName.Text = _sourceEntity.DisplayName ?? string.Empty;
-
-            var selectedCategory = AxisCategories.FirstOrDefault(x =>
-                string.Equals(x.Value, _sourceEntity.AxisCategory ?? "Linear", StringComparison.OrdinalIgnoreCase));
-            dropdownAxisCategory.SelectedValue = selectedCategory == null
-                ? AxisCategories[0].DisplayName
-                : selectedCategory.DisplayName;
 
             SelectCardById(_sourceEntity.CardId);
-            RefreshPhysicalMappingOptions(_sourceEntity.AxisId, _sourceEntity.PhysicalCore, _sourceEntity.PhysicalAxis);
+            RefreshCoreOptions(_sourceEntity.Core);
 
-            inputSortOrder.Text = _sourceEntity.SortOrder.ToString();
+            inputHardwareBit.Text = _sourceEntity.HardwareBit.ToString();
+            checkIsExtModule.Checked = _sourceEntity.IsExtModule;
             checkIsEnabled.Checked = _sourceEntity.IsEnabled;
-            inputDescription.Text = _sourceEntity.Description ?? string.Empty;
+            inputSortOrder.Text = _sourceEntity.SortOrder.ToString();
             inputRemark.Text = _sourceEntity.Remark ?? string.Empty;
         }
 
         private void DropdownCardId_SelectedValueChanged(object sender, ObjectNEventArgs e)
         {
-            var currentAxisId = GetSelectedShort(dropdownAxisId, 0);
-            var currentCore = GetSelectedShort(dropdownPhysicalCore, 1);
-            var currentPhysicalAxis = GetSelectedShort(dropdownPhysicalAxis, 0);
-
-            RefreshPhysicalMappingOptions(currentAxisId, currentCore, currentPhysicalAxis);
+            var currentCore = GetSelectedShort(dropdownCore, 1);
+            RefreshCoreOptions(currentCore);
         }
 
-        private void RefreshPhysicalMappingOptions(short preferAxisId, short preferCore, short preferPhysicalAxis)
+        private void RefreshCoreOptions(short preferCore)
         {
             var card = GetSelectedCard();
-
-            var axisMax = card != null && card.AxisCountNumber > 0
-                ? card.AxisCountNumber
-                : (short)32;
 
             var coreMax = card != null && card.CoreNumber > 0
                 ? card.CoreNumber
                 : 1;
 
-            if (axisMax <= 0)
-                axisMax = 1;
-
             if (coreMax <= 0)
                 coreMax = 1;
 
-            var axisOptions = BuildShortRange(0, axisMax - 1);
             var coreOptions = BuildShortRange(1, coreMax);
-            var physicalAxisOptions = BuildShortRange(0, axisMax - 1);
 
-            dropdownAxisId.Items.Clear();
-            dropdownAxisId.Items.AddRange(axisOptions.Select(x => (object)x.ToString()).ToArray());
-            dropdownAxisId.SelectedValue = axisOptions.Contains(preferAxisId)
-                ? preferAxisId.ToString()
-                : axisOptions[0].ToString();
-
-            dropdownPhysicalCore.Items.Clear();
-            dropdownPhysicalCore.Items.AddRange(coreOptions.Select(x => (object)x.ToString()).ToArray());
-            dropdownPhysicalCore.SelectedValue = coreOptions.Contains(preferCore)
+            dropdownCore.Items.Clear();
+            dropdownCore.Items.AddRange(coreOptions.Select(x => (object)x.ToString()).ToArray());
+            dropdownCore.SelectedValue = coreOptions.Contains(preferCore)
                 ? preferCore.ToString()
                 : coreOptions[0].ToString();
-
-            dropdownPhysicalAxis.Items.Clear();
-            dropdownPhysicalAxis.Items.AddRange(physicalAxisOptions.Select(x => (object)x.ToString()).ToArray());
-            dropdownPhysicalAxis.SelectedValue = physicalAxisOptions.Contains(preferPhysicalAxis)
-                ? preferPhysicalAxis.ToString()
-                : physicalAxisOptions[0].ToString();
         }
 
         private void ButtonOk_Click(object sender, EventArgs e)
         {
-            MotionAxisEntity entity;
+            MotionIoMapEntity entity;
             if (!TryBuildEntity(out entity))
                 return;
 
@@ -194,7 +169,7 @@ namespace AMControlWinF.Views.MotionConfig
             Close();
         }
 
-        private void MotionAxisEditDialog_KeyDown(object sender, KeyEventArgs e)
+        private void MotionIoMapEditDialog_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Escape)
             {
@@ -210,25 +185,9 @@ namespace AMControlWinF.Views.MotionConfig
             }
         }
 
-        private bool TryBuildEntity(out MotionAxisEntity entity)
+        private bool TryBuildEntity(out MotionIoMapEntity entity)
         {
             entity = null;
-
-            short logicalAxis;
-            if (!short.TryParse((inputLogicalAxis.Text ?? string.Empty).Trim(), out logicalAxis) || logicalAxis <= 0)
-            {
-                PageDialogHelper.ShowWarn(this, "输入提示", "逻辑轴号必须为大于 0 的整数。");
-                inputLogicalAxis.Focus();
-                return false;
-            }
-
-            var name = (inputName.Text ?? string.Empty).Trim();
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                PageDialogHelper.ShowWarn(this, "输入提示", "内部名称不能为空。");
-                inputName.Focus();
-                return false;
-            }
 
             var selectedCard = GetSelectedCard();
             if (selectedCard == null)
@@ -238,9 +197,45 @@ namespace AMControlWinF.Views.MotionConfig
                 return false;
             }
 
-            short axisId = GetSelectedShort(dropdownAxisId, 0);
-            short physicalCore = GetSelectedShort(dropdownPhysicalCore, 1);
-            short physicalAxis = GetSelectedShort(dropdownPhysicalAxis, 0);
+            var selectedIoTypeText = dropdownIoType.SelectedValue == null
+                ? string.Empty
+                : dropdownIoType.SelectedValue.ToString();
+
+            var ioType = IoTypes.FirstOrDefault(x =>
+                string.Equals(x.DisplayName, selectedIoTypeText, StringComparison.OrdinalIgnoreCase));
+
+            if (ioType == null)
+            {
+                PageDialogHelper.ShowWarn(this, "输入提示", "请选择 IO 类型。");
+                dropdownIoType.Focus();
+                return false;
+            }
+
+            short logicalBit;
+            if (!short.TryParse((inputLogicalBit.Text ?? string.Empty).Trim(), out logicalBit) || logicalBit <= 0)
+            {
+                PageDialogHelper.ShowWarn(this, "输入提示", "逻辑位号必须为大于 0 的整数。");
+                inputLogicalBit.Focus();
+                return false;
+            }
+
+            var name = (inputName.Text ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                PageDialogHelper.ShowWarn(this, "输入提示", "名称不能为空。");
+                inputName.Focus();
+                return false;
+            }
+
+            var core = GetSelectedShort(dropdownCore, 1);
+
+            short hardwareBit;
+            if (!short.TryParse((inputHardwareBit.Text ?? string.Empty).Trim(), out hardwareBit) || hardwareBit < 0)
+            {
+                PageDialogHelper.ShowWarn(this, "输入提示", "硬件位号必须为非负整数。");
+                inputHardwareBit.Focus();
+                return false;
+            }
 
             int sortOrder;
             if (!int.TryParse((inputSortOrder.Text ?? string.Empty).Trim(), out sortOrder) || sortOrder < 0)
@@ -250,30 +245,19 @@ namespace AMControlWinF.Views.MotionConfig
                 return false;
             }
 
-            var selectedAxisCategoryText = dropdownAxisCategory.SelectedValue == null
-                ? string.Empty
-                : dropdownAxisCategory.SelectedValue.ToString();
-
-            var axisCategory = AxisCategories.FirstOrDefault(x =>
-                string.Equals(x.DisplayName, selectedAxisCategoryText, StringComparison.OrdinalIgnoreCase));
-
-            entity = new MotionAxisEntity
+            entity = new MotionIoMapEntity
             {
                 Id = _sourceEntity.Id,
                 CardId = selectedCard.CardId,
-                AxisId = axisId,
-                LogicalAxis = logicalAxis,
+                IoType = ioType.Value,
+                LogicalBit = logicalBit,
                 Name = name,
-                DisplayName = NormalizeNullable(inputDisplayName.Text),
-                AxisCategory = axisCategory == null ? "Linear" : axisCategory.Value,
-                PhysicalCore = physicalCore,
-                PhysicalAxis = physicalAxis,
+                Core = core,
+                IsExtModule = checkIsExtModule.Checked,
+                HardwareBit = hardwareBit,
                 IsEnabled = checkIsEnabled.Checked,
                 SortOrder = sortOrder,
-                Description = NormalizeNullable(inputDescription.Text),
-                Remark = NormalizeNullable(inputRemark.Text),
-                CreateTime = _sourceEntity.CreateTime == default(DateTime) ? DateTime.Now : _sourceEntity.CreateTime,
-                UpdateTime = DateTime.Now
+                Remark = NormalizeNullable(inputRemark.Text)
             };
 
             return true;
@@ -364,9 +348,9 @@ namespace AMControlWinF.Views.MotionConfig
             textureBackgroundDialog.SetTheme(isDarkMode);
         }
 
-        private sealed class AxisCategoryItem
+        private sealed class IoTypeItem
         {
-            public AxisCategoryItem(string value, string displayName)
+            public IoTypeItem(string value, string displayName)
             {
                 Value = value;
                 DisplayName = displayName;
