@@ -228,7 +228,6 @@
             this.buttonEdit.Size = new System.Drawing.Size(64, 32);
             this.buttonEdit.TabIndex = 0;
             this.buttonEdit.Text = "编辑";
-            this.buttonEdit.Type = AntdUI.TTypeMini.Primary;
             this.buttonEdit.WaveSize = 0;
             // 
             // buttonDelete

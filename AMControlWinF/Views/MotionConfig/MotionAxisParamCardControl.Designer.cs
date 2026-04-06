@@ -100,6 +100,7 @@
             this.buttonTypeTag.Size = new System.Drawing.Size(42, 24);
             this.buttonTypeTag.TabIndex = 0;
             this.buttonTypeTag.Text = "小数";
+            this.buttonTypeTag.Visible = false;
             this.buttonTypeTag.WaveSize = 0;
             // 
             // MotionAxisParamCardControl

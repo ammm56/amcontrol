@@ -189,7 +189,7 @@ namespace AMControlWinF.Views.MotionConfig
                 var cardId = wrapper.Tag is short ? (short)wrapper.Tag : (short)0;
                 var selected = _selectedCardId.HasValue && _selectedCardId.Value == cardId;
 
-                wrapper.BorderWidth = selected ? 2F : 1F;
+                wrapper.BorderWidth = selected ? 2F : 0F;
                 wrapper.BorderColor = selected
                     ? Color.FromArgb(22, 119, 255)
                     : Color.FromArgb(225, 229, 235);

@@ -187,6 +187,7 @@
             // 
             // buttonDetail
             // 
+            this.buttonDetail.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonDetail.IconSvg = "ProfileOutlined";
             this.buttonDetail.Location = new System.Drawing.Point(215, 6);
             this.buttonDetail.Margin = new System.Windows.Forms.Padding(0);
@@ -255,7 +256,6 @@
             this.buttonEdit.Size = new System.Drawing.Size(64, 32);
             this.buttonEdit.TabIndex = 0;
             this.buttonEdit.Text = "编辑";
-            this.buttonEdit.Type = AntdUI.TTypeMini.Primary;
             this.buttonEdit.WaveSize = 0;
             // 
             // buttonDelete
