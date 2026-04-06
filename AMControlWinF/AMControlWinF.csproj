@@ -151,6 +151,36 @@
     <Compile Include="Views\MotionConfig\MotionAxisManagementPage.Designer.cs">
       <DependentUpon>MotionAxisManagementPage.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\MotionConfig\MotionAxisParamCardControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionAxisParamCardControl.Designer.cs">
+      <DependentUpon>MotionAxisParamCardControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionAxisParamDetailControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionAxisParamDetailControl.Designer.cs">
+      <DependentUpon>MotionAxisParamDetailControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionAxisParamEditDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionAxisParamEditDialog.Designer.cs">
+      <DependentUpon>MotionAxisParamEditDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionAxisParamManagementPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionAxisParamManagementPage.Designer.cs">
+      <DependentUpon>MotionAxisParamManagementPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionAxisSelectDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionAxisSelectDialog.Designer.cs">
+      <DependentUpon>MotionAxisSelectDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Views\MotionConfig\MotionCardControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -270,6 +300,15 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Views\MotionConfig\MotionAxisManagementPage.resx">
       <DependentUpon>MotionAxisManagementPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\MotionAxisParamCardControl.resx">
+      <DependentUpon>MotionAxisParamCardControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\MotionAxisParamEditDialog.resx">
+      <DependentUpon>MotionAxisParamEditDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\MotionAxisParamManagementPage.resx">
+      <DependentUpon>MotionAxisParamManagementPage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\MotionConfig\MotionCardControl.resx">
       <DependentUpon>MotionCardControl.cs</DependentUpon>

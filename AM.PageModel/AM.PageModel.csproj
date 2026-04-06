@@ -50,6 +50,7 @@
     <Compile Include="Main\MainWindowExitReason.cs" />
     <Compile Include="Main\MainWindowModel.cs" />
     <Compile Include="MotionConfig\MotionAxisManagementPageModel.cs" />
+    <Compile Include="MotionConfig\MotionAxisParamManagementPageModel.cs" />
     <Compile Include="MotionConfig\MotionCardManagementPageModel.cs" />
     <Compile Include="MotionConfig\MotionIoMapManagementPageModel.cs" />
     <Compile Include="Navigation\NavigationCatalog.cs" />
