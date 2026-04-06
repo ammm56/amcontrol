@@ -39,10 +39,10 @@
             this.labelPhysicalCore = new AntdUI.Label();
             this.labelValueAxisId = new AntdUI.Label();
             this.labelAxisId = new AntdUI.Label();
-            this.dividerSectionMapping = new AntdUI.Divider();
-            this.stackBasic = new AntdUI.StackPanel();
             this.labelValueCard = new AntdUI.Label();
             this.labelCard = new AntdUI.Label();
+            this.dividerSectionMapping = new AntdUI.Divider();
+            this.stackBasic = new AntdUI.StackPanel();
             this.labelValueName = new AntdUI.Label();
             this.labelName = new AntdUI.Label();
             this.labelValueDisplayName = new AntdUI.Label();
@@ -68,7 +68,7 @@
             this.panelRoot.Margin = new System.Windows.Forms.Padding(0);
             this.panelRoot.Name = "panelRoot";
             this.panelRoot.Radius = 0;
-            this.panelRoot.Size = new System.Drawing.Size(600, 520);
+            this.panelRoot.Size = new System.Drawing.Size(550, 460);
             this.panelRoot.TabIndex = 0;
             this.panelRoot.Text = "panelRoot";
             // 
@@ -82,7 +82,7 @@
             this.gridDetails.Location = new System.Drawing.Point(0, 0);
             this.gridDetails.Margin = new System.Windows.Forms.Padding(0);
             this.gridDetails.Name = "gridDetails";
-            this.gridDetails.Size = new System.Drawing.Size(600, 520);
+            this.gridDetails.Size = new System.Drawing.Size(550, 460);
             this.gridDetails.Span = "50% 50%;50% 50%;-55%";
             this.gridDetails.TabIndex = 0;
             this.gridDetails.Text = "gridDetails";
@@ -95,11 +95,11 @@
             this.stackRemark.Controls.Add(this.labelValueDescription);
             this.stackRemark.Controls.Add(this.labelDescription);
             this.stackRemark.Controls.Add(this.dividerSectionRemark);
-            this.stackRemark.Location = new System.Drawing.Point(300, 286);
+            this.stackRemark.Location = new System.Drawing.Point(275, 253);
             this.stackRemark.Margin = new System.Windows.Forms.Padding(0);
             this.stackRemark.Name = "stackRemark";
             this.stackRemark.Padding = new System.Windows.Forms.Padding(4);
-            this.stackRemark.Size = new System.Drawing.Size(300, 234);
+            this.stackRemark.Size = new System.Drawing.Size(275, 207);
             this.stackRemark.TabIndex = 3;
             this.stackRemark.Text = "stackRemark";
             this.stackRemark.Vertical = true;
@@ -110,7 +110,7 @@
             this.labelValueRemark.Location = new System.Drawing.Point(4, 131);
             this.labelValueRemark.Margin = new System.Windows.Forms.Padding(0);
             this.labelValueRemark.Name = "labelValueRemark";
-            this.labelValueRemark.Size = new System.Drawing.Size(292, 48);
+            this.labelValueRemark.Size = new System.Drawing.Size(267, 48);
             this.labelValueRemark.TabIndex = 4;
             this.labelValueRemark.Text = "-";
             this.labelValueRemark.TextAlign = System.Drawing.ContentAlignment.TopLeft;
@@ -121,7 +121,7 @@
             this.labelRemark.Location = new System.Drawing.Point(4, 109);
             this.labelRemark.Margin = new System.Windows.Forms.Padding(0);
             this.labelRemark.Name = "labelRemark";
-            this.labelRemark.Size = new System.Drawing.Size(292, 22);
+            this.labelRemark.Size = new System.Drawing.Size(267, 22);
             this.labelRemark.TabIndex = 3;
             this.labelRemark.Text = "备注";
             // 
@@ -131,7 +131,7 @@
             this.labelValueDescription.Location = new System.Drawing.Point(4, 55);
             this.labelValueDescription.Margin = new System.Windows.Forms.Padding(0, 0, 0, 6);
             this.labelValueDescription.Name = "labelValueDescription";
-            this.labelValueDescription.Size = new System.Drawing.Size(292, 48);
+            this.labelValueDescription.Size = new System.Drawing.Size(267, 48);
             this.labelValueDescription.TabIndex = 2;
             this.labelValueDescription.Text = "-";
             this.labelValueDescription.TextAlign = System.Drawing.ContentAlignment.TopLeft;
@@ -142,7 +142,7 @@
             this.labelDescription.Location = new System.Drawing.Point(4, 33);
             this.labelDescription.Margin = new System.Windows.Forms.Padding(0);
             this.labelDescription.Name = "labelDescription";
-            this.labelDescription.Size = new System.Drawing.Size(292, 22);
+            this.labelDescription.Size = new System.Drawing.Size(267, 22);
             this.labelDescription.TabIndex = 1;
             this.labelDescription.Text = "描述";
             // 
@@ -150,7 +150,7 @@
             // 
             this.dividerSectionRemark.Location = new System.Drawing.Point(7, 7);
             this.dividerSectionRemark.Name = "dividerSectionRemark";
-            this.dividerSectionRemark.Size = new System.Drawing.Size(286, 23);
+            this.dividerSectionRemark.Size = new System.Drawing.Size(261, 23);
             this.dividerSectionRemark.TabIndex = 0;
             this.dividerSectionRemark.Text = "说明与备注";
             // 
@@ -164,11 +164,11 @@
             this.stackState.Controls.Add(this.labelValueEnabled);
             this.stackState.Controls.Add(this.labelEnabled);
             this.stackState.Controls.Add(this.dividerSectionState);
-            this.stackState.Location = new System.Drawing.Point(0, 286);
+            this.stackState.Location = new System.Drawing.Point(0, 253);
             this.stackState.Margin = new System.Windows.Forms.Padding(0);
             this.stackState.Name = "stackState";
             this.stackState.Padding = new System.Windows.Forms.Padding(4);
-            this.stackState.Size = new System.Drawing.Size(300, 234);
+            this.stackState.Size = new System.Drawing.Size(275, 207);
             this.stackState.TabIndex = 2;
             this.stackState.Text = "stackState";
             this.stackState.Vertical = true;
@@ -179,7 +179,7 @@
             this.labelValueUpdateTime.Location = new System.Drawing.Point(4, 147);
             this.labelValueUpdateTime.Margin = new System.Windows.Forms.Padding(0, 0, 0, 6);
             this.labelValueUpdateTime.Name = "labelValueUpdateTime";
-            this.labelValueUpdateTime.Size = new System.Drawing.Size(292, 24);
+            this.labelValueUpdateTime.Size = new System.Drawing.Size(267, 24);
             this.labelValueUpdateTime.TabIndex = 6;
             this.labelValueUpdateTime.Text = "-";
             // 
@@ -189,7 +189,7 @@
             this.labelUpdateTime.Location = new System.Drawing.Point(4, 125);
             this.labelUpdateTime.Margin = new System.Windows.Forms.Padding(0);
             this.labelUpdateTime.Name = "labelUpdateTime";
-            this.labelUpdateTime.Size = new System.Drawing.Size(292, 22);
+            this.labelUpdateTime.Size = new System.Drawing.Size(267, 22);
             this.labelUpdateTime.TabIndex = 5;
             this.labelUpdateTime.Text = "更新时间";
             // 
@@ -199,7 +199,7 @@
             this.labelValueSortOrder.Location = new System.Drawing.Point(4, 101);
             this.labelValueSortOrder.Margin = new System.Windows.Forms.Padding(0);
             this.labelValueSortOrder.Name = "labelValueSortOrder";
-            this.labelValueSortOrder.Size = new System.Drawing.Size(292, 24);
+            this.labelValueSortOrder.Size = new System.Drawing.Size(267, 24);
             this.labelValueSortOrder.TabIndex = 4;
             this.labelValueSortOrder.Text = "-";
             // 
@@ -209,7 +209,7 @@
             this.labelSortOrder.Location = new System.Drawing.Point(4, 79);
             this.labelSortOrder.Margin = new System.Windows.Forms.Padding(0);
             this.labelSortOrder.Name = "labelSortOrder";
-            this.labelSortOrder.Size = new System.Drawing.Size(292, 22);
+            this.labelSortOrder.Size = new System.Drawing.Size(267, 22);
             this.labelSortOrder.TabIndex = 3;
             this.labelSortOrder.Text = "排序号";
             // 
@@ -219,7 +219,7 @@
             this.labelValueEnabled.Location = new System.Drawing.Point(4, 55);
             this.labelValueEnabled.Margin = new System.Windows.Forms.Padding(0);
             this.labelValueEnabled.Name = "labelValueEnabled";
-            this.labelValueEnabled.Size = new System.Drawing.Size(292, 24);
+            this.labelValueEnabled.Size = new System.Drawing.Size(267, 24);
             this.labelValueEnabled.TabIndex = 2;
             this.labelValueEnabled.Text = "-";
             // 
@@ -229,7 +229,7 @@
             this.labelEnabled.Location = new System.Drawing.Point(4, 33);
             this.labelEnabled.Margin = new System.Windows.Forms.Padding(0);
             this.labelEnabled.Name = "labelEnabled";
-            this.labelEnabled.Size = new System.Drawing.Size(292, 22);
+            this.labelEnabled.Size = new System.Drawing.Size(267, 22);
             this.labelEnabled.TabIndex = 1;
             this.labelEnabled.Text = "启用状态";
             // 
@@ -237,7 +237,7 @@
             // 
             this.dividerSectionState.Location = new System.Drawing.Point(7, 7);
             this.dividerSectionState.Name = "dividerSectionState";
-            this.dividerSectionState.Size = new System.Drawing.Size(286, 23);
+            this.dividerSectionState.Size = new System.Drawing.Size(261, 23);
             this.dividerSectionState.TabIndex = 0;
             this.dividerSectionState.Text = "状态与排序";
             // 
@@ -250,12 +250,14 @@
             this.stackMapping.Controls.Add(this.labelPhysicalCore);
             this.stackMapping.Controls.Add(this.labelValueAxisId);
             this.stackMapping.Controls.Add(this.labelAxisId);
+            this.stackMapping.Controls.Add(this.labelValueCard);
+            this.stackMapping.Controls.Add(this.labelCard);
             this.stackMapping.Controls.Add(this.dividerSectionMapping);
-            this.stackMapping.Location = new System.Drawing.Point(300, 0);
+            this.stackMapping.Location = new System.Drawing.Point(275, 0);
             this.stackMapping.Margin = new System.Windows.Forms.Padding(0);
             this.stackMapping.Name = "stackMapping";
             this.stackMapping.Padding = new System.Windows.Forms.Padding(4);
-            this.stackMapping.Size = new System.Drawing.Size(300, 286);
+            this.stackMapping.Size = new System.Drawing.Size(275, 253);
             this.stackMapping.TabIndex = 1;
             this.stackMapping.Text = "stackMapping";
             this.stackMapping.Vertical = true;
@@ -263,76 +265,94 @@
             // labelValuePhysicalAxis
             // 
             this.labelValuePhysicalAxis.Font = new System.Drawing.Font("Microsoft YaHei UI", 10F, System.Drawing.FontStyle.Bold);
-            this.labelValuePhysicalAxis.Location = new System.Drawing.Point(4, 147);
+            this.labelValuePhysicalAxis.Location = new System.Drawing.Point(4, 193);
             this.labelValuePhysicalAxis.Margin = new System.Windows.Forms.Padding(0);
             this.labelValuePhysicalAxis.Name = "labelValuePhysicalAxis";
-            this.labelValuePhysicalAxis.Size = new System.Drawing.Size(292, 24);
+            this.labelValuePhysicalAxis.Size = new System.Drawing.Size(267, 24);
             this.labelValuePhysicalAxis.TabIndex = 6;
             this.labelValuePhysicalAxis.Text = "-";
             // 
             // labelPhysicalAxis
             // 
             this.labelPhysicalAxis.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(110)))), ((int)(((byte)(110)))), ((int)(((byte)(110)))));
-            this.labelPhysicalAxis.Location = new System.Drawing.Point(4, 125);
+            this.labelPhysicalAxis.Location = new System.Drawing.Point(4, 171);
             this.labelPhysicalAxis.Margin = new System.Windows.Forms.Padding(0);
             this.labelPhysicalAxis.Name = "labelPhysicalAxis";
-            this.labelPhysicalAxis.Size = new System.Drawing.Size(292, 22);
+            this.labelPhysicalAxis.Size = new System.Drawing.Size(267, 22);
             this.labelPhysicalAxis.TabIndex = 5;
             this.labelPhysicalAxis.Text = "物理轴号";
             // 
             // labelValuePhysicalCore
             // 
             this.labelValuePhysicalCore.Font = new System.Drawing.Font("Microsoft YaHei UI", 10F, System.Drawing.FontStyle.Bold);
-            this.labelValuePhysicalCore.Location = new System.Drawing.Point(4, 101);
+            this.labelValuePhysicalCore.Location = new System.Drawing.Point(4, 147);
             this.labelValuePhysicalCore.Margin = new System.Windows.Forms.Padding(0);
             this.labelValuePhysicalCore.Name = "labelValuePhysicalCore";
-            this.labelValuePhysicalCore.Size = new System.Drawing.Size(292, 24);
+            this.labelValuePhysicalCore.Size = new System.Drawing.Size(267, 24);
             this.labelValuePhysicalCore.TabIndex = 4;
             this.labelValuePhysicalCore.Text = "-";
             // 
             // labelPhysicalCore
             // 
             this.labelPhysicalCore.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(110)))), ((int)(((byte)(110)))), ((int)(((byte)(110)))));
-            this.labelPhysicalCore.Location = new System.Drawing.Point(4, 79);
+            this.labelPhysicalCore.Location = new System.Drawing.Point(4, 125);
             this.labelPhysicalCore.Margin = new System.Windows.Forms.Padding(0);
             this.labelPhysicalCore.Name = "labelPhysicalCore";
-            this.labelPhysicalCore.Size = new System.Drawing.Size(292, 22);
+            this.labelPhysicalCore.Size = new System.Drawing.Size(267, 22);
             this.labelPhysicalCore.TabIndex = 3;
             this.labelPhysicalCore.Text = "物理内核号";
             // 
             // labelValueAxisId
             // 
             this.labelValueAxisId.Font = new System.Drawing.Font("Microsoft YaHei UI", 10F, System.Drawing.FontStyle.Bold);
-            this.labelValueAxisId.Location = new System.Drawing.Point(4, 55);
+            this.labelValueAxisId.Location = new System.Drawing.Point(4, 101);
             this.labelValueAxisId.Margin = new System.Windows.Forms.Padding(0);
             this.labelValueAxisId.Name = "labelValueAxisId";
-            this.labelValueAxisId.Size = new System.Drawing.Size(292, 24);
+            this.labelValueAxisId.Size = new System.Drawing.Size(267, 24);
             this.labelValueAxisId.TabIndex = 2;
             this.labelValueAxisId.Text = "-";
             // 
             // labelAxisId
             // 
             this.labelAxisId.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(110)))), ((int)(((byte)(110)))), ((int)(((byte)(110)))));
-            this.labelAxisId.Location = new System.Drawing.Point(4, 33);
+            this.labelAxisId.Location = new System.Drawing.Point(4, 79);
             this.labelAxisId.Margin = new System.Windows.Forms.Padding(0);
             this.labelAxisId.Name = "labelAxisId";
-            this.labelAxisId.Size = new System.Drawing.Size(292, 22);
+            this.labelAxisId.Size = new System.Drawing.Size(267, 22);
             this.labelAxisId.TabIndex = 1;
             this.labelAxisId.Text = "卡内轴号（AxisId）";
+            // 
+            // labelValueCard
+            // 
+            this.labelValueCard.Font = new System.Drawing.Font("Microsoft YaHei UI", 10F, System.Drawing.FontStyle.Bold);
+            this.labelValueCard.Location = new System.Drawing.Point(4, 55);
+            this.labelValueCard.Margin = new System.Windows.Forms.Padding(0);
+            this.labelValueCard.Name = "labelValueCard";
+            this.labelValueCard.Size = new System.Drawing.Size(267, 24);
+            this.labelValueCard.TabIndex = 10;
+            this.labelValueCard.Text = "-";
+            // 
+            // labelCard
+            // 
+            this.labelCard.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(110)))), ((int)(((byte)(110)))), ((int)(((byte)(110)))));
+            this.labelCard.Location = new System.Drawing.Point(4, 33);
+            this.labelCard.Margin = new System.Windows.Forms.Padding(0);
+            this.labelCard.Name = "labelCard";
+            this.labelCard.Size = new System.Drawing.Size(267, 22);
+            this.labelCard.TabIndex = 9;
+            this.labelCard.Text = "所属控制卡";
             // 
             // dividerSectionMapping
             // 
             this.dividerSectionMapping.Location = new System.Drawing.Point(7, 7);
             this.dividerSectionMapping.Name = "dividerSectionMapping";
-            this.dividerSectionMapping.Size = new System.Drawing.Size(286, 23);
+            this.dividerSectionMapping.Size = new System.Drawing.Size(261, 23);
             this.dividerSectionMapping.TabIndex = 0;
             this.dividerSectionMapping.Text = "归属与映射";
             // 
             // stackBasic
             // 
             this.stackBasic.AutoScroll = true;
-            this.stackBasic.Controls.Add(this.labelValueCard);
-            this.stackBasic.Controls.Add(this.labelCard);
             this.stackBasic.Controls.Add(this.labelValueName);
             this.stackBasic.Controls.Add(this.labelName);
             this.stackBasic.Controls.Add(this.labelValueDisplayName);
@@ -346,30 +366,10 @@
             this.stackBasic.Margin = new System.Windows.Forms.Padding(0);
             this.stackBasic.Name = "stackBasic";
             this.stackBasic.Padding = new System.Windows.Forms.Padding(4);
-            this.stackBasic.Size = new System.Drawing.Size(300, 286);
+            this.stackBasic.Size = new System.Drawing.Size(275, 253);
             this.stackBasic.TabIndex = 0;
             this.stackBasic.Text = "stackBasic";
             this.stackBasic.Vertical = true;
-            // 
-            // labelValueCard
-            // 
-            this.labelValueCard.Font = new System.Drawing.Font("Microsoft YaHei UI", 10F, System.Drawing.FontStyle.Bold);
-            this.labelValueCard.Location = new System.Drawing.Point(4, 239);
-            this.labelValueCard.Margin = new System.Windows.Forms.Padding(0);
-            this.labelValueCard.Name = "labelValueCard";
-            this.labelValueCard.Size = new System.Drawing.Size(292, 24);
-            this.labelValueCard.TabIndex = 10;
-            this.labelValueCard.Text = "-";
-            // 
-            // labelCard
-            // 
-            this.labelCard.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(110)))), ((int)(((byte)(110)))), ((int)(((byte)(110)))));
-            this.labelCard.Location = new System.Drawing.Point(4, 217);
-            this.labelCard.Margin = new System.Windows.Forms.Padding(0);
-            this.labelCard.Name = "labelCard";
-            this.labelCard.Size = new System.Drawing.Size(292, 22);
-            this.labelCard.TabIndex = 9;
-            this.labelCard.Text = "所属控制卡";
             // 
             // labelValueName
             // 
@@ -377,7 +377,7 @@
             this.labelValueName.Location = new System.Drawing.Point(4, 193);
             this.labelValueName.Margin = new System.Windows.Forms.Padding(0);
             this.labelValueName.Name = "labelValueName";
-            this.labelValueName.Size = new System.Drawing.Size(292, 24);
+            this.labelValueName.Size = new System.Drawing.Size(267, 24);
             this.labelValueName.TabIndex = 8;
             this.labelValueName.Text = "-";
             // 
@@ -387,7 +387,7 @@
             this.labelName.Location = new System.Drawing.Point(4, 171);
             this.labelName.Margin = new System.Windows.Forms.Padding(0);
             this.labelName.Name = "labelName";
-            this.labelName.Size = new System.Drawing.Size(292, 22);
+            this.labelName.Size = new System.Drawing.Size(267, 22);
             this.labelName.TabIndex = 7;
             this.labelName.Text = "内部名称";
             // 
@@ -397,7 +397,7 @@
             this.labelValueDisplayName.Location = new System.Drawing.Point(4, 147);
             this.labelValueDisplayName.Margin = new System.Windows.Forms.Padding(0);
             this.labelValueDisplayName.Name = "labelValueDisplayName";
-            this.labelValueDisplayName.Size = new System.Drawing.Size(292, 24);
+            this.labelValueDisplayName.Size = new System.Drawing.Size(267, 24);
             this.labelValueDisplayName.TabIndex = 6;
             this.labelValueDisplayName.Text = "-";
             // 
@@ -407,7 +407,7 @@
             this.labelDisplayName.Location = new System.Drawing.Point(4, 125);
             this.labelDisplayName.Margin = new System.Windows.Forms.Padding(0);
             this.labelDisplayName.Name = "labelDisplayName";
-            this.labelDisplayName.Size = new System.Drawing.Size(292, 22);
+            this.labelDisplayName.Size = new System.Drawing.Size(267, 22);
             this.labelDisplayName.TabIndex = 5;
             this.labelDisplayName.Text = "显示名称";
             // 
@@ -417,7 +417,7 @@
             this.labelValueAxisCategory.Location = new System.Drawing.Point(4, 101);
             this.labelValueAxisCategory.Margin = new System.Windows.Forms.Padding(0);
             this.labelValueAxisCategory.Name = "labelValueAxisCategory";
-            this.labelValueAxisCategory.Size = new System.Drawing.Size(292, 24);
+            this.labelValueAxisCategory.Size = new System.Drawing.Size(267, 24);
             this.labelValueAxisCategory.TabIndex = 4;
             this.labelValueAxisCategory.Text = "-";
             // 
@@ -427,7 +427,7 @@
             this.labelAxisCategory.Location = new System.Drawing.Point(4, 79);
             this.labelAxisCategory.Margin = new System.Windows.Forms.Padding(0);
             this.labelAxisCategory.Name = "labelAxisCategory";
-            this.labelAxisCategory.Size = new System.Drawing.Size(292, 22);
+            this.labelAxisCategory.Size = new System.Drawing.Size(267, 22);
             this.labelAxisCategory.TabIndex = 3;
             this.labelAxisCategory.Text = "轴分类";
             // 
@@ -437,7 +437,7 @@
             this.labelValueLogicalAxis.Location = new System.Drawing.Point(4, 55);
             this.labelValueLogicalAxis.Margin = new System.Windows.Forms.Padding(0);
             this.labelValueLogicalAxis.Name = "labelValueLogicalAxis";
-            this.labelValueLogicalAxis.Size = new System.Drawing.Size(292, 24);
+            this.labelValueLogicalAxis.Size = new System.Drawing.Size(267, 24);
             this.labelValueLogicalAxis.TabIndex = 2;
             this.labelValueLogicalAxis.Text = "-";
             // 
@@ -447,7 +447,7 @@
             this.labelLogicalAxis.Location = new System.Drawing.Point(4, 33);
             this.labelLogicalAxis.Margin = new System.Windows.Forms.Padding(0);
             this.labelLogicalAxis.Name = "labelLogicalAxis";
-            this.labelLogicalAxis.Size = new System.Drawing.Size(292, 22);
+            this.labelLogicalAxis.Size = new System.Drawing.Size(267, 22);
             this.labelLogicalAxis.TabIndex = 1;
             this.labelLogicalAxis.Text = "逻辑轴号";
             // 
@@ -455,18 +455,18 @@
             // 
             this.dividerSectionBasic.Location = new System.Drawing.Point(7, 7);
             this.dividerSectionBasic.Name = "dividerSectionBasic";
-            this.dividerSectionBasic.Size = new System.Drawing.Size(286, 23);
+            this.dividerSectionBasic.Size = new System.Drawing.Size(261, 23);
             this.dividerSectionBasic.TabIndex = 0;
             this.dividerSectionBasic.Text = "基础标识";
             // 
             // MotionAxisDetailControl
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
-            this.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.Controls.Add(this.panelRoot);
+            this.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.Margin = new System.Windows.Forms.Padding(0);
             this.Name = "MotionAxisDetailControl";
-            this.Size = new System.Drawing.Size(600, 520);
+            this.Size = new System.Drawing.Size(550, 460);
             this.panelRoot.ResumeLayout(false);
             this.gridDetails.ResumeLayout(false);
             this.stackRemark.ResumeLayout(false);

@@ -190,7 +190,7 @@ namespace AMControlWinF.Views.MotionConfig
             var detail = new MotionAxisDetailControl();
             detail.Bind(item);
 
-            PageDialogHelper.ShowDetailPopover(this, anchorControl, detail, new Size(600, 520));
+            PageDialogHelper.ShowDetailPopover(this, anchorControl, detail, new Size(500, 460));
 
         }
     }
