@@ -497,6 +497,7 @@
             // 
             // labelCardType
             // 
+            this.labelCardType.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.labelCardType.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(110)))), ((int)(((byte)(110)))), ((int)(((byte)(110)))));
             this.labelCardType.Location = new System.Drawing.Point(4, 79);
             this.labelCardType.Margin = new System.Windows.Forms.Padding(0);
@@ -517,7 +518,7 @@
             // 
             // labelCardId
             // 
-            this.labelCardId.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.labelCardId.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.labelCardId.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(110)))), ((int)(((byte)(110)))), ((int)(((byte)(110)))));
             this.labelCardId.Location = new System.Drawing.Point(4, 33);
             this.labelCardId.Margin = new System.Windows.Forms.Padding(0);
@@ -537,6 +538,7 @@
             // MotionCardDetailControl
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
+            this.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.Controls.Add(this.panelRoot);
             this.Margin = new System.Windows.Forms.Padding(0);
             this.Name = "MotionCardDetailControl";

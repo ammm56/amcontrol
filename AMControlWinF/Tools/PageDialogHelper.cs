@@ -114,12 +114,6 @@ namespace AMControlWinF.Tools
             content.Size = contentSize;
             content.MinimumSize = contentSize;
 
-            var window = ResolveOwnerWindow(owner) ?? ResolveOwnerWindow(anchorControl);
-            if (window != null)
-            {
-                window.AutoDpi(content);
-            }
-
             var align = ResolvePopoverAlign(owner, anchorControl, content.Size);
 
             return AntdUI.Popover.open(new AntdUI.Popover.Config(anchorControl, content)

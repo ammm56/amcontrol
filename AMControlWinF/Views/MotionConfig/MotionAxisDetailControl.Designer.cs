@@ -462,6 +462,7 @@
             // MotionAxisDetailControl
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
+            this.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.Controls.Add(this.panelRoot);
             this.Margin = new System.Windows.Forms.Padding(0);
             this.Name = "MotionAxisDetailControl";
