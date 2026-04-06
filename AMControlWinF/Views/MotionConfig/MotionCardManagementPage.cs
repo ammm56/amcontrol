@@ -93,7 +93,7 @@ namespace AMControlWinF.Views.MotionConfig
                     card.Margin = new Padding(0);
                     card.EditRequested += async (s, e) => await EditCardAsync(card.CardItem);
                     card.DeleteRequested += async (s, e) => await DeleteCardAsync(card.CardItem);
-                    card.DetailRequested += (s, e) => ShowDetail(card.CardItem);
+                    card.DetailRequested += (s, e) => ShowDetail(s as Control ?? card, card.CardItem);
                     flowCards.Controls.Add(card);
                 }
             }
@@ -167,15 +167,35 @@ namespace AMControlWinF.Views.MotionConfig
             await ReloadAsync();
         }
 
-        private void ShowDetail(MotionCardManagementPageModel.MotionCardViewItem item)
+        private void ShowDetail(Control anchorControl, MotionCardManagementPageModel.MotionCardViewItem item)
         {
-            if (item == null)
+            if (anchorControl == null || item == null)
                 return;
 
-            using (var dialog = new MotionCardDetailDialog(item))
+            var detail = new MotionCardDetailControl();
+            detail.Bind(item);
+            detail.Margin = new Padding(0);
+            detail.Size = new Size(600, 560);
+            detail.MinimumSize = new Size(600, 560);
+
+            var window = FindForm() as AntdUI.Window;
+            if (window != null)
             {
-                dialog.ShowDialog(FindForm());
+                window.AutoDpi(detail);
             }
+
+            AntdUI.Popover.open(new AntdUI.Popover.Config(anchorControl, detail)
+            {
+                ArrowAlign = AntdUI.TAlign.LT,
+                Radius = 10,
+                Padding = new Size(16, 16),
+                Gap = 6,
+                Focus = false,
+                OnClosing = (s, e) =>
+                {
+                    detail.Dispose();
+                }
+            });
         }
 
         private static MotionCardEntity CreateDefaultCardEntity()

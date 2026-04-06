@@ -100,7 +100,8 @@ namespace AMControlWinF.Views.MotionConfig
             var handler = DetailRequested;
             if (handler != null)
             {
-                handler(this, EventArgs.Empty);
+                //handler(this, EventArgs.Empty);
+                handler(buttonDetail, EventArgs.Empty);
             }
         }
 
