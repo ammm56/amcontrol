@@ -21,19 +21,19 @@
             this.flowBottomRight = new AntdUI.FlowPanel();
             this.labelValueStatus = new AntdUI.Label();
             this.flowBottomLeft = new AntdUI.FlowPanel();
+            this.labelValuePhysicalAxis = new AntdUI.Label();
             this.labelValuePhysicalCore = new AntdUI.Label();
             this.panelBody = new AntdUI.Panel();
             this.labelValueLogicalAxis = new AntdUI.Label();
+            this.buttonDetail = new AntdUI.Button();
             this.labelSubTitle = new AntdUI.Label();
             this.labelTitle = new AntdUI.Label();
             this.panelHeader = new AntdUI.Panel();
             this.flowHeaderRight = new AntdUI.FlowPanel();
             this.buttonEdit = new AntdUI.Button();
-            this.buttonDetail = new AntdUI.Button();
             this.buttonDelete = new AntdUI.Button();
             this.panelHeaderLeft = new AntdUI.Panel();
             this.buttonCategoryTag = new AntdUI.Button();
-            this.labelValuePhysicalAxis = new AntdUI.Label();
             this.panelCard.SuspendLayout();
             this.panelBottom.SuspendLayout();
             this.flowBottomRight.SuspendLayout();
@@ -59,7 +59,8 @@
             this.panelCard.Radius = 12;
             this.panelCard.Shadow = 4;
             this.panelCard.ShadowOpacity = 0.2F;
-            this.panelCard.Size = new System.Drawing.Size(250, 180);
+            this.panelCard.ShadowOpacityAnimation = true;
+            this.panelCard.Size = new System.Drawing.Size(245, 170);
             this.panelCard.TabIndex = 0;
             // 
             // panelBottom
@@ -67,12 +68,12 @@
             this.panelBottom.Controls.Add(this.flowBottomRight);
             this.panelBottom.Controls.Add(this.flowBottomLeft);
             this.panelBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panelBottom.Location = new System.Drawing.Point(16, 124);
+            this.panelBottom.Location = new System.Drawing.Point(16, 114);
             this.panelBottom.Margin = new System.Windows.Forms.Padding(0);
             this.panelBottom.Name = "panelBottom";
             this.panelBottom.Padding = new System.Windows.Forms.Padding(0, 8, 0, 0);
             this.panelBottom.Radius = 0;
-            this.panelBottom.Size = new System.Drawing.Size(218, 40);
+            this.panelBottom.Size = new System.Drawing.Size(213, 40);
             this.panelBottom.TabIndex = 2;
             this.panelBottom.Text = "panelBottom";
             // 
@@ -81,7 +82,7 @@
             this.flowBottomRight.Align = AntdUI.TAlignFlow.Right;
             this.flowBottomRight.Controls.Add(this.labelValueStatus);
             this.flowBottomRight.Dock = System.Windows.Forms.DockStyle.Right;
-            this.flowBottomRight.Location = new System.Drawing.Point(140, 8);
+            this.flowBottomRight.Location = new System.Drawing.Point(135, 8);
             this.flowBottomRight.Margin = new System.Windows.Forms.Padding(0);
             this.flowBottomRight.Name = "flowBottomRight";
             this.flowBottomRight.Size = new System.Drawing.Size(78, 32);
@@ -111,6 +112,15 @@
             this.flowBottomLeft.TabIndex = 0;
             this.flowBottomLeft.Text = "flowBottomLeft";
             // 
+            // labelValuePhysicalAxis
+            // 
+            this.labelValuePhysicalAxis.Location = new System.Drawing.Point(50, 0);
+            this.labelValuePhysicalAxis.Margin = new System.Windows.Forms.Padding(0);
+            this.labelValuePhysicalAxis.Name = "labelValuePhysicalAxis";
+            this.labelValuePhysicalAxis.Size = new System.Drawing.Size(55, 32);
+            this.labelValuePhysicalAxis.TabIndex = 1;
+            this.labelValuePhysicalAxis.Text = "轴: A1";
+            // 
             // labelValuePhysicalCore
             // 
             this.labelValuePhysicalCore.Location = new System.Drawing.Point(0, 0);
@@ -132,14 +142,14 @@
             this.panelBody.Name = "panelBody";
             this.panelBody.Padding = new System.Windows.Forms.Padding(0, 2, 0, 0);
             this.panelBody.Radius = 0;
-            this.panelBody.Size = new System.Drawing.Size(218, 112);
+            this.panelBody.Size = new System.Drawing.Size(213, 102);
             this.panelBody.TabIndex = 1;
             // 
             // labelValueLogicalAxis
             // 
             this.labelValueLogicalAxis.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.labelValueLogicalAxis.ForeColor = System.Drawing.Color.Gray;
-            this.labelValueLogicalAxis.Location = new System.Drawing.Point(154, 40);
+            this.labelValueLogicalAxis.Location = new System.Drawing.Point(149, 40);
             this.labelValueLogicalAxis.Margin = new System.Windows.Forms.Padding(0);
             this.labelValueLogicalAxis.Name = "labelValueLogicalAxis";
             this.labelValueLogicalAxis.Padding = new System.Windows.Forms.Padding(0, 0, 6, 0);
@@ -147,6 +157,18 @@
             this.labelValueLogicalAxis.TabIndex = 2;
             this.labelValueLogicalAxis.Text = "L101";
             this.labelValueLogicalAxis.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // buttonDetail
+            // 
+            this.buttonDetail.IconSvg = "ProfileOutlined";
+            this.buttonDetail.Location = new System.Drawing.Point(154, 6);
+            this.buttonDetail.Margin = new System.Windows.Forms.Padding(0);
+            this.buttonDetail.Name = "buttonDetail";
+            this.buttonDetail.Radius = 8;
+            this.buttonDetail.Size = new System.Drawing.Size(64, 32);
+            this.buttonDetail.TabIndex = 1;
+            this.buttonDetail.Text = "详情";
+            this.buttonDetail.WaveSize = 0;
             // 
             // labelSubTitle
             // 
@@ -179,7 +201,7 @@
             this.panelHeader.Margin = new System.Windows.Forms.Padding(0);
             this.panelHeader.Name = "panelHeader";
             this.panelHeader.Radius = 0;
-            this.panelHeader.Size = new System.Drawing.Size(218, 36);
+            this.panelHeader.Size = new System.Drawing.Size(213, 36);
             this.panelHeader.TabIndex = 0;
             // 
             // flowHeaderRight
@@ -189,7 +211,7 @@
             this.flowHeaderRight.Controls.Add(this.buttonDelete);
             this.flowHeaderRight.Dock = System.Windows.Forms.DockStyle.Right;
             this.flowHeaderRight.Gap = 6;
-            this.flowHeaderRight.Location = new System.Drawing.Point(72, 0);
+            this.flowHeaderRight.Location = new System.Drawing.Point(67, 0);
             this.flowHeaderRight.Margin = new System.Windows.Forms.Padding(0);
             this.flowHeaderRight.Name = "flowHeaderRight";
             this.flowHeaderRight.Size = new System.Drawing.Size(146, 36);
@@ -208,18 +230,6 @@
             this.buttonEdit.Text = "编辑";
             this.buttonEdit.Type = AntdUI.TTypeMini.Primary;
             this.buttonEdit.WaveSize = 0;
-            // 
-            // buttonDetail
-            // 
-            this.buttonDetail.IconSvg = "ProfileOutlined";
-            this.buttonDetail.Location = new System.Drawing.Point(154, 6);
-            this.buttonDetail.Margin = new System.Windows.Forms.Padding(0);
-            this.buttonDetail.Name = "buttonDetail";
-            this.buttonDetail.Radius = 8;
-            this.buttonDetail.Size = new System.Drawing.Size(64, 32);
-            this.buttonDetail.TabIndex = 1;
-            this.buttonDetail.Text = "详情";
-            this.buttonDetail.WaveSize = 0;
             // 
             // buttonDelete
             // 
@@ -256,22 +266,13 @@
             this.buttonCategoryTag.Text = "直线轴";
             this.buttonCategoryTag.WaveSize = 0;
             // 
-            // labelValuePhysicalAxis
-            // 
-            this.labelValuePhysicalAxis.Location = new System.Drawing.Point(50, 0);
-            this.labelValuePhysicalAxis.Margin = new System.Windows.Forms.Padding(0);
-            this.labelValuePhysicalAxis.Name = "labelValuePhysicalAxis";
-            this.labelValuePhysicalAxis.Size = new System.Drawing.Size(55, 32);
-            this.labelValuePhysicalAxis.TabIndex = 1;
-            this.labelValuePhysicalAxis.Text = "轴: A1";
-            // 
             // MotionAxisCardControl
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.Controls.Add(this.panelCard);
             this.Margin = new System.Windows.Forms.Padding(0);
             this.Name = "MotionAxisCardControl";
-            this.Size = new System.Drawing.Size(250, 180);
+            this.Size = new System.Drawing.Size(245, 170);
             this.panelCard.ResumeLayout(false);
             this.panelBottom.ResumeLayout(false);
             this.flowBottomRight.ResumeLayout(false);

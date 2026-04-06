@@ -27,12 +27,12 @@
             this.labelValueCore = new AntdUI.Label();
             this.panelBody = new AntdUI.Panel();
             this.labelValueCardId = new AntdUI.Label();
+            this.buttonDetail = new AntdUI.Button();
             this.labelSubTitle = new AntdUI.Label();
             this.labelTitle = new AntdUI.Label();
             this.panelHeader = new AntdUI.Panel();
             this.flowHeaderRight = new AntdUI.FlowPanel();
             this.buttonEdit = new AntdUI.Button();
-            this.buttonDetail = new AntdUI.Button();
             this.buttonDelete = new AntdUI.Button();
             this.panelHeaderLeft = new AntdUI.Panel();
             this.buttonTypeTag = new AntdUI.Button();
@@ -61,6 +61,7 @@
             this.panelCard.Radius = 12;
             this.panelCard.Shadow = 4;
             this.panelCard.ShadowOpacity = 0.2F;
+            this.panelCard.ShadowOpacityAnimation = true;
             this.panelCard.Size = new System.Drawing.Size(311, 201);
             this.panelCard.TabIndex = 0;
             // 
@@ -184,6 +185,18 @@
             this.labelValueCardId.Text = "#0";
             this.labelValueCardId.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
+            // buttonDetail
+            // 
+            this.buttonDetail.IconSvg = "ProfileOutlined";
+            this.buttonDetail.Location = new System.Drawing.Point(215, 6);
+            this.buttonDetail.Margin = new System.Windows.Forms.Padding(0);
+            this.buttonDetail.Name = "buttonDetail";
+            this.buttonDetail.Radius = 8;
+            this.buttonDetail.Size = new System.Drawing.Size(64, 32);
+            this.buttonDetail.TabIndex = 1;
+            this.buttonDetail.Text = "详情";
+            this.buttonDetail.WaveSize = 0;
+            // 
             // labelSubTitle
             // 
             this.labelSubTitle.ForeColor = System.Drawing.Color.Gray;
@@ -244,18 +257,6 @@
             this.buttonEdit.Text = "编辑";
             this.buttonEdit.Type = AntdUI.TTypeMini.Primary;
             this.buttonEdit.WaveSize = 0;
-            // 
-            // buttonDetail
-            // 
-            this.buttonDetail.IconSvg = "ProfileOutlined";
-            this.buttonDetail.Location = new System.Drawing.Point(215, 6);
-            this.buttonDetail.Margin = new System.Windows.Forms.Padding(0);
-            this.buttonDetail.Name = "buttonDetail";
-            this.buttonDetail.Radius = 8;
-            this.buttonDetail.Size = new System.Drawing.Size(64, 32);
-            this.buttonDetail.TabIndex = 1;
-            this.buttonDetail.Text = "详情";
-            this.buttonDetail.WaveSize = 0;
             // 
             // buttonDelete
             // 
