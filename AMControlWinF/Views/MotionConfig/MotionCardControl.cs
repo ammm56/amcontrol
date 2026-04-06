@@ -66,8 +66,6 @@ namespace AMControlWinF.Views.MotionConfig
             buttonStatusTag.Type = item != null && item.IsEnabled
                 ? TTypeMini.Success
                 : TTypeMini.Error;
-
-            buttonTypeTag.Type = ResolveCardTypeTagType(item == null ? 99 : item.CardType);
         }
 
         private void BindEvents()

@@ -127,6 +127,24 @@
     <Compile Include="Views\Main\UserAvatarPopoverCard.Designer.cs">
       <DependentUpon>UserAvatarPopoverCard.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\MotionConfig\MotionAxisCardControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionAxisCardControl.Designer.cs">
+      <DependentUpon>MotionAxisCardControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionAxisEditDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionAxisEditDialog.Designer.cs">
+      <DependentUpon>MotionAxisEditDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionAxisManagementPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionAxisManagementPage.Designer.cs">
+      <DependentUpon>MotionAxisManagementPage.cs</DependentUpon>
+    </Compile>
     <Compile Include="Views\MotionConfig\MotionCardControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -162,6 +180,12 @@
     </Compile>
     <Compile Include="Views\MotionConfig\MotionCardManagementPage.Designer.cs">
       <DependentUpon>MotionCardManagementPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionCardSelectDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionCardSelectDialog.Designer.cs">
+      <DependentUpon>MotionCardSelectDialog.cs</DependentUpon>
     </Compile>
     <EmbeddedResource Include="MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>
@@ -204,6 +228,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Views\Main\UserAvatarPopoverCard.resx">
       <DependentUpon>UserAvatarPopoverCard.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\MotionAxisCardControl.resx">
+      <DependentUpon>MotionAxisCardControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\MotionAxisManagementPage.resx">
+      <DependentUpon>MotionAxisManagementPage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\MotionConfig\MotionCardControl.resx">
       <DependentUpon>MotionCardControl.cs</DependentUpon>
