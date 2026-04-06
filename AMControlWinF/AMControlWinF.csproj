@@ -133,6 +133,12 @@
     <Compile Include="Views\MotionConfig\MotionAxisCardControl.Designer.cs">
       <DependentUpon>MotionAxisCardControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\MotionConfig\MotionAxisDetailControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionAxisDetailControl.Designer.cs">
+      <DependentUpon>MotionAxisDetailControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="Views\MotionConfig\MotionAxisEditDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -231,6 +237,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Views\MotionConfig\MotionAxisCardControl.resx">
       <DependentUpon>MotionAxisCardControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\MotionAxisDetailControl.resx">
+      <DependentUpon>MotionAxisDetailControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\MotionConfig\MotionAxisManagementPage.resx">
       <DependentUpon>MotionAxisManagementPage.cs</DependentUpon>

@@ -1,6 +1,7 @@
 ﻿using AM.PageModel.MotionConfig;
 using AMControlWinF.Tools;
 using System;
+using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -188,10 +189,11 @@ namespace AMControlWinF.Views.MotionConfig
             if (anchorControl == null || item == null)
                 return;
 
-            PageDialogHelper.ShowInfo(
-                this,
-                "轴详情",
-                "轴详情 Popover 页面下一步实现。\r\n当前轴：" + item.DisplayName + " / L" + item.LogicalAxis);
+            var detail = new MotionAxisDetailControl();
+            detail.Bind(item);
+
+            PageDialogHelper.ShowDetailPopover(this, anchorControl, detail, new Size(600, 520));
+
         }
     }
 }
