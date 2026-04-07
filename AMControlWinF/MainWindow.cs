@@ -8,6 +8,7 @@ using AMControlWinF.Tools;
 using AMControlWinF.Views.Am;
 using AMControlWinF.Views.Auth;
 using AMControlWinF.Views.Main;
+using AMControlWinF.Views.Motion;
 using AMControlWinF.Views.MotionConfig;
 using AntdUI;
 using System;
@@ -464,7 +465,7 @@ namespace AMControlWinF
                 { "Home.Overview",          () => CreatePlaceholderPage("首页 / 总览看板") },
                 { "Home.SysStatus",         () => CreatePlaceholderPage("首页 / 系统状态") },
 
-                { "Motion.DI",              () => CreatePlaceholderPage("设备 / DI 监视") },
+                { "Motion.DI",              () => new DIMotionPage() },
                 { "Motion.DO",              () => CreatePlaceholderPage("设备 / DO 监视") },
                 { "Motion.Monitor",         () => CreatePlaceholderPage("设备 / 多轴总览") },
                 { "Motion.Axis",            () => CreatePlaceholderPage("设备 / 轴控制") },

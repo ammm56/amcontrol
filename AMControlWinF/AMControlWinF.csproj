@@ -295,6 +295,24 @@
     <Compile Include="Views\MotionConfig\VacuumEditControl.Designer.cs">
       <DependentUpon>VacuumEditControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\Motion\DIMotionDetailControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Motion\DIMotionDetailControl.Designer.cs">
+      <DependentUpon>DIMotionDetailControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Motion\DIMotionPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Motion\DIMotionPage.Designer.cs">
+      <DependentUpon>DIMotionPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Motion\DIMotionVirtualListControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Motion\DIMotionVirtualListControl.Designer.cs">
+      <DependentUpon>DIMotionVirtualListControl.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </EmbeddedResource>
@@ -408,6 +426,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Views\MotionConfig\VacuumEditControl.resx">
       <DependentUpon>VacuumEditControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\Motion\DIMotionPage.resx">
+      <DependentUpon>DIMotionPage.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.manifest" />
     <None Include="Properties\Settings.settings">

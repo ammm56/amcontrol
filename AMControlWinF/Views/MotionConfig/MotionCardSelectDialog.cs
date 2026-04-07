@@ -74,6 +74,9 @@ namespace AMControlWinF.Views.MotionConfig
             {
                 await _model.LoadAsync();
 
+                // 选择窗口不做分页，直接展示全部控制卡。
+                _model.ChangePage(1, Math.Max(1, _model.TotalCount));
+
                 if (!_selectedCardId.HasValue && _initialSelectedCardId.HasValue)
                 {
                     _selectedCardId = _initialSelectedCardId;
