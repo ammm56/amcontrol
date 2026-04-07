@@ -127,6 +127,30 @@
     <Compile Include="Views\Main\UserAvatarPopoverCard.Designer.cs">
       <DependentUpon>UserAvatarPopoverCard.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\MotionConfig\ActuatorEditDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\ActuatorEditDialog.Designer.cs">
+      <DependentUpon>ActuatorEditDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\ActuatorManagementPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\ActuatorManagementPage.Designer.cs">
+      <DependentUpon>ActuatorManagementPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\CylinderEditControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\CylinderEditControl.Designer.cs">
+      <DependentUpon>CylinderEditControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\GripperEditControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\GripperEditControl.Designer.cs">
+      <DependentUpon>GripperEditControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="Views\MotionConfig\MotionAxisCardControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -247,6 +271,18 @@
     <Compile Include="Views\MotionConfig\MotionIoMapManagementPage.Designer.cs">
       <DependentUpon>MotionIoMapManagementPage.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\MotionConfig\StackLightEditControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\StackLightEditControl.Designer.cs">
+      <DependentUpon>StackLightEditControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\VacuumEditControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\VacuumEditControl.Designer.cs">
+      <DependentUpon>VacuumEditControl.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </EmbeddedResource>
@@ -288,6 +324,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Views\Main\UserAvatarPopoverCard.resx">
       <DependentUpon>UserAvatarPopoverCard.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\ActuatorEditDialog.resx">
+      <DependentUpon>ActuatorEditDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\ActuatorManagementPage.resx">
+      <DependentUpon>ActuatorManagementPage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\MotionConfig\MotionAxisCardControl.resx">
       <DependentUpon>MotionAxisCardControl.cs</DependentUpon>

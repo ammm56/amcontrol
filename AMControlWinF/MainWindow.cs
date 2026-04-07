@@ -474,7 +474,7 @@ namespace AMControlWinF
                 { "MotionConfig.Axis",      () => new MotionAxisManagementPage() },
                 { "MotionConfig.IoMap",     () => new MotionIoMapManagementPage() },
                 { "MotionConfig.AxisParam", () => new MotionAxisParamManagementPage() },
-                { "MotionConfig.Actuator",  () => CreatePlaceholderPage("运控配置 / 执行器配置") },
+                { "MotionConfig.Actuator",  () => new ActuatorManagementPage() },
 
                 { "AlarmLog.Current",       () => CreatePlaceholderPage("报警与日志 / 当前报警") },
                 { "AlarmLog.History",       () => CreatePlaceholderPage("报警与日志 / 报警历史") },
