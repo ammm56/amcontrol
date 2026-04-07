@@ -116,7 +116,9 @@ namespace AM.PageModel.MotionConfig
 
         public short GetDefaultCardId()
         {
-            return _allCards.Count > 0 ? _allCards[0].CardId : (short)0;
+            return _allCards.Count == 0
+                ? (short)1
+                : (short)(_allCards.Max(x => x.CardId) + 1);
         }
 
         private void NormalizePage()
