@@ -28,7 +28,7 @@
             this.panelRoot.Name = "panelRoot";
             this.panelRoot.Padding = new System.Windows.Forms.Padding(4);
             this.panelRoot.Radius = 0;
-            this.panelRoot.Size = new System.Drawing.Size(520, 420);
+            this.panelRoot.Size = new System.Drawing.Size(180, 100);
             this.panelRoot.TabIndex = 0;
             // 
             // virtualPanelInputs
@@ -36,7 +36,7 @@
             this.virtualPanelInputs.Dock = System.Windows.Forms.DockStyle.Fill;
             this.virtualPanelInputs.Empty = true;
             this.virtualPanelInputs.EmptyText = "暂无 DI 输入点";
-            this.virtualPanelInputs.Gap = 12;
+            this.virtualPanelInputs.Gap = 0;
             this.virtualPanelInputs.Location = new System.Drawing.Point(4, 4);
             this.virtualPanelInputs.Margin = new System.Windows.Forms.Padding(0);
             this.virtualPanelInputs.Name = "virtualPanelInputs";
@@ -46,9 +46,8 @@
             this.virtualPanelInputs.ShadowOpacity = 0.12F;
             this.virtualPanelInputs.ShadowOpacityAnimation = true;
             this.virtualPanelInputs.ShadowOpacityHover = 0.22F;
-            this.virtualPanelInputs.Size = new System.Drawing.Size(512, 412);
+            this.virtualPanelInputs.Size = new System.Drawing.Size(172, 92);
             this.virtualPanelInputs.TabIndex = 0;
-            this.virtualPanelInputs.Wrap = true;
             // 
             // DIMotionVirtualListControl
             // 
@@ -56,7 +55,7 @@
             this.Controls.Add(this.panelRoot);
             this.Margin = new System.Windows.Forms.Padding(0);
             this.Name = "DIMotionVirtualListControl";
-            this.Size = new System.Drawing.Size(520, 420);
+            this.Size = new System.Drawing.Size(180, 100);
             this.panelRoot.ResumeLayout(false);
             this.ResumeLayout(false);
 

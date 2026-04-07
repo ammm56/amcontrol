@@ -152,9 +152,9 @@
             this.panelListCard.Location = new System.Drawing.Point(0, 0);
             this.panelListCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelListCard.Name = "panelListCard";
-            this.panelListCard.Padding = new System.Windows.Forms.Padding(8);
-            this.panelListCard.Radius = 12;
-            this.panelListCard.Shadow = 4;
+            this.panelListCard.Radius = 0;
+            this.panelListCard.ShadowOpacity = 0F;
+            this.panelListCard.ShadowOpacityHover = 0F;
             this.panelListCard.Size = new System.Drawing.Size(560, 472);
             this.panelListCard.TabIndex = 0;
             // 
@@ -367,10 +367,10 @@
             // diMotionVirtualListControl
             // 
             this.diMotionVirtualListControl.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.diMotionVirtualListControl.Location = new System.Drawing.Point(12, 12);
+            this.diMotionVirtualListControl.Location = new System.Drawing.Point(0, 0);
             this.diMotionVirtualListControl.Margin = new System.Windows.Forms.Padding(0);
             this.diMotionVirtualListControl.Name = "diMotionVirtualListControl";
-            this.diMotionVirtualListControl.Size = new System.Drawing.Size(536, 448);
+            this.diMotionVirtualListControl.Size = new System.Drawing.Size(560, 472);
             this.diMotionVirtualListControl.TabIndex = 0;
             // 
             // DIMotionPage

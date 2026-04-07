@@ -165,8 +165,7 @@
             // 
             // labelTagLinkKey
             // 
-            this.labelTagLinkKey.BackColor = System.Drawing.Color.DimGray;
-            this.labelTagLinkKey.ForeColor = System.Drawing.Color.White;
+            this.labelTagLinkKey.ForeColor = System.Drawing.Color.Gray;
             this.labelTagLinkKey.Location = new System.Drawing.Point(0, 0);
             this.labelTagLinkKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelTagLinkKey.Name = "labelTagLinkKey";
@@ -200,8 +199,7 @@
             // 
             // labelTagLastUpdateKey
             // 
-            this.labelTagLastUpdateKey.BackColor = System.Drawing.Color.DimGray;
-            this.labelTagLastUpdateKey.ForeColor = System.Drawing.Color.White;
+            this.labelTagLastUpdateKey.ForeColor = System.Drawing.Color.Gray;
             this.labelTagLastUpdateKey.Location = new System.Drawing.Point(0, 0);
             this.labelTagLastUpdateKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelTagLastUpdateKey.Name = "labelTagLastUpdateKey";
@@ -235,8 +233,7 @@
             // 
             // labelTagStateKey
             // 
-            this.labelTagStateKey.BackColor = System.Drawing.Color.DimGray;
-            this.labelTagStateKey.ForeColor = System.Drawing.Color.White;
+            this.labelTagStateKey.ForeColor = System.Drawing.Color.Gray;
             this.labelTagStateKey.Location = new System.Drawing.Point(0, 0);
             this.labelTagStateKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelTagStateKey.Name = "labelTagStateKey";
@@ -270,8 +267,7 @@
             // 
             // labelTagHardwareKey
             // 
-            this.labelTagHardwareKey.BackColor = System.Drawing.Color.DimGray;
-            this.labelTagHardwareKey.ForeColor = System.Drawing.Color.White;
+            this.labelTagHardwareKey.ForeColor = System.Drawing.Color.Gray;
             this.labelTagHardwareKey.Location = new System.Drawing.Point(0, 0);
             this.labelTagHardwareKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelTagHardwareKey.Name = "labelTagHardwareKey";
@@ -305,8 +301,7 @@
             // 
             // labelTagCardKey
             // 
-            this.labelTagCardKey.BackColor = System.Drawing.Color.DimGray;
-            this.labelTagCardKey.ForeColor = System.Drawing.Color.White;
+            this.labelTagCardKey.ForeColor = System.Drawing.Color.Gray;
             this.labelTagCardKey.Location = new System.Drawing.Point(0, 0);
             this.labelTagCardKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelTagCardKey.Name = "labelTagCardKey";
@@ -340,8 +335,7 @@
             // 
             // labelTagCategoryKey
             // 
-            this.labelTagCategoryKey.BackColor = System.Drawing.Color.DimGray;
-            this.labelTagCategoryKey.ForeColor = System.Drawing.Color.White;
+            this.labelTagCategoryKey.ForeColor = System.Drawing.Color.Gray;
             this.labelTagCategoryKey.Location = new System.Drawing.Point(0, 0);
             this.labelTagCategoryKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelTagCategoryKey.Name = "labelTagCategoryKey";
@@ -375,8 +369,7 @@
             // 
             // labelTagLogicKey
             // 
-            this.labelTagLogicKey.BackColor = System.Drawing.Color.DimGray;
-            this.labelTagLogicKey.ForeColor = System.Drawing.Color.White;
+            this.labelTagLogicKey.ForeColor = System.Drawing.Color.Gray;
             this.labelTagLogicKey.Location = new System.Drawing.Point(0, 0);
             this.labelTagLogicKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelTagLogicKey.Name = "labelTagLogicKey";
