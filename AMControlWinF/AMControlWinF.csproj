@@ -331,6 +331,24 @@
     <Compile Include="Views\Motion\DOMotionVirtualListControl.Designer.cs">
       <DependentUpon>DOMotionVirtualListControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\Motion\MotionMonitorDetailControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Motion\MotionMonitorDetailControl.Designer.cs">
+      <DependentUpon>MotionMonitorDetailControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Motion\MotionMonitorPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Motion\MotionMonitorPage.Designer.cs">
+      <DependentUpon>MotionMonitorPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Motion\MotionMonitorVirtualListControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Motion\MotionMonitorVirtualListControl.Designer.cs">
+      <DependentUpon>MotionMonitorVirtualListControl.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </EmbeddedResource>
@@ -456,6 +474,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Views\Motion\DOMotionDetailControl.resx">
       <DependentUpon>DOMotionDetailControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\Motion\MotionMonitorPage.resx">
+      <DependentUpon>MotionMonitorPage.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.manifest" />
     <None Include="Properties\Settings.settings">
