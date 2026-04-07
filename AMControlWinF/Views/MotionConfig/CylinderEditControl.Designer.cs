@@ -114,18 +114,18 @@
             // 
             // inputRemark
             // 
-            this.inputRemark.Location = new System.Drawing.Point(4, 334);
+            this.inputRemark.Location = new System.Drawing.Point(4, 339);
             this.inputRemark.Margin = new System.Windows.Forms.Padding(0);
             this.inputRemark.Multiline = true;
             this.inputRemark.Name = "inputRemark";
             this.inputRemark.PlaceholderText = "请输入备注";
-            this.inputRemark.Size = new System.Drawing.Size(240, 60);
+            this.inputRemark.Size = new System.Drawing.Size(240, 65);
             this.inputRemark.TabIndex = 10;
             this.inputRemark.WaveSize = 0;
             // 
             // labelRemark
             // 
-            this.labelRemark.Location = new System.Drawing.Point(4, 308);
+            this.labelRemark.Location = new System.Drawing.Point(4, 313);
             this.labelRemark.Margin = new System.Windows.Forms.Padding(0);
             this.labelRemark.Name = "labelRemark";
             this.labelRemark.Size = new System.Drawing.Size(240, 22);
@@ -139,7 +139,7 @@
             this.inputDescription.Multiline = true;
             this.inputDescription.Name = "inputDescription";
             this.inputDescription.PlaceholderText = "请输入描述";
-            this.inputDescription.Size = new System.Drawing.Size(240, 60);
+            this.inputDescription.Size = new System.Drawing.Size(240, 65);
             this.inputDescription.TabIndex = 8;
             this.inputDescription.WaveSize = 0;
             // 

@@ -63,15 +63,20 @@ namespace AMControlWinF.Views.MotionConfig
             SetBusyState(true);
             try
             {
-                await _model.LoadAsync();
-                NormalizeSelectedItem();
-                UpdateCategoryButtons();
-                BuildCards();
+                await ReloadCoreAsync();
             }
             finally
             {
                 SetBusyState(false);
             }
+        }
+
+        private async Task ReloadCoreAsync()
+        {
+            await _model.LoadAsync();
+            NormalizeSelectedItem();
+            UpdateCategoryButtons();
+            BuildCards();
         }
 
         private void SetBusyState(bool isBusy)
@@ -273,7 +278,7 @@ namespace AMControlWinF.Views.MotionConfig
 
                     _selectedItemKey = dialog.ResultActuatorType + "|" + GetEntityName(dialog.ResultEntity);
                     _model.SelectedCategoryKey = dialog.ResultActuatorType;
-                    await ReloadAsync();
+                    await ReloadCoreAsync();
                 }
                 finally
                 {
@@ -307,7 +312,7 @@ namespace AMControlWinF.Views.MotionConfig
                         return;
 
                     _selectedItemKey = dialog.ResultActuatorType + "|" + GetEntityName(dialog.ResultEntity);
-                    await ReloadAsync();
+                    await ReloadCoreAsync();
                 }
                 finally
                 {
@@ -344,7 +349,7 @@ namespace AMControlWinF.Views.MotionConfig
                     return;
 
                 _selectedItemKey = null;
-                await ReloadAsync();
+                await ReloadCoreAsync();
             }
             finally
             {

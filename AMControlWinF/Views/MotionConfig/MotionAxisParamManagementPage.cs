@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
 namespace AMControlWinF.Views.MotionConfig
 {
@@ -65,16 +66,21 @@ namespace AMControlWinF.Views.MotionConfig
             SetBusyState(true);
             try
             {
-                await _model.LoadAsync();
-                NormalizeSelectedParam();
-                UpdateSelectionUi();
-                UpdateGroupButtons();
-                BuildCards();
+                await ReloadCoreAsync();
             }
             finally
             {
                 SetBusyState(false);
             }
+        }
+
+        private async Task ReloadCoreAsync()
+        {
+            await _model.LoadAsync();
+            NormalizeSelectedParam();
+            UpdateSelectionUi();
+            UpdateGroupButtons();
+            BuildCards();
         }
 
         private void SetBusyState(bool isBusy)
@@ -156,6 +162,7 @@ namespace AMControlWinF.Views.MotionConfig
             {
                 flowCards.ResumeLayout();
             }
+            UpdateActionButtons();
         }
 
         private AntdUI.Panel CreateCardWrapper(MotionAxisParamManagementPageModel.AxisParamViewItem item)
@@ -304,7 +311,7 @@ namespace AMControlWinF.Views.MotionConfig
                         return;
 
                     _selectedParamName = dialog.ResultEntity.ParamName;
-                    await ReloadAsync();
+                    await ReloadCoreAsync();
                 }
                 finally
                 {
@@ -338,7 +345,7 @@ namespace AMControlWinF.Views.MotionConfig
                         return;
 
                     _selectedParamName = dialog.ResultEntity.ParamName;
-                    await ReloadAsync();
+                    await ReloadCoreAsync();
                 }
                 finally
                 {
@@ -374,7 +381,7 @@ namespace AMControlWinF.Views.MotionConfig
                 if (!result.Success)
                     return;
 
-                await ReloadAsync();
+                await ReloadCoreAsync();
             }
             finally
             {

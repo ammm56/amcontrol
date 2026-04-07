@@ -406,6 +406,9 @@
     <EmbeddedResource Include="Views\MotionConfig\MotionIoMapManagementPage.resx">
       <DependentUpon>MotionIoMapManagementPage.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\VacuumEditControl.resx">
+      <DependentUpon>VacuumEditControl.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="app.manifest" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

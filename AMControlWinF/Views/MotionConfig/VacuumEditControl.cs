@@ -29,17 +29,25 @@ namespace AMControlWinF.Views.MotionConfig
 
         public void Bind(VacuumConfigEntity entity, bool isAdd, IList<MotionIoMapEntity> allIoItems)
         {
-            _sourceEntity = entity ?? new VacuumConfigEntity
+            SuspendLayout();
+            try
             {
-                IsEnabled = true,
-                VacuumBuildTimeoutMs = 3000,
-                ReleaseTimeoutMs = 1000,
-                KeepVacuumOnAfterDetected = true
-            };
-            _isAdd = isAdd;
+                _sourceEntity = entity ?? new VacuumConfigEntity
+                {
+                    IsEnabled = true,
+                    VacuumBuildTimeoutMs = 3000,
+                    ReleaseTimeoutMs = 1000,
+                    KeepVacuumOnAfterDetected = true
+                };
+                _isAdd = isAdd;
 
-            LoadIoOptions(allIoItems ?? new List<MotionIoMapEntity>());
-            LoadEntity();
+                LoadIoOptions(allIoItems ?? new List<MotionIoMapEntity>());
+                LoadEntity();
+            }
+            finally
+            {
+                ResumeLayout();
+            }
         }
 
         public bool TryBuildEntity(out VacuumConfigEntity entity)
@@ -157,9 +165,14 @@ namespace AMControlWinF.Views.MotionConfig
                 list.Add(new IoOptionItem(null, "不配置"));
             }
 
-            foreach (var item in source.Where(x => string.Equals(x.IoType, ioType, StringComparison.OrdinalIgnoreCase)))
+            foreach (var item in source
+                .Where(x => string.Equals(x.IoType, ioType, StringComparison.OrdinalIgnoreCase))
+                .OrderBy(x => x.SortOrder)
+                .ThenBy(x => x.LogicalBit))
             {
-                list.Add(new IoOptionItem(item.LogicalBit, "L" + item.LogicalBit + " · " + (string.IsNullOrWhiteSpace(item.Name) ? "-" : item.Name)));
+                list.Add(new IoOptionItem(
+                    item.LogicalBit,
+                    "L" + item.LogicalBit + " · " + (string.IsNullOrWhiteSpace(item.Name) ? "-" : item.Name)));
             }
 
             return list;
