@@ -349,6 +349,9 @@
     <EmbeddedResource Include="Views\MotionConfig\ActuatorManagementPage.resx">
       <DependentUpon>ActuatorManagementPage.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\CylinderEditControl.resx">
+      <DependentUpon>CylinderEditControl.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Views\MotionConfig\MotionAxisCardControl.resx">
       <DependentUpon>MotionAxisCardControl.cs</DependentUpon>
     </EmbeddedResource>

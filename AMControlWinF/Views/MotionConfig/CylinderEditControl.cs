@@ -192,6 +192,7 @@ namespace AMControlWinF.Views.MotionConfig
         {
             var isSingle = string.Equals(GetSelectedDriveMode(), "Single", StringComparison.OrdinalIgnoreCase);
             dropdownRetractOutputBit.Enabled = !isSingle;
+            dropdownRetractOutputBit.Enabled = !isSingle;
 
             if (isSingle && _doOptionalOptions.Count > 0)
             {
@@ -220,9 +221,14 @@ namespace AMControlWinF.Views.MotionConfig
                 list.Add(new IoOptionItem(null, "不配置"));
             }
 
-            foreach (var item in source.Where(x => string.Equals(x.IoType, ioType, StringComparison.OrdinalIgnoreCase)))
+            foreach (var item in source
+                .Where(x => string.Equals(x.IoType, ioType, StringComparison.OrdinalIgnoreCase))
+                .OrderBy(x => x.SortOrder)
+                .ThenBy(x => x.LogicalBit))
             {
-                list.Add(new IoOptionItem(item.LogicalBit, "L" + item.LogicalBit + " · " + (string.IsNullOrWhiteSpace(item.Name) ? "-" : item.Name)));
+                list.Add(new IoOptionItem(
+                    item.LogicalBit,
+                    "L" + item.LogicalBit + " · " + (string.IsNullOrWhiteSpace(item.Name) ? "-" : item.Name)));
             }
 
             return list;
