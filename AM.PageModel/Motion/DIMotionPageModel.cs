@@ -2,6 +2,7 @@
 using AM.DBService.Services.Motion.Runtime;
 using AM.Model.Common;
 using AM.Model.Motion;
+using AM.Model.MotionCard;
 using AM.PageModel.Common;
 using System;
 using System.Collections.Generic;
@@ -298,14 +299,19 @@ namespace AM.PageModel.Motion
 
         private void RefreshCardFilters()
         {
-            _cardFilters = _allItems
-                .GroupBy(x => x.CardId)
-                .Select(g => new MotionCardFilterItem
+            var cards = ConfigContext.Instance.Config.MotionCardsConfig ?? new List<MotionCardConfig>();
+
+            _cardFilters = cards
+                .Where(x => x != null)
+                .OrderBy(x => x.InitOrder)
+                .ThenBy(x => x.CardId)
+                .Select(x => new MotionCardFilterItem
                 {
-                    CardId = g.Key,
-                    DisplayName = g.Select(x => x.CardDisplayName).FirstOrDefault()
+                    CardId = x.CardId,
+                    DisplayName = string.IsNullOrWhiteSpace(x.DisplayName) ? x.Name : x.DisplayName
                 })
-                .OrderBy(x => x.CardId)
+                .GroupBy(x => x.CardId)
+                .Select(x => x.First())
                 .ToList();
 
             OnPropertyChanged(nameof(CardFilters));

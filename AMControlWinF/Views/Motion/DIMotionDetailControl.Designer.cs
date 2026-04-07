@@ -108,16 +108,17 @@
             // 
             // labelRemarkValue
             // 
-            this.labelRemarkValue.Location = new System.Drawing.Point(14, 302);
+            this.labelRemarkValue.Location = new System.Drawing.Point(14, 310);
             this.labelRemarkValue.Name = "labelRemarkValue";
             this.labelRemarkValue.Size = new System.Drawing.Size(220, 48);
             this.labelRemarkValue.TabIndex = 11;
             this.labelRemarkValue.Text = "—";
+            this.labelRemarkValue.TextAlign = System.Drawing.ContentAlignment.TopLeft;
             // 
             // labelRemarkTitle
             // 
             this.labelRemarkTitle.ForeColor = System.Drawing.Color.Gray;
-            this.labelRemarkTitle.Location = new System.Drawing.Point(14, 276);
+            this.labelRemarkTitle.Location = new System.Drawing.Point(14, 284);
             this.labelRemarkTitle.Name = "labelRemarkTitle";
             this.labelRemarkTitle.Size = new System.Drawing.Size(220, 20);
             this.labelRemarkTitle.TabIndex = 10;
@@ -130,6 +131,7 @@
             this.labelDescriptionValue.Size = new System.Drawing.Size(220, 48);
             this.labelDescriptionValue.TabIndex = 9;
             this.labelDescriptionValue.Text = "—";
+            this.labelDescriptionValue.TextAlign = System.Drawing.ContentAlignment.TopLeft;
             // 
             // labelDescriptionTitle
             // 
