@@ -1,4 +1,5 @@
-﻿using AM.DBService.Services.Motion.Topology;
+﻿using AM.DBService.Services.Motion.App;
+using AM.DBService.Services.Motion.Topology;
 using AM.Model.Entity.Motion.Topology;
 using AM.PageModel.MotionConfig;
 using AMControlWinF.Tools;
@@ -20,6 +21,8 @@ namespace AMControlWinF.Views.MotionConfig
     {
         private readonly MotionCardManagementPageModel _model;
         private readonly MotionCardCrudService _cardService;
+        private readonly MachineConfigReloadService _machineConfigReloadService;
+
         private bool _isFirstLoad;
         private bool _isBusy;
         private bool _isUpdatingPagination;
@@ -30,6 +33,7 @@ namespace AMControlWinF.Views.MotionConfig
 
             _model = new MotionCardManagementPageModel();
             _cardService = new MotionCardCrudService();
+            _machineConfigReloadService = new MachineConfigReloadService();
 
             BindEvents();
             UpdateActionButtons();
@@ -53,6 +57,10 @@ namespace AMControlWinF.Views.MotionConfig
             await ReloadAsync();
         }
 
+        /// <summary>
+        /// 重新加载控制卡列表。
+        /// 这里只刷新配置页自身显示，不做运行时设备上下文重建。
+        /// </summary>
         private async Task ReloadAsync()
         {
             if (_isBusy)
@@ -73,7 +81,7 @@ namespace AMControlWinF.Views.MotionConfig
 
         private void PaginationCards_ValueChanged(object sender, PagePageEventArgs e)
         {
-            if (_isUpdatingPagination || _isBusy)
+            if (_isUpdatingPagination || _isBusy || e == null)
                 return;
 
             _model.ChangePage(e.Current, e.PageSize);
@@ -122,9 +130,11 @@ namespace AMControlWinF.Views.MotionConfig
                     var card = new MotionCardControl();
                     card.Bind(item);
                     card.Margin = new Padding(0);
+
                     card.EditRequested += async (s, e) => await EditCardAsync(card.CardItem);
                     card.DeleteRequested += async (s, e) => await DeleteCardAsync(card.CardItem);
                     card.DetailRequested += (s, e) => ShowDetail(s as Control ?? card, card.CardItem);
+
                     flowCards.Controls.Add(card);
                 }
             }
@@ -132,6 +142,16 @@ namespace AMControlWinF.Views.MotionConfig
             {
                 flowCards.ResumeLayout();
             }
+        }
+
+        /// <summary>
+        /// 控制卡配置变更后，立即热重载运行中的设备配置。
+        /// 否则 DI/DO 页面仍会读取旧的 ConfigContext，导致新卡在选择后被判定为无效。
+        /// </summary>
+        private async Task<bool> ReloadMachineConfigAsync()
+        {
+            var result = await Task.Run(() => _machineConfigReloadService.ReloadAndRebuild());
+            return result.Success;
         }
 
         private async Task AddCardAsync()
@@ -147,11 +167,24 @@ namespace AMControlWinF.Views.MotionConfig
                 if (dialog.ShowDialog(FindForm()) != DialogResult.OK)
                     return;
 
-                var result = await Task.Run(() => _cardService.Save(dialog.ResultEntity));
-                if (!result.Success)
-                    return;
+                SetBusyState(true);
+                try
+                {
+                    var result = await Task.Run(() => _cardService.Save(dialog.ResultEntity));
+                    if (!result.Success)
+                        return;
 
-                await ReloadAsync();
+                    if (!await ReloadMachineConfigAsync())
+                        return;
+
+                    await _model.LoadAsync();
+                    RefreshPaginationUi();
+                    BuildCards();
+                }
+                finally
+                {
+                    SetBusyState(false);
+                }
             }
         }
 
@@ -160,20 +193,41 @@ namespace AMControlWinF.Views.MotionConfig
             if (_isBusy || item == null)
                 return;
 
-            var queryResult = await Task.Run(() => _cardService.QueryByCardId(item.CardId));
-            if (!queryResult.Success || queryResult.Item == null)
-                return;
-
-            using (var dialog = new MotionCardEditDialog(queryResult.Item, false))
+            SetBusyState(true);
+            try
             {
-                if (dialog.ShowDialog(FindForm()) != DialogResult.OK)
+                var queryResult = await Task.Run(() => _cardService.QueryByCardId(item.CardId));
+                if (!queryResult.Success || queryResult.Item == null)
                     return;
 
-                var saveResult = await Task.Run(() => _cardService.Save(dialog.ResultEntity));
-                if (!saveResult.Success)
-                    return;
+                using (var dialog = new MotionCardEditDialog(queryResult.Item, false))
+                {
+                    SetBusyState(false);
+                    try
+                    {
+                        if (dialog.ShowDialog(FindForm()) != DialogResult.OK)
+                            return;
+                    }
+                    finally
+                    {
+                        SetBusyState(true);
+                    }
 
-                await ReloadAsync();
+                    var saveResult = await Task.Run(() => _cardService.Save(dialog.ResultEntity));
+                    if (!saveResult.Success)
+                        return;
+
+                    if (!await ReloadMachineConfigAsync())
+                        return;
+
+                    await _model.LoadAsync();
+                    RefreshPaginationUi();
+                    BuildCards();
+                }
+            }
+            finally
+            {
+                SetBusyState(false);
             }
         }
 
@@ -192,11 +246,24 @@ namespace AMControlWinF.Views.MotionConfig
                     return;
             }
 
-            var result = await Task.Run(() => _cardService.DeleteByCardId(item.CardId));
-            if (!result.Success)
-                return;
+            SetBusyState(true);
+            try
+            {
+                var result = await Task.Run(() => _cardService.DeleteByCardId(item.CardId));
+                if (!result.Success)
+                    return;
 
-            await ReloadAsync();
+                if (!await ReloadMachineConfigAsync())
+                    return;
+
+                await _model.LoadAsync();
+                RefreshPaginationUi();
+                BuildCards();
+            }
+            finally
+            {
+                SetBusyState(false);
+            }
         }
 
         private void ShowDetail(Control anchorControl, MotionCardManagementPageModel.MotionCardViewItem item)

@@ -466,7 +466,7 @@ namespace AMControlWinF
                 { "Home.SysStatus",         () => CreatePlaceholderPage("首页 / 系统状态") },
 
                 { "Motion.DI",              () => new DIMotionPage() },
-                { "Motion.DO",              () => CreatePlaceholderPage("设备 / DO 监视") },
+                { "Motion.DO",              () => new DOMotionPage() },
                 { "Motion.Monitor",         () => CreatePlaceholderPage("设备 / 多轴总览") },
                 { "Motion.Axis",            () => CreatePlaceholderPage("设备 / 轴控制") },
                 { "Motion.Actuator",        () => CreatePlaceholderPage("设备 / 执行器控制") },

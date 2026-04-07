@@ -313,6 +313,24 @@
     <Compile Include="Views\Motion\DIMotionVirtualListControl.Designer.cs">
       <DependentUpon>DIMotionVirtualListControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\Motion\DOMotionDetailControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Motion\DOMotionDetailControl.Designer.cs">
+      <DependentUpon>DOMotionDetailControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Motion\DOMotionPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Motion\DOMotionPage.Designer.cs">
+      <DependentUpon>DOMotionPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Motion\DOMotionVirtualListControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Motion\DOMotionVirtualListControl.Designer.cs">
+      <DependentUpon>DOMotionVirtualListControl.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </EmbeddedResource>
@@ -435,6 +453,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Views\Motion\DIMotionVirtualListControl.resx">
       <DependentUpon>DIMotionVirtualListControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\Motion\DOMotionDetailControl.resx">
+      <DependentUpon>DOMotionDetailControl.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.manifest" />
     <None Include="Properties\Settings.settings">
