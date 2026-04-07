@@ -58,15 +58,7 @@ namespace AMControlWinF.Views.Motion
 
         private void InitializePagination()
         {
-            paginationInputs.Current = 1;
-            paginationInputs.Total = 0;
-            paginationInputs.PageSize = 48;
-            paginationInputs.PageSizeOptions = new int[] { 24, 48, 96, 192 };
-            paginationInputs.ShowSizeChanger = true;
-            paginationInputs.SizeChangerWidth = 72;
-            paginationInputs.RightToLeft = RightToLeft.Yes;
-            paginationInputs.Gap = 8;
-            paginationInputs.Radius = 8;
+            paginationInputs.PageSizeOptions = new int[] { 6, 12, 24, 48, 96, 192 };
         }
 
         private async void DIMotionPage_Load(object sender, EventArgs e)

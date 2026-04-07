@@ -87,7 +87,6 @@
             // 
             // panelScroll
             // 
-            this.panelScroll.AutoScroll = true;
             this.panelScroll.Controls.Add(this.labelRemarkValue);
             this.panelScroll.Controls.Add(this.labelRemarkTitle);
             this.panelScroll.Controls.Add(this.labelDescriptionValue);
@@ -109,39 +108,35 @@
             // 
             // labelRemarkValue
             // 
-            this.labelRemarkValue.AutoSizeMode = AntdUI.TAutoSize.Auto;
             this.labelRemarkValue.Location = new System.Drawing.Point(14, 302);
             this.labelRemarkValue.Name = "labelRemarkValue";
-            this.labelRemarkValue.Size = new System.Drawing.Size(12, 12);
+            this.labelRemarkValue.Size = new System.Drawing.Size(220, 48);
             this.labelRemarkValue.TabIndex = 11;
             this.labelRemarkValue.Text = "—";
             // 
             // labelRemarkTitle
             // 
-            this.labelRemarkTitle.AutoSizeMode = AntdUI.TAutoSize.Auto;
             this.labelRemarkTitle.ForeColor = System.Drawing.Color.Gray;
             this.labelRemarkTitle.Location = new System.Drawing.Point(14, 276);
             this.labelRemarkTitle.Name = "labelRemarkTitle";
-            this.labelRemarkTitle.Size = new System.Drawing.Size(24, 14);
+            this.labelRemarkTitle.Size = new System.Drawing.Size(220, 20);
             this.labelRemarkTitle.TabIndex = 10;
             this.labelRemarkTitle.Text = "备注";
             // 
             // labelDescriptionValue
             // 
-            this.labelDescriptionValue.AutoSizeMode = AntdUI.TAutoSize.Auto;
             this.labelDescriptionValue.Location = new System.Drawing.Point(14, 241);
             this.labelDescriptionValue.Name = "labelDescriptionValue";
-            this.labelDescriptionValue.Size = new System.Drawing.Size(12, 12);
+            this.labelDescriptionValue.Size = new System.Drawing.Size(220, 48);
             this.labelDescriptionValue.TabIndex = 9;
             this.labelDescriptionValue.Text = "—";
             // 
             // labelDescriptionTitle
             // 
-            this.labelDescriptionTitle.AutoSizeMode = AntdUI.TAutoSize.Auto;
             this.labelDescriptionTitle.ForeColor = System.Drawing.Color.Gray;
             this.labelDescriptionTitle.Location = new System.Drawing.Point(14, 215);
             this.labelDescriptionTitle.Name = "labelDescriptionTitle";
-            this.labelDescriptionTitle.Size = new System.Drawing.Size(24, 14);
+            this.labelDescriptionTitle.Size = new System.Drawing.Size(220, 20);
             this.labelDescriptionTitle.TabIndex = 8;
             this.labelDescriptionTitle.Text = "说明";
             // 
@@ -462,7 +457,6 @@
             this.panelRoot.ResumeLayout(false);
             this.panelDetail.ResumeLayout(false);
             this.panelScroll.ResumeLayout(false);
-            this.panelScroll.PerformLayout();
             this.panelTagLink.ResumeLayout(false);
             this.panelTagLastUpdate.ResumeLayout(false);
             this.panelTagState.ResumeLayout(false);

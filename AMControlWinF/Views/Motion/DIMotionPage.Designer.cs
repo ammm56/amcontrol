@@ -21,9 +21,7 @@
             this.paginationInputs = new AntdUI.Pagination();
             this.labelPageSummary = new AntdUI.Label();
             this.panelDetailCard = new AntdUI.Panel();
-            this.diMotionDetailControl = new AMControlWinF.Views.Motion.DIMotionDetailControl();
             this.panelListCard = new AntdUI.Panel();
-            this.diMotionVirtualListControl = new AMControlWinF.Views.Motion.DIMotionVirtualListControl();
             this.flowStats = new AntdUI.FlowPanel();
             this.panelScanCard = new AntdUI.Panel();
             this.labelScanValue = new AntdUI.Label();
@@ -40,6 +38,8 @@
             this.flowToolbarLeft = new AntdUI.FlowPanel();
             this.labelSelectedCard = new AntdUI.Label();
             this.buttonSelectCard = new AntdUI.Button();
+            this.diMotionDetailControl = new AMControlWinF.Views.Motion.DIMotionDetailControl();
+            this.diMotionVirtualListControl = new AMControlWinF.Views.Motion.DIMotionVirtualListControl();
             this.panelRoot.SuspendLayout();
             this.panelContentCard.SuspendLayout();
             this.gridContent.SuspendLayout();
@@ -76,7 +76,7 @@
             this.panelContentCard.Location = new System.Drawing.Point(8, 140);
             this.panelContentCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelContentCard.Name = "panelContentCard";
-            this.panelContentCard.Padding = new System.Windows.Forms.Padding(8);
+            this.panelContentCard.Padding = new System.Windows.Forms.Padding(8, 0, 8, 0);
             this.panelContentCard.Radius = 12;
             this.panelContentCard.Shadow = 4;
             this.panelContentCard.ShadowOpacity = 0F;
@@ -90,10 +90,10 @@
             this.gridContent.Controls.Add(this.panelDetailCard);
             this.gridContent.Controls.Add(this.panelListCard);
             this.gridContent.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gridContent.Location = new System.Drawing.Point(12, 12);
+            this.gridContent.Location = new System.Drawing.Point(12, 4);
             this.gridContent.Margin = new System.Windows.Forms.Padding(0);
             this.gridContent.Name = "gridContent";
-            this.gridContent.Size = new System.Drawing.Size(810, 508);
+            this.gridContent.Size = new System.Drawing.Size(810, 524);
             this.gridContent.Span = "100% 250;100%-100% 52";
             this.gridContent.TabIndex = 0;
             // 
@@ -101,7 +101,7 @@
             // 
             this.panelFooter.Controls.Add(this.paginationInputs);
             this.panelFooter.Controls.Add(this.labelPageSummary);
-            this.panelFooter.Location = new System.Drawing.Point(0, 456);
+            this.panelFooter.Location = new System.Drawing.Point(0, 472);
             this.panelFooter.Margin = new System.Windows.Forms.Padding(0);
             this.panelFooter.Name = "panelFooter";
             this.panelFooter.Padding = new System.Windows.Forms.Padding(0, 8, 0, 0);
@@ -112,11 +112,13 @@
             // paginationInputs
             // 
             this.paginationInputs.Dock = System.Windows.Forms.DockStyle.Right;
-            this.paginationInputs.Location = new System.Drawing.Point(426, 8);
+            this.paginationInputs.Location = new System.Drawing.Point(249, 8);
             this.paginationInputs.Margin = new System.Windows.Forms.Padding(0);
             this.paginationInputs.Name = "paginationInputs";
+            this.paginationInputs.PageSize = 48;
             this.paginationInputs.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
-            this.paginationInputs.Size = new System.Drawing.Size(384, 44);
+            this.paginationInputs.ShowSizeChanger = true;
+            this.paginationInputs.Size = new System.Drawing.Size(561, 44);
             this.paginationInputs.SizeChangerWidth = 72;
             this.paginationInputs.TabIndex = 1;
             // 
@@ -126,7 +128,7 @@
             this.labelPageSummary.Location = new System.Drawing.Point(0, 8);
             this.labelPageSummary.Margin = new System.Windows.Forms.Padding(0);
             this.labelPageSummary.Name = "labelPageSummary";
-            this.labelPageSummary.Size = new System.Drawing.Size(260, 44);
+            this.labelPageSummary.Size = new System.Drawing.Size(218, 44);
             this.labelPageSummary.TabIndex = 0;
             this.labelPageSummary.Text = "共 0 项";
             // 
@@ -140,17 +142,8 @@
             this.panelDetailCard.Padding = new System.Windows.Forms.Padding(8);
             this.panelDetailCard.Radius = 12;
             this.panelDetailCard.Shadow = 4;
-            this.panelDetailCard.Size = new System.Drawing.Size(250, 456);
+            this.panelDetailCard.Size = new System.Drawing.Size(250, 472);
             this.panelDetailCard.TabIndex = 1;
-            // 
-            // diMotionDetailControl
-            // 
-            this.diMotionDetailControl.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.diMotionDetailControl.Location = new System.Drawing.Point(12, 12);
-            this.diMotionDetailControl.Margin = new System.Windows.Forms.Padding(0);
-            this.diMotionDetailControl.Name = "diMotionDetailControl";
-            this.diMotionDetailControl.Size = new System.Drawing.Size(226, 432);
-            this.diMotionDetailControl.TabIndex = 0;
             // 
             // panelListCard
             // 
@@ -162,17 +155,8 @@
             this.panelListCard.Padding = new System.Windows.Forms.Padding(8);
             this.panelListCard.Radius = 12;
             this.panelListCard.Shadow = 4;
-            this.panelListCard.Size = new System.Drawing.Size(560, 456);
+            this.panelListCard.Size = new System.Drawing.Size(560, 472);
             this.panelListCard.TabIndex = 0;
-            // 
-            // diMotionVirtualListControl
-            // 
-            this.diMotionVirtualListControl.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.diMotionVirtualListControl.Location = new System.Drawing.Point(12, 12);
-            this.diMotionVirtualListControl.Margin = new System.Windows.Forms.Padding(0);
-            this.diMotionVirtualListControl.Name = "diMotionVirtualListControl";
-            this.diMotionVirtualListControl.Size = new System.Drawing.Size(536, 432);
-            this.diMotionVirtualListControl.TabIndex = 0;
             // 
             // flowStats
             // 
@@ -370,6 +354,24 @@
             this.buttonSelectCard.Text = "选择控制卡";
             this.buttonSelectCard.Type = AntdUI.TTypeMini.Primary;
             this.buttonSelectCard.WaveSize = 0;
+            // 
+            // diMotionDetailControl
+            // 
+            this.diMotionDetailControl.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.diMotionDetailControl.Location = new System.Drawing.Point(12, 12);
+            this.diMotionDetailControl.Margin = new System.Windows.Forms.Padding(0);
+            this.diMotionDetailControl.Name = "diMotionDetailControl";
+            this.diMotionDetailControl.Size = new System.Drawing.Size(226, 448);
+            this.diMotionDetailControl.TabIndex = 0;
+            // 
+            // diMotionVirtualListControl
+            // 
+            this.diMotionVirtualListControl.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.diMotionVirtualListControl.Location = new System.Drawing.Point(12, 12);
+            this.diMotionVirtualListControl.Margin = new System.Windows.Forms.Padding(0);
+            this.diMotionVirtualListControl.Name = "diMotionVirtualListControl";
+            this.diMotionVirtualListControl.Size = new System.Drawing.Size(536, 448);
+            this.diMotionVirtualListControl.TabIndex = 0;
             // 
             // DIMotionPage
             // 
