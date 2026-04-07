@@ -348,6 +348,7 @@ Program.Main()
 - 主界面重构时页面显示内容完整不变，只允许替换布局控件
 - 优先使用 AntdUI 的 FlowPanel、Panel、GridPanel 等布局控件
 - 主界面简化时删除多余抽象（ShellRefreshScope / Model_PropertyChanged / ConfigureShellLayout），保留最少的刷新与页面切换逻辑
+- 在 AMControlWinF 中实现页面时保持代码与 Designer 分离，优先用 UserControl 拆分功能，界面风格与现有 AntdUI 页面一致，并在 C# 代码中添加清晰注释。
 
 ### 8.6 WinForms 窗体/对话框风格
 

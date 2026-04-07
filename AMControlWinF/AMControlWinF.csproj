@@ -427,6 +427,9 @@
     <EmbeddedResource Include="Views\MotionConfig\VacuumEditControl.resx">
       <DependentUpon>VacuumEditControl.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\Motion\DIMotionDetailControl.resx">
+      <DependentUpon>DIMotionDetailControl.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Views\Motion\DIMotionPage.resx">
       <DependentUpon>DIMotionPage.cs</DependentUpon>
     </EmbeddedResource>

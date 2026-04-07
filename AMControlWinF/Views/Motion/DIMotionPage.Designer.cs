@@ -94,7 +94,7 @@
             this.gridContent.Margin = new System.Windows.Forms.Padding(0);
             this.gridContent.Name = "gridContent";
             this.gridContent.Size = new System.Drawing.Size(810, 508);
-            this.gridContent.Span = "62% 38%;100%-100% 52";
+            this.gridContent.Span = "100% 250;100%-100% 52";
             this.gridContent.TabIndex = 0;
             // 
             // panelFooter
@@ -134,13 +134,13 @@
             // 
             this.panelDetailCard.BackColor = System.Drawing.Color.Transparent;
             this.panelDetailCard.Controls.Add(this.diMotionDetailControl);
-            this.panelDetailCard.Location = new System.Drawing.Point(502, 0);
+            this.panelDetailCard.Location = new System.Drawing.Point(560, 0);
             this.panelDetailCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelDetailCard.Name = "panelDetailCard";
             this.panelDetailCard.Padding = new System.Windows.Forms.Padding(8);
             this.panelDetailCard.Radius = 12;
             this.panelDetailCard.Shadow = 4;
-            this.panelDetailCard.Size = new System.Drawing.Size(308, 456);
+            this.panelDetailCard.Size = new System.Drawing.Size(250, 456);
             this.panelDetailCard.TabIndex = 1;
             // 
             // diMotionDetailControl
@@ -149,7 +149,7 @@
             this.diMotionDetailControl.Location = new System.Drawing.Point(12, 12);
             this.diMotionDetailControl.Margin = new System.Windows.Forms.Padding(0);
             this.diMotionDetailControl.Name = "diMotionDetailControl";
-            this.diMotionDetailControl.Size = new System.Drawing.Size(284, 432);
+            this.diMotionDetailControl.Size = new System.Drawing.Size(226, 432);
             this.diMotionDetailControl.TabIndex = 0;
             // 
             // panelListCard
@@ -162,7 +162,7 @@
             this.panelListCard.Padding = new System.Windows.Forms.Padding(8);
             this.panelListCard.Radius = 12;
             this.panelListCard.Shadow = 4;
-            this.panelListCard.Size = new System.Drawing.Size(502, 456);
+            this.panelListCard.Size = new System.Drawing.Size(560, 456);
             this.panelListCard.TabIndex = 0;
             // 
             // diMotionVirtualListControl
@@ -171,7 +171,7 @@
             this.diMotionVirtualListControl.Location = new System.Drawing.Point(12, 12);
             this.diMotionVirtualListControl.Margin = new System.Windows.Forms.Padding(0);
             this.diMotionVirtualListControl.Name = "diMotionVirtualListControl";
-            this.diMotionVirtualListControl.Size = new System.Drawing.Size(478, 432);
+            this.diMotionVirtualListControl.Size = new System.Drawing.Size(536, 432);
             this.diMotionVirtualListControl.TabIndex = 0;
             // 
             // flowStats
