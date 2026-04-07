@@ -145,11 +145,11 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panelTagJogVel.Controls.Add(this.labelTagJogVelValue);
             this.panelTagJogVel.Controls.Add(this.labelTagJogVelKey);
-            this.panelTagJogVel.Location = new System.Drawing.Point(8, 422);
+            this.panelTagJogVel.Location = new System.Drawing.Point(8, 338);
             this.panelTagJogVel.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagJogVel.Name = "panelTagJogVel";
             this.panelTagJogVel.Radius = 0;
-            this.panelTagJogVel.Size = new System.Drawing.Size(272, 24);
+            this.panelTagJogVel.Size = new System.Drawing.Size(234, 24);
             this.panelTagJogVel.TabIndex = 14;
             // 
             // labelTagJogVelValue
@@ -158,7 +158,7 @@
             this.labelTagJogVelValue.Location = new System.Drawing.Point(94, 0);
             this.labelTagJogVelValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelTagJogVelValue.Name = "labelTagJogVelValue";
-            this.labelTagJogVelValue.Size = new System.Drawing.Size(170, 24);
+            this.labelTagJogVelValue.Size = new System.Drawing.Size(140, 22);
             this.labelTagJogVelValue.TabIndex = 1;
             this.labelTagJogVelValue.Text = "—";
             // 
@@ -168,7 +168,7 @@
             this.labelTagJogVelKey.Location = new System.Drawing.Point(0, 0);
             this.labelTagJogVelKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelTagJogVelKey.Name = "labelTagJogVelKey";
-            this.labelTagJogVelKey.Size = new System.Drawing.Size(88, 24);
+            this.labelTagJogVelKey.Size = new System.Drawing.Size(88, 22);
             this.labelTagJogVelKey.TabIndex = 0;
             this.labelTagJogVelKey.Text = "点动速度";
             this.labelTagJogVelKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -179,11 +179,11 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panelTagDefaultVel.Controls.Add(this.labelTagDefaultVelValue);
             this.panelTagDefaultVel.Controls.Add(this.labelTagDefaultVelKey);
-            this.panelTagDefaultVel.Location = new System.Drawing.Point(8, 392);
+            this.panelTagDefaultVel.Location = new System.Drawing.Point(8, 314);
             this.panelTagDefaultVel.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagDefaultVel.Name = "panelTagDefaultVel";
             this.panelTagDefaultVel.Radius = 0;
-            this.panelTagDefaultVel.Size = new System.Drawing.Size(272, 24);
+            this.panelTagDefaultVel.Size = new System.Drawing.Size(234, 24);
             this.panelTagDefaultVel.TabIndex = 13;
             // 
             // labelTagDefaultVelValue
@@ -192,7 +192,7 @@
             this.labelTagDefaultVelValue.Location = new System.Drawing.Point(94, 0);
             this.labelTagDefaultVelValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelTagDefaultVelValue.Name = "labelTagDefaultVelValue";
-            this.labelTagDefaultVelValue.Size = new System.Drawing.Size(170, 24);
+            this.labelTagDefaultVelValue.Size = new System.Drawing.Size(140, 22);
             this.labelTagDefaultVelValue.TabIndex = 1;
             this.labelTagDefaultVelValue.Text = "—";
             // 
@@ -202,7 +202,7 @@
             this.labelTagDefaultVelKey.Location = new System.Drawing.Point(0, 0);
             this.labelTagDefaultVelKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelTagDefaultVelKey.Name = "labelTagDefaultVelKey";
-            this.labelTagDefaultVelKey.Size = new System.Drawing.Size(88, 24);
+            this.labelTagDefaultVelKey.Size = new System.Drawing.Size(88, 22);
             this.labelTagDefaultVelKey.TabIndex = 0;
             this.labelTagDefaultVelKey.Text = "默认速度";
             this.labelTagDefaultVelKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -213,11 +213,11 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panelTagEncPulse.Controls.Add(this.labelTagEncPulseValue);
             this.panelTagEncPulse.Controls.Add(this.labelTagEncPulseKey);
-            this.panelTagEncPulse.Location = new System.Drawing.Point(8, 362);
+            this.panelTagEncPulse.Location = new System.Drawing.Point(8, 290);
             this.panelTagEncPulse.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagEncPulse.Name = "panelTagEncPulse";
             this.panelTagEncPulse.Radius = 0;
-            this.panelTagEncPulse.Size = new System.Drawing.Size(272, 24);
+            this.panelTagEncPulse.Size = new System.Drawing.Size(234, 24);
             this.panelTagEncPulse.TabIndex = 12;
             // 
             // labelTagEncPulseValue
@@ -226,7 +226,7 @@
             this.labelTagEncPulseValue.Location = new System.Drawing.Point(94, 0);
             this.labelTagEncPulseValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelTagEncPulseValue.Name = "labelTagEncPulseValue";
-            this.labelTagEncPulseValue.Size = new System.Drawing.Size(170, 24);
+            this.labelTagEncPulseValue.Size = new System.Drawing.Size(140, 22);
             this.labelTagEncPulseValue.TabIndex = 1;
             this.labelTagEncPulseValue.Text = "—";
             // 
@@ -236,7 +236,7 @@
             this.labelTagEncPulseKey.Location = new System.Drawing.Point(0, 0);
             this.labelTagEncPulseKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelTagEncPulseKey.Name = "labelTagEncPulseKey";
-            this.labelTagEncPulseKey.Size = new System.Drawing.Size(88, 24);
+            this.labelTagEncPulseKey.Size = new System.Drawing.Size(88, 22);
             this.labelTagEncPulseKey.TabIndex = 0;
             this.labelTagEncPulseKey.Text = "编码器脉冲";
             this.labelTagEncPulseKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -247,11 +247,11 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panelTagCmdPulse.Controls.Add(this.labelTagCmdPulseValue);
             this.panelTagCmdPulse.Controls.Add(this.labelTagCmdPulseKey);
-            this.panelTagCmdPulse.Location = new System.Drawing.Point(8, 332);
+            this.panelTagCmdPulse.Location = new System.Drawing.Point(8, 266);
             this.panelTagCmdPulse.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagCmdPulse.Name = "panelTagCmdPulse";
             this.panelTagCmdPulse.Radius = 0;
-            this.panelTagCmdPulse.Size = new System.Drawing.Size(272, 24);
+            this.panelTagCmdPulse.Size = new System.Drawing.Size(234, 24);
             this.panelTagCmdPulse.TabIndex = 11;
             // 
             // labelTagCmdPulseValue
@@ -260,7 +260,7 @@
             this.labelTagCmdPulseValue.Location = new System.Drawing.Point(94, 0);
             this.labelTagCmdPulseValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelTagCmdPulseValue.Name = "labelTagCmdPulseValue";
-            this.labelTagCmdPulseValue.Size = new System.Drawing.Size(170, 24);
+            this.labelTagCmdPulseValue.Size = new System.Drawing.Size(140, 22);
             this.labelTagCmdPulseValue.TabIndex = 1;
             this.labelTagCmdPulseValue.Text = "—";
             // 
@@ -270,7 +270,7 @@
             this.labelTagCmdPulseKey.Location = new System.Drawing.Point(0, 0);
             this.labelTagCmdPulseKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelTagCmdPulseKey.Name = "labelTagCmdPulseKey";
-            this.labelTagCmdPulseKey.Size = new System.Drawing.Size(88, 24);
+            this.labelTagCmdPulseKey.Size = new System.Drawing.Size(88, 22);
             this.labelTagCmdPulseKey.TabIndex = 0;
             this.labelTagCmdPulseKey.Text = "指令脉冲";
             this.labelTagCmdPulseKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -281,11 +281,11 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panelTagErrorMm.Controls.Add(this.labelTagErrorMmValue);
             this.panelTagErrorMm.Controls.Add(this.labelTagErrorMmKey);
-            this.panelTagErrorMm.Location = new System.Drawing.Point(8, 302);
+            this.panelTagErrorMm.Location = new System.Drawing.Point(8, 242);
             this.panelTagErrorMm.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagErrorMm.Name = "panelTagErrorMm";
             this.panelTagErrorMm.Radius = 0;
-            this.panelTagErrorMm.Size = new System.Drawing.Size(272, 24);
+            this.panelTagErrorMm.Size = new System.Drawing.Size(234, 24);
             this.panelTagErrorMm.TabIndex = 10;
             // 
             // labelTagErrorMmValue
@@ -294,7 +294,7 @@
             this.labelTagErrorMmValue.Location = new System.Drawing.Point(94, 0);
             this.labelTagErrorMmValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelTagErrorMmValue.Name = "labelTagErrorMmValue";
-            this.labelTagErrorMmValue.Size = new System.Drawing.Size(170, 24);
+            this.labelTagErrorMmValue.Size = new System.Drawing.Size(140, 22);
             this.labelTagErrorMmValue.TabIndex = 1;
             this.labelTagErrorMmValue.Text = "—";
             // 
@@ -304,7 +304,7 @@
             this.labelTagErrorMmKey.Location = new System.Drawing.Point(0, 0);
             this.labelTagErrorMmKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelTagErrorMmKey.Name = "labelTagErrorMmKey";
-            this.labelTagErrorMmKey.Size = new System.Drawing.Size(88, 24);
+            this.labelTagErrorMmKey.Size = new System.Drawing.Size(88, 22);
             this.labelTagErrorMmKey.TabIndex = 0;
             this.labelTagErrorMmKey.Text = "位置误差";
             this.labelTagErrorMmKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -315,11 +315,11 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panelTagEncMm.Controls.Add(this.labelTagEncMmValue);
             this.panelTagEncMm.Controls.Add(this.labelTagEncMmKey);
-            this.panelTagEncMm.Location = new System.Drawing.Point(8, 272);
+            this.panelTagEncMm.Location = new System.Drawing.Point(8, 218);
             this.panelTagEncMm.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagEncMm.Name = "panelTagEncMm";
             this.panelTagEncMm.Radius = 0;
-            this.panelTagEncMm.Size = new System.Drawing.Size(272, 24);
+            this.panelTagEncMm.Size = new System.Drawing.Size(234, 24);
             this.panelTagEncMm.TabIndex = 9;
             // 
             // labelTagEncMmValue
@@ -328,7 +328,7 @@
             this.labelTagEncMmValue.Location = new System.Drawing.Point(94, 0);
             this.labelTagEncMmValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelTagEncMmValue.Name = "labelTagEncMmValue";
-            this.labelTagEncMmValue.Size = new System.Drawing.Size(170, 24);
+            this.labelTagEncMmValue.Size = new System.Drawing.Size(140, 22);
             this.labelTagEncMmValue.TabIndex = 1;
             this.labelTagEncMmValue.Text = "—";
             // 
@@ -338,7 +338,7 @@
             this.labelTagEncMmKey.Location = new System.Drawing.Point(0, 0);
             this.labelTagEncMmKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelTagEncMmKey.Name = "labelTagEncMmKey";
-            this.labelTagEncMmKey.Size = new System.Drawing.Size(88, 24);
+            this.labelTagEncMmKey.Size = new System.Drawing.Size(88, 22);
             this.labelTagEncMmKey.TabIndex = 0;
             this.labelTagEncMmKey.Text = "编码器位置";
             this.labelTagEncMmKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -349,11 +349,11 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panelTagCmdMm.Controls.Add(this.labelTagCmdMmValue);
             this.panelTagCmdMm.Controls.Add(this.labelTagCmdMmKey);
-            this.panelTagCmdMm.Location = new System.Drawing.Point(8, 242);
+            this.panelTagCmdMm.Location = new System.Drawing.Point(8, 194);
             this.panelTagCmdMm.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagCmdMm.Name = "panelTagCmdMm";
             this.panelTagCmdMm.Radius = 0;
-            this.panelTagCmdMm.Size = new System.Drawing.Size(272, 24);
+            this.panelTagCmdMm.Size = new System.Drawing.Size(234, 24);
             this.panelTagCmdMm.TabIndex = 8;
             // 
             // labelTagCmdMmValue
@@ -362,7 +362,7 @@
             this.labelTagCmdMmValue.Location = new System.Drawing.Point(94, 0);
             this.labelTagCmdMmValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelTagCmdMmValue.Name = "labelTagCmdMmValue";
-            this.labelTagCmdMmValue.Size = new System.Drawing.Size(170, 24);
+            this.labelTagCmdMmValue.Size = new System.Drawing.Size(140, 22);
             this.labelTagCmdMmValue.TabIndex = 1;
             this.labelTagCmdMmValue.Text = "—";
             // 
@@ -372,7 +372,7 @@
             this.labelTagCmdMmKey.Location = new System.Drawing.Point(0, 0);
             this.labelTagCmdMmKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelTagCmdMmKey.Name = "labelTagCmdMmKey";
-            this.labelTagCmdMmKey.Size = new System.Drawing.Size(88, 24);
+            this.labelTagCmdMmKey.Size = new System.Drawing.Size(88, 22);
             this.labelTagCmdMmKey.TabIndex = 0;
             this.labelTagCmdMmKey.Text = "指令位置";
             this.labelTagCmdMmKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -383,11 +383,11 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panelTagLimit.Controls.Add(this.labelTagLimitValue);
             this.panelTagLimit.Controls.Add(this.labelTagLimitKey);
-            this.panelTagLimit.Location = new System.Drawing.Point(8, 212);
+            this.panelTagLimit.Location = new System.Drawing.Point(8, 170);
             this.panelTagLimit.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagLimit.Name = "panelTagLimit";
             this.panelTagLimit.Radius = 0;
-            this.panelTagLimit.Size = new System.Drawing.Size(272, 24);
+            this.panelTagLimit.Size = new System.Drawing.Size(234, 24);
             this.panelTagLimit.TabIndex = 7;
             // 
             // labelTagLimitValue
@@ -396,7 +396,7 @@
             this.labelTagLimitValue.Location = new System.Drawing.Point(94, 0);
             this.labelTagLimitValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelTagLimitValue.Name = "labelTagLimitValue";
-            this.labelTagLimitValue.Size = new System.Drawing.Size(170, 24);
+            this.labelTagLimitValue.Size = new System.Drawing.Size(140, 22);
             this.labelTagLimitValue.TabIndex = 1;
             this.labelTagLimitValue.Text = "—";
             // 
@@ -406,7 +406,7 @@
             this.labelTagLimitKey.Location = new System.Drawing.Point(0, 0);
             this.labelTagLimitKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelTagLimitKey.Name = "labelTagLimitKey";
-            this.labelTagLimitKey.Size = new System.Drawing.Size(88, 24);
+            this.labelTagLimitKey.Size = new System.Drawing.Size(88, 22);
             this.labelTagLimitKey.TabIndex = 0;
             this.labelTagLimitKey.Text = "限位状态";
             this.labelTagLimitKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -417,11 +417,11 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panelTagDone.Controls.Add(this.labelTagDoneValue);
             this.panelTagDone.Controls.Add(this.labelTagDoneKey);
-            this.panelTagDone.Location = new System.Drawing.Point(8, 182);
+            this.panelTagDone.Location = new System.Drawing.Point(8, 146);
             this.panelTagDone.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagDone.Name = "panelTagDone";
             this.panelTagDone.Radius = 0;
-            this.panelTagDone.Size = new System.Drawing.Size(272, 24);
+            this.panelTagDone.Size = new System.Drawing.Size(234, 24);
             this.panelTagDone.TabIndex = 6;
             // 
             // labelTagDoneValue
@@ -430,7 +430,7 @@
             this.labelTagDoneValue.Location = new System.Drawing.Point(94, 0);
             this.labelTagDoneValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelTagDoneValue.Name = "labelTagDoneValue";
-            this.labelTagDoneValue.Size = new System.Drawing.Size(170, 24);
+            this.labelTagDoneValue.Size = new System.Drawing.Size(140, 22);
             this.labelTagDoneValue.TabIndex = 1;
             this.labelTagDoneValue.Text = "—";
             // 
@@ -440,7 +440,7 @@
             this.labelTagDoneKey.Location = new System.Drawing.Point(0, 0);
             this.labelTagDoneKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelTagDoneKey.Name = "labelTagDoneKey";
-            this.labelTagDoneKey.Size = new System.Drawing.Size(88, 24);
+            this.labelTagDoneKey.Size = new System.Drawing.Size(88, 22);
             this.labelTagDoneKey.TabIndex = 0;
             this.labelTagDoneKey.Text = "到位状态";
             this.labelTagDoneKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -451,11 +451,11 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panelTagHome.Controls.Add(this.labelTagHomeValue);
             this.panelTagHome.Controls.Add(this.labelTagHomeKey);
-            this.panelTagHome.Location = new System.Drawing.Point(8, 152);
+            this.panelTagHome.Location = new System.Drawing.Point(8, 122);
             this.panelTagHome.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagHome.Name = "panelTagHome";
             this.panelTagHome.Radius = 0;
-            this.panelTagHome.Size = new System.Drawing.Size(272, 24);
+            this.panelTagHome.Size = new System.Drawing.Size(234, 24);
             this.panelTagHome.TabIndex = 5;
             // 
             // labelTagHomeValue
@@ -464,7 +464,7 @@
             this.labelTagHomeValue.Location = new System.Drawing.Point(94, 0);
             this.labelTagHomeValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelTagHomeValue.Name = "labelTagHomeValue";
-            this.labelTagHomeValue.Size = new System.Drawing.Size(170, 24);
+            this.labelTagHomeValue.Size = new System.Drawing.Size(140, 22);
             this.labelTagHomeValue.TabIndex = 1;
             this.labelTagHomeValue.Text = "—";
             // 
@@ -474,7 +474,7 @@
             this.labelTagHomeKey.Location = new System.Drawing.Point(0, 0);
             this.labelTagHomeKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelTagHomeKey.Name = "labelTagHomeKey";
-            this.labelTagHomeKey.Size = new System.Drawing.Size(88, 24);
+            this.labelTagHomeKey.Size = new System.Drawing.Size(88, 22);
             this.labelTagHomeKey.TabIndex = 0;
             this.labelTagHomeKey.Text = "原点状态";
             this.labelTagHomeKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -485,11 +485,11 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panelTagEnable.Controls.Add(this.labelTagEnableValue);
             this.panelTagEnable.Controls.Add(this.labelTagEnableKey);
-            this.panelTagEnable.Location = new System.Drawing.Point(8, 122);
+            this.panelTagEnable.Location = new System.Drawing.Point(8, 98);
             this.panelTagEnable.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagEnable.Name = "panelTagEnable";
             this.panelTagEnable.Radius = 0;
-            this.panelTagEnable.Size = new System.Drawing.Size(272, 24);
+            this.panelTagEnable.Size = new System.Drawing.Size(234, 24);
             this.panelTagEnable.TabIndex = 4;
             // 
             // labelTagEnableValue
@@ -498,7 +498,7 @@
             this.labelTagEnableValue.Location = new System.Drawing.Point(94, 0);
             this.labelTagEnableValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelTagEnableValue.Name = "labelTagEnableValue";
-            this.labelTagEnableValue.Size = new System.Drawing.Size(170, 24);
+            this.labelTagEnableValue.Size = new System.Drawing.Size(140, 22);
             this.labelTagEnableValue.TabIndex = 1;
             this.labelTagEnableValue.Text = "—";
             // 
@@ -508,7 +508,7 @@
             this.labelTagEnableKey.Location = new System.Drawing.Point(0, 0);
             this.labelTagEnableKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelTagEnableKey.Name = "labelTagEnableKey";
-            this.labelTagEnableKey.Size = new System.Drawing.Size(88, 24);
+            this.labelTagEnableKey.Size = new System.Drawing.Size(88, 22);
             this.labelTagEnableKey.TabIndex = 0;
             this.labelTagEnableKey.Text = "使能状态";
             this.labelTagEnableKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -519,11 +519,11 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panelTagState.Controls.Add(this.labelTagStateValue);
             this.panelTagState.Controls.Add(this.labelTagStateKey);
-            this.panelTagState.Location = new System.Drawing.Point(8, 92);
+            this.panelTagState.Location = new System.Drawing.Point(8, 74);
             this.panelTagState.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagState.Name = "panelTagState";
             this.panelTagState.Radius = 0;
-            this.panelTagState.Size = new System.Drawing.Size(272, 24);
+            this.panelTagState.Size = new System.Drawing.Size(234, 24);
             this.panelTagState.TabIndex = 3;
             // 
             // labelTagStateValue
@@ -532,7 +532,7 @@
             this.labelTagStateValue.Location = new System.Drawing.Point(94, 0);
             this.labelTagStateValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelTagStateValue.Name = "labelTagStateValue";
-            this.labelTagStateValue.Size = new System.Drawing.Size(170, 24);
+            this.labelTagStateValue.Size = new System.Drawing.Size(140, 22);
             this.labelTagStateValue.TabIndex = 1;
             this.labelTagStateValue.Text = "—";
             // 
@@ -542,7 +542,7 @@
             this.labelTagStateKey.Location = new System.Drawing.Point(0, 0);
             this.labelTagStateKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelTagStateKey.Name = "labelTagStateKey";
-            this.labelTagStateKey.Size = new System.Drawing.Size(88, 24);
+            this.labelTagStateKey.Size = new System.Drawing.Size(88, 22);
             this.labelTagStateKey.TabIndex = 0;
             this.labelTagStateKey.Text = "当前状态";
             this.labelTagStateKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -553,11 +553,11 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panelTagPhysical.Controls.Add(this.labelTagPhysicalValue);
             this.panelTagPhysical.Controls.Add(this.labelTagPhysicalKey);
-            this.panelTagPhysical.Location = new System.Drawing.Point(8, 62);
+            this.panelTagPhysical.Location = new System.Drawing.Point(8, 50);
             this.panelTagPhysical.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagPhysical.Name = "panelTagPhysical";
             this.panelTagPhysical.Radius = 0;
-            this.panelTagPhysical.Size = new System.Drawing.Size(272, 24);
+            this.panelTagPhysical.Size = new System.Drawing.Size(234, 24);
             this.panelTagPhysical.TabIndex = 2;
             // 
             // labelTagPhysicalValue
@@ -566,7 +566,7 @@
             this.labelTagPhysicalValue.Location = new System.Drawing.Point(94, 0);
             this.labelTagPhysicalValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelTagPhysicalValue.Name = "labelTagPhysicalValue";
-            this.labelTagPhysicalValue.Size = new System.Drawing.Size(170, 24);
+            this.labelTagPhysicalValue.Size = new System.Drawing.Size(140, 22);
             this.labelTagPhysicalValue.TabIndex = 1;
             this.labelTagPhysicalValue.Text = "—";
             // 
@@ -576,7 +576,7 @@
             this.labelTagPhysicalKey.Location = new System.Drawing.Point(0, 0);
             this.labelTagPhysicalKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelTagPhysicalKey.Name = "labelTagPhysicalKey";
-            this.labelTagPhysicalKey.Size = new System.Drawing.Size(88, 24);
+            this.labelTagPhysicalKey.Size = new System.Drawing.Size(88, 22);
             this.labelTagPhysicalKey.TabIndex = 0;
             this.labelTagPhysicalKey.Text = "物理映射";
             this.labelTagPhysicalKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -587,11 +587,11 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panelTagAxisType.Controls.Add(this.labelTagAxisTypeValue);
             this.panelTagAxisType.Controls.Add(this.labelTagAxisTypeKey);
-            this.panelTagAxisType.Location = new System.Drawing.Point(8, 32);
+            this.panelTagAxisType.Location = new System.Drawing.Point(8, 26);
             this.panelTagAxisType.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagAxisType.Name = "panelTagAxisType";
             this.panelTagAxisType.Radius = 0;
-            this.panelTagAxisType.Size = new System.Drawing.Size(272, 24);
+            this.panelTagAxisType.Size = new System.Drawing.Size(234, 24);
             this.panelTagAxisType.TabIndex = 1;
             // 
             // labelTagAxisTypeValue
@@ -600,7 +600,7 @@
             this.labelTagAxisTypeValue.Location = new System.Drawing.Point(94, 0);
             this.labelTagAxisTypeValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelTagAxisTypeValue.Name = "labelTagAxisTypeValue";
-            this.labelTagAxisTypeValue.Size = new System.Drawing.Size(170, 24);
+            this.labelTagAxisTypeValue.Size = new System.Drawing.Size(140, 22);
             this.labelTagAxisTypeValue.TabIndex = 1;
             this.labelTagAxisTypeValue.Text = "—";
             // 
@@ -610,7 +610,7 @@
             this.labelTagAxisTypeKey.Location = new System.Drawing.Point(0, 0);
             this.labelTagAxisTypeKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelTagAxisTypeKey.Name = "labelTagAxisTypeKey";
-            this.labelTagAxisTypeKey.Size = new System.Drawing.Size(88, 24);
+            this.labelTagAxisTypeKey.Size = new System.Drawing.Size(88, 22);
             this.labelTagAxisTypeKey.TabIndex = 0;
             this.labelTagAxisTypeKey.Text = "轴类型";
             this.labelTagAxisTypeKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -625,7 +625,9 @@
             this.panelTagLogicalAxis.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagLogicalAxis.Name = "panelTagLogicalAxis";
             this.panelTagLogicalAxis.Radius = 0;
-            this.panelTagLogicalAxis.Size = new System.Drawing.Size(272, 24);
+            this.panelTagLogicalAxis.ShadowOpacity = 0F;
+            this.panelTagLogicalAxis.ShadowOpacityHover = 0F;
+            this.panelTagLogicalAxis.Size = new System.Drawing.Size(234, 24);
             this.panelTagLogicalAxis.TabIndex = 0;
             // 
             // labelTagLogicalAxisValue
@@ -634,7 +636,7 @@
             this.labelTagLogicalAxisValue.Location = new System.Drawing.Point(94, 0);
             this.labelTagLogicalAxisValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelTagLogicalAxisValue.Name = "labelTagLogicalAxisValue";
-            this.labelTagLogicalAxisValue.Size = new System.Drawing.Size(170, 24);
+            this.labelTagLogicalAxisValue.Size = new System.Drawing.Size(134, 22);
             this.labelTagLogicalAxisValue.TabIndex = 1;
             this.labelTagLogicalAxisValue.Text = "—";
             // 
@@ -645,7 +647,7 @@
             this.labelTagLogicalAxisKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelTagLogicalAxisKey.Name = "labelTagLogicalAxisKey";
             this.labelTagLogicalAxisKey.ShadowOpacity = 0F;
-            this.labelTagLogicalAxisKey.Size = new System.Drawing.Size(88, 24);
+            this.labelTagLogicalAxisKey.Size = new System.Drawing.Size(88, 22);
             this.labelTagLogicalAxisKey.TabIndex = 0;
             this.labelTagLogicalAxisKey.Text = "逻辑轴";
             this.labelTagLogicalAxisKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -671,7 +673,7 @@
             this.labelSubTitle.Location = new System.Drawing.Point(8, 34);
             this.labelSubTitle.Margin = new System.Windows.Forms.Padding(0);
             this.labelSubTitle.Name = "labelSubTitle";
-            this.labelSubTitle.Size = new System.Drawing.Size(264, 22);
+            this.labelSubTitle.Size = new System.Drawing.Size(234, 22);
             this.labelSubTitle.TabIndex = 1;
             this.labelSubTitle.Text = "—";
             // 
@@ -683,7 +685,7 @@
             this.labelTitle.Location = new System.Drawing.Point(8, 8);
             this.labelTitle.Margin = new System.Windows.Forms.Padding(0);
             this.labelTitle.Name = "labelTitle";
-            this.labelTitle.Size = new System.Drawing.Size(264, 26);
+            this.labelTitle.Size = new System.Drawing.Size(234, 26);
             this.labelTitle.TabIndex = 0;
             this.labelTitle.Text = "—";
             // 
