@@ -1,4 +1,5 @@
-﻿using AM.PageModel.MotionConfig;
+﻿using AM.DBService.Services.Motion.App;
+using AM.PageModel.MotionConfig;
 using AMControlWinF.Tools;
 using AntdUI;
 using System;
@@ -18,6 +19,8 @@ namespace AMControlWinF.Views.MotionConfig
     public sealed partial class MotionIoMapManagementPage : UserControl
     {
         private readonly MotionIoMapManagementPageModel _model;
+        private readonly MachineConfigReloadService _machineConfigReloadService;
+
         private bool _isFirstLoad;
         private bool _isBusy;
         private bool _isUpdatingPagination;
@@ -27,6 +30,7 @@ namespace AMControlWinF.Views.MotionConfig
             InitializeComponent();
 
             _model = new MotionIoMapManagementPageModel();
+            _machineConfigReloadService = new MachineConfigReloadService();
 
             BindEvents();
             UpdateActionButtons();
@@ -75,9 +79,19 @@ namespace AMControlWinF.Views.MotionConfig
             }
         }
 
+        /// <summary>
+        /// IO 映射变更后立即热重载设备配置。
+        /// 这样 DI/DO 监视页和运行时路由才能立刻使用最新映射。
+        /// </summary>
+        private async Task<bool> ReloadMachineConfigAsync()
+        {
+            var result = await Task.Run(() => _machineConfigReloadService.ReloadAndRebuild());
+            return result.Success;
+        }
+
         private void PaginationCards_ValueChanged(object sender, PagePageEventArgs e)
         {
-            if (_isUpdatingPagination || _isBusy)
+            if (_isUpdatingPagination || _isBusy || e == null)
                 return;
 
             _model.ChangePage(e.Current, e.PageSize);
@@ -216,11 +230,22 @@ namespace AMControlWinF.Views.MotionConfig
                 if (dialog.ShowDialog(FindForm()) != DialogResult.OK)
                     return;
 
-                var result = await _model.SaveAsync(dialog.ResultEntity);
-                if (!result.Success)
-                    return;
+                SetBusyState(true);
+                try
+                {
+                    var result = await _model.SaveAsync(dialog.ResultEntity);
+                    if (!result.Success)
+                        return;
 
-                await ReloadAsync();
+                    if (!await ReloadMachineConfigAsync())
+                        return;
+
+                    await ReloadAsync();
+                }
+                finally
+                {
+                    SetBusyState(false);
+                }
             }
         }
 
@@ -234,11 +259,22 @@ namespace AMControlWinF.Views.MotionConfig
                 if (dialog.ShowDialog(FindForm()) != DialogResult.OK)
                     return;
 
-                var result = await _model.SaveAsync(dialog.ResultEntity);
-                if (!result.Success)
-                    return;
+                SetBusyState(true);
+                try
+                {
+                    var result = await _model.SaveAsync(dialog.ResultEntity);
+                    if (!result.Success)
+                        return;
 
-                await ReloadAsync();
+                    if (!await ReloadMachineConfigAsync())
+                        return;
+
+                    await ReloadAsync();
+                }
+                finally
+                {
+                    SetBusyState(false);
+                }
             }
         }
 
@@ -255,11 +291,22 @@ namespace AMControlWinF.Views.MotionConfig
             if (!ok)
                 return;
 
-            var result = await _model.DeleteAsync(item.LogicalBit, item.IoType);
-            if (!result.Success)
-                return;
+            SetBusyState(true);
+            try
+            {
+                var result = await _model.DeleteAsync(item.LogicalBit, item.IoType);
+                if (!result.Success)
+                    return;
 
-            await ReloadAsync();
+                if (!await ReloadMachineConfigAsync())
+                    return;
+
+                await ReloadAsync();
+            }
+            finally
+            {
+                SetBusyState(false);
+            }
         }
 
         private void ShowDetail(Control anchorControl, MotionIoMapManagementPageModel.MotionIoMapViewItem item)

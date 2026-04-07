@@ -1,4 +1,5 @@
-﻿using AM.PageModel.MotionConfig;
+﻿using AM.DBService.Services.Motion.App;
+using AM.PageModel.MotionConfig;
 using AMControlWinF.Tools;
 using AntdUI;
 using System;
@@ -18,6 +19,8 @@ namespace AMControlWinF.Views.MotionConfig
     public sealed partial class MotionAxisManagementPage : UserControl
     {
         private readonly MotionAxisManagementPageModel _model;
+        private readonly MachineConfigReloadService _machineConfigReloadService;
+
         private bool _isFirstLoad;
         private bool _isBusy;
         private bool _isUpdatingPagination;
@@ -27,6 +30,7 @@ namespace AMControlWinF.Views.MotionConfig
             InitializeComponent();
 
             _model = new MotionAxisManagementPageModel();
+            _machineConfigReloadService = new MachineConfigReloadService();
 
             BindEvents();
             UpdateActionButtons();
@@ -70,9 +74,19 @@ namespace AMControlWinF.Views.MotionConfig
             }
         }
 
+        /// <summary>
+        /// 轴拓扑变更后立即热重载设备配置。
+        /// 这样运行时轴映射和监视/控制页面才能立刻使用最新轴配置。
+        /// </summary>
+        private async Task<bool> ReloadMachineConfigAsync()
+        {
+            var result = await Task.Run(() => _machineConfigReloadService.ReloadAndRebuild());
+            return result.Success;
+        }
+
         private void PaginationCards_ValueChanged(object sender, PagePageEventArgs e)
         {
-            if (_isUpdatingPagination || _isBusy)
+            if (_isUpdatingPagination || _isBusy || e == null)
                 return;
 
             _model.ChangePage(e.Current, e.PageSize);
@@ -145,7 +159,6 @@ namespace AMControlWinF.Views.MotionConfig
                     return;
 
                 _model.SelectedCardId = dialog.SelectedCardId;
-
                 await ReloadAsync();
             }
         }
@@ -167,11 +180,22 @@ namespace AMControlWinF.Views.MotionConfig
                 if (dialog.ShowDialog(FindForm()) != DialogResult.OK)
                     return;
 
-                var result = await _model.SaveAsync(dialog.ResultEntity);
-                if (!result.Success)
-                    return;
+                SetBusyState(true);
+                try
+                {
+                    var result = await _model.SaveAsync(dialog.ResultEntity);
+                    if (!result.Success)
+                        return;
 
-                await ReloadAsync();
+                    if (!await ReloadMachineConfigAsync())
+                        return;
+
+                    await ReloadAsync();
+                }
+                finally
+                {
+                    SetBusyState(false);
+                }
             }
         }
 
@@ -185,11 +209,22 @@ namespace AMControlWinF.Views.MotionConfig
                 if (dialog.ShowDialog(FindForm()) != DialogResult.OK)
                     return;
 
-                var result = await _model.SaveAsync(dialog.ResultEntity);
-                if (!result.Success)
-                    return;
+                SetBusyState(true);
+                try
+                {
+                    var result = await _model.SaveAsync(dialog.ResultEntity);
+                    if (!result.Success)
+                        return;
 
-                await ReloadAsync();
+                    if (!await ReloadMachineConfigAsync())
+                        return;
+
+                    await ReloadAsync();
+                }
+                finally
+                {
+                    SetBusyState(false);
+                }
             }
         }
 
@@ -206,11 +241,22 @@ namespace AMControlWinF.Views.MotionConfig
             if (!ok)
                 return;
 
-            var result = await _model.DeleteAsync(item.LogicalAxis);
-            if (!result.Success)
-                return;
+            SetBusyState(true);
+            try
+            {
+                var result = await _model.DeleteAsync(item.LogicalAxis);
+                if (!result.Success)
+                    return;
 
-            await ReloadAsync();
+                if (!await ReloadMachineConfigAsync())
+                    return;
+
+                await ReloadAsync();
+            }
+            finally
+            {
+                SetBusyState(false);
+            }
         }
 
         private void ShowDetail(Control anchorControl, MotionAxisManagementPageModel.MotionAxisViewItem item)

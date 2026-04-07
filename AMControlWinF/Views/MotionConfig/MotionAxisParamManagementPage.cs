@@ -1,11 +1,11 @@
-﻿using AM.PageModel.MotionConfig;
+﻿using AM.DBService.Services.Motion.App;
+using AM.PageModel.MotionConfig;
 using AMControlWinF.Tools;
 using System;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
 namespace AMControlWinF.Views.MotionConfig
 {
@@ -15,6 +15,8 @@ namespace AMControlWinF.Views.MotionConfig
     public sealed partial class MotionAxisParamManagementPage : UserControl
     {
         private readonly MotionAxisParamManagementPageModel _model;
+        private readonly MachineConfigReloadService _machineConfigReloadService;
+
         private bool _isFirstLoad;
         private bool _isBusy;
         private string _selectedParamName;
@@ -24,6 +26,7 @@ namespace AMControlWinF.Views.MotionConfig
             InitializeComponent();
 
             _model = new MotionAxisParamManagementPageModel();
+            _machineConfigReloadService = new MachineConfigReloadService();
 
             BindEvents();
             UpdateActionButtons();
@@ -81,6 +84,16 @@ namespace AMControlWinF.Views.MotionConfig
             UpdateSelectionUi();
             UpdateGroupButtons();
             BuildCards();
+        }
+
+        /// <summary>
+        /// 轴参数变更后立即热重载设备配置。
+        /// 这样轴参数覆盖结果能立刻同步到运行中的 MotionCardConfig.AxisConfigs。
+        /// </summary>
+        private async Task<bool> ReloadMachineConfigAsync()
+        {
+            var result = await Task.Run(() => _machineConfigReloadService.ReloadAndRebuild());
+            return result.Success;
         }
 
         private void SetBusyState(bool isBusy)
@@ -162,6 +175,7 @@ namespace AMControlWinF.Views.MotionConfig
             {
                 flowCards.ResumeLayout();
             }
+
             UpdateActionButtons();
         }
 
@@ -310,6 +324,9 @@ namespace AMControlWinF.Views.MotionConfig
                     if (!result.Success)
                         return;
 
+                    if (!await ReloadMachineConfigAsync())
+                        return;
+
                     _selectedParamName = dialog.ResultEntity.ParamName;
                     await ReloadCoreAsync();
                 }
@@ -342,6 +359,9 @@ namespace AMControlWinF.Views.MotionConfig
                 {
                     var result = await _model.SaveAsync(dialog.ResultEntity);
                     if (!result.Success)
+                        return;
+
+                    if (!await ReloadMachineConfigAsync())
                         return;
 
                     _selectedParamName = dialog.ResultEntity.ParamName;
@@ -379,6 +399,9 @@ namespace AMControlWinF.Views.MotionConfig
             {
                 var result = await _model.DeleteAsync(param.ParamName);
                 if (!result.Success)
+                    return;
+
+                if (!await ReloadMachineConfigAsync())
                     return;
 
                 await ReloadCoreAsync();
