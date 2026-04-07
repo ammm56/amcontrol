@@ -385,6 +385,7 @@
             this.labelTagLogicKey.Location = new System.Drawing.Point(0, 0);
             this.labelTagLogicKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelTagLogicKey.Name = "labelTagLogicKey";
+            this.labelTagLogicKey.ShadowOpacity = 0F;
             this.labelTagLogicKey.Size = new System.Drawing.Size(64, 24);
             this.labelTagLogicKey.TabIndex = 0;
             this.labelTagLogicKey.Text = "逻辑位";
