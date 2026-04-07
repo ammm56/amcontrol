@@ -18,39 +18,60 @@ namespace AMControlWinF.Views.MotionConfig
 
         public void Bind(ActuatorManagementPageModel.ActuatorViewItem item)
         {
-            ClearSectionContent();
-
-            if (item == null)
+            SuspendSectionLayout();
+            try
             {
-                AddDetailItem(stackBasic, "执行器类型", "-");
-                AddDetailItem(stackBasic, "对象名称", "-");
-                AddDetailItem(stackBasic, "显示名称", "-");
-                return;
+                ClearSectionContent();
+
+                if (item == null)
+                {
+                    AddDetailItem(flowBasic, "执行器类型", "-");
+                    AddDetailItem(flowBasic, "对象名称", "-");
+                    AddDetailItem(flowBasic, "显示名称", "-");
+                    return;
+                }
+
+                var lines = item.DetailLines == null
+                    ? Enumerable.Empty<ActuatorManagementPageModel.ActuatorDetailLine>()
+                    : item.DetailLines.Where(x => x != null);
+
+                foreach (var line in lines)
+                {
+                    var section = ResolveSection(line.Title);
+                    AddDetailItem(section, line.Title, line.Value);
+                }
             }
-
-            var lines = item.DetailLines == null
-                ? Enumerable.Empty<ActuatorManagementPageModel.ActuatorDetailLine>()
-                : item.DetailLines;
-
-            foreach (var line in lines)
+            finally
             {
-                if (line == null)
-                    continue;
-
-                var section = ResolveSection(line.Title);
-                AddDetailItem(section, line.Title, line.Value);
+                ResumeSectionLayout();
             }
+        }
+
+        private void SuspendSectionLayout()
+        {
+            flowBasic.SuspendLayout();
+            flowMapping.SuspendLayout();
+            flowState.SuspendLayout();
+            flowRemark.SuspendLayout();
+        }
+
+        private void ResumeSectionLayout()
+        {
+            flowBasic.ResumeLayout();
+            flowMapping.ResumeLayout();
+            flowState.ResumeLayout();
+            flowRemark.ResumeLayout();
         }
 
         private void ClearSectionContent()
         {
-            ClearSection(stackBasic, dividerSectionBasic);
-            ClearSection(stackMapping, dividerSectionMapping);
-            ClearSection(stackState, dividerSectionState);
-            ClearSection(stackRemark, dividerSectionRemark);
+            ClearSection(flowBasic);
+            ClearSection(flowMapping);
+            ClearSection(flowState);
+            ClearSection(flowRemark);
         }
 
-        private static void ClearSection(AntdUI.StackPanel section, Control divider)
+        private static void ClearSection(AntdUI.FlowPanel section)
         {
             if (section == null)
                 return;
@@ -58,23 +79,20 @@ namespace AMControlWinF.Views.MotionConfig
             for (var i = section.Controls.Count - 1; i >= 0; i--)
             {
                 var control = section.Controls[i];
-                if (ReferenceEquals(control, divider))
-                    continue;
-
                 section.Controls.RemoveAt(i);
                 control.Dispose();
             }
         }
 
-        private Control ResolveSection(string title)
+        private AntdUI.FlowPanel ResolveSection(string title)
         {
             if (string.IsNullOrWhiteSpace(title))
-                return stackBasic;
+                return flowBasic;
 
             if (string.Equals(title, "描述", StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(title, "备注", StringComparison.OrdinalIgnoreCase))
             {
-                return stackRemark;
+                return flowRemark;
             }
 
             if (title.IndexOf("输出位", StringComparison.OrdinalIgnoreCase) >= 0 ||
@@ -82,7 +100,7 @@ namespace AMControlWinF.Views.MotionConfig
                 title.IndexOf("检测位", StringComparison.OrdinalIgnoreCase) >= 0 ||
                 title.IndexOf("驱动模式", StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                return stackMapping;
+                return flowMapping;
             }
 
             if (title.IndexOf("超时", StringComparison.OrdinalIgnoreCase) >= 0 ||
@@ -93,39 +111,38 @@ namespace AMControlWinF.Views.MotionConfig
                 title.IndexOf("允许", StringComparison.OrdinalIgnoreCase) >= 0 ||
                 title.IndexOf("保持", StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                return stackState;
+                return flowState;
             }
 
-            return stackBasic;
+            return flowBasic;
         }
 
-        private static void AddDetailItem(Control host, string title, string value)
+        private static void AddDetailItem(AntdUI.FlowPanel host, string title, string value)
         {
-            var stack = host as AntdUI.StackPanel;
-            if (stack == null)
+            if (host == null)
                 return;
 
-            var labelTitle = new AntdUI.Label();
-            labelTitle.ForeColor = Color.FromArgb(110, 110, 110);
-            labelTitle.Margin = new Padding(0);
-            labelTitle.Size = new Size(267, 22);
-            labelTitle.Text = string.IsNullOrWhiteSpace(title) ? "-" : title;
-
             var labelValue = new AntdUI.Label();
-            labelValue.Font = new Font("Microsoft YaHei UI", 10F, FontStyle.Bold);
-            labelValue.Margin = new Padding(0, 0, 0, 6);
-            labelValue.Size = new Size(267, 24);
+            labelValue.Font = new Font("Microsoft YaHei UI", 9F, FontStyle.Bold);
+            labelValue.Margin = new Padding(0);
+            labelValue.Size = new Size(267, 22);
             labelValue.Text = string.IsNullOrWhiteSpace(value) ? "-" : value;
 
-            if (!string.IsNullOrWhiteSpace(value) && value.Length > 24)
+            if (!string.IsNullOrWhiteSpace(value) && value.Length > 22)
             {
                 labelValue.AutoEllipsis = false;
-                labelValue.Size = new Size(267, 48);
+                labelValue.Size = new Size(267, 44);
                 labelValue.TextAlign = ContentAlignment.TopLeft;
             }
 
-            stack.Controls.Add(labelTitle);
-            stack.Controls.Add(labelValue);
+            var labelTitle = new AntdUI.Label();
+            labelTitle.ForeColor = Color.FromArgb(110, 110, 110);
+            labelTitle.Margin = new Padding(0, 0, 0, 0);
+            labelTitle.Size = new Size(267, 22);
+            labelTitle.Text = string.IsNullOrWhiteSpace(title) ? "-" : title;
+
+            host.Controls.Add(labelValue);
+            host.Controls.Add(labelTitle);
         }
     }
 }

@@ -18,20 +18,24 @@
         {
             this.panelRoot = new AntdUI.Panel();
             this.gridDetails = new AntdUI.GridPanel();
-            this.stackRemark = new AntdUI.StackPanel();
+            this.panelRemark = new AntdUI.Panel();
+            this.flowRemark = new AntdUI.FlowPanel();
             this.dividerSectionRemark = new AntdUI.Divider();
-            this.stackState = new AntdUI.StackPanel();
-            this.dividerSectionState = new AntdUI.Divider();
-            this.stackMapping = new AntdUI.StackPanel();
-            this.dividerSectionMapping = new AntdUI.Divider();
-            this.stackBasic = new AntdUI.StackPanel();
+            this.panelBasic = new AntdUI.Panel();
+            this.flowBasic = new AntdUI.FlowPanel();
             this.dividerSectionBasic = new AntdUI.Divider();
+            this.panelMapping = new AntdUI.Panel();
+            this.flowMapping = new AntdUI.FlowPanel();
+            this.dividerSectionMapping = new AntdUI.Divider();
+            this.panelState = new AntdUI.Panel();
+            this.flowState = new AntdUI.FlowPanel();
+            this.dividerSectionState = new AntdUI.Divider();
             this.panelRoot.SuspendLayout();
             this.gridDetails.SuspendLayout();
-            this.stackRemark.SuspendLayout();
-            this.stackState.SuspendLayout();
-            this.stackMapping.SuspendLayout();
-            this.stackBasic.SuspendLayout();
+            this.panelRemark.SuspendLayout();
+            this.panelBasic.SuspendLayout();
+            this.panelMapping.SuspendLayout();
+            this.panelState.SuspendLayout();
             this.SuspendLayout();
             // 
             // panelRoot
@@ -42,108 +46,160 @@
             this.panelRoot.Margin = new System.Windows.Forms.Padding(0);
             this.panelRoot.Name = "panelRoot";
             this.panelRoot.Radius = 0;
-            this.panelRoot.Size = new System.Drawing.Size(550, 560);
+            this.panelRoot.Size = new System.Drawing.Size(550, 620);
             this.panelRoot.TabIndex = 0;
             this.panelRoot.Text = "panelRoot";
             // 
             // gridDetails
             // 
-            this.gridDetails.Controls.Add(this.stackRemark);
-            this.gridDetails.Controls.Add(this.stackState);
-            this.gridDetails.Controls.Add(this.stackMapping);
-            this.gridDetails.Controls.Add(this.stackBasic);
+            this.gridDetails.Controls.Add(this.panelRemark);
+            this.gridDetails.Controls.Add(this.panelBasic);
+            this.gridDetails.Controls.Add(this.panelMapping);
+            this.gridDetails.Controls.Add(this.panelState);
             this.gridDetails.Dock = System.Windows.Forms.DockStyle.Fill;
             this.gridDetails.Location = new System.Drawing.Point(0, 0);
             this.gridDetails.Margin = new System.Windows.Forms.Padding(0);
             this.gridDetails.Name = "gridDetails";
-            this.gridDetails.Size = new System.Drawing.Size(550, 560);
-            this.gridDetails.Span = "50% 50%;50% 50%;-55%";
+            this.gridDetails.Size = new System.Drawing.Size(550, 620);
+            this.gridDetails.Span = "50% 50%;50% 50%;-70%";
             this.gridDetails.TabIndex = 0;
             this.gridDetails.Text = "gridDetails";
             // 
-            // stackRemark
+            // panelRemark
             // 
-            this.stackRemark.AutoScroll = true;
-            this.stackRemark.Controls.Add(this.dividerSectionRemark);
-            this.stackRemark.Location = new System.Drawing.Point(275, 308);
-            this.stackRemark.Margin = new System.Windows.Forms.Padding(0);
-            this.stackRemark.Name = "stackRemark";
-            this.stackRemark.Padding = new System.Windows.Forms.Padding(4);
-            this.stackRemark.Size = new System.Drawing.Size(275, 252);
-            this.stackRemark.TabIndex = 3;
-            this.stackRemark.Text = "stackRemark";
-            this.stackRemark.Vertical = true;
+            this.panelRemark.Controls.Add(this.flowRemark);
+            this.panelRemark.Controls.Add(this.dividerSectionRemark);
+            this.panelRemark.Location = new System.Drawing.Point(275, 434);
+            this.panelRemark.Margin = new System.Windows.Forms.Padding(0);
+            this.panelRemark.Name = "panelRemark";
+            this.panelRemark.Padding = new System.Windows.Forms.Padding(4);
+            this.panelRemark.Radius = 0;
+            this.panelRemark.Size = new System.Drawing.Size(275, 186);
+            this.panelRemark.TabIndex = 3;
+            this.panelRemark.Text = "panelRemark";
+            // 
+            // flowRemark
+            // 
+            this.flowRemark.AutoScroll = true;
+            this.flowRemark.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.flowRemark.Location = new System.Drawing.Point(4, 27);
+            this.flowRemark.Margin = new System.Windows.Forms.Padding(0);
+            this.flowRemark.Name = "flowRemark";
+            this.flowRemark.Size = new System.Drawing.Size(267, 155);
+            this.flowRemark.TabIndex = 1;
+            this.flowRemark.Text = "flowRemark";
             // 
             // dividerSectionRemark
             // 
-            this.dividerSectionRemark.Location = new System.Drawing.Point(7, 7);
+            this.dividerSectionRemark.Dock = System.Windows.Forms.DockStyle.Top;
+            this.dividerSectionRemark.Location = new System.Drawing.Point(4, 4);
+            this.dividerSectionRemark.Margin = new System.Windows.Forms.Padding(0);
             this.dividerSectionRemark.Name = "dividerSectionRemark";
-            this.dividerSectionRemark.Size = new System.Drawing.Size(261, 23);
+            this.dividerSectionRemark.Size = new System.Drawing.Size(267, 23);
             this.dividerSectionRemark.TabIndex = 0;
             this.dividerSectionRemark.Text = "说明与备注";
             // 
-            // stackState
+            // panelBasic
             // 
-            this.stackState.AutoScroll = true;
-            this.stackState.Controls.Add(this.dividerSectionState);
-            this.stackState.Location = new System.Drawing.Point(0, 308);
-            this.stackState.Margin = new System.Windows.Forms.Padding(0);
-            this.stackState.Name = "stackState";
-            this.stackState.Padding = new System.Windows.Forms.Padding(4);
-            this.stackState.Size = new System.Drawing.Size(275, 252);
-            this.stackState.TabIndex = 2;
-            this.stackState.Text = "stackState";
-            this.stackState.Vertical = true;
+            this.panelBasic.Controls.Add(this.flowBasic);
+            this.panelBasic.Controls.Add(this.dividerSectionBasic);
+            this.panelBasic.Location = new System.Drawing.Point(0, 434);
+            this.panelBasic.Margin = new System.Windows.Forms.Padding(0);
+            this.panelBasic.Name = "panelBasic";
+            this.panelBasic.Padding = new System.Windows.Forms.Padding(4);
+            this.panelBasic.Radius = 0;
+            this.panelBasic.Size = new System.Drawing.Size(275, 186);
+            this.panelBasic.TabIndex = 0;
+            this.panelBasic.Text = "panelBasic";
             // 
-            // dividerSectionState
+            // flowBasic
             // 
-            this.dividerSectionState.Location = new System.Drawing.Point(7, 7);
-            this.dividerSectionState.Name = "dividerSectionState";
-            this.dividerSectionState.Size = new System.Drawing.Size(261, 23);
-            this.dividerSectionState.TabIndex = 0;
-            this.dividerSectionState.Text = "状态与参数";
-            // 
-            // stackMapping
-            // 
-            this.stackMapping.AutoScroll = true;
-            this.stackMapping.Controls.Add(this.dividerSectionMapping);
-            this.stackMapping.Location = new System.Drawing.Point(275, 0);
-            this.stackMapping.Margin = new System.Windows.Forms.Padding(0);
-            this.stackMapping.Name = "stackMapping";
-            this.stackMapping.Padding = new System.Windows.Forms.Padding(4);
-            this.stackMapping.Size = new System.Drawing.Size(275, 308);
-            this.stackMapping.TabIndex = 1;
-            this.stackMapping.Text = "stackMapping";
-            this.stackMapping.Vertical = true;
-            // 
-            // dividerSectionMapping
-            // 
-            this.dividerSectionMapping.Location = new System.Drawing.Point(7, 7);
-            this.dividerSectionMapping.Name = "dividerSectionMapping";
-            this.dividerSectionMapping.Size = new System.Drawing.Size(261, 23);
-            this.dividerSectionMapping.TabIndex = 0;
-            this.dividerSectionMapping.Text = "IO与映射";
-            // 
-            // stackBasic
-            // 
-            this.stackBasic.AutoScroll = true;
-            this.stackBasic.Controls.Add(this.dividerSectionBasic);
-            this.stackBasic.Location = new System.Drawing.Point(0, 0);
-            this.stackBasic.Margin = new System.Windows.Forms.Padding(0);
-            this.stackBasic.Name = "stackBasic";
-            this.stackBasic.Padding = new System.Windows.Forms.Padding(4);
-            this.stackBasic.Size = new System.Drawing.Size(275, 308);
-            this.stackBasic.TabIndex = 0;
-            this.stackBasic.Text = "stackBasic";
-            this.stackBasic.Vertical = true;
+            this.flowBasic.AutoScroll = true;
+            this.flowBasic.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.flowBasic.Location = new System.Drawing.Point(4, 27);
+            this.flowBasic.Margin = new System.Windows.Forms.Padding(0);
+            this.flowBasic.Name = "flowBasic";
+            this.flowBasic.Size = new System.Drawing.Size(267, 155);
+            this.flowBasic.TabIndex = 1;
+            this.flowBasic.Text = "flowBasic";
             // 
             // dividerSectionBasic
             // 
-            this.dividerSectionBasic.Location = new System.Drawing.Point(7, 7);
+            this.dividerSectionBasic.Dock = System.Windows.Forms.DockStyle.Top;
+            this.dividerSectionBasic.Location = new System.Drawing.Point(4, 4);
+            this.dividerSectionBasic.Margin = new System.Windows.Forms.Padding(0);
             this.dividerSectionBasic.Name = "dividerSectionBasic";
-            this.dividerSectionBasic.Size = new System.Drawing.Size(261, 23);
+            this.dividerSectionBasic.Size = new System.Drawing.Size(267, 23);
             this.dividerSectionBasic.TabIndex = 0;
             this.dividerSectionBasic.Text = "基础信息";
+            // 
+            // panelMapping
+            // 
+            this.panelMapping.Controls.Add(this.flowMapping);
+            this.panelMapping.Controls.Add(this.dividerSectionMapping);
+            this.panelMapping.Location = new System.Drawing.Point(275, 0);
+            this.panelMapping.Margin = new System.Windows.Forms.Padding(0);
+            this.panelMapping.Name = "panelMapping";
+            this.panelMapping.Padding = new System.Windows.Forms.Padding(4);
+            this.panelMapping.Radius = 0;
+            this.panelMapping.Size = new System.Drawing.Size(275, 434);
+            this.panelMapping.TabIndex = 1;
+            this.panelMapping.Text = "panelMapping";
+            // 
+            // flowMapping
+            // 
+            this.flowMapping.AutoScroll = true;
+            this.flowMapping.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.flowMapping.Location = new System.Drawing.Point(4, 27);
+            this.flowMapping.Margin = new System.Windows.Forms.Padding(0);
+            this.flowMapping.Name = "flowMapping";
+            this.flowMapping.Size = new System.Drawing.Size(267, 403);
+            this.flowMapping.TabIndex = 1;
+            this.flowMapping.Text = "flowMapping";
+            // 
+            // dividerSectionMapping
+            // 
+            this.dividerSectionMapping.Dock = System.Windows.Forms.DockStyle.Top;
+            this.dividerSectionMapping.Location = new System.Drawing.Point(4, 4);
+            this.dividerSectionMapping.Margin = new System.Windows.Forms.Padding(0);
+            this.dividerSectionMapping.Name = "dividerSectionMapping";
+            this.dividerSectionMapping.Size = new System.Drawing.Size(267, 23);
+            this.dividerSectionMapping.TabIndex = 0;
+            this.dividerSectionMapping.Text = "IO与映射";
+            // 
+            // panelState
+            // 
+            this.panelState.Controls.Add(this.flowState);
+            this.panelState.Controls.Add(this.dividerSectionState);
+            this.panelState.Location = new System.Drawing.Point(0, 0);
+            this.panelState.Margin = new System.Windows.Forms.Padding(0);
+            this.panelState.Name = "panelState";
+            this.panelState.Padding = new System.Windows.Forms.Padding(4);
+            this.panelState.Radius = 0;
+            this.panelState.Size = new System.Drawing.Size(275, 434);
+            this.panelState.TabIndex = 2;
+            this.panelState.Text = "panelState";
+            // 
+            // flowState
+            // 
+            this.flowState.AutoScroll = true;
+            this.flowState.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.flowState.Location = new System.Drawing.Point(4, 27);
+            this.flowState.Margin = new System.Windows.Forms.Padding(0);
+            this.flowState.Name = "flowState";
+            this.flowState.Size = new System.Drawing.Size(267, 403);
+            this.flowState.TabIndex = 1;
+            this.flowState.Text = "flowState";
+            // 
+            // dividerSectionState
+            // 
+            this.dividerSectionState.Dock = System.Windows.Forms.DockStyle.Top;
+            this.dividerSectionState.Location = new System.Drawing.Point(4, 4);
+            this.dividerSectionState.Margin = new System.Windows.Forms.Padding(0);
+            this.dividerSectionState.Name = "dividerSectionState";
+            this.dividerSectionState.Size = new System.Drawing.Size(267, 23);
+            this.dividerSectionState.TabIndex = 0;
+            this.dividerSectionState.Text = "状态与参数";
             // 
             // ActuatorDetailControl
             // 
@@ -151,26 +207,30 @@
             this.Controls.Add(this.panelRoot);
             this.Margin = new System.Windows.Forms.Padding(0);
             this.Name = "ActuatorDetailControl";
-            this.Size = new System.Drawing.Size(550, 560);
+            this.Size = new System.Drawing.Size(550, 620);
             this.panelRoot.ResumeLayout(false);
             this.gridDetails.ResumeLayout(false);
-            this.stackRemark.ResumeLayout(false);
-            this.stackState.ResumeLayout(false);
-            this.stackMapping.ResumeLayout(false);
-            this.stackBasic.ResumeLayout(false);
+            this.panelRemark.ResumeLayout(false);
+            this.panelBasic.ResumeLayout(false);
+            this.panelMapping.ResumeLayout(false);
+            this.panelState.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
 
         private AntdUI.Panel panelRoot;
         private AntdUI.GridPanel gridDetails;
-        private AntdUI.StackPanel stackBasic;
+        private AntdUI.Panel panelBasic;
         private AntdUI.Divider dividerSectionBasic;
-        private AntdUI.StackPanel stackMapping;
+        private AntdUI.FlowPanel flowBasic;
+        private AntdUI.Panel panelMapping;
         private AntdUI.Divider dividerSectionMapping;
-        private AntdUI.StackPanel stackState;
+        private AntdUI.FlowPanel flowMapping;
+        private AntdUI.Panel panelState;
         private AntdUI.Divider dividerSectionState;
-        private AntdUI.StackPanel stackRemark;
+        private AntdUI.FlowPanel flowState;
+        private AntdUI.Panel panelRemark;
         private AntdUI.Divider dividerSectionRemark;
+        private AntdUI.FlowPanel flowRemark;
     }
 }
