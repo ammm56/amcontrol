@@ -269,7 +269,6 @@
             this.panelToolbar.ResumeLayout(false);
             this.flowToolbarRight.ResumeLayout(false);
             this.ResumeLayout(false);
-
         }
 
         private AntdUI.Panel panelRoot;

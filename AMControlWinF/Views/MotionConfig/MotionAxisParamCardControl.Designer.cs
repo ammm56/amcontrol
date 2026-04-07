@@ -43,16 +43,16 @@
             this.panelCard.Shadow = 4;
             this.panelCard.ShadowOpacity = 0.2F;
             this.panelCard.ShadowOpacityAnimation = true;
-            this.panelCard.Size = new System.Drawing.Size(140, 85);
+            this.panelCard.Size = new System.Drawing.Size(140, 95);
             this.panelCard.TabIndex = 0;
             // 
             // labelParamName
             // 
             this.labelParamName.ForeColor = System.Drawing.Color.Gray;
-            this.labelParamName.Location = new System.Drawing.Point(11, 55);
+            this.labelParamName.Location = new System.Drawing.Point(11, 59);
             this.labelParamName.Margin = new System.Windows.Forms.Padding(0);
             this.labelParamName.Name = "labelParamName";
-            this.labelParamName.Size = new System.Drawing.Size(121, 22);
+            this.labelParamName.Size = new System.Drawing.Size(117, 22);
             this.labelParamName.TabIndex = 0;
             this.labelParamName.Text = "ParamName";
             // 
@@ -71,7 +71,7 @@
             // labelValue
             // 
             this.labelValue.Font = new System.Drawing.Font("Microsoft YaHei UI", 14F, System.Drawing.FontStyle.Bold);
-            this.labelValue.Location = new System.Drawing.Point(87, 29);
+            this.labelValue.Location = new System.Drawing.Point(87, 32);
             this.labelValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelValue.Name = "labelValue";
             this.labelValue.Padding = new System.Windows.Forms.Padding(6, 0, 0, 0);
@@ -82,7 +82,7 @@
             // labelTitle
             // 
             this.labelTitle.Font = new System.Drawing.Font("Microsoft YaHei UI", 11F, System.Drawing.FontStyle.Bold);
-            this.labelTitle.Location = new System.Drawing.Point(6, 29);
+            this.labelTitle.Location = new System.Drawing.Point(6, 32);
             this.labelTitle.Margin = new System.Windows.Forms.Padding(0);
             this.labelTitle.Name = "labelTitle";
             this.labelTitle.Padding = new System.Windows.Forms.Padding(6, 0, 0, 0);
@@ -110,7 +110,7 @@
             this.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
             this.Margin = new System.Windows.Forms.Padding(0);
             this.Name = "MotionAxisParamCardControl";
-            this.Size = new System.Drawing.Size(140, 85);
+            this.Size = new System.Drawing.Size(140, 95);
             this.panelCard.ResumeLayout(false);
             this.ResumeLayout(false);
 

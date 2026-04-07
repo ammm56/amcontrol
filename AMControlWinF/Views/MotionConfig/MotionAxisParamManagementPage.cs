@@ -164,7 +164,7 @@ namespace AMControlWinF.Views.MotionConfig
             var card = new MotionAxisParamCardControl();
             var clickHandler = new EventHandler((s, e) => SelectParam(item.ParamName));
 
-            wrapper.Size = new Size(140, 80);
+            wrapper.Size = new Size(140, 95);
             wrapper.Radius = 12;
             wrapper.Tag = item.ParamName ?? string.Empty;
 

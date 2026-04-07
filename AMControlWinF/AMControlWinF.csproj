@@ -127,6 +127,18 @@
     <Compile Include="Views\Main\UserAvatarPopoverCard.Designer.cs">
       <DependentUpon>UserAvatarPopoverCard.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\MotionConfig\ActuatorCardControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\ActuatorCardControl.Designer.cs">
+      <DependentUpon>ActuatorCardControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\ActuatorDetailControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\ActuatorDetailControl.Designer.cs">
+      <DependentUpon>ActuatorDetailControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="Views\MotionConfig\ActuatorEditDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -324,6 +336,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Views\Main\UserAvatarPopoverCard.resx">
       <DependentUpon>UserAvatarPopoverCard.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\ActuatorCardControl.resx">
+      <DependentUpon>ActuatorCardControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\ActuatorDetailControl.resx">
+      <DependentUpon>ActuatorDetailControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\MotionConfig\ActuatorEditDialog.resx">
       <DependentUpon>ActuatorEditDialog.cs</DependentUpon>
