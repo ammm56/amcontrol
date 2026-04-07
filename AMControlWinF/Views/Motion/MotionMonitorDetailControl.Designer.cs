@@ -67,6 +67,9 @@
             this.labelTitle = new AntdUI.Label();
             this.panelEmpty = new AntdUI.Panel();
             this.labelEmpty = new AntdUI.Label();
+            this.labelTagLastUpdateValue = new AntdUI.Label();
+            this.labelTagLastUpdateKey = new AntdUI.Label();
+            this.panelTagLastUpdate = new AntdUI.Panel();
             this.panelRoot.SuspendLayout();
             this.panelDetail.SuspendLayout();
             this.panelScroll.SuspendLayout();
@@ -87,6 +90,7 @@
             this.panelTagLogicalAxis.SuspendLayout();
             this.panelHeader.SuspendLayout();
             this.panelEmpty.SuspendLayout();
+            this.panelTagLastUpdate.SuspendLayout();
             this.SuspendLayout();
             // 
             // panelRoot
@@ -116,6 +120,7 @@
             // 
             // panelScroll
             // 
+            this.panelScroll.Controls.Add(this.panelTagLastUpdate);
             this.panelScroll.Controls.Add(this.panelTagJogVel);
             this.panelScroll.Controls.Add(this.panelTagDefaultVel);
             this.panelScroll.Controls.Add(this.panelTagEncPulse);
@@ -713,6 +718,40 @@
             this.labelEmpty.Text = "请选择左侧轴卡片查看详情";
             this.labelEmpty.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
+            // labelTagLastUpdateValue
+            // 
+            this.labelTagLastUpdateValue.AutoEllipsis = true;
+            this.labelTagLastUpdateValue.Location = new System.Drawing.Point(94, 0);
+            this.labelTagLastUpdateValue.Margin = new System.Windows.Forms.Padding(0);
+            this.labelTagLastUpdateValue.Name = "labelTagLastUpdateValue";
+            this.labelTagLastUpdateValue.Size = new System.Drawing.Size(140, 22);
+            this.labelTagLastUpdateValue.TabIndex = 1;
+            this.labelTagLastUpdateValue.Text = "—";
+            // 
+            // labelTagLastUpdateKey
+            // 
+            this.labelTagLastUpdateKey.ForeColor = System.Drawing.Color.Gray;
+            this.labelTagLastUpdateKey.Location = new System.Drawing.Point(0, 0);
+            this.labelTagLastUpdateKey.Margin = new System.Windows.Forms.Padding(0);
+            this.labelTagLastUpdateKey.Name = "labelTagLastUpdateKey";
+            this.labelTagLastUpdateKey.Size = new System.Drawing.Size(88, 22);
+            this.labelTagLastUpdateKey.TabIndex = 0;
+            this.labelTagLastUpdateKey.Text = "最后更新";
+            this.labelTagLastUpdateKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // panelTagLastUpdate
+            // 
+            this.panelTagLastUpdate.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.panelTagLastUpdate.Controls.Add(this.labelTagLastUpdateValue);
+            this.panelTagLastUpdate.Controls.Add(this.labelTagLastUpdateKey);
+            this.panelTagLastUpdate.Location = new System.Drawing.Point(8, 362);
+            this.panelTagLastUpdate.Margin = new System.Windows.Forms.Padding(0);
+            this.panelTagLastUpdate.Name = "panelTagLastUpdate";
+            this.panelTagLastUpdate.Radius = 0;
+            this.panelTagLastUpdate.Size = new System.Drawing.Size(234, 24);
+            this.panelTagLastUpdate.TabIndex = 15;
+            // 
             // MotionMonitorDetailControl
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
@@ -740,6 +779,7 @@
             this.panelTagLogicalAxis.ResumeLayout(false);
             this.panelHeader.ResumeLayout(false);
             this.panelEmpty.ResumeLayout(false);
+            this.panelTagLastUpdate.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -797,5 +837,8 @@
         private AntdUI.Label labelSubTitle;
         private AntdUI.Panel panelEmpty;
         private AntdUI.Label labelEmpty;
+        private AntdUI.Panel panelTagLastUpdate;
+        private AntdUI.Label labelTagLastUpdateValue;
+        private AntdUI.Label labelTagLastUpdateKey;
     }
 }

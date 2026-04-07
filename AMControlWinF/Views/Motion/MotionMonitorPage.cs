@@ -62,7 +62,7 @@ namespace AMControlWinF.Views.Motion
 
         private void InitializePagination()
         {
-            paginationAxes.PageSizeOptions = new int[] { 8, 12, 24, 36, 48, 96 };
+            paginationAxes.PageSizeOptions = new int[] { 6, 12, 24, 36, 48, 96 };
         }
 
         private async void MotionMonitorPage_Load(object sender, EventArgs e)

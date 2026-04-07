@@ -155,6 +155,8 @@ namespace AMControlWinF.Views.Motion
                 SetTagRow(labelTagEncPulseKey, labelTagEncPulseValue, "编码器位置(pulse)", item.EncoderPositionPulseText);
                 SetTagRow(labelTagDefaultVelKey, labelTagDefaultVelValue, "默认速度", item.DefaultVelocityText);
                 SetTagRow(labelTagJogVelKey, labelTagJogVelValue, "点动速度", item.JogVelocityText);
+                SetTagRow(labelTagLastUpdateKey, labelTagLastUpdateValue, "最后更新", item.UpdateTimeText);
+
             }
             finally
             {
@@ -206,7 +208,8 @@ namespace AMControlWinF.Views.Motion
                 item.CommandPositionPulseText ?? string.Empty,
                 item.EncoderPositionPulseText ?? string.Empty,
                 item.DefaultVelocityText ?? string.Empty,
-                item.JogVelocityText ?? string.Empty
+                item.JogVelocityText ?? string.Empty,
+                item.UpdateTimeText ?? string.Empty
             });
         }
 

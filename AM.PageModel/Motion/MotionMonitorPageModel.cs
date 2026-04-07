@@ -510,7 +510,8 @@ namespace AM.PageModel.Motion
                 PositiveLimit = item != null && item.PositiveLimit,
                 NegativeLimit = item != null && item.NegativeLimit,
                 IsDone = item != null && item.IsDone,
-                IsMoving = item != null && item.IsMoving
+                IsMoving = item != null && item.IsMoving,
+                UpdateTime = item == null ? (DateTime?)null : item.UpdateTime
             };
         }
 
@@ -542,6 +543,8 @@ namespace AM.PageModel.Motion
             public bool NegativeLimit { get; set; }
             public bool IsDone { get; set; }
             public bool IsMoving { get; set; }
+
+            public DateTime? UpdateTime { get; set; }
 
             public string DisplayTitle
             {
@@ -631,9 +634,12 @@ namespace AM.PageModel.Motion
                 }
             }
 
+            /// <summary>
+            /// 位置误差 指令位置 - 编码器位置。
+            /// </summary>
             public double PositionErrorMm
             {
-                get { return EncoderPositionMm - CommandPositionMm; }
+                get { return CommandPositionMm - EncoderPositionMm; }
             }
 
             public string CommandPositionMmText
@@ -669,6 +675,16 @@ namespace AM.PageModel.Motion
             public string JogVelocityText
             {
                 get { return JogVelocityMm.ToString("0.###") + " mm/s"; }
+            }
+
+            public string UpdateTimeText
+            {
+                get
+                {
+                    return UpdateTime.HasValue
+                        ? UpdateTime.Value.ToString("yyyy-MM-dd HH:mm:ss")
+                        : "—";
+                }
             }
         }
     }

@@ -21,7 +21,9 @@
             this.paginationAxes = new AntdUI.Pagination();
             this.labelPageSummary = new AntdUI.Label();
             this.panelDetailCard = new AntdUI.Panel();
+            this.motionMonitorDetailControl = new AMControlWinF.Views.Motion.MotionMonitorDetailControl();
             this.panelListCard = new AntdUI.Panel();
+            this.motionMonitorVirtualListControl = new AMControlWinF.Views.Motion.MotionMonitorVirtualListControl();
             this.flowStats = new AntdUI.FlowPanel();
             this.panelScanCard = new AntdUI.Panel();
             this.labelScanValue = new AntdUI.Label();
@@ -44,8 +46,6 @@
             this.flowToolbarLeft = new AntdUI.FlowPanel();
             this.labelSelectedCard = new AntdUI.Label();
             this.buttonSelectCard = new AntdUI.Button();
-            this.motionMonitorDetailControl = new AMControlWinF.Views.Motion.MotionMonitorDetailControl();
-            this.motionMonitorVirtualListControl = new AMControlWinF.Views.Motion.MotionMonitorVirtualListControl();
             this.panelRoot.SuspendLayout();
             this.panelContentCard.SuspendLayout();
             this.gridContent.SuspendLayout();
@@ -109,18 +109,17 @@
             // 
             this.panelFooter.Controls.Add(this.paginationAxes);
             this.panelFooter.Controls.Add(this.labelPageSummary);
-            this.panelFooter.Location = new System.Drawing.Point(0, 472);
-            this.panelFooter.Margin = new System.Windows.Forms.Padding(0);
+            this.panelFooter.Location = new System.Drawing.Point(0, 480);
+            this.panelFooter.Margin = new System.Windows.Forms.Padding(0, 8, 0, 0);
             this.panelFooter.Name = "panelFooter";
-            this.panelFooter.Padding = new System.Windows.Forms.Padding(0, 8, 0, 0);
             this.panelFooter.Radius = 0;
-            this.panelFooter.Size = new System.Drawing.Size(940, 52);
+            this.panelFooter.Size = new System.Drawing.Size(940, 44);
             this.panelFooter.TabIndex = 2;
             // 
             // paginationAxes
             // 
             this.paginationAxes.Dock = System.Windows.Forms.DockStyle.Right;
-            this.paginationAxes.Location = new System.Drawing.Point(379, 8);
+            this.paginationAxes.Location = new System.Drawing.Point(379, 0);
             this.paginationAxes.Margin = new System.Windows.Forms.Padding(0);
             this.paginationAxes.Name = "paginationAxes";
             this.paginationAxes.PageSize = 24;
@@ -133,7 +132,7 @@
             // labelPageSummary
             // 
             this.labelPageSummary.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labelPageSummary.Location = new System.Drawing.Point(0, 8);
+            this.labelPageSummary.Location = new System.Drawing.Point(0, 0);
             this.labelPageSummary.Margin = new System.Windows.Forms.Padding(0);
             this.labelPageSummary.Name = "labelPageSummary";
             this.labelPageSummary.Size = new System.Drawing.Size(260, 44);
@@ -147,11 +146,20 @@
             this.panelDetailCard.Location = new System.Drawing.Point(690, 0);
             this.panelDetailCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelDetailCard.Name = "panelDetailCard";
-            this.panelDetailCard.Padding = new System.Windows.Forms.Padding(8);
+            this.panelDetailCard.Padding = new System.Windows.Forms.Padding(4);
             this.panelDetailCard.Radius = 12;
             this.panelDetailCard.Shadow = 4;
             this.panelDetailCard.Size = new System.Drawing.Size(250, 472);
             this.panelDetailCard.TabIndex = 1;
+            // 
+            // motionMonitorDetailControl
+            // 
+            this.motionMonitorDetailControl.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.motionMonitorDetailControl.Location = new System.Drawing.Point(8, 8);
+            this.motionMonitorDetailControl.Margin = new System.Windows.Forms.Padding(0);
+            this.motionMonitorDetailControl.Name = "motionMonitorDetailControl";
+            this.motionMonitorDetailControl.Size = new System.Drawing.Size(234, 456);
+            this.motionMonitorDetailControl.TabIndex = 0;
             // 
             // panelListCard
             // 
@@ -165,6 +173,15 @@
             this.panelListCard.ShadowOpacityHover = 0F;
             this.panelListCard.Size = new System.Drawing.Size(690, 472);
             this.panelListCard.TabIndex = 0;
+            // 
+            // motionMonitorVirtualListControl
+            // 
+            this.motionMonitorVirtualListControl.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.motionMonitorVirtualListControl.Location = new System.Drawing.Point(0, 0);
+            this.motionMonitorVirtualListControl.Margin = new System.Windows.Forms.Padding(0);
+            this.motionMonitorVirtualListControl.Name = "motionMonitorVirtualListControl";
+            this.motionMonitorVirtualListControl.Size = new System.Drawing.Size(690, 472);
+            this.motionMonitorVirtualListControl.TabIndex = 0;
             // 
             // flowStats
             // 
@@ -442,24 +459,6 @@
             this.buttonSelectCard.Text = "选择控制卡";
             this.buttonSelectCard.Type = AntdUI.TTypeMini.Primary;
             this.buttonSelectCard.WaveSize = 0;
-            // 
-            // motionMonitorDetailControl
-            // 
-            this.motionMonitorDetailControl.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.motionMonitorDetailControl.Location = new System.Drawing.Point(12, 12);
-            this.motionMonitorDetailControl.Margin = new System.Windows.Forms.Padding(0);
-            this.motionMonitorDetailControl.Name = "motionMonitorDetailControl";
-            this.motionMonitorDetailControl.Size = new System.Drawing.Size(226, 448);
-            this.motionMonitorDetailControl.TabIndex = 0;
-            // 
-            // motionMonitorVirtualListControl
-            // 
-            this.motionMonitorVirtualListControl.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.motionMonitorVirtualListControl.Location = new System.Drawing.Point(0, 0);
-            this.motionMonitorVirtualListControl.Margin = new System.Windows.Forms.Padding(0);
-            this.motionMonitorVirtualListControl.Name = "motionMonitorVirtualListControl";
-            this.motionMonitorVirtualListControl.Size = new System.Drawing.Size(690, 472);
-            this.motionMonitorVirtualListControl.TabIndex = 0;
             // 
             // MotionMonitorPage
             // 
