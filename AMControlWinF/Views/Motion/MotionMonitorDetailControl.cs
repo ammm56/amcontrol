@@ -1,7 +1,7 @@
 ﻿using AM.PageModel.Motion;
+using AntdUI;
 using System;
 using System.Reflection;
-using System.Text;
 using System.Windows.Forms;
 
 namespace AMControlWinF.Views.Motion
@@ -9,31 +9,34 @@ namespace AMControlWinF.Views.Motion
     /// <summary>
     /// 多轴总览右侧详情控件。
     ///
-    /// 当前版本职责：
-    /// 1. 根据选中轴显示右侧详情；
-    /// 2. 通过快照去重，避免 500ms 刷新时重复重绘；
-    /// 3. 使用当前第一阶段 Designer 中的标题、副标题、说明文本完成真实绑定。
+    /// 设计目标：
+    /// 1. 使用固定标签控件显示选中轴的详细信息；
+    /// 2. 避免每次刷新都动态创建控件，降低闪烁与内存抖动；
+    /// 3. 与 DI/DO 详情区保持一致，使用“快照去重 + SuspendLayout + 双缓冲”策略；
+    /// 4. 当用户在左侧切换轴，或运行态发生变化时，仅刷新真正变化的内容。
     ///
-    /// 后续若要进一步升级，可把 labelPlaceholder 替换成多行标签区，
-    /// 但当前版本已经可以稳定展示真实内容，并与 DI/DO 页面防闪策略保持一致。
+    /// 说明：
+    /// - 该控件不负责数据查询；
+    /// - 只负责将页面模型中的 MotionAxisViewItem 显示到右侧；
+    /// - 页面层传入当前选中项即可。
     /// </summary>
     public partial class MotionMonitorDetailControl : UserControl
     {
         /// <summary>
-        /// 上一次已渲染的逻辑轴。
-        /// 用于判断当前是否仍然是同一张轴详情。
+        /// 上一次已渲染的逻辑轴编号。
+        /// 用于判断本次刷新是否仍然是同一条轴详情。
         /// </summary>
         private short? _lastLogicalAxis;
 
         /// <summary>
         /// 上一次已渲染的内容快照。
-        /// 相同快照不重复刷新，减少闪烁。
+        /// 当快照完全一致时，直接跳过 UI 重绘，减少闪烁。
         /// </summary>
         private string _lastSnapshotKey = string.Empty;
 
         /// <summary>
         /// 当前已绑定的轴项。
-        /// 后续如果详情区拆成更多控件，可继续复用该对象。
+        /// 主要用于外部调试或后续扩展。
         /// </summary>
         private MotionMonitorPageModel.MotionAxisViewItem _currentItem;
 
@@ -41,6 +44,8 @@ namespace AMControlWinF.Views.Motion
         {
             InitializeComponent();
 
+            // 为整个详情控件开启双缓冲。
+            // 这样在频繁刷新文本、切换空态/详情态时，闪烁会明显降低。
             SetStyle(
                 ControlStyles.AllPaintingInWmPaint |
                 ControlStyles.OptimizedDoubleBuffer |
@@ -49,8 +54,11 @@ namespace AMControlWinF.Views.Motion
                 true);
             UpdateStyles();
 
+            // 为滚动宿主开启双缓冲。
+            // panelScroll 中承载了多行标签，是最容易发生重绘抖动的区域。
             EnableDoubleBuffer(panelScroll);
 
+            // 初始状态下显示空态。
             panelDetail.Visible = false;
             panelEmpty.Visible = true;
         }
@@ -65,9 +73,15 @@ namespace AMControlWinF.Views.Motion
 
         /// <summary>
         /// 绑定当前选中的轴。
+        ///
+        /// 刷新策略：
+        /// 1. 如果没有选中轴，显示空态；
+        /// 2. 如果逻辑轴相同且快照完全一致，则不刷新；
+        /// 3. 否则批量更新右侧所有标签。
         /// </summary>
         public void Bind(MotionMonitorPageModel.MotionAxisViewItem item)
         {
+            // 没有选中轴时，显示空态并清空缓存快照。
             if (item == null)
             {
                 _lastLogicalAxis = null;
@@ -93,6 +107,8 @@ namespace AMControlWinF.Views.Motion
                 return;
             }
 
+            // 生成本次详情快照。
+            // 如果当前逻辑轴和快照都与上一次一致，说明右侧内容无变化，直接跳过。
             var snapshotKey = BuildSnapshotKey(item);
             if (_lastLogicalAxis.HasValue &&
                 _lastLogicalAxis.Value == item.LogicalAxis &&
@@ -105,12 +121,14 @@ namespace AMControlWinF.Views.Motion
             _lastSnapshotKey = snapshotKey;
             _currentItem = item;
 
+            // 批量更新前暂停布局，避免多次文本赋值导致连续重排。
             SuspendLayout();
             panelDetail.SuspendLayout();
             panelHeader.SuspendLayout();
             panelScroll.SuspendLayout();
             try
             {
+                // 首次从空态切到详情态时，只做一次显隐切换。
                 if (!panelDetail.Visible)
                 {
                     panelEmpty.Visible = false;
@@ -119,11 +137,24 @@ namespace AMControlWinF.Views.Motion
 
                 // 标题区
                 labelTitle.Text = item.DisplayTitle;
-                labelSubTitle.Text = item.CardText + " / " + item.PhysicalText;
+                labelSubTitle.Text = item.CardText;
 
-                // 第一阶段详情文本区：
-                // 先使用单个说明标签承载详细信息，后续再升级成分行标签布局。
-                labelPlaceholder.Text = BuildDetailText(item);
+                // 标签行
+                SetTagRow(labelTagLogicalAxisKey, labelTagLogicalAxisValue, "逻辑轴", "L#" + item.LogicalAxis);
+                SetTagRow(labelTagAxisTypeKey, labelTagAxisTypeValue, "轴类型", item.AxisCategoryText);
+                SetTagRow(labelTagPhysicalKey, labelTagPhysicalValue, "物理映射", item.PhysicalText);
+                SetTagRow(labelTagStateKey, labelTagStateValue, "当前状态", item.StateText);
+                SetTagRow(labelTagEnableKey, labelTagEnableValue, "使能状态", item.EnableText);
+                SetTagRow(labelTagHomeKey, labelTagHomeValue, "原点状态", item.HomeText);
+                SetTagRow(labelTagDoneKey, labelTagDoneValue, "到位状态", item.DoneText);
+                SetTagRow(labelTagLimitKey, labelTagLimitValue, "限位状态", item.LimitText);
+                SetTagRow(labelTagCmdMmKey, labelTagCmdMmValue, "指令位置(mm)", item.CommandPositionMmText);
+                SetTagRow(labelTagEncMmKey, labelTagEncMmValue, "编码器位置(mm)", item.EncoderPositionMmText);
+                SetTagRow(labelTagErrorMmKey, labelTagErrorMmValue, "位置误差(mm)", item.PositionErrorMmText);
+                SetTagRow(labelTagCmdPulseKey, labelTagCmdPulseValue, "指令位置(pulse)", item.CommandPositionPulseText);
+                SetTagRow(labelTagEncPulseKey, labelTagEncPulseValue, "编码器位置(pulse)", item.EncoderPositionPulseText);
+                SetTagRow(labelTagDefaultVelKey, labelTagDefaultVelValue, "默认速度", item.DefaultVelocityText);
+                SetTagRow(labelTagJogVelKey, labelTagJogVelValue, "点动速度", item.JogVelocityText);
             }
             finally
             {
@@ -131,52 +162,37 @@ namespace AMControlWinF.Views.Motion
                 panelHeader.ResumeLayout(false);
                 panelDetail.ResumeLayout(false);
                 ResumeLayout(false);
+
+                // 最后统一重绘一次，避免中间多次闪动。
                 Invalidate();
             }
         }
 
         /// <summary>
-        /// 构建当前详情区显示文本。
-        /// 第一阶段先用单个标签展示完整信息，便于快速落地。
+        /// 设置一行“键 + 值”标签文本。
+        /// 为空时统一回退到占位文本。
         /// </summary>
-        private static string BuildDetailText(MotionMonitorPageModel.MotionAxisViewItem item)
+        private static void SetTagRow(
+            AntdUI.Label keyLabel,
+            AntdUI.Label valueLabel,
+            string keyText,
+            string valueText)
         {
-            var builder = new StringBuilder();
-
-            builder.AppendLine("逻辑轴：L#" + item.LogicalAxis);
-            builder.AppendLine("控制卡：" + item.CardText);
-            builder.AppendLine("轴类型：" + item.AxisCategoryText);
-            builder.AppendLine("物理映射：" + item.PhysicalText);
-            builder.AppendLine("当前状态：" + item.StateText);
-            builder.AppendLine("使能状态：" + item.EnableText);
-            builder.AppendLine("原点状态：" + item.HomeText);
-            builder.AppendLine("到位状态：" + item.DoneText);
-            builder.AppendLine("限位状态：" + item.LimitText);
-            builder.AppendLine();
-            builder.AppendLine("指令位置(mm)： " + item.CommandPositionMmText);
-            builder.AppendLine("编码器位置(mm)： " + item.EncoderPositionMmText);
-            builder.AppendLine("位置误差(mm)： " + item.PositionErrorMmText);
-            builder.AppendLine();
-            builder.AppendLine("指令位置(pulse)： " + item.CommandPositionPulseText);
-            builder.AppendLine("编码器位置(pulse)： " + item.EncoderPositionPulseText);
-            builder.AppendLine();
-            builder.AppendLine("默认速度： " + item.DefaultVelocityText);
-            builder.AppendLine("点动速度： " + item.JogVelocityText);
-
-            return builder.ToString();
+            keyLabel.Text = string.IsNullOrWhiteSpace(keyText) ? "-" : keyText;
+            valueLabel.Text = string.IsNullOrWhiteSpace(valueText) ? "—" : valueText;
         }
 
         /// <summary>
-        /// 生成当前详情快照键。
-        /// 相同内容不重复刷新。
+        /// 生成当前详情内容的快照键。
+        /// 只要这些文本都没有变化，就不重复刷新右侧详情区。
         /// </summary>
         private static string BuildSnapshotKey(MotionMonitorPageModel.MotionAxisViewItem item)
         {
             return string.Join("|", new[]
             {
                 item.DisplayTitle ?? string.Empty,
-                item.LogicalAxis.ToString(),
                 item.CardText ?? string.Empty,
+                item.LogicalAxis.ToString(),
                 item.AxisCategoryText ?? string.Empty,
                 item.PhysicalText ?? string.Empty,
                 item.StateText ?? string.Empty,
@@ -195,7 +211,8 @@ namespace AMControlWinF.Views.Motion
         }
 
         /// <summary>
-        /// 为滚动宿主开启双缓冲，降低文本刷新时的闪烁。
+        /// 为指定控件开启双缓冲。
+        /// 某些 WinForms 原生容器没有公开 DoubleBuffered，这里统一通过反射处理。
         /// </summary>
         private static void EnableDoubleBuffer(Control control)
         {
@@ -213,6 +230,7 @@ namespace AMControlWinF.Views.Motion
             }
             catch
             {
+                // 忽略反射失败，不影响主流程。
             }
         }
     }

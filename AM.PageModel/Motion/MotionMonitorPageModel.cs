@@ -570,7 +570,8 @@ namespace AM.PageModel.Motion
 
             public string PhysicalText
             {
-                get { return "Core " + PhysicalCore + " / Axis " + PhysicalAxis; }
+                //get { return "核 " + PhysicalCore + " / 轴 " + PhysicalAxis; }
+                get { return "轴 " + PhysicalAxis; }
             }
 
             public string EnableText

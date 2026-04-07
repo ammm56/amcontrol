@@ -475,6 +475,9 @@
     <EmbeddedResource Include="Views\Motion\DOMotionDetailControl.resx">
       <DependentUpon>DOMotionDetailControl.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\Motion\MotionMonitorDetailControl.resx">
+      <DependentUpon>MotionMonitorDetailControl.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Views\Motion\MotionMonitorPage.resx">
       <DependentUpon>MotionMonitorPage.cs</DependentUpon>
     </EmbeddedResource>
