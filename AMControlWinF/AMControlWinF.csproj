@@ -502,6 +502,9 @@
     <EmbeddedResource Include="Views\Motion\MotionAxisPage.resx">
       <DependentUpon>MotionAxisPage.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\Motion\MotionAxisParameterActionControl.resx">
+      <DependentUpon>MotionAxisParameterActionControl.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Views\Motion\MotionMonitorDetailControl.resx">
       <DependentUpon>MotionMonitorDetailControl.cs</DependentUpon>
     </EmbeddedResource>

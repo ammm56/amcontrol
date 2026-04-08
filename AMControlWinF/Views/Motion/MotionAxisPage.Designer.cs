@@ -22,20 +22,26 @@ namespace AMControlWinF.Views.Motion
             this.panelListCard = new AntdUI.Panel();
             this.tableLeftSections = new System.Windows.Forms.TableLayoutPanel();
             this.motionAxisVirtualListControl = new AMControlWinF.Views.Motion.MotionAxisVirtualListControl();
-            this.motionAxisParameterActionControl = new AMControlWinF.Views.Motion.MotionAxisParameterActionControl();
+            this.tableParameterCards = new System.Windows.Forms.TableLayoutPanel();
+            this.flowPanel1 = new AntdUI.FlowPanel();
+            this.parameterCardMoveRelative = new AMControlWinF.Views.Motion.MotionAxisParameterActionControl();
+            this.parameterCardMoveAbsolute = new AMControlWinF.Views.Motion.MotionAxisParameterActionControl();
+            this.parameterCardApplyVelocity = new AMControlWinF.Views.Motion.MotionAxisParameterActionControl();
             this.panelBlank = new AntdUI.Panel();
             this.panelToolbar = new AntdUI.Panel();
             this.flowToolbarRight = new AntdUI.FlowPanel();
             this.inputSearch = new AntdUI.Input();
             this.flowToolbarLeft = new AntdUI.FlowPanel();
-            this.labelSelectedAxis = new AntdUI.Label();
             this.buttonSelectAxis = new AntdUI.Button();
+            this.labelSelectedAxis = new AntdUI.Label();
             this.panelRoot.SuspendLayout();
             this.panelContentCard.SuspendLayout();
             this.gridContent.SuspendLayout();
             this.panelDetailCard.SuspendLayout();
             this.panelListCard.SuspendLayout();
             this.tableLeftSections.SuspendLayout();
+            this.tableParameterCards.SuspendLayout();
+            this.flowPanel1.SuspendLayout();
             this.panelToolbar.SuspendLayout();
             this.flowToolbarRight.SuspendLayout();
             this.flowToolbarLeft.SuspendLayout();
@@ -122,14 +128,14 @@ namespace AMControlWinF.Views.Motion
             this.tableLeftSections.ColumnCount = 1;
             this.tableLeftSections.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLeftSections.Controls.Add(this.motionAxisVirtualListControl, 0, 0);
-            this.tableLeftSections.Controls.Add(this.motionAxisParameterActionControl, 0, 1);
+            this.tableLeftSections.Controls.Add(this.tableParameterCards, 0, 1);
             this.tableLeftSections.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLeftSections.Location = new System.Drawing.Point(0, 0);
             this.tableLeftSections.Margin = new System.Windows.Forms.Padding(0);
             this.tableLeftSections.Name = "tableLeftSections";
             this.tableLeftSections.RowCount = 2;
             this.tableLeftSections.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLeftSections.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 228F));
+            this.tableLeftSections.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 148F));
             this.tableLeftSections.Size = new System.Drawing.Size(684, 616);
             this.tableLeftSections.TabIndex = 0;
             // 
@@ -139,17 +145,63 @@ namespace AMControlWinF.Views.Motion
             this.motionAxisVirtualListControl.Location = new System.Drawing.Point(0, 0);
             this.motionAxisVirtualListControl.Margin = new System.Windows.Forms.Padding(0);
             this.motionAxisVirtualListControl.Name = "motionAxisVirtualListControl";
-            this.motionAxisVirtualListControl.Size = new System.Drawing.Size(684, 388);
+            this.motionAxisVirtualListControl.Size = new System.Drawing.Size(684, 468);
             this.motionAxisVirtualListControl.TabIndex = 0;
             // 
-            // motionAxisParameterActionControl
+            // tableParameterCards
             // 
-            this.motionAxisParameterActionControl.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.motionAxisParameterActionControl.Location = new System.Drawing.Point(0, 388);
-            this.motionAxisParameterActionControl.Margin = new System.Windows.Forms.Padding(0);
-            this.motionAxisParameterActionControl.Name = "motionAxisParameterActionControl";
-            this.motionAxisParameterActionControl.Size = new System.Drawing.Size(684, 228);
-            this.motionAxisParameterActionControl.TabIndex = 1;
+            this.tableParameterCards.ColumnCount = 1;
+            this.tableParameterCards.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableParameterCards.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableParameterCards.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableParameterCards.Controls.Add(this.flowPanel1, 0, 0);
+            this.tableParameterCards.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableParameterCards.Location = new System.Drawing.Point(0, 468);
+            this.tableParameterCards.Margin = new System.Windows.Forms.Padding(0);
+            this.tableParameterCards.Name = "tableParameterCards";
+            this.tableParameterCards.RowCount = 1;
+            this.tableParameterCards.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableParameterCards.Size = new System.Drawing.Size(684, 148);
+            this.tableParameterCards.TabIndex = 1;
+            // 
+            // flowPanel1
+            // 
+            this.flowPanel1.Controls.Add(this.parameterCardMoveRelative);
+            this.flowPanel1.Controls.Add(this.parameterCardMoveAbsolute);
+            this.flowPanel1.Controls.Add(this.parameterCardApplyVelocity);
+            this.flowPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.flowPanel1.Location = new System.Drawing.Point(3, 3);
+            this.flowPanel1.Name = "flowPanel1";
+            this.flowPanel1.Size = new System.Drawing.Size(678, 142);
+            this.flowPanel1.TabIndex = 0;
+            this.flowPanel1.Text = "flowPanel1";
+            // 
+            // parameterCardMoveRelative
+            // 
+            this.parameterCardMoveRelative.InputText = "";
+            this.parameterCardMoveRelative.Location = new System.Drawing.Point(346, 0);
+            this.parameterCardMoveRelative.Margin = new System.Windows.Forms.Padding(8, 0, 0, 0);
+            this.parameterCardMoveRelative.Name = "parameterCardMoveRelative";
+            this.parameterCardMoveRelative.Size = new System.Drawing.Size(157, 126);
+            this.parameterCardMoveRelative.TabIndex = 2;
+            // 
+            // parameterCardMoveAbsolute
+            // 
+            this.parameterCardMoveAbsolute.InputText = "";
+            this.parameterCardMoveAbsolute.Location = new System.Drawing.Point(173, 0);
+            this.parameterCardMoveAbsolute.Margin = new System.Windows.Forms.Padding(8, 0, 8, 0);
+            this.parameterCardMoveAbsolute.Name = "parameterCardMoveAbsolute";
+            this.parameterCardMoveAbsolute.Size = new System.Drawing.Size(157, 126);
+            this.parameterCardMoveAbsolute.TabIndex = 1;
+            // 
+            // parameterCardApplyVelocity
+            // 
+            this.parameterCardApplyVelocity.InputText = "";
+            this.parameterCardApplyVelocity.Location = new System.Drawing.Point(0, 0);
+            this.parameterCardApplyVelocity.Margin = new System.Windows.Forms.Padding(0, 0, 8, 0);
+            this.parameterCardApplyVelocity.Name = "parameterCardApplyVelocity";
+            this.parameterCardApplyVelocity.Size = new System.Drawing.Size(157, 126);
+            this.parameterCardApplyVelocity.TabIndex = 0;
             // 
             // panelBlank
             // 
@@ -197,8 +249,8 @@ namespace AMControlWinF.Views.Motion
             // 
             // flowToolbarLeft
             // 
-            this.flowToolbarLeft.Controls.Add(this.labelSelectedAxis);
             this.flowToolbarLeft.Controls.Add(this.buttonSelectAxis);
+            this.flowToolbarLeft.Controls.Add(this.labelSelectedAxis);
             this.flowToolbarLeft.Dock = System.Windows.Forms.DockStyle.Left;
             this.flowToolbarLeft.Gap = 8;
             this.flowToolbarLeft.Location = new System.Drawing.Point(4, 4);
@@ -207,19 +259,10 @@ namespace AMControlWinF.Views.Motion
             this.flowToolbarLeft.Size = new System.Drawing.Size(520, 36);
             this.flowToolbarLeft.TabIndex = 0;
             // 
-            // labelSelectedAxis
-            // 
-            this.labelSelectedAxis.Location = new System.Drawing.Point(140, 0);
-            this.labelSelectedAxis.Margin = new System.Windows.Forms.Padding(0);
-            this.labelSelectedAxis.Name = "labelSelectedAxis";
-            this.labelSelectedAxis.Size = new System.Drawing.Size(380, 36);
-            this.labelSelectedAxis.TabIndex = 1;
-            this.labelSelectedAxis.Text = "当前：未选择轴";
-            // 
             // buttonSelectAxis
             // 
             this.buttonSelectAxis.IconSvg = "AimOutlined";
-            this.buttonSelectAxis.Location = new System.Drawing.Point(0, 0);
+            this.buttonSelectAxis.Location = new System.Drawing.Point(388, 0);
             this.buttonSelectAxis.Margin = new System.Windows.Forms.Padding(0);
             this.buttonSelectAxis.Name = "buttonSelectAxis";
             this.buttonSelectAxis.Radius = 8;
@@ -228,6 +271,15 @@ namespace AMControlWinF.Views.Motion
             this.buttonSelectAxis.Text = "选择轴";
             this.buttonSelectAxis.Type = AntdUI.TTypeMini.Primary;
             this.buttonSelectAxis.WaveSize = 0;
+            // 
+            // labelSelectedAxis
+            // 
+            this.labelSelectedAxis.Location = new System.Drawing.Point(0, 0);
+            this.labelSelectedAxis.Margin = new System.Windows.Forms.Padding(0);
+            this.labelSelectedAxis.Name = "labelSelectedAxis";
+            this.labelSelectedAxis.Size = new System.Drawing.Size(380, 36);
+            this.labelSelectedAxis.TabIndex = 1;
+            this.labelSelectedAxis.Text = "当前：未选择轴";
             // 
             // MotionAxisPage
             // 
@@ -242,6 +294,8 @@ namespace AMControlWinF.Views.Motion
             this.panelDetailCard.ResumeLayout(false);
             this.panelListCard.ResumeLayout(false);
             this.tableLeftSections.ResumeLayout(false);
+            this.tableParameterCards.ResumeLayout(false);
+            this.flowPanel1.ResumeLayout(false);
             this.panelToolbar.ResumeLayout(false);
             this.flowToolbarRight.ResumeLayout(false);
             this.flowToolbarLeft.ResumeLayout(false);
@@ -262,8 +316,12 @@ namespace AMControlWinF.Views.Motion
         private AntdUI.Panel panelListCard;
         private AntdUI.Panel panelDetailCard;
         private MotionAxisVirtualListControl motionAxisVirtualListControl;
-        private MotionAxisParameterActionControl motionAxisParameterActionControl;
+        private MotionAxisParameterActionControl parameterCardApplyVelocity;
+        private MotionAxisParameterActionControl parameterCardMoveAbsolute;
+        private MotionAxisParameterActionControl parameterCardMoveRelative;
         private MotionAxisDetailControl motionAxisDetailControl;
         private System.Windows.Forms.TableLayoutPanel tableLeftSections;
+        private System.Windows.Forms.TableLayoutPanel tableParameterCards;
+        private AntdUI.FlowPanel flowPanel1;
     }
 }

@@ -14,7 +14,7 @@ namespace AMControlWinF.Views.Motion
     /// 页面布局：
     /// 1. 第一行工具栏：左侧选择轴，右侧搜索动作；
     /// 2. 第二行保留极小间隔；
-    /// 3. 第三行主内容：左侧分上下两行，上方简单动作卡片，下方参数动作卡片；右侧实时监视。
+    /// 3. 第三行主内容：左侧分上下两行，上方简单动作卡片，下方 3 个参数动作卡片；右侧实时监视。
     /// </summary>
     public partial class MotionAxisPage : UserControl
     {
@@ -24,6 +24,7 @@ namespace AMControlWinF.Views.Motion
         private bool _isFirstLoad;
         private bool _isRefreshing;
         private bool _isExecutingAction;
+        private short? _lastParameterLogicalAxis;
 
         public MotionAxisPage()
         {
@@ -34,6 +35,7 @@ namespace AMControlWinF.Views.Motion
             _refreshTimer = new Timer();
             _refreshTimer.Interval = 500;
 
+            InitializeParameterCards();
             BindEvents();
 
             Disposed += (s, e) =>
@@ -41,6 +43,30 @@ namespace AMControlWinF.Views.Motion
                 _refreshTimer.Stop();
                 _refreshTimer.Dispose();
             };
+        }
+
+        private void InitializeParameterCards()
+        {
+            parameterCardApplyVelocity.Configure(
+                "ApplyVelocity",
+                "参数",
+                "应用速度",
+                "速度(mm/s)",
+                "Success");
+
+            parameterCardMoveAbsolute.Configure(
+                "MoveAbsolute",
+                "定位",
+                "绝对定位",
+                "目标位置(mm)",
+                "Primary");
+
+            parameterCardMoveRelative.Configure(
+                "MoveRelative",
+                "定位",
+                "相对移动",
+                "相对距离(mm)",
+                "Primary");
         }
 
         private void BindEvents()
@@ -54,7 +80,9 @@ namespace AMControlWinF.Views.Motion
             inputSearch.TextChanged += InputSearch_TextChanged;
 
             motionAxisVirtualListControl.ActionExecuteRequested += MotionAxisVirtualListControl_ActionExecuteRequested;
-            motionAxisParameterActionControl.ActionExecuteRequested += MotionAxisParameterActionControl_ActionExecuteRequested;
+            parameterCardApplyVelocity.ExecuteRequested += ParameterCard_ExecuteRequested;
+            parameterCardMoveAbsolute.ExecuteRequested += ParameterCard_ExecuteRequested;
+            parameterCardMoveRelative.ExecuteRequested += ParameterCard_ExecuteRequested;
         }
 
         private async void MotionAxisPage_Load(object sender, EventArgs e)
@@ -108,14 +136,47 @@ namespace AMControlWinF.Views.Motion
                 .Where(x => !IsParameterAction(x == null ? null : x.ActionKey))
                 .ToList();
 
-            var parameterActionItems = _model.PageItems
-                .Where(x => IsParameterAction(x == null ? null : x.ActionKey))
-                .ToList();
-
             motionAxisVirtualListControl.BindItems(simpleActionItems);
-            motionAxisParameterActionControl.BindItems(parameterActionItems);
-            motionAxisParameterActionControl.BindSelectedAxis(_model.SelectedAxis);
+
+            parameterCardApplyVelocity.BindItem(FindActionItem("ApplyVelocity"));
+            parameterCardMoveAbsolute.BindItem(FindActionItem("MoveAbsolute"));
+            parameterCardMoveRelative.BindItem(FindActionItem("MoveRelative"));
+
+            ApplyParameterDefaultsIfAxisChanged(_model.SelectedAxis);
             motionAxisDetailControl.Bind(_model.SelectedAxis);
+        }
+
+        private MotionAxisPageModel.MotionAxisActionViewItem FindActionItem(string actionKey)
+        {
+            return _model.PageItems.FirstOrDefault(
+                x => string.Equals(x.ActionKey, actionKey, StringComparison.OrdinalIgnoreCase));
+        }
+
+        private void ApplyParameterDefaultsIfAxisChanged(MotionAxisPageModel.MotionAxisSelectedViewItem axisItem)
+        {
+            var logicalAxis = axisItem == null ? (short?)null : axisItem.LogicalAxis;
+            if (_lastParameterLogicalAxis == logicalAxis)
+                return;
+
+            _lastParameterLogicalAxis = logicalAxis;
+
+            if (axisItem == null)
+            {
+                parameterCardApplyVelocity.InputText = "10";
+                parameterCardMoveAbsolute.InputText = "0";
+                parameterCardMoveRelative.InputText = "10";
+                return;
+            }
+
+            if (axisItem.JogVelocityMm > 0D)
+                parameterCardApplyVelocity.InputText = axisItem.JogVelocityMm.ToString("0.###");
+            else if (axisItem.DefaultVelocityMm > 0D)
+                parameterCardApplyVelocity.InputText = axisItem.DefaultVelocityMm.ToString("0.###");
+            else
+                parameterCardApplyVelocity.InputText = "10";
+
+            parameterCardMoveAbsolute.InputText = axisItem.CommandPositionMm.ToString("0.###");
+            parameterCardMoveRelative.InputText = "10";
         }
 
         private static bool IsParameterAction(string actionKey)
@@ -171,7 +232,9 @@ namespace AMControlWinF.Views.Motion
         /// <summary>
         /// 简单动作卡片执行。
         /// </summary>
-        private async void MotionAxisVirtualListControl_ActionExecuteRequested(object sender, MotionAxisVirtualListControl.MotionAxisActionExecuteRequestedEventArgs e)
+        private async void MotionAxisVirtualListControl_ActionExecuteRequested(
+            object sender,
+            MotionAxisVirtualListControl.MotionAxisActionExecuteRequestedEventArgs e)
         {
             if (e == null)
                 return;
@@ -182,7 +245,9 @@ namespace AMControlWinF.Views.Motion
         /// <summary>
         /// 参数动作卡片执行。
         /// </summary>
-        private async void MotionAxisParameterActionControl_ActionExecuteRequested(object sender, MotionAxisParameterActionControl.MotionAxisParameterActionExecuteRequestedEventArgs e)
+        private async void ParameterCard_ExecuteRequested(
+            object sender,
+            MotionAxisParameterActionControl.MotionAxisParameterActionExecuteRequestedEventArgs e)
         {
             if (e == null)
                 return;
@@ -200,9 +265,9 @@ namespace AMControlWinF.Views.Motion
             {
                 await _model.ExecuteActionAsync(
                     actionKey,
-                    motionAxisParameterActionControl.TargetPositionText,
-                    motionAxisParameterActionControl.MoveDistanceText,
-                    motionAxisParameterActionControl.VelocityText);
+                    parameterCardMoveAbsolute.InputText,
+                    parameterCardMoveRelative.InputText,
+                    parameterCardApplyVelocity.InputText);
 
                 await ReloadRuntimeAsync(false);
             }
@@ -213,4 +278,3 @@ namespace AMControlWinF.Views.Motion
         }
     }
 }
-

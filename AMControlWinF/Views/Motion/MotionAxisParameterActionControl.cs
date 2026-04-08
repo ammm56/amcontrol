@@ -1,27 +1,19 @@
 ﻿using AM.PageModel.Motion;
+using AntdUI;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Windows.Forms;
 
 namespace AMControlWinF.Views.Motion
 {
     /// <summary>
-    /// 单轴控制参数动作区。
-    ///
-    /// 职责：
-    /// 1. 只承载参数动作卡片；
-    /// 2. 提供输入框 + 确认按钮；
-    /// 3. 与简单动作虚拟卡片列表分离，保持结构清晰；
-    /// 4. 页面层从本控件读取参数并执行动作。
+    /// 单个参数动作卡片。
+    /// 只负责一张卡片：徽标 + 标题 + 输入框 + 确认按钮。
     /// </summary>
     public partial class MotionAxisParameterActionControl : UserControl
     {
-        private MotionAxisPageModel.MotionAxisActionViewItem _applyVelocityItem;
-        private MotionAxisPageModel.MotionAxisActionViewItem _moveAbsoluteItem;
-        private MotionAxisPageModel.MotionAxisActionViewItem _moveRelativeItem;
-        private short? _lastLogicalAxis;
+        private MotionAxisPageModel.MotionAxisActionViewItem _item;
+        private string _configuredAccentType = "Primary";
 
         public MotionAxisParameterActionControl()
         {
@@ -29,139 +21,89 @@ namespace AMControlWinF.Views.Motion
             BindEvents();
         }
 
-        public event EventHandler<MotionAxisParameterActionExecuteRequestedEventArgs> ActionExecuteRequested;
+        /// <summary>
+        /// 当前卡片绑定的动作键。
+        /// </summary>
+        public string ActionKey { get; private set; }
 
-        public string VelocityText
+        /// <summary>
+        /// 当前输入值。
+        /// </summary>
+        public string InputText
         {
-            get { return inputVelocity.Text; }
-        }
-
-        public string TargetPositionText
-        {
-            get { return inputTargetPosition.Text; }
-        }
-
-        public string MoveDistanceText
-        {
-            get { return inputMoveDistance.Text; }
+            get { return inputValue.Text; }
+            set { inputValue.Text = value ?? string.Empty; }
         }
 
         /// <summary>
-        /// 绑定参数动作卡片状态。
+        /// 配置卡片的静态展示信息。
         /// </summary>
-        public void BindItems(IList<MotionAxisPageModel.MotionAxisActionViewItem> items)
+        public void Configure(
+            string actionKey,
+            string badgeText,
+            string titleText,
+            string placeholderText,
+            string accentType)
         {
-            var sourceItems = items ?? new List<MotionAxisPageModel.MotionAxisActionViewItem>();
+            ActionKey = actionKey ?? string.Empty;
+            labelBadge.Text = string.IsNullOrWhiteSpace(badgeText) ? "-" : badgeText;
+            //labelTitle.Text = string.IsNullOrWhiteSpace(titleText) ? "-" : titleText;
+            inputValue.PlaceholderText = placeholderText ?? string.Empty;
+            _configuredAccentType = string.IsNullOrWhiteSpace(accentType) ? "Primary" : accentType;
 
-            _applyVelocityItem = sourceItems.FirstOrDefault(x => IsAction(x, "ApplyVelocity"));
-            _moveAbsoluteItem = sourceItems.FirstOrDefault(x => IsAction(x, "MoveAbsolute"));
-            _moveRelativeItem = sourceItems.FirstOrDefault(x => IsAction(x, "MoveRelative"));
-
-            BindCard(
-                panelApplyVelocityCard,
-                labelApplyVelocityBadge,
-                labelApplyVelocityTitle,
-                buttonApplyVelocity,
-                _applyVelocityItem,
-                "参数",
-                "应用速度");
-
-            BindCard(
-                panelMoveAbsoluteCard,
-                labelMoveAbsoluteBadge,
-                labelMoveAbsoluteTitle,
-                buttonMoveAbsolute,
-                _moveAbsoluteItem,
-                "定位",
-                "绝对定位");
-
-            BindCard(
-                panelMoveRelativeCard,
-                labelMoveRelativeBadge,
-                labelMoveRelativeTitle,
-                buttonMoveRelative,
-                _moveRelativeItem,
-                "定位",
-                "相对移动");
+            ApplyAppearance(false, _configuredAccentType);
         }
 
         /// <summary>
-        /// 当前轴变化时刷新默认参数。
-        /// 定时刷新不覆盖用户输入。
+        /// 绑定运行态动作项。
+        /// 用于刷新当前卡片是否可执行。
         /// </summary>
-        public void BindSelectedAxis(MotionAxisPageModel.MotionAxisSelectedViewItem axisItem)
+        public void BindItem(MotionAxisPageModel.MotionAxisActionViewItem item)
         {
-            var logicalAxis = axisItem == null ? (short?)null : axisItem.LogicalAxis;
-            if (_lastLogicalAxis == logicalAxis)
+            _item = item;
+            Visible = item != null;
+
+            if (item == null)
                 return;
 
-            _lastLogicalAxis = logicalAxis;
+            if (!string.IsNullOrWhiteSpace(item.ActionKey))
+                ActionKey = item.ActionKey;
 
-            if (axisItem == null)
-            {
-                inputVelocity.Text = "10";
-                inputTargetPosition.Text = "0";
-                inputMoveDistance.Text = "10";
-                return;
-            }
+            if (!string.IsNullOrWhiteSpace(item.CategoryText))
+                labelBadge.Text = item.CategoryText;
 
-            if (axisItem.JogVelocityMm > 0D)
-                inputVelocity.Text = axisItem.JogVelocityMm.ToString("0.###");
-            else if (axisItem.DefaultVelocityMm > 0D)
-                inputVelocity.Text = axisItem.DefaultVelocityMm.ToString("0.###");
-            else
-                inputVelocity.Text = "10";
+            if (!string.IsNullOrWhiteSpace(item.DisplayText))
+                //labelTitle.Text = item.DisplayText;
 
-            inputTargetPosition.Text = axisItem.CommandPositionMm.ToString("0.###");
-            inputMoveDistance.Text = "10";
+            ApplyAppearance(item.CanExecute, item.AccentType);
         }
 
         private void BindEvents()
         {
-            buttonApplyVelocity.Click += (s, e) => RaiseExecuteRequested("ApplyVelocity");
-            buttonMoveAbsolute.Click += (s, e) => RaiseExecuteRequested("MoveAbsolute");
-            buttonMoveRelative.Click += (s, e) => RaiseExecuteRequested("MoveRelative");
+            buttonConfirm.Click += ButtonConfirm_Click;
         }
 
-        private void RaiseExecuteRequested(string actionKey)
+        private void ButtonConfirm_Click(object sender, EventArgs e)
         {
-            var handler = ActionExecuteRequested;
+            if (_item == null || !_item.CanExecute)
+                return;
+
+            var handler = ExecuteRequested;
             if (handler != null)
-                handler(this, new MotionAxisParameterActionExecuteRequestedEventArgs(actionKey));
+                handler(this, new MotionAxisParameterActionExecuteRequestedEventArgs(ActionKey));
         }
 
-        private static void BindCard(
-            AntdUI.Panel cardPanel,
-            AntdUI.Label badgeLabel,
-            AntdUI.Label titleLabel,
-            AntdUI.Button actionButton,
-            MotionAxisPageModel.MotionAxisActionViewItem item,
-            string badgeText,
-            string titleText)
+        private void ApplyAppearance(bool canExecute, string accentType)
         {
-            if (cardPanel == null || badgeLabel == null || titleLabel == null || actionButton == null)
-                return;
+            var accent = ResolveAccentColor(string.IsNullOrWhiteSpace(accentType) ? _configuredAccentType : accentType);
 
-            cardPanel.Visible = item != null;
-            if (item == null)
-                return;
+            labelBadge.BackColor = accent;
+            //labelTitle.ForeColor = canExecute
+            //    ? Color.FromArgb(38, 38, 38)
+            //    : Color.FromArgb(160, 160, 160);
 
-            badgeLabel.Text = badgeText;
-            titleLabel.Text = titleText;
-
-            actionButton.Enabled = item.CanExecute;
-            actionButton.Text = item.CanExecute ? "确认" : "不可用";
-            titleLabel.ForeColor = item.CanExecute
-                ? Color.FromArgb(38, 38, 38)
-                : Color.FromArgb(160, 160, 160);
-
-            badgeLabel.BackColor = ResolveAccentColor(item.AccentType);
-        }
-
-        private static bool IsAction(MotionAxisPageModel.MotionAxisActionViewItem item, string actionKey)
-        {
-            return item != null &&
-                   string.Equals(item.ActionKey, actionKey, StringComparison.OrdinalIgnoreCase);
+            buttonConfirm.Enabled = canExecute;
+            buttonConfirm.Text = canExecute ? "确认" : "不可用";
         }
 
         private static Color ResolveAccentColor(string accentType)
@@ -180,6 +122,8 @@ namespace AMControlWinF.Views.Motion
 
             return Color.FromArgb(22, 119, 255);
         }
+
+        public event EventHandler<MotionAxisParameterActionExecuteRequestedEventArgs> ExecuteRequested;
 
         public sealed class MotionAxisParameterActionExecuteRequestedEventArgs : EventArgs
         {
