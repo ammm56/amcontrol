@@ -102,7 +102,7 @@
             this.gridContent.Margin = new System.Windows.Forms.Padding(0);
             this.gridContent.Name = "gridContent";
             this.gridContent.Size = new System.Drawing.Size(940, 524);
-            this.gridContent.Span = "100% 250;100%-100% 52";
+            this.gridContent.Span = "100% 250";
             this.gridContent.TabIndex = 0;
             // 
             // panelFooter

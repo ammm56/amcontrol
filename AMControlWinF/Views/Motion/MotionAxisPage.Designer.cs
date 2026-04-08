@@ -18,16 +18,16 @@ namespace AMControlWinF.Views.Motion
             this.panelContentCard = new AntdUI.Panel();
             this.gridContent = new AntdUI.GridPanel();
             this.panelDetailCard = new AntdUI.Panel();
+            this.motionAxisDetailControl = new AMControlWinF.Views.Motion.MotionAxisDetailControl();
             this.panelListCard = new AntdUI.Panel();
+            this.motionAxisVirtualListControl = new AMControlWinF.Views.Motion.MotionAxisVirtualListControl();
             this.panelBlank = new AntdUI.Panel();
             this.panelToolbar = new AntdUI.Panel();
             this.flowToolbarRight = new AntdUI.FlowPanel();
             this.inputSearch = new AntdUI.Input();
             this.flowToolbarLeft = new AntdUI.FlowPanel();
-            this.labelSelectedAxis = new AntdUI.Label();
             this.buttonSelectAxis = new AntdUI.Button();
-            this.motionAxisDetailControl = new AMControlWinF.Views.Motion.MotionAxisDetailControl();
-            this.motionAxisVirtualListControl = new AMControlWinF.Views.Motion.MotionAxisVirtualListControl();
+            this.labelSelectedAxis = new AntdUI.Label();
             this.panelRoot.SuspendLayout();
             this.panelContentCard.SuspendLayout();
             this.gridContent.SuspendLayout();
@@ -57,14 +57,14 @@ namespace AMControlWinF.Views.Motion
             this.panelContentCard.BackColor = System.Drawing.Color.Transparent;
             this.panelContentCard.Controls.Add(this.gridContent);
             this.panelContentCard.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelContentCard.Location = new System.Drawing.Point(8, 62);
+            this.panelContentCard.Location = new System.Drawing.Point(8, 56);
             this.panelContentCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelContentCard.Name = "panelContentCard";
-            this.panelContentCard.Padding = new System.Windows.Forms.Padding(8, 0, 8, 0);
+            this.panelContentCard.Padding = new System.Windows.Forms.Padding(0);
             this.panelContentCard.Radius = 0;
             this.panelContentCard.ShadowOpacity = 0F;
             this.panelContentCard.ShadowOpacityHover = 0F;
-            this.panelContentCard.Size = new System.Drawing.Size(964, 610);
+            this.panelContentCard.Size = new System.Drawing.Size(964, 616);
             this.panelContentCard.TabIndex = 2;
             // 
             // gridContent
@@ -72,10 +72,10 @@ namespace AMControlWinF.Views.Motion
             this.gridContent.Controls.Add(this.panelDetailCard);
             this.gridContent.Controls.Add(this.panelListCard);
             this.gridContent.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gridContent.Location = new System.Drawing.Point(8, 0);
+            this.gridContent.Location = new System.Drawing.Point(0, 0);
             this.gridContent.Margin = new System.Windows.Forms.Padding(0);
             this.gridContent.Name = "gridContent";
-            this.gridContent.Size = new System.Drawing.Size(948, 610);
+            this.gridContent.Size = new System.Drawing.Size(964, 616);
             this.gridContent.Span = "100% 280";
             this.gridContent.TabIndex = 0;
             // 
@@ -84,13 +84,23 @@ namespace AMControlWinF.Views.Motion
             this.panelDetailCard.BackColor = System.Drawing.Color.Transparent;
             this.panelDetailCard.Controls.Add(this.motionAxisDetailControl);
             this.panelDetailCard.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelDetailCard.Location = new System.Drawing.Point(668, 0);
+            this.panelDetailCard.Location = new System.Drawing.Point(684, 0);
             this.panelDetailCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelDetailCard.Name = "panelDetailCard";
+            this.panelDetailCard.Padding = new System.Windows.Forms.Padding(0);
             this.panelDetailCard.Radius = 12;
             this.panelDetailCard.Shadow = 4;
-            this.panelDetailCard.Size = new System.Drawing.Size(280, 610);
+            this.panelDetailCard.Size = new System.Drawing.Size(280, 616);
             this.panelDetailCard.TabIndex = 1;
+            // 
+            // motionAxisDetailControl
+            // 
+            this.motionAxisDetailControl.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.motionAxisDetailControl.Location = new System.Drawing.Point(4, 4);
+            this.motionAxisDetailControl.Margin = new System.Windows.Forms.Padding(0);
+            this.motionAxisDetailControl.Name = "motionAxisDetailControl";
+            this.motionAxisDetailControl.Size = new System.Drawing.Size(272, 608);
+            this.motionAxisDetailControl.TabIndex = 0;
             // 
             // panelListCard
             // 
@@ -103,8 +113,17 @@ namespace AMControlWinF.Views.Motion
             this.panelListCard.Radius = 0;
             this.panelListCard.ShadowOpacity = 0F;
             this.panelListCard.ShadowOpacityHover = 0F;
-            this.panelListCard.Size = new System.Drawing.Size(668, 610);
+            this.panelListCard.Size = new System.Drawing.Size(684, 616);
             this.panelListCard.TabIndex = 0;
+            // 
+            // motionAxisVirtualListControl
+            // 
+            this.motionAxisVirtualListControl.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.motionAxisVirtualListControl.Location = new System.Drawing.Point(0, 0);
+            this.motionAxisVirtualListControl.Margin = new System.Windows.Forms.Padding(0);
+            this.motionAxisVirtualListControl.Name = "motionAxisVirtualListControl";
+            this.motionAxisVirtualListControl.Size = new System.Drawing.Size(684, 616);
+            this.motionAxisVirtualListControl.TabIndex = 0;
             // 
             // panelBlank
             // 
@@ -112,9 +131,8 @@ namespace AMControlWinF.Views.Motion
             this.panelBlank.Location = new System.Drawing.Point(8, 52);
             this.panelBlank.Margin = new System.Windows.Forms.Padding(0);
             this.panelBlank.Name = "panelBlank";
-            this.panelBlank.Padding = new System.Windows.Forms.Padding(4, 6, 4, 6);
             this.panelBlank.Radius = 0;
-            this.panelBlank.Size = new System.Drawing.Size(964, 10);
+            this.panelBlank.Size = new System.Drawing.Size(964, 4);
             this.panelBlank.TabIndex = 1;
             // 
             // panelToolbar
@@ -163,15 +181,6 @@ namespace AMControlWinF.Views.Motion
             this.flowToolbarLeft.Size = new System.Drawing.Size(520, 36);
             this.flowToolbarLeft.TabIndex = 0;
             // 
-            // labelSelectedAxis
-            // 
-            this.labelSelectedAxis.Location = new System.Drawing.Point(140, 0);
-            this.labelSelectedAxis.Margin = new System.Windows.Forms.Padding(0);
-            this.labelSelectedAxis.Name = "labelSelectedAxis";
-            this.labelSelectedAxis.Size = new System.Drawing.Size(380, 36);
-            this.labelSelectedAxis.TabIndex = 1;
-            this.labelSelectedAxis.Text = "当前：未选择轴";
-            // 
             // buttonSelectAxis
             // 
             this.buttonSelectAxis.IconSvg = "AimOutlined";
@@ -185,23 +194,14 @@ namespace AMControlWinF.Views.Motion
             this.buttonSelectAxis.Type = AntdUI.TTypeMini.Primary;
             this.buttonSelectAxis.WaveSize = 0;
             // 
-            // motionAxisDetailControl
+            // labelSelectedAxis
             // 
-            this.motionAxisDetailControl.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.motionAxisDetailControl.Location = new System.Drawing.Point(4, 4);
-            this.motionAxisDetailControl.Margin = new System.Windows.Forms.Padding(0);
-            this.motionAxisDetailControl.Name = "motionAxisDetailControl";
-            this.motionAxisDetailControl.Size = new System.Drawing.Size(272, 602);
-            this.motionAxisDetailControl.TabIndex = 0;
-            // 
-            // motionAxisVirtualListControl
-            // 
-            this.motionAxisVirtualListControl.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.motionAxisVirtualListControl.Location = new System.Drawing.Point(0, 0);
-            this.motionAxisVirtualListControl.Margin = new System.Windows.Forms.Padding(0);
-            this.motionAxisVirtualListControl.Name = "motionAxisVirtualListControl";
-            this.motionAxisVirtualListControl.Size = new System.Drawing.Size(668, 610);
-            this.motionAxisVirtualListControl.TabIndex = 0;
+            this.labelSelectedAxis.Location = new System.Drawing.Point(140, 0);
+            this.labelSelectedAxis.Margin = new System.Windows.Forms.Padding(0);
+            this.labelSelectedAxis.Name = "labelSelectedAxis";
+            this.labelSelectedAxis.Size = new System.Drawing.Size(380, 36);
+            this.labelSelectedAxis.TabIndex = 1;
+            this.labelSelectedAxis.Text = "当前：未选择轴";
             // 
             // MotionAxisPage
             // 
@@ -219,7 +219,6 @@ namespace AMControlWinF.Views.Motion
             this.flowToolbarRight.ResumeLayout(false);
             this.flowToolbarLeft.ResumeLayout(false);
             this.ResumeLayout(false);
-
         }
 
         private AntdUI.Panel panelRoot;

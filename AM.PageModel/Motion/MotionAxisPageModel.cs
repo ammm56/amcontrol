@@ -567,7 +567,8 @@ namespace AM.PageModel.Motion
                 PositiveLimit = item != null && item.PositiveLimit,
                 NegativeLimit = item != null && item.NegativeLimit,
                 IsDone = item != null && item.IsDone,
-                IsMoving = item != null && item.IsMoving
+                IsMoving = item != null && item.IsMoving,
+                UpdateTime = item == null ? default(DateTime) : item.UpdateTime
             };
         }
 
@@ -599,6 +600,7 @@ namespace AM.PageModel.Motion
             public bool NegativeLimit { get; set; }
             public bool IsDone { get; set; }
             public bool IsMoving { get; set; }
+            public DateTime UpdateTime { get; set; }
 
             public string DisplayTitle
             {
@@ -700,6 +702,16 @@ namespace AM.PageModel.Motion
             public string JogVelocityText
             {
                 get { return JogVelocityMm.ToString("0.###") + " mm/s"; }
+            }
+
+            public string UpdateTimeText
+            {
+                get
+                {
+                    return UpdateTime == default(DateTime)
+                        ? "—"
+                        : UpdateTime.ToString("yyyy-MM-dd HH:mm:ss");
+                }
             }
         }
 

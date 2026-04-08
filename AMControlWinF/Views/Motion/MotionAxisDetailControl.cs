@@ -1,7 +1,6 @@
+using AM.Core.Context;
 using AM.PageModel.Motion;
-using AntdUI;
 using System;
-using System.Globalization;
 using System.Reflection;
 using System.Windows.Forms;
 
@@ -9,18 +8,19 @@ namespace AMControlWinF.Views.Motion
 {
     /// <summary>
     /// 单轴控制右侧实时监视控件。
-    ///
-    /// 设计目标：
-    /// 1. 右侧始终显示当前选中轴的实时监视信息，不依赖左侧动作卡片是否被点击；
-    /// 2. 提供速度、目标位置、相对距离输入框，供左侧参数动作卡片执行时读取；
-    /// 3. 使用固定标签布局和快照去重，降低 500ms 刷新带来的重绘抖动；
-    /// 4. 保持代码与 Designer 分离，便于后续继续细调布局。
+    /// 右侧只显示当前轴的运行状态信息，不承载参数输入。
     /// </summary>
     public partial class MotionAxisDetailControl : UserControl
     {
         private string _lastSnapshotKey = string.Empty;
         private short? _lastLogicalAxis;
         private MotionAxisPageModel.MotionAxisSelectedViewItem _currentAxis;
+
+        // 先保留这三个属性，兼容当前页面层调用。
+        // 后续把参数输入迁到左侧参数动作卡片后，可一并删除。
+        private string _velocityText = "10";
+        private string _targetPositionText = "0";
+        private string _moveDistanceText = "10";
 
         public MotionAxisDetailControl()
         {
@@ -36,10 +36,6 @@ namespace AMControlWinF.Views.Motion
 
             EnableDoubleBuffer(panelScroll);
 
-            inputVelocity.Text = "10";
-            inputTargetPosition.Text = "0";
-            inputMoveDistance.Text = "10";
-
             panelDetail.Visible = false;
             panelEmpty.Visible = true;
         }
@@ -51,22 +47,21 @@ namespace AMControlWinF.Views.Motion
 
         public string VelocityText
         {
-            get { return inputVelocity.Text; }
+            get { return _velocityText; }
         }
 
         public string TargetPositionText
         {
-            get { return inputTargetPosition.Text; }
+            get { return _targetPositionText; }
         }
 
         public string MoveDistanceText
         {
-            get { return inputMoveDistance.Text; }
+            get { return _moveDistanceText; }
         }
 
         /// <summary>
         /// 绑定当前轴实时信息。
-        /// 右侧不再显示动作详情，因此只关注当前轴本身的监视值和参数输入默认值。
         /// </summary>
         public void Bind(MotionAxisPageModel.MotionAxisSelectedViewItem axisItem)
         {
@@ -117,25 +112,27 @@ namespace AMControlWinF.Views.Motion
                     panelDetail.Visible = true;
                 }
 
-                labelTitle.Text = axisItem.DisplayTitle;
-                labelSubTitle.Text = "L#" + axisItem.LogicalAxis + " / " + axisItem.CardText;
+                labelTitle.Text = "当前轴：L#" + axisItem.LogicalAxis + "  " + axisItem.DisplayTitle;
+                labelSubTitle.Text = axisItem.CardText;
 
-                SetTagRow(labelTagAxisLogicKey, labelTagAxisLogicValue, "逻辑轴", "L#" + axisItem.LogicalAxis);
-                SetTagRow(labelTagAxisTypeKey, labelTagAxisTypeValue, "轴类型", axisItem.AxisCategoryText);
-                SetTagRow(labelTagAxisPhysicalKey, labelTagAxisPhysicalValue, "物理映射", axisItem.PhysicalText);
-                SetTagRow(labelTagAxisStateKey, labelTagAxisStateValue, "当前状态", axisItem.StateText);
-                SetTagRow(labelTagAxisEnableKey, labelTagAxisEnableValue, "使能状态", axisItem.EnableText);
-                SetTagRow(labelTagAxisHomeKey, labelTagAxisHomeValue, "原点状态", axisItem.HomeText);
-                SetTagRow(labelTagAxisDoneKey, labelTagAxisDoneValue, "到位状态", axisItem.DoneText);
-                SetTagRow(labelTagAxisLimitKey, labelTagAxisLimitValue, "限位状态", axisItem.LimitText);
-                SetTagRow(labelTagAxisCommandMmKey, labelTagAxisCommandMmValue, "指令位置", axisItem.CommandPositionMmText);
-                SetTagRow(labelTagAxisEncoderMmKey, labelTagAxisEncoderMmValue, "编码器位置", axisItem.EncoderPositionMmText);
-                SetTagRow(labelTagAxisDefaultVelKey, labelTagAxisDefaultVelValue, "默认速度", axisItem.DefaultVelocityText);
-                SetTagRow(labelTagAxisJogVelKey, labelTagAxisJogVelValue, "点动速度", axisItem.JogVelocityText);
+                SetTagRow(labelTagCardKey, labelTagCardValue, "控制卡", axisItem.CardText);
+                SetTagRow(labelTagScanKey, labelTagScanValue, "采样状态", GetScanStateText());
+                SetTagRow(labelTagUpdateKey, labelTagUpdateValue, "更新时间", axisItem.UpdateTimeText);
+                SetTagRow(labelTagStateKey, labelTagStateValue, "当前状态", GetStateDisplayText(axisItem));
+                SetTagRow(labelTagInterlockKey, labelTagInterlockValue, "联锁说明", GetInterlockText(axisItem));
+                SetTagRow(labelTagLimitKey, labelTagLimitValue, "限位状态", axisItem.LimitText);
+                SetTagRow(labelTagEnableKey, labelTagEnableValue, "使能状态", axisItem.EnableText);
+                SetTagRow(labelTagHomeKey, labelTagHomeValue, "原点状态", axisItem.HomeText);
+                SetTagRow(labelTagDoneKey, labelTagDoneValue, "到位状态", axisItem.DoneText);
+                SetTagRow(labelTagCmdMmKey, labelTagCmdMmValue, "规划位置(mm)", FormatNumber(axisItem.CommandPositionMm));
+                SetTagRow(labelTagEncMmKey, labelTagEncMmValue, "编码器位置(mm)", FormatNumber(axisItem.EncoderPositionMm));
+                SetTagRow(labelTagErrorMmKey, labelTagErrorMmValue, "位置误差(mm)", FormatNumber(axisItem.CommandPositionMm - axisItem.EncoderPositionMm));
+                SetTagRow(labelTagDefaultVelKey, labelTagDefaultVelValue, "默认速度(mm/s)", FormatNumber(axisItem.DefaultVelocityMm));
+                SetTagRow(labelTagJogVelKey, labelTagJogVelValue, "Jog速度(mm/s)", FormatNumber(axisItem.JogVelocityMm));
 
                 if (axisChanged)
                 {
-                    ResetDefaultInputs(axisItem);
+                    ResetDefaultValues(axisItem);
                 }
             }
             finally
@@ -148,25 +145,78 @@ namespace AMControlWinF.Views.Motion
             }
         }
 
-        private void ResetDefaultInputs(MotionAxisPageModel.MotionAxisSelectedViewItem axisItem)
+        private void ResetDefaultValues(MotionAxisPageModel.MotionAxisSelectedViewItem axisItem)
         {
             if (axisItem == null)
             {
-                inputVelocity.Text = "10";
-                inputTargetPosition.Text = "0";
-                inputMoveDistance.Text = "10";
+                _velocityText = "10";
+                _targetPositionText = "0";
+                _moveDistanceText = "10";
                 return;
             }
 
-            if (axisItem.JogVelocityMm > 0)
-                inputVelocity.Text = axisItem.JogVelocityMm.ToString("0.###", CultureInfo.InvariantCulture);
-            else if (axisItem.DefaultVelocityMm > 0)
-                inputVelocity.Text = axisItem.DefaultVelocityMm.ToString("0.###", CultureInfo.InvariantCulture);
-            else
-                inputVelocity.Text = "10";
+            _velocityText = axisItem.JogVelocityMm > 0D
+                ? axisItem.JogVelocityMm.ToString("0.###")
+                : (axisItem.DefaultVelocityMm > 0D ? axisItem.DefaultVelocityMm.ToString("0.###") : "10");
 
-            inputTargetPosition.Text = axisItem.CommandPositionMm.ToString("0.###", CultureInfo.InvariantCulture);
-            inputMoveDistance.Text = "10";
+            _targetPositionText = axisItem.CommandPositionMm.ToString("0.###");
+            _moveDistanceText = "10";
+        }
+
+        private static string GetScanStateText()
+        {
+            var runtime = RuntimeContext.Instance.MotionAxis;
+            return runtime.IsScanServiceRunning
+                ? "运行中 / " + runtime.ScanIntervalMs + "ms"
+                : "已停止";
+        }
+
+        private static string GetStateDisplayText(MotionAxisPageModel.MotionAxisSelectedViewItem axisItem)
+        {
+            if (axisItem == null)
+                return "运行态未建立";
+
+            if (axisItem.IsAlarm)
+                return "报警中";
+
+            if (axisItem.IsMoving)
+                return "运动中";
+
+            if (!axisItem.IsEnabled)
+                return "未使能";
+
+            if (axisItem.IsDone)
+                return "已使能待机";
+
+            return "空闲";
+        }
+
+        private static string GetInterlockText(MotionAxisPageModel.MotionAxisSelectedViewItem axisItem)
+        {
+            if (axisItem == null)
+                return "运行态未建立，禁止操作";
+
+            if (axisItem.IsAlarm)
+                return "当前轴报警中，请先清状态";
+
+            if (!axisItem.IsEnabled)
+                return "当前轴未使能，运动前请先伺服上电";
+
+            if (axisItem.PositiveLimit || axisItem.NegativeLimit)
+                return "当前存在限位约束，请确认方向后操作";
+
+            if (!axisItem.IsAtHome)
+                return "当前轴未回原点，绝对定位前建议先回零";
+
+            if (axisItem.IsMoving)
+                return "当前轴正在运动中，请避免重复下发运动命令";
+
+            return "当前轴允许操作";
+        }
+
+        private static string FormatNumber(double value)
+        {
+            return value.ToString("0.###");
         }
 
         private static void SetTagRow(
@@ -186,17 +236,22 @@ namespace AMControlWinF.Views.Motion
                 axisItem.LogicalAxis.ToString(),
                 axisItem.DisplayTitle ?? string.Empty,
                 axisItem.CardText ?? string.Empty,
-                axisItem.AxisCategoryText ?? string.Empty,
-                axisItem.PhysicalText ?? string.Empty,
-                axisItem.StateText ?? string.Empty,
+                axisItem.UpdateTimeText ?? string.Empty,
                 axisItem.EnableText ?? string.Empty,
                 axisItem.HomeText ?? string.Empty,
                 axisItem.DoneText ?? string.Empty,
                 axisItem.LimitText ?? string.Empty,
-                axisItem.CommandPositionMmText ?? string.Empty,
-                axisItem.EncoderPositionMmText ?? string.Empty,
-                axisItem.DefaultVelocityText ?? string.Empty,
-                axisItem.JogVelocityText ?? string.Empty
+                axisItem.CommandPositionMm.ToString("0.###"),
+                axisItem.EncoderPositionMm.ToString("0.###"),
+                axisItem.DefaultVelocityMm.ToString("0.###"),
+                axisItem.JogVelocityMm.ToString("0.###"),
+                axisItem.IsEnabled.ToString(),
+                axisItem.IsAlarm.ToString(),
+                axisItem.IsAtHome.ToString(),
+                axisItem.IsDone.ToString(),
+                axisItem.IsMoving.ToString(),
+                axisItem.PositiveLimit.ToString(),
+                axisItem.NegativeLimit.ToString()
             });
         }
 

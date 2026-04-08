@@ -17,49 +17,50 @@ namespace AMControlWinF.Views.Motion
             this.panelRoot = new AntdUI.Panel();
             this.panelDetail = new AntdUI.Panel();
             this.panelScroll = new System.Windows.Forms.Panel();
-            this.inputMoveDistance = new AntdUI.Input();
-            this.labelMoveDistanceTitle = new AntdUI.Label();
-            this.inputTargetPosition = new AntdUI.Input();
-            this.labelTargetPositionTitle = new AntdUI.Label();
-            this.inputVelocity = new AntdUI.Input();
-            this.labelVelocityTitle = new AntdUI.Label();
-            this.labelParamHint = new AntdUI.Label();
-            this.panelTagAxisJogVel = new AntdUI.Panel();
-            this.labelTagAxisJogVelValue = new AntdUI.Label();
-            this.labelTagAxisJogVelKey = new AntdUI.Label();
-            this.panelTagAxisDefaultVel = new AntdUI.Panel();
-            this.labelTagAxisDefaultVelValue = new AntdUI.Label();
-            this.labelTagAxisDefaultVelKey = new AntdUI.Label();
-            this.panelTagAxisEncoderMm = new AntdUI.Panel();
-            this.labelTagAxisEncoderMmValue = new AntdUI.Label();
-            this.labelTagAxisEncoderMmKey = new AntdUI.Label();
-            this.panelTagAxisCommandMm = new AntdUI.Panel();
-            this.labelTagAxisCommandMmValue = new AntdUI.Label();
-            this.labelTagAxisCommandMmKey = new AntdUI.Label();
-            this.panelTagAxisLimit = new AntdUI.Panel();
-            this.labelTagAxisLimitValue = new AntdUI.Label();
-            this.labelTagAxisLimitKey = new AntdUI.Label();
-            this.panelTagAxisDone = new AntdUI.Panel();
-            this.labelTagAxisDoneValue = new AntdUI.Label();
-            this.labelTagAxisDoneKey = new AntdUI.Label();
-            this.panelTagAxisHome = new AntdUI.Panel();
-            this.labelTagAxisHomeValue = new AntdUI.Label();
-            this.labelTagAxisHomeKey = new AntdUI.Label();
-            this.panelTagAxisEnable = new AntdUI.Panel();
-            this.labelTagAxisEnableValue = new AntdUI.Label();
-            this.labelTagAxisEnableKey = new AntdUI.Label();
-            this.panelTagAxisState = new AntdUI.Panel();
-            this.labelTagAxisStateValue = new AntdUI.Label();
-            this.labelTagAxisStateKey = new AntdUI.Label();
-            this.panelTagAxisPhysical = new AntdUI.Panel();
-            this.labelTagAxisPhysicalValue = new AntdUI.Label();
-            this.labelTagAxisPhysicalKey = new AntdUI.Label();
-            this.panelTagAxisType = new AntdUI.Panel();
-            this.labelTagAxisTypeValue = new AntdUI.Label();
-            this.labelTagAxisTypeKey = new AntdUI.Label();
-            this.panelTagAxisLogic = new AntdUI.Panel();
-            this.labelTagAxisLogicValue = new AntdUI.Label();
-            this.labelTagAxisLogicKey = new AntdUI.Label();
+            this.labelDescriptionText = new AntdUI.Label();
+            this.labelDescriptionTitle = new AntdUI.Label();
+            this.panelTagJogVel = new AntdUI.Panel();
+            this.labelTagJogVelValue = new AntdUI.Label();
+            this.labelTagJogVelKey = new AntdUI.Label();
+            this.panelTagDefaultVel = new AntdUI.Panel();
+            this.labelTagDefaultVelValue = new AntdUI.Label();
+            this.labelTagDefaultVelKey = new AntdUI.Label();
+            this.panelTagErrorMm = new AntdUI.Panel();
+            this.labelTagErrorMmValue = new AntdUI.Label();
+            this.labelTagErrorMmKey = new AntdUI.Label();
+            this.panelTagEncMm = new AntdUI.Panel();
+            this.labelTagEncMmValue = new AntdUI.Label();
+            this.labelTagEncMmKey = new AntdUI.Label();
+            this.panelTagCmdMm = new AntdUI.Panel();
+            this.labelTagCmdMmValue = new AntdUI.Label();
+            this.labelTagCmdMmKey = new AntdUI.Label();
+            this.panelTagDone = new AntdUI.Panel();
+            this.labelTagDoneValue = new AntdUI.Label();
+            this.labelTagDoneKey = new AntdUI.Label();
+            this.panelTagHome = new AntdUI.Panel();
+            this.labelTagHomeValue = new AntdUI.Label();
+            this.labelTagHomeKey = new AntdUI.Label();
+            this.panelTagEnable = new AntdUI.Panel();
+            this.labelTagEnableValue = new AntdUI.Label();
+            this.labelTagEnableKey = new AntdUI.Label();
+            this.panelTagLimit = new AntdUI.Panel();
+            this.labelTagLimitValue = new AntdUI.Label();
+            this.labelTagLimitKey = new AntdUI.Label();
+            this.panelTagInterlock = new AntdUI.Panel();
+            this.labelTagInterlockValue = new AntdUI.Label();
+            this.labelTagInterlockKey = new AntdUI.Label();
+            this.panelTagState = new AntdUI.Panel();
+            this.labelTagStateValue = new AntdUI.Label();
+            this.labelTagStateKey = new AntdUI.Label();
+            this.panelTagUpdate = new AntdUI.Panel();
+            this.labelTagUpdateValue = new AntdUI.Label();
+            this.labelTagUpdateKey = new AntdUI.Label();
+            this.panelTagScan = new AntdUI.Panel();
+            this.labelTagScanValue = new AntdUI.Label();
+            this.labelTagScanKey = new AntdUI.Label();
+            this.panelTagCard = new AntdUI.Panel();
+            this.labelTagCardValue = new AntdUI.Label();
+            this.labelTagCardKey = new AntdUI.Label();
             this.panelHeader = new AntdUI.Panel();
             this.labelSubTitle = new AntdUI.Label();
             this.labelTitle = new AntdUI.Label();
@@ -68,18 +69,20 @@ namespace AMControlWinF.Views.Motion
             this.panelRoot.SuspendLayout();
             this.panelDetail.SuspendLayout();
             this.panelScroll.SuspendLayout();
-            this.panelTagAxisJogVel.SuspendLayout();
-            this.panelTagAxisDefaultVel.SuspendLayout();
-            this.panelTagAxisEncoderMm.SuspendLayout();
-            this.panelTagAxisCommandMm.SuspendLayout();
-            this.panelTagAxisLimit.SuspendLayout();
-            this.panelTagAxisDone.SuspendLayout();
-            this.panelTagAxisHome.SuspendLayout();
-            this.panelTagAxisEnable.SuspendLayout();
-            this.panelTagAxisState.SuspendLayout();
-            this.panelTagAxisPhysical.SuspendLayout();
-            this.panelTagAxisType.SuspendLayout();
-            this.panelTagAxisLogic.SuspendLayout();
+            this.panelTagJogVel.SuspendLayout();
+            this.panelTagDefaultVel.SuspendLayout();
+            this.panelTagErrorMm.SuspendLayout();
+            this.panelTagEncMm.SuspendLayout();
+            this.panelTagCmdMm.SuspendLayout();
+            this.panelTagDone.SuspendLayout();
+            this.panelTagHome.SuspendLayout();
+            this.panelTagEnable.SuspendLayout();
+            this.panelTagLimit.SuspendLayout();
+            this.panelTagInterlock.SuspendLayout();
+            this.panelTagState.SuspendLayout();
+            this.panelTagUpdate.SuspendLayout();
+            this.panelTagScan.SuspendLayout();
+            this.panelTagCard.SuspendLayout();
             this.panelHeader.SuspendLayout();
             this.panelEmpty.SuspendLayout();
             this.SuspendLayout();
@@ -93,7 +96,7 @@ namespace AMControlWinF.Views.Motion
             this.panelRoot.Margin = new System.Windows.Forms.Padding(0);
             this.panelRoot.Name = "panelRoot";
             this.panelRoot.Radius = 0;
-            this.panelRoot.Size = new System.Drawing.Size(280, 520);
+            this.panelRoot.Size = new System.Drawing.Size(272, 608);
             this.panelRoot.TabIndex = 0;
             // 
             // panelDetail
@@ -105,493 +108,502 @@ namespace AMControlWinF.Views.Motion
             this.panelDetail.Margin = new System.Windows.Forms.Padding(0);
             this.panelDetail.Name = "panelDetail";
             this.panelDetail.Radius = 0;
-            this.panelDetail.Size = new System.Drawing.Size(280, 520);
+            this.panelDetail.Size = new System.Drawing.Size(272, 608);
             this.panelDetail.TabIndex = 1;
             this.panelDetail.Visible = false;
             // 
             // panelScroll
             // 
-            this.panelScroll.AutoScroll = true;
-            this.panelScroll.Controls.Add(this.inputMoveDistance);
-            this.panelScroll.Controls.Add(this.labelMoveDistanceTitle);
-            this.panelScroll.Controls.Add(this.inputTargetPosition);
-            this.panelScroll.Controls.Add(this.labelTargetPositionTitle);
-            this.panelScroll.Controls.Add(this.inputVelocity);
-            this.panelScroll.Controls.Add(this.labelVelocityTitle);
-            this.panelScroll.Controls.Add(this.labelParamHint);
-            this.panelScroll.Controls.Add(this.panelTagAxisJogVel);
-            this.panelScroll.Controls.Add(this.panelTagAxisDefaultVel);
-            this.panelScroll.Controls.Add(this.panelTagAxisEncoderMm);
-            this.panelScroll.Controls.Add(this.panelTagAxisCommandMm);
-            this.panelScroll.Controls.Add(this.panelTagAxisLimit);
-            this.panelScroll.Controls.Add(this.panelTagAxisDone);
-            this.panelScroll.Controls.Add(this.panelTagAxisHome);
-            this.panelScroll.Controls.Add(this.panelTagAxisEnable);
-            this.panelScroll.Controls.Add(this.panelTagAxisState);
-            this.panelScroll.Controls.Add(this.panelTagAxisPhysical);
-            this.panelScroll.Controls.Add(this.panelTagAxisType);
-            this.panelScroll.Controls.Add(this.panelTagAxisLogic);
+            this.panelScroll.Controls.Add(this.labelDescriptionText);
+            this.panelScroll.Controls.Add(this.labelDescriptionTitle);
+            this.panelScroll.Controls.Add(this.panelTagJogVel);
+            this.panelScroll.Controls.Add(this.panelTagDefaultVel);
+            this.panelScroll.Controls.Add(this.panelTagErrorMm);
+            this.panelScroll.Controls.Add(this.panelTagEncMm);
+            this.panelScroll.Controls.Add(this.panelTagCmdMm);
+            this.panelScroll.Controls.Add(this.panelTagDone);
+            this.panelScroll.Controls.Add(this.panelTagHome);
+            this.panelScroll.Controls.Add(this.panelTagEnable);
+            this.panelScroll.Controls.Add(this.panelTagLimit);
+            this.panelScroll.Controls.Add(this.panelTagInterlock);
+            this.panelScroll.Controls.Add(this.panelTagState);
+            this.panelScroll.Controls.Add(this.panelTagUpdate);
+            this.panelScroll.Controls.Add(this.panelTagScan);
+            this.panelScroll.Controls.Add(this.panelTagCard);
             this.panelScroll.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelScroll.Location = new System.Drawing.Point(0, 60);
             this.panelScroll.Margin = new System.Windows.Forms.Padding(0);
             this.panelScroll.Name = "panelScroll";
             this.panelScroll.Padding = new System.Windows.Forms.Padding(14, 12, 14, 12);
-            this.panelScroll.Size = new System.Drawing.Size(280, 460);
+            this.panelScroll.Size = new System.Drawing.Size(272, 548);
             this.panelScroll.TabIndex = 1;
             // 
-            // inputMoveDistance
-            // 
-            this.inputMoveDistance.Location = new System.Drawing.Point(8, 470);
-            this.inputMoveDistance.Margin = new System.Windows.Forms.Padding(0);
-            this.inputMoveDistance.Name = "inputMoveDistance";
-            this.inputMoveDistance.Size = new System.Drawing.Size(252, 36);
-            this.inputMoveDistance.TabIndex = 18;
-            this.inputMoveDistance.Text = "10";
-            this.inputMoveDistance.WaveSize = 0;
-            // 
-            // labelMoveDistanceTitle
-            // 
-            this.labelMoveDistanceTitle.ForeColor = System.Drawing.Color.Gray;
-            this.labelMoveDistanceTitle.Location = new System.Drawing.Point(8, 446);
-            this.labelMoveDistanceTitle.Margin = new System.Windows.Forms.Padding(0);
-            this.labelMoveDistanceTitle.Name = "labelMoveDistanceTitle";
-            this.labelMoveDistanceTitle.Size = new System.Drawing.Size(252, 20);
-            this.labelMoveDistanceTitle.TabIndex = 17;
-            this.labelMoveDistanceTitle.Text = "相对距离(mm)";
-            // 
-            // inputTargetPosition
-            // 
-            this.inputTargetPosition.Location = new System.Drawing.Point(8, 396);
-            this.inputTargetPosition.Margin = new System.Windows.Forms.Padding(0);
-            this.inputTargetPosition.Name = "inputTargetPosition";
-            this.inputTargetPosition.Size = new System.Drawing.Size(252, 36);
-            this.inputTargetPosition.TabIndex = 16;
-            this.inputTargetPosition.Text = "0";
-            this.inputTargetPosition.WaveSize = 0;
-            // 
-            // labelTargetPositionTitle
-            // 
-            this.labelTargetPositionTitle.ForeColor = System.Drawing.Color.Gray;
-            this.labelTargetPositionTitle.Location = new System.Drawing.Point(8, 372);
-            this.labelTargetPositionTitle.Margin = new System.Windows.Forms.Padding(0);
-            this.labelTargetPositionTitle.Name = "labelTargetPositionTitle";
-            this.labelTargetPositionTitle.Size = new System.Drawing.Size(252, 20);
-            this.labelTargetPositionTitle.TabIndex = 15;
-            this.labelTargetPositionTitle.Text = "目标位置(mm)";
-            // 
-            // inputVelocity
-            // 
-            this.inputVelocity.Location = new System.Drawing.Point(8, 322);
-            this.inputVelocity.Margin = new System.Windows.Forms.Padding(0);
-            this.inputVelocity.Name = "inputVelocity";
-            this.inputVelocity.Size = new System.Drawing.Size(252, 36);
-            this.inputVelocity.TabIndex = 14;
-            this.inputVelocity.Text = "10";
-            this.inputVelocity.WaveSize = 0;
-            // 
-            // labelVelocityTitle
-            // 
-            this.labelVelocityTitle.ForeColor = System.Drawing.Color.Gray;
-            this.labelVelocityTitle.Location = new System.Drawing.Point(8, 298);
-            this.labelVelocityTitle.Margin = new System.Windows.Forms.Padding(0);
-            this.labelVelocityTitle.Name = "labelVelocityTitle";
-            this.labelVelocityTitle.Size = new System.Drawing.Size(252, 20);
-            this.labelVelocityTitle.TabIndex = 13;
-            this.labelVelocityTitle.Text = "速度(mm/s)";
-            // 
-            // labelParamHint
-            // 
-            this.labelParamHint.ForeColor = System.Drawing.Color.Gray;
-            this.labelParamHint.Location = new System.Drawing.Point(8, 266);
-            this.labelParamHint.Margin = new System.Windows.Forms.Padding(0);
-            this.labelParamHint.Name = "labelParamHint";
-            this.labelParamHint.Size = new System.Drawing.Size(252, 28);
-            this.labelParamHint.TabIndex = 12;
-            this.labelParamHint.Text = "参数区供应用速度、绝对定位、相对定位和点动动作使用";
-            // 
-            // panelTagAxisJogVel
-            // 
-            this.panelTagAxisJogVel.Controls.Add(this.labelTagAxisJogVelValue);
-            this.panelTagAxisJogVel.Controls.Add(this.labelTagAxisJogVelKey);
-            this.panelTagAxisJogVel.Location = new System.Drawing.Point(8, 234);
-            this.panelTagAxisJogVel.Margin = new System.Windows.Forms.Padding(0);
-            this.panelTagAxisJogVel.Name = "panelTagAxisJogVel";
-            this.panelTagAxisJogVel.Radius = 0;
-            this.panelTagAxisJogVel.Size = new System.Drawing.Size(252, 24);
-            this.panelTagAxisJogVel.TabIndex = 11;
-            // 
-            // labelTagAxisJogVelValue
-            // 
-            this.labelTagAxisJogVelValue.AutoEllipsis = true;
-            this.labelTagAxisJogVelValue.Location = new System.Drawing.Point(94, 0);
-            this.labelTagAxisJogVelValue.Margin = new System.Windows.Forms.Padding(0);
-            this.labelTagAxisJogVelValue.Name = "labelTagAxisJogVelValue";
-            this.labelTagAxisJogVelValue.Size = new System.Drawing.Size(150, 24);
-            this.labelTagAxisJogVelValue.TabIndex = 1;
-            this.labelTagAxisJogVelValue.Text = "—";
-            // 
-            // labelTagAxisJogVelKey
-            // 
-            this.labelTagAxisJogVelKey.ForeColor = System.Drawing.Color.Gray;
-            this.labelTagAxisJogVelKey.Location = new System.Drawing.Point(0, 0);
-            this.labelTagAxisJogVelKey.Margin = new System.Windows.Forms.Padding(0);
-            this.labelTagAxisJogVelKey.Name = "labelTagAxisJogVelKey";
-            this.labelTagAxisJogVelKey.Size = new System.Drawing.Size(88, 24);
-            this.labelTagAxisJogVelKey.TabIndex = 0;
-            this.labelTagAxisJogVelKey.Text = "点动速度";
-            this.labelTagAxisJogVelKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // panelTagAxisDefaultVel
-            // 
-            this.panelTagAxisDefaultVel.Controls.Add(this.labelTagAxisDefaultVelValue);
-            this.panelTagAxisDefaultVel.Controls.Add(this.labelTagAxisDefaultVelKey);
-            this.panelTagAxisDefaultVel.Location = new System.Drawing.Point(8, 204);
-            this.panelTagAxisDefaultVel.Margin = new System.Windows.Forms.Padding(0);
-            this.panelTagAxisDefaultVel.Name = "panelTagAxisDefaultVel";
-            this.panelTagAxisDefaultVel.Radius = 0;
-            this.panelTagAxisDefaultVel.Size = new System.Drawing.Size(252, 24);
-            this.panelTagAxisDefaultVel.TabIndex = 10;
-            // 
-            // labelTagAxisDefaultVelValue
-            // 
-            this.labelTagAxisDefaultVelValue.AutoEllipsis = true;
-            this.labelTagAxisDefaultVelValue.Location = new System.Drawing.Point(94, 0);
-            this.labelTagAxisDefaultVelValue.Margin = new System.Windows.Forms.Padding(0);
-            this.labelTagAxisDefaultVelValue.Name = "labelTagAxisDefaultVelValue";
-            this.labelTagAxisDefaultVelValue.Size = new System.Drawing.Size(150, 24);
-            this.labelTagAxisDefaultVelValue.TabIndex = 1;
-            this.labelTagAxisDefaultVelValue.Text = "—";
-            // 
-            // labelTagAxisDefaultVelKey
-            // 
-            this.labelTagAxisDefaultVelKey.ForeColor = System.Drawing.Color.Gray;
-            this.labelTagAxisDefaultVelKey.Location = new System.Drawing.Point(0, 0);
-            this.labelTagAxisDefaultVelKey.Margin = new System.Windows.Forms.Padding(0);
-            this.labelTagAxisDefaultVelKey.Name = "labelTagAxisDefaultVelKey";
-            this.labelTagAxisDefaultVelKey.Size = new System.Drawing.Size(88, 24);
-            this.labelTagAxisDefaultVelKey.TabIndex = 0;
-            this.labelTagAxisDefaultVelKey.Text = "默认速度";
-            this.labelTagAxisDefaultVelKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // panelTagAxisEncoderMm
-            // 
-            this.panelTagAxisEncoderMm.Controls.Add(this.labelTagAxisEncoderMmValue);
-            this.panelTagAxisEncoderMm.Controls.Add(this.labelTagAxisEncoderMmKey);
-            this.panelTagAxisEncoderMm.Location = new System.Drawing.Point(8, 174);
-            this.panelTagAxisEncoderMm.Margin = new System.Windows.Forms.Padding(0);
-            this.panelTagAxisEncoderMm.Name = "panelTagAxisEncoderMm";
-            this.panelTagAxisEncoderMm.Radius = 0;
-            this.panelTagAxisEncoderMm.Size = new System.Drawing.Size(252, 24);
-            this.panelTagAxisEncoderMm.TabIndex = 9;
-            // 
-            // labelTagAxisEncoderMmValue
-            // 
-            this.labelTagAxisEncoderMmValue.AutoEllipsis = true;
-            this.labelTagAxisEncoderMmValue.Location = new System.Drawing.Point(94, 0);
-            this.labelTagAxisEncoderMmValue.Margin = new System.Windows.Forms.Padding(0);
-            this.labelTagAxisEncoderMmValue.Name = "labelTagAxisEncoderMmValue";
-            this.labelTagAxisEncoderMmValue.Size = new System.Drawing.Size(150, 24);
-            this.labelTagAxisEncoderMmValue.TabIndex = 1;
-            this.labelTagAxisEncoderMmValue.Text = "—";
-            // 
-            // labelTagAxisEncoderMmKey
-            // 
-            this.labelTagAxisEncoderMmKey.ForeColor = System.Drawing.Color.Gray;
-            this.labelTagAxisEncoderMmKey.Location = new System.Drawing.Point(0, 0);
-            this.labelTagAxisEncoderMmKey.Margin = new System.Windows.Forms.Padding(0);
-            this.labelTagAxisEncoderMmKey.Name = "labelTagAxisEncoderMmKey";
-            this.labelTagAxisEncoderMmKey.Size = new System.Drawing.Size(88, 24);
-            this.labelTagAxisEncoderMmKey.TabIndex = 0;
-            this.labelTagAxisEncoderMmKey.Text = "编码器位置";
-            this.labelTagAxisEncoderMmKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // panelTagAxisCommandMm
-            // 
-            this.panelTagAxisCommandMm.Controls.Add(this.labelTagAxisCommandMmValue);
-            this.panelTagAxisCommandMm.Controls.Add(this.labelTagAxisCommandMmKey);
-            this.panelTagAxisCommandMm.Location = new System.Drawing.Point(8, 144);
-            this.panelTagAxisCommandMm.Margin = new System.Windows.Forms.Padding(0);
-            this.panelTagAxisCommandMm.Name = "panelTagAxisCommandMm";
-            this.panelTagAxisCommandMm.Radius = 0;
-            this.panelTagAxisCommandMm.Size = new System.Drawing.Size(252, 24);
-            this.panelTagAxisCommandMm.TabIndex = 8;
-            // 
-            // labelTagAxisCommandMmValue
-            // 
-            this.labelTagAxisCommandMmValue.AutoEllipsis = true;
-            this.labelTagAxisCommandMmValue.Location = new System.Drawing.Point(94, 0);
-            this.labelTagAxisCommandMmValue.Margin = new System.Windows.Forms.Padding(0);
-            this.labelTagAxisCommandMmValue.Name = "labelTagAxisCommandMmValue";
-            this.labelTagAxisCommandMmValue.Size = new System.Drawing.Size(150, 24);
-            this.labelTagAxisCommandMmValue.TabIndex = 1;
-            this.labelTagAxisCommandMmValue.Text = "—";
-            // 
-            // labelTagAxisCommandMmKey
-            // 
-            this.labelTagAxisCommandMmKey.ForeColor = System.Drawing.Color.Gray;
-            this.labelTagAxisCommandMmKey.Location = new System.Drawing.Point(0, 0);
-            this.labelTagAxisCommandMmKey.Margin = new System.Windows.Forms.Padding(0);
-            this.labelTagAxisCommandMmKey.Name = "labelTagAxisCommandMmKey";
-            this.labelTagAxisCommandMmKey.Size = new System.Drawing.Size(88, 24);
-            this.labelTagAxisCommandMmKey.TabIndex = 0;
-            this.labelTagAxisCommandMmKey.Text = "指令位置";
-            this.labelTagAxisCommandMmKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // panelTagAxisLimit
-            // 
-            this.panelTagAxisLimit.Controls.Add(this.labelTagAxisLimitValue);
-            this.panelTagAxisLimit.Controls.Add(this.labelTagAxisLimitKey);
-            this.panelTagAxisLimit.Location = new System.Drawing.Point(8, 114);
-            this.panelTagAxisLimit.Margin = new System.Windows.Forms.Padding(0);
-            this.panelTagAxisLimit.Name = "panelTagAxisLimit";
-            this.panelTagAxisLimit.Radius = 0;
-            this.panelTagAxisLimit.Size = new System.Drawing.Size(252, 24);
-            this.panelTagAxisLimit.TabIndex = 7;
-            // 
-            // labelTagAxisLimitValue
-            // 
-            this.labelTagAxisLimitValue.AutoEllipsis = true;
-            this.labelTagAxisLimitValue.Location = new System.Drawing.Point(94, 0);
-            this.labelTagAxisLimitValue.Margin = new System.Windows.Forms.Padding(0);
-            this.labelTagAxisLimitValue.Name = "labelTagAxisLimitValue";
-            this.labelTagAxisLimitValue.Size = new System.Drawing.Size(150, 24);
-            this.labelTagAxisLimitValue.TabIndex = 1;
-            this.labelTagAxisLimitValue.Text = "—";
-            // 
-            // labelTagAxisLimitKey
-            // 
-            this.labelTagAxisLimitKey.ForeColor = System.Drawing.Color.Gray;
-            this.labelTagAxisLimitKey.Location = new System.Drawing.Point(0, 0);
-            this.labelTagAxisLimitKey.Margin = new System.Windows.Forms.Padding(0);
-            this.labelTagAxisLimitKey.Name = "labelTagAxisLimitKey";
-            this.labelTagAxisLimitKey.Size = new System.Drawing.Size(88, 24);
-            this.labelTagAxisLimitKey.TabIndex = 0;
-            this.labelTagAxisLimitKey.Text = "限位状态";
-            this.labelTagAxisLimitKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // panelTagAxisDone
-            // 
-            this.panelTagAxisDone.Controls.Add(this.labelTagAxisDoneValue);
-            this.panelTagAxisDone.Controls.Add(this.labelTagAxisDoneKey);
-            this.panelTagAxisDone.Location = new System.Drawing.Point(8, 84);
-            this.panelTagAxisDone.Margin = new System.Windows.Forms.Padding(0);
-            this.panelTagAxisDone.Name = "panelTagAxisDone";
-            this.panelTagAxisDone.Radius = 0;
-            this.panelTagAxisDone.Size = new System.Drawing.Size(252, 24);
-            this.panelTagAxisDone.TabIndex = 6;
-            // 
-            // labelTagAxisDoneValue
-            // 
-            this.labelTagAxisDoneValue.AutoEllipsis = true;
-            this.labelTagAxisDoneValue.Location = new System.Drawing.Point(94, 0);
-            this.labelTagAxisDoneValue.Margin = new System.Windows.Forms.Padding(0);
-            this.labelTagAxisDoneValue.Name = "labelTagAxisDoneValue";
-            this.labelTagAxisDoneValue.Size = new System.Drawing.Size(150, 24);
-            this.labelTagAxisDoneValue.TabIndex = 1;
-            this.labelTagAxisDoneValue.Text = "—";
-            // 
-            // labelTagAxisDoneKey
-            // 
-            this.labelTagAxisDoneKey.ForeColor = System.Drawing.Color.Gray;
-            this.labelTagAxisDoneKey.Location = new System.Drawing.Point(0, 0);
-            this.labelTagAxisDoneKey.Margin = new System.Windows.Forms.Padding(0);
-            this.labelTagAxisDoneKey.Name = "labelTagAxisDoneKey";
-            this.labelTagAxisDoneKey.Size = new System.Drawing.Size(88, 24);
-            this.labelTagAxisDoneKey.TabIndex = 0;
-            this.labelTagAxisDoneKey.Text = "到位状态";
-            this.labelTagAxisDoneKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // panelTagAxisHome
-            // 
-            this.panelTagAxisHome.Controls.Add(this.labelTagAxisHomeValue);
-            this.panelTagAxisHome.Controls.Add(this.labelTagAxisHomeKey);
-            this.panelTagAxisHome.Location = new System.Drawing.Point(8, 54);
-            this.panelTagAxisHome.Margin = new System.Windows.Forms.Padding(0);
-            this.panelTagAxisHome.Name = "panelTagAxisHome";
-            this.panelTagAxisHome.Radius = 0;
-            this.panelTagAxisHome.Size = new System.Drawing.Size(252, 24);
-            this.panelTagAxisHome.TabIndex = 5;
-            // 
-            // labelTagAxisHomeValue
-            // 
-            this.labelTagAxisHomeValue.AutoEllipsis = true;
-            this.labelTagAxisHomeValue.Location = new System.Drawing.Point(94, 0);
-            this.labelTagAxisHomeValue.Margin = new System.Windows.Forms.Padding(0);
-            this.labelTagAxisHomeValue.Name = "labelTagAxisHomeValue";
-            this.labelTagAxisHomeValue.Size = new System.Drawing.Size(150, 24);
-            this.labelTagAxisHomeValue.TabIndex = 1;
-            this.labelTagAxisHomeValue.Text = "—";
-            // 
-            // labelTagAxisHomeKey
-            // 
-            this.labelTagAxisHomeKey.ForeColor = System.Drawing.Color.Gray;
-            this.labelTagAxisHomeKey.Location = new System.Drawing.Point(0, 0);
-            this.labelTagAxisHomeKey.Margin = new System.Windows.Forms.Padding(0);
-            this.labelTagAxisHomeKey.Name = "labelTagAxisHomeKey";
-            this.labelTagAxisHomeKey.Size = new System.Drawing.Size(88, 24);
-            this.labelTagAxisHomeKey.TabIndex = 0;
-            this.labelTagAxisHomeKey.Text = "原点状态";
-            this.labelTagAxisHomeKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // panelTagAxisEnable
-            // 
-            this.panelTagAxisEnable.Controls.Add(this.labelTagAxisEnableValue);
-            this.panelTagAxisEnable.Controls.Add(this.labelTagAxisEnableKey);
-            this.panelTagAxisEnable.Location = new System.Drawing.Point(8, 144);
-            this.panelTagAxisEnable.Margin = new System.Windows.Forms.Padding(0);
-            this.panelTagAxisEnable.Name = "panelTagAxisEnable";
-            this.panelTagAxisEnable.Radius = 0;
-            this.panelTagAxisEnable.Size = new System.Drawing.Size(252, 24);
-            this.panelTagAxisEnable.TabIndex = 4;
-            // 
-            // labelTagAxisEnableValue
-            // 
-            this.labelTagAxisEnableValue.AutoEllipsis = true;
-            this.labelTagAxisEnableValue.Location = new System.Drawing.Point(94, 0);
-            this.labelTagAxisEnableValue.Margin = new System.Windows.Forms.Padding(0);
-            this.labelTagAxisEnableValue.Name = "labelTagAxisEnableValue";
-            this.labelTagAxisEnableValue.Size = new System.Drawing.Size(150, 24);
-            this.labelTagAxisEnableValue.TabIndex = 1;
-            this.labelTagAxisEnableValue.Text = "—";
-            // 
-            // labelTagAxisEnableKey
-            // 
-            this.labelTagAxisEnableKey.ForeColor = System.Drawing.Color.Gray;
-            this.labelTagAxisEnableKey.Location = new System.Drawing.Point(0, 0);
-            this.labelTagAxisEnableKey.Margin = new System.Windows.Forms.Padding(0);
-            this.labelTagAxisEnableKey.Name = "labelTagAxisEnableKey";
-            this.labelTagAxisEnableKey.Size = new System.Drawing.Size(88, 24);
-            this.labelTagAxisEnableKey.TabIndex = 0;
-            this.labelTagAxisEnableKey.Text = "使能状态";
-            this.labelTagAxisEnableKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // panelTagAxisState
-            // 
-            this.panelTagAxisState.Controls.Add(this.labelTagAxisStateValue);
-            this.panelTagAxisState.Controls.Add(this.labelTagAxisStateKey);
-            this.panelTagAxisState.Location = new System.Drawing.Point(8, 114);
-            this.panelTagAxisState.Margin = new System.Windows.Forms.Padding(0);
-            this.panelTagAxisState.Name = "panelTagAxisState";
-            this.panelTagAxisState.Radius = 0;
-            this.panelTagAxisState.Size = new System.Drawing.Size(252, 24);
-            this.panelTagAxisState.TabIndex = 3;
-            // 
-            // labelTagAxisStateValue
-            // 
-            this.labelTagAxisStateValue.AutoEllipsis = true;
-            this.labelTagAxisStateValue.Location = new System.Drawing.Point(94, 0);
-            this.labelTagAxisStateValue.Margin = new System.Windows.Forms.Padding(0);
-            this.labelTagAxisStateValue.Name = "labelTagAxisStateValue";
-            this.labelTagAxisStateValue.Size = new System.Drawing.Size(150, 24);
-            this.labelTagAxisStateValue.TabIndex = 1;
-            this.labelTagAxisStateValue.Text = "—";
-            // 
-            // labelTagAxisStateKey
-            // 
-            this.labelTagAxisStateKey.ForeColor = System.Drawing.Color.Gray;
-            this.labelTagAxisStateKey.Location = new System.Drawing.Point(0, 0);
-            this.labelTagAxisStateKey.Margin = new System.Windows.Forms.Padding(0);
-            this.labelTagAxisStateKey.Name = "labelTagAxisStateKey";
-            this.labelTagAxisStateKey.Size = new System.Drawing.Size(88, 24);
-            this.labelTagAxisStateKey.TabIndex = 0;
-            this.labelTagAxisStateKey.Text = "当前状态";
-            this.labelTagAxisStateKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // panelTagAxisPhysical
-            // 
-            this.panelTagAxisPhysical.Controls.Add(this.labelTagAxisPhysicalValue);
-            this.panelTagAxisPhysical.Controls.Add(this.labelTagAxisPhysicalKey);
-            this.panelTagAxisPhysical.Location = new System.Drawing.Point(8, 84);
-            this.panelTagAxisPhysical.Margin = new System.Windows.Forms.Padding(0);
-            this.panelTagAxisPhysical.Name = "panelTagAxisPhysical";
-            this.panelTagAxisPhysical.Radius = 0;
-            this.panelTagAxisPhysical.Size = new System.Drawing.Size(252, 24);
-            this.panelTagAxisPhysical.TabIndex = 2;
-            // 
-            // labelTagAxisPhysicalValue
-            // 
-            this.labelTagAxisPhysicalValue.AutoEllipsis = true;
-            this.labelTagAxisPhysicalValue.Location = new System.Drawing.Point(94, 0);
-            this.labelTagAxisPhysicalValue.Margin = new System.Windows.Forms.Padding(0);
-            this.labelTagAxisPhysicalValue.Name = "labelTagAxisPhysicalValue";
-            this.labelTagAxisPhysicalValue.Size = new System.Drawing.Size(150, 24);
-            this.labelTagAxisPhysicalValue.TabIndex = 1;
-            this.labelTagAxisPhysicalValue.Text = "—";
-            // 
-            // labelTagAxisPhysicalKey
-            // 
-            this.labelTagAxisPhysicalKey.ForeColor = System.Drawing.Color.Gray;
-            this.labelTagAxisPhysicalKey.Location = new System.Drawing.Point(0, 0);
-            this.labelTagAxisPhysicalKey.Margin = new System.Windows.Forms.Padding(0);
-            this.labelTagAxisPhysicalKey.Name = "labelTagAxisPhysicalKey";
-            this.labelTagAxisPhysicalKey.Size = new System.Drawing.Size(88, 24);
-            this.labelTagAxisPhysicalKey.TabIndex = 0;
-            this.labelTagAxisPhysicalKey.Text = "物理映射";
-            this.labelTagAxisPhysicalKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // panelTagAxisType
-            // 
-            this.panelTagAxisType.Controls.Add(this.labelTagAxisTypeValue);
-            this.panelTagAxisType.Controls.Add(this.labelTagAxisTypeKey);
-            this.panelTagAxisType.Location = new System.Drawing.Point(8, 54);
-            this.panelTagAxisType.Margin = new System.Windows.Forms.Padding(0);
-            this.panelTagAxisType.Name = "panelTagAxisType";
-            this.panelTagAxisType.Radius = 0;
-            this.panelTagAxisType.Size = new System.Drawing.Size(252, 24);
-            this.panelTagAxisType.TabIndex = 1;
-            // 
-            // labelTagAxisTypeValue
-            // 
-            this.labelTagAxisTypeValue.AutoEllipsis = true;
-            this.labelTagAxisTypeValue.Location = new System.Drawing.Point(94, 0);
-            this.labelTagAxisTypeValue.Margin = new System.Windows.Forms.Padding(0);
-            this.labelTagAxisTypeValue.Name = "labelTagAxisTypeValue";
-            this.labelTagAxisTypeValue.Size = new System.Drawing.Size(150, 24);
-            this.labelTagAxisTypeValue.TabIndex = 1;
-            this.labelTagAxisTypeValue.Text = "—";
-            // 
-            // labelTagAxisTypeKey
-            // 
-            this.labelTagAxisTypeKey.ForeColor = System.Drawing.Color.Gray;
-            this.labelTagAxisTypeKey.Location = new System.Drawing.Point(0, 0);
-            this.labelTagAxisTypeKey.Margin = new System.Windows.Forms.Padding(0);
-            this.labelTagAxisTypeKey.Name = "labelTagAxisTypeKey";
-            this.labelTagAxisTypeKey.Size = new System.Drawing.Size(88, 24);
-            this.labelTagAxisTypeKey.TabIndex = 0;
-            this.labelTagAxisTypeKey.Text = "轴类型";
-            this.labelTagAxisTypeKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // panelTagAxisLogic
-            // 
-            this.panelTagAxisLogic.Controls.Add(this.labelTagAxisLogicValue);
-            this.panelTagAxisLogic.Controls.Add(this.labelTagAxisLogicKey);
-            this.panelTagAxisLogic.Location = new System.Drawing.Point(8, 24);
-            this.panelTagAxisLogic.Margin = new System.Windows.Forms.Padding(0);
-            this.panelTagAxisLogic.Name = "panelTagAxisLogic";
-            this.panelTagAxisLogic.Radius = 0;
-            this.panelTagAxisLogic.Size = new System.Drawing.Size(252, 24);
-            this.panelTagAxisLogic.TabIndex = 0;
-            // 
-            // labelTagAxisLogicValue
-            // 
-            this.labelTagAxisLogicValue.AutoEllipsis = true;
-            this.labelTagAxisLogicValue.Location = new System.Drawing.Point(94, 0);
-            this.labelTagAxisLogicValue.Margin = new System.Windows.Forms.Padding(0);
-            this.labelTagAxisLogicValue.Name = "labelTagAxisLogicValue";
-            this.labelTagAxisLogicValue.Size = new System.Drawing.Size(150, 24);
-            this.labelTagAxisLogicValue.TabIndex = 1;
-            this.labelTagAxisLogicValue.Text = "—";
-            // 
-            // labelTagAxisLogicKey
-            // 
-            this.labelTagAxisLogicKey.ForeColor = System.Drawing.Color.Gray;
-            this.labelTagAxisLogicKey.Location = new System.Drawing.Point(0, 0);
-            this.labelTagAxisLogicKey.Margin = new System.Windows.Forms.Padding(0);
-            this.labelTagAxisLogicKey.Name = "labelTagAxisLogicKey";
-            this.labelTagAxisLogicKey.Size = new System.Drawing.Size(88, 24);
-            this.labelTagAxisLogicKey.TabIndex = 0;
-            this.labelTagAxisLogicKey.Text = "逻辑轴";
-            this.labelTagAxisLogicKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // labelDescriptionText
+            // 
+            this.labelDescriptionText.Location = new System.Drawing.Point(8, 446);
+            this.labelDescriptionText.Margin = new System.Windows.Forms.Padding(0);
+            this.labelDescriptionText.Name = "labelDescriptionText";
+            this.labelDescriptionText.Size = new System.Drawing.Size(252, 44);
+            this.labelDescriptionText.TabIndex = 15;
+            this.labelDescriptionText.Text = "当前页面用于单轴手动控制与运行状态确认。";
+            // 
+            // labelDescriptionTitle
+            // 
+            this.labelDescriptionTitle.ForeColor = System.Drawing.Color.Gray;
+            this.labelDescriptionTitle.Location = new System.Drawing.Point(8, 420);
+            this.labelDescriptionTitle.Margin = new System.Windows.Forms.Padding(0);
+            this.labelDescriptionTitle.Name = "labelDescriptionTitle";
+            this.labelDescriptionTitle.Size = new System.Drawing.Size(252, 22);
+            this.labelDescriptionTitle.TabIndex = 14;
+            this.labelDescriptionTitle.Text = "说明";
+            // 
+            // panelTagJogVel
+            // 
+            this.panelTagJogVel.Controls.Add(this.labelTagJogVelValue);
+            this.panelTagJogVel.Controls.Add(this.labelTagJogVelKey);
+            this.panelTagJogVel.Location = new System.Drawing.Point(8, 392);
+            this.panelTagJogVel.Margin = new System.Windows.Forms.Padding(0);
+            this.panelTagJogVel.Name = "panelTagJogVel";
+            this.panelTagJogVel.Radius = 0;
+            this.panelTagJogVel.Size = new System.Drawing.Size(252, 24);
+            this.panelTagJogVel.TabIndex = 13;
+            // 
+            // labelTagJogVelValue
+            // 
+            this.labelTagJogVelValue.AutoEllipsis = true;
+            this.labelTagJogVelValue.Location = new System.Drawing.Point(108, 0);
+            this.labelTagJogVelValue.Margin = new System.Windows.Forms.Padding(0);
+            this.labelTagJogVelValue.Name = "labelTagJogVelValue";
+            this.labelTagJogVelValue.Size = new System.Drawing.Size(144, 22);
+            this.labelTagJogVelValue.TabIndex = 1;
+            this.labelTagJogVelValue.Text = "—";
+            // 
+            // labelTagJogVelKey
+            // 
+            this.labelTagJogVelKey.ForeColor = System.Drawing.Color.Gray;
+            this.labelTagJogVelKey.Location = new System.Drawing.Point(0, 0);
+            this.labelTagJogVelKey.Margin = new System.Windows.Forms.Padding(0);
+            this.labelTagJogVelKey.Name = "labelTagJogVelKey";
+            this.labelTagJogVelKey.Size = new System.Drawing.Size(102, 22);
+            this.labelTagJogVelKey.TabIndex = 0;
+            this.labelTagJogVelKey.Text = "Jog速度(mm/s)";
+            this.labelTagJogVelKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // panelTagDefaultVel
+            // 
+            this.panelTagDefaultVel.Controls.Add(this.labelTagDefaultVelValue);
+            this.panelTagDefaultVel.Controls.Add(this.labelTagDefaultVelKey);
+            this.panelTagDefaultVel.Location = new System.Drawing.Point(8, 368);
+            this.panelTagDefaultVel.Margin = new System.Windows.Forms.Padding(0);
+            this.panelTagDefaultVel.Name = "panelTagDefaultVel";
+            this.panelTagDefaultVel.Radius = 0;
+            this.panelTagDefaultVel.Size = new System.Drawing.Size(252, 24);
+            this.panelTagDefaultVel.TabIndex = 12;
+            // 
+            // labelTagDefaultVelValue
+            // 
+            this.labelTagDefaultVelValue.AutoEllipsis = true;
+            this.labelTagDefaultVelValue.Location = new System.Drawing.Point(108, 0);
+            this.labelTagDefaultVelValue.Margin = new System.Windows.Forms.Padding(0);
+            this.labelTagDefaultVelValue.Name = "labelTagDefaultVelValue";
+            this.labelTagDefaultVelValue.Size = new System.Drawing.Size(144, 22);
+            this.labelTagDefaultVelValue.TabIndex = 1;
+            this.labelTagDefaultVelValue.Text = "—";
+            // 
+            // labelTagDefaultVelKey
+            // 
+            this.labelTagDefaultVelKey.ForeColor = System.Drawing.Color.Gray;
+            this.labelTagDefaultVelKey.Location = new System.Drawing.Point(0, 0);
+            this.labelTagDefaultVelKey.Margin = new System.Windows.Forms.Padding(0);
+            this.labelTagDefaultVelKey.Name = "labelTagDefaultVelKey";
+            this.labelTagDefaultVelKey.Size = new System.Drawing.Size(102, 22);
+            this.labelTagDefaultVelKey.TabIndex = 0;
+            this.labelTagDefaultVelKey.Text = "默认速度(mm/s)";
+            this.labelTagDefaultVelKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // panelTagErrorMm
+            // 
+            this.panelTagErrorMm.Controls.Add(this.labelTagErrorMmValue);
+            this.panelTagErrorMm.Controls.Add(this.labelTagErrorMmKey);
+            this.panelTagErrorMm.Location = new System.Drawing.Point(8, 344);
+            this.panelTagErrorMm.Margin = new System.Windows.Forms.Padding(0);
+            this.panelTagErrorMm.Name = "panelTagErrorMm";
+            this.panelTagErrorMm.Radius = 0;
+            this.panelTagErrorMm.Size = new System.Drawing.Size(252, 24);
+            this.panelTagErrorMm.TabIndex = 11;
+            // 
+            // labelTagErrorMmValue
+            // 
+            this.labelTagErrorMmValue.AutoEllipsis = true;
+            this.labelTagErrorMmValue.Location = new System.Drawing.Point(108, 0);
+            this.labelTagErrorMmValue.Margin = new System.Windows.Forms.Padding(0);
+            this.labelTagErrorMmValue.Name = "labelTagErrorMmValue";
+            this.labelTagErrorMmValue.Size = new System.Drawing.Size(144, 22);
+            this.labelTagErrorMmValue.TabIndex = 1;
+            this.labelTagErrorMmValue.Text = "—";
+            // 
+            // labelTagErrorMmKey
+            // 
+            this.labelTagErrorMmKey.ForeColor = System.Drawing.Color.Gray;
+            this.labelTagErrorMmKey.Location = new System.Drawing.Point(0, 0);
+            this.labelTagErrorMmKey.Margin = new System.Windows.Forms.Padding(0);
+            this.labelTagErrorMmKey.Name = "labelTagErrorMmKey";
+            this.labelTagErrorMmKey.Size = new System.Drawing.Size(102, 22);
+            this.labelTagErrorMmKey.TabIndex = 0;
+            this.labelTagErrorMmKey.Text = "位置误差(mm)";
+            this.labelTagErrorMmKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // panelTagEncMm
+            // 
+            this.panelTagEncMm.Controls.Add(this.labelTagEncMmValue);
+            this.panelTagEncMm.Controls.Add(this.labelTagEncMmKey);
+            this.panelTagEncMm.Location = new System.Drawing.Point(8, 320);
+            this.panelTagEncMm.Margin = new System.Windows.Forms.Padding(0);
+            this.panelTagEncMm.Name = "panelTagEncMm";
+            this.panelTagEncMm.Radius = 0;
+            this.panelTagEncMm.Size = new System.Drawing.Size(252, 24);
+            this.panelTagEncMm.TabIndex = 10;
+            // 
+            // labelTagEncMmValue
+            // 
+            this.labelTagEncMmValue.AutoEllipsis = true;
+            this.labelTagEncMmValue.Location = new System.Drawing.Point(108, 0);
+            this.labelTagEncMmValue.Margin = new System.Windows.Forms.Padding(0);
+            this.labelTagEncMmValue.Name = "labelTagEncMmValue";
+            this.labelTagEncMmValue.Size = new System.Drawing.Size(144, 22);
+            this.labelTagEncMmValue.TabIndex = 1;
+            this.labelTagEncMmValue.Text = "—";
+            // 
+            // labelTagEncMmKey
+            // 
+            this.labelTagEncMmKey.ForeColor = System.Drawing.Color.Gray;
+            this.labelTagEncMmKey.Location = new System.Drawing.Point(0, 0);
+            this.labelTagEncMmKey.Margin = new System.Windows.Forms.Padding(0);
+            this.labelTagEncMmKey.Name = "labelTagEncMmKey";
+            this.labelTagEncMmKey.Size = new System.Drawing.Size(102, 22);
+            this.labelTagEncMmKey.TabIndex = 0;
+            this.labelTagEncMmKey.Text = "编码器位置(mm)";
+            this.labelTagEncMmKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // panelTagCmdMm
+            // 
+            this.panelTagCmdMm.Controls.Add(this.labelTagCmdMmValue);
+            this.panelTagCmdMm.Controls.Add(this.labelTagCmdMmKey);
+            this.panelTagCmdMm.Location = new System.Drawing.Point(8, 296);
+            this.panelTagCmdMm.Margin = new System.Windows.Forms.Padding(0);
+            this.panelTagCmdMm.Name = "panelTagCmdMm";
+            this.panelTagCmdMm.Radius = 0;
+            this.panelTagCmdMm.Size = new System.Drawing.Size(252, 24);
+            this.panelTagCmdMm.TabIndex = 9;
+            // 
+            // labelTagCmdMmValue
+            // 
+            this.labelTagCmdMmValue.AutoEllipsis = true;
+            this.labelTagCmdMmValue.Location = new System.Drawing.Point(108, 0);
+            this.labelTagCmdMmValue.Margin = new System.Windows.Forms.Padding(0);
+            this.labelTagCmdMmValue.Name = "labelTagCmdMmValue";
+            this.labelTagCmdMmValue.Size = new System.Drawing.Size(144, 22);
+            this.labelTagCmdMmValue.TabIndex = 1;
+            this.labelTagCmdMmValue.Text = "—";
+            // 
+            // labelTagCmdMmKey
+            // 
+            this.labelTagCmdMmKey.ForeColor = System.Drawing.Color.Gray;
+            this.labelTagCmdMmKey.Location = new System.Drawing.Point(0, 0);
+            this.labelTagCmdMmKey.Margin = new System.Windows.Forms.Padding(0);
+            this.labelTagCmdMmKey.Name = "labelTagCmdMmKey";
+            this.labelTagCmdMmKey.Size = new System.Drawing.Size(102, 22);
+            this.labelTagCmdMmKey.TabIndex = 0;
+            this.labelTagCmdMmKey.Text = "规划位置(mm)";
+            this.labelTagCmdMmKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // panelTagDone
+            // 
+            this.panelTagDone.Controls.Add(this.labelTagDoneValue);
+            this.panelTagDone.Controls.Add(this.labelTagDoneKey);
+            this.panelTagDone.Location = new System.Drawing.Point(8, 272);
+            this.panelTagDone.Margin = new System.Windows.Forms.Padding(0);
+            this.panelTagDone.Name = "panelTagDone";
+            this.panelTagDone.Radius = 0;
+            this.panelTagDone.Size = new System.Drawing.Size(252, 24);
+            this.panelTagDone.TabIndex = 8;
+            // 
+            // labelTagDoneValue
+            // 
+            this.labelTagDoneValue.AutoEllipsis = true;
+            this.labelTagDoneValue.Location = new System.Drawing.Point(108, 0);
+            this.labelTagDoneValue.Margin = new System.Windows.Forms.Padding(0);
+            this.labelTagDoneValue.Name = "labelTagDoneValue";
+            this.labelTagDoneValue.Size = new System.Drawing.Size(144, 22);
+            this.labelTagDoneValue.TabIndex = 1;
+            this.labelTagDoneValue.Text = "—";
+            // 
+            // labelTagDoneKey
+            // 
+            this.labelTagDoneKey.ForeColor = System.Drawing.Color.Gray;
+            this.labelTagDoneKey.Location = new System.Drawing.Point(0, 0);
+            this.labelTagDoneKey.Margin = new System.Windows.Forms.Padding(0);
+            this.labelTagDoneKey.Name = "labelTagDoneKey";
+            this.labelTagDoneKey.Size = new System.Drawing.Size(102, 22);
+            this.labelTagDoneKey.TabIndex = 0;
+            this.labelTagDoneKey.Text = "到位状态";
+            this.labelTagDoneKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // panelTagHome
+            // 
+            this.panelTagHome.Controls.Add(this.labelTagHomeValue);
+            this.panelTagHome.Controls.Add(this.labelTagHomeKey);
+            this.panelTagHome.Location = new System.Drawing.Point(8, 248);
+            this.panelTagHome.Margin = new System.Windows.Forms.Padding(0);
+            this.panelTagHome.Name = "panelTagHome";
+            this.panelTagHome.Radius = 0;
+            this.panelTagHome.Size = new System.Drawing.Size(252, 24);
+            this.panelTagHome.TabIndex = 7;
+            // 
+            // labelTagHomeValue
+            // 
+            this.labelTagHomeValue.AutoEllipsis = true;
+            this.labelTagHomeValue.Location = new System.Drawing.Point(108, 0);
+            this.labelTagHomeValue.Margin = new System.Windows.Forms.Padding(0);
+            this.labelTagHomeValue.Name = "labelTagHomeValue";
+            this.labelTagHomeValue.Size = new System.Drawing.Size(144, 22);
+            this.labelTagHomeValue.TabIndex = 1;
+            this.labelTagHomeValue.Text = "—";
+            // 
+            // labelTagHomeKey
+            // 
+            this.labelTagHomeKey.ForeColor = System.Drawing.Color.Gray;
+            this.labelTagHomeKey.Location = new System.Drawing.Point(0, 0);
+            this.labelTagHomeKey.Margin = new System.Windows.Forms.Padding(0);
+            this.labelTagHomeKey.Name = "labelTagHomeKey";
+            this.labelTagHomeKey.Size = new System.Drawing.Size(102, 22);
+            this.labelTagHomeKey.TabIndex = 0;
+            this.labelTagHomeKey.Text = "原点状态";
+            this.labelTagHomeKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // panelTagEnable
+            // 
+            this.panelTagEnable.Controls.Add(this.labelTagEnableValue);
+            this.panelTagEnable.Controls.Add(this.labelTagEnableKey);
+            this.panelTagEnable.Location = new System.Drawing.Point(8, 224);
+            this.panelTagEnable.Margin = new System.Windows.Forms.Padding(0);
+            this.panelTagEnable.Name = "panelTagEnable";
+            this.panelTagEnable.Radius = 0;
+            this.panelTagEnable.Size = new System.Drawing.Size(252, 24);
+            this.panelTagEnable.TabIndex = 6;
+            // 
+            // labelTagEnableValue
+            // 
+            this.labelTagEnableValue.AutoEllipsis = true;
+            this.labelTagEnableValue.Location = new System.Drawing.Point(108, 0);
+            this.labelTagEnableValue.Margin = new System.Windows.Forms.Padding(0);
+            this.labelTagEnableValue.Name = "labelTagEnableValue";
+            this.labelTagEnableValue.Size = new System.Drawing.Size(144, 22);
+            this.labelTagEnableValue.TabIndex = 1;
+            this.labelTagEnableValue.Text = "—";
+            // 
+            // labelTagEnableKey
+            // 
+            this.labelTagEnableKey.ForeColor = System.Drawing.Color.Gray;
+            this.labelTagEnableKey.Location = new System.Drawing.Point(0, 0);
+            this.labelTagEnableKey.Margin = new System.Windows.Forms.Padding(0);
+            this.labelTagEnableKey.Name = "labelTagEnableKey";
+            this.labelTagEnableKey.Size = new System.Drawing.Size(102, 22);
+            this.labelTagEnableKey.TabIndex = 0;
+            this.labelTagEnableKey.Text = "使能状态";
+            this.labelTagEnableKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // panelTagLimit
+            // 
+            this.panelTagLimit.Controls.Add(this.labelTagLimitValue);
+            this.panelTagLimit.Controls.Add(this.labelTagLimitKey);
+            this.panelTagLimit.Location = new System.Drawing.Point(8, 200);
+            this.panelTagLimit.Margin = new System.Windows.Forms.Padding(0);
+            this.panelTagLimit.Name = "panelTagLimit";
+            this.panelTagLimit.Radius = 0;
+            this.panelTagLimit.Size = new System.Drawing.Size(252, 24);
+            this.panelTagLimit.TabIndex = 5;
+            // 
+            // labelTagLimitValue
+            // 
+            this.labelTagLimitValue.AutoEllipsis = true;
+            this.labelTagLimitValue.Location = new System.Drawing.Point(108, 0);
+            this.labelTagLimitValue.Margin = new System.Windows.Forms.Padding(0);
+            this.labelTagLimitValue.Name = "labelTagLimitValue";
+            this.labelTagLimitValue.Size = new System.Drawing.Size(144, 22);
+            this.labelTagLimitValue.TabIndex = 1;
+            this.labelTagLimitValue.Text = "—";
+            // 
+            // labelTagLimitKey
+            // 
+            this.labelTagLimitKey.ForeColor = System.Drawing.Color.Gray;
+            this.labelTagLimitKey.Location = new System.Drawing.Point(0, 0);
+            this.labelTagLimitKey.Margin = new System.Windows.Forms.Padding(0);
+            this.labelTagLimitKey.Name = "labelTagLimitKey";
+            this.labelTagLimitKey.Size = new System.Drawing.Size(102, 22);
+            this.labelTagLimitKey.TabIndex = 0;
+            this.labelTagLimitKey.Text = "限位状态";
+            this.labelTagLimitKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // panelTagInterlock
+            // 
+            this.panelTagInterlock.Controls.Add(this.labelTagInterlockValue);
+            this.panelTagInterlock.Controls.Add(this.labelTagInterlockKey);
+            this.panelTagInterlock.Location = new System.Drawing.Point(8, 160);
+            this.panelTagInterlock.Margin = new System.Windows.Forms.Padding(0);
+            this.panelTagInterlock.Name = "panelTagInterlock";
+            this.panelTagInterlock.Radius = 0;
+            this.panelTagInterlock.Size = new System.Drawing.Size(252, 40);
+            this.panelTagInterlock.TabIndex = 4;
+            // 
+            // labelTagInterlockValue
+            // 
+            this.labelTagInterlockValue.AutoEllipsis = true;
+            this.labelTagInterlockValue.Location = new System.Drawing.Point(108, 0);
+            this.labelTagInterlockValue.Margin = new System.Windows.Forms.Padding(0);
+            this.labelTagInterlockValue.Name = "labelTagInterlockValue";
+            this.labelTagInterlockValue.Size = new System.Drawing.Size(144, 40);
+            this.labelTagInterlockValue.TabIndex = 1;
+            this.labelTagInterlockValue.Text = "—";
+            // 
+            // labelTagInterlockKey
+            // 
+            this.labelTagInterlockKey.ForeColor = System.Drawing.Color.Gray;
+            this.labelTagInterlockKey.Location = new System.Drawing.Point(0, 0);
+            this.labelTagInterlockKey.Margin = new System.Windows.Forms.Padding(0);
+            this.labelTagInterlockKey.Name = "labelTagInterlockKey";
+            this.labelTagInterlockKey.Size = new System.Drawing.Size(102, 22);
+            this.labelTagInterlockKey.TabIndex = 0;
+            this.labelTagInterlockKey.Text = "联锁说明";
+            this.labelTagInterlockKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // panelTagState
+            // 
+            this.panelTagState.Controls.Add(this.labelTagStateValue);
+            this.panelTagState.Controls.Add(this.labelTagStateKey);
+            this.panelTagState.Location = new System.Drawing.Point(8, 136);
+            this.panelTagState.Margin = new System.Windows.Forms.Padding(0);
+            this.panelTagState.Name = "panelTagState";
+            this.panelTagState.Radius = 0;
+            this.panelTagState.Size = new System.Drawing.Size(252, 24);
+            this.panelTagState.TabIndex = 3;
+            // 
+            // labelTagStateValue
+            // 
+            this.labelTagStateValue.AutoEllipsis = true;
+            this.labelTagStateValue.Location = new System.Drawing.Point(108, 0);
+            this.labelTagStateValue.Margin = new System.Windows.Forms.Padding(0);
+            this.labelTagStateValue.Name = "labelTagStateValue";
+            this.labelTagStateValue.Size = new System.Drawing.Size(144, 22);
+            this.labelTagStateValue.TabIndex = 1;
+            this.labelTagStateValue.Text = "—";
+            // 
+            // labelTagStateKey
+            // 
+            this.labelTagStateKey.ForeColor = System.Drawing.Color.Gray;
+            this.labelTagStateKey.Location = new System.Drawing.Point(0, 0);
+            this.labelTagStateKey.Margin = new System.Windows.Forms.Padding(0);
+            this.labelTagStateKey.Name = "labelTagStateKey";
+            this.labelTagStateKey.Size = new System.Drawing.Size(102, 22);
+            this.labelTagStateKey.TabIndex = 0;
+            this.labelTagStateKey.Text = "当前状态";
+            this.labelTagStateKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // panelTagUpdate
+            // 
+            this.panelTagUpdate.Controls.Add(this.labelTagUpdateValue);
+            this.panelTagUpdate.Controls.Add(this.labelTagUpdateKey);
+            this.panelTagUpdate.Location = new System.Drawing.Point(8, 112);
+            this.panelTagUpdate.Margin = new System.Windows.Forms.Padding(0);
+            this.panelTagUpdate.Name = "panelTagUpdate";
+            this.panelTagUpdate.Radius = 0;
+            this.panelTagUpdate.Size = new System.Drawing.Size(252, 24);
+            this.panelTagUpdate.TabIndex = 2;
+            // 
+            // labelTagUpdateValue
+            // 
+            this.labelTagUpdateValue.AutoEllipsis = true;
+            this.labelTagUpdateValue.Location = new System.Drawing.Point(108, 0);
+            this.labelTagUpdateValue.Margin = new System.Windows.Forms.Padding(0);
+            this.labelTagUpdateValue.Name = "labelTagUpdateValue";
+            this.labelTagUpdateValue.Size = new System.Drawing.Size(144, 22);
+            this.labelTagUpdateValue.TabIndex = 1;
+            this.labelTagUpdateValue.Text = "—";
+            // 
+            // labelTagUpdateKey
+            // 
+            this.labelTagUpdateKey.ForeColor = System.Drawing.Color.Gray;
+            this.labelTagUpdateKey.Location = new System.Drawing.Point(0, 0);
+            this.labelTagUpdateKey.Margin = new System.Windows.Forms.Padding(0);
+            this.labelTagUpdateKey.Name = "labelTagUpdateKey";
+            this.labelTagUpdateKey.Size = new System.Drawing.Size(102, 22);
+            this.labelTagUpdateKey.TabIndex = 0;
+            this.labelTagUpdateKey.Text = "更新时间";
+            this.labelTagUpdateKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // panelTagScan
+            // 
+            this.panelTagScan.Controls.Add(this.labelTagScanValue);
+            this.panelTagScan.Controls.Add(this.labelTagScanKey);
+            this.panelTagScan.Location = new System.Drawing.Point(8, 88);
+            this.panelTagScan.Margin = new System.Windows.Forms.Padding(0);
+            this.panelTagScan.Name = "panelTagScan";
+            this.panelTagScan.Radius = 0;
+            this.panelTagScan.Size = new System.Drawing.Size(252, 24);
+            this.panelTagScan.TabIndex = 1;
+            // 
+            // labelTagScanValue
+            // 
+            this.labelTagScanValue.AutoEllipsis = true;
+            this.labelTagScanValue.Location = new System.Drawing.Point(108, 0);
+            this.labelTagScanValue.Margin = new System.Windows.Forms.Padding(0);
+            this.labelTagScanValue.Name = "labelTagScanValue";
+            this.labelTagScanValue.Size = new System.Drawing.Size(144, 22);
+            this.labelTagScanValue.TabIndex = 1;
+            this.labelTagScanValue.Text = "—";
+            // 
+            // labelTagScanKey
+            // 
+            this.labelTagScanKey.ForeColor = System.Drawing.Color.Gray;
+            this.labelTagScanKey.Location = new System.Drawing.Point(0, 0);
+            this.labelTagScanKey.Margin = new System.Windows.Forms.Padding(0);
+            this.labelTagScanKey.Name = "labelTagScanKey";
+            this.labelTagScanKey.Size = new System.Drawing.Size(102, 22);
+            this.labelTagScanKey.TabIndex = 0;
+            this.labelTagScanKey.Text = "采样状态";
+            this.labelTagScanKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // panelTagCard
+            // 
+            this.panelTagCard.Controls.Add(this.labelTagCardValue);
+            this.panelTagCard.Controls.Add(this.labelTagCardKey);
+            this.panelTagCard.Location = new System.Drawing.Point(8, 64);
+            this.panelTagCard.Margin = new System.Windows.Forms.Padding(0);
+            this.panelTagCard.Name = "panelTagCard";
+            this.panelTagCard.Radius = 0;
+            this.panelTagCard.Size = new System.Drawing.Size(252, 24);
+            this.panelTagCard.TabIndex = 0;
+            // 
+            // labelTagCardValue
+            // 
+            this.labelTagCardValue.AutoEllipsis = true;
+            this.labelTagCardValue.Location = new System.Drawing.Point(108, 0);
+            this.labelTagCardValue.Margin = new System.Windows.Forms.Padding(0);
+            this.labelTagCardValue.Name = "labelTagCardValue";
+            this.labelTagCardValue.Size = new System.Drawing.Size(144, 22);
+            this.labelTagCardValue.TabIndex = 1;
+            this.labelTagCardValue.Text = "—";
+            // 
+            // labelTagCardKey
+            // 
+            this.labelTagCardKey.ForeColor = System.Drawing.Color.Gray;
+            this.labelTagCardKey.Location = new System.Drawing.Point(0, 0);
+            this.labelTagCardKey.Margin = new System.Windows.Forms.Padding(0);
+            this.labelTagCardKey.Name = "labelTagCardKey";
+            this.labelTagCardKey.Size = new System.Drawing.Size(102, 22);
+            this.labelTagCardKey.TabIndex = 0;
+            this.labelTagCardKey.Text = "控制卡";
+            this.labelTagCardKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // panelHeader
             // 
@@ -603,7 +615,7 @@ namespace AMControlWinF.Views.Motion
             this.panelHeader.Name = "panelHeader";
             this.panelHeader.Padding = new System.Windows.Forms.Padding(8);
             this.panelHeader.Radius = 0;
-            this.panelHeader.Size = new System.Drawing.Size(280, 60);
+            this.panelHeader.Size = new System.Drawing.Size(272, 60);
             this.panelHeader.TabIndex = 0;
             // 
             // labelSubTitle
@@ -614,9 +626,9 @@ namespace AMControlWinF.Views.Motion
             this.labelSubTitle.Location = new System.Drawing.Point(8, 34);
             this.labelSubTitle.Margin = new System.Windows.Forms.Padding(0);
             this.labelSubTitle.Name = "labelSubTitle";
-            this.labelSubTitle.Size = new System.Drawing.Size(264, 22);
+            this.labelSubTitle.Size = new System.Drawing.Size(256, 22);
             this.labelSubTitle.TabIndex = 1;
-            this.labelSubTitle.Text = "当前轴：未选择";
+            this.labelSubTitle.Text = "卡#0  默认虚拟卡";
             // 
             // labelTitle
             // 
@@ -626,9 +638,9 @@ namespace AMControlWinF.Views.Motion
             this.labelTitle.Location = new System.Drawing.Point(8, 8);
             this.labelTitle.Margin = new System.Windows.Forms.Padding(0);
             this.labelTitle.Name = "labelTitle";
-            this.labelTitle.Size = new System.Drawing.Size(264, 26);
+            this.labelTitle.Size = new System.Drawing.Size(256, 26);
             this.labelTitle.TabIndex = 0;
-            this.labelTitle.Text = "轴实时监视";
+            this.labelTitle.Text = "当前轴：未选择";
             // 
             // panelEmpty
             // 
@@ -638,7 +650,7 @@ namespace AMControlWinF.Views.Motion
             this.panelEmpty.Margin = new System.Windows.Forms.Padding(0);
             this.panelEmpty.Name = "panelEmpty";
             this.panelEmpty.Radius = 0;
-            this.panelEmpty.Size = new System.Drawing.Size(280, 520);
+            this.panelEmpty.Size = new System.Drawing.Size(272, 608);
             this.panelEmpty.TabIndex = 0;
             // 
             // labelEmpty
@@ -649,7 +661,7 @@ namespace AMControlWinF.Views.Motion
             this.labelEmpty.Location = new System.Drawing.Point(0, 0);
             this.labelEmpty.Margin = new System.Windows.Forms.Padding(0);
             this.labelEmpty.Name = "labelEmpty";
-            this.labelEmpty.Size = new System.Drawing.Size(280, 520);
+            this.labelEmpty.Size = new System.Drawing.Size(272, 608);
             this.labelEmpty.TabIndex = 0;
             this.labelEmpty.Text = "请先选择轴查看实时监视信息";
             this.labelEmpty.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -660,22 +672,24 @@ namespace AMControlWinF.Views.Motion
             this.Controls.Add(this.panelRoot);
             this.Margin = new System.Windows.Forms.Padding(0);
             this.Name = "MotionAxisDetailControl";
-            this.Size = new System.Drawing.Size(280, 520);
+            this.Size = new System.Drawing.Size(272, 608);
             this.panelRoot.ResumeLayout(false);
             this.panelDetail.ResumeLayout(false);
             this.panelScroll.ResumeLayout(false);
-            this.panelTagAxisJogVel.ResumeLayout(false);
-            this.panelTagAxisDefaultVel.ResumeLayout(false);
-            this.panelTagAxisEncoderMm.ResumeLayout(false);
-            this.panelTagAxisCommandMm.ResumeLayout(false);
-            this.panelTagAxisLimit.ResumeLayout(false);
-            this.panelTagAxisDone.ResumeLayout(false);
-            this.panelTagAxisHome.ResumeLayout(false);
-            this.panelTagAxisEnable.ResumeLayout(false);
-            this.panelTagAxisState.ResumeLayout(false);
-            this.panelTagAxisPhysical.ResumeLayout(false);
-            this.panelTagAxisType.ResumeLayout(false);
-            this.panelTagAxisLogic.ResumeLayout(false);
+            this.panelTagJogVel.ResumeLayout(false);
+            this.panelTagDefaultVel.ResumeLayout(false);
+            this.panelTagErrorMm.ResumeLayout(false);
+            this.panelTagEncMm.ResumeLayout(false);
+            this.panelTagCmdMm.ResumeLayout(false);
+            this.panelTagDone.ResumeLayout(false);
+            this.panelTagHome.ResumeLayout(false);
+            this.panelTagEnable.ResumeLayout(false);
+            this.panelTagLimit.ResumeLayout(false);
+            this.panelTagInterlock.ResumeLayout(false);
+            this.panelTagState.ResumeLayout(false);
+            this.panelTagUpdate.ResumeLayout(false);
+            this.panelTagScan.ResumeLayout(false);
+            this.panelTagCard.ResumeLayout(false);
             this.panelHeader.ResumeLayout(false);
             this.panelEmpty.ResumeLayout(false);
             this.ResumeLayout(false);
@@ -689,48 +703,50 @@ namespace AMControlWinF.Views.Motion
         private AntdUI.Label labelTitle;
         private AntdUI.Panel panelEmpty;
         private AntdUI.Label labelEmpty;
-        private AntdUI.Panel panelTagAxisLogic;
-        private AntdUI.Label labelTagAxisLogicKey;
-        private AntdUI.Label labelTagAxisLogicValue;
-        private AntdUI.Panel panelTagAxisType;
-        private AntdUI.Label labelTagAxisTypeKey;
-        private AntdUI.Label labelTagAxisTypeValue;
-        private AntdUI.Panel panelTagAxisPhysical;
-        private AntdUI.Label labelTagAxisPhysicalKey;
-        private AntdUI.Label labelTagAxisPhysicalValue;
-        private AntdUI.Panel panelTagAxisState;
-        private AntdUI.Label labelTagAxisStateKey;
-        private AntdUI.Label labelTagAxisStateValue;
-        private AntdUI.Panel panelTagAxisEnable;
-        private AntdUI.Label labelTagAxisEnableKey;
-        private AntdUI.Label labelTagAxisEnableValue;
-        private AntdUI.Panel panelTagAxisHome;
-        private AntdUI.Label labelTagAxisHomeKey;
-        private AntdUI.Label labelTagAxisHomeValue;
-        private AntdUI.Panel panelTagAxisDone;
-        private AntdUI.Label labelTagAxisDoneKey;
-        private AntdUI.Label labelTagAxisDoneValue;
-        private AntdUI.Panel panelTagAxisLimit;
-        private AntdUI.Label labelTagAxisLimitKey;
-        private AntdUI.Label labelTagAxisLimitValue;
-        private AntdUI.Panel panelTagAxisCommandMm;
-        private AntdUI.Label labelTagAxisCommandMmKey;
-        private AntdUI.Label labelTagAxisCommandMmValue;
-        private AntdUI.Panel panelTagAxisEncoderMm;
-        private AntdUI.Label labelTagAxisEncoderMmKey;
-        private AntdUI.Label labelTagAxisEncoderMmValue;
-        private AntdUI.Panel panelTagAxisDefaultVel;
-        private AntdUI.Label labelTagAxisDefaultVelKey;
-        private AntdUI.Label labelTagAxisDefaultVelValue;
-        private AntdUI.Panel panelTagAxisJogVel;
-        private AntdUI.Label labelTagAxisJogVelKey;
-        private AntdUI.Label labelTagAxisJogVelValue;
-        private AntdUI.Label labelParamHint;
-        private AntdUI.Label labelVelocityTitle;
-        private AntdUI.Input inputVelocity;
-        private AntdUI.Label labelTargetPositionTitle;
-        private AntdUI.Input inputTargetPosition;
-        private AntdUI.Label labelMoveDistanceTitle;
-        private AntdUI.Input inputMoveDistance;
+
+        private AntdUI.Panel panelTagCard;
+        private AntdUI.Label labelTagCardKey;
+        private AntdUI.Label labelTagCardValue;
+        private AntdUI.Panel panelTagScan;
+        private AntdUI.Label labelTagScanKey;
+        private AntdUI.Label labelTagScanValue;
+        private AntdUI.Panel panelTagUpdate;
+        private AntdUI.Label labelTagUpdateKey;
+        private AntdUI.Label labelTagUpdateValue;
+        private AntdUI.Panel panelTagState;
+        private AntdUI.Label labelTagStateKey;
+        private AntdUI.Label labelTagStateValue;
+        private AntdUI.Panel panelTagInterlock;
+        private AntdUI.Label labelTagInterlockKey;
+        private AntdUI.Label labelTagInterlockValue;
+        private AntdUI.Panel panelTagLimit;
+        private AntdUI.Label labelTagLimitKey;
+        private AntdUI.Label labelTagLimitValue;
+        private AntdUI.Panel panelTagEnable;
+        private AntdUI.Label labelTagEnableKey;
+        private AntdUI.Label labelTagEnableValue;
+        private AntdUI.Panel panelTagHome;
+        private AntdUI.Label labelTagHomeKey;
+        private AntdUI.Label labelTagHomeValue;
+        private AntdUI.Panel panelTagDone;
+        private AntdUI.Label labelTagDoneKey;
+        private AntdUI.Label labelTagDoneValue;
+        private AntdUI.Panel panelTagCmdMm;
+        private AntdUI.Label labelTagCmdMmKey;
+        private AntdUI.Label labelTagCmdMmValue;
+        private AntdUI.Panel panelTagEncMm;
+        private AntdUI.Label labelTagEncMmKey;
+        private AntdUI.Label labelTagEncMmValue;
+        private AntdUI.Panel panelTagErrorMm;
+        private AntdUI.Label labelTagErrorMmKey;
+        private AntdUI.Label labelTagErrorMmValue;
+        private AntdUI.Panel panelTagDefaultVel;
+        private AntdUI.Label labelTagDefaultVelKey;
+        private AntdUI.Label labelTagDefaultVelValue;
+        private AntdUI.Panel panelTagJogVel;
+        private AntdUI.Label labelTagJogVelKey;
+        private AntdUI.Label labelTagJogVelValue;
+        private AntdUI.Label labelDescriptionTitle;
+        private AntdUI.Label labelDescriptionText;
     }
 }
