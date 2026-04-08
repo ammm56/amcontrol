@@ -249,8 +249,8 @@ namespace AMControlWinF.Views.Motion
             // 
             // flowToolbarLeft
             // 
-            this.flowToolbarLeft.Controls.Add(this.buttonSelectAxis);
             this.flowToolbarLeft.Controls.Add(this.labelSelectedAxis);
+            this.flowToolbarLeft.Controls.Add(this.buttonSelectAxis);
             this.flowToolbarLeft.Dock = System.Windows.Forms.DockStyle.Left;
             this.flowToolbarLeft.Gap = 8;
             this.flowToolbarLeft.Location = new System.Drawing.Point(4, 4);

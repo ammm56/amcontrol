@@ -79,6 +79,7 @@
             // buttonBadge
             // 
             this.buttonBadge.Font = new System.Drawing.Font("Microsoft YaHei UI", 8F, System.Drawing.FontStyle.Bold);
+            this.buttonBadge.ForeColor = System.Drawing.Color.White;
             this.buttonBadge.Location = new System.Drawing.Point(10, 10);
             this.buttonBadge.Margin = new System.Windows.Forms.Padding(0);
             this.buttonBadge.Name = "buttonBadge";
