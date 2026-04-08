@@ -24,18 +24,19 @@
             this.panelLeft = new AntdUI.Panel();
             this.actuatorVirtualListControl = new AMControlWinF.Views.Motion.MotionActuatorVirtualListControl();
             this.panelSummary = new AntdUI.Panel();
-            this.panelCylinderSummary = new AntdUI.Panel();
-            this.labelCylinderCount = new AntdUI.Label();
-            this.labelCylinderTitle = new AntdUI.Label();
-            this.panelVacuumSummary = new AntdUI.Panel();
-            this.labelVacuumCount = new AntdUI.Label();
-            this.labelVacuumTitle = new AntdUI.Label();
-            this.panelGripperSummary = new AntdUI.Panel();
-            this.labelGripperCount = new AntdUI.Label();
-            this.labelGripperTitle = new AntdUI.Label();
+            this.flowStats = new AntdUI.FlowPanel();
             this.panelStackLightSummary = new AntdUI.Panel();
             this.labelStackLightCount = new AntdUI.Label();
             this.labelStackLightTitle = new AntdUI.Label();
+            this.panelGripperSummary = new AntdUI.Panel();
+            this.labelGripperCount = new AntdUI.Label();
+            this.labelGripperTitle = new AntdUI.Label();
+            this.panelVacuumSummary = new AntdUI.Panel();
+            this.labelVacuumCount = new AntdUI.Label();
+            this.labelVacuumTitle = new AntdUI.Label();
+            this.panelCylinderSummary = new AntdUI.Panel();
+            this.labelCylinderCount = new AntdUI.Label();
+            this.labelCylinderTitle = new AntdUI.Label();
             this.panelToolbar = new AntdUI.Panel();
             this.flowToolbarRight = new AntdUI.FlowPanel();
             this.inputSearch = new AntdUI.Input();
@@ -45,7 +46,6 @@
             this.buttonFilterVacuum = new AntdUI.Button();
             this.buttonFilterCylinder = new AntdUI.Button();
             this.buttonFilterAll = new AntdUI.Button();
-            this.tableSummary = new System.Windows.Forms.TableLayoutPanel();
             this.panelRoot.SuspendLayout();
             this.panelContent.SuspendLayout();
             this.gridContent.SuspendLayout();
@@ -53,10 +53,11 @@
             this.tableRight.SuspendLayout();
             this.panelLeft.SuspendLayout();
             this.panelSummary.SuspendLayout();
-            this.panelCylinderSummary.SuspendLayout();
-            this.panelVacuumSummary.SuspendLayout();
-            this.panelGripperSummary.SuspendLayout();
+            this.flowStats.SuspendLayout();
             this.panelStackLightSummary.SuspendLayout();
+            this.panelGripperSummary.SuspendLayout();
+            this.panelVacuumSummary.SuspendLayout();
+            this.panelCylinderSummary.SuspendLayout();
             this.panelToolbar.SuspendLayout();
             this.flowToolbarRight.SuspendLayout();
             this.flowToolbarLeft.SuspendLayout();
@@ -80,13 +81,13 @@
             // 
             this.panelContent.Controls.Add(this.gridContent);
             this.panelContent.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelContent.Location = new System.Drawing.Point(8, 128);
+            this.panelContent.Location = new System.Drawing.Point(8, 140);
             this.panelContent.Margin = new System.Windows.Forms.Padding(0);
             this.panelContent.Name = "panelContent";
             this.panelContent.Radius = 0;
             this.panelContent.ShadowOpacity = 0F;
             this.panelContent.ShadowOpacityHover = 0F;
-            this.panelContent.Size = new System.Drawing.Size(834, 544);
+            this.panelContent.Size = new System.Drawing.Size(834, 532);
             this.panelContent.TabIndex = 2;
             // 
             // gridContent
@@ -97,7 +98,7 @@
             this.gridContent.Location = new System.Drawing.Point(0, 0);
             this.gridContent.Margin = new System.Windows.Forms.Padding(0);
             this.gridContent.Name = "gridContent";
-            this.gridContent.Size = new System.Drawing.Size(834, 544);
+            this.gridContent.Size = new System.Drawing.Size(834, 532);
             this.gridContent.Span = "100% 320";
             this.gridContent.TabIndex = 0;
             // 
@@ -110,7 +111,7 @@
             this.panelRight.Name = "panelRight";
             this.panelRight.Radius = 12;
             this.panelRight.Shadow = 4;
-            this.panelRight.Size = new System.Drawing.Size(320, 544);
+            this.panelRight.Size = new System.Drawing.Size(320, 532);
             this.panelRight.TabIndex = 1;
             // 
             // tableRight
@@ -126,7 +127,7 @@
             this.tableRight.RowCount = 2;
             this.tableRight.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 196F));
             this.tableRight.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableRight.Size = new System.Drawing.Size(312, 536);
+            this.tableRight.Size = new System.Drawing.Size(312, 524);
             this.tableRight.TabIndex = 0;
             // 
             // actuatorActionPanelControl
@@ -144,15 +145,11 @@
             this.actuatorDetailControl.Location = new System.Drawing.Point(0, 196);
             this.actuatorDetailControl.Margin = new System.Windows.Forms.Padding(0);
             this.actuatorDetailControl.Name = "actuatorDetailControl";
-            this.actuatorDetailControl.Size = new System.Drawing.Size(312, 340);
+            this.actuatorDetailControl.Size = new System.Drawing.Size(312, 328);
             this.actuatorDetailControl.TabIndex = 1;
             // 
             // panelLeft
             // 
-            this.panelLeft.Controls.Add(this.panelStackLightSummary);
-            this.panelLeft.Controls.Add(this.panelGripperSummary);
-            this.panelLeft.Controls.Add(this.panelVacuumSummary);
-            this.panelLeft.Controls.Add(this.panelCylinderSummary);
             this.panelLeft.Controls.Add(this.actuatorVirtualListControl);
             this.panelLeft.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelLeft.Location = new System.Drawing.Point(0, 0);
@@ -161,7 +158,7 @@
             this.panelLeft.Radius = 0;
             this.panelLeft.ShadowOpacity = 0F;
             this.panelLeft.ShadowOpacityHover = 0F;
-            this.panelLeft.Size = new System.Drawing.Size(514, 544);
+            this.panelLeft.Size = new System.Drawing.Size(514, 532);
             this.panelLeft.TabIndex = 0;
             // 
             // actuatorVirtualListControl
@@ -170,144 +167,187 @@
             this.actuatorVirtualListControl.Location = new System.Drawing.Point(0, 0);
             this.actuatorVirtualListControl.Margin = new System.Windows.Forms.Padding(0);
             this.actuatorVirtualListControl.Name = "actuatorVirtualListControl";
-            this.actuatorVirtualListControl.Size = new System.Drawing.Size(514, 544);
+            this.actuatorVirtualListControl.Size = new System.Drawing.Size(514, 532);
             this.actuatorVirtualListControl.TabIndex = 0;
             // 
             // panelSummary
             // 
-            this.panelSummary.Controls.Add(this.tableSummary);
+            this.panelSummary.Controls.Add(this.flowStats);
             this.panelSummary.Dock = System.Windows.Forms.DockStyle.Top;
             this.panelSummary.Location = new System.Drawing.Point(8, 52);
             this.panelSummary.Margin = new System.Windows.Forms.Padding(0);
             this.panelSummary.Name = "panelSummary";
-            this.panelSummary.Padding = new System.Windows.Forms.Padding(0, 8, 0, 8);
             this.panelSummary.Radius = 0;
-            this.panelSummary.Size = new System.Drawing.Size(834, 76);
+            this.panelSummary.ShadowOpacity = 0F;
+            this.panelSummary.ShadowOpacityHover = 0F;
+            this.panelSummary.Size = new System.Drawing.Size(834, 88);
             this.panelSummary.TabIndex = 1;
             // 
-            // panelCylinderSummary
+            // flowStats
             // 
-            this.panelCylinderSummary.Controls.Add(this.labelCylinderCount);
-            this.panelCylinderSummary.Controls.Add(this.labelCylinderTitle);
-            this.panelCylinderSummary.Location = new System.Drawing.Point(67, 52);
-            this.panelCylinderSummary.Margin = new System.Windows.Forms.Padding(0, 0, 6, 0);
-            this.panelCylinderSummary.Name = "panelCylinderSummary";
-            this.panelCylinderSummary.Padding = new System.Windows.Forms.Padding(12, 8, 12, 8);
-            this.panelCylinderSummary.Radius = 10;
-            this.panelCylinderSummary.Size = new System.Drawing.Size(202, 60);
-            this.panelCylinderSummary.TabIndex = 0;
-            // 
-            // labelCylinderCount
-            // 
-            this.labelCylinderCount.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.labelCylinderCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 14F, System.Drawing.FontStyle.Bold);
-            this.labelCylinderCount.Location = new System.Drawing.Point(12, 28);
-            this.labelCylinderCount.Name = "labelCylinderCount";
-            this.labelCylinderCount.Size = new System.Drawing.Size(178, 24);
-            this.labelCylinderCount.TabIndex = 1;
-            this.labelCylinderCount.Text = "0";
-            // 
-            // labelCylinderTitle
-            // 
-            this.labelCylinderTitle.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelCylinderTitle.Location = new System.Drawing.Point(12, 8);
-            this.labelCylinderTitle.Name = "labelCylinderTitle";
-            this.labelCylinderTitle.Size = new System.Drawing.Size(178, 18);
-            this.labelCylinderTitle.TabIndex = 0;
-            this.labelCylinderTitle.Text = "气缸";
-            // 
-            // panelVacuumSummary
-            // 
-            this.panelVacuumSummary.Controls.Add(this.labelVacuumCount);
-            this.panelVacuumSummary.Controls.Add(this.labelVacuumTitle);
-            this.panelVacuumSummary.Location = new System.Drawing.Point(281, 80);
-            this.panelVacuumSummary.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.panelVacuumSummary.Name = "panelVacuumSummary";
-            this.panelVacuumSummary.Padding = new System.Windows.Forms.Padding(12, 8, 12, 8);
-            this.panelVacuumSummary.Radius = 10;
-            this.panelVacuumSummary.Size = new System.Drawing.Size(196, 60);
-            this.panelVacuumSummary.TabIndex = 1;
-            // 
-            // labelVacuumCount
-            // 
-            this.labelVacuumCount.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.labelVacuumCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 14F, System.Drawing.FontStyle.Bold);
-            this.labelVacuumCount.Location = new System.Drawing.Point(12, 28);
-            this.labelVacuumCount.Name = "labelVacuumCount";
-            this.labelVacuumCount.Size = new System.Drawing.Size(172, 24);
-            this.labelVacuumCount.TabIndex = 1;
-            this.labelVacuumCount.Text = "0";
-            // 
-            // labelVacuumTitle
-            // 
-            this.labelVacuumTitle.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelVacuumTitle.Location = new System.Drawing.Point(12, 8);
-            this.labelVacuumTitle.Name = "labelVacuumTitle";
-            this.labelVacuumTitle.Size = new System.Drawing.Size(172, 18);
-            this.labelVacuumTitle.TabIndex = 0;
-            this.labelVacuumTitle.Text = "真空";
-            // 
-            // panelGripperSummary
-            // 
-            this.panelGripperSummary.Controls.Add(this.labelGripperCount);
-            this.panelGripperSummary.Controls.Add(this.labelGripperTitle);
-            this.panelGripperSummary.Location = new System.Drawing.Point(281, 171);
-            this.panelGripperSummary.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.panelGripperSummary.Name = "panelGripperSummary";
-            this.panelGripperSummary.Padding = new System.Windows.Forms.Padding(12, 8, 12, 8);
-            this.panelGripperSummary.Radius = 10;
-            this.panelGripperSummary.Size = new System.Drawing.Size(196, 60);
-            this.panelGripperSummary.TabIndex = 2;
-            // 
-            // labelGripperCount
-            // 
-            this.labelGripperCount.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.labelGripperCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 14F, System.Drawing.FontStyle.Bold);
-            this.labelGripperCount.Location = new System.Drawing.Point(12, 28);
-            this.labelGripperCount.Name = "labelGripperCount";
-            this.labelGripperCount.Size = new System.Drawing.Size(172, 24);
-            this.labelGripperCount.TabIndex = 1;
-            this.labelGripperCount.Text = "0";
-            // 
-            // labelGripperTitle
-            // 
-            this.labelGripperTitle.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelGripperTitle.Location = new System.Drawing.Point(12, 8);
-            this.labelGripperTitle.Name = "labelGripperTitle";
-            this.labelGripperTitle.Size = new System.Drawing.Size(172, 18);
-            this.labelGripperTitle.TabIndex = 0;
-            this.labelGripperTitle.Text = "夹爪";
+            this.flowStats.Controls.Add(this.panelStackLightSummary);
+            this.flowStats.Controls.Add(this.panelGripperSummary);
+            this.flowStats.Controls.Add(this.panelVacuumSummary);
+            this.flowStats.Controls.Add(this.panelCylinderSummary);
+            this.flowStats.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.flowStats.Location = new System.Drawing.Point(0, 0);
+            this.flowStats.Name = "flowStats";
+            this.flowStats.Padding = new System.Windows.Forms.Padding(4, 6, 4, 6);
+            this.flowStats.Size = new System.Drawing.Size(834, 88);
+            this.flowStats.TabIndex = 0;
+            this.flowStats.Text = "flowPanel1";
             // 
             // panelStackLightSummary
             // 
             this.panelStackLightSummary.Controls.Add(this.labelStackLightCount);
             this.panelStackLightSummary.Controls.Add(this.labelStackLightTitle);
-            this.panelStackLightSummary.Location = new System.Drawing.Point(293, 293);
+            this.panelStackLightSummary.Location = new System.Drawing.Point(574, 6);
             this.panelStackLightSummary.Margin = new System.Windows.Forms.Padding(6, 0, 0, 0);
             this.panelStackLightSummary.Name = "panelStackLightSummary";
-            this.panelStackLightSummary.Padding = new System.Windows.Forms.Padding(12, 8, 12, 8);
-            this.panelStackLightSummary.Radius = 10;
-            this.panelStackLightSummary.Size = new System.Drawing.Size(204, 60);
+            this.panelStackLightSummary.Padding = new System.Windows.Forms.Padding(12);
+            this.panelStackLightSummary.Radius = 12;
+            this.panelStackLightSummary.Shadow = 4;
+            this.panelStackLightSummary.ShadowOpacity = 0.2F;
+            this.panelStackLightSummary.ShadowOpacityAnimation = true;
+            this.panelStackLightSummary.Size = new System.Drawing.Size(180, 72);
             this.panelStackLightSummary.TabIndex = 3;
             // 
             // labelStackLightCount
             // 
-            this.labelStackLightCount.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.labelStackLightCount.BackColor = System.Drawing.Color.Transparent;
+            this.labelStackLightCount.Dock = System.Windows.Forms.DockStyle.Right;
             this.labelStackLightCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 14F, System.Drawing.FontStyle.Bold);
-            this.labelStackLightCount.Location = new System.Drawing.Point(12, 28);
+            this.labelStackLightCount.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(140)))), ((int)(((byte)(22)))));
+            this.labelStackLightCount.Location = new System.Drawing.Point(93, 16);
             this.labelStackLightCount.Name = "labelStackLightCount";
-            this.labelStackLightCount.Size = new System.Drawing.Size(180, 24);
+            this.labelStackLightCount.Size = new System.Drawing.Size(71, 40);
             this.labelStackLightCount.TabIndex = 1;
             this.labelStackLightCount.Text = "0";
             // 
             // labelStackLightTitle
             // 
-            this.labelStackLightTitle.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelStackLightTitle.Location = new System.Drawing.Point(12, 8);
+            this.labelStackLightTitle.BackColor = System.Drawing.Color.Transparent;
+            this.labelStackLightTitle.Dock = System.Windows.Forms.DockStyle.Left;
+            this.labelStackLightTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(140)))), ((int)(((byte)(22)))));
+            this.labelStackLightTitle.Location = new System.Drawing.Point(16, 16);
             this.labelStackLightTitle.Name = "labelStackLightTitle";
-            this.labelStackLightTitle.Size = new System.Drawing.Size(180, 18);
+            this.labelStackLightTitle.Size = new System.Drawing.Size(72, 40);
             this.labelStackLightTitle.TabIndex = 0;
             this.labelStackLightTitle.Text = "灯塔";
+            // 
+            // panelGripperSummary
+            // 
+            this.panelGripperSummary.Controls.Add(this.labelGripperCount);
+            this.panelGripperSummary.Controls.Add(this.labelGripperTitle);
+            this.panelGripperSummary.Location = new System.Drawing.Point(382, 6);
+            this.panelGripperSummary.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.panelGripperSummary.Name = "panelGripperSummary";
+            this.panelGripperSummary.Padding = new System.Windows.Forms.Padding(12, 8, 12, 8);
+            this.panelGripperSummary.Radius = 12;
+            this.panelGripperSummary.Shadow = 4;
+            this.panelGripperSummary.ShadowOpacity = 0.2F;
+            this.panelGripperSummary.ShadowOpacityAnimation = true;
+            this.panelGripperSummary.Size = new System.Drawing.Size(180, 72);
+            this.panelGripperSummary.TabIndex = 2;
+            // 
+            // labelGripperCount
+            // 
+            this.labelGripperCount.BackColor = System.Drawing.Color.Transparent;
+            this.labelGripperCount.Dock = System.Windows.Forms.DockStyle.Right;
+            this.labelGripperCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 14F, System.Drawing.FontStyle.Bold);
+            this.labelGripperCount.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(156)))), ((int)(((byte)(39)))), ((int)(((byte)(176)))));
+            this.labelGripperCount.Location = new System.Drawing.Point(93, 12);
+            this.labelGripperCount.Name = "labelGripperCount";
+            this.labelGripperCount.Size = new System.Drawing.Size(71, 48);
+            this.labelGripperCount.TabIndex = 1;
+            this.labelGripperCount.Text = "0";
+            // 
+            // labelGripperTitle
+            // 
+            this.labelGripperTitle.BackColor = System.Drawing.Color.Transparent;
+            this.labelGripperTitle.Dock = System.Windows.Forms.DockStyle.Left;
+            this.labelGripperTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(156)))), ((int)(((byte)(39)))), ((int)(((byte)(176)))));
+            this.labelGripperTitle.Location = new System.Drawing.Point(16, 12);
+            this.labelGripperTitle.Name = "labelGripperTitle";
+            this.labelGripperTitle.Size = new System.Drawing.Size(72, 48);
+            this.labelGripperTitle.TabIndex = 0;
+            this.labelGripperTitle.Text = "夹爪";
+            // 
+            // panelVacuumSummary
+            // 
+            this.panelVacuumSummary.Controls.Add(this.labelVacuumCount);
+            this.panelVacuumSummary.Controls.Add(this.labelVacuumTitle);
+            this.panelVacuumSummary.Location = new System.Drawing.Point(190, 6);
+            this.panelVacuumSummary.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.panelVacuumSummary.Name = "panelVacuumSummary";
+            this.panelVacuumSummary.Padding = new System.Windows.Forms.Padding(12, 8, 12, 8);
+            this.panelVacuumSummary.Radius = 12;
+            this.panelVacuumSummary.Shadow = 4;
+            this.panelVacuumSummary.ShadowOpacity = 0.2F;
+            this.panelVacuumSummary.ShadowOpacityAnimation = true;
+            this.panelVacuumSummary.Size = new System.Drawing.Size(180, 72);
+            this.panelVacuumSummary.TabIndex = 1;
+            // 
+            // labelVacuumCount
+            // 
+            this.labelVacuumCount.BackColor = System.Drawing.Color.Transparent;
+            this.labelVacuumCount.Dock = System.Windows.Forms.DockStyle.Right;
+            this.labelVacuumCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 14F, System.Drawing.FontStyle.Bold);
+            this.labelVacuumCount.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(3)))), ((int)(((byte)(169)))), ((int)(((byte)(244)))));
+            this.labelVacuumCount.Location = new System.Drawing.Point(93, 12);
+            this.labelVacuumCount.Name = "labelVacuumCount";
+            this.labelVacuumCount.Size = new System.Drawing.Size(71, 48);
+            this.labelVacuumCount.TabIndex = 1;
+            this.labelVacuumCount.Text = "0";
+            // 
+            // labelVacuumTitle
+            // 
+            this.labelVacuumTitle.BackColor = System.Drawing.Color.Transparent;
+            this.labelVacuumTitle.Dock = System.Windows.Forms.DockStyle.Left;
+            this.labelVacuumTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(3)))), ((int)(((byte)(169)))), ((int)(((byte)(244)))));
+            this.labelVacuumTitle.Location = new System.Drawing.Point(16, 12);
+            this.labelVacuumTitle.Name = "labelVacuumTitle";
+            this.labelVacuumTitle.Size = new System.Drawing.Size(72, 48);
+            this.labelVacuumTitle.TabIndex = 0;
+            this.labelVacuumTitle.Text = "真空";
+            // 
+            // panelCylinderSummary
+            // 
+            this.panelCylinderSummary.Controls.Add(this.labelCylinderCount);
+            this.panelCylinderSummary.Controls.Add(this.labelCylinderTitle);
+            this.panelCylinderSummary.Location = new System.Drawing.Point(4, 6);
+            this.panelCylinderSummary.Margin = new System.Windows.Forms.Padding(0);
+            this.panelCylinderSummary.Name = "panelCylinderSummary";
+            this.panelCylinderSummary.Padding = new System.Windows.Forms.Padding(12);
+            this.panelCylinderSummary.Radius = 12;
+            this.panelCylinderSummary.Shadow = 4;
+            this.panelCylinderSummary.ShadowOpacity = 0.2F;
+            this.panelCylinderSummary.ShadowOpacityAnimation = true;
+            this.panelCylinderSummary.Size = new System.Drawing.Size(180, 72);
+            this.panelCylinderSummary.TabIndex = 0;
+            // 
+            // labelCylinderCount
+            // 
+            this.labelCylinderCount.BackColor = System.Drawing.Color.Transparent;
+            this.labelCylinderCount.Dock = System.Windows.Forms.DockStyle.Right;
+            this.labelCylinderCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 14F, System.Drawing.FontStyle.Bold);
+            this.labelCylinderCount.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(22)))), ((int)(((byte)(119)))), ((int)(((byte)(255)))));
+            this.labelCylinderCount.Location = new System.Drawing.Point(93, 16);
+            this.labelCylinderCount.Name = "labelCylinderCount";
+            this.labelCylinderCount.Size = new System.Drawing.Size(71, 40);
+            this.labelCylinderCount.TabIndex = 1;
+            this.labelCylinderCount.Text = "0";
+            // 
+            // labelCylinderTitle
+            // 
+            this.labelCylinderTitle.BackColor = System.Drawing.Color.Transparent;
+            this.labelCylinderTitle.Dock = System.Windows.Forms.DockStyle.Left;
+            this.labelCylinderTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(22)))), ((int)(((byte)(119)))), ((int)(((byte)(255)))));
+            this.labelCylinderTitle.Location = new System.Drawing.Point(16, 16);
+            this.labelCylinderTitle.Name = "labelCylinderTitle";
+            this.labelCylinderTitle.Size = new System.Drawing.Size(72, 40);
+            this.labelCylinderTitle.TabIndex = 0;
+            this.labelCylinderTitle.Text = "气缸";
             // 
             // panelToolbar
             // 
@@ -414,22 +454,6 @@
             this.buttonFilterAll.Type = AntdUI.TTypeMini.Primary;
             this.buttonFilterAll.WaveSize = 0;
             // 
-            // tableSummary
-            // 
-            this.tableSummary.ColumnCount = 1;
-            this.tableSummary.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableSummary.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableSummary.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableSummary.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableSummary.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableSummary.Location = new System.Drawing.Point(0, 8);
-            this.tableSummary.Margin = new System.Windows.Forms.Padding(0);
-            this.tableSummary.Name = "tableSummary";
-            this.tableSummary.RowCount = 1;
-            this.tableSummary.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableSummary.Size = new System.Drawing.Size(834, 60);
-            this.tableSummary.TabIndex = 0;
-            // 
             // MotionActuatorPage
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
@@ -444,10 +468,11 @@
             this.tableRight.ResumeLayout(false);
             this.panelLeft.ResumeLayout(false);
             this.panelSummary.ResumeLayout(false);
-            this.panelCylinderSummary.ResumeLayout(false);
-            this.panelVacuumSummary.ResumeLayout(false);
-            this.panelGripperSummary.ResumeLayout(false);
+            this.flowStats.ResumeLayout(false);
             this.panelStackLightSummary.ResumeLayout(false);
+            this.panelGripperSummary.ResumeLayout(false);
+            this.panelVacuumSummary.ResumeLayout(false);
+            this.panelCylinderSummary.ResumeLayout(false);
             this.panelToolbar.ResumeLayout(false);
             this.flowToolbarRight.ResumeLayout(false);
             this.flowToolbarLeft.ResumeLayout(false);
@@ -486,6 +511,6 @@
         private System.Windows.Forms.TableLayoutPanel tableRight;
         private MotionActuatorActionPanelControl actuatorActionPanelControl;
         private MotionActuatorDetailControl actuatorDetailControl;
-        private System.Windows.Forms.TableLayoutPanel tableSummary;
+        private AntdUI.FlowPanel flowStats;
     }
 }
