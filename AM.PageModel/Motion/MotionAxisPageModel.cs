@@ -694,6 +694,19 @@ namespace AM.PageModel.Motion
                 get { return EncoderPositionMm.ToString("0.###") + " mm"; }
             }
 
+            /// <summary>
+            /// 位置误差 指令位置 - 编码器位置。
+            /// </summary>
+            public double PositionErrorMm
+            {
+                get { return CommandPositionMm - EncoderPositionMm; }
+            }
+
+            public string PositionErrorMmText
+            {
+                get { return PositionErrorMm.ToString("0.###") + " mm"; }
+            }
+
             public string DefaultVelocityText
             {
                 get { return DefaultVelocityMm.ToString("0.###") + " mm/s"; }

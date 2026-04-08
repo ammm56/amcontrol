@@ -490,6 +490,9 @@
     <EmbeddedResource Include="Views\Motion\DOMotionDetailControl.resx">
       <DependentUpon>DOMotionDetailControl.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\Motion\MotionAxisDetailControl.resx">
+      <DependentUpon>MotionAxisDetailControl.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Views\Motion\MotionAxisPage.resx">
       <DependentUpon>MotionAxisPage.cs</DependentUpon>
     </EmbeddedResource>
@@ -553,4 +556,3 @@
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
-

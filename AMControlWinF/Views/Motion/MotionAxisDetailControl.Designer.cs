@@ -140,7 +140,7 @@ namespace AMControlWinF.Views.Motion
             // 
             // labelDescriptionText
             // 
-            this.labelDescriptionText.Location = new System.Drawing.Point(8, 446);
+            this.labelDescriptionText.Location = new System.Drawing.Point(8, 393);
             this.labelDescriptionText.Margin = new System.Windows.Forms.Padding(0);
             this.labelDescriptionText.Name = "labelDescriptionText";
             this.labelDescriptionText.Size = new System.Drawing.Size(252, 44);
@@ -150,7 +150,7 @@ namespace AMControlWinF.Views.Motion
             // labelDescriptionTitle
             // 
             this.labelDescriptionTitle.ForeColor = System.Drawing.Color.Gray;
-            this.labelDescriptionTitle.Location = new System.Drawing.Point(8, 420);
+            this.labelDescriptionTitle.Location = new System.Drawing.Point(8, 367);
             this.labelDescriptionTitle.Margin = new System.Windows.Forms.Padding(0);
             this.labelDescriptionTitle.Name = "labelDescriptionTitle";
             this.labelDescriptionTitle.Size = new System.Drawing.Size(252, 22);
@@ -161,7 +161,7 @@ namespace AMControlWinF.Views.Motion
             // 
             this.panelTagJogVel.Controls.Add(this.labelTagJogVelValue);
             this.panelTagJogVel.Controls.Add(this.labelTagJogVelKey);
-            this.panelTagJogVel.Location = new System.Drawing.Point(8, 392);
+            this.panelTagJogVel.Location = new System.Drawing.Point(8, 318);
             this.panelTagJogVel.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagJogVel.Name = "panelTagJogVel";
             this.panelTagJogVel.Radius = 0;
@@ -186,14 +186,14 @@ namespace AMControlWinF.Views.Motion
             this.labelTagJogVelKey.Name = "labelTagJogVelKey";
             this.labelTagJogVelKey.Size = new System.Drawing.Size(102, 22);
             this.labelTagJogVelKey.TabIndex = 0;
-            this.labelTagJogVelKey.Text = "Jog速度(mm/s)";
+            this.labelTagJogVelKey.Text = "速度(mm/s)";
             this.labelTagJogVelKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // panelTagDefaultVel
             // 
             this.panelTagDefaultVel.Controls.Add(this.labelTagDefaultVelValue);
             this.panelTagDefaultVel.Controls.Add(this.labelTagDefaultVelKey);
-            this.panelTagDefaultVel.Location = new System.Drawing.Point(8, 368);
+            this.panelTagDefaultVel.Location = new System.Drawing.Point(8, 294);
             this.panelTagDefaultVel.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagDefaultVel.Name = "panelTagDefaultVel";
             this.panelTagDefaultVel.Radius = 0;
@@ -225,7 +225,7 @@ namespace AMControlWinF.Views.Motion
             // 
             this.panelTagErrorMm.Controls.Add(this.labelTagErrorMmValue);
             this.panelTagErrorMm.Controls.Add(this.labelTagErrorMmKey);
-            this.panelTagErrorMm.Location = new System.Drawing.Point(8, 344);
+            this.panelTagErrorMm.Location = new System.Drawing.Point(8, 270);
             this.panelTagErrorMm.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagErrorMm.Name = "panelTagErrorMm";
             this.panelTagErrorMm.Radius = 0;
@@ -257,7 +257,7 @@ namespace AMControlWinF.Views.Motion
             // 
             this.panelTagEncMm.Controls.Add(this.labelTagEncMmValue);
             this.panelTagEncMm.Controls.Add(this.labelTagEncMmKey);
-            this.panelTagEncMm.Location = new System.Drawing.Point(8, 320);
+            this.panelTagEncMm.Location = new System.Drawing.Point(8, 246);
             this.panelTagEncMm.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagEncMm.Name = "panelTagEncMm";
             this.panelTagEncMm.Radius = 0;
@@ -289,7 +289,7 @@ namespace AMControlWinF.Views.Motion
             // 
             this.panelTagCmdMm.Controls.Add(this.labelTagCmdMmValue);
             this.panelTagCmdMm.Controls.Add(this.labelTagCmdMmKey);
-            this.panelTagCmdMm.Location = new System.Drawing.Point(8, 296);
+            this.panelTagCmdMm.Location = new System.Drawing.Point(8, 222);
             this.panelTagCmdMm.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagCmdMm.Name = "panelTagCmdMm";
             this.panelTagCmdMm.Radius = 0;
@@ -321,7 +321,7 @@ namespace AMControlWinF.Views.Motion
             // 
             this.panelTagDone.Controls.Add(this.labelTagDoneValue);
             this.panelTagDone.Controls.Add(this.labelTagDoneKey);
-            this.panelTagDone.Location = new System.Drawing.Point(8, 272);
+            this.panelTagDone.Location = new System.Drawing.Point(8, 198);
             this.panelTagDone.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagDone.Name = "panelTagDone";
             this.panelTagDone.Radius = 0;
@@ -353,7 +353,7 @@ namespace AMControlWinF.Views.Motion
             // 
             this.panelTagHome.Controls.Add(this.labelTagHomeValue);
             this.panelTagHome.Controls.Add(this.labelTagHomeKey);
-            this.panelTagHome.Location = new System.Drawing.Point(8, 248);
+            this.panelTagHome.Location = new System.Drawing.Point(8, 174);
             this.panelTagHome.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagHome.Name = "panelTagHome";
             this.panelTagHome.Radius = 0;
@@ -385,7 +385,7 @@ namespace AMControlWinF.Views.Motion
             // 
             this.panelTagEnable.Controls.Add(this.labelTagEnableValue);
             this.panelTagEnable.Controls.Add(this.labelTagEnableKey);
-            this.panelTagEnable.Location = new System.Drawing.Point(8, 224);
+            this.panelTagEnable.Location = new System.Drawing.Point(8, 150);
             this.panelTagEnable.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagEnable.Name = "panelTagEnable";
             this.panelTagEnable.Radius = 0;
@@ -417,7 +417,7 @@ namespace AMControlWinF.Views.Motion
             // 
             this.panelTagLimit.Controls.Add(this.labelTagLimitValue);
             this.panelTagLimit.Controls.Add(this.labelTagLimitKey);
-            this.panelTagLimit.Location = new System.Drawing.Point(8, 200);
+            this.panelTagLimit.Location = new System.Drawing.Point(8, 126);
             this.panelTagLimit.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagLimit.Name = "panelTagLimit";
             this.panelTagLimit.Radius = 0;
@@ -449,7 +449,7 @@ namespace AMControlWinF.Views.Motion
             // 
             this.panelTagInterlock.Controls.Add(this.labelTagInterlockValue);
             this.panelTagInterlock.Controls.Add(this.labelTagInterlockKey);
-            this.panelTagInterlock.Location = new System.Drawing.Point(8, 160);
+            this.panelTagInterlock.Location = new System.Drawing.Point(8, 86);
             this.panelTagInterlock.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagInterlock.Name = "panelTagInterlock";
             this.panelTagInterlock.Radius = 0;
@@ -481,7 +481,7 @@ namespace AMControlWinF.Views.Motion
             // 
             this.panelTagState.Controls.Add(this.labelTagStateValue);
             this.panelTagState.Controls.Add(this.labelTagStateKey);
-            this.panelTagState.Location = new System.Drawing.Point(8, 136);
+            this.panelTagState.Location = new System.Drawing.Point(8, 62);
             this.panelTagState.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagState.Name = "panelTagState";
             this.panelTagState.Radius = 0;
@@ -513,7 +513,7 @@ namespace AMControlWinF.Views.Motion
             // 
             this.panelTagUpdate.Controls.Add(this.labelTagUpdateValue);
             this.panelTagUpdate.Controls.Add(this.labelTagUpdateKey);
-            this.panelTagUpdate.Location = new System.Drawing.Point(8, 112);
+            this.panelTagUpdate.Location = new System.Drawing.Point(8, 343);
             this.panelTagUpdate.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagUpdate.Name = "panelTagUpdate";
             this.panelTagUpdate.Radius = 0;
@@ -545,7 +545,7 @@ namespace AMControlWinF.Views.Motion
             // 
             this.panelTagScan.Controls.Add(this.labelTagScanValue);
             this.panelTagScan.Controls.Add(this.labelTagScanKey);
-            this.panelTagScan.Location = new System.Drawing.Point(8, 88);
+            this.panelTagScan.Location = new System.Drawing.Point(8, 35);
             this.panelTagScan.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagScan.Name = "panelTagScan";
             this.panelTagScan.Radius = 0;
@@ -577,7 +577,7 @@ namespace AMControlWinF.Views.Motion
             // 
             this.panelTagCard.Controls.Add(this.labelTagCardValue);
             this.panelTagCard.Controls.Add(this.labelTagCardKey);
-            this.panelTagCard.Location = new System.Drawing.Point(8, 64);
+            this.panelTagCard.Location = new System.Drawing.Point(8, 10);
             this.panelTagCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagCard.Name = "panelTagCard";
             this.panelTagCard.Radius = 0;
@@ -693,6 +693,7 @@ namespace AMControlWinF.Views.Motion
             this.panelHeader.ResumeLayout(false);
             this.panelEmpty.ResumeLayout(false);
             this.ResumeLayout(false);
+
         }
 
         private AntdUI.Panel panelRoot;

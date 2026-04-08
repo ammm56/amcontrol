@@ -1,6 +1,7 @@
 using AM.Core.Context;
 using AM.PageModel.Motion;
 using System;
+using System.ComponentModel;
 using System.Reflection;
 using System.Windows.Forms;
 
@@ -124,11 +125,11 @@ namespace AMControlWinF.Views.Motion
                 SetTagRow(labelTagEnableKey, labelTagEnableValue, "使能状态", axisItem.EnableText);
                 SetTagRow(labelTagHomeKey, labelTagHomeValue, "原点状态", axisItem.HomeText);
                 SetTagRow(labelTagDoneKey, labelTagDoneValue, "到位状态", axisItem.DoneText);
-                SetTagRow(labelTagCmdMmKey, labelTagCmdMmValue, "规划位置(mm)", FormatNumber(axisItem.CommandPositionMm));
-                SetTagRow(labelTagEncMmKey, labelTagEncMmValue, "编码器位置(mm)", FormatNumber(axisItem.EncoderPositionMm));
-                SetTagRow(labelTagErrorMmKey, labelTagErrorMmValue, "位置误差(mm)", FormatNumber(axisItem.CommandPositionMm - axisItem.EncoderPositionMm));
-                SetTagRow(labelTagDefaultVelKey, labelTagDefaultVelValue, "默认速度(mm/s)", FormatNumber(axisItem.DefaultVelocityMm));
-                SetTagRow(labelTagJogVelKey, labelTagJogVelValue, "Jog速度(mm/s)", FormatNumber(axisItem.JogVelocityMm));
+                SetTagRow(labelTagCmdMmKey, labelTagCmdMmValue, "规划位置(mm)", axisItem.CommandPositionMmText);
+                SetTagRow(labelTagEncMmKey, labelTagEncMmValue, "编码器位置(mm)", axisItem.EncoderPositionMmText);
+                SetTagRow(labelTagErrorMmKey, labelTagErrorMmValue, "位置误差(mm)", axisItem.PositionErrorMmText);
+                SetTagRow(labelTagDefaultVelKey, labelTagDefaultVelValue, "默认速度(mm/s)", axisItem.DefaultVelocityText);
+                SetTagRow(labelTagJogVelKey, labelTagJogVelValue, "Jog速度(mm/s)", axisItem.JogVelocityText);
 
                 if (axisChanged)
                 {

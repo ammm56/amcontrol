@@ -109,7 +109,7 @@
             // 
             this.panelFooter.Controls.Add(this.paginationAxes);
             this.panelFooter.Controls.Add(this.labelPageSummary);
-            this.panelFooter.Location = new System.Drawing.Point(0, 480);
+            this.panelFooter.Location = new System.Drawing.Point(-940, -524);
             this.panelFooter.Margin = new System.Windows.Forms.Padding(0, 8, 0, 0);
             this.panelFooter.Name = "panelFooter";
             this.panelFooter.Radius = 0;
@@ -146,19 +146,18 @@
             this.panelDetailCard.Location = new System.Drawing.Point(690, 0);
             this.panelDetailCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelDetailCard.Name = "panelDetailCard";
-            this.panelDetailCard.Padding = new System.Windows.Forms.Padding(4);
             this.panelDetailCard.Radius = 12;
             this.panelDetailCard.Shadow = 4;
-            this.panelDetailCard.Size = new System.Drawing.Size(250, 472);
+            this.panelDetailCard.Size = new System.Drawing.Size(250, 524);
             this.panelDetailCard.TabIndex = 1;
             // 
             // motionMonitorDetailControl
             // 
             this.motionMonitorDetailControl.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.motionMonitorDetailControl.Location = new System.Drawing.Point(8, 8);
+            this.motionMonitorDetailControl.Location = new System.Drawing.Point(4, 4);
             this.motionMonitorDetailControl.Margin = new System.Windows.Forms.Padding(0);
             this.motionMonitorDetailControl.Name = "motionMonitorDetailControl";
-            this.motionMonitorDetailControl.Size = new System.Drawing.Size(234, 456);
+            this.motionMonitorDetailControl.Size = new System.Drawing.Size(242, 516);
             this.motionMonitorDetailControl.TabIndex = 0;
             // 
             // panelListCard
@@ -171,7 +170,7 @@
             this.panelListCard.Radius = 0;
             this.panelListCard.ShadowOpacity = 0F;
             this.panelListCard.ShadowOpacityHover = 0F;
-            this.panelListCard.Size = new System.Drawing.Size(690, 472);
+            this.panelListCard.Size = new System.Drawing.Size(690, 524);
             this.panelListCard.TabIndex = 0;
             // 
             // motionMonitorVirtualListControl
@@ -180,7 +179,7 @@
             this.motionMonitorVirtualListControl.Location = new System.Drawing.Point(0, 0);
             this.motionMonitorVirtualListControl.Margin = new System.Windows.Forms.Padding(0);
             this.motionMonitorVirtualListControl.Name = "motionMonitorVirtualListControl";
-            this.motionMonitorVirtualListControl.Size = new System.Drawing.Size(690, 472);
+            this.motionMonitorVirtualListControl.Size = new System.Drawing.Size(690, 524);
             this.motionMonitorVirtualListControl.TabIndex = 0;
             // 
             // flowStats
