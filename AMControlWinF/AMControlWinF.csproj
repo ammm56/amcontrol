@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -427,9 +427,6 @@
     <EmbeddedResource Include="Views\MotionConfig\MotionAxisCardControl.resx">
       <DependentUpon>MotionAxisCardControl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Views\MotionConfig\MotionAxisDetailControl.resx">
-      <DependentUpon>MotionAxisDetailControl.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Views\MotionConfig\MotionAxisEditDialog.resx">
       <DependentUpon>MotionAxisEditDialog.cs</DependentUpon>
     </EmbeddedResource>
@@ -556,3 +553,4 @@
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
+

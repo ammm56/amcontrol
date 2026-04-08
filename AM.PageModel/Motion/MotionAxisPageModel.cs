@@ -12,48 +12,45 @@ namespace AM.PageModel.Motion
     /// <summary>
     /// WinForms 单轴控制页页面模型。
     /// 负责：
-    /// 1. 查询轴静态结构 + 运行态快照；
+    /// 1. 查询轴静态结构与运行态快照；
     /// 2. 维护当前选中轴；
-    /// 3. 维护动作卡片列表；
+    /// 3. 维护左侧动作卡片列表；
     /// 4. 按关键字搜索动作卡片；
-    /// 5. 计算分页并维护当前选中的动作项。
+    /// 5. 根据当前轴运行态更新动作联动可用性；
+    /// 6. 接收页面层传入的参数并执行对应动作。
     /// </summary>
     public class MotionAxisPageModel : BindableBase
     {
         private readonly MotionRuntimeQueryService _runtimeQueryService;
+        private readonly MotionAxisOperationService _operationService;
 
         private List<MotionAxisSelectedViewItem> _allAxes;
         private List<MotionAxisActionViewItem> _allActionItems;
         private List<MotionAxisActionViewItem> _filteredActionItems;
-        private List<MotionAxisActionViewItem> _pageActionItems;
 
         private short? _selectedLogicalAxis;
         private MotionAxisSelectedViewItem _selectedAxis;
-        private MotionAxisActionViewItem _selectedAction;
         private string _searchText;
-        private int _pageIndex;
-        private int _pageSize;
 
         public MotionAxisPageModel()
         {
             _runtimeQueryService = new MotionRuntimeQueryService();
+            _operationService = new MotionAxisOperationService();
 
             _allAxes = new List<MotionAxisSelectedViewItem>();
             _allActionItems = CreateActionItems();
             _filteredActionItems = new List<MotionAxisActionViewItem>();
-            _pageActionItems = new List<MotionAxisActionViewItem>();
 
             _searchText = string.Empty;
-            _pageIndex = 1;
-            _pageSize = 12;
         }
 
         /// <summary>
-        /// 当前页动作卡片数据。
+        /// 当前展示的动作卡片集合。
+        /// 当前页面固定动作数量不多，不再额外分页，直接交给 VirtualPanel 承载。
         /// </summary>
         public IList<MotionAxisActionViewItem> PageItems
         {
-            get { return _pageActionItems; }
+            get { return _filteredActionItems; }
         }
 
         /// <summary>
@@ -66,15 +63,6 @@ namespace AM.PageModel.Motion
         }
 
         /// <summary>
-        /// 当前选中的动作卡片。
-        /// </summary>
-        public MotionAxisActionViewItem SelectedAction
-        {
-            get { return _selectedAction; }
-            private set { SetProperty(ref _selectedAction, value); }
-        }
-
-        /// <summary>
         /// 当前选中的逻辑轴。
         /// </summary>
         public short? SelectedLogicalAxis
@@ -84,41 +72,24 @@ namespace AM.PageModel.Motion
 
         /// <summary>
         /// 搜索关键字。
-        /// 当前页面搜索的是“动作卡片”，不是轴结构。
+        /// 当前页面搜索的是动作卡片，不是轴结构。
         /// </summary>
         public string SearchText
         {
             get { return _searchText; }
         }
 
+        /// <summary>
+        /// 当前动作卡片数量。
+        /// </summary>
         public int FilteredCount
         {
             get { return _filteredActionItems.Count; }
         }
 
-        public int PageIndex
-        {
-            get { return _pageIndex; }
-            private set { SetProperty(ref _pageIndex, value <= 0 ? 1 : value); }
-        }
-
-        public int PageSize
-        {
-            get { return _pageSize; }
-            private set { SetProperty(ref _pageSize, value <= 0 ? 12 : value); }
-        }
-
-        public int PageCount
-        {
-            get
-            {
-                if (FilteredCount <= 0 || PageSize <= 0)
-                    return 1;
-
-                return (int)Math.Ceiling(FilteredCount * 1.0 / PageSize);
-            }
-        }
-
+        /// <summary>
+        /// 当前轴标题文本。
+        /// </summary>
         public string SelectedAxisText
         {
             get
@@ -127,19 +98,6 @@ namespace AM.PageModel.Motion
                     return "未选择轴";
 
                 return "L#" + SelectedAxis.LogicalAxis + "  " + SelectedAxis.DisplayTitle;
-            }
-        }
-
-        public string PageSummaryText
-        {
-            get
-            {
-                if (FilteredCount <= 0)
-                    return "共 0 项";
-
-                var start = ((PageIndex - 1) * PageSize) + 1;
-                var end = Math.Min(PageIndex * PageSize, FilteredCount);
-                return "第 " + start + " - " + end + " 项，共 " + FilteredCount + " 项";
             }
         }
 
@@ -152,8 +110,7 @@ namespace AM.PageModel.Motion
         }
 
         /// <summary>
-        /// 定时刷新运行态。
-        /// 单轴控制页与监视页保持一致，使用低频刷新。
+        /// 低频刷新运行态。
         /// </summary>
         public async Task<Result> RefreshAsync()
         {
@@ -162,7 +119,7 @@ namespace AM.PageModel.Motion
 
         /// <summary>
         /// 设置搜索关键字。
-        /// 搜索范围为动作名称、分组、描述和参数说明。
+        /// 搜索范围为动作名称、分类和禁用原因。
         /// </summary>
         public void SetSearchText(string searchText)
         {
@@ -173,20 +130,7 @@ namespace AM.PageModel.Motion
             _searchText = searchText;
             OnPropertyChanged(nameof(SearchText));
 
-            PageIndex = 1;
-            ApplyActionFilterAndPaging();
-        }
-
-        /// <summary>
-        /// 切换分页。
-        /// </summary>
-        public void ChangePage(int pageIndex, int pageSize)
-        {
-            PageIndex = pageIndex <= 0 ? 1 : pageIndex;
-            PageSize = pageSize <= 0 ? PageSize : pageSize;
-
-            NormalizePage();
-            RebuildPageItems();
+            ApplyActionFilter();
         }
 
         /// <summary>
@@ -203,25 +147,141 @@ namespace AM.PageModel.Motion
 
             RefreshSelectedAxis();
             UpdateActionAvailability();
-            ApplyActionFilterAndPaging();
+            ApplyActionFilter();
             OnPropertyChanged(nameof(SelectedAxisText));
         }
 
         /// <summary>
-        /// 选中指定动作卡片。
+        /// 执行左侧动作卡片对应的轴动作。
+        /// 普通卡片点击即执行；需要参数的动作从右侧实时监视区读取输入值。
         /// </summary>
-        public void SelectAction(string actionKey)
+        public Task<Result> ExecuteActionAsync(
+            string actionKey,
+            string targetPositionText,
+            string moveDistanceText,
+            string velocityText)
         {
             if (string.IsNullOrWhiteSpace(actionKey))
-                return;
+            {
+                return Task.FromResult(Result.Fail(-2100, "未识别的轴动作。", ResultSource.Motion));
+            }
 
-            var selected = _pageActionItems.FirstOrDefault(
+            if (SelectedAxis == null)
+            {
+                return Task.FromResult(Result.Fail(-2101, "请先选择轴。", ResultSource.Motion));
+            }
+
+            var action = _allActionItems.FirstOrDefault(
                 x => string.Equals(x.ActionKey, actionKey, StringComparison.OrdinalIgnoreCase));
+            if (action == null)
+            {
+                return Task.FromResult(Result.Fail(-2102, "未识别的轴动作：" + actionKey, ResultSource.Motion));
+            }
 
-            if (selected == null)
-                return;
+            if (!action.CanExecute)
+            {
+                return Task.FromResult(Result.Fail(-2103, action.DisabledReason, ResultSource.Motion));
+            }
 
-            SelectedAction = selected;
+            var logicalAxis = SelectedAxis.LogicalAxis;
+
+            if (string.Equals(actionKey, "Enable", StringComparison.OrdinalIgnoreCase))
+                return Task.FromResult(_operationService.Enable(logicalAxis, true));
+
+            if (string.Equals(actionKey, "Disable", StringComparison.OrdinalIgnoreCase))
+                return Task.FromResult(_operationService.Enable(logicalAxis, false));
+
+            if (string.Equals(actionKey, "Home", StringComparison.OrdinalIgnoreCase))
+                return _operationService.HomeAsync(logicalAxis);
+
+            if (string.Equals(actionKey, "ClearStatus", StringComparison.OrdinalIgnoreCase))
+                return Task.FromResult(_operationService.ClearStatus(logicalAxis));
+
+            if (string.Equals(actionKey, "Stop", StringComparison.OrdinalIgnoreCase))
+                return Task.FromResult(_operationService.Stop(logicalAxis, false));
+
+            if (string.Equals(actionKey, "EmergencyStop", StringComparison.OrdinalIgnoreCase))
+                return Task.FromResult(_operationService.Stop(logicalAxis, true));
+
+            if (string.Equals(actionKey, "JogNegative", StringComparison.OrdinalIgnoreCase))
+            {
+                double velocityMm;
+                if (!TryParsePositiveNumber(velocityText, out velocityMm))
+                    return Task.FromResult(Result.Fail(-2104, "速度必须是大于 0 的数字。", ResultSource.Motion));
+
+                return Task.FromResult(_operationService.JogMove(logicalAxis, false, velocityMm));
+            }
+
+            if (string.Equals(actionKey, "JogStop", StringComparison.OrdinalIgnoreCase))
+                return Task.FromResult(_operationService.JogStop(logicalAxis));
+
+            if (string.Equals(actionKey, "JogPositive", StringComparison.OrdinalIgnoreCase))
+            {
+                double velocityMm;
+                if (!TryParsePositiveNumber(velocityText, out velocityMm))
+                    return Task.FromResult(Result.Fail(-2105, "速度必须是大于 0 的数字。", ResultSource.Motion));
+
+                return Task.FromResult(_operationService.JogMove(logicalAxis, true, velocityMm));
+            }
+
+            if (string.Equals(actionKey, "ApplyVelocity", StringComparison.OrdinalIgnoreCase))
+            {
+                double velocityMm;
+                if (!TryParsePositiveNumber(velocityText, out velocityMm))
+                    return Task.FromResult(Result.Fail(-2106, "速度必须是大于 0 的数字。", ResultSource.Motion));
+
+                return Task.FromResult(_operationService.ApplyVelocityMm(logicalAxis, velocityMm));
+            }
+
+            if (string.Equals(actionKey, "MoveAbsolute", StringComparison.OrdinalIgnoreCase))
+            {
+                double positionMm;
+                double velocityMm;
+
+                if (!TryParseNumber(targetPositionText, out positionMm))
+                    return Task.FromResult(Result.Fail(-2107, "目标位置格式无效。", ResultSource.Motion));
+
+                if (!TryParsePositiveNumber(velocityText, out velocityMm))
+                    return Task.FromResult(Result.Fail(-2108, "速度必须是大于 0 的数字。", ResultSource.Motion));
+
+                return Task.FromResult(_operationService.MoveAbsoluteMm(logicalAxis, positionMm, velocityMm));
+            }
+
+            if (string.Equals(actionKey, "MoveRelative", StringComparison.OrdinalIgnoreCase))
+            {
+                double distanceMm;
+                double velocityMm;
+
+                if (!TryParseNumber(moveDistanceText, out distanceMm))
+                    return Task.FromResult(Result.Fail(-2109, "相对距离格式无效。", ResultSource.Motion));
+
+                if (!TryParsePositiveNumber(velocityText, out velocityMm))
+                    return Task.FromResult(Result.Fail(-2110, "速度必须是大于 0 的数字。", ResultSource.Motion));
+
+                return Task.FromResult(_operationService.MoveRelativeMm(logicalAxis, distanceMm, velocityMm));
+            }
+
+            return Task.FromResult(Result.Fail(-2111, "未识别的轴动作：" + actionKey, ResultSource.Motion));
+        }
+
+        private static bool TryParseNumber(string text, out double value)
+        {
+            value = 0D;
+
+            if (string.IsNullOrWhiteSpace(text))
+                return false;
+
+            return double.TryParse(text.Trim(), out value);
+        }
+
+        private static bool TryParsePositiveNumber(string text, out double value)
+        {
+            value = 0D;
+
+            if (!TryParseNumber(text, out value))
+                return false;
+
+            return value > 0D;
         }
 
         private async Task<Result> ReloadAsync()
@@ -229,7 +289,6 @@ namespace AM.PageModel.Motion
             return await Task.Run(() =>
             {
                 var previousLogicalAxis = _selectedLogicalAxis;
-                var previousActionKey = SelectedAction == null ? null : SelectedAction.ActionKey;
 
                 var result = _runtimeQueryService.QueryAxisSnapshot();
                 if (!result.Success)
@@ -260,13 +319,12 @@ namespace AM.PageModel.Motion
 
                 RefreshSelectedAxis();
                 UpdateActionAvailability();
-                ApplyActionFilterAndPaging();
-                RestoreSelectedAction(previousActionKey);
+                ApplyActionFilter();
 
                 OnPropertyChanged(nameof(SelectedLogicalAxis));
                 OnPropertyChanged(nameof(SelectedAxisText));
 
-                return Result.Ok("单轴控制页加载成功");
+                return Result.Ok("单轴控制页加载成功", ResultSource.Motion);
             });
         }
 
@@ -278,8 +336,6 @@ namespace AM.PageModel.Motion
 
             _allActionItems = CreateActionItems();
             _filteredActionItems = new List<MotionAxisActionViewItem>();
-            _pageActionItems = new List<MotionAxisActionViewItem>();
-            SelectedAction = null;
 
             RaiseUiChanged();
             OnPropertyChanged(nameof(SelectedLogicalAxis));
@@ -298,20 +354,132 @@ namespace AM.PageModel.Motion
         }
 
         /// <summary>
-        /// 更新动作卡片是否具备可执行前提。
-        /// 第一阶段先只判断“是否已选择轴”。
+        /// 根据当前轴运行态更新动作卡片联动状态。
+        /// 这里直接按 WPF 页面现有联动约束收敛，不额外再包装新抽象。
         /// </summary>
         private void UpdateActionAvailability()
         {
-            var hasAxis = SelectedAxis != null;
-
             foreach (var action in _allActionItems)
             {
-                action.HasSelectedAxis = hasAxis;
+                var validate = ValidateAction(action.ActionKey);
+                action.CanExecute = validate.Success;
+                action.DisabledReason = validate.Success ? "单击立即执行" : validate.Message;
             }
         }
 
-        private void ApplyActionFilterAndPaging()
+        private Result ValidateAction(string actionKey)
+        {
+            if (SelectedAxis == null)
+                return Result.Fail(-2201, "请先选择轴", ResultSource.Motion);
+
+            var axis = SelectedAxis;
+
+            if (string.Equals(actionKey, "Enable", StringComparison.OrdinalIgnoreCase))
+            {
+                if (axis.IsEnabled)
+                    return Result.Fail(-2202, "当前轴已使能", ResultSource.Motion);
+
+                return Result.Ok("允许执行", ResultSource.Motion);
+            }
+
+            if (string.Equals(actionKey, "Disable", StringComparison.OrdinalIgnoreCase))
+            {
+                if (!axis.IsEnabled)
+                    return Result.Fail(-2203, "当前轴未使能", ResultSource.Motion);
+
+                if (axis.IsMoving)
+                    return Result.Fail(-2204, "当前轴运动中，禁止失能", ResultSource.Motion);
+
+                return Result.Ok("允许执行", ResultSource.Motion);
+            }
+
+            if (string.Equals(actionKey, "ClearStatus", StringComparison.OrdinalIgnoreCase))
+                return Result.Ok("允许执行", ResultSource.Motion);
+
+            if (string.Equals(actionKey, "EmergencyStop", StringComparison.OrdinalIgnoreCase))
+                return Result.Ok("允许执行", ResultSource.Motion);
+
+            if (string.Equals(actionKey, "Stop", StringComparison.OrdinalIgnoreCase))
+            {
+                if (!axis.IsMoving)
+                    return Result.Fail(-2205, "当前轴未运动", ResultSource.Motion);
+
+                return Result.Ok("允许执行", ResultSource.Motion);
+            }
+
+            if (string.Equals(actionKey, "JogStop", StringComparison.OrdinalIgnoreCase))
+                return Result.Ok("允许执行", ResultSource.Motion);
+
+            if (axis.IsAlarm)
+                return Result.Fail(-2206, "当前轴报警中，请先清状态", ResultSource.Motion);
+
+            if (!axis.IsEnabled)
+                return Result.Fail(-2207, "当前轴未使能", ResultSource.Motion);
+
+            if (string.Equals(actionKey, "Home", StringComparison.OrdinalIgnoreCase))
+            {
+                if (axis.IsMoving)
+                    return Result.Fail(-2208, "当前轴运动中，禁止回零", ResultSource.Motion);
+
+                if (axis.PositiveLimit || axis.NegativeLimit)
+                    return Result.Fail(-2209, "当前轴存在限位，禁止回零", ResultSource.Motion);
+
+                return Result.Ok("允许执行", ResultSource.Motion);
+            }
+
+            if (string.Equals(actionKey, "JogNegative", StringComparison.OrdinalIgnoreCase))
+            {
+                if (axis.IsMoving)
+                    return Result.Fail(-2210, "当前轴运动中", ResultSource.Motion);
+
+                if (axis.NegativeLimit)
+                    return Result.Fail(-2211, "当前轴负限位触发", ResultSource.Motion);
+
+                return Result.Ok("允许执行", ResultSource.Motion);
+            }
+
+            if (string.Equals(actionKey, "JogPositive", StringComparison.OrdinalIgnoreCase))
+            {
+                if (axis.IsMoving)
+                    return Result.Fail(-2212, "当前轴运动中", ResultSource.Motion);
+
+                if (axis.PositiveLimit)
+                    return Result.Fail(-2213, "当前轴正限位触发", ResultSource.Motion);
+
+                return Result.Ok("允许执行", ResultSource.Motion);
+            }
+
+            if (string.Equals(actionKey, "ApplyVelocity", StringComparison.OrdinalIgnoreCase))
+            {
+                if (axis.IsMoving)
+                    return Result.Fail(-2214, "当前轴运动中，禁止改速度", ResultSource.Motion);
+
+                return Result.Ok("允许执行", ResultSource.Motion);
+            }
+
+            if (string.Equals(actionKey, "MoveAbsolute", StringComparison.OrdinalIgnoreCase))
+            {
+                if (axis.IsMoving)
+                    return Result.Fail(-2215, "当前轴运动中", ResultSource.Motion);
+
+                if (!axis.IsAtHome)
+                    return Result.Fail(-2216, "当前轴未回原点", ResultSource.Motion);
+
+                return Result.Ok("允许执行", ResultSource.Motion);
+            }
+
+            if (string.Equals(actionKey, "MoveRelative", StringComparison.OrdinalIgnoreCase))
+            {
+                if (axis.IsMoving)
+                    return Result.Fail(-2217, "当前轴运动中", ResultSource.Motion);
+
+                return Result.Ok("允许执行", ResultSource.Motion);
+            }
+
+            return Result.Fail(-2218, "未识别的动作", ResultSource.Motion);
+        }
+
+        private void ApplyActionFilter()
         {
             IEnumerable<MotionAxisActionViewItem> query = _allActionItems;
 
@@ -321,94 +489,39 @@ namespace AM.PageModel.Motion
                 query = query.Where(x =>
                     (x.DisplayText ?? string.Empty).ToLowerInvariant().Contains(keyword) ||
                     (x.CategoryText ?? string.Empty).ToLowerInvariant().Contains(keyword) ||
-                    (x.DescriptionText ?? string.Empty).ToLowerInvariant().Contains(keyword) ||
-                    (x.ParameterHintText ?? string.Empty).ToLowerInvariant().Contains(keyword));
+                    (x.DisabledReason ?? string.Empty).ToLowerInvariant().Contains(keyword));
             }
 
             _filteredActionItems = query.ToList();
-
-            NormalizePage();
-            RebuildPageItems();
-        }
-
-        private void NormalizePage()
-        {
-            if (PageIndex <= 0)
-                PageIndex = 1;
-
-            var pageCount = PageCount;
-            if (PageIndex > pageCount)
-                PageIndex = pageCount;
-        }
-
-        private void RebuildPageItems()
-        {
-            var previousActionKey = SelectedAction == null ? null : SelectedAction.ActionKey;
-
-            var skip = (PageIndex - 1) * PageSize;
-            _pageActionItems = _filteredActionItems
-                .Skip(skip)
-                .Take(PageSize)
-                .ToList();
-
-            if (!string.IsNullOrWhiteSpace(previousActionKey))
-            {
-                SelectedAction = _pageActionItems.FirstOrDefault(
-                    x => string.Equals(x.ActionKey, previousActionKey, StringComparison.OrdinalIgnoreCase))
-                    ?? (_pageActionItems.Count > 0 ? _pageActionItems[0] : null);
-            }
-            else
-            {
-                SelectedAction = _pageActionItems.Count > 0 ? _pageActionItems[0] : null;
-            }
-
             RaiseUiChanged();
-        }
-
-        private void RestoreSelectedAction(string actionKey)
-        {
-            if (string.IsNullOrWhiteSpace(actionKey))
-            {
-                SelectedAction = _pageActionItems.Count > 0 ? _pageActionItems[0] : null;
-                return;
-            }
-
-            SelectedAction = _pageActionItems.FirstOrDefault(
-                x => string.Equals(x.ActionKey, actionKey, StringComparison.OrdinalIgnoreCase))
-                ?? (_pageActionItems.Count > 0 ? _pageActionItems[0] : null);
         }
 
         private void RaiseUiChanged()
         {
             OnPropertyChanged(nameof(PageItems));
             OnPropertyChanged(nameof(FilteredCount));
-            OnPropertyChanged(nameof(PageIndex));
-            OnPropertyChanged(nameof(PageSize));
-            OnPropertyChanged(nameof(PageCount));
-            OnPropertyChanged(nameof(PageSummaryText));
         }
 
         /// <summary>
         /// 初始化动作卡片定义。
-        /// 第一阶段先构建动作元数据，不在页面模型内直接执行设备动作。
-        /// 真正执行可在下一阶段接入 MotionAxisOperationService。
+        /// 左侧卡片统一保持按钮式小卡片风格，只保留分类和名称。
         /// </summary>
         private static List<MotionAxisActionViewItem> CreateActionItems()
         {
             return new List<MotionAxisActionViewItem>
             {
-                CreateAction("Enable", "使能", "基础操作", "给当前选中轴上伺服使能。", "无需额外参数", "Primary"),
-                CreateAction("Disable", "失能", "基础操作", "关闭当前选中轴的使能状态。", "无需额外参数", "Default"),
-                CreateAction("Home", "回零", "回零", "执行当前选中轴回零。", "无需额外参数", "Warning"),
-                CreateAction("ClearStatus", "清状态", "维护", "清除轴当前状态和部分故障标记。", "无需额外参数", "Default"),
-                CreateAction("Stop", "平停", "停止", "执行普通停止，按减速过程停止轴。", "无需额外参数", "Success"),
-                CreateAction("EmergencyStop", "急停", "停止", "执行急停，立即打断当前运动。", "无需额外参数", "Danger"),
-                CreateAction("JogNegative", "负向运动", "点动", "按当前速度做负方向连续点动。", "需要速度参数", "Primary"),
-                CreateAction("JogStop", "停止", "点动", "停止当前点动运动。", "无需额外参数", "Default"),
-                CreateAction("JogPositive", "正向运动", "点动", "按当前速度做正方向连续点动。", "需要速度参数", "Primary"),
-                CreateAction("ApplyVelocity", "应用速度", "参数", "将当前输入速度应用到轴运行参数。", "需要速度参数", "Success"),
-                CreateAction("MoveAbsolute", "绝对定位", "定位", "移动到指定绝对位置。", "需要位置与速度参数", "Primary"),
-                CreateAction("MoveRelative", "相对移动", "定位", "按指定距离做相对位移。", "需要距离与速度参数", "Primary")
+                CreateAction("Enable", "使能", "基础操作", "Primary"),
+                CreateAction("Disable", "失能", "基础操作", "Default"),
+                CreateAction("Home", "回零", "回零", "Warning"),
+                CreateAction("ClearStatus", "清状态", "维护", "Default"),
+                CreateAction("Stop", "平停", "停止", "Success"),
+                CreateAction("EmergencyStop", "急停", "停止", "Danger"),
+                CreateAction("JogNegative", "负向运动", "点动", "Primary"),
+                CreateAction("JogStop", "停止", "点动", "Default"),
+                CreateAction("JogPositive", "正向运动", "点动", "Primary"),
+                CreateAction("ApplyVelocity", "应用速度", "参数", "Success"),
+                CreateAction("MoveAbsolute", "绝对定位", "定位", "Primary"),
+                CreateAction("MoveRelative", "相对定位", "定位", "Primary")
             };
         }
 
@@ -416,8 +529,6 @@ namespace AM.PageModel.Motion
             string actionKey,
             string displayText,
             string categoryText,
-            string descriptionText,
-            string parameterHintText,
             string accentType)
         {
             return new MotionAxisActionViewItem
@@ -425,10 +536,9 @@ namespace AM.PageModel.Motion
                 ActionKey = actionKey,
                 DisplayText = displayText,
                 CategoryText = categoryText,
-                DescriptionText = descriptionText,
-                ParameterHintText = parameterHintText,
                 AccentType = accentType,
-                HasSelectedAxis = false
+                CanExecute = false,
+                DisabledReason = "请先选择轴"
             };
         }
 
@@ -463,7 +573,7 @@ namespace AM.PageModel.Motion
 
         /// <summary>
         /// 当前选中轴显示项。
-        /// 供右侧详情区使用。
+        /// 供右侧实时监视区使用。
         /// </summary>
         public sealed class MotionAxisSelectedViewItem
         {
@@ -594,23 +704,17 @@ namespace AM.PageModel.Motion
         }
 
         /// <summary>
-        /// 单轴控制动作卡片显示项。
-        /// 当前阶段先承载动作元数据，后续再接入真实执行逻辑。
+        /// 左侧动作卡片显示项。
+        /// 卡片外观保持统一按钮式小卡片风格，只承载当前动作的执行状态。
         /// </summary>
         public sealed class MotionAxisActionViewItem
         {
             public string ActionKey { get; set; }
             public string DisplayText { get; set; }
             public string CategoryText { get; set; }
-            public string DescriptionText { get; set; }
-            public string ParameterHintText { get; set; }
             public string AccentType { get; set; }
-            public bool HasSelectedAxis { get; set; }
-
-            public string AxisStateHintText
-            {
-                get { return HasSelectedAxis ? "已选择轴" : "需先选轴"; }
-            }
+            public bool CanExecute { get; set; }
+            public string DisabledReason { get; set; }
         }
     }
 }

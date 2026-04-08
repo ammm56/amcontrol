@@ -1,27 +1,26 @@
-﻿using AM.PageModel.Motion;
+using AM.PageModel.Motion;
+using AntdUI;
 using System;
+using System.Globalization;
 using System.Reflection;
-using System.Text;
 using System.Windows.Forms;
 
 namespace AMControlWinF.Views.Motion
 {
     /// <summary>
-    /// 单轴控制右侧详情控件。
+    /// 单轴控制右侧实时监视控件。
     ///
-    /// 第一阶段职责：
-    /// 1. 展示“当前选中轴 + 当前选中动作”的详细说明；
-    /// 2. 使用快照去重，避免 500ms 刷新时频繁重绘；
-    /// 3. 为下一步 Designer 明细布局做好准备。
-    ///
-    /// 当前阶段先使用“单标签承载详细文本”的方式实现，
-    /// 后续再拆为更细的标签行布局。
+    /// 设计目标：
+    /// 1. 右侧始终显示当前选中轴的实时监视信息，不依赖左侧动作卡片是否被点击；
+    /// 2. 提供速度、目标位置、相对距离输入框，供左侧参数动作卡片执行时读取；
+    /// 3. 使用固定标签布局和快照去重，降低 500ms 刷新带来的重绘抖动；
+    /// 4. 保持代码与 Designer 分离，便于后续继续细调布局。
     /// </summary>
     public partial class MotionAxisDetailControl : UserControl
     {
         private string _lastSnapshotKey = string.Empty;
+        private short? _lastLogicalAxis;
         private MotionAxisPageModel.MotionAxisSelectedViewItem _currentAxis;
-        private MotionAxisPageModel.MotionAxisActionViewItem _currentAction;
 
         public MotionAxisDetailControl()
         {
@@ -36,6 +35,13 @@ namespace AMControlWinF.Views.Motion
             UpdateStyles();
 
             EnableDoubleBuffer(panelScroll);
+
+            inputVelocity.Text = "10";
+            inputTargetPosition.Text = "0";
+            inputMoveDistance.Text = "10";
+
+            panelDetail.Visible = false;
+            panelEmpty.Visible = true;
         }
 
         public MotionAxisPageModel.MotionAxisSelectedViewItem CurrentAxis
@@ -43,113 +49,157 @@ namespace AMControlWinF.Views.Motion
             get { return _currentAxis; }
         }
 
-        public MotionAxisPageModel.MotionAxisActionViewItem CurrentAction
+        public string VelocityText
         {
-            get { return _currentAction; }
+            get { return inputVelocity.Text; }
+        }
+
+        public string TargetPositionText
+        {
+            get { return inputTargetPosition.Text; }
+        }
+
+        public string MoveDistanceText
+        {
+            get { return inputMoveDistance.Text; }
         }
 
         /// <summary>
-        /// 绑定当前选中轴与动作项。
-        /// 第一阶段先使用单个说明区域承载详情文本。
+        /// 绑定当前轴实时信息。
+        /// 右侧不再显示动作详情，因此只关注当前轴本身的监视值和参数输入默认值。
         /// </summary>
-        public void Bind(
-            MotionAxisPageModel.MotionAxisSelectedViewItem axisItem,
-            MotionAxisPageModel.MotionAxisActionViewItem actionItem)
+        public void Bind(MotionAxisPageModel.MotionAxisSelectedViewItem axisItem)
         {
-            if (actionItem == null)
+            if (axisItem == null)
             {
                 _lastSnapshotKey = string.Empty;
+                _lastLogicalAxis = null;
                 _currentAxis = null;
-                _currentAction = null;
-                Invalidate();
+
+                if (!panelEmpty.Visible)
+                {
+                    SuspendLayout();
+                    panelDetail.SuspendLayout();
+                    try
+                    {
+                        panelDetail.Visible = false;
+                        panelEmpty.Visible = true;
+                    }
+                    finally
+                    {
+                        panelDetail.ResumeLayout(false);
+                        ResumeLayout(false);
+                    }
+                }
+
                 return;
             }
 
-            var snapshotKey = BuildSnapshotKey(axisItem, actionItem);
-            if (string.Equals(_lastSnapshotKey, snapshotKey, StringComparison.Ordinal))
+            var snapshotKey = BuildSnapshotKey(axisItem);
+            var axisChanged = !_lastLogicalAxis.HasValue || _lastLogicalAxis.Value != axisItem.LogicalAxis;
+
+            if (string.Equals(_lastSnapshotKey, snapshotKey, StringComparison.Ordinal) && !axisChanged)
                 return;
 
             _lastSnapshotKey = snapshotKey;
+            _lastLogicalAxis = axisItem.LogicalAxis;
             _currentAxis = axisItem;
-            _currentAction = actionItem;
 
-            Invalidate();
+            SuspendLayout();
+            panelDetail.SuspendLayout();
+            panelHeader.SuspendLayout();
+            panelScroll.SuspendLayout();
+            try
+            {
+                if (!panelDetail.Visible)
+                {
+                    panelEmpty.Visible = false;
+                    panelDetail.Visible = true;
+                }
+
+                labelTitle.Text = axisItem.DisplayTitle;
+                labelSubTitle.Text = "L#" + axisItem.LogicalAxis + " / " + axisItem.CardText;
+
+                SetTagRow(labelTagAxisLogicKey, labelTagAxisLogicValue, "逻辑轴", "L#" + axisItem.LogicalAxis);
+                SetTagRow(labelTagAxisTypeKey, labelTagAxisTypeValue, "轴类型", axisItem.AxisCategoryText);
+                SetTagRow(labelTagAxisPhysicalKey, labelTagAxisPhysicalValue, "物理映射", axisItem.PhysicalText);
+                SetTagRow(labelTagAxisStateKey, labelTagAxisStateValue, "当前状态", axisItem.StateText);
+                SetTagRow(labelTagAxisEnableKey, labelTagAxisEnableValue, "使能状态", axisItem.EnableText);
+                SetTagRow(labelTagAxisHomeKey, labelTagAxisHomeValue, "原点状态", axisItem.HomeText);
+                SetTagRow(labelTagAxisDoneKey, labelTagAxisDoneValue, "到位状态", axisItem.DoneText);
+                SetTagRow(labelTagAxisLimitKey, labelTagAxisLimitValue, "限位状态", axisItem.LimitText);
+                SetTagRow(labelTagAxisCommandMmKey, labelTagAxisCommandMmValue, "指令位置", axisItem.CommandPositionMmText);
+                SetTagRow(labelTagAxisEncoderMmKey, labelTagAxisEncoderMmValue, "编码器位置", axisItem.EncoderPositionMmText);
+                SetTagRow(labelTagAxisDefaultVelKey, labelTagAxisDefaultVelValue, "默认速度", axisItem.DefaultVelocityText);
+                SetTagRow(labelTagAxisJogVelKey, labelTagAxisJogVelValue, "点动速度", axisItem.JogVelocityText);
+
+                if (axisChanged)
+                {
+                    ResetDefaultInputs(axisItem);
+                }
+            }
+            finally
+            {
+                panelScroll.ResumeLayout(false);
+                panelHeader.ResumeLayout(false);
+                panelDetail.ResumeLayout(false);
+                ResumeLayout(false);
+                Invalidate();
+            }
         }
 
-        /// <summary>
-        /// 构建详情快照键。
-        /// 只要轴状态和动作说明都未变化，就不重复刷新。
-        /// </summary>
-        private static string BuildSnapshotKey(
-            MotionAxisPageModel.MotionAxisSelectedViewItem axisItem,
-            MotionAxisPageModel.MotionAxisActionViewItem actionItem)
+        private void ResetDefaultInputs(MotionAxisPageModel.MotionAxisSelectedViewItem axisItem)
+        {
+            if (axisItem == null)
+            {
+                inputVelocity.Text = "10";
+                inputTargetPosition.Text = "0";
+                inputMoveDistance.Text = "10";
+                return;
+            }
+
+            if (axisItem.JogVelocityMm > 0)
+                inputVelocity.Text = axisItem.JogVelocityMm.ToString("0.###", CultureInfo.InvariantCulture);
+            else if (axisItem.DefaultVelocityMm > 0)
+                inputVelocity.Text = axisItem.DefaultVelocityMm.ToString("0.###", CultureInfo.InvariantCulture);
+            else
+                inputVelocity.Text = "10";
+
+            inputTargetPosition.Text = axisItem.CommandPositionMm.ToString("0.###", CultureInfo.InvariantCulture);
+            inputMoveDistance.Text = "10";
+        }
+
+        private static void SetTagRow(
+            AntdUI.Label keyLabel,
+            AntdUI.Label valueLabel,
+            string keyText,
+            string valueText)
+        {
+            keyLabel.Text = string.IsNullOrWhiteSpace(keyText) ? "-" : keyText;
+            valueLabel.Text = string.IsNullOrWhiteSpace(valueText) ? "—" : valueText;
+        }
+
+        private static string BuildSnapshotKey(MotionAxisPageModel.MotionAxisSelectedViewItem axisItem)
         {
             return string.Join("|", new[]
             {
-                actionItem == null ? string.Empty : (actionItem.ActionKey ?? string.Empty),
-                actionItem == null ? string.Empty : (actionItem.DisplayText ?? string.Empty),
-                actionItem == null ? string.Empty : (actionItem.DescriptionText ?? string.Empty),
-                actionItem == null ? string.Empty : (actionItem.ParameterHintText ?? string.Empty),
-                axisItem == null ? string.Empty : axisItem.LogicalAxis.ToString(),
-                axisItem == null ? string.Empty : (axisItem.DisplayTitle ?? string.Empty),
-                axisItem == null ? string.Empty : (axisItem.CardText ?? string.Empty),
-                axisItem == null ? string.Empty : (axisItem.StateText ?? string.Empty),
-                axisItem == null ? string.Empty : (axisItem.EnableText ?? string.Empty),
-                axisItem == null ? string.Empty : (axisItem.HomeText ?? string.Empty),
-                axisItem == null ? string.Empty : (axisItem.DoneText ?? string.Empty),
-                axisItem == null ? string.Empty : (axisItem.LimitText ?? string.Empty),
-                axisItem == null ? string.Empty : (axisItem.CommandPositionMmText ?? string.Empty),
-                axisItem == null ? string.Empty : (axisItem.EncoderPositionMmText ?? string.Empty)
+                axisItem.LogicalAxis.ToString(),
+                axisItem.DisplayTitle ?? string.Empty,
+                axisItem.CardText ?? string.Empty,
+                axisItem.AxisCategoryText ?? string.Empty,
+                axisItem.PhysicalText ?? string.Empty,
+                axisItem.StateText ?? string.Empty,
+                axisItem.EnableText ?? string.Empty,
+                axisItem.HomeText ?? string.Empty,
+                axisItem.DoneText ?? string.Empty,
+                axisItem.LimitText ?? string.Empty,
+                axisItem.CommandPositionMmText ?? string.Empty,
+                axisItem.EncoderPositionMmText ?? string.Empty,
+                axisItem.DefaultVelocityText ?? string.Empty,
+                axisItem.JogVelocityText ?? string.Empty
             });
         }
 
-        /// <summary>
-        /// 第一阶段的详情文本。
-        /// 下一步可以拆成更标准的标签布局。
-        /// </summary>
-        private static string BuildDetailText(
-            MotionAxisPageModel.MotionAxisSelectedViewItem axisItem,
-            MotionAxisPageModel.MotionAxisActionViewItem actionItem)
-        {
-            var builder = new StringBuilder();
-
-            if (actionItem != null)
-            {
-                builder.AppendLine("动作名称： " + actionItem.DisplayText);
-                builder.AppendLine("动作分组： " + actionItem.CategoryText);
-                builder.AppendLine("动作说明： " + actionItem.DescriptionText);
-                builder.AppendLine("参数要求： " + actionItem.ParameterHintText);
-                builder.AppendLine();
-            }
-
-            if (axisItem == null)
-            {
-                builder.AppendLine("当前轴：未选择");
-                builder.AppendLine("提示：请先点击顶部“选择轴”按钮。");
-                return builder.ToString();
-            }
-
-            builder.AppendLine("当前轴：L#" + axisItem.LogicalAxis + "  " + axisItem.DisplayTitle);
-            builder.AppendLine("控制卡： " + axisItem.CardText);
-            builder.AppendLine("轴类型： " + axisItem.AxisCategoryText);
-            builder.AppendLine("物理映射： " + axisItem.PhysicalText);
-            builder.AppendLine("当前状态： " + axisItem.StateText);
-            builder.AppendLine("使能状态： " + axisItem.EnableText);
-            builder.AppendLine("原点状态： " + axisItem.HomeText);
-            builder.AppendLine("到位状态： " + axisItem.DoneText);
-            builder.AppendLine("限位状态： " + axisItem.LimitText);
-            builder.AppendLine();
-            builder.AppendLine("指令位置： " + axisItem.CommandPositionMmText);
-            builder.AppendLine("编码器位置： " + axisItem.EncoderPositionMmText);
-            builder.AppendLine("默认速度： " + axisItem.DefaultVelocityText);
-            builder.AppendLine("点动速度： " + axisItem.JogVelocityText);
-
-            return builder.ToString();
-        }
-
-        /// <summary>
-        /// 滚动区域双缓冲处理。
-        /// </summary>
         private static void EnableDoubleBuffer(Control control)
         {
             if (control == null)

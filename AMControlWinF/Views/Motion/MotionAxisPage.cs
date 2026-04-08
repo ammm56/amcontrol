@@ -1,7 +1,6 @@
-﻿using AM.Model.Common;
+using AM.Model.Common;
 using AM.PageModel.Motion;
 using AMControlWinF.Views.MotionConfig;
-using AntdUI;
 using System;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -11,16 +10,16 @@ namespace AMControlWinF.Views.Motion
     /// <summary>
     /// 单轴控制页面。
     ///
-    /// 第一阶段先完成：
-    /// 1. 页面级数据刷新逻辑；
-    /// 2. 轴选择、动作搜索、分页；
-    /// 3. 左侧虚拟动作卡片列表与右侧详情占位绑定；
-    /// 4. 500ms 定时低频刷新选中轴运行态。
+    /// 页面布局：
+    /// 1. 第一行工具栏：左侧选择轴，右侧搜索动作；
+    /// 2. 第二行预留空白区：保持和现有监视页一致的三行结构；
+    /// 3. 第三行主内容：左侧虚拟动作卡片，右侧实时监视信息。
     ///
-    /// 当前阶段说明：
-    /// - 左侧卡片用于“选择动作”；
-    /// - 右侧详情区显示“当前轴 + 当前动作”的说明信息；
-    /// - 真正动作执行入口在下一阶段补充。
+    /// 交互策略：
+    /// - 左侧动作卡片外观是卡片，交互语义按按钮处理；
+    /// - 普通动作卡片单击即执行；
+    /// - 需要参数的动作从右侧参数输入区读取数值；
+    /// - 右侧始终显示当前轴实时信息，不依赖动作卡片选中。
     /// </summary>
     public partial class MotionAxisPage : UserControl
     {
@@ -29,7 +28,7 @@ namespace AMControlWinF.Views.Motion
 
         private bool _isFirstLoad;
         private bool _isRefreshing;
-        private bool _isUpdatingPagination;
+        private bool _isExecutingAction;
 
         public MotionAxisPage()
         {
@@ -40,10 +39,8 @@ namespace AMControlWinF.Views.Motion
             _refreshTimer = new Timer();
             _refreshTimer.Interval = 500;
 
-            InitializePagination();
             BindEvents();
 
-            // 页面释放时停止后台 UI 刷新定时器。
             Disposed += (s, e) =>
             {
                 _refreshTimer.Stop();
@@ -60,13 +57,7 @@ namespace AMControlWinF.Views.Motion
 
             buttonSelectAxis.Click += async (s, e) => await SelectAxisAsync();
             inputSearch.TextChanged += InputSearch_TextChanged;
-            paginationActions.ValueChanged += PaginationActions_ValueChanged;
-            motionAxisVirtualListControl.ItemSelected += MotionAxisVirtualListControl_ItemSelected;
-        }
-
-        private void InitializePagination()
-        {
-            paginationActions.PageSizeOptions = new int[] { 6, 12, 24, 36, 48, 96 };
+            motionAxisVirtualListControl.ActionExecuteRequested += MotionAxisVirtualListControl_ActionExecuteRequested;
         }
 
         private async void MotionAxisPage_Load(object sender, EventArgs e)
@@ -83,18 +74,12 @@ namespace AMControlWinF.Views.Motion
             UpdateRefreshTimerState();
         }
 
-        /// <summary>
-        /// 首次进入页面时加载数据。
-        /// </summary>
         private async Task InitializePageAsync()
         {
             await ReloadRuntimeAsync(true);
             UpdateRefreshTimerState();
         }
 
-        /// <summary>
-        /// 首次加载和定时刷新共用同一套入口。
-        /// </summary>
         private async Task ReloadRuntimeAsync(bool useLoadMethod)
         {
             if (_isRefreshing)
@@ -122,31 +107,10 @@ namespace AMControlWinF.Views.Motion
         {
             labelSelectedAxis.Text = "当前：" + _model.SelectedAxisText;
 
-            motionAxisVirtualListControl.BindItems(_model.PageItems, _model.SelectedAction);
-            motionAxisDetailControl.Bind(_model.SelectedAxis, _model.SelectedAction);
-
-            SyncPagination();
+            motionAxisVirtualListControl.BindItems(_model.PageItems);
+            motionAxisDetailControl.Bind(_model.SelectedAxis);
         }
 
-        private void SyncPagination()
-        {
-            _isUpdatingPagination = true;
-            try
-            {
-                paginationActions.Total = _model.FilteredCount;
-                paginationActions.PageSize = _model.PageSize;
-                paginationActions.Current = _model.PageIndex;
-                labelPageSummary.Text = _model.PageSummaryText;
-            }
-            finally
-            {
-                _isUpdatingPagination = false;
-            }
-        }
-
-        /// <summary>
-        /// 页面可见时启动刷新，不可见时停止。
-        /// </summary>
         private void UpdateRefreshTimerState()
         {
             if (IsDisposed)
@@ -160,7 +124,7 @@ namespace AMControlWinF.Views.Motion
 
         private async void RefreshTimer_Tick(object sender, EventArgs e)
         {
-            if (!Visible || _isRefreshing)
+            if (!Visible || _isRefreshing || _isExecutingAction)
                 return;
 
             await ReloadRuntimeAsync(false);
@@ -168,9 +132,7 @@ namespace AMControlWinF.Views.Motion
 
         /// <summary>
         /// 选择轴。
-        ///
-        /// 当前第一阶段先复用现有 `MotionAxisSelectDialog`。
-        /// 下一阶段如需完全对齐你的要求，可替换成“复用轴拓扑配置页 UserControl”的选择窗口。
+        /// 当前先复用现有轴选择窗口，后续如需切换为直接嵌入轴拓扑页，可在此替换实现。
         /// </summary>
         private async Task SelectAxisAsync()
         {
@@ -192,23 +154,30 @@ namespace AMControlWinF.Views.Motion
             RefreshView();
         }
 
-        private void PaginationActions_ValueChanged(object sender, PagePageEventArgs e)
+        /// <summary>
+        /// 左侧动作卡片单击即执行。
+        /// 执行参数统一从右侧实时监视区读取。
+        /// </summary>
+        private async void MotionAxisVirtualListControl_ActionExecuteRequested(object sender, MotionAxisVirtualListControl.MotionAxisActionExecuteRequestedEventArgs e)
         {
-            if (_isUpdatingPagination || e == null)
+            if (e == null || _isExecutingAction)
                 return;
 
-            _model.ChangePage(e.Current, e.PageSize);
-            RefreshView();
-        }
+            _isExecutingAction = true;
+            try
+            {
+                await _model.ExecuteActionAsync(
+                    e.ActionKey,
+                    motionAxisDetailControl.TargetPositionText,
+                    motionAxisDetailControl.MoveDistanceText,
+                    motionAxisDetailControl.VelocityText);
 
-        private void MotionAxisVirtualListControl_ItemSelected(object sender, MotionAxisVirtualListControl.MotionAxisActionItemSelectedEventArgs e)
-        {
-            if (e == null)
-                return;
-
-            _model.SelectAction(e.ActionKey);
-            motionAxisVirtualListControl.BindItems(_model.PageItems, _model.SelectedAction);
-            motionAxisDetailControl.Bind(_model.SelectedAxis, _model.SelectedAction);
+                await ReloadRuntimeAsync(false);
+            }
+            finally
+            {
+                _isExecutingAction = false;
+            }
         }
     }
 }
