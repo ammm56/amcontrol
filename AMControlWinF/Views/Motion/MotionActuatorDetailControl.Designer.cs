@@ -16,8 +16,6 @@
         {
             this.panelRoot = new AntdUI.Panel();
             this.tableMain = new System.Windows.Forms.TableLayoutPanel();
-            this.labelTitle = new AntdUI.Label();
-            this.labelSubTitle = new AntdUI.Label();
             this.tableInfo = new System.Windows.Forms.TableLayoutPanel();
             this.labelStateKey = new AntdUI.Label();
             this.labelStateValue = new AntdUI.Label();
@@ -62,40 +60,17 @@
             // 
             this.tableMain.ColumnCount = 1;
             this.tableMain.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableMain.Controls.Add(this.labelTitle, 0, 0);
-            this.tableMain.Controls.Add(this.labelSubTitle, 0, 1);
-            this.tableMain.Controls.Add(this.tableInfo, 0, 2);
+            this.tableMain.Controls.Add(this.tableInfo, 0, 0);
             this.tableMain.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableMain.Location = new System.Drawing.Point(16, 16);
+            this.tableMain.Location = new System.Drawing.Point(12, 12);
             this.tableMain.Margin = new System.Windows.Forms.Padding(0);
             this.tableMain.Name = "tableMain";
-            this.tableMain.RowCount = 3;
-            this.tableMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 24F));
-            this.tableMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 22F));
+            this.tableMain.RowCount = 1;
             this.tableMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableMain.Size = new System.Drawing.Size(288, 288);
+            this.tableMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableMain.Size = new System.Drawing.Size(296, 296);
             this.tableMain.TabIndex = 0;
-            // 
-            // labelTitle
-            // 
-            this.labelTitle.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.labelTitle.Font = new System.Drawing.Font("Microsoft YaHei UI", 10F, System.Drawing.FontStyle.Bold);
-            this.labelTitle.Location = new System.Drawing.Point(0, 0);
-            this.labelTitle.Margin = new System.Windows.Forms.Padding(0);
-            this.labelTitle.Name = "labelTitle";
-            this.labelTitle.Size = new System.Drawing.Size(288, 24);
-            this.labelTitle.TabIndex = 0;
-            this.labelTitle.Text = "未选择执行器";
-            // 
-            // labelSubTitle
-            // 
-            this.labelSubTitle.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.labelSubTitle.Location = new System.Drawing.Point(0, 24);
-            this.labelSubTitle.Margin = new System.Windows.Forms.Padding(0);
-            this.labelSubTitle.Name = "labelSubTitle";
-            this.labelSubTitle.Size = new System.Drawing.Size(288, 22);
-            this.labelSubTitle.TabIndex = 1;
-            this.labelSubTitle.Text = "请先在左侧选择一个执行器对象。";
             // 
             // tableInfo
             // 
@@ -125,7 +100,7 @@
             this.tableInfo.Controls.Add(this.labelLastActionKey, 0, 10);
             this.tableInfo.Controls.Add(this.labelLastActionValue, 1, 10);
             this.tableInfo.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableInfo.Location = new System.Drawing.Point(0, 46);
+            this.tableInfo.Location = new System.Drawing.Point(0, 0);
             this.tableInfo.Margin = new System.Windows.Forms.Padding(0);
             this.tableInfo.Name = "tableInfo";
             this.tableInfo.RowCount = 11;
@@ -140,18 +115,20 @@
             this.tableInfo.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 22F));
             this.tableInfo.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 22F));
             this.tableInfo.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableInfo.Size = new System.Drawing.Size(288, 242);
+            this.tableInfo.Size = new System.Drawing.Size(296, 296);
             this.tableInfo.TabIndex = 2;
             // 
             // labelStateKey
             // 
             this.labelStateKey.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.labelStateKey.ForeColor = System.Drawing.Color.Gray;
             this.labelStateKey.Location = new System.Drawing.Point(0, 0);
             this.labelStateKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelStateKey.Name = "labelStateKey";
             this.labelStateKey.Size = new System.Drawing.Size(78, 22);
             this.labelStateKey.TabIndex = 0;
             this.labelStateKey.Text = "状态";
+            this.labelStateKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // labelStateValue
             // 
@@ -159,19 +136,21 @@
             this.labelStateValue.Location = new System.Drawing.Point(78, 0);
             this.labelStateValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelStateValue.Name = "labelStateValue";
-            this.labelStateValue.Size = new System.Drawing.Size(210, 22);
+            this.labelStateValue.Size = new System.Drawing.Size(218, 22);
             this.labelStateValue.TabIndex = 1;
             this.labelStateValue.Text = "—";
             // 
             // labelModeKey
             // 
             this.labelModeKey.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.labelModeKey.ForeColor = System.Drawing.Color.Gray;
             this.labelModeKey.Location = new System.Drawing.Point(0, 22);
             this.labelModeKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelModeKey.Name = "labelModeKey";
             this.labelModeKey.Size = new System.Drawing.Size(78, 22);
             this.labelModeKey.TabIndex = 2;
             this.labelModeKey.Text = "模式";
+            this.labelModeKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // labelModeValue
             // 
@@ -179,19 +158,21 @@
             this.labelModeValue.Location = new System.Drawing.Point(78, 22);
             this.labelModeValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelModeValue.Name = "labelModeValue";
-            this.labelModeValue.Size = new System.Drawing.Size(210, 22);
+            this.labelModeValue.Size = new System.Drawing.Size(218, 22);
             this.labelModeValue.TabIndex = 3;
             this.labelModeValue.Text = "—";
             // 
             // labelPrimaryOutputKey
             // 
             this.labelPrimaryOutputKey.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.labelPrimaryOutputKey.ForeColor = System.Drawing.Color.Gray;
             this.labelPrimaryOutputKey.Location = new System.Drawing.Point(0, 44);
             this.labelPrimaryOutputKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelPrimaryOutputKey.Name = "labelPrimaryOutputKey";
             this.labelPrimaryOutputKey.Size = new System.Drawing.Size(78, 22);
             this.labelPrimaryOutputKey.TabIndex = 4;
             this.labelPrimaryOutputKey.Text = "主输出";
+            this.labelPrimaryOutputKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // labelPrimaryOutputValue
             // 
@@ -199,19 +180,21 @@
             this.labelPrimaryOutputValue.Location = new System.Drawing.Point(78, 44);
             this.labelPrimaryOutputValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelPrimaryOutputValue.Name = "labelPrimaryOutputValue";
-            this.labelPrimaryOutputValue.Size = new System.Drawing.Size(210, 22);
+            this.labelPrimaryOutputValue.Size = new System.Drawing.Size(218, 22);
             this.labelPrimaryOutputValue.TabIndex = 5;
             this.labelPrimaryOutputValue.Text = "—";
             // 
             // labelSecondaryOutputKey
             // 
             this.labelSecondaryOutputKey.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.labelSecondaryOutputKey.ForeColor = System.Drawing.Color.Gray;
             this.labelSecondaryOutputKey.Location = new System.Drawing.Point(0, 66);
             this.labelSecondaryOutputKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelSecondaryOutputKey.Name = "labelSecondaryOutputKey";
             this.labelSecondaryOutputKey.Size = new System.Drawing.Size(78, 22);
             this.labelSecondaryOutputKey.TabIndex = 6;
             this.labelSecondaryOutputKey.Text = "副输出";
+            this.labelSecondaryOutputKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // labelSecondaryOutputValue
             // 
@@ -219,19 +202,21 @@
             this.labelSecondaryOutputValue.Location = new System.Drawing.Point(78, 66);
             this.labelSecondaryOutputValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelSecondaryOutputValue.Name = "labelSecondaryOutputValue";
-            this.labelSecondaryOutputValue.Size = new System.Drawing.Size(210, 22);
+            this.labelSecondaryOutputValue.Size = new System.Drawing.Size(218, 22);
             this.labelSecondaryOutputValue.TabIndex = 7;
             this.labelSecondaryOutputValue.Text = "—";
             // 
             // labelPrimaryFeedbackKey
             // 
             this.labelPrimaryFeedbackKey.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.labelPrimaryFeedbackKey.ForeColor = System.Drawing.Color.Gray;
             this.labelPrimaryFeedbackKey.Location = new System.Drawing.Point(0, 88);
             this.labelPrimaryFeedbackKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelPrimaryFeedbackKey.Name = "labelPrimaryFeedbackKey";
             this.labelPrimaryFeedbackKey.Size = new System.Drawing.Size(78, 22);
             this.labelPrimaryFeedbackKey.TabIndex = 8;
             this.labelPrimaryFeedbackKey.Text = "主反馈";
+            this.labelPrimaryFeedbackKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // labelPrimaryFeedbackValue
             // 
@@ -239,19 +224,21 @@
             this.labelPrimaryFeedbackValue.Location = new System.Drawing.Point(78, 88);
             this.labelPrimaryFeedbackValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelPrimaryFeedbackValue.Name = "labelPrimaryFeedbackValue";
-            this.labelPrimaryFeedbackValue.Size = new System.Drawing.Size(210, 22);
+            this.labelPrimaryFeedbackValue.Size = new System.Drawing.Size(218, 22);
             this.labelPrimaryFeedbackValue.TabIndex = 9;
             this.labelPrimaryFeedbackValue.Text = "—";
             // 
             // labelSecondaryFeedbackKey
             // 
             this.labelSecondaryFeedbackKey.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.labelSecondaryFeedbackKey.ForeColor = System.Drawing.Color.Gray;
             this.labelSecondaryFeedbackKey.Location = new System.Drawing.Point(0, 110);
             this.labelSecondaryFeedbackKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelSecondaryFeedbackKey.Name = "labelSecondaryFeedbackKey";
             this.labelSecondaryFeedbackKey.Size = new System.Drawing.Size(78, 22);
             this.labelSecondaryFeedbackKey.TabIndex = 10;
             this.labelSecondaryFeedbackKey.Text = "副反馈";
+            this.labelSecondaryFeedbackKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // labelSecondaryFeedbackValue
             // 
@@ -259,19 +246,21 @@
             this.labelSecondaryFeedbackValue.Location = new System.Drawing.Point(78, 110);
             this.labelSecondaryFeedbackValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelSecondaryFeedbackValue.Name = "labelSecondaryFeedbackValue";
-            this.labelSecondaryFeedbackValue.Size = new System.Drawing.Size(210, 22);
+            this.labelSecondaryFeedbackValue.Size = new System.Drawing.Size(218, 22);
             this.labelSecondaryFeedbackValue.TabIndex = 11;
             this.labelSecondaryFeedbackValue.Text = "—";
             // 
             // labelWorkpieceKey
             // 
             this.labelWorkpieceKey.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.labelWorkpieceKey.ForeColor = System.Drawing.Color.Gray;
             this.labelWorkpieceKey.Location = new System.Drawing.Point(0, 132);
             this.labelWorkpieceKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelWorkpieceKey.Name = "labelWorkpieceKey";
             this.labelWorkpieceKey.Size = new System.Drawing.Size(78, 22);
             this.labelWorkpieceKey.TabIndex = 12;
             this.labelWorkpieceKey.Text = "工件检测";
+            this.labelWorkpieceKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // labelWorkpieceValue
             // 
@@ -279,19 +268,21 @@
             this.labelWorkpieceValue.Location = new System.Drawing.Point(78, 132);
             this.labelWorkpieceValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelWorkpieceValue.Name = "labelWorkpieceValue";
-            this.labelWorkpieceValue.Size = new System.Drawing.Size(210, 22);
+            this.labelWorkpieceValue.Size = new System.Drawing.Size(218, 22);
             this.labelWorkpieceValue.TabIndex = 13;
             this.labelWorkpieceValue.Text = "—";
             // 
             // labelTimeoutKey
             // 
             this.labelTimeoutKey.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.labelTimeoutKey.ForeColor = System.Drawing.Color.Gray;
             this.labelTimeoutKey.Location = new System.Drawing.Point(0, 154);
             this.labelTimeoutKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelTimeoutKey.Name = "labelTimeoutKey";
             this.labelTimeoutKey.Size = new System.Drawing.Size(78, 22);
             this.labelTimeoutKey.TabIndex = 14;
             this.labelTimeoutKey.Text = "超时配置";
+            this.labelTimeoutKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // labelTimeoutValue
             // 
@@ -299,19 +290,21 @@
             this.labelTimeoutValue.Location = new System.Drawing.Point(78, 154);
             this.labelTimeoutValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelTimeoutValue.Name = "labelTimeoutValue";
-            this.labelTimeoutValue.Size = new System.Drawing.Size(210, 22);
+            this.labelTimeoutValue.Size = new System.Drawing.Size(218, 22);
             this.labelTimeoutValue.TabIndex = 15;
             this.labelTimeoutValue.Text = "—";
             // 
             // labelSummaryKey
             // 
             this.labelSummaryKey.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.labelSummaryKey.ForeColor = System.Drawing.Color.Gray;
             this.labelSummaryKey.Location = new System.Drawing.Point(0, 176);
             this.labelSummaryKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelSummaryKey.Name = "labelSummaryKey";
             this.labelSummaryKey.Size = new System.Drawing.Size(78, 22);
             this.labelSummaryKey.TabIndex = 16;
             this.labelSummaryKey.Text = "运行摘要";
+            this.labelSummaryKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // labelSummaryValue
             // 
@@ -319,19 +312,21 @@
             this.labelSummaryValue.Location = new System.Drawing.Point(78, 176);
             this.labelSummaryValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelSummaryValue.Name = "labelSummaryValue";
-            this.labelSummaryValue.Size = new System.Drawing.Size(210, 22);
+            this.labelSummaryValue.Size = new System.Drawing.Size(218, 22);
             this.labelSummaryValue.TabIndex = 17;
             this.labelSummaryValue.Text = "—";
             // 
             // labelUpdateTimeKey
             // 
             this.labelUpdateTimeKey.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.labelUpdateTimeKey.ForeColor = System.Drawing.Color.Gray;
             this.labelUpdateTimeKey.Location = new System.Drawing.Point(0, 198);
             this.labelUpdateTimeKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelUpdateTimeKey.Name = "labelUpdateTimeKey";
             this.labelUpdateTimeKey.Size = new System.Drawing.Size(78, 22);
             this.labelUpdateTimeKey.TabIndex = 18;
             this.labelUpdateTimeKey.Text = "更新时间";
+            this.labelUpdateTimeKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // labelUpdateTimeValue
             // 
@@ -339,23 +334,23 @@
             this.labelUpdateTimeValue.Location = new System.Drawing.Point(78, 198);
             this.labelUpdateTimeValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelUpdateTimeValue.Name = "labelUpdateTimeValue";
-            this.labelUpdateTimeValue.Size = new System.Drawing.Size(210, 22);
+            this.labelUpdateTimeValue.Size = new System.Drawing.Size(218, 22);
             this.labelUpdateTimeValue.TabIndex = 19;
             this.labelUpdateTimeValue.Text = "—";
             // 
             // labelLastActionKey
             // 
-            this.labelLastActionKey.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.labelLastActionKey.ForeColor = System.Drawing.Color.Gray;
             this.labelLastActionKey.Location = new System.Drawing.Point(0, 220);
             this.labelLastActionKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelLastActionKey.Name = "labelLastActionKey";
             this.labelLastActionKey.Size = new System.Drawing.Size(78, 22);
             this.labelLastActionKey.TabIndex = 20;
             this.labelLastActionKey.Text = "最近操作";
+            this.labelLastActionKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // labelLastActionValue
             // 
-            this.labelLastActionValue.Dock = System.Windows.Forms.DockStyle.Fill;
             this.labelLastActionValue.Location = new System.Drawing.Point(78, 220);
             this.labelLastActionValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelLastActionValue.Name = "labelLastActionValue";
@@ -374,12 +369,11 @@
             this.tableMain.ResumeLayout(false);
             this.tableInfo.ResumeLayout(false);
             this.ResumeLayout(false);
+
         }
 
         private AntdUI.Panel panelRoot;
         private System.Windows.Forms.TableLayoutPanel tableMain;
-        private AntdUI.Label labelTitle;
-        private AntdUI.Label labelSubTitle;
         private System.Windows.Forms.TableLayoutPanel tableInfo;
         private AntdUI.Label labelStateKey;
         private AntdUI.Label labelStateValue;

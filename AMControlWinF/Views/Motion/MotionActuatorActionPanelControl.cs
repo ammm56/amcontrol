@@ -1,6 +1,7 @@
 ﻿using AM.PageModel.Motion;
 using AntdUI;
 using System;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace AMControlWinF.Views.Motion
@@ -8,17 +9,15 @@ namespace AMControlWinF.Views.Motion
     /// <summary>
     /// 执行器右侧上半区控制面板。
     ///
-    /// 当前职责：
-    /// 1. 显示选中对象标题、副标题；
-    /// 2. 提供普通执行器主/副动作按钮；
-    /// 3. 提供灯塔状态按钮组；
-    /// 4. 提供等待反馈、等待工件、蜂鸣联动三个选项；
-    /// 5. 把用户操作通过事件抛给页面层统一处理。
-    ///
-    /// 说明：
-    /// - 控件本身不直接调用服务；
-    /// - 联动校验与真实执行统一由 MotionActuatorPage + MotionActuatorPageModel 处理；
-    /// - 本控件只负责界面状态呈现与用户输入采集。
+    /// 当前实现原则：
+    /// 1. 结构尽量简单，避免多层嵌套与复杂提示区；
+    /// 2. 整体固定为三行：
+    ///    - 第一行：标题 / 副标题；
+    ///    - 第二行：控制选项；
+    ///    - 第三行：动作按钮区；
+    /// 3. 所有动作按钮统一放在同一个 FlowPanel 中，
+    ///    不同执行器只通过 Visible / Enabled 控制显示与禁用；
+    /// 4. 控件本身不直接调用服务，只抛出事件给页面层统一处理。
     /// </summary>
     public partial class MotionActuatorActionPanelControl : UserControl
     {
@@ -56,7 +55,7 @@ namespace AMControlWinF.Views.Motion
 
         /// <summary>
         /// 绑定当前选中对象。
-        /// 这里只处理显示结构切换，不处理动作可执行状态。
+        /// 这里只负责基础结构切换，不负责动作可执行状态计算。
         /// </summary>
         public void Bind(MotionActuatorPageModel.MotionActuatorViewItem item)
         {
@@ -65,80 +64,116 @@ namespace AMControlWinF.Views.Motion
             if (item == null)
             {
                 labelTitle.Text = "当前对象：未选择";
-                labelSubTitle.Text = "—";
-                labelHint.Text = "请先在左侧选择一个执行器对象。";
+                labelSubTitle.Text = "内部名称：—";
 
-                panelNormalActions.Visible = true;
-                panelStackLightActions.Visible = false;
-
+                checkStackLightWithBuzzer.Visible = false;
+                checkWaitWorkpiece.Visible = false;
                 checkWaitFeedback.Visible = true;
                 checkWaitFeedback.Enabled = false;
-                checkWaitWorkpiece.Visible = false;
-                checkStackLightWithBuzzer.Visible = false;
+
+                SetButtonVisible(buttonPrimary, true);
+                SetButtonVisible(buttonSecondary, true);
+
+                SetButtonVisible(buttonStateOff, false);
+                SetButtonVisible(buttonStateIdle, false);
+                SetButtonVisible(buttonStateRunning, false);
+                SetButtonVisible(buttonStateWarning, false);
+                SetButtonVisible(buttonStateAlarm, false);
 
                 buttonPrimary.Text = "主操作";
                 buttonSecondary.Text = "副操作";
                 buttonPrimary.Enabled = false;
                 buttonSecondary.Enabled = false;
 
-                ApplyStackLightButton(buttonStateOff, "熄灭", false, false, "Off");
-                ApplyStackLightButton(buttonStateIdle, "空闲", false, false, "Idle");
-                ApplyStackLightButton(buttonStateRunning, "运行", false, false, "Running");
-                ApplyStackLightButton(buttonStateWarning, "警告", false, false, "Warning");
-                ApplyStackLightButton(buttonStateAlarm, "报警", false, false, "Alarm");
+                UpdateButtonWidths();
+                RefreshLayoutState();
                 return;
             }
 
             labelTitle.Text = item.TypeDisplay + " / " + item.DisplayTitle;
-            labelSubTitle.Text = item.Name;
+            labelSubTitle.Text = "内部名称：" + item.Name;
 
             var isStackLight = string.Equals(item.ActuatorType, "StackLight", StringComparison.OrdinalIgnoreCase);
-            var canUseWorkpiece = string.Equals(item.ActuatorType, "Vacuum", StringComparison.OrdinalIgnoreCase)
+            var canUseWorkpiece =
+                string.Equals(item.ActuatorType, "Vacuum", StringComparison.OrdinalIgnoreCase)
                 || string.Equals(item.ActuatorType, "Gripper", StringComparison.OrdinalIgnoreCase);
 
-            panelNormalActions.Visible = !isStackLight;
-            panelStackLightActions.Visible = isStackLight;
-
-            checkWaitFeedback.Visible = !isStackLight;
-            checkWaitFeedback.Enabled = !isStackLight;
+            checkStackLightWithBuzzer.Visible = isStackLight;
+            checkStackLightWithBuzzer.Enabled = isStackLight;
 
             checkWaitWorkpiece.Visible = canUseWorkpiece;
             checkWaitWorkpiece.Enabled = canUseWorkpiece;
 
-            checkStackLightWithBuzzer.Visible = isStackLight;
-            checkStackLightWithBuzzer.Enabled = isStackLight;
+            checkWaitFeedback.Visible = !isStackLight;
+            checkWaitFeedback.Enabled = !isStackLight;
+
+            SetButtonVisible(buttonPrimary, !isStackLight);
+            SetButtonVisible(buttonSecondary, !isStackLight);
+
+            SetButtonVisible(buttonStateOff, isStackLight);
+            SetButtonVisible(buttonStateIdle, isStackLight);
+            SetButtonVisible(buttonStateRunning, isStackLight);
+            SetButtonVisible(buttonStateWarning, isStackLight);
+            SetButtonVisible(buttonStateAlarm, isStackLight);
+
+            UpdateButtonWidths();
+            RefreshLayoutState();
         }
 
         /// <summary>
-        /// 应用页面模型计算得到的控制面板状态。
+        /// 应用页面模型计算出的控制状态。
+        /// 这里只做显示，不再保留额外文字提示区。
         /// </summary>
         public void ApplyActionState(MotionActuatorPageModel.MotionActuatorActionPanelState state)
         {
             if (state == null)
                 return;
 
-            labelTitle.Text = state.TitleText ?? "当前对象：未选择";
-            labelSubTitle.Text = state.SubTitleText ?? "—";
-            labelHint.Text = state.HintText ?? string.Empty;
+            labelTitle.Text = string.IsNullOrWhiteSpace(state.TitleText)
+                ? "当前对象：未选择"
+                : state.TitleText;
 
-            panelNormalActions.Visible = state.ShowNormalActions;
-            panelStackLightActions.Visible = state.ShowStackLightActions;
+            labelSubTitle.Text = string.IsNullOrWhiteSpace(state.SubTitleText)
+                ? "内部名称：—"
+                : "内部名称：" + state.SubTitleText.Replace("内部名称：", string.Empty);
 
-            checkWaitFeedback.Visible = state.ShowWaitFeedback;
-            checkWaitWorkpiece.Visible = state.ShowWaitWorkpiece;
             checkStackLightWithBuzzer.Visible = state.ShowStackLightWithBuzzer;
+            checkWaitWorkpiece.Visible = state.ShowWaitWorkpiece;
+            checkWaitFeedback.Visible = state.ShowWaitFeedback;
 
-            buttonPrimary.Text = string.IsNullOrWhiteSpace(state.PrimaryButtonText) ? "主操作" : state.PrimaryButtonText;
+            SetCheckedSilently(checkStackLightWithBuzzer, state.StackLightWithBuzzer);
+            SetCheckedSilently(checkWaitWorkpiece, state.WaitWorkpiece);
+            SetCheckedSilently(checkWaitFeedback, state.WaitFeedback);
+
+            SetButtonVisible(buttonPrimary, state.ShowNormalActions);
+            SetButtonVisible(buttonSecondary, state.ShowNormalActions);
+
+            SetButtonVisible(buttonStateOff, state.ShowStackLightActions);
+            SetButtonVisible(buttonStateIdle, state.ShowStackLightActions);
+            SetButtonVisible(buttonStateRunning, state.ShowStackLightActions);
+            SetButtonVisible(buttonStateWarning, state.ShowStackLightActions);
+            SetButtonVisible(buttonStateAlarm, state.ShowStackLightActions);
+
+            buttonPrimary.Text = string.IsNullOrWhiteSpace(state.PrimaryButtonText)
+                ? "主操作"
+                : state.PrimaryButtonText;
             buttonPrimary.Enabled = state.PrimaryButtonEnabled;
 
-            buttonSecondary.Text = string.IsNullOrWhiteSpace(state.SecondaryButtonText) ? "副操作" : state.SecondaryButtonText;
+            buttonSecondary.Text = string.IsNullOrWhiteSpace(state.SecondaryButtonText)
+                ? "副操作"
+                : state.SecondaryButtonText;
             buttonSecondary.Enabled = state.SecondaryButtonEnabled;
+
+            ApplyNormalActionButtonStyle();
 
             ApplyStackLightButton(buttonStateOff, state.OffButtonText, state.OffButtonEnabled, state.IsOffCurrent, "Off");
             ApplyStackLightButton(buttonStateIdle, state.IdleButtonText, state.IdleButtonEnabled, state.IsIdleCurrent, "Idle");
             ApplyStackLightButton(buttonStateRunning, state.RunningButtonText, state.RunningButtonEnabled, state.IsRunningCurrent, "Running");
             ApplyStackLightButton(buttonStateWarning, state.WarningButtonText, state.WarningButtonEnabled, state.IsWarningCurrent, "Warning");
             ApplyStackLightButton(buttonStateAlarm, state.AlarmButtonText, state.AlarmButtonEnabled, state.IsAlarmCurrent, "Alarm");
+
+            UpdateButtonWidths();
+            RefreshLayoutState();
         }
 
         private void BindEvents()
@@ -152,9 +187,9 @@ namespace AMControlWinF.Views.Motion
             buttonStateWarning.Click += (s, e) => RaiseStackLightStateRequested("Warning");
             buttonStateAlarm.Click += (s, e) => RaiseStackLightStateRequested("Alarm");
 
-            checkWaitFeedback.CheckedChanged += OptionControl_CheckedChanged;
-            checkWaitWorkpiece.CheckedChanged += OptionControl_CheckedChanged;
             checkStackLightWithBuzzer.CheckedChanged += OptionControl_CheckedChanged;
+            checkWaitWorkpiece.CheckedChanged += OptionControl_CheckedChanged;
+            checkWaitFeedback.CheckedChanged += OptionControl_CheckedChanged;
         }
 
         private void ButtonPrimary_Click(object sender, EventArgs e)
@@ -185,6 +220,40 @@ namespace AMControlWinF.Views.Motion
                 handler(this, EventArgs.Empty);
         }
 
+        /// <summary>
+        /// 普通执行器主/副按钮样式。
+        /// 这里保持简单：
+        /// - 真空：主蓝、副黄
+        /// - 夹爪：主紫、副绿（用 Error/Success 近似表达）
+        /// - 气缸：主蓝、副绿
+        /// </summary>
+        private void ApplyNormalActionButtonStyle()
+        {
+            if (_item == null)
+            {
+                buttonPrimary.Type = TTypeMini.Primary;
+                buttonSecondary.Type = TTypeMini.Default;
+                return;
+            }
+
+            if (string.Equals(_item.ActuatorType, "Vacuum", StringComparison.OrdinalIgnoreCase))
+            {
+                buttonPrimary.Type = TTypeMini.Primary;
+                buttonSecondary.Type = TTypeMini.Warn;
+                return;
+            }
+
+            if (string.Equals(_item.ActuatorType, "Gripper", StringComparison.OrdinalIgnoreCase))
+            {
+                buttonPrimary.Type = TTypeMini.Error;
+                buttonSecondary.Type = TTypeMini.Success;
+                return;
+            }
+
+            buttonPrimary.Type = TTypeMini.Primary;
+            buttonSecondary.Type = TTypeMini.Success;
+        }
+
         private static void ApplyStackLightButton(
             AntdUI.Button button,
             string text,
@@ -200,7 +269,26 @@ namespace AMControlWinF.Views.Motion
 
             if (!isCurrent)
             {
-                button.Type = TTypeMini.Default;
+                switch (stateKey)
+                {
+                    case "Warning":
+                        button.Type = TTypeMini.Warn;
+                        break;
+
+                    case "Alarm":
+                        button.Type = TTypeMini.Error;
+                        break;
+
+                    case "Idle":
+                    case "Running":
+                        button.Type = TTypeMini.Primary;
+                        break;
+
+                    default:
+                        button.Type = TTypeMini.Default;
+                        break;
+                }
+
                 return;
             }
 
@@ -220,9 +308,72 @@ namespace AMControlWinF.Views.Motion
                     break;
 
                 default:
-                    button.Type = TTypeMini.Primary;
+                    button.Type = TTypeMini.Default;
                     break;
             }
+        }
+
+        private static void SetButtonVisible(Control control, bool visible)
+        {
+            if (control == null)
+                return;
+
+            control.Visible = visible;
+        }
+
+        private static void SetCheckedSilently(Checkbox checkbox, bool value)
+        {
+            if (checkbox == null)
+                return;
+
+            if (checkbox.Checked != value)
+                checkbox.Checked = value;
+        }
+
+        /// <summary>
+        /// 根据按钮文本自动调整宽度，避免“当前”文案变长后显示不全。
+        /// 第三行使用 FlowPanel，可自动换行。
+        /// </summary>
+        private void UpdateButtonWidths()
+        {
+            ResizeButton(buttonPrimary, 92, 160);
+            ResizeButton(buttonSecondary, 92, 160);
+
+            ResizeButton(buttonStateOff, 60, 110);
+            ResizeButton(buttonStateIdle, 60, 110);
+            ResizeButton(buttonStateRunning, 60, 110);
+            ResizeButton(buttonStateWarning, 60, 110);
+            ResizeButton(buttonStateAlarm, 60, 110);
+        }
+
+        private static void ResizeButton(AntdUI.Button button, int minWidth, int maxWidth)
+        {
+            if (button == null)
+                return;
+
+            var text = string.IsNullOrWhiteSpace(button.Text) ? "按钮" : button.Text;
+            var textWidth = TextRenderer.MeasureText(text, button.Font).Width + 28;
+
+            if (textWidth < minWidth)
+                textWidth = minWidth;
+
+            if (textWidth > maxWidth)
+                textWidth = maxWidth;
+
+            button.Width = textWidth;
+            button.Height = 36;
+        }
+
+        /// <summary>
+        /// 控件显隐切换后，主动触发布局刷新。
+        /// 页面缓存复用时这样更稳。
+        /// </summary>
+        private void RefreshLayoutState()
+        {
+            flowOptions.PerformLayout();
+            flowActionButtons.PerformLayout();
+            gridRoot.PerformLayout();
+            panelRoot.PerformLayout();
         }
 
         /// <summary>
@@ -242,7 +393,7 @@ namespace AMControlWinF.Views.Motion
 
         /// <summary>
         /// 控制选项变化事件。
-        /// 页面层收到后重新计算按钮启用状态与提示文案。
+        /// 页面层收到后重新计算按钮启用状态。
         /// </summary>
         public event EventHandler OptionsChanged;
 

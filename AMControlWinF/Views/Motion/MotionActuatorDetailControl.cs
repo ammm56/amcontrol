@@ -22,9 +22,6 @@ namespace AMControlWinF.Views.Motion
         {
             if (item == null)
             {
-                labelTitle.Text = "未选择执行器";
-                labelSubTitle.Text = "请先在左侧选择一个执行器对象。";
-
                 labelStateValue.Text = "—";
                 labelModeValue.Text = "—";
                 labelPrimaryOutputValue.Text = "—";
@@ -38,9 +35,6 @@ namespace AMControlWinF.Views.Motion
                 labelLastActionValue.Text = "—";
                 return;
             }
-
-            labelTitle.Text = item.TypeDisplay + " / " + item.DisplayTitle;
-            labelSubTitle.Text = "内部名称：" + item.Name;
 
             labelStateValue.Text = item.StateText;
             labelModeValue.Text = item.ControlModeText;

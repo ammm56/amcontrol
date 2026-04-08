@@ -250,8 +250,8 @@ namespace AM.PageModel.Motion
                 state.StackLightWithBuzzer = stackLightWithBuzzer;
 
                 state.OffButtonText = IsStackLightCurrentState("Off", stackLightWithBuzzer) ? "熄灭（当前）" : "熄灭";
-                state.IdleButtonText = IsStackLightCurrentState("Idle", stackLightWithBuzzer) ? "空闲（当前）" : "空闲";
-                state.RunningButtonText = IsStackLightCurrentState("Running", stackLightWithBuzzer) ? "运行（当前）" : "运行";
+                state.IdleButtonText = IsStackLightCurrentState("Idle", stackLightWithBuzzer) ? "空闲" : "空闲";
+                state.RunningButtonText = IsStackLightCurrentState("Running", stackLightWithBuzzer) ? "运行" : "运行";
                 state.WarningButtonText = IsStackLightCurrentState("Warning", stackLightWithBuzzer) ? "警告（当前）" : "警告";
                 state.AlarmButtonText = IsStackLightCurrentState("Alarm", stackLightWithBuzzer) ? "报警（当前）" : "报警";
 
