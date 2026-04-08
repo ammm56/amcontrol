@@ -138,18 +138,12 @@ namespace AMControlWinF.Views.Motion
 
             motionAxisVirtualListControl.BindItems(simpleActionItems);
 
-            parameterCardApplyVelocity.BindItem(FindActionItem("ApplyVelocity"));
-            parameterCardMoveAbsolute.BindItem(FindActionItem("MoveAbsolute"));
-            parameterCardMoveRelative.BindItem(FindActionItem("MoveRelative"));
+            parameterCardApplyVelocity.BindItem(_model.GetActionItem("ApplyVelocity"));
+            parameterCardMoveAbsolute.BindItem(_model.GetActionItem("MoveAbsolute"));
+            parameterCardMoveRelative.BindItem(_model.GetActionItem("MoveRelative"));
 
             ApplyParameterDefaultsIfAxisChanged(_model.SelectedAxis);
             motionAxisDetailControl.Bind(_model.SelectedAxis);
-        }
-
-        private MotionAxisPageModel.MotionAxisActionViewItem FindActionItem(string actionKey)
-        {
-            return _model.PageItems.FirstOrDefault(
-                x => string.Equals(x.ActionKey, actionKey, StringComparison.OrdinalIgnoreCase));
         }
 
         private void ApplyParameterDefaultsIfAxisChanged(MotionAxisPageModel.MotionAxisSelectedViewItem axisItem)

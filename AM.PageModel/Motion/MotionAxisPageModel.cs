@@ -152,6 +152,19 @@ namespace AM.PageModel.Motion
         }
 
         /// <summary>
+        /// 按动作键获取原始动作项。
+        /// 该方法不受搜索过滤影响，适合底部固定参数卡片使用。
+        /// </summary>
+        public MotionAxisActionViewItem GetActionItem(string actionKey)
+        {
+            if (string.IsNullOrWhiteSpace(actionKey))
+                return null;
+
+            return _allActionItems.FirstOrDefault(
+                x => string.Equals(x.ActionKey, actionKey, StringComparison.OrdinalIgnoreCase));
+        }
+
+        /// <summary>
         /// 执行左侧动作卡片对应的轴动作。
         /// 普通卡片点击即执行；需要参数的动作从右侧实时监视区读取输入值。
         /// </summary>
@@ -413,6 +426,14 @@ namespace AM.PageModel.Motion
             if (axis.IsAlarm)
                 return Result.Fail(-2206, "当前轴报警中，请先清状态", ResultSource.Motion);
 
+            if (string.Equals(actionKey, "ApplyVelocity", StringComparison.OrdinalIgnoreCase))
+            {
+                if (axis.IsMoving)
+                    return Result.Fail(-2214, "当前轴运动中，禁止改速度", ResultSource.Motion);
+
+                return Result.Ok("允许执行", ResultSource.Motion);
+            }
+
             if (!axis.IsEnabled)
                 return Result.Fail(-2207, "当前轴未使能", ResultSource.Motion);
 
@@ -445,14 +466,6 @@ namespace AM.PageModel.Motion
 
                 if (axis.PositiveLimit)
                     return Result.Fail(-2213, "当前轴正限位触发", ResultSource.Motion);
-
-                return Result.Ok("允许执行", ResultSource.Motion);
-            }
-
-            if (string.Equals(actionKey, "ApplyVelocity", StringComparison.OrdinalIgnoreCase))
-            {
-                if (axis.IsMoving)
-                    return Result.Fail(-2214, "当前轴运动中，禁止改速度", ResultSource.Motion);
 
                 return Result.Ok("允许执行", ResultSource.Motion);
             }
