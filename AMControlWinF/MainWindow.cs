@@ -469,7 +469,7 @@ namespace AMControlWinF
                 { "Motion.DO",              () => new DOMotionPage() },
                 { "Motion.Monitor",         () => new MotionMonitorPage() },
                 { "Motion.Axis",            () => new MotionAxisPage() },
-                { "Motion.Actuator",        () => CreatePlaceholderPage("设备 / 执行器控制") },
+                { "Motion.Actuator",        () => new MotionActuatorPage() },
 
                 { "MotionConfig.Card",      () => new MotionCardManagementPage() },
                 { "MotionConfig.Axis",      () => new MotionAxisManagementPage() },

@@ -331,6 +331,30 @@
     <Compile Include="Views\Motion\DOMotionVirtualListControl.Designer.cs">
       <DependentUpon>DOMotionVirtualListControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\Motion\MotionActuatorActionPanelControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Motion\MotionActuatorActionPanelControl.Designer.cs">
+      <DependentUpon>MotionActuatorActionPanelControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Motion\MotionActuatorDetailControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Motion\MotionActuatorDetailControl.Designer.cs">
+      <DependentUpon>MotionActuatorDetailControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Motion\MotionActuatorPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Motion\MotionActuatorPage.Designer.cs">
+      <DependentUpon>MotionActuatorPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Motion\MotionActuatorVirtualListControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Motion\MotionActuatorVirtualListControl.Designer.cs">
+      <DependentUpon>MotionActuatorVirtualListControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="Views\Motion\MotionAxisDetailControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -495,6 +519,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Views\Motion\DOMotionDetailControl.resx">
       <DependentUpon>DOMotionDetailControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\Motion\MotionActuatorPage.resx">
+      <DependentUpon>MotionActuatorPage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\Motion\MotionAxisDetailControl.resx">
       <DependentUpon>MotionAxisDetailControl.cs</DependentUpon>
