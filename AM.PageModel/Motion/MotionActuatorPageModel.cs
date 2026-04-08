@@ -18,13 +18,14 @@ namespace AM.PageModel.Motion
     /// 2. 从 RuntimeContext / 执行器服务读取运行态；
     /// 3. 维护类型筛选、关键字筛选；
     /// 4. 维护左侧卡片集合与当前选中项；
-    /// 5. 为 WinForms 页面提供稳定、无 UI 依赖的数据结构。
+    /// 5. 提供右侧控制面板所需的联动校验与实际执行入口。
     /// </summary>
     public class MotionActuatorPageModel : BindableBase
     {
         private readonly CylinderService _cylinderService;
         private readonly VacuumService _vacuumService;
         private readonly GripperService _gripperService;
+        private readonly StackLightService _stackLightService;
 
         private List<MotionActuatorViewItem> _allItems;
         private List<MotionActuatorViewItem> _filteredItems;
@@ -44,6 +45,7 @@ namespace AM.PageModel.Motion
             _cylinderService = new CylinderService();
             _vacuumService = new VacuumService();
             _gripperService = new GripperService();
+            _stackLightService = new StackLightService();
 
             _allItems = new List<MotionActuatorViewItem>();
             _filteredItems = new List<MotionActuatorViewItem>();
@@ -185,18 +187,8 @@ namespace AM.PageModel.Motion
         }
 
         /// <summary>
-        /// 按动作键读取固定对象。
-        /// 右侧控件需要时可直接使用。
+        /// 首次加载与定时刷新共用的数据刷新入口。
         /// </summary>
-        public MotionActuatorViewItem GetItem(string itemKey)
-        {
-            if (string.IsNullOrWhiteSpace(itemKey))
-                return null;
-
-            return _allItems.FirstOrDefault(x =>
-                string.Equals(x.ItemKey, itemKey, StringComparison.OrdinalIgnoreCase));
-        }
-
         private async Task<Result> ReloadAsync()
         {
             return await Task.Run(() =>
@@ -209,6 +201,406 @@ namespace AM.PageModel.Motion
 
                 return Result.Ok("执行器控制页加载成功");
             });
+        }
+
+        /// <summary>
+        /// 构建右侧控制面板状态。
+        /// 页面层只负责把该状态应用到控件，不在 UI 层重复写联动判断。
+        /// </summary>
+        public MotionActuatorActionPanelState BuildActionPanelState(
+            bool waitFeedback,
+            bool waitWorkpiece,
+            bool stackLightWithBuzzer)
+        {
+            var state = new MotionActuatorActionPanelState();
+
+            if (SelectedItem == null)
+            {
+                state.TitleText = "当前对象：未选择";
+                state.SubTitleText = "—";
+                state.HintText = "请先在左侧选择一个执行器对象。";
+
+                state.ShowNormalActions = true;
+                state.ShowStackLightActions = false;
+
+                state.PrimaryButtonText = "主操作";
+                state.SecondaryButtonText = "副操作";
+                state.PrimaryButtonEnabled = false;
+                state.SecondaryButtonEnabled = false;
+
+                state.ShowWaitFeedback = true;
+                state.ShowWaitWorkpiece = false;
+                state.ShowStackLightWithBuzzer = false;
+
+                return state;
+            }
+
+            state.TitleText = SelectedItem.TypeDisplay + " / " + SelectedItem.DisplayTitle;
+            state.SubTitleText = SelectedItem.Name;
+
+            if (string.Equals(SelectedItem.ActuatorType, "StackLight", StringComparison.OrdinalIgnoreCase))
+            {
+                state.ShowNormalActions = false;
+                state.ShowStackLightActions = true;
+
+                state.ShowWaitFeedback = false;
+                state.ShowWaitWorkpiece = false;
+                state.ShowStackLightWithBuzzer = true;
+
+                state.StackLightWithBuzzer = stackLightWithBuzzer;
+
+                state.OffButtonText = IsStackLightCurrentState("Off", stackLightWithBuzzer) ? "熄灭（当前）" : "熄灭";
+                state.IdleButtonText = IsStackLightCurrentState("Idle", stackLightWithBuzzer) ? "空闲（当前）" : "空闲";
+                state.RunningButtonText = IsStackLightCurrentState("Running", stackLightWithBuzzer) ? "运行（当前）" : "运行";
+                state.WarningButtonText = IsStackLightCurrentState("Warning", stackLightWithBuzzer) ? "警告（当前）" : "警告";
+                state.AlarmButtonText = IsStackLightCurrentState("Alarm", stackLightWithBuzzer) ? "报警（当前）" : "报警";
+
+                state.IsOffCurrent = IsStackLightCurrentState("Off", stackLightWithBuzzer);
+                state.IsIdleCurrent = IsStackLightCurrentState("Idle", stackLightWithBuzzer);
+                state.IsRunningCurrent = IsStackLightCurrentState("Running", stackLightWithBuzzer);
+                state.IsWarningCurrent = IsStackLightCurrentState("Warning", stackLightWithBuzzer);
+                state.IsAlarmCurrent = IsStackLightCurrentState("Alarm", stackLightWithBuzzer);
+
+                state.OffButtonEnabled = ValidateStackLightState("Off", stackLightWithBuzzer).Success;
+                state.IdleButtonEnabled = ValidateStackLightState("Idle", stackLightWithBuzzer).Success;
+                state.RunningButtonEnabled = ValidateStackLightState("Running", stackLightWithBuzzer).Success;
+                state.WarningButtonEnabled = ValidateStackLightState("Warning", stackLightWithBuzzer).Success;
+                state.AlarmButtonEnabled = ValidateStackLightState("Alarm", stackLightWithBuzzer).Success;
+
+                state.HintText = SelectedItem.DetailText;
+                if (stackLightWithBuzzer)
+                    state.HintText += "；当前已开启蜂鸣联动。";
+
+                return state;
+            }
+
+            state.ShowNormalActions = true;
+            state.ShowStackLightActions = false;
+
+            state.ShowWaitFeedback = true;
+            state.ShowWaitWorkpiece =
+                string.Equals(SelectedItem.ActuatorType, "Vacuum", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(SelectedItem.ActuatorType, "Gripper", StringComparison.OrdinalIgnoreCase);
+            state.ShowStackLightWithBuzzer = false;
+
+            state.WaitFeedback = waitFeedback;
+            state.WaitWorkpiece = waitWorkpiece;
+
+            var primaryValidate = ValidatePrimaryAction(waitFeedback, waitWorkpiece);
+            var secondaryValidate = ValidateSecondaryAction(waitFeedback);
+
+            state.PrimaryButtonText = ResolvePrimaryActionButtonText(SelectedItem, waitWorkpiece);
+            state.SecondaryButtonText = ResolveSecondaryActionButtonText(SelectedItem);
+
+            state.PrimaryButtonEnabled = primaryValidate.Success;
+            state.SecondaryButtonEnabled = SelectedItem.HasSecondaryAction && secondaryValidate.Success;
+
+            if (!primaryValidate.Success && SelectedItem.HasSecondaryAction && !secondaryValidate.Success)
+            {
+                state.HintText = "主操作：" + primaryValidate.Message + "；副操作：" + secondaryValidate.Message;
+            }
+            else if (!primaryValidate.Success)
+            {
+                state.HintText = "主操作：" + primaryValidate.Message;
+            }
+            else if (SelectedItem.HasSecondaryAction && !secondaryValidate.Success)
+            {
+                state.HintText = "副操作：" + secondaryValidate.Message;
+            }
+            else
+            {
+                state.HintText = SelectedItem.DetailText;
+            }
+
+            return state;
+        }
+
+        /// <summary>
+        /// 校验当前主动作是否允许执行。
+        /// </summary>
+        public Result ValidatePrimaryAction(bool waitFeedback, bool waitWorkpiece)
+        {
+            if (SelectedItem == null)
+                return Result.Fail(-2301, "请先选择执行器对象", ResultSource.Motion);
+
+            switch (SelectedItem.ActuatorType)
+            {
+                case "Cylinder":
+                    if (SelectedItem.PrimaryState == true && SelectedItem.SecondaryState != true)
+                        return Result.Fail(-2302, "当前气缸已在伸出到位状态，无需重复伸出", ResultSource.Motion);
+
+                    if (waitFeedback)
+                    {
+                        if (!SelectedItem.UseFeedbackCheck)
+                            return Result.Fail(-2303, "当前气缸未启用反馈校验，请取消“等待反馈”或调整配置", ResultSource.Motion);
+
+                        if (!SelectedItem.PrimaryFeedbackBit.HasValue)
+                            return Result.Fail(-2304, "当前气缸未配置伸出反馈位，无法等待伸出到位", ResultSource.Motion);
+                    }
+
+                    return Result.Ok("允许执行", ResultSource.Motion);
+
+                case "Vacuum":
+                    if (SelectedItem.PrimaryState == true && (!waitWorkpiece || SelectedItem.WorkpieceState != false))
+                        return Result.Fail(-2305, "当前真空已建立，无需重复吸真空", ResultSource.Motion);
+
+                    if (waitFeedback)
+                    {
+                        if (!SelectedItem.UseFeedbackCheck)
+                            return Result.Fail(-2306, "当前真空未启用反馈校验，请取消“等待反馈”或调整配置", ResultSource.Motion);
+
+                        if (!SelectedItem.PrimaryFeedbackBit.HasValue)
+                            return Result.Fail(-2307, "当前真空未配置建压反馈位，无法等待真空建立", ResultSource.Motion);
+                    }
+
+                    if (waitWorkpiece)
+                    {
+                        if (!SelectedItem.UseWorkpieceCheck)
+                            return Result.Fail(-2308, "当前真空未启用工件检测校验，请取消“等待工件检测”或调整配置", ResultSource.Motion);
+
+                        if (!SelectedItem.WorkpieceBit.HasValue)
+                            return Result.Fail(-2309, "当前真空未配置工件检测位，无法等待工件检测", ResultSource.Motion);
+                    }
+
+                    return Result.Ok("允许执行", ResultSource.Motion);
+
+                case "Gripper":
+                    if (SelectedItem.PrimaryState == true && (!waitWorkpiece || SelectedItem.WorkpieceState != false))
+                        return Result.Fail(-2310, "当前夹爪已在夹紧到位状态，无需重复夹紧", ResultSource.Motion);
+
+                    if (waitFeedback)
+                    {
+                        if (!SelectedItem.UseFeedbackCheck)
+                            return Result.Fail(-2311, "当前夹爪未启用反馈校验，请取消“等待反馈”或调整配置", ResultSource.Motion);
+
+                        if (!SelectedItem.PrimaryFeedbackBit.HasValue)
+                            return Result.Fail(-2312, "当前夹爪未配置夹紧反馈位，无法等待夹紧到位", ResultSource.Motion);
+                    }
+
+                    if (waitWorkpiece)
+                    {
+                        if (!SelectedItem.UseWorkpieceCheck)
+                            return Result.Fail(-2313, "当前夹爪未启用工件检测校验，请取消“等待工件检测”或调整配置", ResultSource.Motion);
+
+                        if (!SelectedItem.WorkpieceBit.HasValue)
+                            return Result.Fail(-2314, "当前夹爪未配置工件检测位，无法等待工件检测", ResultSource.Motion);
+                    }
+
+                    return Result.Ok("允许执行", ResultSource.Motion);
+
+                default:
+                    return Result.Fail(-2315, "当前对象不支持主动作", ResultSource.Motion);
+            }
+        }
+
+        /// <summary>
+        /// 校验当前副动作是否允许执行。
+        /// </summary>
+        public Result ValidateSecondaryAction(bool waitFeedback)
+        {
+            if (SelectedItem == null)
+                return Result.Fail(-2320, "请先选择执行器对象", ResultSource.Motion);
+
+            switch (SelectedItem.ActuatorType)
+            {
+                case "Cylinder":
+                    if (SelectedItem.SecondaryState == true && SelectedItem.PrimaryState != true)
+                        return Result.Fail(-2321, "当前气缸已在缩回到位状态，无需重复缩回", ResultSource.Motion);
+
+                    if (waitFeedback)
+                    {
+                        if (!SelectedItem.UseFeedbackCheck)
+                            return Result.Fail(-2322, "当前气缸未启用反馈校验，请取消“等待反馈”或调整配置", ResultSource.Motion);
+
+                        if (!SelectedItem.SecondaryFeedbackBit.HasValue)
+                            return Result.Fail(-2323, "当前气缸未配置缩回反馈位，无法等待缩回到位", ResultSource.Motion);
+                    }
+
+                    return Result.Ok("允许执行", ResultSource.Motion);
+
+                case "Vacuum":
+                    if (SelectedItem.SecondaryState == true || SelectedItem.PrimaryState == false)
+                        return Result.Fail(-2324, "当前真空已处于释放状态，无需重复关闭真空", ResultSource.Motion);
+
+                    if (waitFeedback)
+                    {
+                        if (!SelectedItem.UseFeedbackCheck)
+                            return Result.Fail(-2325, "当前真空未启用反馈校验，请取消“等待反馈”或调整配置", ResultSource.Motion);
+
+                        if (!SelectedItem.SecondaryFeedbackBit.HasValue && !SelectedItem.PrimaryFeedbackBit.HasValue)
+                            return Result.Fail(-2326, "当前真空未配置释放反馈位或建压反馈位，无法等待真空释放", ResultSource.Motion);
+                    }
+
+                    return Result.Ok("允许执行", ResultSource.Motion);
+
+                case "Gripper":
+                    if (SelectedItem.SecondaryState == true && SelectedItem.PrimaryState != true)
+                        return Result.Fail(-2327, "当前夹爪已在打开到位状态，无需重复打开", ResultSource.Motion);
+
+                    if (waitFeedback)
+                    {
+                        if (!SelectedItem.UseFeedbackCheck)
+                            return Result.Fail(-2328, "当前夹爪未启用反馈校验，请取消“等待反馈”或调整配置", ResultSource.Motion);
+
+                        if (!SelectedItem.SecondaryFeedbackBit.HasValue)
+                            return Result.Fail(-2329, "当前夹爪未配置打开反馈位，无法等待打开到位", ResultSource.Motion);
+                    }
+
+                    return Result.Ok("允许执行", ResultSource.Motion);
+
+                default:
+                    return Result.Fail(-2330, "当前对象不支持副动作", ResultSource.Motion);
+            }
+        }
+
+        /// <summary>
+        /// 校验灯塔目标状态是否允许切换。
+        /// </summary>
+        public Result ValidateStackLightState(string stateKey, bool stackLightWithBuzzer)
+        {
+            if (SelectedItem == null || !string.Equals(SelectedItem.ActuatorType, "StackLight", StringComparison.OrdinalIgnoreCase))
+                return Result.Fail(-2335, "请先选择灯塔对象", ResultSource.Motion);
+
+            if (!SelectedItem.HasAnyStackLightOutput)
+                return Result.Fail(-2336, "当前灯塔未配置任何输出位，无法执行状态切换", ResultSource.Motion);
+
+            StackLightState targetState;
+            if (!TryParseStackLightState(stateKey, out targetState))
+                return Result.Fail(-2337, "不支持的灯塔状态: " + stateKey, ResultSource.Motion);
+
+            if (IsStackLightAlreadyInTargetState(SelectedItem, targetState, stackLightWithBuzzer))
+                return Result.Fail(-2338, "当前灯塔已处于目标状态，无需重复切换", ResultSource.Motion);
+
+            return Result.Ok("允许执行", ResultSource.Motion);
+        }
+
+        /// <summary>
+        /// 执行当前主动作。
+        /// 实际执行仍统一走第三层执行器服务。
+        /// </summary>
+        public async Task<Result> ExecutePrimaryActionAsync(bool waitFeedback, bool waitWorkpiece)
+        {
+            var item = SelectedItem;
+            if (item == null)
+                return Result.Fail(-2340, "请先选择执行器对象", ResultSource.Motion);
+
+            var validate = ValidatePrimaryAction(waitFeedback, waitWorkpiece);
+            if (!validate.Success)
+            {
+                ApplyActionResult(item, validate);
+                return validate;
+            }
+
+            Result result;
+            switch (item.ActuatorType)
+            {
+                case "Cylinder":
+                    result = await Task.Run(() => _cylinderService.Extend(item.Name, waitFeedback));
+                    break;
+
+                case "Vacuum":
+                    result = await Task.Run(() => _vacuumService.VacuumOn(item.Name, waitFeedback, waitWorkpiece));
+                    break;
+
+                case "Gripper":
+                    result = await Task.Run(() => _gripperService.Close(item.Name, waitFeedback, waitWorkpiece));
+                    break;
+
+                default:
+                    result = Result.Fail(-2341, "当前对象不支持主动作", ResultSource.Motion);
+                    break;
+            }
+
+            ApplyActionResult(item, result);
+            return result;
+        }
+
+        /// <summary>
+        /// 执行当前副动作。
+        /// </summary>
+        public async Task<Result> ExecuteSecondaryActionAsync(bool waitFeedback)
+        {
+            var item = SelectedItem;
+            if (item == null)
+                return Result.Fail(-2342, "请先选择执行器对象", ResultSource.Motion);
+
+            var validate = ValidateSecondaryAction(waitFeedback);
+            if (!validate.Success)
+            {
+                ApplyActionResult(item, validate);
+                return validate;
+            }
+
+            Result result;
+            switch (item.ActuatorType)
+            {
+                case "Cylinder":
+                    result = await Task.Run(() => _cylinderService.Retract(item.Name, waitFeedback));
+                    break;
+
+                case "Vacuum":
+                    result = await Task.Run(() => _vacuumService.VacuumOff(item.Name, waitFeedback));
+                    break;
+
+                case "Gripper":
+                    result = await Task.Run(() => _gripperService.Open(item.Name, waitFeedback));
+                    break;
+
+                default:
+                    result = Result.Fail(-2343, "当前对象不支持副动作", ResultSource.Motion);
+                    break;
+            }
+
+            ApplyActionResult(item, result);
+            return result;
+        }
+
+        /// <summary>
+        /// 切换灯塔状态。
+        /// </summary>
+        public async Task<Result> SetStackLightStateAsync(string stateKey, bool stackLightWithBuzzer)
+        {
+            var item = SelectedItem;
+            if (item == null)
+                return Result.Fail(-2344, "请先选择灯塔对象", ResultSource.Motion);
+
+            var validate = ValidateStackLightState(stateKey, stackLightWithBuzzer);
+            if (!validate.Success)
+            {
+                ApplyActionResult(item, validate);
+                return validate;
+            }
+
+            Result result;
+            switch (stateKey)
+            {
+                case "Off":
+                    result = await Task.Run(() => _stackLightService.TurnOff(item.Name));
+                    break;
+
+                case "Idle":
+                    result = await Task.Run(() => _stackLightService.SetIdle(item.Name));
+                    break;
+
+                case "Running":
+                    result = await Task.Run(() => _stackLightService.SetRunning(item.Name));
+                    break;
+
+                case "Warning":
+                    result = await Task.Run(() => _stackLightService.SetWarning(item.Name, stackLightWithBuzzer));
+                    break;
+
+                case "Alarm":
+                    result = await Task.Run(() => _stackLightService.SetAlarm(item.Name, stackLightWithBuzzer));
+                    break;
+
+                default:
+                    result = Result.Fail(-2345, "不支持的灯塔状态", ResultSource.Motion);
+                    break;
+            }
+
+            ApplyActionResult(item, result);
+            return result;
         }
 
         /// <summary>
@@ -740,7 +1132,6 @@ namespace AM.PageModel.Motion
                 selected = _filteredItems[0];
 
             SelectedItem = selected;
-
             RaiseUiChanged();
         }
 
@@ -759,6 +1150,149 @@ namespace AM.PageModel.Motion
         {
             OnPropertyChanged(nameof(PageItems));
             OnPropertyChanged(nameof(SelectedItem));
+        }
+
+        private static string ResolvePrimaryActionButtonText(MotionActuatorViewItem item, bool waitWorkpiece)
+        {
+            if (item == null)
+                return "主操作";
+
+            switch (item.ActuatorType)
+            {
+                case "Cylinder":
+                    return item.PrimaryState == true && item.SecondaryState != true
+                        ? "伸出（已到位）"
+                        : "伸出";
+
+                case "Vacuum":
+                    if (item.PrimaryState == true && (!waitWorkpiece || item.WorkpieceState != false))
+                        return "吸真空（已建立）";
+
+                    return waitWorkpiece ? "吸真空+检测" : "吸真空";
+
+                case "Gripper":
+                    if (item.PrimaryState == true && (!waitWorkpiece || item.WorkpieceState != false))
+                        return "夹紧（已到位）";
+
+                    return waitWorkpiece ? "夹紧+检测" : "夹紧";
+
+                default:
+                    return "主操作";
+            }
+        }
+
+        private static string ResolveSecondaryActionButtonText(MotionActuatorViewItem item)
+        {
+            if (item == null)
+                return "副操作";
+
+            switch (item.ActuatorType)
+            {
+                case "Cylinder":
+                    return item.SecondaryState == true && item.PrimaryState != true
+                        ? "缩回（已到位）"
+                        : "缩回";
+
+                case "Vacuum":
+                    return item.SecondaryState == true || item.PrimaryState == false
+                        ? "关闭真空（已释放）"
+                        : "关闭真空";
+
+                case "Gripper":
+                    return item.SecondaryState == true && item.PrimaryState != true
+                        ? "打开（已到位）"
+                        : "打开";
+
+                default:
+                    return "副操作";
+            }
+        }
+
+        private bool IsStackLightCurrentState(string stateKey, bool stackLightWithBuzzer)
+        {
+            if (SelectedItem == null || !string.Equals(SelectedItem.ActuatorType, "StackLight", StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            StackLightState state;
+            if (!TryParseStackLightState(stateKey, out state))
+                return false;
+
+            return IsStackLightAlreadyInTargetState(SelectedItem, state, stackLightWithBuzzer);
+        }
+
+        private static bool TryParseStackLightState(string stateKey, out StackLightState state)
+        {
+            state = StackLightState.Off;
+
+            switch (stateKey)
+            {
+                case "Off":
+                    state = StackLightState.Off;
+                    return true;
+
+                case "Idle":
+                    state = StackLightState.Idle;
+                    return true;
+
+                case "Running":
+                    state = StackLightState.Running;
+                    return true;
+
+                case "Warning":
+                    state = StackLightState.Warning;
+                    return true;
+
+                case "Alarm":
+                    state = StackLightState.Alarm;
+                    return true;
+
+                default:
+                    return false;
+            }
+        }
+
+        private static bool IsStackLightAlreadyInTargetState(
+            MotionActuatorViewItem item,
+            StackLightState targetState,
+            bool withBuzzer)
+        {
+            if (item == null)
+                return false;
+
+            switch (targetState)
+            {
+                case StackLightState.Off:
+                    return item.RedOn != true
+                        && item.YellowOn != true
+                        && item.GreenOn != true
+                        && item.BlueOn != true
+                        && item.BuzzerOn != true;
+
+                case StackLightState.Idle:
+                case StackLightState.Running:
+                    return item.GreenOn == true
+                        && item.RedOn != true
+                        && item.YellowOn != true
+                        && item.BlueOn != true
+                        && item.BuzzerOn != true;
+
+                case StackLightState.Warning:
+                    return item.YellowOn == true
+                        && item.RedOn != true
+                        && item.GreenOn != true
+                        && item.BlueOn != true
+                        && (withBuzzer ? item.BuzzerOn == true : true);
+
+                case StackLightState.Alarm:
+                    return item.RedOn == true
+                        && item.YellowOn != true
+                        && item.GreenOn != true
+                        && item.BlueOn != true
+                        && (withBuzzer ? item.BuzzerOn == true : true);
+
+                default:
+                    return false;
+            }
         }
 
         private static int GetActuatorTypeSort(string actuatorType)
@@ -831,6 +1365,27 @@ namespace AM.PageModel.Motion
                 return null;
 
             return value;
+        }
+
+        private void ApplyActionResult(MotionActuatorViewItem item, Result result)
+        {
+            if (item == null || result == null)
+                return;
+
+            item.LastActionMessage = BuildLayeredActionMessage(result);
+            item.LastActionLevel = result.Success ? "Success" : "Danger";
+            item.HasFault = !result.Success;
+        }
+
+        private static string BuildLayeredActionMessage(Result result)
+        {
+            if (result == null)
+                return "执行失败：未返回结果";
+
+            if (result.Success)
+                return "操作成功：" + result.Message;
+
+            return "操作失败：" + result.Message;
         }
 
         /// <summary>
@@ -923,6 +1478,52 @@ namespace AM.PageModel.Motion
             {
                 get { return (ActuatorType ?? string.Empty) + "|" + (Name ?? string.Empty); }
             }
+        }
+
+        /// <summary>
+        /// 右侧控制面板状态。
+        /// 该对象不依赖具体 UI 控件类型，只表达控件当前应展示什么。
+        /// </summary>
+        public sealed class MotionActuatorActionPanelState
+        {
+            public string TitleText { get; set; }
+            public string SubTitleText { get; set; }
+            public string HintText { get; set; }
+
+            public bool ShowNormalActions { get; set; }
+            public bool ShowStackLightActions { get; set; }
+
+            public bool ShowWaitFeedback { get; set; }
+            public bool ShowWaitWorkpiece { get; set; }
+            public bool ShowStackLightWithBuzzer { get; set; }
+
+            public bool WaitFeedback { get; set; }
+            public bool WaitWorkpiece { get; set; }
+            public bool StackLightWithBuzzer { get; set; }
+
+            public string PrimaryButtonText { get; set; }
+            public bool PrimaryButtonEnabled { get; set; }
+
+            public string SecondaryButtonText { get; set; }
+            public bool SecondaryButtonEnabled { get; set; }
+
+            public string OffButtonText { get; set; }
+            public string IdleButtonText { get; set; }
+            public string RunningButtonText { get; set; }
+            public string WarningButtonText { get; set; }
+            public string AlarmButtonText { get; set; }
+
+            public bool OffButtonEnabled { get; set; }
+            public bool IdleButtonEnabled { get; set; }
+            public bool RunningButtonEnabled { get; set; }
+            public bool WarningButtonEnabled { get; set; }
+            public bool AlarmButtonEnabled { get; set; }
+
+            public bool IsOffCurrent { get; set; }
+            public bool IsIdleCurrent { get; set; }
+            public bool IsRunningCurrent { get; set; }
+            public bool IsWarningCurrent { get; set; }
+            public bool IsAlarmCurrent { get; set; }
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using AM.Model.Common;
 using AM.PageModel.Motion;
-using AMControlWinF.Views.MotionConfig;
 using AntdUI;
 using System;
 using System.Threading.Tasks;
@@ -11,18 +10,13 @@ namespace AMControlWinF.Views.Motion
     /// <summary>
     /// 执行器控制页面。
     ///
-    /// 当前第一步实现内容：
-    /// 1. 三行页面布局；
-    /// 2. 顶部类型筛选与搜索；
-    /// 3. 第二行统计信息；
-    /// 4. 第三行左侧执行器虚拟卡片列表；
-    /// 5. 第三行右侧上下两块 UserControl 骨架绑定；
-    /// 6. 500ms 低频刷新运行态。
-    ///
-    /// 下一步再补：
-    /// - 右侧动作按钮实际执行；
-    /// - 等待反馈 / 等待工件 / 灯塔蜂鸣等联动逻辑；
-    /// - 更完整的详情字段与样式细调。
+    /// 当前第二步实现内容：
+    /// 1. 左侧执行器卡片选择；
+    /// 2. 右侧上半区控制面板交互；
+    /// 3. 主动作 / 副动作 / 灯塔状态切换；
+    /// 4. WaitFeedback / WaitWorkpiece / 蜂鸣联动；
+    /// 5. 右侧下半区详情按行展示；
+    /// 6. 页面统一调度动作执行，避免控件内部直接调用服务。
     /// </summary>
     public partial class MotionActuatorPage : UserControl
     {
@@ -31,6 +25,7 @@ namespace AMControlWinF.Views.Motion
 
         private bool _isFirstLoad;
         private bool _isRefreshing;
+        private bool _isExecutingAction;
 
         public MotionActuatorPage()
         {
@@ -65,6 +60,11 @@ namespace AMControlWinF.Views.Motion
 
             inputSearch.TextChanged += InputSearch_TextChanged;
             actuatorVirtualListControl.ItemSelected += ActuatorVirtualListControl_ItemSelected;
+
+            actuatorActionPanelControl.OptionsChanged += ActuatorActionPanelControl_OptionsChanged;
+            actuatorActionPanelControl.PrimaryActionRequested += ActuatorActionPanelControl_PrimaryActionRequested;
+            actuatorActionPanelControl.SecondaryActionRequested += ActuatorActionPanelControl_SecondaryActionRequested;
+            actuatorActionPanelControl.StackLightStateRequested += ActuatorActionPanelControl_StackLightStateRequested;
         }
 
         private async void MotionActuatorPage_Load(object sender, EventArgs e)
@@ -128,9 +128,23 @@ namespace AMControlWinF.Views.Motion
 
             actuatorVirtualListControl.BindItems(_model.PageItems, _model.SelectedItem);
             actuatorActionPanelControl.Bind(_model.SelectedItem);
+            RefreshActionPanelState();
             actuatorDetailControl.Bind(_model.SelectedItem);
 
             UpdateFilterButtonStyles();
+        }
+
+        /// <summary>
+        /// 根据当前选中项和选项状态，刷新右侧上半区联动状态。
+        /// 不做整页刷新，避免输入选项切换时影响左侧滚动位置。
+        /// </summary>
+        private void RefreshActionPanelState()
+        {
+            actuatorActionPanelControl.ApplyActionState(
+                _model.BuildActionPanelState(
+                    actuatorActionPanelControl.WaitFeedback,
+                    actuatorActionPanelControl.WaitWorkpiece,
+                    actuatorActionPanelControl.StackLightWithBuzzer));
         }
 
         /// <summary>
@@ -144,7 +158,6 @@ namespace AMControlWinF.Views.Motion
 
         /// <summary>
         /// 根据当前筛选状态刷新顶部按钮样式。
-        /// 这里只做最小视觉反馈，不做复杂状态管理。
         /// </summary>
         private void UpdateFilterButtonStyles()
         {
@@ -179,7 +192,67 @@ namespace AMControlWinF.Views.Motion
             _model.SelectItem(e.ItemKey);
             actuatorVirtualListControl.BindItems(_model.PageItems, _model.SelectedItem);
             actuatorActionPanelControl.Bind(_model.SelectedItem);
+            RefreshActionPanelState();
             actuatorDetailControl.Bind(_model.SelectedItem);
+        }
+
+        private void ActuatorActionPanelControl_OptionsChanged(object sender, EventArgs e)
+        {
+            RefreshActionPanelState();
+        }
+
+        private async void ActuatorActionPanelControl_PrimaryActionRequested(object sender, EventArgs e)
+        {
+            await ExecuteActionAsync(() =>
+                _model.ExecutePrimaryActionAsync(
+                    actuatorActionPanelControl.WaitFeedback,
+                    actuatorActionPanelControl.WaitWorkpiece));
+        }
+
+        private async void ActuatorActionPanelControl_SecondaryActionRequested(object sender, EventArgs e)
+        {
+            await ExecuteActionAsync(() =>
+                _model.ExecuteSecondaryActionAsync(
+                    actuatorActionPanelControl.WaitFeedback));
+        }
+
+        private async void ActuatorActionPanelControl_StackLightStateRequested(
+            object sender,
+            MotionActuatorActionPanelControl.StackLightStateRequestedEventArgs e)
+        {
+            if (e == null)
+                return;
+
+            await ExecuteActionAsync(() =>
+                _model.SetStackLightStateAsync(
+                    e.StateKey,
+                    actuatorActionPanelControl.StackLightWithBuzzer));
+        }
+
+        /// <summary>
+        /// 统一动作执行入口。
+        /// 成功后刷新运行态；失败时仅刷新右侧状态与详情文案。
+        /// </summary>
+        private async Task ExecuteActionAsync(Func<Task<Result>> executeFunc)
+        {
+            if (_isExecutingAction || executeFunc == null)
+                return;
+
+            _isExecutingAction = true;
+            try
+            {
+                var result = await executeFunc();
+
+                actuatorDetailControl.Bind(_model.SelectedItem);
+                RefreshActionPanelState();
+
+                if (result != null && result.Success)
+                    await ReloadRuntimeAsync(false);
+            }
+            finally
+            {
+                _isExecutingAction = false;
+            }
         }
 
         private void UpdateRefreshTimerState()
@@ -195,7 +268,7 @@ namespace AMControlWinF.Views.Motion
 
         private async void RefreshTimer_Tick(object sender, EventArgs e)
         {
-            if (!Visible || _isRefreshing)
+            if (!Visible || _isRefreshing || _isExecutingAction)
                 return;
 
             await ReloadRuntimeAsync(false);

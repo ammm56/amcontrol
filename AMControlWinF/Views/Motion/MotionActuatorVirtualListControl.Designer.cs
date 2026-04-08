@@ -36,11 +36,11 @@
             this.virtualPanelItems.Dock = System.Windows.Forms.DockStyle.Fill;
             this.virtualPanelItems.Empty = true;
             this.virtualPanelItems.EmptyText = "暂无执行器对象";
-            this.virtualPanelItems.Gap = 8;
+            this.virtualPanelItems.Gap = 0;
             this.virtualPanelItems.Location = new System.Drawing.Point(4, 4);
             this.virtualPanelItems.Margin = new System.Windows.Forms.Padding(0);
             this.virtualPanelItems.Name = "virtualPanelItems";
-            this.virtualPanelItems.Padding = new System.Windows.Forms.Padding(4);
+            this.virtualPanelItems.Padding = new System.Windows.Forms.Padding(0);
             this.virtualPanelItems.Radius = 12;
             this.virtualPanelItems.Shadow = 6;
             this.virtualPanelItems.ShadowOpacity = 0.12F;

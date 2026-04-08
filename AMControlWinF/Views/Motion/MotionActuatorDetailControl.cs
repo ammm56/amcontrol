@@ -1,12 +1,15 @@
 ﻿using AM.PageModel.Motion;
-using AntdUI;
 using System.Windows.Forms;
 
 namespace AMControlWinF.Views.Motion
 {
     /// <summary>
     /// 执行器右侧下半区详细信息控件。
-    /// 当前第一步只负责显示信息，不承担动作执行。
+    ///
+    /// 当前实现：
+    /// 1. 采用分行紧凑布局替代原来的纯文本大段拼接；
+    /// 2. 重点展示当前对象最常用的结构与运行态信息；
+    /// 3. 不承担动作执行，只负责数据显示。
     /// </summary>
     public partial class MotionActuatorDetailControl : UserControl
     {
@@ -20,26 +23,36 @@ namespace AMControlWinF.Views.Motion
             if (item == null)
             {
                 labelTitle.Text = "未选择执行器";
-                labelDetail.Text = "请先在左侧选择一个执行器对象。";
+                labelSubTitle.Text = "请先在左侧选择一个执行器对象。";
+
+                labelStateValue.Text = "—";
+                labelModeValue.Text = "—";
+                labelPrimaryOutputValue.Text = "—";
+                labelSecondaryOutputValue.Text = "—";
+                labelPrimaryFeedbackValue.Text = "—";
+                labelSecondaryFeedbackValue.Text = "—";
+                labelWorkpieceValue.Text = "—";
+                labelTimeoutValue.Text = "—";
+                labelSummaryValue.Text = "—";
+                labelUpdateTimeValue.Text = "—";
+                labelLastActionValue.Text = "—";
                 return;
             }
 
             labelTitle.Text = item.TypeDisplay + " / " + item.DisplayTitle;
+            labelSubTitle.Text = "内部名称：" + item.Name;
 
-            labelDetail.Text =
-                "内部名称：" + item.Name + System.Environment.NewLine +
-                "模式：" + item.ControlModeText + System.Environment.NewLine +
-                item.PrimaryOutputText + System.Environment.NewLine +
-                item.SecondaryOutputText + System.Environment.NewLine +
-                item.PrimaryFeedbackText + System.Environment.NewLine +
-                item.SecondaryFeedbackText + System.Environment.NewLine +
-                item.WorkpieceText + System.Environment.NewLine +
-                item.TimeoutText + System.Environment.NewLine +
-                "状态：" + item.StateText + System.Environment.NewLine +
-                "说明：" + item.DetailText + System.Environment.NewLine +
-                "摘要：" + item.FooterText + System.Environment.NewLine +
-                "更新时间：" + item.RuntimeUpdateTimeText + System.Environment.NewLine +
-                item.LastActionMessage;
+            labelStateValue.Text = item.StateText;
+            labelModeValue.Text = item.ControlModeText;
+            labelPrimaryOutputValue.Text = item.PrimaryOutputText;
+            labelSecondaryOutputValue.Text = item.SecondaryOutputText;
+            labelPrimaryFeedbackValue.Text = item.PrimaryFeedbackText;
+            labelSecondaryFeedbackValue.Text = item.SecondaryFeedbackText;
+            labelWorkpieceValue.Text = item.WorkpieceText;
+            labelTimeoutValue.Text = item.TimeoutText;
+            labelSummaryValue.Text = item.FooterText;
+            labelUpdateTimeValue.Text = item.RuntimeUpdateTimeText;
+            labelLastActionValue.Text = item.LastActionMessage;
         }
     }
 }

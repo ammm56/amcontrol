@@ -99,19 +99,19 @@
             this.gridContent.Margin = new System.Windows.Forms.Padding(0);
             this.gridContent.Name = "gridContent";
             this.gridContent.Size = new System.Drawing.Size(834, 532);
-            this.gridContent.Span = "100% 320";
+            this.gridContent.Span = "100% 280";
             this.gridContent.TabIndex = 0;
             // 
             // panelRight
             // 
             this.panelRight.Controls.Add(this.tableRight);
             this.panelRight.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelRight.Location = new System.Drawing.Point(514, 0);
+            this.panelRight.Location = new System.Drawing.Point(554, 0);
             this.panelRight.Margin = new System.Windows.Forms.Padding(0);
             this.panelRight.Name = "panelRight";
             this.panelRight.Radius = 12;
             this.panelRight.Shadow = 4;
-            this.panelRight.Size = new System.Drawing.Size(320, 532);
+            this.panelRight.Size = new System.Drawing.Size(280, 532);
             this.panelRight.TabIndex = 1;
             // 
             // tableRight
@@ -127,7 +127,7 @@
             this.tableRight.RowCount = 2;
             this.tableRight.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 196F));
             this.tableRight.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableRight.Size = new System.Drawing.Size(312, 524);
+            this.tableRight.Size = new System.Drawing.Size(272, 524);
             this.tableRight.TabIndex = 0;
             // 
             // actuatorActionPanelControl
@@ -136,7 +136,7 @@
             this.actuatorActionPanelControl.Location = new System.Drawing.Point(0, 0);
             this.actuatorActionPanelControl.Margin = new System.Windows.Forms.Padding(0);
             this.actuatorActionPanelControl.Name = "actuatorActionPanelControl";
-            this.actuatorActionPanelControl.Size = new System.Drawing.Size(312, 196);
+            this.actuatorActionPanelControl.Size = new System.Drawing.Size(272, 196);
             this.actuatorActionPanelControl.TabIndex = 0;
             // 
             // actuatorDetailControl
@@ -145,7 +145,7 @@
             this.actuatorDetailControl.Location = new System.Drawing.Point(0, 196);
             this.actuatorDetailControl.Margin = new System.Windows.Forms.Padding(0);
             this.actuatorDetailControl.Name = "actuatorDetailControl";
-            this.actuatorDetailControl.Size = new System.Drawing.Size(312, 328);
+            this.actuatorDetailControl.Size = new System.Drawing.Size(272, 328);
             this.actuatorDetailControl.TabIndex = 1;
             // 
             // panelLeft
@@ -158,7 +158,7 @@
             this.panelLeft.Radius = 0;
             this.panelLeft.ShadowOpacity = 0F;
             this.panelLeft.ShadowOpacityHover = 0F;
-            this.panelLeft.Size = new System.Drawing.Size(514, 532);
+            this.panelLeft.Size = new System.Drawing.Size(554, 532);
             this.panelLeft.TabIndex = 0;
             // 
             // actuatorVirtualListControl
@@ -167,7 +167,7 @@
             this.actuatorVirtualListControl.Location = new System.Drawing.Point(0, 0);
             this.actuatorVirtualListControl.Margin = new System.Windows.Forms.Padding(0);
             this.actuatorVirtualListControl.Name = "actuatorVirtualListControl";
-            this.actuatorVirtualListControl.Size = new System.Drawing.Size(514, 532);
+            this.actuatorVirtualListControl.Size = new System.Drawing.Size(554, 532);
             this.actuatorVirtualListControl.TabIndex = 0;
             // 
             // panelSummary
@@ -216,7 +216,7 @@
             // 
             this.labelStackLightCount.BackColor = System.Drawing.Color.Transparent;
             this.labelStackLightCount.Dock = System.Windows.Forms.DockStyle.Right;
-            this.labelStackLightCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 14F, System.Drawing.FontStyle.Bold);
+            this.labelStackLightCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 18F, System.Drawing.FontStyle.Bold);
             this.labelStackLightCount.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(140)))), ((int)(((byte)(22)))));
             this.labelStackLightCount.Location = new System.Drawing.Point(93, 16);
             this.labelStackLightCount.Name = "labelStackLightCount";
@@ -254,7 +254,7 @@
             // 
             this.labelGripperCount.BackColor = System.Drawing.Color.Transparent;
             this.labelGripperCount.Dock = System.Windows.Forms.DockStyle.Right;
-            this.labelGripperCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 14F, System.Drawing.FontStyle.Bold);
+            this.labelGripperCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 18F, System.Drawing.FontStyle.Bold);
             this.labelGripperCount.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(156)))), ((int)(((byte)(39)))), ((int)(((byte)(176)))));
             this.labelGripperCount.Location = new System.Drawing.Point(93, 12);
             this.labelGripperCount.Name = "labelGripperCount";
@@ -292,7 +292,7 @@
             // 
             this.labelVacuumCount.BackColor = System.Drawing.Color.Transparent;
             this.labelVacuumCount.Dock = System.Windows.Forms.DockStyle.Right;
-            this.labelVacuumCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 14F, System.Drawing.FontStyle.Bold);
+            this.labelVacuumCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 18F, System.Drawing.FontStyle.Bold);
             this.labelVacuumCount.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(3)))), ((int)(((byte)(169)))), ((int)(((byte)(244)))));
             this.labelVacuumCount.Location = new System.Drawing.Point(93, 12);
             this.labelVacuumCount.Name = "labelVacuumCount";
@@ -330,7 +330,7 @@
             // 
             this.labelCylinderCount.BackColor = System.Drawing.Color.Transparent;
             this.labelCylinderCount.Dock = System.Windows.Forms.DockStyle.Right;
-            this.labelCylinderCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 14F, System.Drawing.FontStyle.Bold);
+            this.labelCylinderCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 18F, System.Drawing.FontStyle.Bold);
             this.labelCylinderCount.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(22)))), ((int)(((byte)(119)))), ((int)(((byte)(255)))));
             this.labelCylinderCount.Location = new System.Drawing.Point(93, 16);
             this.labelCylinderCount.Name = "labelCylinderCount";

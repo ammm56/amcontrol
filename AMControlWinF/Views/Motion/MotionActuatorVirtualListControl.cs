@@ -188,8 +188,8 @@ namespace AMControlWinF.Views.Motion
             {
                 var dpi = g == null ? 1F : g.Dpi;
                 return new Size(
-                    (int)Math.Round(178 * dpi),
-                    (int)Math.Round(124 * dpi));
+                    (int)Math.Round(170 * dpi),
+                    (int)Math.Round(135 * dpi));
             }
 
             public override bool MouseMove(VirtualPanel sender, VirtualPanelMouseArgs e)
