@@ -20,19 +20,22 @@ namespace AMControlWinF.Views.Motion
             this.panelDetailCard = new AntdUI.Panel();
             this.motionAxisDetailControl = new AMControlWinF.Views.Motion.MotionAxisDetailControl();
             this.panelListCard = new AntdUI.Panel();
+            this.tableLeftSections = new System.Windows.Forms.TableLayoutPanel();
             this.motionAxisVirtualListControl = new AMControlWinF.Views.Motion.MotionAxisVirtualListControl();
+            this.motionAxisParameterActionControl = new AMControlWinF.Views.Motion.MotionAxisParameterActionControl();
             this.panelBlank = new AntdUI.Panel();
             this.panelToolbar = new AntdUI.Panel();
             this.flowToolbarRight = new AntdUI.FlowPanel();
             this.inputSearch = new AntdUI.Input();
             this.flowToolbarLeft = new AntdUI.FlowPanel();
-            this.buttonSelectAxis = new AntdUI.Button();
             this.labelSelectedAxis = new AntdUI.Label();
+            this.buttonSelectAxis = new AntdUI.Button();
             this.panelRoot.SuspendLayout();
             this.panelContentCard.SuspendLayout();
             this.gridContent.SuspendLayout();
             this.panelDetailCard.SuspendLayout();
             this.panelListCard.SuspendLayout();
+            this.tableLeftSections.SuspendLayout();
             this.panelToolbar.SuspendLayout();
             this.flowToolbarRight.SuspendLayout();
             this.flowToolbarLeft.SuspendLayout();
@@ -60,7 +63,6 @@ namespace AMControlWinF.Views.Motion
             this.panelContentCard.Location = new System.Drawing.Point(8, 56);
             this.panelContentCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelContentCard.Name = "panelContentCard";
-            this.panelContentCard.Padding = new System.Windows.Forms.Padding(0);
             this.panelContentCard.Radius = 0;
             this.panelContentCard.ShadowOpacity = 0F;
             this.panelContentCard.ShadowOpacityHover = 0F;
@@ -87,7 +89,6 @@ namespace AMControlWinF.Views.Motion
             this.panelDetailCard.Location = new System.Drawing.Point(684, 0);
             this.panelDetailCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelDetailCard.Name = "panelDetailCard";
-            this.panelDetailCard.Padding = new System.Windows.Forms.Padding(0);
             this.panelDetailCard.Radius = 12;
             this.panelDetailCard.Shadow = 4;
             this.panelDetailCard.Size = new System.Drawing.Size(280, 616);
@@ -105,7 +106,7 @@ namespace AMControlWinF.Views.Motion
             // panelListCard
             // 
             this.panelListCard.BackColor = System.Drawing.Color.Transparent;
-            this.panelListCard.Controls.Add(this.motionAxisVirtualListControl);
+            this.panelListCard.Controls.Add(this.tableLeftSections);
             this.panelListCard.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelListCard.Location = new System.Drawing.Point(0, 0);
             this.panelListCard.Margin = new System.Windows.Forms.Padding(0);
@@ -116,14 +117,39 @@ namespace AMControlWinF.Views.Motion
             this.panelListCard.Size = new System.Drawing.Size(684, 616);
             this.panelListCard.TabIndex = 0;
             // 
+            // tableLeftSections
+            // 
+            this.tableLeftSections.ColumnCount = 1;
+            this.tableLeftSections.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLeftSections.Controls.Add(this.motionAxisVirtualListControl, 0, 0);
+            this.tableLeftSections.Controls.Add(this.motionAxisParameterActionControl, 0, 1);
+            this.tableLeftSections.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLeftSections.Location = new System.Drawing.Point(0, 0);
+            this.tableLeftSections.Margin = new System.Windows.Forms.Padding(0);
+            this.tableLeftSections.Name = "tableLeftSections";
+            this.tableLeftSections.RowCount = 2;
+            this.tableLeftSections.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLeftSections.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 228F));
+            this.tableLeftSections.Size = new System.Drawing.Size(684, 616);
+            this.tableLeftSections.TabIndex = 0;
+            // 
             // motionAxisVirtualListControl
             // 
             this.motionAxisVirtualListControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.motionAxisVirtualListControl.Location = new System.Drawing.Point(0, 0);
             this.motionAxisVirtualListControl.Margin = new System.Windows.Forms.Padding(0);
             this.motionAxisVirtualListControl.Name = "motionAxisVirtualListControl";
-            this.motionAxisVirtualListControl.Size = new System.Drawing.Size(684, 616);
+            this.motionAxisVirtualListControl.Size = new System.Drawing.Size(684, 388);
             this.motionAxisVirtualListControl.TabIndex = 0;
+            // 
+            // motionAxisParameterActionControl
+            // 
+            this.motionAxisParameterActionControl.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.motionAxisParameterActionControl.Location = new System.Drawing.Point(0, 388);
+            this.motionAxisParameterActionControl.Margin = new System.Windows.Forms.Padding(0);
+            this.motionAxisParameterActionControl.Name = "motionAxisParameterActionControl";
+            this.motionAxisParameterActionControl.Size = new System.Drawing.Size(684, 228);
+            this.motionAxisParameterActionControl.TabIndex = 1;
             // 
             // panelBlank
             // 
@@ -181,6 +207,15 @@ namespace AMControlWinF.Views.Motion
             this.flowToolbarLeft.Size = new System.Drawing.Size(520, 36);
             this.flowToolbarLeft.TabIndex = 0;
             // 
+            // labelSelectedAxis
+            // 
+            this.labelSelectedAxis.Location = new System.Drawing.Point(140, 0);
+            this.labelSelectedAxis.Margin = new System.Windows.Forms.Padding(0);
+            this.labelSelectedAxis.Name = "labelSelectedAxis";
+            this.labelSelectedAxis.Size = new System.Drawing.Size(380, 36);
+            this.labelSelectedAxis.TabIndex = 1;
+            this.labelSelectedAxis.Text = "当前：未选择轴";
+            // 
             // buttonSelectAxis
             // 
             this.buttonSelectAxis.IconSvg = "AimOutlined";
@@ -194,15 +229,6 @@ namespace AMControlWinF.Views.Motion
             this.buttonSelectAxis.Type = AntdUI.TTypeMini.Primary;
             this.buttonSelectAxis.WaveSize = 0;
             // 
-            // labelSelectedAxis
-            // 
-            this.labelSelectedAxis.Location = new System.Drawing.Point(140, 0);
-            this.labelSelectedAxis.Margin = new System.Windows.Forms.Padding(0);
-            this.labelSelectedAxis.Name = "labelSelectedAxis";
-            this.labelSelectedAxis.Size = new System.Drawing.Size(380, 36);
-            this.labelSelectedAxis.TabIndex = 1;
-            this.labelSelectedAxis.Text = "当前：未选择轴";
-            // 
             // MotionAxisPage
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
@@ -215,10 +241,12 @@ namespace AMControlWinF.Views.Motion
             this.gridContent.ResumeLayout(false);
             this.panelDetailCard.ResumeLayout(false);
             this.panelListCard.ResumeLayout(false);
+            this.tableLeftSections.ResumeLayout(false);
             this.panelToolbar.ResumeLayout(false);
             this.flowToolbarRight.ResumeLayout(false);
             this.flowToolbarLeft.ResumeLayout(false);
             this.ResumeLayout(false);
+
         }
 
         private AntdUI.Panel panelRoot;
@@ -234,6 +262,8 @@ namespace AMControlWinF.Views.Motion
         private AntdUI.Panel panelListCard;
         private AntdUI.Panel panelDetailCard;
         private MotionAxisVirtualListControl motionAxisVirtualListControl;
+        private MotionAxisParameterActionControl motionAxisParameterActionControl;
         private MotionAxisDetailControl motionAxisDetailControl;
+        private System.Windows.Forms.TableLayoutPanel tableLeftSections;
     }
 }

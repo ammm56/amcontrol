@@ -3,19 +3,18 @@ using AntdUI;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 
 namespace AMControlWinF.Views.Motion
 {
     /// <summary>
-    /// 单轴控制动作虚拟卡片列表。
+    /// 单轴控制左侧简单动作虚拟卡片列表。
     ///
-    /// 设计目标：
-    /// 1. 左侧动作区域统一使用 VirtualPanel 虚拟绘制，避免为每张小卡片创建真实控件；
-    /// 2. 卡片视觉保持 AntdUI 风格统一，但交互语义按“按钮”处理；
-    /// 3. 卡片数量增多时仍能保持滚动流畅和较低资源占用；
-    /// 4. 刷新时优先原地更新，避免整批重建造成滚动位置抖动。
+    /// 职责说明：
+    /// 1. 只承载简单动作卡片；
+    /// 2. 不承载输入框、确认按钮等复杂参数布局；
+    /// 3. 继续使用 VirtualPanel，保证滚动流畅和资源占用低；
+    /// 4. 参数动作（应用速度 / 绝对定位 / 相对移动）由独立 UserControl 实现。
     /// </summary>
     public partial class MotionAxisVirtualListControl : UserControl
     {
@@ -26,14 +25,12 @@ namespace AMControlWinF.Views.Motion
         }
 
         /// <summary>
-        /// 动作执行请求事件。
-        /// 左侧卡片单击即执行，因此这里直接把 ActionKey 抛给页面层。
+        /// 简单动作执行请求事件。
         /// </summary>
         public event EventHandler<MotionAxisActionExecuteRequestedEventArgs> ActionExecuteRequested;
 
         /// <summary>
-        /// 绑定当前要显示的动作卡片集合。
-        /// 当前动作集合数量固定不大，但仍统一使用虚拟绘制方案，保持和 DI/DO 页面结构一致。
+        /// 绑定当前要显示的简单动作卡片集合。
         /// </summary>
         public void BindItems(IList<MotionAxisPageModel.MotionAxisActionViewItem> items)
         {
@@ -58,8 +55,7 @@ namespace AMControlWinF.Views.Motion
         }
 
         /// <summary>
-        /// 卡片单击即执行。
-        /// 不可执行卡片直接忽略点击，只保留禁用视觉反馈。
+        /// 简单动作卡片单击即执行。
         /// </summary>
         private void VirtualPanelActions_ItemClick(object sender, VirtualItemEventArgs e)
         {
@@ -135,7 +131,7 @@ namespace AMControlWinF.Views.Motion
         }
 
         /// <summary>
-        /// 动作执行请求事件参数。
+        /// 简单动作执行请求事件参数。
         /// </summary>
         public sealed class MotionAxisActionExecuteRequestedEventArgs : EventArgs
         {
@@ -149,8 +145,7 @@ namespace AMControlWinF.Views.Motion
 
         /// <summary>
         /// VirtualPanel 内部的按钮式动作小卡片。
-        /// 卡片只显示左上角分类与中间名称，不额外显示描述和右上角状态。
-        /// 是否可执行完全由背景、边框和文字透明度表达。
+        /// 卡片只显示左上角分类与中间名称。
         /// </summary>
         private sealed class MotionAxisActionVirtualCardItem : VirtualShadowItem
         {

@@ -343,6 +343,12 @@
     <Compile Include="Views\Motion\MotionAxisPage.Designer.cs">
       <DependentUpon>MotionAxisPage.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\Motion\MotionAxisParameterActionControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Motion\MotionAxisParameterActionControl.Designer.cs">
+      <DependentUpon>MotionAxisParameterActionControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="Views\Motion\MotionAxisVirtualListControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
