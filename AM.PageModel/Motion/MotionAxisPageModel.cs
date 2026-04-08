@@ -382,11 +382,17 @@ namespace AM.PageModel.Motion
 
         private Result ValidateAction(string actionKey)
         {
+            // 1. 必须先有当前选中轴。
+            // 没有选中轴时，任何动作都不允许执行。
             if (SelectedAxis == null)
                 return Result.Fail(-2201, "请先选择轴", ResultSource.Motion);
 
             var axis = SelectedAxis;
 
+            // 2. 先处理不依赖报警/使能公共规则的基础动作。
+            // 这些动作属于页面级基础控制，优先单独判断，避免后续通用拦截误伤。
+
+            // 2.1 使能：当前已经使能时不允许重复使能。
             if (string.Equals(actionKey, "Enable", StringComparison.OrdinalIgnoreCase))
             {
                 if (axis.IsEnabled)
@@ -395,6 +401,7 @@ namespace AM.PageModel.Motion
                 return Result.Ok("允许执行", ResultSource.Motion);
             }
 
+            // 2.2 失能：要求当前已使能，且运动中禁止失能。
             if (string.Equals(actionKey, "Disable", StringComparison.OrdinalIgnoreCase))
             {
                 if (!axis.IsEnabled)
@@ -406,12 +413,15 @@ namespace AM.PageModel.Motion
                 return Result.Ok("允许执行", ResultSource.Motion);
             }
 
+            // 2.3 清状态：任何时候都允许尝试执行。
             if (string.Equals(actionKey, "ClearStatus", StringComparison.OrdinalIgnoreCase))
                 return Result.Ok("允许执行", ResultSource.Motion);
 
+            // 2.4 急停：任何时候都允许尝试执行。
             if (string.Equals(actionKey, "EmergencyStop", StringComparison.OrdinalIgnoreCase))
                 return Result.Ok("允许执行", ResultSource.Motion);
 
+            // 2.5 平停：只有运动中才有意义。
             if (string.Equals(actionKey, "Stop", StringComparison.OrdinalIgnoreCase))
             {
                 if (!axis.IsMoving)
@@ -420,12 +430,21 @@ namespace AM.PageModel.Motion
                 return Result.Ok("允许执行", ResultSource.Motion);
             }
 
+            // 2.6 点动停止：允许随时尝试下发，便于兜底停止点动。
             if (string.Equals(actionKey, "JogStop", StringComparison.OrdinalIgnoreCase))
                 return Result.Ok("允许执行", ResultSource.Motion);
 
+            // 3. 报警态公共拦截。
+            // 除上面已单独放行的基础动作外，其余运动相关动作在报警时一律禁止。
             if (axis.IsAlarm)
                 return Result.Fail(-2206, "当前轴报警中，请先清状态", ResultSource.Motion);
 
+            // 4. 应用速度单独处理，必须放在“未使能拦截”之前。
+            //
+            // 业务规则：
+            // - 速度参数属于运动前参数配置；
+            // - 未运动时即可设置，不要求先使能；
+            // - 一旦已在运动中，禁止修改速度。
             if (string.Equals(actionKey, "ApplyVelocity", StringComparison.OrdinalIgnoreCase))
             {
                 if (axis.IsMoving)
@@ -434,9 +453,11 @@ namespace AM.PageModel.Motion
                 return Result.Ok("允许执行", ResultSource.Motion);
             }
 
+            // 5. 从这里开始，其余动作统一要求“轴已使能”。
             if (!axis.IsEnabled)
                 return Result.Fail(-2207, "当前轴未使能", ResultSource.Motion);
 
+            // 6. 回零：运动中禁止；存在限位时禁止。
             if (string.Equals(actionKey, "Home", StringComparison.OrdinalIgnoreCase))
             {
                 if (axis.IsMoving)
@@ -448,6 +469,7 @@ namespace AM.PageModel.Motion
                 return Result.Ok("允许执行", ResultSource.Motion);
             }
 
+            // 7. 负向点动：运动中禁止；负限位触发时禁止。
             if (string.Equals(actionKey, "JogNegative", StringComparison.OrdinalIgnoreCase))
             {
                 if (axis.IsMoving)
@@ -459,6 +481,7 @@ namespace AM.PageModel.Motion
                 return Result.Ok("允许执行", ResultSource.Motion);
             }
 
+            // 8. 正向点动：运动中禁止；正限位触发时禁止。
             if (string.Equals(actionKey, "JogPositive", StringComparison.OrdinalIgnoreCase))
             {
                 if (axis.IsMoving)
@@ -470,6 +493,7 @@ namespace AM.PageModel.Motion
                 return Result.Ok("允许执行", ResultSource.Motion);
             }
 
+            // 9. 绝对定位：运动中禁止；要求先回原点。
             if (string.Equals(actionKey, "MoveAbsolute", StringComparison.OrdinalIgnoreCase))
             {
                 if (axis.IsMoving)
@@ -481,6 +505,7 @@ namespace AM.PageModel.Motion
                 return Result.Ok("允许执行", ResultSource.Motion);
             }
 
+            // 10. 相对定位：只要求当前不在运动中。
             if (string.Equals(actionKey, "MoveRelative", StringComparison.OrdinalIgnoreCase))
             {
                 if (axis.IsMoving)
@@ -489,6 +514,7 @@ namespace AM.PageModel.Motion
                 return Result.Ok("允许执行", ResultSource.Motion);
             }
 
+            // 11. 兜底：未知动作一律按失败处理。
             return Result.Fail(-2218, "未识别的动作", ResultSource.Motion);
         }
 

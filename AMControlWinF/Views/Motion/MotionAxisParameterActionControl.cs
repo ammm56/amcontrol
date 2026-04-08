@@ -1,6 +1,6 @@
 ﻿using AM.PageModel.Motion;
+using AntdUI;
 using System;
-using System.Drawing;
 using System.Windows.Forms;
 
 namespace AMControlWinF.Views.Motion
@@ -8,37 +8,30 @@ namespace AMControlWinF.Views.Motion
     /// <summary>
     /// 单个参数动作卡片控件。
     ///
-    /// 设计目的：
+    /// 设计说明：
     /// 1. 一个控件只表示一个参数动作，例如“应用速度”“绝对定位”“相对移动”；
     /// 2. 控件内部只包含：左上角分类徽标、参数输入框、右下角动作按钮；
-    /// 3. 按钮文案直接显示实际动作名，而不是“确认”；
-    /// 4. 控件本身不负责业务校验与动作执行，只负责展示和抛出点击事件；
-    /// 5. 是否可执行由页面层传入的动作项决定，控件只根据状态更新外观。
+    /// 3. 左上角徽标使用 AntdUI.Button，仅用于视觉表达，不承载点击语义；
+    /// 4. 右下角按钮始终显示真实动作名，不再显示“确认”“不可用”；
+    /// 5. 控件本身不执行业务逻辑，只负责展示状态并抛出执行事件。
     /// </summary>
     public partial class MotionAxisParameterActionControl : UserControl
     {
         /// <summary>
         /// 当前绑定的动作项。
-        /// 来自 MotionAxisPageModel，用于承载当前动作是否可执行等运行态信息。
+        /// 页面层会周期性刷新该项，用于同步可执行状态。
         /// </summary>
         private MotionAxisPageModel.MotionAxisActionViewItem _item;
 
         /// <summary>
-        /// 配置阶段传入的强调色类型。
-        /// 当运行态动作项未提供强调色时，回退使用此值。
+        /// 配置阶段传入的默认徽标样式。
+        /// 当运行态动作项未提供强调类型时，回退使用该值。
         /// </summary>
-        private string _configuredAccentType = "Primary";
+        private TTypeMini _configuredBadgeType = TTypeMini.Primary;
 
         /// <summary>
-        /// 按钮文案。
-        /// 这里明确保存“动作名”，例如：
-        /// - 应用速度
-        /// - 绝对定位
-        /// - 相对移动
-        ///
-        /// 注意：
-        /// 按钮始终显示动作名，不再切换成“确认”“不可用”等文案，
-        /// 避免用户只能看到按钮状态却不知道当前卡片对应哪个动作。
+        /// 右下角动作按钮文案。
+        /// 这里固定保存真实动作名，例如：应用速度、绝对定位、相对移动。
         /// </summary>
         private string _configuredButtonText = string.Empty;
 
@@ -66,16 +59,17 @@ namespace AMControlWinF.Views.Motion
         }
 
         /// <summary>
-        /// 配置当前卡片的静态信息。
+        /// 配置卡片的静态展示信息。
         ///
-        /// 说明：
-        /// - actionKey：动作标识
-        /// - badgeText：左上角小徽标文本，如“参数”“定位”
-        /// - buttonText：右下角按钮文案，直接使用实际动作名
+        /// 参数说明：
+        /// - actionKey：动作键
+        /// - badgeText：左上角分类文本，如“参数”“定位”
+        /// - buttonText：右下角按钮文案，直接显示真实动作名
         /// - placeholderText：输入框占位提示
-        /// - accentType：强调色类型
+        /// - accentType：默认强调类型
         ///
-        /// 该方法一般在页面初始化时调用一次。
+        /// 调用时机：
+        /// 页面初始化时调用一次，建立当前卡片的固定身份。
         /// </summary>
         public void Configure(
             string actionKey,
@@ -85,20 +79,17 @@ namespace AMControlWinF.Views.Motion
             string accentType)
         {
             ActionKey = actionKey ?? string.Empty;
-            labelBadge.Text = string.IsNullOrWhiteSpace(badgeText) ? "-" : badgeText;
+            buttonBadge.Text = string.IsNullOrWhiteSpace(badgeText) ? "-" : badgeText;
             inputValue.PlaceholderText = placeholderText ?? string.Empty;
-
-            _configuredAccentType = string.IsNullOrWhiteSpace(accentType)
-                ? "Primary"
-                : accentType;
 
             _configuredButtonText = string.IsNullOrWhiteSpace(buttonText)
                 ? "执行"
                 : buttonText;
 
-            // 初始配置完成后先以“不可执行”视觉呈现。
-            // 真正的可执行状态由 BindItem(...) 在运行时刷新。
-            ApplyAppearance(false, _configuredAccentType);
+            _configuredBadgeType = ResolveBadgeType(accentType);
+
+            // 初始化时先按不可执行态渲染。
+            ApplyAppearance(false, _configuredBadgeType);
         }
 
         /// <summary>
@@ -106,44 +97,38 @@ namespace AMControlWinF.Views.Motion
         ///
         /// 该方法只负责：
         /// 1. 保存动作项；
-        /// 2. 根据动作项刷新可执行状态；
-        /// 3. 若动作项带有更实时的分类/显示名，则同步更新展示。
+        /// 2. 刷新当前卡片是否可执行；
+        /// 3. 若动作项有更新后的分类或显示名，则同步到界面。
         ///
-        /// 不负责：
-        /// - 解析输入值
-        /// - 直接执行业务动作
+        /// 注意：
+        /// 参数卡片是页面固定结构的一部分，不能因搜索或临时状态而隐藏。
+        /// 因此 item 为 null 时，只刷新成不可执行态，不隐藏控件。
         /// </summary>
         public void BindItem(MotionAxisPageModel.MotionAxisActionViewItem item)
         {
             _item = item;
 
-            // 参数动作卡片是页面固定结构的一部分，不应因为搜索或暂时未绑定而隐藏。
-            // 因此这里不再把 Visible 绑定到 item 是否为空，而是始终保持控件可见。
             if (item == null)
             {
-                ApplyAppearance(false, _configuredAccentType);
+                ApplyAppearance(false, _configuredBadgeType);
                 return;
             }
 
             if (!string.IsNullOrWhiteSpace(item.ActionKey))
                 ActionKey = item.ActionKey;
 
-            // 左上角徽标优先展示当前动作项的分类文本，
-            // 这样当页面模型调整分类文案时，UI 可自动同步。
             if (!string.IsNullOrWhiteSpace(item.CategoryText))
-                labelBadge.Text = item.CategoryText;
+                buttonBadge.Text = item.CategoryText;
 
-            // 按钮文案优先使用动作项显示名。
-            // 这样可以确保页面模型与卡片文案保持一致。
             if (!string.IsNullOrWhiteSpace(item.DisplayText))
                 _configuredButtonText = item.DisplayText;
 
-            ApplyAppearance(item.CanExecute, item.AccentType);
+            ApplyAppearance(item.CanExecute, ResolveBadgeType(item.AccentType));
         }
 
         /// <summary>
         /// 绑定控件内部事件。
-        /// 当前只有一个动作按钮点击事件。
+        /// 当前仅监听右下角动作按钮点击事件。
         /// </summary>
         private void BindEvents()
         {
@@ -154,9 +139,9 @@ namespace AMControlWinF.Views.Motion
         /// 动作按钮点击处理。
         ///
         /// 规则：
-        /// - 未绑定动作项时忽略；
-        /// - 当前动作不可执行时忽略；
-        /// - 真正的动作执行由页面层统一处理，控件仅抛出 ExecuteRequested 事件。
+        /// 1. 未绑定动作项时忽略；
+        /// 2. 当前动作不可执行时忽略；
+        /// 3. 真正的动作执行由页面层统一处理，本控件只抛出动作键。
         /// </summary>
         private void ButtonConfirm_Click(object sender, EventArgs e)
         {
@@ -165,26 +150,21 @@ namespace AMControlWinF.Views.Motion
 
             var handler = ExecuteRequested;
             if (handler != null)
-            {
                 handler(this, new MotionAxisParameterActionExecuteRequestedEventArgs(ActionKey));
-            }
         }
 
         /// <summary>
-        /// 根据当前可执行状态与强调色刷新界面外观。
+        /// 根据可执行状态与徽标类型刷新界面外观。
         ///
-        /// 设计约束：
-        /// 1. 左上角徽标颜色随动作类型变化；
-        /// 2. 右下角按钮文案始终显示动作名；
-        /// 3. 禁用态只通过 Enabled 呈现，不修改按钮文案；
-        /// 4. 不在这里混入业务含义，仅做纯视觉更新。
+        /// 外观规则：
+        /// 1. 左上角徽标通过 Type 呈现颜色语义，不再手工设置 BackColor；
+        /// 2. 右下角动作按钮始终显示真实动作名；
+        /// 3. 禁用态仅通过按钮 Enabled 呈现，不改变按钮文案；
+        /// 4. 徽标按钮不参与点击逻辑，仅保留样式用途。
         /// </summary>
-        private void ApplyAppearance(bool canExecute, string accentType)
+        private void ApplyAppearance(bool canExecute, TTypeMini badgeType)
         {
-            var accent = ResolveAccentColor(
-                string.IsNullOrWhiteSpace(accentType) ? _configuredAccentType : accentType);
-
-            labelBadge.BackColor = accent;
+            buttonBadge.Type = badgeType;
 
             buttonConfirm.Enabled = canExecute;
             buttonConfirm.Text = string.IsNullOrWhiteSpace(_configuredButtonText)
@@ -193,34 +173,29 @@ namespace AMControlWinF.Views.Motion
         }
 
         /// <summary>
-        /// 将动作强调类型转换为实际颜色。
-        /// 与上方简单动作卡片保持同一套颜色语义：
-        /// - Danger：危险/急停
-        /// - Warning：警告/回零等
-        /// - Success：成功/参数应用
-        /// - Default：普通灰色
-        /// - Primary：主色蓝
+        /// 将动作强调类型转换为 AntdUI 内置按钮类型。
+        /// 这样可以直接复用 AntdUI 的标准配色，避免额外维护颜色映射。
         /// </summary>
-        private static Color ResolveAccentColor(string accentType)
+        private static TTypeMini ResolveBadgeType(string accentType)
         {
             if (string.Equals(accentType, "Danger", StringComparison.OrdinalIgnoreCase))
-                return Color.FromArgb(245, 108, 108);
+                return TTypeMini.Error;
 
             if (string.Equals(accentType, "Warning", StringComparison.OrdinalIgnoreCase))
-                return Color.FromArgb(250, 140, 22);
+                return TTypeMini.Warn;
 
             if (string.Equals(accentType, "Success", StringComparison.OrdinalIgnoreCase))
-                return Color.FromArgb(82, 196, 26);
+                return TTypeMini.Success;
 
             if (string.Equals(accentType, "Default", StringComparison.OrdinalIgnoreCase))
-                return Color.FromArgb(96, 125, 139);
+                return TTypeMini.Default;
 
-            return Color.FromArgb(22, 119, 255);
+            return TTypeMini.Primary;
         }
 
         /// <summary>
         /// 参数动作执行请求事件。
-        /// 页面层订阅此事件后，统一读取各参数卡片输入值并调用页面模型执行动作。
+        /// 页面层订阅后，统一读取各卡片输入值并调用页面模型执行动作。
         /// </summary>
         public event EventHandler<MotionAxisParameterActionExecuteRequestedEventArgs> ExecuteRequested;
 
