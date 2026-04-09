@@ -52,6 +52,8 @@ namespace AM.Model.Motion
 
         public bool IsMoving { get; set; }
 
+        public DateTime UpdateTime { get; set; }
+
         public string DisplayTitle
         {
             get

@@ -1,0 +1,97 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{509B39C5-D68E-4F86-90BC-52A5A251F16E}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>AM.PageModel</RootNamespace>
+    <AssemblyName>AM.PageModel</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Am\LoginLogPageModel.cs" />
+    <Compile Include="Am\UserManagementPageModel.cs" />
+    <Compile Include="Am\UserPermissionPageModel.cs" />
+    <Compile Include="Auth\LoginPageModel.cs" />
+    <Compile Include="Common\BindableBase.cs" />
+    <Compile Include="Main\MainWindowExitReason.cs" />
+    <Compile Include="Main\MainWindowModel.cs" />
+    <Compile Include="MotionConfig\ActuatorManagementPageModel.cs" />
+    <Compile Include="MotionConfig\MotionAxisManagementPageModel.cs" />
+    <Compile Include="MotionConfig\MotionAxisParamManagementPageModel.cs" />
+    <Compile Include="MotionConfig\MotionCardManagementPageModel.cs" />
+    <Compile Include="MotionConfig\MotionIoMapManagementPageModel.cs" />
+    <Compile Include="Motion\Actuator\MotionActuatorActionPanelState.cs" />
+    <Compile Include="Motion\Actuator\MotionActuatorButtonState.cs" />
+    <Compile Include="Motion\Actuator\MotionActuatorDetailData.cs" />
+    <Compile Include="Motion\Actuator\MotionActuatorDisplayBuilder.cs" />
+    <Compile Include="Motion\Actuator\MotionActuatorFilter.cs" />
+    <Compile Include="Motion\Actuator\MotionActuatorListItem.cs" />
+    <Compile Include="Motion\Actuator\MotionActuatorSnapshot.cs" />
+    <Compile Include="Motion\Axis\MotionAxisActionKey.cs" />
+    <Compile Include="Motion\Axis\MotionAxisActionRequest.cs" />
+    <Compile Include="Motion\Axis\MotionAxisActionViewItem.cs" />
+    <Compile Include="Motion\Axis\MotionAxisSelectedViewItem.cs" />
+    <Compile Include="Motion\DIMotionPageModel.cs" />
+    <Compile Include="Motion\DI\DIMotionIoViewItem.cs" />
+    <Compile Include="Motion\DOMotionPageModel.cs" />
+    <Compile Include="Motion\DO\DOMotionIoViewItem.cs" />
+    <Compile Include="Motion\Monitor\MotionAxisViewItem.cs" />
+    <Compile Include="Motion\MotionActuatorPageModel.cs" />
+    <Compile Include="Motion\MotionAxisPageModel.cs" />
+    <Compile Include="Motion\MotionMonitorPageModel.cs" />
+    <Compile Include="Navigation\NavigationCatalog.cs" />
+    <Compile Include="Navigation\NavPageDef.cs" />
+    <Compile Include="Navigation\NavPrimaryDef.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\AM.Core\AM.Core.csproj">
+      <Project>{7b305eb1-7403-4c0c-82d4-c871b4c2d877}</Project>
+      <Name>AM.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AM.DBService\AM.DBService.csproj">
+      <Project>{ebbe3fd7-29e4-4976-b182-2da541a363b5}</Project>
+      <Name>AM.DBService</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AM.Model\AM.Model.csproj">
+      <Project>{22cf4793-f392-4421-98fd-0f2e07200689}</Project>
+      <Name>AM.Model</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

@@ -15,6 +15,17 @@
   - 页面级权限从数据库读取。
 - **接口契约**：关键接口的设计规范与稳定性承诺。
 - **架构决策记录（ADR）**：记录重要技术选型和架构决策的背景、决策内容与影响。
+- **AMControlWinF 架构文档**：WinForms 分支的应用生命周期、主题系统和导航系统设计。
+
+---
+
+## AMControlWinF 架构文档
+
+| 文件 | 说明 |
+|------|------|
+| [winf-application-lifecycle.md](winf-application-lifecycle.md) | WinForms 应用生命周期与登录流程（Program.cs while 主循环、ExitReason、三条退出路径） |
+| [winf-theme-system.md](winf-theme-system.md) | WinForms 主题系统（AppThemeHelper、AntdUI 原生渲染、卡片面板规范） |
+| [winf-navigation-system.md](winf-navigation-system.md) | WinForms 导航系统与页面缓存（NavigationCatalog、两级导航、页面工厂与缓存策略） |
 
 ---
 

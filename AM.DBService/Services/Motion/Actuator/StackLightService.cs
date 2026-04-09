@@ -205,6 +205,9 @@ namespace AM.DBService.Services.Motion.Actuator
                     break;
 
                 case StackLightState.Idle:
+                    blue = true;
+                    break;
+
                 case StackLightState.Running:
                     green = true;
                     break;

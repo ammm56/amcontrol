@@ -19,6 +19,14 @@
 
 ---
 
+## AMControlWinF 开发文档
+
+| 文件 | 说明 |
+|------|------|
+| [winf-project-overview.md](winf-project-overview.md) | AMControlWinF WinForms 分支项目总览（技术栈、解决方案结构、文件布局、核心架构约束） |
+
+---
+
 ## 相关文档
 
 - [架构设计](../01-architecture/README.md)

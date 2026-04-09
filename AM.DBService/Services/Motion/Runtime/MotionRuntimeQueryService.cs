@@ -195,6 +195,7 @@ namespace AM.DBService.Services.Motion.Runtime
             item.EncoderPositionPulse = snapshot.EncoderPositionPulse;
             item.CommandPositionMm = snapshot.CommandPositionMm;
             item.EncoderPositionMm = snapshot.EncoderPositionMm;
+            item.UpdateTime = snapshot.UpdateTime;
         }
 
         /// <summary>

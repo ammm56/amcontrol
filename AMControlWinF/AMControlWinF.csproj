@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -14,7 +14,7 @@
     <Deterministic>true</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -22,6 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -31,6 +32,9 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -46,14 +50,356 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Form1.cs">
+    <Compile Include="MainWindow.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="MainWindow.Designer.cs">
+      <DependentUpon>MainWindow.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tools\AppThemeHelper.cs" />
+    <Compile Include="Tools\ControlDisposeHelper.cs" />
+    <Compile Include="Tools\PageDialogHelper.cs" />
+    <Compile Include="Views\Am\LoginLogPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Am\LoginLogPage.Designer.cs">
+      <DependentUpon>LoginLogPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Am\ResetUserPasswordDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\Am\ResetUserPasswordDialog.Designer.cs">
+      <DependentUpon>ResetUserPasswordDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Am\UserEditDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\Am\UserEditDialog.Designer.cs">
+      <DependentUpon>UserEditDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Am\UserManagementPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Am\UserManagementPage.Designer.cs">
+      <DependentUpon>UserManagementPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Am\UserPermissionCardControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Am\UserPermissionCardControl.Designer.cs">
+      <DependentUpon>UserPermissionCardControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Am\UserPermissionPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Am\UserPermissionPage.Designer.cs">
+      <DependentUpon>UserPermissionPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Am\UserPermissionUserSelectDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\Am\UserPermissionUserSelectDialog.Designer.cs">
+      <DependentUpon>UserPermissionUserSelectDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Auth\LoginForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\Auth\LoginForm.Designer.cs">
+      <DependentUpon>LoginForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Main\TextureBackgroundControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Views\Main\TextureBackgroundControl.Designer.cs">
+      <DependentUpon>TextureBackgroundControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Main\UserAvatarMenuControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Main\UserAvatarMenuControl.Designer.cs">
+      <DependentUpon>UserAvatarMenuControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Main\UserAvatarPopoverCard.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Main\UserAvatarPopoverCard.Designer.cs">
+      <DependentUpon>UserAvatarPopoverCard.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\ActuatorCardControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\ActuatorCardControl.Designer.cs">
+      <DependentUpon>ActuatorCardControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\ActuatorDetailControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\ActuatorDetailControl.Designer.cs">
+      <DependentUpon>ActuatorDetailControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\ActuatorEditDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\ActuatorEditDialog.Designer.cs">
+      <DependentUpon>ActuatorEditDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\ActuatorManagementPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\ActuatorManagementPage.Designer.cs">
+      <DependentUpon>ActuatorManagementPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\CylinderEditControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\CylinderEditControl.Designer.cs">
+      <DependentUpon>CylinderEditControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\GripperEditControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\GripperEditControl.Designer.cs">
+      <DependentUpon>GripperEditControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionAxisCardControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionAxisCardControl.Designer.cs">
+      <DependentUpon>MotionAxisCardControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionAxisDetailControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionAxisDetailControl.Designer.cs">
+      <DependentUpon>MotionAxisDetailControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionAxisEditDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionAxisEditDialog.Designer.cs">
+      <DependentUpon>MotionAxisEditDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionAxisManagementPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionAxisManagementPage.Designer.cs">
+      <DependentUpon>MotionAxisManagementPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionAxisParamCardControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionAxisParamCardControl.Designer.cs">
+      <DependentUpon>MotionAxisParamCardControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionAxisParamDetailControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionAxisParamDetailControl.Designer.cs">
+      <DependentUpon>MotionAxisParamDetailControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionAxisParamEditDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionAxisParamEditDialog.Designer.cs">
+      <DependentUpon>MotionAxisParamEditDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionAxisParamManagementPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionAxisParamManagementPage.Designer.cs">
+      <DependentUpon>MotionAxisParamManagementPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionAxisSelectDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionAxisSelectDialog.Designer.cs">
+      <DependentUpon>MotionAxisSelectDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionCardControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionCardControl.Designer.cs">
+      <DependentUpon>MotionCardControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionCardDeleteConfirmDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionCardDeleteConfirmDialog.Designer.cs">
+      <DependentUpon>MotionCardDeleteConfirmDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionCardDetailControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionCardDetailControl.Designer.cs">
+      <DependentUpon>MotionCardDetailControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionCardDetailDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionCardDetailDialog.Designer.cs">
+      <DependentUpon>MotionCardDetailDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionCardEditDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionCardEditDialog.Designer.cs">
+      <DependentUpon>MotionCardEditDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionCardManagementPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionCardManagementPage.Designer.cs">
+      <DependentUpon>MotionCardManagementPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionCardSelectDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionCardSelectDialog.Designer.cs">
+      <DependentUpon>MotionCardSelectDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionIoMapCardControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionIoMapCardControl.Designer.cs">
+      <DependentUpon>MotionIoMapCardControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionIoMapDetailControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionIoMapDetailControl.Designer.cs">
+      <DependentUpon>MotionIoMapDetailControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionIoMapEditDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionIoMapEditDialog.Designer.cs">
+      <DependentUpon>MotionIoMapEditDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionIoMapManagementPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\MotionIoMapManagementPage.Designer.cs">
+      <DependentUpon>MotionIoMapManagementPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\StackLightEditControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\StackLightEditControl.Designer.cs">
+      <DependentUpon>StackLightEditControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MotionConfig\VacuumEditControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\MotionConfig\VacuumEditControl.Designer.cs">
+      <DependentUpon>VacuumEditControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Motion\DIMotionDetailControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Motion\DIMotionDetailControl.Designer.cs">
+      <DependentUpon>DIMotionDetailControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Motion\DIMotionPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Motion\DIMotionPage.Designer.cs">
+      <DependentUpon>DIMotionPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Motion\DIMotionVirtualListControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Motion\DIMotionVirtualListControl.Designer.cs">
+      <DependentUpon>DIMotionVirtualListControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Motion\DOMotionDetailControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Motion\DOMotionDetailControl.Designer.cs">
+      <DependentUpon>DOMotionDetailControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Motion\DOMotionPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Motion\DOMotionPage.Designer.cs">
+      <DependentUpon>DOMotionPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Motion\DOMotionVirtualListControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Motion\DOMotionVirtualListControl.Designer.cs">
+      <DependentUpon>DOMotionVirtualListControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Motion\MotionActuatorActionPanelControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Motion\MotionActuatorActionPanelControl.Designer.cs">
+      <DependentUpon>MotionActuatorActionPanelControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Motion\MotionActuatorDetailControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Motion\MotionActuatorDetailControl.Designer.cs">
+      <DependentUpon>MotionActuatorDetailControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Motion\MotionActuatorPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Motion\MotionActuatorPage.Designer.cs">
+      <DependentUpon>MotionActuatorPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Motion\MotionActuatorVirtualListControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Motion\MotionActuatorVirtualListControl.Designer.cs">
+      <DependentUpon>MotionActuatorVirtualListControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Motion\MotionAxisDetailControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Motion\MotionAxisDetailControl.Designer.cs">
+      <DependentUpon>MotionAxisDetailControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Motion\MotionAxisPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Motion\MotionAxisPage.Designer.cs">
+      <DependentUpon>MotionAxisPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Motion\MotionAxisParameterActionControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Motion\MotionAxisParameterActionControl.Designer.cs">
+      <DependentUpon>MotionAxisParameterActionControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Motion\MotionAxisVirtualListControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Motion\MotionAxisVirtualListControl.Designer.cs">
+      <DependentUpon>MotionAxisVirtualListControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Motion\MotionMonitorDetailControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Motion\MotionMonitorDetailControl.Designer.cs">
+      <DependentUpon>MotionMonitorDetailControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Motion\MotionMonitorPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Motion\MotionMonitorPage.Designer.cs">
+      <DependentUpon>MotionMonitorPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Motion\MotionMonitorVirtualListControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Motion\MotionMonitorVirtualListControl.Designer.cs">
+      <DependentUpon>MotionMonitorVirtualListControl.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="MainWindow.resx">
+      <DependentUpon>MainWindow.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -63,6 +409,142 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="Views\Am\LoginLogPage.resx">
+      <DependentUpon>LoginLogPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\Am\ResetUserPasswordDialog.resx">
+      <DependentUpon>ResetUserPasswordDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\Am\UserEditDialog.resx">
+      <DependentUpon>UserEditDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\Am\UserManagementPage.resx">
+      <DependentUpon>UserManagementPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\Am\UserPermissionCardControl.resx">
+      <DependentUpon>UserPermissionCardControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\Am\UserPermissionPage.resx">
+      <DependentUpon>UserPermissionPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\Am\UserPermissionUserSelectDialog.resx">
+      <DependentUpon>UserPermissionUserSelectDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\Auth\LoginForm.resx">
+      <DependentUpon>LoginForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\Main\UserAvatarMenuControl.resx">
+      <DependentUpon>UserAvatarMenuControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\Main\UserAvatarPopoverCard.resx">
+      <DependentUpon>UserAvatarPopoverCard.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\ActuatorCardControl.resx">
+      <DependentUpon>ActuatorCardControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\ActuatorDetailControl.resx">
+      <DependentUpon>ActuatorDetailControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\ActuatorEditDialog.resx">
+      <DependentUpon>ActuatorEditDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\ActuatorManagementPage.resx">
+      <DependentUpon>ActuatorManagementPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\CylinderEditControl.resx">
+      <DependentUpon>CylinderEditControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\MotionAxisCardControl.resx">
+      <DependentUpon>MotionAxisCardControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\MotionAxisEditDialog.resx">
+      <DependentUpon>MotionAxisEditDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\MotionAxisManagementPage.resx">
+      <DependentUpon>MotionAxisManagementPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\MotionAxisParamCardControl.resx">
+      <DependentUpon>MotionAxisParamCardControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\MotionAxisParamEditDialog.resx">
+      <DependentUpon>MotionAxisParamEditDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\MotionAxisParamManagementPage.resx">
+      <DependentUpon>MotionAxisParamManagementPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\MotionCardControl.resx">
+      <DependentUpon>MotionCardControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\MotionCardDeleteConfirmDialog.resx">
+      <DependentUpon>MotionCardDeleteConfirmDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\MotionCardDetailControl.resx">
+      <DependentUpon>MotionCardDetailControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\MotionCardDetailDialog.resx">
+      <DependentUpon>MotionCardDetailDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\MotionCardEditDialog.resx">
+      <DependentUpon>MotionCardEditDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\MotionCardManagementPage.resx">
+      <DependentUpon>MotionCardManagementPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\MotionCardSelectDialog.resx">
+      <DependentUpon>MotionCardSelectDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\MotionIoMapCardControl.resx">
+      <DependentUpon>MotionIoMapCardControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\MotionIoMapDetailControl.resx">
+      <DependentUpon>MotionIoMapDetailControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\MotionIoMapEditDialog.resx">
+      <DependentUpon>MotionIoMapEditDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\MotionIoMapManagementPage.resx">
+      <DependentUpon>MotionIoMapManagementPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MotionConfig\VacuumEditControl.resx">
+      <DependentUpon>VacuumEditControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\Motion\DIMotionDetailControl.resx">
+      <DependentUpon>DIMotionDetailControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\Motion\DIMotionPage.resx">
+      <DependentUpon>DIMotionPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\Motion\DIMotionVirtualListControl.resx">
+      <DependentUpon>DIMotionVirtualListControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\Motion\DOMotionDetailControl.resx">
+      <DependentUpon>DOMotionDetailControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\Motion\MotionActuatorActionPanelControl.resx">
+      <DependentUpon>MotionActuatorActionPanelControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\Motion\MotionActuatorDetailControl.resx">
+      <DependentUpon>MotionActuatorDetailControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\Motion\MotionActuatorPage.resx">
+      <DependentUpon>MotionActuatorPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\Motion\MotionAxisDetailControl.resx">
+      <DependentUpon>MotionAxisDetailControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\Motion\MotionAxisPage.resx">
+      <DependentUpon>MotionAxisPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\Motion\MotionAxisParameterActionControl.resx">
+      <DependentUpon>MotionAxisParameterActionControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\Motion\MotionMonitorDetailControl.resx">
+      <DependentUpon>MotionMonitorDetailControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\Motion\MotionMonitorPage.resx">
+      <DependentUpon>MotionMonitorPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="app.manifest" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -76,5 +558,43 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AM.App\AM.App.csproj">
+      <Project>{58d771b4-94d2-4fbb-9960-962dd599bd05}</Project>
+      <Name>AM.App</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AM.Core\AM.Core.csproj">
+      <Project>{7b305eb1-7403-4c0c-82d4-c871b4c2d877}</Project>
+      <Name>AM.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AM.DBService\AM.DBService.csproj">
+      <Project>{ebbe3fd7-29e4-4976-b182-2da541a363b5}</Project>
+      <Name>AM.DBService</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AM.Model\AM.Model.csproj">
+      <Project>{22cf4793-f392-4421-98fd-0f2e07200689}</Project>
+      <Name>AM.Model</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AM.MotionService\AM.MotionService.csproj">
+      <Project>{6ea470cf-d319-459d-b90a-8981c12d9f03}</Project>
+      <Name>AM.MotionService</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AM.PageModel\AM.PageModel.csproj">
+      <Project>{509b39c5-d68e-4f86-90bc-52a5a251f16e}</Project>
+      <Name>AM.PageModel</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AM.Tools\AM.Tools.csproj">
+      <Project>{c3fca058-3848-457d-82c6-bee3dba7ec76}</Project>
+      <Name>AM.Tools</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Libsrc\AntdUI\AntdUI\AntdUI.csproj">
+      <Project>{b71d90fd-488d-7c5b-9629-b2a95469f3f0}</Project>
+      <Name>AntdUI</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\Img\logo.ico" />
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

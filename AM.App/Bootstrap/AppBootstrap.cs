@@ -17,7 +17,6 @@ using AM.Model.MotionCard;
 using AM.MotionService.Factory;
 using AM.MotionService.Hub;
 using AM.Tools.Logging;
-using AM.Tools.Messaging;
 using AM.Tools.Reporter;
 using System;
 using System.Collections.Generic;
@@ -44,7 +43,8 @@ namespace AM.App.Bootstrap
 
             // 2. 构造系统基础设施
             IAMLogger logger = new NLogLogger("System");
-            IMessageBus messageBus = new MessageBusToolkit();
+            //IMessageBus messageBus = new MessageBusToolkit();
+            IMessageBus messageBus = new MessageBus();
             IErrorCatalog errorCatalog = new JsonErrorCatalog();
 
             // 报警持久化：保留强类型引用用于启动时恢复未清除报警，DevAlarmRecordService，不走 reporter 避免循环调用

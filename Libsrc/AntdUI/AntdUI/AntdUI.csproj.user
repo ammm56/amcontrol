@@ -1,0 +1,395 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ActiveDebugFramework>net46</ActiveDebugFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Update="Controls\Alert.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Avatar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Badge.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Battery.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Breadcrumb.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Button.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\ButtonShadow.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Calendar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Captcha\PuzzleCaptcha.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Carousel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Chart\Chart.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Chat\ChatList.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Chat\MsgList.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Checkbox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Collapse.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\CollapseGroup.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\ColorPicker\ColorPicker.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\ColorPicker\ColorPicker.Static.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\DatePicker.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\DatePickerRange.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Divider.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Dropdown.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\HyperlinkCheckbox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\HyperlinkLabel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\IconState.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\IControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Image3D.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\ImagePreview.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\InputNumber.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Input\Input.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Input\Input.HistoryRecord.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Input\Input.Keyboard.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Input\Input.LayeredForm.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Input\Input.Layout.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Input\Input.Mouse.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Input\Input.Render.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Input\Input.Scroll.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Input\Input.Text.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\In\FlowLayoutPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Label.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\LabelLed.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\LabelTime.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Layout\ContainerPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Layout\FlowPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Layout\GridPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Layout\StackPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Layout\VirtualPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Menu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\PageHeader.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Pagination.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Panel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Progress.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Radio.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Rate.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Scroll\XScrollBar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Scroll\YScrollBar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Segmented.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Select.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\SelectMultiple.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\SelectNumber.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Shield.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Signal.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Slider.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\SliderRange.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Spin.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Splitter.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Statistic.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Steps.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Switch.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\TabHeader.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Table\FilterControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Controls\Table\Table.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Table\Table.Data.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Table\Table.EditMode.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Table\Table.Event.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Table\Table.Filter.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Table\Table.FocusNavigation.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Table\Table.Keyboard.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Table\Table.Layout.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Table\Table.Mouse.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Table\Table.Render.Button.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Table\Table.Render.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Table\Table.StackedHeader.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Table\Table.Summary.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Table\Table.Template.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Table\Table.Tmp.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Tabs\Style\Tabs.Style.Card.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Tabs\Style\Tabs.Style.Card2.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Tabs\Style\Tabs.Style.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Tabs\Style\Tabs.Style.Line.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Tabs\Tabs.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Tabs\Tabs.Design.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Tag.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Timeline.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\TimePicker.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Tooltip\Tooltip.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Tooltip\Tooltip.Form.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Controls\Tooltip\Tooltip.Static.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Tooltip\TooltipComponent.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Transfer.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Tree.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\UploadDragger.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Design\Color\FrmColorEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Forms\BaseForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\BorderlessForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\BorderlessFormShadow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\DoubleBufferForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\LayeredWindow\ILayeredForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\LayeredWindow\ILayeredFormAnimate.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\LayeredWindow\ILayeredFormOpacity.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\LayeredWindow\ILayeredFormOpacityDown.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\LayeredWindow\ILayeredShadowForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\LayeredWindow\LayeredFormColorPicker.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\LayeredWindow\LayeredFormContextMenuStrip.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\LayeredWindow\LayeredFormDatePicker.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\LayeredWindow\LayeredFormDatePickerRange.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\LayeredWindow\LayeredFormDatePickerRangeTime.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\LayeredWindow\LayeredFormDrawer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\LayeredWindow\LayeredFormFloatButton.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\LayeredWindow\LayeredFormMask.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\LayeredWindow\LayeredFormMenuDown.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\LayeredWindow\LayeredFormModal.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\LayeredWindow\LayeredFormPopover.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\LayeredWindow\LayeredFormPreview.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\LayeredWindow\LayeredFormSelectDown.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\LayeredWindow\LayeredFormSelectMultiple.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\LayeredWindow\LayeredFormSelectMultipleCheck.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\LayeredWindow\LayeredFormTimePicker.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\Window.cs">
+      <SubType>Form</SubType>
+    </Compile>
+  </ItemGroup>
+</Project>

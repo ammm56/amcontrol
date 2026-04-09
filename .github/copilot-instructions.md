@@ -1,69 +1,476 @@
 # Copilot Instructions
 
-## 项目指南
-- 该项目为 .NET Framework 4.7.2 的 WPF 工业设备控制软件，采用 MVVM（CommunityToolkit.Mvvm）、HandyControl、SqlSugar，日志使用 NLog；配置来源为本地 Configuration/config.json（ConfigContext）与数据库并存；核心领域包含运动控制卡（固高/雷赛/虚拟）、IO 传感器、视觉与 PLC 通信。后续建议与改动需围绕此架构。
-- 当前处于开发起步阶段，允许对现有代码进行大幅重构；优先保证运动控制架构思路和接口分层设计正确，再推进实现细节。
-- 用户要求新增代码和文件定义按项目层级结构与职责统一放置，避免功能位置分散和混乱。
-- 用户要求在做页面层改动前先了解并复用现有 View/UserControl 基本框架，不要重复定义已有页面结构。
-- 状态读取接口需要与脉冲/毫米位置语义一一对应：除脉冲位置方法外，还应提供规划毫米位置与编码器毫米位置方法，而不是仅单一 GetPositionMm。
-- 确保全局配置（如 ConfigContext）在运行时同步可见，不接受各类中长期缓存私有副本导致与全局配置脱节。
-- 全局界面配置如语言、主题等需要先定义到 Config/Setting 中，并且后续相关配置信息统一通过 ConfigContext 读取和保存，不在各处维护私有副本。
-- 运动控制对象应通过 MachineContext 作为全局唯一入口直接访问，避免各窗口持有私有副本导致急停/唯一控制失效。
-- 运动控制接口从现在开始统一使用结果容器替代裸 short 返回值；同时结果需承载日志、报警与 UI 状态展示所需信息。
-- 全项目统一使用单一 `Result/Result<T>` 返回模型，而不是按领域拆分 `MotionResult`、`PlcResult`、`VisualResult` 等多个结果类型。
-- 报警持久化命名采用 IAlarmRecord、AlarmRecordService、AlarmRecord，并保持当前解决方案的全局基础设施注入架构；数据库实体统一使用 SqlSugar 标注风格；UI 消息与报警应优先走统一链路而不是各窗口各自定义监听实现。
-- AxisConfig 采用强类型、统一且更清晰的业务命名，属性命名作为数据库轴参数名称标准，补齐软件限位、默认速度、回零流程兼容、多卡使能时序、急停/平停联动等参数。
-- 用户选择 ConfigAxisArg 长期方案 A：数值统一 REAL + 类型标记，并希望通过服务实现将数据库参数覆盖到 MotionCardConfig.AxisConfigs。
-- 保留 `ConfigAxisArgViewModel` 这一命名，因为它直接对应数据库表并表达直接操作数据库；同时对运行时配置类采用统一的、更通用的命名体系，而不是过窄地使用 `AxisRuntimeConfigViewModel`。
-- 对于启动阶段已完成初始化并保证有效的全局对象（如 ConfigContext），不再重复做空判断与封装检查；避免重复定义保存逻辑。
-- WPF 主 Theme/Skin 继续复用 HandyControl 原生 Theme/Skin，通过项目自定义资源字典追加样式，不复制整套主题。WPF 辅助类如 LangThemeHelper 保持最小实现：直接基于已初始化的 ConfigContext 读写配置，不做重复校验。
-- 主界面导航采用左侧两级固定可见布局：一级导航与二级导航同时显示，不使用垂直折叠展开；右侧区域显示当前二级页面的完整工作区，而不是同时堆叠多个二级页面。设备控制页优先单页并列展示关键控制与状态信息，尽量减少隐藏页面。
-- 将可复用的 WPF 界面样式（如导航 ListBoxItem 样式）下沉到 `Resources/Themes/Styles/Style.xaml` 统一管理，在页面中通过静态资源简洁调用，减少在 `MainWindow.xaml` 中内联定义。
-- ViewModel 属性不使用 CommunityToolkit.Mvvm 的源生成器特性（如 [ObservableProperty]），而采用手动定义字段和属性的传统方式。
-- 操作员可查看 Vision/PLC/IO/Motion 监视信息，限制写入、动作参数修改、工程调试和正式配置类权限。用户登录、页面级权限、用户管理与权限配置页面优先完成，后续页面权限分配在用户管理界面中按现场设备实际情况由管理员设置。
-- 切换用户时取消仅关闭登录窗口并保持当前主界面不变；退出登录应关闭主界面并返回登录页；修改密码作为所有用户可用的轻量弹窗操作，不占用右侧主工作区页面；只有管理员的用户管理进入一级/二级导航对应页面。
-- 权限配置现阶段只做到页面级权限；权限信息必须从数据库读取并保存到数据库；权限配置页面本身需要支持选择用户，并按页面布局设计，而不是依赖外部弹窗传入用户。
-- **用户编辑对话框**：作为新增/编辑共用窗口时，新增用户模式应使用更大的窗口尺寸，编辑用户模式可使用更紧凑尺寸；同时应删除权限页与主窗口中的旧过渡传参代码。
-- 在复杂 WPF 布局中，用户偏好对关键的 Grid 行定义使用 x:Name 便于调试定位，同时希望减少过多的 RowDefinition 和无效空白。
-- DI/DO页面自动刷新频率500ms即可；IO扫描读取由后台统一任务完成并写入统一缓存层，相关扫描配置放到后续专门配置页面，不在当前监视页处理。对于高频工业监视页（如DI/DO），后台IO扫描可保持50ms写缓存，但UI层应采用约500ms的低频采样刷新；不应将每次缓存变化直接事件驱动到整页WPF界面，以避免页面卡顿。
-- 权限分配页与分类选择的交互样式偏好：不要仅做悬停边框高亮或胶囊大圆角，改为整个方块/按钮整体背景做细微颜色变化，使用小圆角，整体风格需与程序现有界面和 HandyControl 风格一致。
-- 后续整个程序实现需主动考虑性能因素，例如日志等大数据列表默认采用分页或其他性能友好方案，而不是等用户指出后再补。
-- 报警抽屉面板应作为整个主界面的右侧展开区域，而不是主页面下的次级页面；报警详情应支持较多数据的表格化展示、行选中后右侧显示详细信息，并考虑分页。初始化阶段可注入少量调试报警用于联调。
-- 主界面右侧抽屉展开时，主页面不要横向位移，改为整体轻微缩小并产生类似 3D 后退的视觉效果。
-- 数据库实体定义需统一，命名风格与数据库表命名保持一致；不合适的旧版命名和实现可直接弃用，并按工业运动控制设备软件的整体优秀方案重做；实体目录建议按类别组织。
-- 旧版运动配置实体与相关实现直接废弃删除，不做过渡兼容；后续按新版统一命名、统一表名、按工业运动控制设备软件架构直接重写。
-- 数据库新表及字段命名需去掉下划线分隔，采用与现有 Auth 表一致的连写风格；后续运动配置相关实体和表字段命名应保持这一统一规则。
-- 用户最终确认运动配置表名使用带下划线分隔的风格：`motion_card`、`motion_axis`、`motion_io_map`；表字段保持当前实体属性定义格式，不需要额外下划线字段映射。
-- 配置管理服务按职责拆分，优先单独设计 IMotionCardCrudService、IMotionAxisCrudService、IMotionIoMapCrudService，再由更高层服务聚合与热重载。
-- 在各个项目中按结构和层级创建目录组织 Motion 第三层对象层（如 Cylinder/Actuator）的 Entity、Services、Interfaces，以提升代码清晰度。
-- 第三层对象注册到 MachineContext 时采用精简方案：只保留按名称索引的 Cylinders，不增加按输出位/反馈位的多个反查字典。
-- 实现设备控制相关代码时，要从实际设备场景和全局架构出发，避免只为应付需求而写局部、低质量或脱离现场使用方式的代码。
-- 运行时状态设计需从全局统一框架出发，不仅覆盖 Motion DI/DO，还要统一考虑 PLC 点位值、视觉触发与状态等实时全局值缓存，不接受各子系统各自零散维护。
-- 在高频后台扫描和部分数据处理场景下，OK 成功结果不应默认写日志和发送消息通知；ServiceBase/公共结果方法需要支持可选关闭成功日志与消息通知，默认开启，仅少数场景按需关闭。
-- 用户倾向于不在 `motion_axis_config` 中加入 `EnumOptions` 这类偏 UI/枚举定义字段，优先在代码中定义枚举选项，避免表职责不清和重复数据。
-- 用户倾向于避免引入像 `AxisParameterCatalog` 这样把轴参数元数据大量固化在代码中的复杂目录设计，更希望减少固定写死，避免参数有变化时需要在多处同时改动。
-- 用户要求页面实现是仿照已有页面的统一风格与组件体系，而不是照抄配置页；DI/DO 监视页不需要“全部/DI/DO”切换按钮，顶部应按运动控制卡筛选以支持多卡；由于当前 IO 配置未设置分组，DI/DO 监视页可取消左侧分组导航，改为直接展示按控制卡筛选后的全部 IO 磁贴卡片；扫描时间显示到秒即可，布局需根据监视场景重新优化。
-- DI/DO监视页头部不显示筛选结果；磁贴卡片中不再重复显示控制卡信息；DI/DO与ON/OFF徽标需像右侧Shield那样紧连显示无中间分隔空白；卡片中不显示扫描时间，以缩小卡片并同时展示更多IO信息。
-- DI/DO监视页需要支持分页以提升性能；顶部不显示最后扫描时间；卡片左上角需直接突出显示DI/DO与ON/OFF且颜色明显区分；右侧详情区的Shield元数据需像轴参数页那样每行一个并带明显颜色差异，不应全部同色。
-- 用户要求按WPF MVVM的数据绑定思路实现页面刷新，避免在页面 code-behind 中使用 DispatcherTimer/TimeSpan.FromMilliseconds 这类轮询式刷新页面的方式；优先采用数据变化驱动刷新。
-- 用户要求对页面在主窗口缓存复用场景下的生命周期实现方式形成统一规则并长期遵循：被 MainWindow 页面缓存复用的页面，不应在 Unloaded 中释放会断开实时订阅的 ViewModel/运行态绑定；此类页面的首次加载应用 布尔标记控制，而不是 Loaded 后解绑事件；实现代码中需补充明确注释说明原因，避免后续页面重复出现相同问题。
-- 用户要求 `Motion.Monitor` 页面在卡片区直接沿用 DI/DO 页的实现方式与稳定布局，不额外改成其他滚动/布局方案；同时要求将多轴卡片中的冗余信息替换为更有价值的运行信息。
-- 用户要求 `Motion.Monitor` 多轴总览页按 DI/DO 监视页思路实现：不是左侧列表选中再操作的三列布局，而是两列布局；左侧列表区与中间卡片区合并为一整列，在顶部选择控制卡后直接显示该卡下全部轴，右侧仅保留详情区。
+---
 
-## PLC 接口设计
-- PLC 相关接口分层要重新整理，`DB` 目录只放数据库相关内容；PLC/Motion 领域接口应放到 `AM.Model.Interfaces.Plc` 下，而不是 `AM.Model.Interfaces.DB.Plc`，并要求代码与文档同步调整、目录和注释更清晰。
+## 一、项目总览
 
-## 服务层设计
-- 服务层统一采用“构造注入依赖 + 封装消息发布/日志通知”的风格，避免在各方法中重复直接调用 IMessageBus 和 IAMLogger。
-- 用户希望统一抽取跨服务的日志、消息通知和警报处理到公共 ServiceBase，而不是在各 Service 中重复实现，以明确代码层级、简化框架并提升模块化。
-- 在 AM.Core.Reporter 中 引入 IAppReporter/AppReporter，并继续统一修改 ServiceBase、ViewModel、Tools 等非服务类的日志、消息通知与报警处理，同时完善错误码和错误描述映射设计，减少强制类型转换。
+本解决方案为工业设备运动控制软件，核心功能：
+- 运动控制卡（固高 GOOGO / 雷赛 LEISAI / 虚拟 VIRTUAL）驱动几十个步进/伺服电机
+- 运动控制卡 IO 控制设备传感器（DI/DO）
+- 第三层执行器对象（气缸/真空/夹爪/灯塔）基于 IO 点位抽象
+- 视觉检测与 PLC 通信（待实现）
+- 用户权限、报警、日志、配置管理等工业软件基础设施
 
-## 用户认证
-- 默认管理员账户登录名改为 `am`，初始密码为 `am123`。
-- 角色编码改为 `Operator`（操作员）、`Engineer`（工程师）、`Am`（管理员）。
+解决方案包含两个 UI 分支：
+- **AMControlWPF**（.NET Framework 4.7.2 / WPF / HandyControl / CommunityToolkit.Mvvm）—— 已暂停
+- **AMControlWinF**（.NET Framework 4.6.1 / WinForms / AntdUI）—— **当前活跃分支**
 
-## 按钮样式
-- 用户要求运行页按钮风格不要使用额外自定义按钮样式，而应优先复用 HandyControl 和项目现有页面的一致风格；`MotionActuatorView` 可参考 `ActuatorManagementView` 的按钮呈现，保持整体主题统一，但允许保留与执行器类型对应的颜色区分。
+两者共享同一套后端项目（AM.Core / AM.Model / AM.Tools / AM.DBService / AM.MotionService / AM.App / AM.PageModel）。
 
-## 文档管理
-- 用户要求将解决方案级的详细规划文档统一放入 `Docs` 目录，并遵循 `Docs` 现有文件夹分层与 markdown 说明约定组织新文档。
+---
+
+## 二、解决方案分层架构
+
+### 2.1 项目职责
+
+| 项目 | 层级 | 职责 |
+|------|------|------|
+| **AM.Core** | 基础设施 | 全局上下文（ConfigContext / MachineContext / SystemContext / UserContext / RuntimeContext）、ServiceBase 基类、消息总线接口 IMessageBus、报警管理 AlarmManager、日志接口 IAMLogger、统一报告接口 IAppReporter |
+| **AM.Model** | 模型层 | Entity（Auth / Motion 拓扑 / Motion 轴参数 / Motion 执行器 / PLC / Dev 报警）、运行时 Config 对象（MotionCardConfig / AxisConfig / ActuatorConfig / PlcConfig）、接口定义（IMotionCardService / IPlcClient）、运行时状态缓存（MotionIoRuntimeState / MotionAxisRuntimeState / PlcRuntimeState）、公共结构体（AxisStatus / AxisParam）、统一 Result/Result\<T\> 返回模型 |
+| **AM.Tools** | 工具层 | NLog 实现 NLogLogger、配置文件读写 Tools.ReadConfig/SaveConfig、MessageBus 实现、AppReporter 实现、错误码目录 JsonErrorCatalog |
+| **AM.DBService** | 数据服务 | SqlSugar 数据库操作；Auth 服务（AuthService / AuthSeedService）；Motion 拓扑 CRUD（MotionCardCrudService / MotionAxisCrudService / MotionIoMapCrudService）；Motion 轴参数（MotionAxisConfigService / MotionAxisConfigOverlayService）；执行器 CRUD×4；PLC 配置/驱动/运行时服务；Dev 报警记录（DevAlarmRecordService）；运行时（IoScanWorker / MotionAxisScanWorker / RuntimeTaskManager）；配置重载（MachineConfigReloadService / MachineConfigSeedService） |
+| **AM.MotionService** | 运动控制 | MotionCardBase 公共基类；固高 GoogoMotionCardService / 雷赛 LeisaiMotionCardService / 虚拟 VirtualMotionCardService；MotionServiceHub 统一路由调度入口；工厂 MotionCardFactory |
+| **AM.PageModel** | 页面模型 | WPF/WinForms 共用的无 UI 依赖中间层；NavigationCatalog（全局页面目录）、NavPageDef / NavPrimaryDef；LoginPageModel、MainWindowModel、MainWindowExitReason、UserManagementPageModel；BindableBase 轻量 INotifyPropertyChanged 基类 |
+| **AM.App** | 启动器 | AppBootstrap 组合根，统一编排启动顺序 |
+| **AMControlWPF** | WPF UI | 暂停。HandyControl + MVVM |
+| **AMControlWinF** | WinForms UI | **当前活跃**。AntdUI 控件库 |
+
+### 2.2 全局上下文体系（5 大单例）
+
+| 上下文 | 位置 | 职责 |
+|--------|------|------|
+| `ConfigContext` | AM.Core/Context | config.json 基础配置 + 运行时从 DB 装载的 MotionCardsConfig / ActuatorConfig / PlcConfig（JsonIgnore，不写入 json） |
+| `SystemContext` | AM.Core/Context | IAMLogger、IMessageBus、AlarmManager、IErrorCatalog、IAppReporter、IRuntimeTaskManager |
+| `MachineContext` | AM.Core/Context | 控制卡实例字典 MotionCards\<CardId\>、轴/DI/DO→卡映射（AxisMotionCards / DICards / DOCards）、MotionHub、执行器索引（Cylinders / Vacuums / StackLights / Grippers 按 Name 索引）、PLC 客户端 Plcs |
+| `UserContext` | AM.Core/Context | 当前登录用户 CurrentUser、角色 CurrentRoles、页面权限 CurrentPageKeys |
+| `RuntimeContext` | AM.Core/Context | MotionIo（DI/DO 运行时缓存 ConcurrentDictionary + SnapshotChanged 事件）、MotionAxis（轴快照缓存 + SnapshotChanged 事件）、Plc（PLC 运行时状态） |
+
+### 2.3 启动流程（AppBootstrap.Initialize）
+
+1. 读取 config.json → `ConfigContext.Instance.Initialize(config)`
+2. 构造 NLogLogger / MessageBus / AlarmManager / JsonErrorCatalog / AppReporter
+3. `SystemContext.Instance.Initialize(...)` 注入所有基础设施
+4. AuthSeedService 初始化认证表与默认管理员（am / am123）
+5. MachineConfigSeedService 初始化运动配置种子数据
+6. **MachineConfigReloadService.ReloadAndRebuild()** 从 DB 加载设备配置 → 重建 MachineContext（创建控制卡实例、轴/IO 映射、执行器注册）
+7. 按 InitOrder 顺序 Initialize + Connect 所有控制卡
+8. 注册 IoScanWorker（50ms IO 扫描）+ MotionAxisScanWorker（100ms 轴采样）→ RuntimeTaskManager 管理启停
+9. Program.cs 主循环：登录 → `Application.Run(MainWindow)` → 按 ExitReason 决策（SwitchUser / Logout / Exit）
+
+---
+
+## 三、运动控制架构
+
+### 3.1 接口分层
+
+```
+IMotionCardService（聚合接口）
+├── IMotionCardConnection      Initialize / Connect / Disconnect
+├── IMotionCardConfiguration   LoadAxisConfig(List<AxisConfig>)
+├── IMotionAxisControl         Enable / Stop / StopAll / Home / HomeAsync
+├── IMotionAxisMotion          MoveRelative / MoveAbsolute / JogMove（脉冲 + 毫米双套）
+├── IMotionDigitalIO           SetDO / GetDI / GetDO
+├── IMotionAxisParameter       SetVel / SetAcc / SetDec
+├── IMotionAxisState           GetAxisStatus / Get[Command|Encoder]Position[Mm] / IsMoving
+└── IMotionAxisMaintenance     ClearStatus / SetZeroPos / ConfigAxisHardware
+```
+
+### 3.2 实现类
+
+- `MotionCardBase` —— 公共基类（AM.MotionService/Base）
+- `VirtualMotionCardService` / `GoogoMotionCardService` / `LeisaiMotionCardService` —— 三种卡驱动
+- `MotionServiceHub` —— 按逻辑轴/逻辑 IO 位路由到对应控制卡实例，注册到 `MachineContext.MotionHub`
+
+### 3.3 控制卡类型枚举
+
+`MotionCardType`：GOOGO(10) / LEISAI(20) / VIRTUAL(90) / Other(99)
+
+---
+
+## 四、数据模型与实体规范
+
+### 4.1 Auth 认证（6 张表，PascalCase 连写表名）
+
+SysUserEntity、SysRoleEntity、SysUserRoleEntity、SysLoginLogEntity、SysPagePermissionEntity、SysUserPagePermissionEntity
+
+### 4.2 Motion 拓扑（3 张表，下划线分隔表名）
+
+| 表名 | 实体 | 说明 |
+|------|------|------|
+| `motion_card` | MotionCardEntity | 控制卡基础信息、驱动识别、初始化顺序 |
+| `motion_axis` | MotionAxisEntity | 轴归属、逻辑/物理编号、分类 |
+| `motion_io_map` | MotionIoMapEntity | DI/DO 逻辑位→硬件位映射 |
+
+### 4.3 Motion 轴参数（1 张表，KV 模式）
+
+- `motion_axis_config` / MotionAxisConfigEntity —— (LogicalAxis + ParamName) 唯一；数值统一 REAL + ParamValueType 类型标记
+- 不在表中加入 EnumOptions 等偏 UI 字段，枚举选项在代码中定义
+- 不引入 AxisParameterCatalog 等把元数据大量固化的复杂设计
+
+### 4.4 Motion IO 点位
+
+- `motion_io_point_config` / MotionIoPointConfigEntity
+
+### 4.5 执行器（第三层对象，4 张表）
+
+- `motion_cylinder_config` / CylinderConfigEntity（单/双线圈气缸，伸出/缩回 IO + 反馈 + 超时 + 报警码）
+- `motion_gripper_config` / GripperConfigEntity
+- `motion_vacuum_config` / VacuumConfigEntity
+- `motion_stacklight_config` / StackLightConfigEntity
+
+### 4.6 PLC（3 张表）
+
+PlcStationConfigEntity、PlcReadBlockConfigEntity、PlcPointConfigEntity
+
+### 4.7 Dev 报警
+
+DevAlarmRecordEntity
+
+### 4.8 命名规范
+
+- Motion 相关表名使用下划线分隔：`motion_card`、`motion_axis`、`motion_io_map` 等
+- 表字段保持实体属性 PascalCase，不额外添加下划线字段映射
+- 数据库实体统一使用 SqlSugar `[SugarTable]` / `[SugarColumn]` 标注风格
+- 实体目录按类别组织：Entity/Auth、Entity/Motion/Topology、Entity/Motion/Actuator、Entity/Motion/Point、Entity/Plc、Entity/Dev
+- 旧版运动配置实体与实现直接废弃删除，不做过渡兼容
+
+---
+
+## 五、导航体系
+
+NavigationCatalog（AM.PageModel/Navigation）定义 10+ 个一级模块、40+ 二级页面：
+
+| 一级模块 | 二级页面 |
+|----------|----------|
+| Home 首页 | Overview 总览看板、SysStatus 系统状态 |
+| Motion 设备 | DI 监视、DO 监视、Monitor 多轴总览、Axis 轴控制、Actuator 执行器控制 |
+| Production 生产 | Order、Recipe、Data、Report、Trace、MesStatus、UploadLog |
+| Vision 视觉 | Monitor、Result、Calibrate |
+| PLC | Monitor、Register、Status、Write |
+| Peripheral 外设 | Scanner、ScanTest、Sensor、SensorTrend |
+| MotionConfig 运控配置 | Card、Axis、IoMap、AxisParam、Actuator |
+| SysConfig 系统配置 | Camera、Plc、Sensor、Scanner、Mes、Runtime |
+| Engineer 工程 | Diagnostic、RawAxis、RawPlc、RawCamera |
+| AlarmLog 报警与日志 | Current、History、RunLog |
+| System 系统 | User 用户管理、Permission 权限分配、LoginLog 登录日志 |
+
+每个页面定义了：ModuleKey、PageKey、DisplayName、Description、DefaultRoleCodes（Operator/Engineer/Am）、RiskLevel、SortOrder。
+
+---
+
+## 六、公共架构规范（WPF / WinForms 共享）
+
+### 6.1 统一结果模型
+
+- 全项目统一使用 `Result` / `Result<T>`（AM.Model.Common），不按领域拆分
+- Result 包含：Success / Code / Message / Source / NotifyMode
+- ResultNotifyMode：All / LogOnly / MessageOnly / Silent
+- 失败结果始终全量通知；成功结果的通知渠道由 ServiceBase 方法控制
+
+### 6.2 ServiceBase
+
+- 所有服务继承 `ServiceBase`（AM.Core/Base），封装日志/消息/报警输出
+- 提供 Ok / OkSilent / OkLogOnly / OkMessageOnly / Fail / Error / Alarm 等方法
+- 高频后台扫描场景使用 OkSilent 避免日志/消息风暴
+- 子类可重写 MessageSourceName / DefaultResultSource / MessageCardId
+
+### 6.3 IAppReporter / AppReporter
+
+- 统一封装日志（IAMLogger）+ 消息通知（IMessageBus）+ 报警（AlarmManager）
+- 支持 ReportChannels 控制输出渠道（Log / Message / Alarm / All / None）
+- ServiceBase、ViewModel、Tools 等均通过 Reporter 输出，不直接调用 IMessageBus / IAMLogger
+
+### 6.4 报警系统
+
+- AlarmManager（AM.Core/Alarm）管理内存中活动报警
+- 持久化通过 IAlarmRecord / DevAlarmRecordService 写到 DB
+- 启动时从 DB 恢复未清除报警
+- AlarmCode 枚举定义报警码（PLCDisconnect / AxisServoAlarm / IoScanFailed 等）
+
+### 6.5 消息总线
+
+- IMessageBus / MessageBus（发布/订阅 SystemMessage）
+- SystemMessage 包含 Type（Status/Info/Warning/Error/Alarm）、Source、Message、Code、Time
+- MainWindow 订阅消息总线，更新状态栏 + 弹出通知
+
+### 6.6 全局配置规范
+
+- 语言/主题等界面配置定义在 Config.Setting 中，通过 ConfigContext 读写，不在各处维护私有副本
+- 对启动阶段已初始化的全局对象（ConfigContext 等）不重复做空判断
+- 运动控制对象通过 MachineContext 唯一入口访问，禁止各窗口持有私有副本
+- 运行时状态统一通过 RuntimeContext 缓存，覆盖 Motion IO / 轴 / PLC，不允许各子系统零散维护
+
+### 6.7 运行时状态与后台服务
+
+- IoScanWorker：50ms 周期扫描 DI/DO → 写入 RuntimeContext.MotionIo → 触发 SnapshotChanged
+- MotionAxisScanWorker：100ms 周期采样轴状态 → 写入 RuntimeContext.MotionAxis
+- UI 层应以 ~500ms 低频采样刷新，不将每次缓存变化直接事件驱动到整页界面
+- IRuntimeTaskManager 统一管理后台工作单元注册/启停
+
+### 6.8 配置管理服务
+
+- 按职责拆分：IMotionCardCrudService / IMotionAxisCrudService / IMotionIoMapCrudService
+- 更高层聚合：MachineConfigAppService / MachineConfigReloadService（DB→内存重建）
+- 轴参数覆盖：MotionAxisConfigOverlayService 将 DB 参数覆盖到 MotionCardConfig.AxisConfigs
+- 执行器 CRUD×4（Cylinder / Gripper / Vacuum / StackLight）+ Runtime Service×4
+
+### 6.9 认证与权限
+
+- 默认管理员：登录名 `am`，初始密码 `am123`
+- 角色编码：`Operator`（操作员）/ `Engineer`（工程师）/ `Am`（管理员）
+- 现阶段只做页面级权限，权限从 DB 读取和保存
+- 操作员可查看监视信息，限制写入/动作/配置/调试权限
+- 权限分配页支持选择用户，按页面布局设计，不依赖外部弹窗传入用户
+
+### 6.10 PLC 接口设计
+
+- PLC 领域接口放到 `AM.Model.Interfaces.Plc` 下，不放 `Interfaces.DB.Plc`
+- DB 目录只放数据库相关内容
+- IPlcClient / IPlcClientFactory 定义在 AM.Model.Interfaces.Plc
+
+### 6.11 文件组织与编码规范
+
+- 新增代码按项目层级结构与职责统一放置，避免功能位置分散
+- 文档统一放入 `Docs` 目录，遵循现有文件夹分层与 markdown 约定
+- 实现设备控制代码从实际设备场景和全局架构出发，不写局部脱离现场的代码
+- 大数据列表默认采用分页或性能友好方案
+- 第三层对象注册到 MachineContext 按名称索引，不增加多个反查字典
+- AxisConfig 采用强类型、统一业务命名，属性命名作为数据库轴参数名称标准
+
+### 6.12 公共页面交互规范
+
+- 切换用户：模态 LoginForm，登录成功后关闭当前 MainWindow 并 创建新 MainWindow；取消则保持当前主界面不变
+- 退出登录：关闭主界面并返回登录页
+- 修改密码：轻量弹窗操作，不占用右侧主工作区页面
+- 只有管理员的用户管理进入一级/二级导航对应页面
+- 用户编辑对话框：新增/编辑共用，新增模式窗口尺寸更大，编辑模式更紧凑
+- 数据处理成功/失败由系统消息总线统一展示，页面不额外弹成功/失败对话框
+- 页面只保留必要的交互确认类对话框
+
+---
+
+## 七、AMControlWPF 专属规范（WPF 分支，已暂停）
+
+> WPF 分支当前已暂停开发，以下规范保留以备后续恢复。
+
+### 7.1 技术栈
+
+- .NET Framework 4.7.2
+- WPF + HandyControl（主题/控件库）
+- CommunityToolkit.Mvvm（MVVM 框架，但 **不使用** 源生成器 `[ObservableProperty]`，采用手动字段+属性）
+- AM.ViewModel 项目承载 WPF ViewModel
+
+### 7.2 WPF 主题与样式
+
+- 复用 HandyControl 原生 Theme/Skin，通过项目自定义资源字典追加样式，不复制整套主题
+- LangThemeHelper 保持最小实现，直接基于 ConfigContext 读写
+- 主题切换由 AppThemeHelper 处理
+
+### 7.3 WPF 布局规范
+
+- 主界面左侧两级固定可见导航（一级+二级同时显示，不折叠展开）
+- 右侧显示当前二级页面完整工作区，不堆叠多个二级页面
+- 可复用样式下沉到 `Resources/Themes/Styles/Style.xaml`，减少 MainWindow.xaml 内联定义
+- 复杂布局中关键 Grid 行使用 x:Name 便于调试，减少多余 RowDefinition
+
+### 7.4 WPF 数据刷新
+
+- 按 MVVM 数据绑定思路刷新，避免 DispatcherTimer 轮询式刷新
+- 优先数据变化驱动刷新
+
+### 7.5 WPF 页面生命周期
+
+- 被 MainWindow 缓存复用的页面不在 Unloaded 中释放 ViewModel/运行态绑定
+- 首次加载用布尔标记控制，不用 Loaded 后解绑事件
+- 代码中补充注释说明原因
+
+### 7.6 WPF 页面布局细节
+
+- DI/DO 监视页：顶部按控制卡筛选支持多卡，无"全部/DI/DO"切换按钮，无左侧分组导航，直接展示磁贴卡片
+- DI/DO 卡片：不显示控制卡信息和扫描时间，DI/DO 与 ON/OFF 紧连显示，需分页
+- Motion.Monitor：两列布局（左侧卡片+右侧详情），顶部选控制卡后显示全轴
+- 报警抽屉面板：主界面右侧展开，展开时主页面轻微缩小产生 3D 后退效果
+- 权限分配页：方块整体背景做细微颜色变化，小圆角，与 HandyControl 风格一致
+
+### 7.7 WPF 按钮样式
+
+- 优先复用 HandyControl 和现有页面风格，不使用额外自定义按钮样式
+- 允许保留与执行器类型对应的颜色区分
+
+---
+
+## 八、AMControlWinF 专属规范（WinForms 分支，当前活跃）
+
+### 8.1 技术栈
+
+- .NET Framework 4.6.1
+- WinForms + AntdUI 控件库（Demo/AntdUI-Demo 为控件使用示例）
+- AM.PageModel 项目作为 WPF/WinForms 共用的页面模型中间层（不依赖任何 UI 框架）
+- 数据库同时支持 SQLite / Access / MySQL（SqlSugar）
+
+### 8.2 WinForms 程序生命周期
+
+```
+Program.Main()
+├── AppBootstrap.Initialize()     // 全局唯一初始化
+├── SyncPagePermissions()         // 同步页面权限目录到 DB
+├── ShowLogin() → LoginForm       // 首次登录
+└── while(true) 主循环
+    ├── Application.Run(MainWindow)
+    └── 根据 ExitReason 决策：
+        ├── SwitchUser → 直接下一轮
+        ├── Logout → SignOut + 重新登录
+        └── Exit → 退出
+```
+
+### 8.3 WinForms 主题切换
+
+- `AppThemeHelper.Apply(window, isDarkMode)` → 设置 AntdUI 全局亮暗 + Window 色值
+- `TextureBackgroundControl.SetTheme(isDarkMode)` → 自定义纹理背景同步
+- AntdUI.Panel 带 Shadow 时原生主题渲染已包含正确的卡片背景、边界和阴影，完全交由 AntdUI 原生处理
+- 明暗主题优先使用 AntdUI 默认样式，避免自定义导致样式异常
+
+### 8.4 WinForms 主界面布局
+
+- 左侧两级固定可见导航（一级 Menu + 二级 Menu），右侧工作区
+- 页面缓存机制：`_pageCache` 字典 + `_pageFactories` 工厂，已访问页面缓存复用
+- 底部状态栏显示系统消息（语义色区分：错误/报警红色，警告橙色）
+- 用户头像菜单控件：切换用户 / 修改密码 / 退出登录
+- 语言切换（中/英）+ 主题切换（亮/暗）
+- 消息通知：订阅 SystemContext.MessageBus，状态栏更新 + AntdUI.Message 弹出
+
+### 8.5 WinForms 页面实现规范
+
+- 被 MainWindow 页面缓存复用的页面：不在离开时释放 ViewModel；首次加载用布尔标记 `_isFirstLoad`
+- 页面内校验/信息提示不优先用 AntdUI.Message，倾向用 AntdUI.Modal 对话框
+- 数据处理成功/失败由系统消息总线统一展示，页面不额外弹成功/失败对话框
+- 页面只保留必要的交互确认类对话框
+- 主界面重构时页面显示内容完整不变，只允许替换布局控件
+- 优先使用 AntdUI 的 FlowPanel、Panel、GridPanel 等布局控件
+- 主界面简化时删除多余抽象（ShellRefreshScope / Model_PropertyChanged / ConfigureShellLayout），保留最少的刷新与页面切换逻辑
+- 在 AMControlWinF 中实现页面时保持代码与 Designer 分离，优先用 UserControl 拆分功能，界面风格与现有 AntdUI 页面一致，并在 C# 代码中添加清晰注释。
+
+### 8.6 WinForms 窗体/对话框风格
+
+- LoginForm / UserEditDialog / ResetUserPasswordDialog 统一风格：纹理背景（TextureBackgroundControl）+ 大卡片
+- 卡片分三行：顶部固定标题说明，中间可滚动表单区，底部固定右对齐按钮栏
+- LoginForm 更贴合 AMControlWinF 现有样式与颜色，背景使用 TextureBackgroundControl 并支持主题切换
+- 新增用户模式窗口尺寸更大，编辑用户模式更紧凑
+
+### 8.7 WinForms 用户管理页
+
+- 三行布局：第一行（搜索框+操作按钮）→ 第二行（统计卡片）→ 第三行（AntdUI Table 占满整行）
+- 取消右侧详情栏，操作按钮放搜索行下方
+
+### 8.8 WinForms 监视页规范（DI/DO/Motion.Monitor）
+
+- DI/DO 监视页：顶部按控制卡筛选多卡，无分组导航，直接展示磁贴卡片
+- DI/DO 卡片：不显示控制卡信息和扫描时间，DI/DO 与 ON/OFF 紧连显示颜色明显区分，需分页
+- Motion.Monitor 多轴总览：两列布局，顶部选控制卡后显示全部轴卡片，右侧详情区
+- 报警抽屉面板：主界面右侧展开，展开时主页面右侧轻微缩小产生 3D 后退效果
+
+---
+
+## 九、当前开发进度
+
+### 9.1 后端基础设施（全部完成）
+
+| 模块 | 状态 |
+|------|------|
+| 统一 Result/Result\<T\> 返回模型 | ✅ |
+| ServiceBase（日志/消息/报警封装 + ReportChannels） | ✅ |
+| IAppReporter / AppReporter | ✅ |
+| AlarmManager + 持久化 + 启动恢复 | ✅ |
+| IMessageBus / MessageBus | ✅ |
+| ConfigContext / SystemContext / MachineContext / UserContext / RuntimeContext | ✅ |
+| Auth 完整流程（登录/用户管理/角色/页面权限/种子数据） | ✅ |
+| Motion 拓扑 CRUD（Card / Axis / IoMap）× 3 | ✅ |
+| Motion 轴参数 CRUD + Overlay 覆盖 | ✅ |
+| 执行器 CRUD×4 + Runtime Service×4 | ✅ |
+| MachineConfigReloadService（DB→内存重建） | ✅ |
+| MachineConfigSeedService | ✅ |
+| IoScanWorker + MotionAxisScanWorker + RuntimeTaskManager | ✅ |
+| MotionServiceHub 统一路由调度 | ✅ |
+| VirtualMotionCardService / GoogoMotionCardService / LeisaiMotionCardService | ✅ 框架完成 |
+| RuntimeContext 运行时状态缓存（IO / 轴 / PLC） | ✅ |
+| PLC 接口分层（IPlcClient / Config / Runtime） | ✅ 接口定义完成 |
+| PLC 驱动实现 | ❌ 待实现 |
+| 视觉模块 | ❌ 待实现 |
+
+### 9.2 WinForms UI 进度（AMControlWinF）
+
+| 页面/组件 | 状态 |
+|-----------|------|
+| Program.cs（主循环 + 登录流程） | ✅ |
+| AppBootstrap（启动编排） | ✅ |
+| LoginForm（纹理背景 + AntdUI 主题 + 数据绑定） | ✅ |
+| MainWindow（左侧两级导航 + 页面缓存 + 消息通知 + 语言/主题 + 状态栏） | ✅ |
+| TextureBackgroundControl（明暗纹理背景） | ✅ |
+| UserAvatarMenuControl + UserAvatarPopoverCard | ✅ |
+| AppThemeHelper / PageDialogHelper | ✅ |
+| UserManagementPage（搜索+统计+Table+CRUD） | ✅ |
+| UserEditDialog（新增/编辑共用 + LoginForm 风格） | ✅ |
+| ResetUserPasswordDialog（LoginForm 风格） | ✅ |
+| Motion.DI / Motion.DO 监视页 | ❌ Placeholder |
+| Motion.Monitor 多轴总览 | ❌ Placeholder |
+| Motion.Axis 轴控制 | ❌ Placeholder |
+| Motion.Actuator 执行器控制 | ❌ Placeholder |
+| System.Permission 权限分配页 | ❌ Placeholder |
+| System.LoginLog 登录日志 | ❌ Placeholder |
+| MotionConfig.* 运控配置（5页） | ❌ Placeholder |
+| AlarmLog.* 报警与日志（3页） | ❌ Placeholder |
+| Home.* 首页（2页） | ❌ Placeholder |
+| Production / Vision / PLC / Peripheral / SysConfig / Engineer | ❌ Placeholder |
+
+### 9.3 推荐开发顺序
+
+**阶段 1：核心设备监视**
+1. Motion.DI → DI 监视页（磁贴卡片 + 分页 + 运行时事件驱动刷新）
+2. Motion.DO → DO 监视页（复用 DI 实现）
+3. Motion.Monitor → 多轴总览（两列布局 + 卡片 + 详情）
+4. System.Permission → 权限分配页
+
+**阶段 2：设备控制与运控配置**
+5. Motion.Axis → 单轴控制（左侧动作卡片单击即执行，卡片本质按按钮交互处理；右侧始终显示轴动作实时监视信息，不依赖选中卡片；页面用于调试，需要补齐 WPF 中的动作联动逻辑（如使能/失能互斥可点击），并在后续实现中删除重复与无用代码，保持简单、逻辑清晰）
+6. Motion.Actuator → 执行器手动操作
+7. MotionConfig.* → 运控配置 5 页
+8. 报警抽屉面板
+
+**阶段 3：报警日志与系统管理**
+9. AlarmLog.* → 报警与日志 3 页
+10. System.LoginLog → 登录日志
+11. Home.* → 总览与状态看板
+
+**阶段 4：生产/视觉/PLC/外设**
+12. 按实际硬件对接进度推进
+
+### 9.4 控制卡详情展示
+
+- 控制卡详情优先使用 AntdUI Popover 气泡卡片方式展示，更轻量，并参考 AntdUI Demo 的 Popover 用法保持现有项目风格一致。
+
+### 9.5 控制卡与轴选择窗口规范
+
+- 在选择控制卡、选择轴的窗口中，卡片右上角的编辑、删除、详情按钮要隐藏；选择场景不显示这些操作。
+
+### 9.6 DI 监视页用户要求
+
+- 左侧虚拟卡片列表必须避免刷新时滚动位置回到顶部。
+- 右侧详情区不要采用四分区配置页式布局，而改为参考 WPF 的简单按行标签布局，并优先考虑最简单、性能友好的实现。
+
+### 9.7 关键运行时布局代码注释
+
+- 对关键运行时布局代码（如 VirtualPanel 页面）添加详细中文注释，便于在无法通过设计器直观看到布局时，通过代码与运行界面对照修改。
+
+### 9.8 MotionAxisPage 布局要求
+
+- MotionAxisPage 右侧监控信息采用类似多轴总览右侧详情的紧凑排列；参数输入更倾向放到左侧对应动作卡片而不是右侧监控区；页面布局需消除底部空白并避免不必要滚动条。
+
+---
+
+## 执行器模型偏好
+
+- 执行器相关模型类型优先使用 public，避免不必要的 internal 封装与过度抽象，倾向更贴合 WinForms 的直接实现。
+
+### 事件处理风格
+
+- 用户偏好事件 lambda 统一写成 `(s, e) => ...` 风格，而不是 `(_, __) => ...`。
