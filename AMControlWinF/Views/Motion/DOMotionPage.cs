@@ -51,7 +51,7 @@ namespace AMControlWinF.Views.Motion
 
             _model = new DOMotionPageModel();
             _refreshTimer = new Timer();
-            _refreshTimer.Interval = 500;
+            _refreshTimer.Interval = 200;
 
             InitializePagination();
             BindEvents();

@@ -59,7 +59,7 @@ namespace AMControlWinF.Views.Motion
 
             _model = new MotionAxisPageModel();
             _refreshTimer = new Timer();
-            _refreshTimer.Interval = 500;
+            _refreshTimer.Interval = 100;
 
             InitializeParameterCards();
             BindEvents();
