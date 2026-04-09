@@ -10,32 +10,21 @@ namespace AMControlWinF.Views.Motion
     /// <summary>
     /// 执行器控制页面。
     ///
-    /// 【层级定位】
-    /// - 所在层：WinForms 页面协调层；
-    /// - 上游依赖：MotionActuatorPageModel；
-    /// - 下游控件：
-    ///   1. MotionActuatorVirtualListControl
-    ///   2. MotionActuatorActionPanelControl
-    ///   3. MotionActuatorDetailControl
+    /// 【第二阶段收口定位】
+    /// 页面层只保留 WinForms 最直接的职责：
+    /// 1. 页面生命周期；
+    /// 2. 事件接线；
+    /// 3. 调用页面模型；
+    /// 4. 将模型结果 Bind 到控件。
     ///
-    /// 【职责】
-    /// 1. 管理页面生命周期；
-    /// 2. 处理页面级事件驱动逻辑；
-    /// 3. 调用 PageModel 加载/刷新/动作执行；
-    /// 4. 将页面模型状态绑定到各子控件；
-    /// 5. 保持 WinForms 下简单直接的页面协调方式。
+    /// 与第一阶段相比，本阶段页面不再直接参与动作面板状态组装，
+    /// 而是把动作选项同步给 PageModel，再直接绑定：
+    /// - _model.PageItems
+    /// - _model.SelectedItemKey
+    /// - _model.SelectedDetail
+    /// - _model.SelectedActionPanel
     ///
-    /// 【本轮适配说明】
-    /// 第一轮重构后，页面不再直接依赖旧的 MotionActuatorViewItem：
-    /// - 左侧列表改为绑定 MotionActuatorListItem 集合；
-    /// - 当前选中对象改为 SelectedSnapshot；
-    /// - 右侧详情改为绑定 SelectedDetail；
-    /// - 动作面板继续绑定 BuildActionPanelState(...) 的结果。
-    ///
-    /// 这样页面层的职责会更清晰：
-    /// - PageModel 负责状态与动作协调；
-    /// - Page 负责事件接线与 Bind；
-    /// - 各控件只依赖自己对应的数据对象。
+    /// 这样更符合 WinForms 简单、直观、事件驱动的实现风格。
     /// </summary>
     public partial class MotionActuatorPage : UserControl
     {
@@ -154,41 +143,63 @@ namespace AMControlWinF.Views.Motion
 
         /// <summary>
         /// 将页面模型状态同步到界面。
-        ///
-        /// 当前页面拆分后的绑定规则：
-        /// - 左侧列表：绑定 PageItems + SelectedSnapshot.ItemKey
-        /// - 右上动作区：绑定 BuildActionPanelState(...)
-        /// - 右下详情区：绑定 SelectedDetail
+        /// 第二阶段开始页面只负责 Bind，不再直接参与动作面板状态组装。
         /// </summary>
         private void RefreshView()
         {
-            labelCylinderCount.Text = _model.CylinderCount.ToString();
-            labelVacuumCount.Text = _model.VacuumCount.ToString();
-            labelGripperCount.Text = _model.GripperCount.ToString();
-            labelStackLightCount.Text = _model.StackLightCount.ToString();
+            BindSummary();
 
-            actuatorVirtualListControl.BindItems(
-                _model.PageItems,
-                _model.SelectedSnapshot == null ? null : _model.SelectedSnapshot.ItemKey);
+            UpdateActionPanelOptions();
 
-            RefreshActionPanelState();
-
-            actuatorDetailControl.Bind(_model.SelectedDetail);
+            BindList();
+            BindSelection();
 
             UpdateFilterButtonStyles();
         }
 
         /// <summary>
-        /// 根据当前选中项和选项状态，刷新右侧上半区联动状态。
-        /// 不做整页刷新，避免选项切换时影响左侧滚动位置。
+        /// 绑定顶部统计信息。
         /// </summary>
-        private void RefreshActionPanelState()
+        private void BindSummary()
         {
-            actuatorActionPanelControl.Bind(
-                _model.BuildActionPanelState(
-                    actuatorActionPanelControl.WaitFeedback,
-                    actuatorActionPanelControl.WaitWorkpiece,
-                    actuatorActionPanelControl.StackLightWithBuzzer));
+            labelCylinderCount.Text = _model.CylinderCount.ToString();
+            labelVacuumCount.Text = _model.VacuumCount.ToString();
+            labelGripperCount.Text = _model.GripperCount.ToString();
+            labelStackLightCount.Text = _model.StackLightCount.ToString();
+        }
+
+        /// <summary>
+        /// 绑定左侧列表区。
+        /// </summary>
+        private void BindList()
+        {
+            actuatorVirtualListControl.BindItems(
+                _model.PageItems,
+                _model.SelectedItemKey);
+        }
+
+        /// <summary>
+        /// 绑定右侧选中对象相关区域。
+        /// 包括：
+        /// - 动作面板
+        /// - 详情区
+        /// </summary>
+        private void BindSelection()
+        {
+            actuatorActionPanelControl.Bind(_model.SelectedActionPanel);
+            actuatorDetailControl.Bind(_model.SelectedDetail);
+        }
+
+        /// <summary>
+        /// 将动作区当前选项同步到 PageModel。
+        /// 第二阶段开始，动作面板状态由模型内部统一维护。
+        /// </summary>
+        private void UpdateActionPanelOptions()
+        {
+            _model.UpdateActionPanelOptions(
+                actuatorActionPanelControl.WaitFeedback,
+                actuatorActionPanelControl.WaitWorkpiece,
+                actuatorActionPanelControl.StackLightWithBuzzer);
         }
 
         /// <summary>
@@ -239,45 +250,30 @@ namespace AMControlWinF.Views.Motion
                 return;
 
             _model.SelectItem(e.ItemKey);
+            UpdateActionPanelOptions();
 
-            actuatorVirtualListControl.BindItems(
-                _model.PageItems,
-                _model.SelectedSnapshot == null ? null : _model.SelectedSnapshot.ItemKey);
-
-            RefreshActionPanelState();
-            actuatorDetailControl.Bind(_model.SelectedDetail);
+            BindList();
+            BindSelection();
         }
 
         /// <summary>
-        /// 右侧动作区选项变化：
-        /// - 等待反馈
-        /// - 等待工件检测
-        /// - 附带蜂鸣
-        ///
-        /// 当前只需要重算动作区状态，不需要整页刷新。
+        /// 右侧动作区选项变化后，只同步模型并刷新右侧选中区。
+        /// 不做整页刷新。
         /// </summary>
         private void ActuatorActionPanelControl_OptionsChanged(object sender, EventArgs e)
         {
-            RefreshActionPanelState();
+            UpdateActionPanelOptions();
+            BindSelection();
         }
 
         private async void ActuatorActionPanelControl_PrimaryActionRequested(object sender, EventArgs e)
         {
-            await ExecuteActionAsync(delegate
-            {
-                return _model.ExecutePrimaryActionAsync(
-                    actuatorActionPanelControl.WaitFeedback,
-                    actuatorActionPanelControl.WaitWorkpiece);
-            });
+            await ExecuteActionAsync(_model.ExecutePrimaryActionAsync);
         }
 
         private async void ActuatorActionPanelControl_SecondaryActionRequested(object sender, EventArgs e)
         {
-            await ExecuteActionAsync(delegate
-            {
-                return _model.ExecuteSecondaryActionAsync(
-                    actuatorActionPanelControl.WaitFeedback);
-            });
+            await ExecuteActionAsync(_model.ExecuteSecondaryActionAsync);
         }
 
         private async void ActuatorActionPanelControl_StackLightStateRequested(
@@ -289,9 +285,7 @@ namespace AMControlWinF.Views.Motion
 
             await ExecuteActionAsync(delegate
             {
-                return _model.SetStackLightStateAsync(
-                    e.StateKey,
-                    actuatorActionPanelControl.StackLightWithBuzzer);
+                return _model.SetStackLightStateAsync(e.StateKey);
             });
         }
 
@@ -301,8 +295,8 @@ namespace AMControlWinF.Views.Motion
         /// 设计说明：
         /// 1. 页面上的所有执行器动作都从这里进入；
         /// 2. 动作执行期间禁止重复触发；
-        /// 3. 失败时刷新右侧详情与动作区；
-        /// 4. 成功时再刷新一次运行态，保持页面显示与实际设备状态一致。
+        /// 3. 动作执行后先刷新当前右侧显示；
+        /// 4. 成功后再刷新一次运行态，保持页面显示与实际设备状态一致。
         /// </summary>
         private async Task ExecuteActionAsync(Func<Task<Result>> executeFunc)
         {
@@ -314,12 +308,9 @@ namespace AMControlWinF.Views.Motion
             {
                 var result = await executeFunc();
 
-                // 动作执行后，先立即刷新右侧详情与动作区。
-                // 对于失败场景，这一步可以显示最近操作结果和可执行状态变化。
-                actuatorDetailControl.Bind(_model.SelectedDetail);
-                RefreshActionPanelState();
+                UpdateActionPanelOptions();
+                BindSelection();
 
-                // 成功后再刷新运行态，拉取设备最新状态。
                 if (result != null && result.Success)
                     await ReloadRuntimeAsync(false);
             }
