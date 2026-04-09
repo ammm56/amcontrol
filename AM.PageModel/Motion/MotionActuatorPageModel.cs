@@ -205,32 +205,29 @@ namespace AM.PageModel.Motion
 
         /// <summary>
         /// 构建右侧控制面板状态。
-        /// 页面层只负责把该状态应用到控件，不在 UI 层重复写联动判断。
+        /// 这里只返回当前界面真正需要的最小必要信息。
         /// </summary>
         public MotionActuatorActionPanelState BuildActionPanelState(
             bool waitFeedback,
             bool waitWorkpiece,
             bool stackLightWithBuzzer)
         {
-            var state = new MotionActuatorActionPanelState();
+            var state = MotionActuatorActionPanelState.CreateDefault();
 
             if (SelectedItem == null)
             {
-                state.TitleText = "当前对象：未选择";
-                state.SubTitleText = "—";
-                state.HintText = "请先在左侧选择一个执行器对象。";
-
-                state.ShowNormalActions = true;
-                state.ShowStackLightActions = false;
-
-                state.PrimaryButtonText = "主操作";
-                state.SecondaryButtonText = "副操作";
-                state.PrimaryButtonEnabled = false;
-                state.SecondaryButtonEnabled = false;
-
                 state.ShowWaitFeedback = true;
-                state.ShowWaitWorkpiece = false;
-                state.ShowStackLightWithBuzzer = false;
+                state.WaitFeedback = waitFeedback;
+
+                state.PrimaryButton.Text = "主操作";
+                state.PrimaryButton.Visible = true;
+                state.PrimaryButton.Enabled = false;
+                state.PrimaryButton.Type = "Primary";
+
+                state.SecondaryButton.Text = "副操作";
+                state.SecondaryButton.Visible = true;
+                state.SecondaryButton.Enabled = false;
+                state.SecondaryButton.Type = "Default";
 
                 return state;
             }
@@ -238,78 +235,26 @@ namespace AM.PageModel.Motion
             state.TitleText = SelectedItem.TypeDisplay + " / " + SelectedItem.DisplayTitle;
             state.SubTitleText = SelectedItem.Name;
 
-            if (string.Equals(SelectedItem.ActuatorType, "StackLight", StringComparison.OrdinalIgnoreCase))
-            {
-                state.ShowNormalActions = false;
-                state.ShowStackLightActions = true;
-
-                state.ShowWaitFeedback = false;
-                state.ShowWaitWorkpiece = false;
-                state.ShowStackLightWithBuzzer = true;
-
-                state.StackLightWithBuzzer = stackLightWithBuzzer;
-
-                state.OffButtonText = IsStackLightCurrentState("Off", stackLightWithBuzzer) ? "熄灭（当前）" : "熄灭";
-                state.IdleButtonText = IsStackLightCurrentState("Idle", stackLightWithBuzzer) ? "空闲" : "空闲";
-                state.RunningButtonText = IsStackLightCurrentState("Running", stackLightWithBuzzer) ? "运行" : "运行";
-                state.WarningButtonText = IsStackLightCurrentState("Warning", stackLightWithBuzzer) ? "警告（当前）" : "警告";
-                state.AlarmButtonText = IsStackLightCurrentState("Alarm", stackLightWithBuzzer) ? "报警（当前）" : "报警";
-
-                state.IsOffCurrent = IsStackLightCurrentState("Off", stackLightWithBuzzer);
-                state.IsIdleCurrent = IsStackLightCurrentState("Idle", stackLightWithBuzzer);
-                state.IsRunningCurrent = IsStackLightCurrentState("Running", stackLightWithBuzzer);
-                state.IsWarningCurrent = IsStackLightCurrentState("Warning", stackLightWithBuzzer);
-                state.IsAlarmCurrent = IsStackLightCurrentState("Alarm", stackLightWithBuzzer);
-
-                state.OffButtonEnabled = ValidateStackLightState("Off", stackLightWithBuzzer).Success;
-                state.IdleButtonEnabled = ValidateStackLightState("Idle", stackLightWithBuzzer).Success;
-                state.RunningButtonEnabled = ValidateStackLightState("Running", stackLightWithBuzzer).Success;
-                state.WarningButtonEnabled = ValidateStackLightState("Warning", stackLightWithBuzzer).Success;
-                state.AlarmButtonEnabled = ValidateStackLightState("Alarm", stackLightWithBuzzer).Success;
-
-                state.HintText = SelectedItem.DetailText;
-                if (stackLightWithBuzzer)
-                    state.HintText += "；当前已开启蜂鸣联动。";
-
-                return state;
-            }
-
-            state.ShowNormalActions = true;
-            state.ShowStackLightActions = false;
-
-            state.ShowWaitFeedback = true;
-            state.ShowWaitWorkpiece =
+            var isStackLight = string.Equals(SelectedItem.ActuatorType, "StackLight", StringComparison.OrdinalIgnoreCase);
+            var canUseWorkpiece =
                 string.Equals(SelectedItem.ActuatorType, "Vacuum", StringComparison.OrdinalIgnoreCase)
                 || string.Equals(SelectedItem.ActuatorType, "Gripper", StringComparison.OrdinalIgnoreCase);
-            state.ShowStackLightWithBuzzer = false;
+
+            state.ShowWaitFeedback = !isStackLight;
+            state.ShowWaitWorkpiece = canUseWorkpiece;
+            state.ShowStackLightWithBuzzer = isStackLight;
 
             state.WaitFeedback = waitFeedback;
             state.WaitWorkpiece = waitWorkpiece;
+            state.StackLightWithBuzzer = stackLightWithBuzzer;
 
-            var primaryValidate = ValidatePrimaryAction(waitFeedback, waitWorkpiece);
-            var secondaryValidate = ValidateSecondaryAction(waitFeedback);
-
-            state.PrimaryButtonText = ResolvePrimaryActionButtonText(SelectedItem, waitWorkpiece);
-            state.SecondaryButtonText = ResolveSecondaryActionButtonText(SelectedItem);
-
-            state.PrimaryButtonEnabled = primaryValidate.Success;
-            state.SecondaryButtonEnabled = SelectedItem.HasSecondaryAction && secondaryValidate.Success;
-
-            if (!primaryValidate.Success && SelectedItem.HasSecondaryAction && !secondaryValidate.Success)
+            if (isStackLight)
             {
-                state.HintText = "主操作：" + primaryValidate.Message + "；副操作：" + secondaryValidate.Message;
-            }
-            else if (!primaryValidate.Success)
-            {
-                state.HintText = "主操作：" + primaryValidate.Message;
-            }
-            else if (SelectedItem.HasSecondaryAction && !secondaryValidate.Success)
-            {
-                state.HintText = "副操作：" + secondaryValidate.Message;
+                BuildStackLightButtons(state, stackLightWithBuzzer);
             }
             else
             {
-                state.HintText = SelectedItem.DetailText;
+                BuildNormalActionButtons(state, waitFeedback, waitWorkpiece);
             }
 
             return state;
@@ -476,7 +421,7 @@ namespace AM.PageModel.Motion
 
         /// <summary>
         /// 执行当前主动作。
-        /// 实际执行仍统一走第三层执行器服务。
+        /// 实际执行统一走第三层执行器服务。
         /// </summary>
         public async Task<Result> ExecutePrimaryActionAsync(bool waitFeedback, bool waitWorkpiece)
         {
@@ -1132,7 +1077,68 @@ namespace AM.PageModel.Motion
                 selected = _filteredItems[0];
 
             SelectedItem = selected;
-            RaiseUiChanged();
+            OnPropertyChanged(nameof(PageItems));
+        }
+
+        /// <summary>
+        /// 构建普通执行器主/副按钮状态。
+        /// </summary>
+        private void BuildNormalActionButtons(
+            MotionActuatorActionPanelState state,
+            bool waitFeedback,
+            bool waitWorkpiece)
+        {
+            var primaryValidate = ValidatePrimaryAction(waitFeedback, waitWorkpiece);
+            var secondaryValidate = ValidateSecondaryAction(waitFeedback);
+
+            state.PrimaryButton.Text = ResolvePrimaryActionButtonText(SelectedItem, waitWorkpiece);
+            state.PrimaryButton.Visible = true;
+            state.PrimaryButton.Enabled = primaryValidate.Success;
+            state.PrimaryButton.Type = ResolvePrimaryButtonType(SelectedItem);
+
+            state.SecondaryButton.Text = ResolveSecondaryActionButtonText(SelectedItem);
+            state.SecondaryButton.Visible = true;
+            state.SecondaryButton.Enabled = SelectedItem.HasSecondaryAction && secondaryValidate.Success;
+            state.SecondaryButton.Type = ResolveSecondaryButtonType(SelectedItem);
+        }
+
+        /// <summary>
+        /// 构建灯塔按钮组状态。
+        /// </summary>
+        private void BuildStackLightButtons(
+            MotionActuatorActionPanelState state,
+            bool stackLightWithBuzzer)
+        {
+            var isOffCurrent = IsStackLightCurrentState("Off", stackLightWithBuzzer);
+            var isIdleCurrent = IsStackLightCurrentState("Idle", stackLightWithBuzzer);
+            var isRunningCurrent = IsStackLightCurrentState("Running", stackLightWithBuzzer);
+            var isWarningCurrent = IsStackLightCurrentState("Warning", stackLightWithBuzzer);
+            var isAlarmCurrent = IsStackLightCurrentState("Alarm", stackLightWithBuzzer);
+
+            state.OffButton.Text = isOffCurrent ? "熄灭（当前）" : "熄灭";
+            state.OffButton.Visible = true;
+            state.OffButton.Enabled = ValidateStackLightState("Off", stackLightWithBuzzer).Success;
+            state.OffButton.Type = "Default";
+
+            state.IdleButton.Text = isIdleCurrent ? "空闲（当前）" : "空闲";
+            state.IdleButton.Visible = true;
+            state.IdleButton.Enabled = ValidateStackLightState("Idle", stackLightWithBuzzer).Success;
+            state.IdleButton.Type = isIdleCurrent ? "Success" : "Primary";
+
+            state.RunningButton.Text = isRunningCurrent ? "运行（当前）" : "运行";
+            state.RunningButton.Visible = true;
+            state.RunningButton.Enabled = ValidateStackLightState("Running", stackLightWithBuzzer).Success;
+            state.RunningButton.Type = isRunningCurrent ? "Success" : "Primary";
+
+            state.WarningButton.Text = isWarningCurrent ? "警告（当前）" : "警告";
+            state.WarningButton.Visible = true;
+            state.WarningButton.Enabled = ValidateStackLightState("Warning", stackLightWithBuzzer).Success;
+            state.WarningButton.Type = "Warn";
+
+            state.AlarmButton.Text = isAlarmCurrent ? "报警（当前）" : "报警";
+            state.AlarmButton.Visible = true;
+            state.AlarmButton.Enabled = ValidateStackLightState("Alarm", stackLightWithBuzzer).Success;
+            state.AlarmButton.Type = "Error";
         }
 
         private void UpdateSummary(IList<MotionActuatorViewItem> list)
@@ -1144,12 +1150,6 @@ namespace AM.PageModel.Motion
             VacuumCount = source.Count(x => x.ActuatorType == "Vacuum");
             GripperCount = source.Count(x => x.ActuatorType == "Gripper");
             StackLightCount = source.Count(x => x.ActuatorType == "StackLight");
-        }
-
-        private void RaiseUiChanged()
-        {
-            OnPropertyChanged(nameof(PageItems));
-            OnPropertyChanged(nameof(SelectedItem));
         }
 
         private static string ResolvePrimaryActionButtonText(MotionActuatorViewItem item, bool waitWorkpiece)
@@ -1206,6 +1206,28 @@ namespace AM.PageModel.Motion
                 default:
                     return "副操作";
             }
+        }
+
+        private static string ResolvePrimaryButtonType(MotionActuatorViewItem item)
+        {
+            if (item == null)
+                return "Primary";
+
+            if (string.Equals(item.ActuatorType, "Gripper", StringComparison.OrdinalIgnoreCase))
+                return "Error";
+
+            return "Primary";
+        }
+
+        private static string ResolveSecondaryButtonType(MotionActuatorViewItem item)
+        {
+            if (item == null)
+                return "Default";
+
+            if (string.Equals(item.ActuatorType, "Vacuum", StringComparison.OrdinalIgnoreCase))
+                return "Warn";
+
+            return "Success";
         }
 
         private bool IsStackLightCurrentState(string stateKey, bool stackLightWithBuzzer)
@@ -1390,7 +1412,6 @@ namespace AM.PageModel.Motion
 
         /// <summary>
         /// 执行器卡片显示项。
-        /// 保持字段命名尽量接近 WPF 版本，方便后续迁移动作逻辑。
         /// </summary>
         public sealed class MotionActuatorViewItem
         {
@@ -1482,16 +1503,12 @@ namespace AM.PageModel.Motion
 
         /// <summary>
         /// 右侧控制面板状态。
-        /// 该对象不依赖具体 UI 控件类型，只表达控件当前应展示什么。
+        /// 只保留当前界面真正需要的数据。
         /// </summary>
         public sealed class MotionActuatorActionPanelState
         {
             public string TitleText { get; set; }
             public string SubTitleText { get; set; }
-            public string HintText { get; set; }
-
-            public bool ShowNormalActions { get; set; }
-            public bool ShowStackLightActions { get; set; }
 
             public bool ShowWaitFeedback { get; set; }
             public bool ShowWaitWorkpiece { get; set; }
@@ -1501,29 +1518,55 @@ namespace AM.PageModel.Motion
             public bool WaitWorkpiece { get; set; }
             public bool StackLightWithBuzzer { get; set; }
 
-            public string PrimaryButtonText { get; set; }
-            public bool PrimaryButtonEnabled { get; set; }
+            public MotionActuatorButtonState PrimaryButton { get; private set; }
+            public MotionActuatorButtonState SecondaryButton { get; private set; }
 
-            public string SecondaryButtonText { get; set; }
-            public bool SecondaryButtonEnabled { get; set; }
+            public MotionActuatorButtonState OffButton { get; private set; }
+            public MotionActuatorButtonState IdleButton { get; private set; }
+            public MotionActuatorButtonState RunningButton { get; private set; }
+            public MotionActuatorButtonState WarningButton { get; private set; }
+            public MotionActuatorButtonState AlarmButton { get; private set; }
 
-            public string OffButtonText { get; set; }
-            public string IdleButtonText { get; set; }
-            public string RunningButtonText { get; set; }
-            public string WarningButtonText { get; set; }
-            public string AlarmButtonText { get; set; }
+            public MotionActuatorActionPanelState()
+            {
+                PrimaryButton = new MotionActuatorButtonState();
+                SecondaryButton = new MotionActuatorButtonState();
 
-            public bool OffButtonEnabled { get; set; }
-            public bool IdleButtonEnabled { get; set; }
-            public bool RunningButtonEnabled { get; set; }
-            public bool WarningButtonEnabled { get; set; }
-            public bool AlarmButtonEnabled { get; set; }
+                OffButton = new MotionActuatorButtonState();
+                IdleButton = new MotionActuatorButtonState();
+                RunningButton = new MotionActuatorButtonState();
+                WarningButton = new MotionActuatorButtonState();
+                AlarmButton = new MotionActuatorButtonState();
+            }
 
-            public bool IsOffCurrent { get; set; }
-            public bool IsIdleCurrent { get; set; }
-            public bool IsRunningCurrent { get; set; }
-            public bool IsWarningCurrent { get; set; }
-            public bool IsAlarmCurrent { get; set; }
+            public static MotionActuatorActionPanelState CreateDefault()
+            {
+                return new MotionActuatorActionPanelState
+                {
+                    TitleText = "当前对象：未选择",
+                    SubTitleText = "—"
+                };
+            }
+        }
+
+        /// <summary>
+        /// 单个动作按钮状态。
+        /// 用统一结构代替大量平铺字段，减少重复。
+        /// </summary>
+        public sealed class MotionActuatorButtonState
+        {
+            public string Text { get; set; }
+            public bool Visible { get; set; }
+            public bool Enabled { get; set; }
+            public string Type { get; set; }
+
+            public MotionActuatorButtonState()
+            {
+                Text = string.Empty;
+                Visible = false;
+                Enabled = false;
+                Type = "Default";
+            }
         }
     }
 }
