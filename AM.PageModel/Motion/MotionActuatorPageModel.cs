@@ -3,6 +3,7 @@ using AM.DBService.Services.Motion.Actuator;
 using AM.Model.Common;
 using AM.Model.MotionCard.Actuator;
 using AM.PageModel.Common;
+using AM.PageModel.Motion.Actuator;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,12 +14,36 @@ namespace AM.PageModel.Motion
     /// <summary>
     /// WinForms 执行器控制页页面模型。
     ///
-    /// 职责：
-    /// 1. 从 MachineContext 读取执行器静态结构；
-    /// 2. 从 RuntimeContext / 执行器服务读取运行态；
-    /// 3. 维护类型筛选、关键字筛选；
-    /// 4. 维护左侧卡片集合与当前选中项；
-    /// 5. 提供右侧控制面板所需的联动校验与实际执行入口。
+    /// 【当前阶段定位】
+    /// 本类是执行器页面的“页面协调模型”，而不是完整 MVVM ViewModel。
+    /// 它保留 WinForms 事件驱动的直接性，同时引入轻量的数据组装思路。
+    ///
+    /// 【本轮重构目标】
+    /// 1. 不改动底层服务层和动作执行入口；
+    /// 2. 不引入 WPF 式复杂 MVVM；
+    /// 3. 把原来大而全的 MotionActuatorViewItem 拆分为：
+    ///    - MotionActuatorSnapshot：页面内部原始快照
+    ///    - MotionActuatorListItem：左侧列表显示对象
+    ///    - MotionActuatorDetailData：右侧详情显示对象
+    ///    - MotionActuatorActionPanelState：右侧动作区显示对象
+    /// 4. 引入 MotionActuatorDisplayBuilder，把部分显示组装逻辑从 PageModel 中抽离；
+    /// 5. 保留 Validate / Execute 逻辑在当前类中，避免第一阶段过度拆分。
+    ///
+    /// 【层级关系】
+    /// MachineContext / RuntimeContext / 执行器服务
+    ///     ↓
+    /// MotionActuatorPageModel（当前类）
+    ///     ↓
+    /// MotionActuatorDisplayBuilder
+    ///     ↓
+    /// ListItem / DetailData / ActionPanelState
+    ///     ↓
+    /// WinForms 各显示控件 Bind(...)
+    ///
+    /// 【与自动任务层的关系】
+    /// - 本类仅服务于“页面手动控制与监控”；
+    /// - 不负责后台自动流程、状态机、步骤编排；
+    /// - 后续自动任务层应独立建设，不与页面显示模型混合。
     /// </summary>
     public class MotionActuatorPageModel : BindableBase
     {
@@ -27,12 +52,38 @@ namespace AM.PageModel.Motion
         private readonly GripperService _gripperService;
         private readonly StackLightService _stackLightService;
 
-        private List<MotionActuatorViewItem> _allItems;
-        private List<MotionActuatorViewItem> _filteredItems;
+        private readonly MotionActuatorFilter _filter;
+        private readonly MotionActuatorDisplayBuilder _displayBuilder;
 
-        private string _searchText;
-        private string _typeFilter;
-        private MotionActuatorViewItem _selectedItem;
+        /// <summary>
+        /// 所有执行器原始快照。
+        /// 包含当前页面需要的静态配置与运行态数据。
+        /// </summary>
+        private List<MotionActuatorSnapshot> _allSnapshots;
+
+        /// <summary>
+        /// 当前筛选后的原始快照集合。
+        /// 选择逻辑、动作逻辑都基于它。
+        /// </summary>
+        private List<MotionActuatorSnapshot> _filteredSnapshots;
+
+        /// <summary>
+        /// 当前筛选后的左侧列表显示对象集合。
+        /// 只提供给左侧列表控件使用。
+        /// </summary>
+        private List<MotionActuatorListItem> _pageItems;
+
+        /// <summary>
+        /// 当前选中的原始快照。
+        /// 后续详情区、动作区都基于该对象派生。
+        /// </summary>
+        private MotionActuatorSnapshot _selectedSnapshot;
+
+        /// <summary>
+        /// 当前选中对象对应的详情显示数据。
+        /// 由 DisplayBuilder 从 SelectedSnapshot 映射而来。
+        /// </summary>
+        private MotionActuatorDetailData _selectedDetail;
 
         private int _totalCount;
         private int _cylinderCount;
@@ -47,29 +98,45 @@ namespace AM.PageModel.Motion
             _gripperService = new GripperService();
             _stackLightService = new StackLightService();
 
-            _allItems = new List<MotionActuatorViewItem>();
-            _filteredItems = new List<MotionActuatorViewItem>();
+            _filter = new MotionActuatorFilter();
+            _displayBuilder = new MotionActuatorDisplayBuilder();
 
-            _searchText = string.Empty;
-            _typeFilter = "All";
+            _allSnapshots = new List<MotionActuatorSnapshot>();
+            _filteredSnapshots = new List<MotionActuatorSnapshot>();
+            _pageItems = new List<MotionActuatorListItem>();
+
+            _selectedDetail = MotionActuatorDetailData.CreateEmpty();
         }
 
         /// <summary>
         /// 当前左侧卡片数据。
         /// 执行器控制页不分页，直接交给 VirtualPanel。
+        /// 该集合已经是专门的列表显示对象，不再直接暴露原始快照。
         /// </summary>
-        public IList<MotionActuatorViewItem> PageItems
+        public IList<MotionActuatorListItem> PageItems
         {
-            get { return _filteredItems; }
+            get { return _pageItems; }
         }
 
         /// <summary>
-        /// 当前选中的执行器对象。
+        /// 当前选中的原始快照。
+        /// 这是页面内部主状态对象。
+        /// 动作校验、动作执行、详情映射、动作面板映射均基于它。
         /// </summary>
-        public MotionActuatorViewItem SelectedItem
+        public MotionActuatorSnapshot SelectedSnapshot
         {
-            get { return _selectedItem; }
-            private set { SetProperty(ref _selectedItem, value); }
+            get { return _selectedSnapshot; }
+            private set { SetProperty(ref _selectedSnapshot, value); }
+        }
+
+        /// <summary>
+        /// 当前右侧详情区显示数据。
+        /// 页面或详情控件可直接 Bind 该对象。
+        /// </summary>
+        public MotionActuatorDetailData SelectedDetail
+        {
+            get { return _selectedDetail; }
+            private set { SetProperty(ref _selectedDetail, value); }
         }
 
         /// <summary>
@@ -77,7 +144,7 @@ namespace AM.PageModel.Motion
         /// </summary>
         public string SearchText
         {
-            get { return _searchText; }
+            get { return _filter.SearchText; }
         }
 
         /// <summary>
@@ -86,7 +153,7 @@ namespace AM.PageModel.Motion
         /// </summary>
         public string TypeFilter
         {
-            get { return _typeFilter; }
+            get { return _filter.TypeFilter; }
         }
 
         /// <summary>
@@ -145,10 +212,10 @@ namespace AM.PageModel.Motion
         public void SetSearchText(string searchText)
         {
             searchText = searchText ?? string.Empty;
-            if (string.Equals(_searchText, searchText, StringComparison.Ordinal))
+            if (string.Equals(_filter.SearchText, searchText, StringComparison.Ordinal))
                 return;
 
-            _searchText = searchText;
+            _filter.SearchText = searchText;
             OnPropertyChanged(nameof(SearchText));
 
             ApplyFilterAndSelection();
@@ -160,10 +227,10 @@ namespace AM.PageModel.Motion
         public void SetTypeFilter(string typeFilter)
         {
             typeFilter = string.IsNullOrWhiteSpace(typeFilter) ? "All" : typeFilter;
-            if (string.Equals(_typeFilter, typeFilter, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(_filter.TypeFilter, typeFilter, StringComparison.OrdinalIgnoreCase))
                 return;
 
-            _typeFilter = typeFilter;
+            _filter.TypeFilter = typeFilter;
             OnPropertyChanged(nameof(TypeFilter));
 
             ApplyFilterAndSelection();
@@ -171,92 +238,55 @@ namespace AM.PageModel.Motion
 
         /// <summary>
         /// 选中指定执行器对象。
+        /// 左侧列表点击后通过 ItemKey 选中对应原始快照。
         /// </summary>
         public void SelectItem(string itemKey)
         {
             if (string.IsNullOrWhiteSpace(itemKey))
                 return;
 
-            var selected = _filteredItems.FirstOrDefault(x =>
+            var selected = _filteredSnapshots.FirstOrDefault(x =>
                 string.Equals(x.ItemKey, itemKey, StringComparison.OrdinalIgnoreCase));
 
             if (selected == null)
                 return;
 
-            SelectedItem = selected;
+            SelectedSnapshot = selected;
+            SelectedDetail = _displayBuilder.BuildDetailData(selected);
+
+            OnPropertyChanged(nameof(SelectedSnapshot));
+            OnPropertyChanged(nameof(SelectedDetail));
         }
 
         /// <summary>
-        /// 首次加载与定时刷新共用的数据刷新入口。
-        /// </summary>
-        private async Task<Result> ReloadAsync()
-        {
-            return await Task.Run(() =>
-            {
-                var previousSelectedKey = SelectedItem == null ? null : SelectedItem.ItemKey;
-
-                _allItems = BuildAllItemsFromMachineContext();
-                RefreshRuntimeStateCore(_allItems);
-                ApplyFilterAndSelection(previousSelectedKey);
-
-                return Result.Ok("执行器控制页加载成功");
-            });
-        }
-
-        /// <summary>
-        /// 构建右侧控制面板状态。
-        /// 这里只返回当前界面真正需要的最小必要信息。
+        /// 构建右侧动作面板状态。
+        ///
+        /// 当前实现思路：
+        /// 1. 先由 DisplayBuilder 构建基础结构和基础文案；
+        /// 2. 再由 PageModel 根据校验结果覆盖按钮启用状态；
+        /// 3. 保持 Builder 负责显示组装，PageModel 负责动作规则。
         /// </summary>
         public MotionActuatorActionPanelState BuildActionPanelState(
             bool waitFeedback,
             bool waitWorkpiece,
             bool stackLightWithBuzzer)
         {
-            var state = MotionActuatorActionPanelState.CreateDefault();
+            var state = _displayBuilder.BuildBaseActionPanelState(
+                SelectedSnapshot,
+                waitFeedback,
+                waitWorkpiece,
+                stackLightWithBuzzer);
 
-            if (SelectedItem == null)
+            if (SelectedSnapshot == null)
+                return state;
+
+            if (string.Equals(SelectedSnapshot.ActuatorType, "StackLight", StringComparison.OrdinalIgnoreCase))
             {
-                state.ShowWaitFeedback = true;
-                state.WaitFeedback = waitFeedback;
-
-                state.PrimaryButton.Text = "主操作";
-                state.PrimaryButton.Visible = true;
-                state.PrimaryButton.Enabled = false;
-                state.PrimaryButton.Type = "Primary";
-
-                state.SecondaryButton.Text = "副操作";
-                state.SecondaryButton.Visible = true;
-                state.SecondaryButton.Enabled = false;
-                state.SecondaryButton.Type = "Default";
-
+                BuildStackLightButtons(state, stackLightWithBuzzer);
                 return state;
             }
 
-            state.TitleText = SelectedItem.TypeDisplay + " / " + SelectedItem.DisplayTitle;
-            state.SubTitleText = SelectedItem.Name;
-
-            var isStackLight = string.Equals(SelectedItem.ActuatorType, "StackLight", StringComparison.OrdinalIgnoreCase);
-            var canUseWorkpiece =
-                string.Equals(SelectedItem.ActuatorType, "Vacuum", StringComparison.OrdinalIgnoreCase)
-                || string.Equals(SelectedItem.ActuatorType, "Gripper", StringComparison.OrdinalIgnoreCase);
-
-            state.ShowWaitFeedback = !isStackLight;
-            state.ShowWaitWorkpiece = canUseWorkpiece;
-            state.ShowStackLightWithBuzzer = isStackLight;
-
-            state.WaitFeedback = waitFeedback;
-            state.WaitWorkpiece = waitWorkpiece;
-            state.StackLightWithBuzzer = stackLightWithBuzzer;
-
-            if (isStackLight)
-            {
-                BuildStackLightButtons(state, stackLightWithBuzzer);
-            }
-            else
-            {
-                BuildNormalActionButtons(state, waitFeedback, waitWorkpiece);
-            }
-
+            BuildNormalActionButtons(state, waitFeedback, waitWorkpiece);
             return state;
         }
 
@@ -265,69 +295,69 @@ namespace AM.PageModel.Motion
         /// </summary>
         public Result ValidatePrimaryAction(bool waitFeedback, bool waitWorkpiece)
         {
-            if (SelectedItem == null)
+            if (SelectedSnapshot == null)
                 return Result.Fail(-2301, "请先选择执行器对象", ResultSource.Motion);
 
-            switch (SelectedItem.ActuatorType)
+            switch (SelectedSnapshot.ActuatorType)
             {
                 case "Cylinder":
-                    if (SelectedItem.PrimaryState == true && SelectedItem.SecondaryState != true)
+                    if (SelectedSnapshot.PrimaryState == true && SelectedSnapshot.SecondaryState != true)
                         return Result.Fail(-2302, "当前气缸已在伸出到位状态，无需重复伸出", ResultSource.Motion);
 
                     if (waitFeedback)
                     {
-                        if (!SelectedItem.UseFeedbackCheck)
+                        if (!SelectedSnapshot.UseFeedbackCheck)
                             return Result.Fail(-2303, "当前气缸未启用反馈校验，请取消“等待反馈”或调整配置", ResultSource.Motion);
 
-                        if (!SelectedItem.PrimaryFeedbackBit.HasValue)
+                        if (!SelectedSnapshot.PrimaryFeedbackBit.HasValue)
                             return Result.Fail(-2304, "当前气缸未配置伸出反馈位，无法等待伸出到位", ResultSource.Motion);
                     }
 
                     return Result.Ok("允许执行", ResultSource.Motion);
 
                 case "Vacuum":
-                    if (SelectedItem.PrimaryState == true && (!waitWorkpiece || SelectedItem.WorkpieceState != false))
+                    if (SelectedSnapshot.PrimaryState == true && (!waitWorkpiece || SelectedSnapshot.WorkpieceState != false))
                         return Result.Fail(-2305, "当前真空已建立，无需重复吸真空", ResultSource.Motion);
 
                     if (waitFeedback)
                     {
-                        if (!SelectedItem.UseFeedbackCheck)
+                        if (!SelectedSnapshot.UseFeedbackCheck)
                             return Result.Fail(-2306, "当前真空未启用反馈校验，请取消“等待反馈”或调整配置", ResultSource.Motion);
 
-                        if (!SelectedItem.PrimaryFeedbackBit.HasValue)
+                        if (!SelectedSnapshot.PrimaryFeedbackBit.HasValue)
                             return Result.Fail(-2307, "当前真空未配置建压反馈位，无法等待真空建立", ResultSource.Motion);
                     }
 
                     if (waitWorkpiece)
                     {
-                        if (!SelectedItem.UseWorkpieceCheck)
+                        if (!SelectedSnapshot.UseWorkpieceCheck)
                             return Result.Fail(-2308, "当前真空未启用工件检测校验，请取消“等待工件检测”或调整配置", ResultSource.Motion);
 
-                        if (!SelectedItem.WorkpieceBit.HasValue)
+                        if (!SelectedSnapshot.WorkpieceBit.HasValue)
                             return Result.Fail(-2309, "当前真空未配置工件检测位，无法等待工件检测", ResultSource.Motion);
                     }
 
                     return Result.Ok("允许执行", ResultSource.Motion);
 
                 case "Gripper":
-                    if (SelectedItem.PrimaryState == true && (!waitWorkpiece || SelectedItem.WorkpieceState != false))
+                    if (SelectedSnapshot.PrimaryState == true && (!waitWorkpiece || SelectedSnapshot.WorkpieceState != false))
                         return Result.Fail(-2310, "当前夹爪已在夹紧到位状态，无需重复夹紧", ResultSource.Motion);
 
                     if (waitFeedback)
                     {
-                        if (!SelectedItem.UseFeedbackCheck)
+                        if (!SelectedSnapshot.UseFeedbackCheck)
                             return Result.Fail(-2311, "当前夹爪未启用反馈校验，请取消“等待反馈”或调整配置", ResultSource.Motion);
 
-                        if (!SelectedItem.PrimaryFeedbackBit.HasValue)
+                        if (!SelectedSnapshot.PrimaryFeedbackBit.HasValue)
                             return Result.Fail(-2312, "当前夹爪未配置夹紧反馈位，无法等待夹紧到位", ResultSource.Motion);
                     }
 
                     if (waitWorkpiece)
                     {
-                        if (!SelectedItem.UseWorkpieceCheck)
+                        if (!SelectedSnapshot.UseWorkpieceCheck)
                             return Result.Fail(-2313, "当前夹爪未启用工件检测校验，请取消“等待工件检测”或调整配置", ResultSource.Motion);
 
-                        if (!SelectedItem.WorkpieceBit.HasValue)
+                        if (!SelectedSnapshot.WorkpieceBit.HasValue)
                             return Result.Fail(-2314, "当前夹爪未配置工件检测位，无法等待工件检测", ResultSource.Motion);
                     }
 
@@ -343,51 +373,51 @@ namespace AM.PageModel.Motion
         /// </summary>
         public Result ValidateSecondaryAction(bool waitFeedback)
         {
-            if (SelectedItem == null)
+            if (SelectedSnapshot == null)
                 return Result.Fail(-2320, "请先选择执行器对象", ResultSource.Motion);
 
-            switch (SelectedItem.ActuatorType)
+            switch (SelectedSnapshot.ActuatorType)
             {
                 case "Cylinder":
-                    if (SelectedItem.SecondaryState == true && SelectedItem.PrimaryState != true)
+                    if (SelectedSnapshot.SecondaryState == true && SelectedSnapshot.PrimaryState != true)
                         return Result.Fail(-2321, "当前气缸已在缩回到位状态，无需重复缩回", ResultSource.Motion);
 
                     if (waitFeedback)
                     {
-                        if (!SelectedItem.UseFeedbackCheck)
+                        if (!SelectedSnapshot.UseFeedbackCheck)
                             return Result.Fail(-2322, "当前气缸未启用反馈校验，请取消“等待反馈”或调整配置", ResultSource.Motion);
 
-                        if (!SelectedItem.SecondaryFeedbackBit.HasValue)
+                        if (!SelectedSnapshot.SecondaryFeedbackBit.HasValue)
                             return Result.Fail(-2323, "当前气缸未配置缩回反馈位，无法等待缩回到位", ResultSource.Motion);
                     }
 
                     return Result.Ok("允许执行", ResultSource.Motion);
 
                 case "Vacuum":
-                    if (SelectedItem.SecondaryState == true || SelectedItem.PrimaryState == false)
+                    if (SelectedSnapshot.SecondaryState == true || SelectedSnapshot.PrimaryState == false)
                         return Result.Fail(-2324, "当前真空已处于释放状态，无需重复关闭真空", ResultSource.Motion);
 
                     if (waitFeedback)
                     {
-                        if (!SelectedItem.UseFeedbackCheck)
+                        if (!SelectedSnapshot.UseFeedbackCheck)
                             return Result.Fail(-2325, "当前真空未启用反馈校验，请取消“等待反馈”或调整配置", ResultSource.Motion);
 
-                        if (!SelectedItem.SecondaryFeedbackBit.HasValue && !SelectedItem.PrimaryFeedbackBit.HasValue)
+                        if (!SelectedSnapshot.SecondaryFeedbackBit.HasValue && !SelectedSnapshot.PrimaryFeedbackBit.HasValue)
                             return Result.Fail(-2326, "当前真空未配置释放反馈位或建压反馈位，无法等待真空释放", ResultSource.Motion);
                     }
 
                     return Result.Ok("允许执行", ResultSource.Motion);
 
                 case "Gripper":
-                    if (SelectedItem.SecondaryState == true && SelectedItem.PrimaryState != true)
+                    if (SelectedSnapshot.SecondaryState == true && SelectedSnapshot.PrimaryState != true)
                         return Result.Fail(-2327, "当前夹爪已在打开到位状态，无需重复打开", ResultSource.Motion);
 
                     if (waitFeedback)
                     {
-                        if (!SelectedItem.UseFeedbackCheck)
+                        if (!SelectedSnapshot.UseFeedbackCheck)
                             return Result.Fail(-2328, "当前夹爪未启用反馈校验，请取消“等待反馈”或调整配置", ResultSource.Motion);
 
-                        if (!SelectedItem.SecondaryFeedbackBit.HasValue)
+                        if (!SelectedSnapshot.SecondaryFeedbackBit.HasValue)
                             return Result.Fail(-2329, "当前夹爪未配置打开反馈位，无法等待打开到位", ResultSource.Motion);
                     }
 
@@ -403,17 +433,20 @@ namespace AM.PageModel.Motion
         /// </summary>
         public Result ValidateStackLightState(string stateKey, bool stackLightWithBuzzer)
         {
-            if (SelectedItem == null || !string.Equals(SelectedItem.ActuatorType, "StackLight", StringComparison.OrdinalIgnoreCase))
+            if (SelectedSnapshot == null
+                || !string.Equals(SelectedSnapshot.ActuatorType, "StackLight", StringComparison.OrdinalIgnoreCase))
+            {
                 return Result.Fail(-2335, "请先选择灯塔对象", ResultSource.Motion);
+            }
 
-            if (!SelectedItem.HasAnyStackLightOutput)
+            if (!SelectedSnapshot.HasAnyStackLightOutput)
                 return Result.Fail(-2336, "当前灯塔未配置任何输出位，无法执行状态切换", ResultSource.Motion);
 
             StackLightState targetState;
             if (!TryParseStackLightState(stateKey, out targetState))
                 return Result.Fail(-2337, "不支持的灯塔状态: " + stateKey, ResultSource.Motion);
 
-            if (IsStackLightAlreadyInTargetState(SelectedItem, targetState, stackLightWithBuzzer))
+            if (IsStackLightAlreadyInTargetState(SelectedSnapshot, targetState, stackLightWithBuzzer))
                 return Result.Fail(-2338, "当前灯塔已处于目标状态，无需重复切换", ResultSource.Motion);
 
             return Result.Ok("允许执行", ResultSource.Motion);
@@ -425,30 +458,30 @@ namespace AM.PageModel.Motion
         /// </summary>
         public async Task<Result> ExecutePrimaryActionAsync(bool waitFeedback, bool waitWorkpiece)
         {
-            var item = SelectedItem;
-            if (item == null)
+            var snapshot = SelectedSnapshot;
+            if (snapshot == null)
                 return Result.Fail(-2340, "请先选择执行器对象", ResultSource.Motion);
 
             var validate = ValidatePrimaryAction(waitFeedback, waitWorkpiece);
             if (!validate.Success)
             {
-                ApplyActionResult(item, validate);
+                ApplyActionResult(snapshot, validate);
                 return validate;
             }
 
             Result result;
-            switch (item.ActuatorType)
+            switch (snapshot.ActuatorType)
             {
                 case "Cylinder":
-                    result = await Task.Run(() => _cylinderService.Extend(item.Name, waitFeedback));
+                    result = await Task.Run(() => _cylinderService.Extend(snapshot.Name, waitFeedback));
                     break;
 
                 case "Vacuum":
-                    result = await Task.Run(() => _vacuumService.VacuumOn(item.Name, waitFeedback, waitWorkpiece));
+                    result = await Task.Run(() => _vacuumService.VacuumOn(snapshot.Name, waitFeedback, waitWorkpiece));
                     break;
 
                 case "Gripper":
-                    result = await Task.Run(() => _gripperService.Close(item.Name, waitFeedback, waitWorkpiece));
+                    result = await Task.Run(() => _gripperService.Close(snapshot.Name, waitFeedback, waitWorkpiece));
                     break;
 
                 default:
@@ -456,7 +489,7 @@ namespace AM.PageModel.Motion
                     break;
             }
 
-            ApplyActionResult(item, result);
+            ApplyActionResult(snapshot, result);
             return result;
         }
 
@@ -465,30 +498,30 @@ namespace AM.PageModel.Motion
         /// </summary>
         public async Task<Result> ExecuteSecondaryActionAsync(bool waitFeedback)
         {
-            var item = SelectedItem;
-            if (item == null)
+            var snapshot = SelectedSnapshot;
+            if (snapshot == null)
                 return Result.Fail(-2342, "请先选择执行器对象", ResultSource.Motion);
 
             var validate = ValidateSecondaryAction(waitFeedback);
             if (!validate.Success)
             {
-                ApplyActionResult(item, validate);
+                ApplyActionResult(snapshot, validate);
                 return validate;
             }
 
             Result result;
-            switch (item.ActuatorType)
+            switch (snapshot.ActuatorType)
             {
                 case "Cylinder":
-                    result = await Task.Run(() => _cylinderService.Retract(item.Name, waitFeedback));
+                    result = await Task.Run(() => _cylinderService.Retract(snapshot.Name, waitFeedback));
                     break;
 
                 case "Vacuum":
-                    result = await Task.Run(() => _vacuumService.VacuumOff(item.Name, waitFeedback));
+                    result = await Task.Run(() => _vacuumService.VacuumOff(snapshot.Name, waitFeedback));
                     break;
 
                 case "Gripper":
-                    result = await Task.Run(() => _gripperService.Open(item.Name, waitFeedback));
+                    result = await Task.Run(() => _gripperService.Open(snapshot.Name, waitFeedback));
                     break;
 
                 default:
@@ -496,7 +529,7 @@ namespace AM.PageModel.Motion
                     break;
             }
 
-            ApplyActionResult(item, result);
+            ApplyActionResult(snapshot, result);
             return result;
         }
 
@@ -505,14 +538,14 @@ namespace AM.PageModel.Motion
         /// </summary>
         public async Task<Result> SetStackLightStateAsync(string stateKey, bool stackLightWithBuzzer)
         {
-            var item = SelectedItem;
-            if (item == null)
+            var snapshot = SelectedSnapshot;
+            if (snapshot == null)
                 return Result.Fail(-2344, "请先选择灯塔对象", ResultSource.Motion);
 
             var validate = ValidateStackLightState(stateKey, stackLightWithBuzzer);
             if (!validate.Success)
             {
-                ApplyActionResult(item, validate);
+                ApplyActionResult(snapshot, validate);
                 return validate;
             }
 
@@ -520,23 +553,23 @@ namespace AM.PageModel.Motion
             switch (stateKey)
             {
                 case "Off":
-                    result = await Task.Run(() => _stackLightService.TurnOff(item.Name));
+                    result = await Task.Run(() => _stackLightService.TurnOff(snapshot.Name));
                     break;
 
                 case "Idle":
-                    result = await Task.Run(() => _stackLightService.SetIdle(item.Name));
+                    result = await Task.Run(() => _stackLightService.SetIdle(snapshot.Name));
                     break;
 
                 case "Running":
-                    result = await Task.Run(() => _stackLightService.SetRunning(item.Name));
+                    result = await Task.Run(() => _stackLightService.SetRunning(snapshot.Name));
                     break;
 
                 case "Warning":
-                    result = await Task.Run(() => _stackLightService.SetWarning(item.Name, stackLightWithBuzzer));
+                    result = await Task.Run(() => _stackLightService.SetWarning(snapshot.Name, stackLightWithBuzzer));
                     break;
 
                 case "Alarm":
-                    result = await Task.Run(() => _stackLightService.SetAlarm(item.Name, stackLightWithBuzzer));
+                    result = await Task.Run(() => _stackLightService.SetAlarm(snapshot.Name, stackLightWithBuzzer));
                     break;
 
                 default:
@@ -544,18 +577,35 @@ namespace AM.PageModel.Motion
                     break;
             }
 
-            ApplyActionResult(item, result);
+            ApplyActionResult(snapshot, result);
             return result;
         }
 
         /// <summary>
-        /// 从 MachineContext 构建执行器静态对象列表。
-        /// 这一层只负责结构，不负责运行态。
+        /// 首次加载与定时刷新共用的数据刷新入口。
         /// </summary>
-        private List<MotionActuatorViewItem> BuildAllItemsFromMachineContext()
+        private async Task<Result> ReloadAsync()
+        {
+            return await Task.Run(() =>
+            {
+                var previousSelectedKey = SelectedSnapshot == null ? null : SelectedSnapshot.ItemKey;
+
+                _allSnapshots = BuildAllSnapshotsFromMachineContext();
+                RefreshRuntimeStateCore(_allSnapshots);
+                ApplyFilterAndSelection(previousSelectedKey);
+
+                return Result.Ok("执行器控制页加载成功");
+            });
+        }
+
+        /// <summary>
+        /// 从 MachineContext 构建执行器静态对象列表。
+        /// 第一阶段仍保留部分显示字段在 Snapshot 中，后续再继续收口。
+        /// </summary>
+        private List<MotionActuatorSnapshot> BuildAllSnapshotsFromMachineContext()
         {
             var machine = MachineContext.Instance;
-            var list = new List<MotionActuatorViewItem>();
+            var list = new List<MotionActuatorSnapshot>();
 
             if (machine.Cylinders != null)
             {
@@ -564,7 +614,7 @@ namespace AM.PageModel.Motion
                     .OrderBy(x => x.SortOrder)
                     .ThenBy(x => x.Name))
                 {
-                    list.Add(new MotionActuatorViewItem
+                    list.Add(new MotionActuatorSnapshot
                     {
                         ActuatorType = "Cylinder",
                         TypeDisplay = "气缸",
@@ -605,7 +655,7 @@ namespace AM.PageModel.Motion
                     .OrderBy(x => x.SortOrder)
                     .ThenBy(x => x.Name))
                 {
-                    list.Add(new MotionActuatorViewItem
+                    list.Add(new MotionActuatorSnapshot
                     {
                         ActuatorType = "Vacuum",
                         TypeDisplay = "真空",
@@ -647,7 +697,7 @@ namespace AM.PageModel.Motion
                     .OrderBy(x => x.SortOrder)
                     .ThenBy(x => x.Name))
                 {
-                    list.Add(new MotionActuatorViewItem
+                    list.Add(new MotionActuatorSnapshot
                     {
                         ActuatorType = "Gripper",
                         TypeDisplay = "夹爪",
@@ -689,7 +739,7 @@ namespace AM.PageModel.Motion
                     .OrderBy(x => x.SortOrder)
                     .ThenBy(x => x.Name))
                 {
-                    list.Add(new MotionActuatorViewItem
+                    list.Add(new MotionActuatorSnapshot
                     {
                         ActuatorType = "StackLight",
                         TypeDisplay = "灯塔",
@@ -735,296 +785,298 @@ namespace AM.PageModel.Motion
 
         /// <summary>
         /// 刷新所有执行器运行态。
+        /// 这一层仍然直接写入 Snapshot，
+        /// 第一阶段不继续拆出独立 RuntimeAssembler，避免过度设计。
         /// </summary>
-        private void RefreshRuntimeStateCore(IEnumerable<MotionActuatorViewItem> items)
+        private void RefreshRuntimeStateCore(IEnumerable<MotionActuatorSnapshot> snapshots)
         {
-            foreach (var item in items)
+            foreach (var snapshot in snapshots)
             {
-                if (item == null)
+                if (snapshot == null)
                     continue;
 
-                switch (item.ActuatorType)
+                switch (snapshot.ActuatorType)
                 {
                     case "Cylinder":
-                        RefreshCylinderState(item);
+                        RefreshCylinderState(snapshot);
                         break;
 
                     case "Vacuum":
-                        RefreshVacuumState(item);
+                        RefreshVacuumState(snapshot);
                         break;
 
                     case "Gripper":
-                        RefreshGripperState(item);
+                        RefreshGripperState(snapshot);
                         break;
 
                     case "StackLight":
-                        RefreshStackLightState(item);
+                        RefreshStackLightState(snapshot);
                         break;
                 }
             }
         }
 
-        private void RefreshCylinderState(MotionActuatorViewItem item)
+        private void RefreshCylinderState(MotionActuatorSnapshot snapshot)
         {
-            var isExtended = TryReadBoolResult(() => _cylinderService.IsExtended(item.Name));
-            var isRetracted = TryReadBoolResult(() => _cylinderService.IsRetracted(item.Name));
+            var isExtended = TryReadBoolResult(() => _cylinderService.IsExtended(snapshot.Name));
+            var isRetracted = TryReadBoolResult(() => _cylinderService.IsRetracted(snapshot.Name));
 
-            item.PrimaryState = isExtended;
-            item.SecondaryState = isRetracted;
-            item.WorkpieceState = null;
+            snapshot.PrimaryState = isExtended;
+            snapshot.SecondaryState = isRetracted;
+            snapshot.WorkpieceState = null;
 
-            if (!item.PrimaryFeedbackBit.HasValue && !item.SecondaryFeedbackBit.HasValue)
+            if (!snapshot.PrimaryFeedbackBit.HasValue && !snapshot.SecondaryFeedbackBit.HasValue)
             {
-                item.StateText = "未配反馈";
-                item.StateLevel = "Warning";
-                item.DetailText = "未配置伸出/缩回反馈位";
-                item.FooterText = "反馈：— / —";
-                item.HasFault = false;
+                snapshot.StateText = "未配反馈";
+                snapshot.StateLevel = "Warning";
+                snapshot.DetailText = "未配置伸出/缩回反馈位";
+                snapshot.FooterText = "反馈：— / —";
+                snapshot.HasFault = false;
             }
             else if (isExtended == true && isRetracted == true)
             {
-                item.StateText = "反馈冲突";
-                item.StateLevel = "Danger";
-                item.DetailText = "伸出与缩回反馈同时为到位";
-                item.FooterText = "伸出=Y / 缩回=Y";
-                item.HasFault = true;
+                snapshot.StateText = "反馈冲突";
+                snapshot.StateLevel = "Danger";
+                snapshot.DetailText = "伸出与缩回反馈同时为到位";
+                snapshot.FooterText = "伸出=Y / 缩回=Y";
+                snapshot.HasFault = true;
             }
             else if (isExtended == true)
             {
-                item.StateText = "伸出到位";
-                item.StateLevel = "Success";
-                item.DetailText = "气缸当前处于伸出端";
-                item.FooterText = "伸出=Y / 缩回=" + BoolToShortText(isRetracted);
-                item.HasFault = false;
+                snapshot.StateText = "伸出到位";
+                snapshot.StateLevel = "Success";
+                snapshot.DetailText = "气缸当前处于伸出端";
+                snapshot.FooterText = "伸出=Y / 缩回=" + BoolToShortText(isRetracted);
+                snapshot.HasFault = false;
             }
             else if (isRetracted == true)
             {
-                item.StateText = "缩回到位";
-                item.StateLevel = "Primary";
-                item.DetailText = "气缸当前处于缩回端";
-                item.FooterText = "伸出=" + BoolToShortText(isExtended) + " / 缩回=Y";
-                item.HasFault = false;
+                snapshot.StateText = "缩回到位";
+                snapshot.StateLevel = "Primary";
+                snapshot.DetailText = "气缸当前处于缩回端";
+                snapshot.FooterText = "伸出=" + BoolToShortText(isExtended) + " / 缩回=Y";
+                snapshot.HasFault = false;
             }
             else if (isExtended == false && isRetracted == false)
             {
-                item.StateText = "双未到位";
-                item.StateLevel = "Warning";
-                item.DetailText = "伸出与缩回反馈均未到位";
-                item.FooterText = "伸出=N / 缩回=N";
-                item.HasFault = false;
+                snapshot.StateText = "双未到位";
+                snapshot.StateLevel = "Warning";
+                snapshot.DetailText = "伸出与缩回反馈均未到位";
+                snapshot.FooterText = "伸出=N / 缩回=N";
+                snapshot.HasFault = false;
             }
             else
             {
-                item.StateText = "状态未知";
-                item.StateLevel = "Secondary";
-                item.DetailText = "当前反馈不足以判断气缸端位";
-                item.FooterText = "伸出=" + BoolToShortText(isExtended) + " / 缩回=" + BoolToShortText(isRetracted);
-                item.HasFault = false;
+                snapshot.StateText = "状态未知";
+                snapshot.StateLevel = "Secondary";
+                snapshot.DetailText = "当前反馈不足以判断气缸端位";
+                snapshot.FooterText = "伸出=" + BoolToShortText(isExtended) + " / 缩回=" + BoolToShortText(isRetracted);
+                snapshot.HasFault = false;
             }
 
-            item.RuntimeUpdateTimeText = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            snapshot.RuntimeUpdateTimeText = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
         }
 
-        private void RefreshVacuumState(MotionActuatorViewItem item)
+        private void RefreshVacuumState(MotionActuatorSnapshot snapshot)
         {
-            var isBuilt = TryReadBoolResult(() => _vacuumService.IsVacuumBuilt(item.Name));
-            var isReleased = TryReadBoolResult(() => _vacuumService.IsReleased(item.Name));
-            var hasWorkpiece = TryReadBoolResult(() => _vacuumService.HasWorkpiece(item.Name));
+            var isBuilt = TryReadBoolResult(() => _vacuumService.IsVacuumBuilt(snapshot.Name));
+            var isReleased = TryReadBoolResult(() => _vacuumService.IsReleased(snapshot.Name));
+            var hasWorkpiece = TryReadBoolResult(() => _vacuumService.HasWorkpiece(snapshot.Name));
 
-            item.PrimaryState = isBuilt;
-            item.SecondaryState = isReleased;
-            item.WorkpieceState = hasWorkpiece;
+            snapshot.PrimaryState = isBuilt;
+            snapshot.SecondaryState = isReleased;
+            snapshot.WorkpieceState = hasWorkpiece;
 
-            if (!item.PrimaryFeedbackBit.HasValue && !item.SecondaryFeedbackBit.HasValue)
+            if (!snapshot.PrimaryFeedbackBit.HasValue && !snapshot.SecondaryFeedbackBit.HasValue)
             {
-                item.StateText = "未配反馈";
-                item.StateLevel = "Warning";
-                item.DetailText = "未配置建压/释放反馈位";
-                item.FooterText = "工件=" + BoolToShortText(hasWorkpiece);
-                item.HasFault = false;
+                snapshot.StateText = "未配反馈";
+                snapshot.StateLevel = "Warning";
+                snapshot.DetailText = "未配置建压/释放反馈位";
+                snapshot.FooterText = "工件=" + BoolToShortText(hasWorkpiece);
+                snapshot.HasFault = false;
             }
             else if (isBuilt == true && isReleased == true)
             {
-                item.StateText = "反馈冲突";
-                item.StateLevel = "Danger";
-                item.DetailText = "建压与释放反馈同时成立";
-                item.FooterText = "建压=Y / 释放=Y";
-                item.HasFault = true;
+                snapshot.StateText = "反馈冲突";
+                snapshot.StateLevel = "Danger";
+                snapshot.DetailText = "建压与释放反馈同时成立";
+                snapshot.FooterText = "建压=Y / 释放=Y";
+                snapshot.HasFault = true;
             }
             else if (isBuilt == true && hasWorkpiece == true)
             {
-                item.StateText = "已吸附";
-                item.StateLevel = "Success";
-                item.DetailText = "真空已建立，且已检测到工件";
-                item.FooterText = "建压=Y / 工件=Y";
-                item.HasFault = false;
+                snapshot.StateText = "已吸附";
+                snapshot.StateLevel = "Success";
+                snapshot.DetailText = "真空已建立，且已检测到工件";
+                snapshot.FooterText = "建压=Y / 工件=Y";
+                snapshot.HasFault = false;
             }
             else if (isBuilt == true)
             {
-                item.StateText = "真空建立";
-                item.StateLevel = "Success";
-                item.DetailText = "真空已建立";
-                item.FooterText = "建压=Y / 工件=" + BoolToShortText(hasWorkpiece);
-                item.HasFault = false;
+                snapshot.StateText = "真空建立";
+                snapshot.StateLevel = "Success";
+                snapshot.DetailText = "真空已建立";
+                snapshot.FooterText = "建压=Y / 工件=" + BoolToShortText(hasWorkpiece);
+                snapshot.HasFault = false;
             }
             else if (isReleased == true)
             {
-                item.StateText = "已释放";
-                item.StateLevel = "Primary";
-                item.DetailText = "真空当前处于释放状态";
-                item.FooterText = "释放=Y / 工件=" + BoolToShortText(hasWorkpiece);
-                item.HasFault = false;
+                snapshot.StateText = "已释放";
+                snapshot.StateLevel = "Primary";
+                snapshot.DetailText = "真空当前处于释放状态";
+                snapshot.FooterText = "释放=Y / 工件=" + BoolToShortText(hasWorkpiece);
+                snapshot.HasFault = false;
             }
             else if (isBuilt == false && isReleased == false)
             {
-                item.StateText = "未建压";
-                item.StateLevel = "Secondary";
-                item.DetailText = "当前既未检测到建压，也未检测到释放到位";
-                item.FooterText = "建压=N / 释放=N";
-                item.HasFault = false;
+                snapshot.StateText = "未建压";
+                snapshot.StateLevel = "Secondary";
+                snapshot.DetailText = "当前既未检测到建压，也未检测到释放到位";
+                snapshot.FooterText = "建压=N / 释放=N";
+                snapshot.HasFault = false;
             }
             else
             {
-                item.StateText = "状态未知";
-                item.StateLevel = "Secondary";
-                item.DetailText = "当前反馈不足以判断真空状态";
-                item.FooterText = "工件=" + BoolToShortText(hasWorkpiece);
-                item.HasFault = false;
+                snapshot.StateText = "状态未知";
+                snapshot.StateLevel = "Secondary";
+                snapshot.DetailText = "当前反馈不足以判断真空状态";
+                snapshot.FooterText = "工件=" + BoolToShortText(hasWorkpiece);
+                snapshot.HasFault = false;
             }
 
-            item.RuntimeUpdateTimeText = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            snapshot.RuntimeUpdateTimeText = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
         }
 
-        private void RefreshGripperState(MotionActuatorViewItem item)
+        private void RefreshGripperState(MotionActuatorSnapshot snapshot)
         {
-            var isClosed = TryReadBoolResult(() => _gripperService.IsClosed(item.Name));
-            var isOpened = TryReadBoolResult(() => _gripperService.IsOpened(item.Name));
-            var hasWorkpiece = TryReadBoolResult(() => _gripperService.HasWorkpiece(item.Name));
+            var isClosed = TryReadBoolResult(() => _gripperService.IsClosed(snapshot.Name));
+            var isOpened = TryReadBoolResult(() => _gripperService.IsOpened(snapshot.Name));
+            var hasWorkpiece = TryReadBoolResult(() => _gripperService.HasWorkpiece(snapshot.Name));
 
-            item.PrimaryState = isClosed;
-            item.SecondaryState = isOpened;
-            item.WorkpieceState = hasWorkpiece;
+            snapshot.PrimaryState = isClosed;
+            snapshot.SecondaryState = isOpened;
+            snapshot.WorkpieceState = hasWorkpiece;
 
-            if (!item.PrimaryFeedbackBit.HasValue && !item.SecondaryFeedbackBit.HasValue)
+            if (!snapshot.PrimaryFeedbackBit.HasValue && !snapshot.SecondaryFeedbackBit.HasValue)
             {
-                item.StateText = "未配反馈";
-                item.StateLevel = "Warning";
-                item.DetailText = "未配置夹紧/打开反馈位";
-                item.FooterText = "工件=" + BoolToShortText(hasWorkpiece);
-                item.HasFault = false;
+                snapshot.StateText = "未配反馈";
+                snapshot.StateLevel = "Warning";
+                snapshot.DetailText = "未配置夹紧/打开反馈位";
+                snapshot.FooterText = "工件=" + BoolToShortText(hasWorkpiece);
+                snapshot.HasFault = false;
             }
             else if (isClosed == true && isOpened == true)
             {
-                item.StateText = "反馈冲突";
-                item.StateLevel = "Danger";
-                item.DetailText = "夹紧与打开反馈同时成立";
-                item.FooterText = "夹紧=Y / 打开=Y";
-                item.HasFault = true;
+                snapshot.StateText = "反馈冲突";
+                snapshot.StateLevel = "Danger";
+                snapshot.DetailText = "夹紧与打开反馈同时成立";
+                snapshot.FooterText = "夹紧=Y / 打开=Y";
+                snapshot.HasFault = true;
             }
             else if (isClosed == true && hasWorkpiece == true)
             {
-                item.StateText = "夹紧有料";
-                item.StateLevel = "Success";
-                item.DetailText = "夹爪夹紧到位，且已检测到工件";
-                item.FooterText = "夹紧=Y / 工件=Y";
-                item.HasFault = false;
+                snapshot.StateText = "夹紧有料";
+                snapshot.StateLevel = "Success";
+                snapshot.DetailText = "夹爪夹紧到位，且已检测到工件";
+                snapshot.FooterText = "夹紧=Y / 工件=Y";
+                snapshot.HasFault = false;
             }
             else if (isClosed == true)
             {
-                item.StateText = "夹紧到位";
-                item.StateLevel = "Success";
-                item.DetailText = "夹爪已夹紧到位";
-                item.FooterText = "夹紧=Y / 工件=" + BoolToShortText(hasWorkpiece);
-                item.HasFault = false;
+                snapshot.StateText = "夹紧到位";
+                snapshot.StateLevel = "Success";
+                snapshot.DetailText = "夹爪已夹紧到位";
+                snapshot.FooterText = "夹紧=Y / 工件=" + BoolToShortText(hasWorkpiece);
+                snapshot.HasFault = false;
             }
             else if (isOpened == true)
             {
-                item.StateText = "打开到位";
-                item.StateLevel = "Primary";
-                item.DetailText = "夹爪已打开到位";
-                item.FooterText = "打开=Y / 工件=" + BoolToShortText(hasWorkpiece);
-                item.HasFault = false;
+                snapshot.StateText = "打开到位";
+                snapshot.StateLevel = "Primary";
+                snapshot.DetailText = "夹爪已打开到位";
+                snapshot.FooterText = "打开=Y / 工件=" + BoolToShortText(hasWorkpiece);
+                snapshot.HasFault = false;
             }
             else if (isClosed == false && isOpened == false)
             {
-                item.StateText = "双未到位";
-                item.StateLevel = "Secondary";
-                item.DetailText = "夹紧与打开反馈均未到位";
-                item.FooterText = "夹紧=N / 打开=N";
-                item.HasFault = false;
+                snapshot.StateText = "双未到位";
+                snapshot.StateLevel = "Secondary";
+                snapshot.DetailText = "夹紧与打开反馈均未到位";
+                snapshot.FooterText = "夹紧=N / 打开=N";
+                snapshot.HasFault = false;
             }
             else
             {
-                item.StateText = "状态未知";
-                item.StateLevel = "Secondary";
-                item.DetailText = "当前反馈不足以判断夹爪状态";
-                item.FooterText = "工件=" + BoolToShortText(hasWorkpiece);
-                item.HasFault = false;
+                snapshot.StateText = "状态未知";
+                snapshot.StateLevel = "Secondary";
+                snapshot.DetailText = "当前反馈不足以判断夹爪状态";
+                snapshot.FooterText = "工件=" + BoolToShortText(hasWorkpiece);
+                snapshot.HasFault = false;
             }
 
-            item.RuntimeUpdateTimeText = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            snapshot.RuntimeUpdateTimeText = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
         }
 
-        private void RefreshStackLightState(MotionActuatorViewItem item)
+        private void RefreshStackLightState(MotionActuatorSnapshot snapshot)
         {
-            item.RedOn = ReadDoState(item.RedOutputBit);
-            item.YellowOn = ReadDoState(item.YellowOutputBit);
-            item.GreenOn = ReadDoState(item.GreenOutputBit);
-            item.BlueOn = ReadDoState(item.BlueOutputBit);
-            item.BuzzerOn = ReadDoState(item.BuzzerOutputBit);
+            snapshot.RedOn = ReadDoState(snapshot.RedOutputBit);
+            snapshot.YellowOn = ReadDoState(snapshot.YellowOutputBit);
+            snapshot.GreenOn = ReadDoState(snapshot.GreenOutputBit);
+            snapshot.BlueOn = ReadDoState(snapshot.BlueOutputBit);
+            snapshot.BuzzerOn = ReadDoState(snapshot.BuzzerOutputBit);
 
             var onSegments = new List<string>();
-            if (item.RedOn == true) onSegments.Add("红");
-            if (item.YellowOn == true) onSegments.Add("黄");
-            if (item.GreenOn == true) onSegments.Add("绿");
-            if (item.BlueOn == true) onSegments.Add("蓝");
+            if (snapshot.RedOn == true) onSegments.Add("红");
+            if (snapshot.YellowOn == true) onSegments.Add("黄");
+            if (snapshot.GreenOn == true) onSegments.Add("绿");
+            if (snapshot.BlueOn == true) onSegments.Add("蓝");
 
-            if (!item.HasAnyStackLightOutput)
+            if (!snapshot.HasAnyStackLightOutput)
             {
-                item.StateText = "未配输出";
-                item.StateLevel = "Warning";
-                item.DetailText = "未配置任何灯塔输出位";
-                item.FooterText = "亮段：—";
-                item.HasFault = false;
+                snapshot.StateText = "未配输出";
+                snapshot.StateLevel = "Warning";
+                snapshot.DetailText = "未配置任何灯塔输出位";
+                snapshot.FooterText = "亮段：—";
+                snapshot.HasFault = false;
             }
-            else if (onSegments.Count == 0 && item.BuzzerOn != true)
+            else if (onSegments.Count == 0 && snapshot.BuzzerOn != true)
             {
-                item.StateText = "全灭";
-                item.StateLevel = "Secondary";
-                item.DetailText = "当前所有灯段均关闭";
-                item.FooterText = "亮段：无 / 蜂鸣=N";
-                item.HasFault = false;
+                snapshot.StateText = "全灭";
+                snapshot.StateLevel = "Secondary";
+                snapshot.DetailText = "当前所有灯段均关闭";
+                snapshot.FooterText = "亮段：无 / 蜂鸣=N";
+                snapshot.HasFault = false;
             }
             else if (onSegments.Count == 1)
             {
-                item.StateText = onSegments[0] + (item.BuzzerOn == true ? "+蜂鸣" : "灯");
-                item.StateLevel = item.RedOn == true
+                snapshot.StateText = onSegments[0] + (snapshot.BuzzerOn == true ? "+蜂鸣" : "灯");
+                snapshot.StateLevel = snapshot.RedOn == true
                     ? "Danger"
-                    : (item.YellowOn == true ? "Warning" : "Success");
-                item.DetailText = "红=" + BoolToShortText(item.RedOn)
-                    + " / 黄=" + BoolToShortText(item.YellowOn)
-                    + " / 绿=" + BoolToShortText(item.GreenOn)
-                    + " / 蓝=" + BoolToShortText(item.BlueOn)
-                    + " / 鸣=" + BoolToShortText(item.BuzzerOn);
-                item.FooterText = "亮段：" + onSegments[0] + " / 蜂鸣=" + BoolToShortText(item.BuzzerOn);
-                item.HasFault = false;
+                    : (snapshot.YellowOn == true ? "Warning" : "Success");
+                snapshot.DetailText = "红=" + BoolToShortText(snapshot.RedOn)
+                    + " / 黄=" + BoolToShortText(snapshot.YellowOn)
+                    + " / 绿=" + BoolToShortText(snapshot.GreenOn)
+                    + " / 蓝=" + BoolToShortText(snapshot.BlueOn)
+                    + " / 鸣=" + BoolToShortText(snapshot.BuzzerOn);
+                snapshot.FooterText = "亮段：" + onSegments[0] + " / 蜂鸣=" + BoolToShortText(snapshot.BuzzerOn);
+                snapshot.HasFault = false;
             }
             else
             {
-                item.StateText = item.BuzzerOn == true ? "多段+蜂鸣" : "多段点亮";
-                item.StateLevel = item.RedOn == true
+                snapshot.StateText = snapshot.BuzzerOn == true ? "多段+蜂鸣" : "多段点亮";
+                snapshot.StateLevel = snapshot.RedOn == true
                     ? "Danger"
-                    : (item.YellowOn == true ? "Warning" : "Primary");
-                item.DetailText = "红=" + BoolToShortText(item.RedOn)
-                    + " / 黄=" + BoolToShortText(item.YellowOn)
-                    + " / 绿=" + BoolToShortText(item.GreenOn)
-                    + " / 蓝=" + BoolToShortText(item.BlueOn)
-                    + " / 鸣=" + BoolToShortText(item.BuzzerOn);
-                item.FooterText = "亮段：" + string.Join("/", onSegments) + " / 蜂鸣=" + BoolToShortText(item.BuzzerOn);
-                item.HasFault = false;
+                    : (snapshot.YellowOn == true ? "Warning" : "Primary");
+                snapshot.DetailText = "红=" + BoolToShortText(snapshot.RedOn)
+                    + " / 黄=" + BoolToShortText(snapshot.YellowOn)
+                    + " / 绿=" + BoolToShortText(snapshot.GreenOn)
+                    + " / 蓝=" + BoolToShortText(snapshot.BlueOn)
+                    + " / 鸣=" + BoolToShortText(snapshot.BuzzerOn);
+                snapshot.FooterText = "亮段：" + string.Join("/", onSegments) + " / 蜂鸣=" + BoolToShortText(snapshot.BuzzerOn);
+                snapshot.HasFault = false;
             }
 
-            item.RuntimeUpdateTimeText = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            snapshot.RuntimeUpdateTimeText = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
         }
 
         /// <summary>
@@ -1032,56 +1084,50 @@ namespace AM.PageModel.Motion
         /// </summary>
         private void ApplyFilterAndSelection()
         {
-            var previousSelectedKey = SelectedItem == null ? null : SelectedItem.ItemKey;
+            var previousSelectedKey = SelectedSnapshot == null ? null : SelectedSnapshot.ItemKey;
             ApplyFilterAndSelection(previousSelectedKey);
         }
 
         private void ApplyFilterAndSelection(string previousSelectedKey)
         {
-            IEnumerable<MotionActuatorViewItem> query = _allItems;
+            _filter.Normalize();
 
-            if (!string.Equals(_typeFilter, "All", StringComparison.OrdinalIgnoreCase))
-            {
-                query = query.Where(x => string.Equals(x.ActuatorType, _typeFilter, StringComparison.OrdinalIgnoreCase));
-            }
-
-            if (!string.IsNullOrWhiteSpace(_searchText))
-            {
-                var keyword = _searchText.Trim().ToLowerInvariant();
-                query = query.Where(x =>
-                    (x.Name ?? string.Empty).ToLowerInvariant().Contains(keyword) ||
-                    (x.DisplayName ?? string.Empty).ToLowerInvariant().Contains(keyword) ||
-                    (x.TypeDisplay ?? string.Empty).ToLowerInvariant().Contains(keyword) ||
-                    (x.StateText ?? string.Empty).ToLowerInvariant().Contains(keyword) ||
-                    (x.CardLine1Text ?? string.Empty).ToLowerInvariant().Contains(keyword) ||
-                    (x.CardLine2Text ?? string.Empty).ToLowerInvariant().Contains(keyword) ||
-                    (x.LastActionMessage ?? string.Empty).ToLowerInvariant().Contains(keyword));
-            }
-
-            _filteredItems = query
+            _filteredSnapshots = _allSnapshots
+                .Where(x => _filter.IsMatch(x))
                 .OrderBy(x => GetActuatorTypeSort(x.ActuatorType))
                 .ThenBy(x => x.SortOrder)
                 .ThenBy(x => x.Name)
                 .ToList();
 
-            UpdateSummary(_filteredItems);
+            _pageItems = _filteredSnapshots
+                .Select(x => _displayBuilder.BuildListItem(x))
+                .Where(x => x != null)
+                .ToList();
 
-            MotionActuatorViewItem selected = null;
+            UpdateSummary(_filteredSnapshots);
+
+            MotionActuatorSnapshot selected = null;
             if (!string.IsNullOrWhiteSpace(previousSelectedKey))
             {
-                selected = _filteredItems.FirstOrDefault(x =>
+                selected = _filteredSnapshots.FirstOrDefault(x =>
                     string.Equals(x.ItemKey, previousSelectedKey, StringComparison.OrdinalIgnoreCase));
             }
 
-            if (selected == null && _filteredItems.Count > 0)
-                selected = _filteredItems[0];
+            if (selected == null && _filteredSnapshots.Count > 0)
+                selected = _filteredSnapshots[0];
 
-            SelectedItem = selected;
+            SelectedSnapshot = selected;
+            SelectedDetail = _displayBuilder.BuildDetailData(selected);
+
             OnPropertyChanged(nameof(PageItems));
+            OnPropertyChanged(nameof(SelectedSnapshot));
+            OnPropertyChanged(nameof(SelectedDetail));
         }
 
         /// <summary>
         /// 构建普通执行器主/副按钮状态。
+        /// 当前阶段由 Builder 提供基础文本，
+        /// 这里补充动作可执行校验结果。
         /// </summary>
         private void BuildNormalActionButtons(
             MotionActuatorActionPanelState state,
@@ -1091,19 +1137,18 @@ namespace AM.PageModel.Motion
             var primaryValidate = ValidatePrimaryAction(waitFeedback, waitWorkpiece);
             var secondaryValidate = ValidateSecondaryAction(waitFeedback);
 
-            state.PrimaryButton.Text = ResolvePrimaryActionButtonText(SelectedItem, waitWorkpiece);
-            state.PrimaryButton.Visible = true;
             state.PrimaryButton.Enabled = primaryValidate.Success;
-            state.PrimaryButton.Type = ResolvePrimaryButtonType(SelectedItem);
 
-            state.SecondaryButton.Text = ResolveSecondaryActionButtonText(SelectedItem);
-            state.SecondaryButton.Visible = true;
-            state.SecondaryButton.Enabled = SelectedItem.HasSecondaryAction && secondaryValidate.Success;
-            state.SecondaryButton.Type = ResolveSecondaryButtonType(SelectedItem);
+            state.SecondaryButton.Visible = SelectedSnapshot != null && SelectedSnapshot.HasSecondaryAction;
+            state.SecondaryButton.Enabled = SelectedSnapshot != null
+                && SelectedSnapshot.HasSecondaryAction
+                && secondaryValidate.Success;
         }
 
         /// <summary>
         /// 构建灯塔按钮组状态。
+        /// 当前阶段仍由 PageModel 保留动作规则判断，
+        /// 避免第一步就把执行规则完全拆散。
         /// </summary>
         private void BuildStackLightButtons(
             MotionActuatorActionPanelState state,
@@ -1141,9 +1186,9 @@ namespace AM.PageModel.Motion
             state.AlarmButton.Type = "Error";
         }
 
-        private void UpdateSummary(IList<MotionActuatorViewItem> list)
+        private void UpdateSummary(IList<MotionActuatorSnapshot> list)
         {
-            var source = list ?? new List<MotionActuatorViewItem>();
+            var source = list ?? new List<MotionActuatorSnapshot>();
 
             TotalCount = source.Count;
             CylinderCount = source.Count(x => x.ActuatorType == "Cylinder");
@@ -1152,94 +1197,19 @@ namespace AM.PageModel.Motion
             StackLightCount = source.Count(x => x.ActuatorType == "StackLight");
         }
 
-        private static string ResolvePrimaryActionButtonText(MotionActuatorViewItem item, bool waitWorkpiece)
-        {
-            if (item == null)
-                return "主操作";
-
-            switch (item.ActuatorType)
-            {
-                case "Cylinder":
-                    return item.PrimaryState == true && item.SecondaryState != true
-                        ? "伸出（已到位）"
-                        : "伸出";
-
-                case "Vacuum":
-                    if (item.PrimaryState == true && (!waitWorkpiece || item.WorkpieceState != false))
-                        return "吸真空（已建立）";
-
-                    return waitWorkpiece ? "吸真空+检测" : "吸真空";
-
-                case "Gripper":
-                    if (item.PrimaryState == true && (!waitWorkpiece || item.WorkpieceState != false))
-                        return "夹紧（已到位）";
-
-                    return waitWorkpiece ? "夹紧+检测" : "夹紧";
-
-                default:
-                    return "主操作";
-            }
-        }
-
-        private static string ResolveSecondaryActionButtonText(MotionActuatorViewItem item)
-        {
-            if (item == null)
-                return "副操作";
-
-            switch (item.ActuatorType)
-            {
-                case "Cylinder":
-                    return item.SecondaryState == true && item.PrimaryState != true
-                        ? "缩回（已到位）"
-                        : "缩回";
-
-                case "Vacuum":
-                    return item.SecondaryState == true || item.PrimaryState == false
-                        ? "关闭真空（已释放）"
-                        : "关闭真空";
-
-                case "Gripper":
-                    return item.SecondaryState == true && item.PrimaryState != true
-                        ? "打开（已到位）"
-                        : "打开";
-
-                default:
-                    return "副操作";
-            }
-        }
-
-        private static string ResolvePrimaryButtonType(MotionActuatorViewItem item)
-        {
-            if (item == null)
-                return "Primary";
-
-            if (string.Equals(item.ActuatorType, "Gripper", StringComparison.OrdinalIgnoreCase))
-                return "Error";
-
-            return "Primary";
-        }
-
-        private static string ResolveSecondaryButtonType(MotionActuatorViewItem item)
-        {
-            if (item == null)
-                return "Default";
-
-            if (string.Equals(item.ActuatorType, "Vacuum", StringComparison.OrdinalIgnoreCase))
-                return "Warn";
-
-            return "Success";
-        }
-
         private bool IsStackLightCurrentState(string stateKey, bool stackLightWithBuzzer)
         {
-            if (SelectedItem == null || !string.Equals(SelectedItem.ActuatorType, "StackLight", StringComparison.OrdinalIgnoreCase))
+            if (SelectedSnapshot == null
+                || !string.Equals(SelectedSnapshot.ActuatorType, "StackLight", StringComparison.OrdinalIgnoreCase))
+            {
                 return false;
+            }
 
             StackLightState state;
             if (!TryParseStackLightState(stateKey, out state))
                 return false;
 
-            return IsStackLightAlreadyInTargetState(SelectedItem, state, stackLightWithBuzzer);
+            return IsStackLightAlreadyInTargetState(SelectedSnapshot, state, stackLightWithBuzzer);
         }
 
         private static bool TryParseStackLightState(string stateKey, out StackLightState state)
@@ -1274,43 +1244,49 @@ namespace AM.PageModel.Motion
         }
 
         private static bool IsStackLightAlreadyInTargetState(
-            MotionActuatorViewItem item,
+            MotionActuatorSnapshot snapshot,
             StackLightState targetState,
             bool withBuzzer)
         {
-            if (item == null)
+            if (snapshot == null)
                 return false;
 
             switch (targetState)
             {
                 case StackLightState.Off:
-                    return item.RedOn != true
-                        && item.YellowOn != true
-                        && item.GreenOn != true
-                        && item.BlueOn != true
-                        && item.BuzzerOn != true;
+                    return snapshot.RedOn != true
+                        && snapshot.YellowOn != true
+                        && snapshot.GreenOn != true
+                        && snapshot.BlueOn != true
+                        && snapshot.BuzzerOn != true;
 
                 case StackLightState.Idle:
+                    return snapshot.BlueOn == true
+                        && snapshot.RedOn != true
+                        && snapshot.YellowOn != true
+                        && snapshot.GreenOn != true
+                        && snapshot.BuzzerOn != true;
+
                 case StackLightState.Running:
-                    return item.GreenOn == true
-                        && item.RedOn != true
-                        && item.YellowOn != true
-                        && item.BlueOn != true
-                        && item.BuzzerOn != true;
+                    return snapshot.GreenOn == true
+                        && snapshot.RedOn != true
+                        && snapshot.YellowOn != true
+                        && snapshot.BlueOn != true
+                        && snapshot.BuzzerOn != true;
 
                 case StackLightState.Warning:
-                    return item.YellowOn == true
-                        && item.RedOn != true
-                        && item.GreenOn != true
-                        && item.BlueOn != true
-                        && (withBuzzer ? item.BuzzerOn == true : true);
+                    return snapshot.YellowOn == true
+                        && snapshot.RedOn != true
+                        && snapshot.GreenOn != true
+                        && snapshot.BlueOn != true
+                        && (withBuzzer ? snapshot.BuzzerOn == true : true);
 
                 case StackLightState.Alarm:
-                    return item.RedOn == true
-                        && item.YellowOn != true
-                        && item.GreenOn != true
-                        && item.BlueOn != true
-                        && (withBuzzer ? item.BuzzerOn == true : true);
+                    return snapshot.RedOn == true
+                        && snapshot.YellowOn != true
+                        && snapshot.GreenOn != true
+                        && snapshot.BlueOn != true
+                        && (withBuzzer ? snapshot.BuzzerOn == true : true);
 
                 default:
                     return false;
@@ -1389,14 +1365,23 @@ namespace AM.PageModel.Motion
             return value;
         }
 
-        private void ApplyActionResult(MotionActuatorViewItem item, Result result)
+        private void ApplyActionResult(MotionActuatorSnapshot snapshot, Result result)
         {
-            if (item == null || result == null)
+            if (snapshot == null || result == null)
                 return;
 
-            item.LastActionMessage = BuildLayeredActionMessage(result);
-            item.LastActionLevel = result.Success ? "Success" : "Danger";
-            item.HasFault = !result.Success;
+            snapshot.LastActionMessage = BuildLayeredActionMessage(result);
+            snapshot.LastActionLevel = result.Success ? "Success" : "Danger";
+            snapshot.HasFault = !result.Success;
+
+            if (SelectedSnapshot != null
+                && string.Equals(SelectedSnapshot.ItemKey, snapshot.ItemKey, StringComparison.OrdinalIgnoreCase))
+            {
+                SelectedDetail = _displayBuilder.BuildDetailData(snapshot);
+                OnPropertyChanged(nameof(SelectedDetail));
+            }
+
+            OnPropertyChanged(nameof(PageItems));
         }
 
         private static string BuildLayeredActionMessage(Result result)
@@ -1408,165 +1393,6 @@ namespace AM.PageModel.Motion
                 return "操作成功：" + result.Message;
 
             return "操作失败：" + result.Message;
-        }
-
-        /// <summary>
-        /// 执行器卡片显示项。
-        /// </summary>
-        public sealed class MotionActuatorViewItem
-        {
-            public string ActuatorType { get; set; }
-            public string TypeDisplay { get; set; }
-            public string Name { get; set; }
-            public string DisplayName { get; set; }
-            public bool IsEnabled { get; set; }
-            public int SortOrder { get; set; }
-            public string Description { get; set; }
-            public string Remark { get; set; }
-            public string ControlModeText { get; set; }
-
-            public short? PrimaryOutputBit { get; set; }
-            public short? SecondaryOutputBit { get; set; }
-            public short? PrimaryFeedbackBit { get; set; }
-            public short? SecondaryFeedbackBit { get; set; }
-            public short? WorkpieceBit { get; set; }
-
-            public short? RedOutputBit { get; set; }
-            public short? YellowOutputBit { get; set; }
-            public short? GreenOutputBit { get; set; }
-            public short? BlueOutputBit { get; set; }
-            public short? BuzzerOutputBit { get; set; }
-
-            public bool? PrimaryState { get; set; }
-            public bool? SecondaryState { get; set; }
-            public bool? WorkpieceState { get; set; }
-
-            public bool? RedOn { get; set; }
-            public bool? YellowOn { get; set; }
-            public bool? GreenOn { get; set; }
-            public bool? BlueOn { get; set; }
-            public bool? BuzzerOn { get; set; }
-
-            public string PrimaryOutputText { get; set; }
-            public string SecondaryOutputText { get; set; }
-            public string PrimaryFeedbackText { get; set; }
-            public string SecondaryFeedbackText { get; set; }
-            public string WorkpieceText { get; set; }
-            public string TimeoutText { get; set; }
-
-            public string CardLine1Text { get; set; }
-            public string CardLine2Text { get; set; }
-
-            public string PrimaryActionText { get; set; }
-            public string SecondaryActionText { get; set; }
-            public bool HasSecondaryAction { get; set; }
-            public bool UseFeedbackCheck { get; set; }
-            public bool UseWorkpieceCheck { get; set; }
-
-            public string StateText { get; set; }
-            public string StateLevel { get; set; }
-            public string DetailText { get; set; }
-            public string FooterText { get; set; }
-            public string RuntimeUpdateTimeText { get; set; }
-            public string LastActionMessage { get; set; }
-            public string LastActionLevel { get; set; }
-            public bool HasFault { get; set; }
-
-            public bool HasAnyStackLightOutput
-            {
-                get
-                {
-                    return RedOutputBit.HasValue
-                        || YellowOutputBit.HasValue
-                        || GreenOutputBit.HasValue
-                        || BlueOutputBit.HasValue
-                        || BuzzerOutputBit.HasValue;
-                }
-            }
-
-            public string DisplayTitle
-            {
-                get
-                {
-                    if (!string.IsNullOrWhiteSpace(DisplayName))
-                        return DisplayName;
-
-                    return string.IsNullOrWhiteSpace(Name) ? "未命名对象" : Name;
-                }
-            }
-
-            public string ItemKey
-            {
-                get { return (ActuatorType ?? string.Empty) + "|" + (Name ?? string.Empty); }
-            }
-        }
-
-        /// <summary>
-        /// 右侧控制面板状态。
-        /// 只保留当前界面真正需要的数据。
-        /// </summary>
-        public sealed class MotionActuatorActionPanelState
-        {
-            public string TitleText { get; set; }
-            public string SubTitleText { get; set; }
-
-            public bool ShowWaitFeedback { get; set; }
-            public bool ShowWaitWorkpiece { get; set; }
-            public bool ShowStackLightWithBuzzer { get; set; }
-
-            public bool WaitFeedback { get; set; }
-            public bool WaitWorkpiece { get; set; }
-            public bool StackLightWithBuzzer { get; set; }
-
-            public MotionActuatorButtonState PrimaryButton { get; private set; }
-            public MotionActuatorButtonState SecondaryButton { get; private set; }
-
-            public MotionActuatorButtonState OffButton { get; private set; }
-            public MotionActuatorButtonState IdleButton { get; private set; }
-            public MotionActuatorButtonState RunningButton { get; private set; }
-            public MotionActuatorButtonState WarningButton { get; private set; }
-            public MotionActuatorButtonState AlarmButton { get; private set; }
-
-            public MotionActuatorActionPanelState()
-            {
-                PrimaryButton = new MotionActuatorButtonState();
-                SecondaryButton = new MotionActuatorButtonState();
-
-                OffButton = new MotionActuatorButtonState();
-                IdleButton = new MotionActuatorButtonState();
-                RunningButton = new MotionActuatorButtonState();
-                WarningButton = new MotionActuatorButtonState();
-                AlarmButton = new MotionActuatorButtonState();
-            }
-
-            public static MotionActuatorActionPanelState CreateDefault()
-            {
-                return new MotionActuatorActionPanelState
-                {
-                    TitleText = "当前对象：未选择",
-                    SubTitleText = "—"
-                };
-            }
-        }
-
-        /// <summary>
-        /// 单个动作按钮状态。
-        /// 用统一结构代替大量平铺字段，减少重复。
-        /// </summary>
-        public sealed class MotionActuatorButtonState
-        {
-            public string Text { get; set; }
-            public bool Visible { get; set; }
-            public bool Enabled { get; set; }
-            public string Type { get; set; }
-
-            public MotionActuatorButtonState()
-            {
-                Text = string.Empty;
-                Visible = false;
-                Enabled = false;
-                Type = "Default";
-            }
         }
     }
 }

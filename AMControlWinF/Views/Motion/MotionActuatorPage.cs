@@ -10,21 +10,54 @@ namespace AMControlWinF.Views.Motion
     /// <summary>
     /// 执行器控制页面。
     ///
-    /// 当前实现内容：
-    /// 1. 左侧执行器虚拟卡片选择；
-    /// 2. 右侧上半区控制面板交互；
-    /// 3. 主动作 / 副动作 / 灯塔状态切换；
-    /// 4. WaitFeedback / WaitWorkpiece / 蜂鸣联动；
-    /// 5. 右侧下半区详情按行展示；
-    /// 6. 页面统一调度动作执行，避免控件内部直接调用服务。
+    /// 【层级定位】
+    /// - 所在层：WinForms 页面协调层；
+    /// - 上游依赖：MotionActuatorPageModel；
+    /// - 下游控件：
+    ///   1. MotionActuatorVirtualListControl
+    ///   2. MotionActuatorActionPanelControl
+    ///   3. MotionActuatorDetailControl
+    ///
+    /// 【职责】
+    /// 1. 管理页面生命周期；
+    /// 2. 处理页面级事件驱动逻辑；
+    /// 3. 调用 PageModel 加载/刷新/动作执行；
+    /// 4. 将页面模型状态绑定到各子控件；
+    /// 5. 保持 WinForms 下简单直接的页面协调方式。
+    ///
+    /// 【本轮适配说明】
+    /// 第一轮重构后，页面不再直接依赖旧的 MotionActuatorViewItem：
+    /// - 左侧列表改为绑定 MotionActuatorListItem 集合；
+    /// - 当前选中对象改为 SelectedSnapshot；
+    /// - 右侧详情改为绑定 SelectedDetail；
+    /// - 动作面板继续绑定 BuildActionPanelState(...) 的结果。
+    ///
+    /// 这样页面层的职责会更清晰：
+    /// - PageModel 负责状态与动作协调；
+    /// - Page 负责事件接线与 Bind；
+    /// - 各控件只依赖自己对应的数据对象。
     /// </summary>
     public partial class MotionActuatorPage : UserControl
     {
         private readonly MotionActuatorPageModel _model;
         private readonly Timer _refreshTimer;
 
+        /// <summary>
+        /// 是否首次加载。
+        /// 页面缓存复用场景下，避免重复初始化。
+        /// </summary>
         private bool _isFirstLoad;
+
+        /// <summary>
+        /// 当前是否正在刷新运行态。
+        /// 防止定时器重入。
+        /// </summary>
         private bool _isRefreshing;
+
+        /// <summary>
+        /// 当前是否正在执行动作。
+        /// 动作执行期间禁止定时刷新和重复点击。
+        /// </summary>
         private bool _isExecutingAction;
 
         public MotionActuatorPage()
@@ -38,13 +71,16 @@ namespace AMControlWinF.Views.Motion
 
             BindEvents();
 
-            Disposed += (s, e) =>
+            Disposed += delegate
             {
                 _refreshTimer.Stop();
                 _refreshTimer.Dispose();
             };
         }
 
+        /// <summary>
+        /// 绑定页面级事件。
+        /// </summary>
         private void BindEvents()
         {
             Load += MotionActuatorPage_Load;
@@ -118,6 +154,11 @@ namespace AMControlWinF.Views.Motion
 
         /// <summary>
         /// 将页面模型状态同步到界面。
+        ///
+        /// 当前页面拆分后的绑定规则：
+        /// - 左侧列表：绑定 PageItems + SelectedSnapshot.ItemKey
+        /// - 右上动作区：绑定 BuildActionPanelState(...)
+        /// - 右下详情区：绑定 SelectedDetail
         /// </summary>
         private void RefreshView()
         {
@@ -126,9 +167,13 @@ namespace AMControlWinF.Views.Motion
             labelGripperCount.Text = _model.GripperCount.ToString();
             labelStackLightCount.Text = _model.StackLightCount.ToString();
 
-            actuatorVirtualListControl.BindItems(_model.PageItems, _model.SelectedItem);
+            actuatorVirtualListControl.BindItems(
+                _model.PageItems,
+                _model.SelectedSnapshot == null ? null : _model.SelectedSnapshot.ItemKey);
+
             RefreshActionPanelState();
-            actuatorDetailControl.Bind(_model.SelectedItem);
+
+            actuatorDetailControl.Bind(_model.SelectedDetail);
 
             UpdateFilterButtonStyles();
         }
@@ -148,6 +193,7 @@ namespace AMControlWinF.Views.Motion
 
         /// <summary>
         /// 切换类型筛选。
+        /// 当前筛选属于页面内状态变化，不需要重新构造页面。
         /// </summary>
         private void ChangeTypeFilter(string typeFilter)
         {
@@ -181,6 +227,10 @@ namespace AMControlWinF.Views.Motion
             RefreshView();
         }
 
+        /// <summary>
+        /// 左侧卡片选中后，仅更新当前选中对象相关区域。
+        /// 不做整页重载。
+        /// </summary>
         private void ActuatorVirtualListControl_ItemSelected(
             object sender,
             MotionActuatorVirtualListControl.MotionActuatorItemSelectedEventArgs e)
@@ -189,11 +239,23 @@ namespace AMControlWinF.Views.Motion
                 return;
 
             _model.SelectItem(e.ItemKey);
-            actuatorVirtualListControl.BindItems(_model.PageItems, _model.SelectedItem);
+
+            actuatorVirtualListControl.BindItems(
+                _model.PageItems,
+                _model.SelectedSnapshot == null ? null : _model.SelectedSnapshot.ItemKey);
+
             RefreshActionPanelState();
-            actuatorDetailControl.Bind(_model.SelectedItem);
+            actuatorDetailControl.Bind(_model.SelectedDetail);
         }
 
+        /// <summary>
+        /// 右侧动作区选项变化：
+        /// - 等待反馈
+        /// - 等待工件检测
+        /// - 附带蜂鸣
+        ///
+        /// 当前只需要重算动作区状态，不需要整页刷新。
+        /// </summary>
         private void ActuatorActionPanelControl_OptionsChanged(object sender, EventArgs e)
         {
             RefreshActionPanelState();
@@ -235,7 +297,12 @@ namespace AMControlWinF.Views.Motion
 
         /// <summary>
         /// 统一动作执行入口。
-        /// 成功后刷新运行态；失败时仅刷新右侧状态与详情。
+        ///
+        /// 设计说明：
+        /// 1. 页面上的所有执行器动作都从这里进入；
+        /// 2. 动作执行期间禁止重复触发；
+        /// 3. 失败时刷新右侧详情与动作区；
+        /// 4. 成功时再刷新一次运行态，保持页面显示与实际设备状态一致。
         /// </summary>
         private async Task ExecuteActionAsync(Func<Task<Result>> executeFunc)
         {
@@ -247,9 +314,12 @@ namespace AMControlWinF.Views.Motion
             {
                 var result = await executeFunc();
 
-                actuatorDetailControl.Bind(_model.SelectedItem);
+                // 动作执行后，先立即刷新右侧详情与动作区。
+                // 对于失败场景，这一步可以显示最近操作结果和可执行状态变化。
+                actuatorDetailControl.Bind(_model.SelectedDetail);
                 RefreshActionPanelState();
 
+                // 成功后再刷新运行态，拉取设备最新状态。
                 if (result != null && result.Success)
                     await ReloadRuntimeAsync(false);
             }
@@ -260,7 +330,8 @@ namespace AMControlWinF.Views.Motion
         }
 
         /// <summary>
-        /// 页面可见时启动刷新，不可见时停止。
+        /// 页面可见时启动定时刷新，不可见时停止。
+        /// 缓存页面复用场景下保持逻辑简单直接。
         /// </summary>
         private void UpdateRefreshTimerState()
         {

@@ -1,4 +1,4 @@
-﻿using AM.PageModel.Motion;
+﻿using AM.PageModel.Motion.Actuator;
 using AntdUI;
 using System;
 using System.Drawing;
@@ -9,15 +9,37 @@ namespace AMControlWinF.Views.Motion
     /// <summary>
     /// 执行器右侧上半区控制面板。
     ///
-    /// 设计原则：
+    /// 【层级定位】
+    /// - 所在层：WinForms 显示控件层；
+    /// - 上游来源：MotionActuatorPage / MotionActuatorPageModel；
+    /// - 下游输出：按钮点击事件、选项变化事件。
+    ///
+    /// 【职责】
+    /// 1. 负责右侧上半区动作面板显示；
+    /// 2. 显示标题 / 副标题；
+    /// 3. 显示等待反馈、等待工件检测、附带蜂鸣三个选项；
+    /// 4. 显示普通执行器动作按钮或灯塔状态按钮；
+    /// 5. 不直接调用服务层，只抛出事件给页面层处理。
+    ///
+    /// 【设计原则】
     /// 1. 结构固定为三行：
     ///    - 第一行：当前对象标题 + 副标题；
     ///    - 第二行：控制选项；
     ///    - 第三行：动作按钮区；
     /// 2. 所有动作按钮统一放在同一个 FlowPanel 中；
     /// 3. 不同执行器只通过 Visible / Enabled / Text / Type 控制显示；
-    /// 4. 控件本身不直接执行业务动作，只抛出事件给页面层统一处理；
-    /// 5. 外部只通过 Bind(...) 单入口刷新，避免重复状态同步。
+    /// 4. 外部只通过 Bind(...) 单入口刷新，避免重复状态同步。
+    ///
+    /// 【本轮重构意义】
+    /// 旧实现依赖 PageModel 中嵌套类型：
+    /// - MotionActuatorPageModel.MotionActuatorActionPanelState
+    /// - MotionActuatorPageModel.MotionActuatorButtonState
+    ///
+    /// 第一轮适配后：
+    /// - 控件改为直接依赖独立的页面显示模型：
+    ///   MotionActuatorActionPanelState / MotionActuatorButtonState
+    /// - 动作面板显示对象与 PageModel 主类解耦；
+    /// - 更利于后续持续拆分页面状态模型。
     /// </summary>
     public partial class MotionActuatorActionPanelControl : UserControl
     {
@@ -62,7 +84,7 @@ namespace AMControlWinF.Views.Motion
         /// 绑定页面模型计算出的控制面板状态。
         /// 这是控件唯一的外部刷新入口。
         /// </summary>
-        public void Bind(MotionActuatorPageModel.MotionActuatorActionPanelState state)
+        public void Bind(MotionActuatorActionPanelState state)
         {
             if (state == null)
                 return;
@@ -129,10 +151,11 @@ namespace AMControlWinF.Views.Motion
 
         /// <summary>
         /// 应用单个按钮状态。
+        /// 控件层只负责显示，不负责推导状态。
         /// </summary>
         private static void ApplyButtonState(
             AntdUI.Button button,
-            MotionActuatorPageModel.MotionActuatorButtonState state)
+            MotionActuatorButtonState state)
         {
             if (button == null || state == null)
                 return;

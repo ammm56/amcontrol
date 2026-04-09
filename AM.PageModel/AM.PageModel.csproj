@@ -54,6 +54,13 @@
     <Compile Include="MotionConfig\MotionAxisParamManagementPageModel.cs" />
     <Compile Include="MotionConfig\MotionCardManagementPageModel.cs" />
     <Compile Include="MotionConfig\MotionIoMapManagementPageModel.cs" />
+    <Compile Include="Motion\Actuator\MotionActuatorActionPanelState.cs" />
+    <Compile Include="Motion\Actuator\MotionActuatorButtonState.cs" />
+    <Compile Include="Motion\Actuator\MotionActuatorDetailData.cs" />
+    <Compile Include="Motion\Actuator\MotionActuatorDisplayBuilder.cs" />
+    <Compile Include="Motion\Actuator\MotionActuatorFilter.cs" />
+    <Compile Include="Motion\Actuator\MotionActuatorListItem.cs" />
+    <Compile Include="Motion\Actuator\MotionActuatorSnapshot.cs" />
     <Compile Include="Motion\DIMotionPageModel.cs" />
     <Compile Include="Motion\DOMotionPageModel.cs" />
     <Compile Include="Motion\MotionActuatorPageModel.cs" />
