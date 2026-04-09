@@ -1053,6 +1053,10 @@ namespace AM.PageModel.Motion
                 snapshot.StateLevel = snapshot.RedOn == true
                     ? "Danger"
                     : (snapshot.YellowOn == true ? "Warning" : "Success");
+                if (snapshot.BlueOn == true)
+                {
+                    snapshot.StateLevel = "Primary";
+                }
                 snapshot.DetailText = "红=" + BoolToShortText(snapshot.RedOn)
                     + " / 黄=" + BoolToShortText(snapshot.YellowOn)
                     + " / 绿=" + BoolToShortText(snapshot.GreenOn)

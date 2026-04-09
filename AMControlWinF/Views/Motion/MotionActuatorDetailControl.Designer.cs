@@ -171,7 +171,7 @@
             this.labelPrimaryOutputKey.Name = "labelPrimaryOutputKey";
             this.labelPrimaryOutputKey.Size = new System.Drawing.Size(78, 22);
             this.labelPrimaryOutputKey.TabIndex = 4;
-            this.labelPrimaryOutputKey.Text = "主输出";
+            this.labelPrimaryOutputKey.Text = "";
             this.labelPrimaryOutputKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // labelPrimaryOutputValue
@@ -193,7 +193,7 @@
             this.labelSecondaryOutputKey.Name = "labelSecondaryOutputKey";
             this.labelSecondaryOutputKey.Size = new System.Drawing.Size(78, 22);
             this.labelSecondaryOutputKey.TabIndex = 6;
-            this.labelSecondaryOutputKey.Text = "副输出";
+            this.labelSecondaryOutputKey.Text = "";
             this.labelSecondaryOutputKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // labelSecondaryOutputValue
@@ -215,7 +215,7 @@
             this.labelPrimaryFeedbackKey.Name = "labelPrimaryFeedbackKey";
             this.labelPrimaryFeedbackKey.Size = new System.Drawing.Size(78, 22);
             this.labelPrimaryFeedbackKey.TabIndex = 8;
-            this.labelPrimaryFeedbackKey.Text = "主反馈";
+            this.labelPrimaryFeedbackKey.Text = "";
             this.labelPrimaryFeedbackKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // labelPrimaryFeedbackValue
@@ -237,7 +237,7 @@
             this.labelSecondaryFeedbackKey.Name = "labelSecondaryFeedbackKey";
             this.labelSecondaryFeedbackKey.Size = new System.Drawing.Size(78, 22);
             this.labelSecondaryFeedbackKey.TabIndex = 10;
-            this.labelSecondaryFeedbackKey.Text = "副反馈";
+            this.labelSecondaryFeedbackKey.Text = "";
             this.labelSecondaryFeedbackKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // labelSecondaryFeedbackValue
@@ -259,7 +259,7 @@
             this.labelWorkpieceKey.Name = "labelWorkpieceKey";
             this.labelWorkpieceKey.Size = new System.Drawing.Size(78, 22);
             this.labelWorkpieceKey.TabIndex = 12;
-            this.labelWorkpieceKey.Text = "工件检测";
+            this.labelWorkpieceKey.Text = "";
             this.labelWorkpieceKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // labelWorkpieceValue
