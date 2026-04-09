@@ -1,4 +1,3 @@
-using AM.PageModel.Motion;
 using AM.PageModel.Motion.Axis;
 using AntdUI;
 using System;
@@ -11,14 +10,21 @@ namespace AMControlWinF.Views.Motion
     /// <summary>
     /// 单轴控制左侧简单动作虚拟卡片列表。
     ///
-    /// 职责说明：
+    /// 【当前职责】
     /// 1. 只承载简单动作卡片；
     /// 2. 不承载输入框、确认按钮等复杂参数布局；
-    /// 3. 继续使用 VirtualPanel，保证滚动流畅和资源占用低；
-    /// 4. 参数动作（应用速度 / 绝对定位 / 相对移动）由独立 UserControl 实现。
+    /// 3. 使用 VirtualPanel 保持滚动流畅和资源占用低；
+    /// 4. 参数动作（应用速度 / 绝对定位 / 相对移动）由独立控件实现。
+    ///
+    /// 【层级关系】
+    /// - 上游：MotionAxisPage、MotionAxisPageModel；
+    /// - 当前层：WinForms 左侧简单动作区；
+    /// - 下游：动作执行请求事件。
     /// </summary>
     public partial class MotionAxisVirtualListControl : UserControl
     {
+        #region 构造与绑定
+
         public MotionAxisVirtualListControl()
         {
             InitializeComponent();
@@ -67,9 +73,9 @@ namespace AMControlWinF.Views.Motion
             if (!cardItem.Item.CanExecute)
                 return;
 
-            var handler = ActionExecuteRequested;
-            if (handler != null)
-                handler(this, new MotionAxisActionExecuteRequestedEventArgs(cardItem.Item.ActionKey));
+            ActionExecuteRequested?.Invoke(
+                this,
+                new MotionAxisActionExecuteRequestedEventArgs(cardItem.Item.ActionKey));
         }
 
         private bool CanUpdateInPlace(IList<MotionAxisActionViewItem> items)
@@ -86,7 +92,7 @@ namespace AMControlWinF.Views.Motion
                 if (virtualItem == null || virtualItem.Item == null)
                     return false;
 
-                if (!string.Equals(virtualItem.Item.ActionKey, items[i].ActionKey, StringComparison.OrdinalIgnoreCase))
+                if (virtualItem.Item.ActionKey != items[i].ActionKey)
                     return false;
             }
 
@@ -131,25 +137,33 @@ namespace AMControlWinF.Views.Motion
             }
         }
 
+        #endregion
+
+        #region 事件参数
+
         /// <summary>
         /// 简单动作执行请求事件参数。
         /// </summary>
         public sealed class MotionAxisActionExecuteRequestedEventArgs : EventArgs
         {
-            public MotionAxisActionExecuteRequestedEventArgs(string actionKey)
+            public MotionAxisActionExecuteRequestedEventArgs(MotionAxisActionKey actionKey)
             {
                 ActionKey = actionKey;
             }
 
-            public string ActionKey { get; private set; }
+            public MotionAxisActionKey ActionKey { get; private set; }
         }
+
+        #endregion
+
+        #region 虚拟动作卡片
 
         /// <summary>
         /// VirtualPanel 内部的按钮式动作小卡片。
         ///
         /// 交互语义说明：
         /// 1. 这类卡片是“点击即执行”，不是“点击后保持选中”；
-        /// 2. 因此默认态不显示明显边框，只保留阴影层次；
+        /// 2. 默认态不显示明显边框，只保留阴影层次；
         /// 3. 鼠标移入时显示轻微边框，并利用 VirtualShadowItem 的 Hover 阴影动画增强悬停感；
         /// 4. 鼠标点击成功时，短暂显示强调边框，作为“点击成功已触发”的即时反馈；
         /// 5. 点击反馈结束后边框自动恢复消失，不保留选中态。
@@ -159,16 +173,7 @@ namespace AMControlWinF.Views.Motion
             private static readonly Font FontTitle = new Font("Microsoft YaHei UI", 10F, FontStyle.Bold);
             private static readonly Font FontBadge = new Font("Microsoft YaHei UI", 8F, FontStyle.Bold);
 
-            /// <summary>
-            /// 点击反馈是否处于显示中。
-            /// true 表示当前应绘制强调边框。
-            /// </summary>
             private bool _clickFeedbackVisible;
-
-            /// <summary>
-            /// 用于控制点击反馈的短暂显示时长。
-            /// 点击后启动，超时自动关闭强调边框。
-            /// </summary>
             private Timer _clickFeedbackTimer;
 
             public MotionAxisActionVirtualCardItem(MotionAxisActionViewItem item)
@@ -239,15 +244,6 @@ namespace AMControlWinF.Views.Motion
 
             /// <summary>
             /// 绘制单张动作卡片。
-            ///
-            /// 边框策略：
-            /// - 默认态：无明显边框；
-            /// - Hover：轻边框；
-            /// - Click：强调边框；
-            ///
-            /// 阴影策略：
-            /// - 默认态依赖 VirtualPanel 配置的阴影；
-            /// - Hover 时由 VirtualShadowItem 自带动画增强阴影反馈。
             /// </summary>
             public override void Paint(Canvas g, VirtualPanelArgs e)
             {
@@ -271,14 +267,11 @@ namespace AMControlWinF.Views.Motion
                     ? ResolveAccentColor(Item.AccentType)
                     : Color.FromArgb(160, 160, 160);
 
-                // 默认态：不显示明显边框。
-                // Hover：显示轻微边框。
-                // Click：显示强调边框。
                 var showClickBorder = enabled && _clickFeedbackVisible;
                 var showHoverBorder = !showClickBorder && Hover;
 
-                var borderColor = isDark 
-                    ? Color.FromArgb(64, 72, 84) 
+                var borderColor = isDark
+                    ? Color.FromArgb(64, 72, 84)
                     : Color.FromArgb(236, 239, 244);
                 var borderWidth = 1.0F;
 
@@ -303,10 +296,12 @@ namespace AMControlWinF.Views.Motion
                         g.Draw(borderColor, borderWidth, path);
                 }
 
-                // 左上角分类徽标。
-                DrawBadge(g, new Rectangle(10, 10, 52, 20), badgeColor, TrimText(Item.CategoryText, 6));
+                DrawBadge(
+                    g,
+                    new Rectangle(10, 10, 52, 20),
+                    badgeColor,
+                    TrimText(Item.CategoryText, 6));
 
-                // 中间动作主标题。
                 g.String(
                     TrimText(Item.DisplayText, 8),
                     FontTitle,
@@ -393,5 +388,7 @@ namespace AMControlWinF.Views.Motion
                 return text.Substring(0, maxLength - 1) + "…";
             }
         }
+
+        #endregion
     }
 }

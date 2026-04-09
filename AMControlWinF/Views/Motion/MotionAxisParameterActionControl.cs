@@ -1,5 +1,4 @@
-﻿using AM.PageModel.Motion;
-using AM.PageModel.Motion.Axis;
+﻿using AM.PageModel.Motion.Axis;
 using AntdUI;
 using System;
 using System.Windows.Forms;
@@ -9,12 +8,24 @@ namespace AMControlWinF.Views.Motion
     /// <summary>
     /// 单个参数动作卡片控件。
     /// 一个控件只表示一个参数动作，例如：应用速度、绝对定位、相对移动。
+    ///
+    /// 【当前职责】
+    /// 1. 承载参数输入框和确认按钮；
+    /// 2. 绑定页面模型给出的动作显示状态；
+    /// 3. 用户点击后抛出参数动作执行请求，不直接执行业务逻辑。
+    ///
+    /// 【层级关系】
+    /// - 上游：MotionAxisPage、MotionAxisPageModel；
+    /// - 当前层：WinForms 参数动作卡片控件；
+    /// - 下游：参数动作执行请求事件。
     /// </summary>
     public partial class MotionAxisParameterActionControl : UserControl
     {
         private MotionAxisActionViewItem _item;
         private TTypeMini _badgeType = TTypeMini.Primary;
         private string _buttonText = string.Empty;
+
+        #region 构造与属性
 
         public MotionAxisParameterActionControl()
         {
@@ -25,7 +36,7 @@ namespace AMControlWinF.Views.Motion
         /// <summary>
         /// 当前卡片对应的动作键。
         /// </summary>
-        public string ActionKey { get; private set; }
+        public MotionAxisActionKey ActionKey { get; private set; }
 
         /// <summary>
         /// 当前输入框文本。
@@ -37,17 +48,22 @@ namespace AMControlWinF.Views.Motion
             set { inputValue.Text = value ?? string.Empty; }
         }
 
+        #endregion
+
+        #region 初始化与绑定
+
         /// <summary>
         /// 初始化卡片静态信息。
+        /// 推荐由页面直接传入动作枚举。
         /// </summary>
         public void Configure(
-            string actionKey,
+            MotionAxisActionKey actionKey,
             string badgeText,
             string buttonText,
             string placeholderText,
             string accentType)
         {
-            ActionKey = actionKey ?? string.Empty;
+            ActionKey = actionKey;
             buttonBadge.Text = string.IsNullOrWhiteSpace(badgeText) ? "-" : badgeText;
             inputValue.PlaceholderText = placeholderText ?? string.Empty;
 
@@ -70,8 +86,7 @@ namespace AMControlWinF.Views.Motion
                 return;
             }
 
-            if (!string.IsNullOrWhiteSpace(item.ActionKey))
-                ActionKey = item.ActionKey;
+            ActionKey = item.ActionKey;
 
             if (!string.IsNullOrWhiteSpace(item.CategoryText))
                 buttonBadge.Text = item.CategoryText;
@@ -82,14 +97,18 @@ namespace AMControlWinF.Views.Motion
             ApplyAppearance(item.CanExecute, ResolveBadgeType(item.AccentType));
         }
 
+        #endregion
+
+        #region 控件事件
+
         private void ButtonConfirm_Click(object sender, EventArgs e)
         {
             if (_item == null || !_item.CanExecute)
                 return;
 
-            var handler = ExecuteRequested;
-            if (handler != null)
-                handler(this, new MotionAxisParameterActionExecuteRequestedEventArgs(ActionKey));
+            ExecuteRequested?.Invoke(
+                this,
+                new MotionAxisParameterActionExecuteRequestedEventArgs(ActionKey));
         }
 
         /// <summary>
@@ -128,16 +147,22 @@ namespace AMControlWinF.Views.Motion
             return TTypeMini.Primary;
         }
 
+        #endregion
+
+        #region 事件与参数
+
         public event EventHandler<MotionAxisParameterActionExecuteRequestedEventArgs> ExecuteRequested;
 
         public sealed class MotionAxisParameterActionExecuteRequestedEventArgs : EventArgs
         {
-            public MotionAxisParameterActionExecuteRequestedEventArgs(string actionKey)
+            public MotionAxisParameterActionExecuteRequestedEventArgs(MotionAxisActionKey actionKey)
             {
                 ActionKey = actionKey;
             }
 
-            public string ActionKey { get; private set; }
+            public MotionAxisActionKey ActionKey { get; private set; }
         }
+
+        #endregion
     }
 }

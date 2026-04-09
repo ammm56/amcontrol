@@ -11,14 +11,26 @@ using System.Threading.Tasks;
 namespace AM.PageModel.Motion
 {
     /// <summary>
-    /// WinForms 单轴控制页页面模型。
-    /// 负责：
+    /// WinForms 单轴控制页面模型。
+    ///
+    /// 【当前职责】
     /// 1. 查询轴静态结构与运行态快照；
     /// 2. 维护当前选中轴；
-    /// 3. 维护左侧动作卡片列表；
+    /// 3. 维护左侧动作卡片集合；
     /// 4. 按关键字搜索动作卡片；
     /// 5. 根据当前轴运行态更新动作联动可用性；
-    /// 6. 接收页面层传入的参数并执行对应动作。
+    /// 6. 接收页面层传入的动作请求并执行对应动作。
+    ///
+    /// 【层级关系】
+    /// - 上游：`MotionAxisPage`；
+    /// - 当前层：WinForms 页面模型层；
+    /// - 下游：`MotionRuntimeQueryService`、`MotionAxisOperationService`。
+    ///
+    /// 【设计说明】
+    /// 本类保持 WinForms 直接事件驱动下的轻量页面模型定位：
+    /// - 页面层负责事件接线与 `Bind`；
+    /// - 页面模型负责状态维护、动作校验与动作执行；
+    /// - 不引入额外命令系统、验证器类或执行器类。
     /// </summary>
     public class MotionAxisPageModel : BindableBase
     {
@@ -32,6 +44,8 @@ namespace AM.PageModel.Motion
         private short? _selectedLogicalAxis;
         private MotionAxisSelectedViewItem _selectedAxis;
         private string _searchText;
+
+        #region 构造与属性
 
         public MotionAxisPageModel()
         {
@@ -47,7 +61,7 @@ namespace AM.PageModel.Motion
 
         /// <summary>
         /// 当前展示的动作卡片集合。
-        /// 当前页面固定动作数量不多，不再额外分页，直接交给 VirtualPanel 承载。
+        /// 当前页面固定动作数量不多，不再额外分页，直接交给 `VirtualPanel` 承载。
         /// </summary>
         public IList<MotionAxisActionViewItem> PageItems
         {
@@ -56,6 +70,7 @@ namespace AM.PageModel.Motion
 
         /// <summary>
         /// 当前选中的轴。
+        /// 右侧详情区直接绑定该对象。
         /// </summary>
         public MotionAxisSelectedViewItem SelectedAxis
         {
@@ -101,6 +116,10 @@ namespace AM.PageModel.Motion
                 return "L#" + SelectedAxis.LogicalAxis + "  " + SelectedAxis.DisplayTitle;
             }
         }
+
+        #endregion
+
+        #region 页面状态入口
 
         /// <summary>
         /// 首次加载。
@@ -152,151 +171,44 @@ namespace AM.PageModel.Motion
             OnPropertyChanged(nameof(SelectedAxisText));
         }
 
+        #endregion
+
+        #region 页面动作入口
+
         /// <summary>
-        /// 按动作键获取原始动作项。
+        /// 按动作枚举获取原始动作项。
         /// 该方法不受搜索过滤影响，适合底部固定参数卡片使用。
         /// </summary>
-        public MotionAxisActionViewItem GetActionItem(string actionKey)
+        public MotionAxisActionViewItem GetActionItem(MotionAxisActionKey actionKey)
         {
-            if (string.IsNullOrWhiteSpace(actionKey))
-                return null;
-
-            return _allActionItems.FirstOrDefault(
-                x => string.Equals(x.ActionKey, actionKey, StringComparison.OrdinalIgnoreCase));
+            return _allActionItems.FirstOrDefault(x => x.ActionKey == actionKey);
         }
 
         /// <summary>
-        /// 执行左侧动作卡片对应的轴动作。
-        /// 普通卡片点击即执行；需要参数的动作从右侧实时监视区读取输入值。
+        /// 执行轴动作请求。
+        /// 页面层负责收集参数文本，本模型负责校验、解析和动作执行。
         /// </summary>
-        public Task<Result> ExecuteActionAsync(
-            string actionKey,
-            string targetPositionText,
-            string moveDistanceText,
-            string velocityText)
+        public Task<Result> ExecuteActionAsync(MotionAxisActionRequest request)
         {
-            if (string.IsNullOrWhiteSpace(actionKey))
-            {
+            if (request == null)
                 return Task.FromResult(Result.Fail(-2100, "未识别的轴动作。", ResultSource.Motion));
-            }
 
             if (SelectedAxis == null)
-            {
                 return Task.FromResult(Result.Fail(-2101, "请先选择轴。", ResultSource.Motion));
-            }
 
-            var action = _allActionItems.FirstOrDefault(
-                x => string.Equals(x.ActionKey, actionKey, StringComparison.OrdinalIgnoreCase));
+            var action = GetActionItem(request.ActionKey);
             if (action == null)
-            {
-                return Task.FromResult(Result.Fail(-2102, "未识别的轴动作：" + actionKey, ResultSource.Motion));
-            }
+                return Task.FromResult(Result.Fail(-2102, "未识别的轴动作：" + request.ActionKey, ResultSource.Motion));
 
             if (!action.CanExecute)
-            {
                 return Task.FromResult(Result.Fail(-2103, action.DisabledReason, ResultSource.Motion));
-            }
 
-            var logicalAxis = SelectedAxis.LogicalAxis;
-
-            if (string.Equals(actionKey, "Enable", StringComparison.OrdinalIgnoreCase))
-                return Task.FromResult(_operationService.Enable(logicalAxis, true));
-
-            if (string.Equals(actionKey, "Disable", StringComparison.OrdinalIgnoreCase))
-                return Task.FromResult(_operationService.Enable(logicalAxis, false));
-
-            if (string.Equals(actionKey, "Home", StringComparison.OrdinalIgnoreCase))
-                return _operationService.HomeAsync(logicalAxis);
-
-            if (string.Equals(actionKey, "ClearStatus", StringComparison.OrdinalIgnoreCase))
-                return Task.FromResult(_operationService.ClearStatus(logicalAxis));
-
-            if (string.Equals(actionKey, "Stop", StringComparison.OrdinalIgnoreCase))
-                return Task.FromResult(_operationService.Stop(logicalAxis, false));
-
-            if (string.Equals(actionKey, "EmergencyStop", StringComparison.OrdinalIgnoreCase))
-                return Task.FromResult(_operationService.Stop(logicalAxis, true));
-
-            if (string.Equals(actionKey, "JogNegative", StringComparison.OrdinalIgnoreCase))
-            {
-                double velocityMm;
-                if (!TryParsePositiveNumber(velocityText, out velocityMm))
-                    return Task.FromResult(Result.Fail(-2104, "速度必须是大于 0 的数字。", ResultSource.Motion));
-
-                return Task.FromResult(_operationService.JogMove(logicalAxis, false, velocityMm));
-            }
-
-            if (string.Equals(actionKey, "JogStop", StringComparison.OrdinalIgnoreCase))
-                return Task.FromResult(_operationService.JogStop(logicalAxis));
-
-            if (string.Equals(actionKey, "JogPositive", StringComparison.OrdinalIgnoreCase))
-            {
-                double velocityMm;
-                if (!TryParsePositiveNumber(velocityText, out velocityMm))
-                    return Task.FromResult(Result.Fail(-2105, "速度必须是大于 0 的数字。", ResultSource.Motion));
-
-                return Task.FromResult(_operationService.JogMove(logicalAxis, true, velocityMm));
-            }
-
-            if (string.Equals(actionKey, "ApplyVelocity", StringComparison.OrdinalIgnoreCase))
-            {
-                double velocityMm;
-                if (!TryParsePositiveNumber(velocityText, out velocityMm))
-                    return Task.FromResult(Result.Fail(-2106, "速度必须是大于 0 的数字。", ResultSource.Motion));
-
-                return Task.FromResult(_operationService.ApplyVelocityMm(logicalAxis, velocityMm));
-            }
-
-            if (string.Equals(actionKey, "MoveAbsolute", StringComparison.OrdinalIgnoreCase))
-            {
-                double positionMm;
-                double velocityMm;
-
-                if (!TryParseNumber(targetPositionText, out positionMm))
-                    return Task.FromResult(Result.Fail(-2107, "目标位置格式无效。", ResultSource.Motion));
-
-                if (!TryParsePositiveNumber(velocityText, out velocityMm))
-                    return Task.FromResult(Result.Fail(-2108, "速度必须是大于 0 的数字。", ResultSource.Motion));
-
-                return Task.FromResult(_operationService.MoveAbsoluteMm(logicalAxis, positionMm, velocityMm));
-            }
-
-            if (string.Equals(actionKey, "MoveRelative", StringComparison.OrdinalIgnoreCase))
-            {
-                double distanceMm;
-                double velocityMm;
-
-                if (!TryParseNumber(moveDistanceText, out distanceMm))
-                    return Task.FromResult(Result.Fail(-2109, "相对距离格式无效。", ResultSource.Motion));
-
-                if (!TryParsePositiveNumber(velocityText, out velocityMm))
-                    return Task.FromResult(Result.Fail(-2110, "速度必须是大于 0 的数字。", ResultSource.Motion));
-
-                return Task.FromResult(_operationService.MoveRelativeMm(logicalAxis, distanceMm, velocityMm));
-            }
-
-            return Task.FromResult(Result.Fail(-2111, "未识别的轴动作：" + actionKey, ResultSource.Motion));
+            return ExecuteActionCoreAsync(request);
         }
 
-        private static bool TryParseNumber(string text, out double value)
-        {
-            value = 0D;
+        #endregion
 
-            if (string.IsNullOrWhiteSpace(text))
-                return false;
-
-            return double.TryParse(text.Trim(), out value);
-        }
-
-        private static bool TryParsePositiveNumber(string text, out double value)
-        {
-            value = 0D;
-
-            if (!TryParseNumber(text, out value))
-                return false;
-
-            return value > 0D;
-        }
+        #region 数据刷新与选中轴维护
 
         private async Task<Result> ReloadAsync()
         {
@@ -367,9 +279,12 @@ namespace AM.PageModel.Motion
             SelectedAxis = _allAxes.FirstOrDefault(x => x.LogicalAxis == _selectedLogicalAxis.Value);
         }
 
+        #endregion
+
+        #region 动作状态与过滤
+
         /// <summary>
         /// 根据当前轴运行态更新动作卡片联动状态。
-        /// 这里直接按 WPF 页面现有联动约束收敛，不额外再包装新抽象。
         /// </summary>
         private void UpdateActionAvailability()
         {
@@ -379,144 +294,6 @@ namespace AM.PageModel.Motion
                 action.CanExecute = validate.Success;
                 action.DisabledReason = validate.Success ? "单击立即执行" : validate.Message;
             }
-        }
-
-        private Result ValidateAction(string actionKey)
-        {
-            // 1. 必须先有当前选中轴。
-            // 没有选中轴时，任何动作都不允许执行。
-            if (SelectedAxis == null)
-                return Result.Fail(-2201, "请先选择轴", ResultSource.Motion);
-
-            var axis = SelectedAxis;
-
-            // 2. 先处理不依赖报警/使能公共规则的基础动作。
-            // 这些动作属于页面级基础控制，优先单独判断，避免后续通用拦截误伤。
-
-            // 2.1 使能：当前已经使能时不允许重复使能。
-            if (string.Equals(actionKey, "Enable", StringComparison.OrdinalIgnoreCase))
-            {
-                if (axis.IsEnabled)
-                    return Result.Fail(-2202, "当前轴已使能", ResultSource.Motion);
-
-                return Result.Ok("允许执行", ResultSource.Motion);
-            }
-
-            // 2.2 失能：要求当前已使能，且运动中禁止失能。
-            if (string.Equals(actionKey, "Disable", StringComparison.OrdinalIgnoreCase))
-            {
-                if (!axis.IsEnabled)
-                    return Result.Fail(-2203, "当前轴未使能", ResultSource.Motion);
-
-                if (axis.IsMoving)
-                    return Result.Fail(-2204, "当前轴运动中，禁止失能", ResultSource.Motion);
-
-                return Result.Ok("允许执行", ResultSource.Motion);
-            }
-
-            // 2.3 清状态：任何时候都允许尝试执行。
-            if (string.Equals(actionKey, "ClearStatus", StringComparison.OrdinalIgnoreCase))
-                return Result.Ok("允许执行", ResultSource.Motion);
-
-            // 2.4 急停：任何时候都允许尝试执行。
-            if (string.Equals(actionKey, "EmergencyStop", StringComparison.OrdinalIgnoreCase))
-                return Result.Ok("允许执行", ResultSource.Motion);
-
-            // 2.5 平停：只有运动中才有意义。
-            if (string.Equals(actionKey, "Stop", StringComparison.OrdinalIgnoreCase))
-            {
-                if (!axis.IsMoving)
-                    return Result.Fail(-2205, "当前轴未运动", ResultSource.Motion);
-
-                return Result.Ok("允许执行", ResultSource.Motion);
-            }
-
-            // 2.6 点动停止：允许随时尝试下发，便于兜底停止点动。
-            if (string.Equals(actionKey, "JogStop", StringComparison.OrdinalIgnoreCase))
-                return Result.Ok("允许执行", ResultSource.Motion);
-
-            // 3. 报警态公共拦截。
-            // 除上面已单独放行的基础动作外，其余运动相关动作在报警时一律禁止。
-            if (axis.IsAlarm)
-                return Result.Fail(-2206, "当前轴报警中，请先清状态", ResultSource.Motion);
-
-            // 4. 应用速度单独处理，必须放在“未使能拦截”之前。
-            //
-            // 业务规则：
-            // - 速度参数属于运动前参数配置；
-            // - 未运动时即可设置，不要求先使能；
-            // - 一旦已在运动中，禁止修改速度。
-            if (string.Equals(actionKey, "ApplyVelocity", StringComparison.OrdinalIgnoreCase))
-            {
-                if (axis.IsMoving)
-                    return Result.Fail(-2214, "当前轴运动中，禁止改速度", ResultSource.Motion);
-
-                return Result.Ok("允许执行", ResultSource.Motion);
-            }
-
-            // 5. 从这里开始，其余动作统一要求“轴已使能”。
-            if (!axis.IsEnabled)
-                return Result.Fail(-2207, "当前轴未使能", ResultSource.Motion);
-
-            // 6. 回零：运动中禁止；存在限位时禁止。
-            if (string.Equals(actionKey, "Home", StringComparison.OrdinalIgnoreCase))
-            {
-                if (axis.IsMoving)
-                    return Result.Fail(-2208, "当前轴运动中，禁止回零", ResultSource.Motion);
-
-                if (axis.PositiveLimit || axis.NegativeLimit)
-                    return Result.Fail(-2209, "当前轴存在限位，禁止回零", ResultSource.Motion);
-
-                return Result.Ok("允许执行", ResultSource.Motion);
-            }
-
-            // 7. 负向点动：运动中禁止；负限位触发时禁止。
-            if (string.Equals(actionKey, "JogNegative", StringComparison.OrdinalIgnoreCase))
-            {
-                if (axis.IsMoving)
-                    return Result.Fail(-2210, "当前轴运动中", ResultSource.Motion);
-
-                if (axis.NegativeLimit)
-                    return Result.Fail(-2211, "当前轴负限位触发", ResultSource.Motion);
-
-                return Result.Ok("允许执行", ResultSource.Motion);
-            }
-
-            // 8. 正向点动：运动中禁止；正限位触发时禁止。
-            if (string.Equals(actionKey, "JogPositive", StringComparison.OrdinalIgnoreCase))
-            {
-                if (axis.IsMoving)
-                    return Result.Fail(-2212, "当前轴运动中", ResultSource.Motion);
-
-                if (axis.PositiveLimit)
-                    return Result.Fail(-2213, "当前轴正限位触发", ResultSource.Motion);
-
-                return Result.Ok("允许执行", ResultSource.Motion);
-            }
-
-            // 9. 绝对定位：运动中禁止；要求先回原点。
-            if (string.Equals(actionKey, "MoveAbsolute", StringComparison.OrdinalIgnoreCase))
-            {
-                if (axis.IsMoving)
-                    return Result.Fail(-2215, "当前轴运动中", ResultSource.Motion);
-
-                if (!axis.IsAtHome)
-                    return Result.Fail(-2216, "当前轴未回原点", ResultSource.Motion);
-
-                return Result.Ok("允许执行", ResultSource.Motion);
-            }
-
-            // 10. 相对定位：只要求当前不在运动中。
-            if (string.Equals(actionKey, "MoveRelative", StringComparison.OrdinalIgnoreCase))
-            {
-                if (axis.IsMoving)
-                    return Result.Fail(-2217, "当前轴运动中", ResultSource.Motion);
-
-                return Result.Ok("允许执行", ResultSource.Motion);
-            }
-
-            // 11. 兜底：未知动作一律按失败处理。
-            return Result.Fail(-2218, "未识别的动作", ResultSource.Motion);
         }
 
         private void ApplyActionFilter()
@@ -542,6 +319,228 @@ namespace AM.PageModel.Motion
             OnPropertyChanged(nameof(FilteredCount));
         }
 
+        #endregion
+
+        #region 动作校验与执行
+
+        private Result ValidateAction(MotionAxisActionKey actionKey)
+        {
+            if (SelectedAxis == null)
+                return Result.Fail(-2201, "请先选择轴", ResultSource.Motion);
+
+            var axis = SelectedAxis;
+
+            switch (actionKey)
+            {
+                case MotionAxisActionKey.Enable:
+                    if (axis.IsEnabled)
+                        return Result.Fail(-2202, "当前轴已使能", ResultSource.Motion);
+
+                    return Result.Ok("允许执行", ResultSource.Motion);
+
+                case MotionAxisActionKey.Disable:
+                    if (!axis.IsEnabled)
+                        return Result.Fail(-2203, "当前轴未使能", ResultSource.Motion);
+
+                    if (axis.IsMoving)
+                        return Result.Fail(-2204, "当前轴运动中，禁止失能", ResultSource.Motion);
+
+                    return Result.Ok("允许执行", ResultSource.Motion);
+
+                case MotionAxisActionKey.ClearStatus:
+                    return Result.Ok("允许执行", ResultSource.Motion);
+
+                case MotionAxisActionKey.EmergencyStop:
+                    return Result.Ok("允许执行", ResultSource.Motion);
+
+                case MotionAxisActionKey.Stop:
+                    if (!axis.IsMoving)
+                        return Result.Fail(-2205, "当前轴未运动", ResultSource.Motion);
+
+                    return Result.Ok("允许执行", ResultSource.Motion);
+
+                case MotionAxisActionKey.JogStop:
+                    return Result.Ok("允许执行", ResultSource.Motion);
+            }
+
+            if (axis.IsAlarm)
+                return Result.Fail(-2206, "当前轴报警中，请先清状态", ResultSource.Motion);
+
+            if (actionKey == MotionAxisActionKey.ApplyVelocity)
+            {
+                if (axis.IsMoving)
+                    return Result.Fail(-2214, "当前轴运动中，禁止改速度", ResultSource.Motion);
+
+                return Result.Ok("允许执行", ResultSource.Motion);
+            }
+
+            if (!axis.IsEnabled)
+                return Result.Fail(-2207, "当前轴未使能", ResultSource.Motion);
+
+            switch (actionKey)
+            {
+                case MotionAxisActionKey.Home:
+                    if (axis.IsMoving)
+                        return Result.Fail(-2208, "当前轴运动中，禁止回零", ResultSource.Motion);
+
+                    if (axis.PositiveLimit || axis.NegativeLimit)
+                        return Result.Fail(-2209, "当前轴存在限位，禁止回零", ResultSource.Motion);
+
+                    return Result.Ok("允许执行", ResultSource.Motion);
+
+                case MotionAxisActionKey.JogNegative:
+                    if (axis.IsMoving)
+                        return Result.Fail(-2210, "当前轴运动中", ResultSource.Motion);
+
+                    if (axis.NegativeLimit)
+                        return Result.Fail(-2211, "当前轴负限位触发", ResultSource.Motion);
+
+                    return Result.Ok("允许执行", ResultSource.Motion);
+
+                case MotionAxisActionKey.JogPositive:
+                    if (axis.IsMoving)
+                        return Result.Fail(-2212, "当前轴运动中", ResultSource.Motion);
+
+                    if (axis.PositiveLimit)
+                        return Result.Fail(-2213, "当前轴正限位触发", ResultSource.Motion);
+
+                    return Result.Ok("允许执行", ResultSource.Motion);
+
+                case MotionAxisActionKey.MoveAbsolute:
+                    if (axis.IsMoving)
+                        return Result.Fail(-2215, "当前轴运动中", ResultSource.Motion);
+
+                    if (!axis.IsAtHome)
+                        return Result.Fail(-2216, "当前轴未回原点", ResultSource.Motion);
+
+                    return Result.Ok("允许执行", ResultSource.Motion);
+
+                case MotionAxisActionKey.MoveRelative:
+                    if (axis.IsMoving)
+                        return Result.Fail(-2217, "当前轴运动中", ResultSource.Motion);
+
+                    return Result.Ok("允许执行", ResultSource.Motion);
+
+                default:
+                    return Result.Fail(-2218, "未识别的动作", ResultSource.Motion);
+            }
+        }
+
+        private Task<Result> ExecuteActionCoreAsync(MotionAxisActionRequest request)
+        {
+            var logicalAxis = SelectedAxis.LogicalAxis;
+
+            switch (request.ActionKey)
+            {
+                case MotionAxisActionKey.Enable:
+                    return Task.FromResult(_operationService.Enable(logicalAxis, true));
+
+                case MotionAxisActionKey.Disable:
+                    return Task.FromResult(_operationService.Enable(logicalAxis, false));
+
+                case MotionAxisActionKey.Home:
+                    return _operationService.HomeAsync(logicalAxis);
+
+                case MotionAxisActionKey.ClearStatus:
+                    return Task.FromResult(_operationService.ClearStatus(logicalAxis));
+
+                case MotionAxisActionKey.Stop:
+                    return Task.FromResult(_operationService.Stop(logicalAxis, false));
+
+                case MotionAxisActionKey.EmergencyStop:
+                    return Task.FromResult(_operationService.Stop(logicalAxis, true));
+
+                case MotionAxisActionKey.JogNegative:
+                    {
+                        double velocityMm;
+                        if (!TryParsePositiveNumber(request.VelocityText, out velocityMm))
+                            return Task.FromResult(Result.Fail(-2104, "速度必须是大于 0 的数字。", ResultSource.Motion));
+
+                        return Task.FromResult(_operationService.JogMove(logicalAxis, false, velocityMm));
+                    }
+
+                case MotionAxisActionKey.JogStop:
+                    return Task.FromResult(_operationService.JogStop(logicalAxis));
+
+                case MotionAxisActionKey.JogPositive:
+                    {
+                        double velocityMm;
+                        if (!TryParsePositiveNumber(request.VelocityText, out velocityMm))
+                            return Task.FromResult(Result.Fail(-2105, "速度必须是大于 0 的数字。", ResultSource.Motion));
+
+                        return Task.FromResult(_operationService.JogMove(logicalAxis, true, velocityMm));
+                    }
+
+                case MotionAxisActionKey.ApplyVelocity:
+                    {
+                        double velocityMm;
+                        if (!TryParsePositiveNumber(request.VelocityText, out velocityMm))
+                            return Task.FromResult(Result.Fail(-2106, "速度必须是大于 0 的数字。", ResultSource.Motion));
+
+                        return Task.FromResult(_operationService.ApplyVelocityMm(logicalAxis, velocityMm));
+                    }
+
+                case MotionAxisActionKey.MoveAbsolute:
+                    {
+                        double positionMm;
+                        double velocityMm;
+
+                        if (!TryParseNumber(request.TargetPositionText, out positionMm))
+                            return Task.FromResult(Result.Fail(-2107, "目标位置格式无效。", ResultSource.Motion));
+
+                        if (!TryParsePositiveNumber(request.VelocityText, out velocityMm))
+                            return Task.FromResult(Result.Fail(-2108, "速度必须是大于 0 的数字。", ResultSource.Motion));
+
+                        return Task.FromResult(_operationService.MoveAbsoluteMm(logicalAxis, positionMm, velocityMm));
+                    }
+
+                case MotionAxisActionKey.MoveRelative:
+                    {
+                        double distanceMm;
+                        double velocityMm;
+
+                        if (!TryParseNumber(request.MoveDistanceText, out distanceMm))
+                            return Task.FromResult(Result.Fail(-2109, "相对距离格式无效。", ResultSource.Motion));
+
+                        if (!TryParsePositiveNumber(request.VelocityText, out velocityMm))
+                            return Task.FromResult(Result.Fail(-2110, "速度必须是大于 0 的数字。", ResultSource.Motion));
+
+                        return Task.FromResult(_operationService.MoveRelativeMm(logicalAxis, distanceMm, velocityMm));
+                    }
+
+                default:
+                    return Task.FromResult(Result.Fail(-2111, "未识别的轴动作：" + request.ActionKey, ResultSource.Motion));
+            }
+        }
+
+        #endregion
+
+        #region 参数解析
+
+        private static bool TryParseNumber(string text, out double value)
+        {
+            value = 0D;
+
+            if (string.IsNullOrWhiteSpace(text))
+                return false;
+
+            return double.TryParse(text.Trim(), out value);
+        }
+
+        private static bool TryParsePositiveNumber(string text, out double value)
+        {
+            value = 0D;
+
+            if (!TryParseNumber(text, out value))
+                return false;
+
+            return value > 0D;
+        }
+
+        #endregion
+
+        #region 动作定义与映射
+
         /// <summary>
         /// 初始化动作卡片定义。
         /// 左侧卡片统一保持按钮式小卡片风格，只保留分类和名称。
@@ -550,23 +549,23 @@ namespace AM.PageModel.Motion
         {
             return new List<MotionAxisActionViewItem>
             {
-                CreateAction("Enable", "使能", "基础操作", "Primary"),
-                CreateAction("Disable", "失能", "基础操作", "Default"),
-                CreateAction("Home", "回零", "回零", "Warning"),
-                CreateAction("ClearStatus", "清状态", "维护", "Default"),
-                CreateAction("Stop", "平停", "停止", "Success"),
-                CreateAction("EmergencyStop", "急停", "停止", "Danger"),
-                CreateAction("JogNegative", "负向运动", "点动", "Primary"),
-                CreateAction("JogStop", "停止", "点动", "Default"),
-                CreateAction("JogPositive", "正向运动", "点动", "Primary"),
-                CreateAction("ApplyVelocity", "应用速度", "参数", "Success"),
-                CreateAction("MoveAbsolute", "绝对定位", "定位", "Primary"),
-                CreateAction("MoveRelative", "相对定位", "定位", "Primary")
+                CreateAction(MotionAxisActionKey.Enable, "使能", "基础操作", "Primary"),
+                CreateAction(MotionAxisActionKey.Disable, "失能", "基础操作", "Default"),
+                CreateAction(MotionAxisActionKey.Home, "回零", "回零", "Warning"),
+                CreateAction(MotionAxisActionKey.ClearStatus, "清状态", "维护", "Default"),
+                CreateAction(MotionAxisActionKey.Stop, "平停", "停止", "Success"),
+                CreateAction(MotionAxisActionKey.EmergencyStop, "急停", "停止", "Danger"),
+                CreateAction(MotionAxisActionKey.JogNegative, "负向运动", "点动", "Primary"),
+                CreateAction(MotionAxisActionKey.JogStop, "停止", "点动", "Default"),
+                CreateAction(MotionAxisActionKey.JogPositive, "正向运动", "点动", "Primary"),
+                CreateAction(MotionAxisActionKey.ApplyVelocity, "应用速度", "参数", "Success"),
+                CreateAction(MotionAxisActionKey.MoveAbsolute, "绝对定位", "定位", "Primary"),
+                CreateAction(MotionAxisActionKey.MoveRelative, "相对定位", "定位", "Primary")
             };
         }
 
         private static MotionAxisActionViewItem CreateAction(
-            string actionKey,
+            MotionAxisActionKey actionKey,
             string displayText,
             string categoryText,
             string accentType)
@@ -612,8 +611,6 @@ namespace AM.PageModel.Motion
             };
         }
 
-        
-
-        
+        #endregion
     }
 }
