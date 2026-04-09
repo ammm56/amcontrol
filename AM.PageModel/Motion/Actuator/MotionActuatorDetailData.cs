@@ -3,20 +3,14 @@
     /// <summary>
     /// 执行器右侧详情显示对象。
     ///
-    /// 【层级定位】
-    /// - 所在层：页面显示数据层；
-    /// - 上游来源：MotionActuatorDisplayBuilder；
-    /// - 下游去向：MotionActuatorDetailControl。
+    /// 【当前职责】
+    /// 1. 承载右侧详情区的稳定显示字段；
+    /// 2. 避免详情控件自行拼接文本或访问原始快照；
+    /// 3. 让页面刷新时只需整体 Bind 一个对象。
     ///
-    /// 【职责】
-    /// 1. 仅承载右侧详情区需要显示的数据；
-    /// 2. 保持字段语义稳定，避免控件层拼接复杂文本；
-    /// 3. 让详情控件只负责 Bind 和显示，不负责状态推导。
-    ///
-    /// 【设计关系】
-    /// - 由 MotionActuatorSnapshot 映射得到；
-    /// - 是 Snapshot 的“详情视图”；
-    /// - 不承担动作执行与联动校验职责。
+    /// 【层级关系】
+    /// - 上游：MotionActuatorSnapshot、MotionActuatorDisplayBuilder；
+    /// - 下游：MotionActuatorDetailControl。
     /// </summary>
     public sealed class MotionActuatorDetailData
     {

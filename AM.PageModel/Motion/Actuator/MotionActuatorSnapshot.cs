@@ -3,31 +3,21 @@
 namespace AM.PageModel.Motion.Actuator
 {
     /// <summary>
-    /// 执行器页面内部原始快照模型。
+    /// 执行器页面原始快照模型。
     ///
-    /// 【层级定位】
-    /// - 所在层：AM.PageModel 页面模型层内部的数据中间层；
-    /// - 上游来源：MachineContext、RuntimeContext、执行器服务；
-    /// - 下游去向：MotionActuatorDisplayBuilder；
-    /// - 不直接绑定任何具体 WinForms 控件。
+    /// 【当前职责】
+    /// 1. 承载页面所需的执行器完整状态与配置快照；
+    /// 2. 作为列表、详情和动作面板的统一数据源；
+    /// 3. 集中保存运行态、配置态与少量必要衍生字段。
     ///
-    /// 【职责】
-    /// 1. 承载当前页面需要的执行器“完整原始状态”；
-    /// 2. 同时包含静态配置与运行态快照；
-    /// 3. 为列表、详情、动作面板提供统一数据来源；
-    /// 4. 避免把大量界面显示文本直接混在 PageModel 的核心逻辑中。
+    /// 【层级关系】
+    /// - 上游：MachineContext、RuntimeContext、第三层执行器服务；
+    /// - 当前层：页面模型内部原始状态对象；
+    /// - 下游：MotionActuatorDisplayBuilder、MotionActuatorPageModel。
     ///
-    /// 【与其它模型的关系】
-    /// - MotionActuatorSnapshot：原始数据源；
-    /// - MotionActuatorListItem：由 Snapshot 映射得到，供左侧列表使用；
-    /// - MotionActuatorDetailData：由 Snapshot 映射得到，供右侧详情使用；
-    /// - MotionActuatorActionPanelState：由 Snapshot + 当前页面选项映射得到，供动作面板使用。
-    ///
-    /// 【设计原则】
-    /// - 这里优先放“状态”和“配置”；
-    /// - 尽量少放具体中文显示文案；
-    /// - 保留必要的衍生属性，例如 ItemKey / DisplayTitle / HasAnyStackLightOutput，
-    ///   因为它们属于模型层通用信息，不是纯界面装饰文本。
+    /// 【调用关系】
+    /// 页面模型先从 MachineContext 构建该对象，再刷新运行态，
+    /// 然后根据当前页面需要映射为列表显示对象、详情显示对象和动作面板状态。
     /// </summary>
     public sealed class MotionActuatorSnapshot
     {

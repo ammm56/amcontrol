@@ -5,26 +5,14 @@ namespace AM.PageModel.Motion.Actuator
     /// <summary>
     /// 执行器页面筛选条件对象。
     ///
-    /// 【层级定位】
-    /// - 所在层：页面模型辅助对象；
-    /// - 上游来源：MotionActuatorPageModel；
-    /// - 下游去向：Snapshot / ListItem 过滤逻辑。
+    /// 【当前职责】
+    /// 1. 收口页面筛选条件输入；
+    /// 2. 避免页面模型中散落多个筛选字段；
+    /// 3. 统一封装筛选规范化与匹配逻辑。
     ///
-    /// 【职责】
-    /// 1. 收口页面筛选条件；
-    /// 2. 避免 PageModel 中长期散落多个筛选字段；
-    /// 3. 让筛选逻辑的输入结构清晰稳定。
-    ///
-    /// 【当前阶段说明】
-    /// 第一阶段只保留：
-    /// - SearchText
-    /// - TypeFilter
-    ///
-    /// 后续如果增加：
-    /// - 是否仅显示故障对象
-    /// - 是否仅显示启用对象
-    /// - 是否按控制卡过滤
-    /// 都可以继续加到该对象中，而不是继续摊在 PageModel 成员上。
+    /// 【层级关系】
+    /// - 上游：MotionActuatorPageModel；
+    /// - 下游：MotionActuatorSnapshot 过滤逻辑。
     /// </summary>
     public sealed class MotionActuatorFilter
     {
@@ -57,8 +45,7 @@ namespace AM.PageModel.Motion.Actuator
 
         /// <summary>
         /// 判断某个原始快照是否满足当前筛选条件。
-        /// 这里优先基于 Snapshot 自身已有文本字段做匹配，
-        /// 第一阶段不额外依赖 DisplayBuilder。
+        /// 优先基于快照自身已有文本字段做匹配，不额外依赖显示映射层。
         /// </summary>
         public bool IsMatch(MotionActuatorSnapshot snapshot)
         {

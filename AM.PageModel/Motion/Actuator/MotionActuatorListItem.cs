@@ -3,21 +3,14 @@
     /// <summary>
     /// 执行器左侧虚拟卡片显示对象。
     ///
-    /// 【层级定位】
-    /// - 所在层：页面显示数据层；
-    /// - 上游来源：MotionActuatorDisplayBuilder；
-    /// - 下游去向：MotionActuatorVirtualListControl。
+    /// 【当前职责】
+    /// 1. 仅承载左侧卡片渲染所需字段；
+    /// 2. 保持列表显示与详情、动作区解耦；
+    /// 3. 通过 `ItemKey` 与页面模型中的原始快照建立关联。
     ///
-    /// 【职责】
-    /// 1. 仅为左侧列表卡片提供最小必要显示数据；
-    /// 2. 不混入详情区字段；
-    /// 3. 不混入动作面板字段；
-    /// 4. 只保留列表渲染和选择所需的信息。
-    ///
-    /// 【设计关系】
-    /// - 由 MotionActuatorSnapshot 映射而来；
-    /// - 可视为 Snapshot 的“列表视图”；
-    /// - 页面切换选中时通过 ItemKey 回到 Snapshot。
+    /// 【层级关系】
+    /// - 上游：MotionActuatorSnapshot、MotionActuatorDisplayBuilder；
+    /// - 下游：MotionActuatorVirtualListControl。
     /// </summary>
     public sealed class MotionActuatorListItem
     {

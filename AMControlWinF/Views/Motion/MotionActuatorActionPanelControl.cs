@@ -10,30 +10,35 @@ namespace AMControlWinF.Views.Motion
     /// <summary>
     /// 执行器右侧上半区控制面板。
     ///
-    /// 【层级定位】
-    /// - 所在层：WinForms 显示控件层；
-    /// - 上游来源：MotionActuatorPage / MotionActuatorPageModel；
-    /// - 下游输出：按钮点击事件、选项变化事件。
+    /// 【当前职责】
+    /// 1. 负责显示当前选中执行器的标题、副标题与动作选项；
+    /// 2. 负责显示普通执行器主副按钮或灯塔状态按钮组；
+    /// 3. 负责将按钮点击与选项变化以事件形式回传给页面层；
+    /// 4. 不直接访问服务层，不直接持有页面原始状态对象。
     ///
-    /// 【职责】
-    /// 1. 负责右侧上半区动作面板显示；
-    /// 2. 显示标题 / 副标题；
-    /// 3. 显示等待反馈、等待工件检测、附带蜂鸣三个选项；
-    /// 4. 显示普通执行器动作按钮或灯塔状态按钮；
-    /// 5. 不直接调用服务层，只抛出事件给页面层处理。
+    /// 【层级关系】
+    /// - 上游：MotionActuatorPage、MotionActuatorPageModel；
+    /// - 当前层：WinForms 动作面板显示控件；
+    /// - 下游：按钮点击事件、选项变化事件。
     ///
-    /// 【当前收口说明】
-    /// - 动作面板只负责显示状态和抛出事件；
-    /// - 灯塔按钮事件已从 string 改为 StackLightState 枚举；
-    /// - 这样避免字符串中转、TryParse 和额外桥接逻辑。
+    /// 【调用关系】
+    /// 1. 页面把 `MotionActuatorActionPanelState` 整体绑定到本控件；
+    /// 2. 控件按状态刷新标题、选项和按钮显隐；
+    /// 3. 用户操作按钮后，本控件只抛出事件；
+    /// 4. 页面接收事件后再调用页面模型执行动作。
+    ///
+    /// 【设计说明】
+    /// 本控件保持 WinForms 常见的“Bind + 事件回调”模式：
+    /// - 显示逻辑集中在控件；
+    /// - 状态推导集中在页面模型；
+    /// - 设备动作集中在服务层；
+    /// - 不引入额外命令对象或中间抽象。
     /// </summary>
     public partial class MotionActuatorActionPanelControl : UserControl
     {
-        /// <summary>
-        /// 应用界面状态时，临时抑制复选框事件，
-        /// 避免 Checked 赋值再次触发 OptionsChanged，造成重复刷新。
-        /// </summary>
         private bool _suppressOptionChanged;
+
+        #region 构造与属性
 
         public MotionActuatorActionPanelControl()
         {
@@ -43,7 +48,7 @@ namespace AMControlWinF.Views.Motion
 
         /// <summary>
         /// 当前是否勾选等待反馈。
-        /// 页面层统一从这里读取用户选项。
+        /// 页面层从这里读取用户当前动作选项。
         /// </summary>
         public bool WaitFeedback
         {
@@ -66,6 +71,35 @@ namespace AMControlWinF.Views.Motion
             get { return checkStackLightWithBuzzer.Checked; }
         }
 
+        #endregion
+
+        #region 公开事件
+
+        /// <summary>
+        /// 普通执行器主动作请求事件。
+        /// </summary>
+        public event EventHandler PrimaryActionRequested;
+
+        /// <summary>
+        /// 普通执行器副动作请求事件。
+        /// </summary>
+        public event EventHandler SecondaryActionRequested;
+
+        /// <summary>
+        /// 灯塔状态切换请求事件。
+        /// </summary>
+        public event EventHandler<StackLightStateRequestedEventArgs> StackLightStateRequested;
+
+        /// <summary>
+        /// 控制选项变化事件。
+        /// 页面层收到后重新计算按钮启用状态。
+        /// </summary>
+        public event EventHandler OptionsChanged;
+
+        #endregion
+
+        #region 绑定与界面刷新
+
         /// <summary>
         /// 绑定页面模型计算出的控制面板状态。
         /// 这是控件唯一的外部刷新入口。
@@ -86,7 +120,6 @@ namespace AMControlWinF.Views.Motion
                     ? "内部名称：—"
                     : "内部名称：" + state.SubTitleText.Replace("内部名称：", string.Empty);
 
-                // 第二行：选项区显隐与取值。
                 checkStackLightWithBuzzer.Visible = state.ShowStackLightWithBuzzer;
                 checkWaitWorkpiece.Visible = state.ShowWaitWorkpiece;
                 checkWaitFeedback.Visible = state.ShowWaitFeedback;
@@ -95,7 +128,6 @@ namespace AMControlWinF.Views.Motion
                 checkWaitWorkpiece.Checked = state.WaitWorkpiece;
                 checkWaitFeedback.Checked = state.WaitFeedback;
 
-                // 第三行：统一按钮区。
                 ApplyButtonState(buttonPrimary, state.PrimaryButton);
                 ApplyButtonState(buttonSecondary, state.SecondaryButton);
                 ApplyButtonState(buttonStateOff, state.OffButton);
@@ -126,18 +158,13 @@ namespace AMControlWinF.Views.Motion
             buttonStateRunning.Click += (s, e) => RaiseStackLightStateRequested(StackLightState.Running);
             buttonStateWarning.Click += (s, e) => RaiseStackLightStateRequested(StackLightState.Warning);
             buttonStateAlarm.Click += (s, e) => RaiseStackLightStateRequested(StackLightState.Alarm);
+
             checkStackLightWithBuzzer.CheckedChanged += OptionControl_CheckedChanged;
             checkWaitWorkpiece.CheckedChanged += OptionControl_CheckedChanged;
             checkWaitFeedback.CheckedChanged += OptionControl_CheckedChanged;
         }
 
-        /// <summary>
-        /// 应用单个按钮状态。
-        /// 控件层只负责显示，不负责推导状态。
-        /// </summary>
-        private static void ApplyButtonState(
-            AntdUI.Button button,
-            MotionActuatorButtonState state)
+        private static void ApplyButtonState(AntdUI.Button button, MotionActuatorButtonState state)
         {
             if (button == null || state == null)
                 return;
@@ -148,9 +175,6 @@ namespace AMControlWinF.Views.Motion
             button.Type = ResolveButtonType(state.Type);
         }
 
-        /// <summary>
-        /// 页面模型中的轻量字符串类型映射为 AntdUI 内置按钮类型。
-        /// </summary>
         private static TTypeMini ResolveButtonType(string type)
         {
             switch (type)
@@ -172,42 +196,10 @@ namespace AMControlWinF.Views.Motion
             }
         }
 
-        private void ButtonPrimary_Click(object sender, EventArgs e)
-        {
-            PrimaryActionRequested?.Invoke(this, EventArgs.Empty);
-        }
-
-        private void ButtonSecondary_Click(object sender, EventArgs e)
-        {
-            SecondaryActionRequested?.Invoke(this, EventArgs.Empty);
-        }
-
-        private void RaiseStackLightStateRequested(StackLightState state)
-        {
-            StackLightStateRequested?.Invoke(this, new StackLightStateRequestedEventArgs(state));
-        }
-
-        /// <summary>
-        /// 选项变化时通知页面层重新计算按钮启用状态。
-        /// 应用状态阶段会被 _suppressOptionChanged 抑制，避免重复刷新。
-        /// </summary>
-        private void OptionControl_CheckedChanged(object sender, EventArgs e)
-        {
-            if (_suppressOptionChanged)
-                return;
-
-            OptionsChanged?.Invoke(this, EventArgs.Empty);
-        }
-
-        /// <summary>
-        /// 根据当前按钮文本自动调整按钮宽度。
-        /// 第三行使用 FlowPanel，可自动换行，因此只需要保证单按钮宽度合理。
-        /// </summary>
         private void UpdateButtonWidths()
         {
             ResizeButton(buttonPrimary, 92, 160);
             ResizeButton(buttonSecondary, 92, 160);
-
             ResizeButton(buttonStateOff, 60, 120);
             ResizeButton(buttonStateIdle, 60, 120);
             ResizeButton(buttonStateRunning, 60, 120);
@@ -233,10 +225,6 @@ namespace AMControlWinF.Views.Motion
             button.Height = 36;
         }
 
-        /// <summary>
-        /// 控件显隐切换后主动刷新布局。
-        /// 页面缓存复用时，这样能减少局部未重排问题。
-        /// </summary>
         private void RefreshLayoutState()
         {
             flowOptions.PerformLayout();
@@ -245,27 +233,41 @@ namespace AMControlWinF.Views.Motion
             panelRoot.PerformLayout();
         }
 
-        /// <summary>
-        /// 普通执行器主动作请求事件。
-        /// </summary>
-        public event EventHandler PrimaryActionRequested;
+        #endregion
+
+        #region 控件事件转发
+
+        private void ButtonPrimary_Click(object sender, EventArgs e)
+        {
+            PrimaryActionRequested?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void ButtonSecondary_Click(object sender, EventArgs e)
+        {
+            SecondaryActionRequested?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void RaiseStackLightStateRequested(StackLightState state)
+        {
+            StackLightStateRequested?.Invoke(this, new StackLightStateRequestedEventArgs(state));
+        }
+
+        private void OptionControl_CheckedChanged(object sender, EventArgs e)
+        {
+            if (_suppressOptionChanged)
+                return;
+
+            OptionsChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        #endregion
+
+        #region 事件参数
 
         /// <summary>
-        /// 普通执行器副动作请求事件。
+        /// 灯塔状态切换请求参数。
+        /// 页面层直接使用枚举值调用页面模型，避免字符串中转。
         /// </summary>
-        public event EventHandler SecondaryActionRequested;
-
-        /// <summary>
-        /// 灯塔状态切换请求事件。
-        /// </summary>
-        public event EventHandler<StackLightStateRequestedEventArgs> StackLightStateRequested;
-
-        /// <summary>
-        /// 控制选项变化事件。
-        /// 页面层收到后重新计算按钮启用状态。
-        /// </summary>
-        public event EventHandler OptionsChanged;
-
         public sealed class StackLightStateRequestedEventArgs : EventArgs
         {
             public StackLightStateRequestedEventArgs(StackLightState state)
@@ -275,5 +277,7 @@ namespace AMControlWinF.Views.Motion
 
             public StackLightState State { get; private set; }
         }
+
+        #endregion
     }
 }

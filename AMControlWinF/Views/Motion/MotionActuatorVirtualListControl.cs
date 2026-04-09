@@ -10,31 +10,21 @@ namespace AMControlWinF.Views.Motion
     /// <summary>
     /// 执行器虚拟卡片列表。
     ///
-    /// 【层级定位】
-    /// - 所在层：WinForms 显示控件层；
-    /// - 上游来源：MotionActuatorPage / MotionActuatorPageModel；
-    /// - 下游输出：卡片点击选择事件。
+    /// 【当前职责】
+    /// 1. 负责显示左侧执行器卡片集合；
+    /// 2. 使用 `VirtualPanel + VirtualItem` 保持大列表滚动性能；
+    /// 3. 只负责显示和选择，不承担动作执行与状态推导；
+    /// 4. 只依赖列表显示对象 `MotionActuatorListItem`。
     ///
-    /// 【职责】
-    /// 1. 显示左侧执行器卡片集合；
-    /// 2. 使用 VirtualPanel + VirtualItem 保持大列表滚动性能；
-    /// 3. 仅负责“显示”和“选择”，不承担动作执行；
-    /// 4. 不再依赖页面原始快照，而只依赖专门的列表显示对象 MotionActuatorListItem。
-    ///
-    /// 【本轮重构意义】
-    /// 旧实现直接依赖 MotionActuatorViewItem，一个对象同时承担：
-    /// - 原始状态
-    /// - 列表显示
-    /// - 详情显示
-    /// - 动作面板输入
-    ///
-    /// 第一轮适配后：
-    /// - 本控件只依赖 MotionActuatorListItem；
-    /// - 页面层通过 ItemKey 保持选中；
-    /// - 左侧列表与右侧详情/动作区的数据对象开始解耦。
+    /// 【层级关系】
+    /// - 上游：MotionActuatorPage、MotionActuatorPageModel；
+    /// - 当前层：WinForms 左侧列表显示控件；
+    /// - 下游：卡片点击选择事件。
     /// </summary>
     public partial class MotionActuatorVirtualListControl : UserControl
     {
+        #region 构造与绑定
+
         public MotionActuatorVirtualListControl()
         {
             InitializeComponent();
@@ -88,18 +78,12 @@ namespace AMControlWinF.Views.Motion
             if (cardItem == null || cardItem.Item == null)
                 return;
 
-            var handler = ItemSelected;
-            if (handler != null)
-                handler(this, new MotionActuatorItemSelectedEventArgs(cardItem.Item.ItemKey));
+            ItemSelected?.Invoke(this, new MotionActuatorItemSelectedEventArgs(cardItem.Item.ItemKey));
         }
 
         /// <summary>
         /// 判断当前虚拟项集合是否可以原地更新。
-        ///
-        /// 原地更新条件：
-        /// - 数量一致；
-        /// - 每个位置的 ItemKey 一致；
-        /// 这样就可以只刷新内容与选中状态，而不重建 VirtualItem，
+        /// 数量和每个位置的 `ItemKey` 都一致时，只刷新内容与选中态，
         /// 从而尽量保持滚动位置稳定。
         /// </summary>
         private bool CanUpdateInPlace(IList<MotionActuatorListItem> items)
@@ -182,9 +166,13 @@ namespace AMControlWinF.Views.Motion
             }
         }
 
+        #endregion
+
+        #region 事件参数与虚拟卡片
+
         /// <summary>
         /// 列表项选中事件参数。
-        /// 页面层只通过 ItemKey 与页面模型交互，避免控件直接持有页面原始状态对象。
+        /// 页面层只通过 `ItemKey` 与页面模型交互。
         /// </summary>
         public sealed class MotionActuatorItemSelectedEventArgs : EventArgs
         {
@@ -198,11 +186,7 @@ namespace AMControlWinF.Views.Motion
 
         /// <summary>
         /// VirtualPanel 中的执行器卡片。
-        ///
-        /// 【职责】
-        /// 1. 只承载 MotionActuatorListItem；
-        /// 2. 只绘制列表展示所需字段；
-        /// 3. 不依赖详情区和动作区字段。
+        /// 只承载列表显示对象并负责卡片绘制。
         /// </summary>
         private sealed class MotionActuatorVirtualCardItem : VirtualShadowItem
         {
@@ -234,7 +218,6 @@ namespace AMControlWinF.Views.Motion
 
             /// <summary>
             /// 返回每个卡片的固定绘制大小。
-            /// 当前使用紧凑卡片风格，与 DI/DO/多轴总览左侧卡片风格保持一致。
             /// </summary>
             public override Size Size(Canvas g, VirtualPanelArgs e)
             {
@@ -251,13 +234,6 @@ namespace AMControlWinF.Views.Motion
 
             /// <summary>
             /// 绘制单张执行器卡片。
-            ///
-            /// 显示内容：
-            /// - 左上角类型标签
-            /// - 状态标签
-            /// - 标题
-            /// - 内部名称
-            /// - 两行摘要
             /// </summary>
             public override void Paint(Canvas g, VirtualPanelArgs e)
             {
@@ -342,7 +318,6 @@ namespace AMControlWinF.Views.Motion
 
             /// <summary>
             /// 根据类型文本解析对应标签色。
-            /// 第一轮适配中直接使用 TypeText，避免控件依赖原始快照中的 ActuatorType。
             /// </summary>
             private static Color ResolveActuatorTypeColor(string typeText)
             {
@@ -393,5 +368,7 @@ namespace AMControlWinF.Views.Motion
                 return text.Substring(0, maxLength - 1) + "…";
             }
         }
+
+        #endregion
     }
 }

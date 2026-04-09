@@ -10,21 +10,31 @@ namespace AMControlWinF.Views.Motion
     /// <summary>
     /// 执行器控制页面。
     ///
-    /// 【第二阶段收口定位】
-    /// 页面层只保留 WinForms 最直接的职责：
-    /// 1. 页面生命周期；
-    /// 2. 事件接线；
-    /// 3. 调用页面模型；
-    /// 4. 将模型结果 Bind 到控件。
+    /// 【当前职责】
+    /// 1. 负责页面生命周期与页面缓存复用下的初始化控制；
+    /// 2. 负责 WinForms 直接事件接线；
+    /// 3. 调用 `MotionActuatorPageModel` 完成数据加载、筛选、选择与动作执行；
+    /// 4. 将页面模型的显示结果绑定到列表、动作区和详情区控件；
+    /// 5. 控制定时刷新与动作执行期间的页面刷新节奏。
     ///
-    /// 与第一阶段相比，本阶段页面不再直接参与动作面板状态组装，
-    /// 而是把动作选项同步给 PageModel，再直接绑定：
-    /// - _model.PageItems
-    /// - _model.SelectedItemKey
-    /// - _model.SelectedDetail
-    /// - _model.SelectedActionPanel
+    /// 【层级关系】
+    /// - 上游：MainWindow 页面缓存与导航切换；
+    /// - 当前层：WinForms 页面协调层；
+    /// - 下游：MotionActuatorVirtualListControl、MotionActuatorActionPanelControl、
+    ///   MotionActuatorDetailControl。
     ///
-    /// 这样更符合 WinForms 简单、直观、事件驱动的实现风格。
+    /// 【调用关系】
+    /// 1. 页面首次加载时调用 `LoadAsync` 建立初始显示；
+    /// 2. 页面内的筛选、搜索、选中、按钮点击都直接由控件事件驱动；
+    /// 3. 页面只把当前 UI 选项同步给页面模型，然后直接 Bind 模型结果；
+    /// 4. 动作成功后再补一次运行态刷新，保证显示与设备状态一致。
+    ///
+    /// 【设计说明】
+    /// 本页仍保持 WinForms 的直接事件驱动写法：
+    /// - 页面不引入 WPF 式命令系统；
+    /// - 页面不自行拼装动作面板状态；
+    /// - 页面只负责事件、调用与绑定；
+    /// - 页面模型负责状态、规则与动作执行。
     /// </summary>
     public partial class MotionActuatorPage : UserControl
     {
@@ -35,22 +45,19 @@ namespace AMControlWinF.Views.Motion
         private bool _isRefreshing;
         private bool _isExecutingAction;
 
+        #region 构造与初始化
+
         public MotionActuatorPage()
         {
             InitializeComponent();
 
             _model = new MotionActuatorPageModel();
-
             _refreshTimer = new Timer();
             _refreshTimer.Interval = 500;
 
             BindEvents();
 
-            Disposed += delegate
-            {
-                _refreshTimer.Stop();
-                _refreshTimer.Dispose();
-            };
+            Disposed += MotionActuatorPage_Disposed;
         }
 
         private void BindEvents()
@@ -74,6 +81,16 @@ namespace AMControlWinF.Views.Motion
             actuatorActionPanelControl.SecondaryActionRequested += ActuatorActionPanelControl_SecondaryActionRequested;
             actuatorActionPanelControl.StackLightStateRequested += ActuatorActionPanelControl_StackLightStateRequested;
         }
+
+        private void MotionActuatorPage_Disposed(object sender, EventArgs e)
+        {
+            _refreshTimer.Stop();
+            _refreshTimer.Dispose();
+        }
+
+        #endregion
+
+        #region 页面生命周期
 
         private async void MotionActuatorPage_Load(object sender, EventArgs e)
         {
@@ -118,15 +135,35 @@ namespace AMControlWinF.Views.Motion
             }
         }
 
+        private void UpdateRefreshTimerState()
+        {
+            if (IsDisposed)
+                return;
+
+            if (_isFirstLoad && Visible)
+                _refreshTimer.Start();
+            else
+                _refreshTimer.Stop();
+        }
+
+        private async void RefreshTimer_Tick(object sender, EventArgs e)
+        {
+            if (!Visible || _isRefreshing || _isExecutingAction)
+                return;
+
+            await ReloadRuntimeAsync(false);
+        }
+
+        #endregion
+
+        #region 视图绑定
+
         private void RefreshView()
         {
             BindSummary();
-
             UpdateActionPanelOptions();
-
             BindList();
             BindSelection();
-
             UpdateFilterButtonStyles();
         }
 
@@ -159,12 +196,6 @@ namespace AMControlWinF.Views.Motion
                 actuatorActionPanelControl.StackLightWithBuzzer);
         }
 
-        private void ChangeTypeFilter(string typeFilter)
-        {
-            _model.SetTypeFilter(typeFilter);
-            RefreshView();
-        }
-
         private void UpdateFilterButtonStyles()
         {
             ApplyFilterButtonStyle(buttonFilterAll, string.Equals(_model.TypeFilter, "All", StringComparison.OrdinalIgnoreCase));
@@ -180,6 +211,16 @@ namespace AMControlWinF.Views.Motion
                 return;
 
             button.Type = selected ? TTypeMini.Primary : TTypeMini.Default;
+        }
+
+        #endregion
+
+        #region 页面事件处理
+
+        private void ChangeTypeFilter(string typeFilter)
+        {
+            _model.SetTypeFilter(typeFilter);
+            RefreshView();
         }
 
         private void InputSearch_TextChanged(object sender, EventArgs e)
@@ -220,19 +261,25 @@ namespace AMControlWinF.Views.Motion
             await ExecuteActionAsync(_model.ExecuteSecondaryActionAsync);
         }
 
-        private async void ActuatorActionPanelControl_StackLightStateRequested(object sender, MotionActuatorActionPanelControl.StackLightStateRequestedEventArgs e)
+        private async void ActuatorActionPanelControl_StackLightStateRequested(
+            object sender,
+            MotionActuatorActionPanelControl.StackLightStateRequestedEventArgs e)
         {
             if (e == null)
                 return;
 
             UpdateActionPanelOptions();
-
-            await ExecuteActionAsync(()=>
-            {
-                return _model.SetStackLightStateAsync(e.State);
-            });
+            await ExecuteActionAsync(() => _model.SetStackLightStateAsync(e.State));
         }
 
+        #endregion
+
+        #region 页面动作执行
+
+        /// <summary>
+        /// 页面统一动作执行入口。
+        /// 负责控制重复点击、动作后的局部刷新以及成功后的运行态重载。
+        /// </summary>
         private async Task ExecuteActionAsync(Func<Task<Result>> executeFunc)
         {
             if (_isExecutingAction || executeFunc == null)
@@ -255,23 +302,6 @@ namespace AMControlWinF.Views.Motion
             }
         }
 
-        private void UpdateRefreshTimerState()
-        {
-            if (IsDisposed)
-                return;
-
-            if (_isFirstLoad && Visible)
-                _refreshTimer.Start();
-            else
-                _refreshTimer.Stop();
-        }
-
-        private async void RefreshTimer_Tick(object sender, EventArgs e)
-        {
-            if (!Visible || _isRefreshing || _isExecutingAction)
-                return;
-
-            await ReloadRuntimeAsync(false);
-        }
+        #endregion
     }
 }

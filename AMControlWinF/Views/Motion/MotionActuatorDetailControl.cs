@@ -4,33 +4,21 @@ using System.Windows.Forms;
 namespace AMControlWinF.Views.Motion
 {
     /// <summary>
-    /// 执行器右侧下半区详细信息控件。
+    /// 执行器右侧下半区详情控件。
     ///
-    /// 【层级定位】
-    /// - 所在层：WinForms 显示控件层；
-    /// - 上游来源：MotionActuatorPage / MotionActuatorPageModel；
-    /// - 下游职责：只负责把详情数据显示到界面标签。
+    /// 【当前职责】
+    /// 1. 负责显示当前选中执行器的详情信息；
+    /// 2. 只依赖 `MotionActuatorDetailData` 进行整体绑定；
+    /// 3. 不访问原始快照，不参与动作规则与业务校验。
     ///
-    /// 【职责】
-    /// 1. 显示当前选中执行器的详细信息；
-    /// 2. 只依赖专门的详情显示对象 MotionActuatorDetailData；
-    /// 3. 不再依赖页面原始快照或动作面板状态；
-    /// 4. 不承担动作执行、状态推导、业务校验。
-    ///
-    /// 【本轮重构意义】
-    /// 旧实现直接依赖 MotionActuatorViewItem，一个对象同时承担：
-    /// - 原始状态
-    /// - 列表显示
-    /// - 详情显示
-    /// - 动作面板输入
-    ///
-    /// 第一轮适配后：
-    /// - 本控件只依赖 MotionActuatorDetailData；
-    /// - 页面层负责把 SelectedSnapshot 转换成 DetailData；
-    /// - 详情控件与列表/动作面板的数据对象解耦。
+    /// 【层级关系】
+    /// - 上游：MotionActuatorPage、MotionActuatorPageModel；
+    /// - 当前层：WinForms 详情显示控件。
     /// </summary>
     public partial class MotionActuatorDetailControl : UserControl
     {
+        #region 构造与绑定
+
         public MotionActuatorDetailControl()
         {
             InitializeComponent();
@@ -39,10 +27,8 @@ namespace AMControlWinF.Views.Motion
         /// <summary>
         /// 绑定详情显示数据。
         ///
-        /// 说明：
-        /// - data 为页面模型已组装好的详情对象；
-        /// - 控件层不再拼接显示文本；
-        /// - 未选中对象时可直接传入 null，内部自动显示空值。
+        /// 页面只需传入页面模型已组装好的详情对象，
+        /// 控件层不再自行拼接文本。
         /// </summary>
         public void Bind(MotionActuatorDetailData data)
         {
@@ -61,5 +47,7 @@ namespace AMControlWinF.Views.Motion
             labelUpdateTimeValue.Text = data.UpdateTimeText;
             labelLastActionValue.Text = data.LastActionText;
         }
+
+        #endregion
     }
 }

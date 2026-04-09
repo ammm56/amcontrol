@@ -3,21 +3,14 @@
     /// <summary>
     /// 执行器右侧动作面板显示状态。
     ///
-    /// 【层级定位】
-    /// - 所在层：页面显示数据层；
-    /// - 上游来源：MotionActuatorDisplayBuilder + MotionActuatorPageModel；
-    /// - 下游去向：MotionActuatorActionPanelControl。
+    /// 【当前职责】
+    /// 1. 承载动作面板标题、副标题、选项状态与按钮状态；
+    /// 2. 只表达界面应该如何显示，不承担执行逻辑；
+    /// 3. 作为 `MotionActuatorPageModel` 与 `MotionActuatorActionPanelControl` 之间的稳定绑定对象。
     ///
-    /// 【职责】
-    /// 1. 为右侧动作面板提供完整但最小必要的数据；
-    /// 2. 包含标题、副标题、选项状态、动作按钮状态；
-    /// 3. 只表达“界面当前应该怎么显示”，不负责执行逻辑。
-    ///
-    /// 【关系说明】
-    /// - Snapshot 表达原始状态；
-    /// - ActionPanelState 表达动作区显示状态；
-    /// - Validate/Execute 逻辑仍暂时保留在 MotionActuatorPageModel 中；
-    /// - 后续如果动作规则更多，再考虑拆出专门的状态构建器。
+    /// 【层级关系】
+    /// - 上游：MotionActuatorPageModel；
+    /// - 下游：MotionActuatorActionPanelControl。
     /// </summary>
     public sealed class MotionActuatorActionPanelState
     {

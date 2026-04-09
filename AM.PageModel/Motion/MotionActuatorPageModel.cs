@@ -12,36 +12,34 @@ using System.Threading.Tasks;
 namespace AM.PageModel.Motion
 {
     /// <summary>
-    /// WinForms 执行器控制页页面模型。
-    ///
-    /// 【第二阶段收口定位】
-    /// 本类继续保持“页面协调模型”定位，不做完整 MVVM。
-    /// 在第一阶段完成模型拆分后，第二阶段开始收短调用链，
-    /// 让页面层从“参与状态组装”收敛为“只负责事件和 Bind”。
+    /// WinForms 执行器控制页面模型。
     ///
     /// 【当前职责】
     /// 1. 从 MachineContext 构建执行器静态快照；
-    /// 2. 从 RuntimeContext / 执行器服务刷新运行态；
-    /// 3. 维护搜索、类型筛选、当前选中；
-    /// 4. 维护左侧列表显示对象；
-    /// 5. 直接维护右侧详情显示对象；
-    /// 6. 直接维护右侧动作面板显示对象；
-    /// 7. 提供动作校验与执行入口。
+    /// 2. 从 RuntimeContext 与执行器服务刷新运行态；
+    /// 3. 维护搜索、类型筛选、当前选中对象与动作选项；
+    /// 4. 生成左侧列表、右侧详情、右侧动作面板所需显示数据；
+    /// 5. 提供执行器动作校验与执行入口；
+    /// 6. 在动作执行后回写最近操作结果与刷新选中区显示。
     ///
-    /// 【与页面层关系】
-    /// 页面层只读取：
-    /// - PageItems
-    /// - SelectedItemKey
-    /// - SelectedDetail
-    /// - SelectedActionPanel
+    /// 【层级关系】
+    /// - 上游：MachineContext、RuntimeContext、第三层执行器服务；
+    /// - 当前层：页面状态协调、显示数据整理、动作规则与动作执行；
+    /// - 下游：MotionActuatorPage、MotionActuatorVirtualListControl、
+    ///   MotionActuatorActionPanelControl、MotionActuatorDetailControl。
     ///
-    /// 页面层只做：
-    /// - 事件接线
-    /// - 更新选项
-    /// - 调模型动作
-    /// - Bind 到控件
+    /// 【调用关系】
+    /// 1. 页面首次加载或定时刷新时，页面调用 LoadAsync / RefreshAsync；
+    /// 2. 页面模型重建快照、刷新运行态、应用筛选并恢复选中；
+    /// 3. 页面读取 PageItems、SelectedDetail、SelectedActionPanel 直接 Bind；
+    /// 4. 页面事件仍保持 WinForms 直接驱动，动作统一回到本模型执行。
     ///
-    /// 这样更符合 WinForms 简单、直观、事件驱动的实现方式。
+    /// 【设计说明】
+    /// 本类不是 WPF 的完整 MVVM ViewModel，而是 WinForms 下的轻量页面模型：
+    /// - 页面继续保持直接事件驱动；
+    /// - 模型负责维护页面状态与显示结果；
+    /// - 控件只负责显示和抛出事件；
+    /// - 不引入多余的命令系统或额外抽象层。
     /// </summary>
     public class MotionActuatorPageModel : BindableBase
     {
@@ -71,6 +69,8 @@ namespace AM.PageModel.Motion
         private int _gripperCount;
         private int _stackLightCount;
 
+        #region 构造与属性
+
         public MotionActuatorPageModel()
         {
             _cylinderService = new CylinderService();
@@ -95,6 +95,7 @@ namespace AM.PageModel.Motion
 
         /// <summary>
         /// 当前左侧卡片数据。
+        /// 页面直接将该集合绑定到虚拟列表控件。
         /// </summary>
         public IList<MotionActuatorListItem> PageItems
         {
@@ -103,7 +104,7 @@ namespace AM.PageModel.Motion
 
         /// <summary>
         /// 当前选中的原始快照。
-        /// 第二阶段保留公开，便于页面和调试直接查看。
+        /// 便于页面调试和问题定位时直接查看当前完整状态。
         /// </summary>
         public MotionActuatorSnapshot SelectedSnapshot
         {
@@ -113,7 +114,7 @@ namespace AM.PageModel.Motion
 
         /// <summary>
         /// 当前选中项唯一键。
-        /// 列表控件优先使用该值保持选中状态。
+        /// 左侧列表通过该值保持选中状态。
         /// </summary>
         public string SelectedItemKey
         {
@@ -138,16 +139,26 @@ namespace AM.PageModel.Motion
             private set { SetProperty(ref _selectedActionPanel, value); }
         }
 
+        /// <summary>
+        /// 当前搜索关键字。
+        /// </summary>
         public string SearchText
         {
             get { return _filter.SearchText; }
         }
 
+        /// <summary>
+        /// 当前类型筛选。
+        /// 取值约定：All / Cylinder / Vacuum / Gripper / StackLight。
+        /// </summary>
         public string TypeFilter
         {
             get { return _filter.TypeFilter; }
         }
 
+        /// <summary>
+        /// 当前显示总数。
+        /// </summary>
         public int TotalCount
         {
             get { return _totalCount; }
@@ -178,16 +189,30 @@ namespace AM.PageModel.Motion
             private set { SetProperty(ref _stackLightCount, value); }
         }
 
+        #endregion
+
+        #region 页面状态入口
+
+        /// <summary>
+        /// 首次进入页面时加载执行器数据。
+        /// </summary>
         public async Task<Result> LoadAsync()
         {
             return await ReloadAsync();
         }
 
+        /// <summary>
+        /// 定时刷新执行器运行态与当前显示。
+        /// </summary>
         public async Task<Result> RefreshAsync()
         {
             return await ReloadAsync();
         }
 
+        /// <summary>
+        /// 设置搜索关键字并重新应用筛选。
+        /// 页面内搜索只基于当前快照集合，不重新查库。
+        /// </summary>
         public void SetSearchText(string searchText)
         {
             searchText = searchText ?? string.Empty;
@@ -200,6 +225,9 @@ namespace AM.PageModel.Motion
             ApplyFilterAndSelection();
         }
 
+        /// <summary>
+        /// 设置类型筛选并重新应用筛选。
+        /// </summary>
         public void SetTypeFilter(string typeFilter)
         {
             typeFilter = string.IsNullOrWhiteSpace(typeFilter) ? "All" : typeFilter;
@@ -212,6 +240,9 @@ namespace AM.PageModel.Motion
             ApplyFilterAndSelection();
         }
 
+        /// <summary>
+        /// 根据 ItemKey 切换当前选中执行器对象。
+        /// </summary>
         public void SelectItem(string itemKey)
         {
             if (string.IsNullOrWhiteSpace(itemKey))
@@ -227,6 +258,11 @@ namespace AM.PageModel.Motion
             RefreshSelectionViewData();
         }
 
+        /// <summary>
+        /// 更新右侧动作面板选项。
+        /// 页面只负责把当前控件选项同步进来，
+        /// 具体按钮状态与说明文本由页面模型统一重算。
+        /// </summary>
         public void UpdateActionPanelOptions(
             bool waitFeedback,
             bool waitWorkpiece,
@@ -246,55 +282,65 @@ namespace AM.PageModel.Motion
             RefreshSelectionViewData();
         }
 
+        #endregion
+
+        #region 页面动作入口
+
+        /// <summary>
+        /// 基于当前页面选项校验主动作是否允许执行。
+        /// </summary>
         public Result ValidatePrimaryAction()
         {
             return ValidatePrimaryActionCore(_waitFeedback, _waitWorkpiece);
         }
 
+        /// <summary>
+        /// 基于当前页面选项校验副动作是否允许执行。
+        /// </summary>
         public Result ValidateSecondaryAction()
         {
             return ValidateSecondaryActionCore(_waitFeedback);
         }
 
+        /// <summary>
+        /// 基于当前页面选项校验灯塔目标状态是否允许切换。
+        /// </summary>
         public Result ValidateStackLightState(StackLightState state)
         {
             return ValidateStackLightStateCore(state, _stackLightWithBuzzer);
         }
 
+        /// <summary>
+        /// 基于当前页面选项执行主动作。
+        /// </summary>
         public Task<Result> ExecutePrimaryActionAsync()
         {
             return ExecutePrimaryActionAsyncCore(_waitFeedback, _waitWorkpiece);
         }
 
+        /// <summary>
+        /// 基于当前页面选项执行副动作。
+        /// </summary>
         public Task<Result> ExecuteSecondaryActionAsync()
         {
             return ExecuteSecondaryActionAsyncCore(_waitFeedback);
         }
 
+        /// <summary>
+        /// 基于当前页面选项切换灯塔状态。
+        /// </summary>
         public Task<Result> SetStackLightStateAsync(StackLightState state)
         {
             return SetStackLightStateAsyncCore(state, _stackLightWithBuzzer);
         }
 
-        private async Task<Result> ReloadAsync()
-        {
-            return await Task.Run(() =>
-            {
-                var previousSelectedKey = SelectedItemKey;
+        #endregion
 
-                _allSnapshots = BuildAllSnapshotsFromMachineContext();
-                RefreshRuntimeStateCore(_allSnapshots);
-                ApplyFilterAndSelection(previousSelectedKey);
-
-                return Result.Ok("执行器控制页加载成功");
-            });
-        }
+        #region 选中区显示状态构建
 
         /// <summary>
         /// 刷新当前选中对象对应的派生显示数据。
-        /// 统一维护：
-        /// - SelectedDetail
-        /// - SelectedActionPanel
+        /// 统一维护右侧详情区与动作面板状态。
         /// </summary>
         private void RefreshSelectionViewData()
         {
@@ -305,8 +351,8 @@ namespace AM.PageModel.Motion
         }
 
         /// <summary>
-        /// 模型内部统一生成当前动作面板状态。
-        /// 页面层不再直接参与动作面板组装。
+        /// 构建当前选中对象的动作面板状态。
+        /// 页面层只负责 Bind，不再直接拼装按钮状态。
         /// </summary>
         private MotionActuatorActionPanelState BuildActionPanelStateCore()
         {
@@ -340,6 +386,85 @@ namespace AM.PageModel.Motion
             BuildNormalActionButtons(state, _waitFeedback, _waitWorkpiece);
             return state;
         }
+
+        /// <summary>
+        /// 构建普通执行器的主副按钮状态。
+        /// </summary>
+        private void BuildNormalActionButtons(
+            MotionActuatorActionPanelState state,
+            bool waitFeedback,
+            bool waitWorkpiece)
+        {
+            var primaryValidate = ValidatePrimaryActionCore(waitFeedback, waitWorkpiece);
+            var secondaryValidate = ValidateSecondaryActionCore(waitFeedback);
+
+            state.PrimaryButton.Text = ResolvePrimaryActionButtonText(SelectedSnapshot, waitWorkpiece);
+            state.PrimaryButton.Visible = true;
+            state.PrimaryButton.Enabled = primaryValidate.Success;
+            state.PrimaryButton.Type = ResolvePrimaryButtonType(SelectedSnapshot);
+
+            state.SecondaryButton.Text = ResolveSecondaryActionButtonText(SelectedSnapshot);
+            state.SecondaryButton.Visible = SelectedSnapshot != null && SelectedSnapshot.HasSecondaryAction;
+            state.SecondaryButton.Enabled = SelectedSnapshot != null
+                && SelectedSnapshot.HasSecondaryAction
+                && secondaryValidate.Success;
+            state.SecondaryButton.Type = ResolveSecondaryButtonType(SelectedSnapshot);
+
+            state.OffButton.Visible = false;
+            state.IdleButton.Visible = false;
+            state.RunningButton.Visible = false;
+            state.WarningButton.Visible = false;
+            state.AlarmButton.Visible = false;
+        }
+
+        /// <summary>
+        /// 构建灯塔状态按钮组。
+        /// 灯塔场景下会显式隐藏普通执行器主副按钮。
+        /// </summary>
+        private void BuildStackLightButtons(
+            MotionActuatorActionPanelState state,
+            bool stackLightWithBuzzer)
+        {
+            var isOffCurrent = IsStackLightCurrentState(StackLightState.Off, stackLightWithBuzzer);
+            var isIdleCurrent = IsStackLightCurrentState(StackLightState.Idle, stackLightWithBuzzer);
+            var isRunningCurrent = IsStackLightCurrentState(StackLightState.Running, stackLightWithBuzzer);
+            var isWarningCurrent = IsStackLightCurrentState(StackLightState.Warning, stackLightWithBuzzer);
+            var isAlarmCurrent = IsStackLightCurrentState(StackLightState.Alarm, stackLightWithBuzzer);
+
+            state.PrimaryButton.Visible = false;
+            state.PrimaryButton.Enabled = false;
+            state.SecondaryButton.Visible = false;
+            state.SecondaryButton.Enabled = false;
+
+            state.OffButton.Text = isOffCurrent ? "熄灭（当前）" : "熄灭";
+            state.OffButton.Visible = true;
+            state.OffButton.Enabled = ValidateStackLightStateCore(StackLightState.Off, stackLightWithBuzzer).Success;
+            state.OffButton.Type = "Default";
+
+            state.IdleButton.Text = isIdleCurrent ? "空闲（当前）" : "空闲";
+            state.IdleButton.Visible = true;
+            state.IdleButton.Enabled = ValidateStackLightStateCore(StackLightState.Idle, stackLightWithBuzzer).Success;
+            state.IdleButton.Type = isIdleCurrent ? "Success" : "Primary";
+
+            state.RunningButton.Text = isRunningCurrent ? "运行（当前）" : "运行";
+            state.RunningButton.Visible = true;
+            state.RunningButton.Enabled = ValidateStackLightStateCore(StackLightState.Running, stackLightWithBuzzer).Success;
+            state.RunningButton.Type = isRunningCurrent ? "Success" : "Primary";
+
+            state.WarningButton.Text = isWarningCurrent ? "警告（当前）" : "警告";
+            state.WarningButton.Visible = true;
+            state.WarningButton.Enabled = ValidateStackLightStateCore(StackLightState.Warning, stackLightWithBuzzer).Success;
+            state.WarningButton.Type = "Warn";
+
+            state.AlarmButton.Text = isAlarmCurrent ? "报警（当前）" : "报警";
+            state.AlarmButton.Visible = true;
+            state.AlarmButton.Enabled = ValidateStackLightStateCore(StackLightState.Alarm, stackLightWithBuzzer).Success;
+            state.AlarmButton.Type = "Error";
+        }
+
+        #endregion
+
+        #region 动作校验与执行
 
         private Result ValidatePrimaryActionCore(bool waitFeedback, bool waitWorkpiece)
         {
@@ -609,6 +734,30 @@ namespace AM.PageModel.Motion
             return result;
         }
 
+        #endregion
+
+        #region 数据加载与运行态刷新
+
+        /// <summary>
+        /// 首次加载与定时刷新共用的数据刷新入口。
+        /// </summary>
+        private async Task<Result> ReloadAsync()
+        {
+            return await Task.Run(() =>
+            {
+                var previousSelectedKey = SelectedItemKey;
+
+                _allSnapshots = BuildAllSnapshotsFromMachineContext();
+                RefreshRuntimeStateCore(_allSnapshots);
+                ApplyFilterAndSelection(previousSelectedKey);
+
+                return Result.Ok("执行器控制页加载成功");
+            });
+        }
+
+        /// <summary>
+        /// 从 MachineContext 构建当前页面所需的执行器静态快照集合。
+        /// </summary>
         private List<MotionActuatorSnapshot> BuildAllSnapshotsFromMachineContext()
         {
             var machine = MachineContext.Instance;
@@ -790,6 +939,9 @@ namespace AM.PageModel.Motion
                 .ToList();
         }
 
+        /// <summary>
+        /// 刷新全部执行器运行态。
+        /// </summary>
         private void RefreshRuntimeStateCore(IEnumerable<MotionActuatorSnapshot> snapshots)
         {
             foreach (var snapshot in snapshots)
@@ -1084,6 +1236,13 @@ namespace AM.PageModel.Motion
             snapshot.RuntimeUpdateTimeText = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
         }
 
+        #endregion
+
+        #region 筛选与汇总
+
+        /// <summary>
+        /// 基于当前选中键重新应用筛选并尽量恢复选中项。
+        /// </summary>
         private void ApplyFilterAndSelection()
         {
             ApplyFilterAndSelection(SelectedItemKey);
@@ -1123,74 +1282,20 @@ namespace AM.PageModel.Motion
             OnPropertyChanged(nameof(PageItems));
         }
 
-        private void BuildNormalActionButtons(
-            MotionActuatorActionPanelState state,
-            bool waitFeedback,
-            bool waitWorkpiece)
+        private void UpdateSummary(IList<MotionActuatorSnapshot> list)
         {
-            var primaryValidate = ValidatePrimaryActionCore(waitFeedback, waitWorkpiece);
-            var secondaryValidate = ValidateSecondaryActionCore(waitFeedback);
+            var source = list ?? new List<MotionActuatorSnapshot>();
 
-            state.PrimaryButton.Text = ResolvePrimaryActionButtonText(SelectedSnapshot, waitWorkpiece);
-            state.PrimaryButton.Visible = true;
-            state.PrimaryButton.Enabled = primaryValidate.Success;
-            state.PrimaryButton.Type = ResolvePrimaryButtonType(SelectedSnapshot);
-
-            state.SecondaryButton.Text = ResolveSecondaryActionButtonText(SelectedSnapshot);
-            state.SecondaryButton.Visible = SelectedSnapshot != null && SelectedSnapshot.HasSecondaryAction;
-            state.SecondaryButton.Enabled = SelectedSnapshot != null
-                && SelectedSnapshot.HasSecondaryAction
-                && secondaryValidate.Success;
-            state.SecondaryButton.Type = ResolveSecondaryButtonType(SelectedSnapshot);
-
-            state.OffButton.Visible = false;
-            state.IdleButton.Visible = false;
-            state.RunningButton.Visible = false;
-            state.WarningButton.Visible = false;
-            state.AlarmButton.Visible = false;
+            TotalCount = source.Count;
+            CylinderCount = source.Count(x => x.ActuatorType == "Cylinder");
+            VacuumCount = source.Count(x => x.ActuatorType == "Vacuum");
+            GripperCount = source.Count(x => x.ActuatorType == "Gripper");
+            StackLightCount = source.Count(x => x.ActuatorType == "StackLight");
         }
 
-        private void BuildStackLightButtons(
-            MotionActuatorActionPanelState state,
-            bool stackLightWithBuzzer)
-        {
-            var isOffCurrent = IsStackLightCurrentState(StackLightState.Off, stackLightWithBuzzer);
-            var isIdleCurrent = IsStackLightCurrentState(StackLightState.Idle, stackLightWithBuzzer);
-            var isRunningCurrent = IsStackLightCurrentState(StackLightState.Running, stackLightWithBuzzer);
-            var isWarningCurrent = IsStackLightCurrentState(StackLightState.Warning, stackLightWithBuzzer);
-            var isAlarmCurrent = IsStackLightCurrentState(StackLightState.Alarm, stackLightWithBuzzer);
+        #endregion
 
-            state.PrimaryButton.Visible = false;
-            state.PrimaryButton.Enabled = false;
-
-            state.SecondaryButton.Visible = false;
-            state.SecondaryButton.Enabled = false;
-
-            state.OffButton.Text = isOffCurrent ? "熄灭（当前）" : "熄灭";
-            state.OffButton.Visible = true;
-            state.OffButton.Enabled = ValidateStackLightStateCore(StackLightState.Off, stackLightWithBuzzer).Success;
-            state.OffButton.Type = "Default";
-
-            state.IdleButton.Text = isIdleCurrent ? "空闲（当前）" : "空闲";
-            state.IdleButton.Visible = true;
-            state.IdleButton.Enabled = ValidateStackLightStateCore(StackLightState.Idle, stackLightWithBuzzer).Success;
-            state.IdleButton.Type = isIdleCurrent ? "Success" : "Primary";
-
-            state.RunningButton.Text = isRunningCurrent ? "运行（当前）" : "运行";
-            state.RunningButton.Visible = true;
-            state.RunningButton.Enabled = ValidateStackLightStateCore(StackLightState.Running, stackLightWithBuzzer).Success;
-            state.RunningButton.Type = isRunningCurrent ? "Success" : "Primary";
-
-            state.WarningButton.Text = isWarningCurrent ? "警告（当前）" : "警告";
-            state.WarningButton.Visible = true;
-            state.WarningButton.Enabled = ValidateStackLightStateCore(StackLightState.Warning, stackLightWithBuzzer).Success;
-            state.WarningButton.Type = "Warn";
-
-            state.AlarmButton.Text = isAlarmCurrent ? "报警（当前）" : "报警";
-            state.AlarmButton.Visible = true;
-            state.AlarmButton.Enabled = ValidateStackLightStateCore(StackLightState.Alarm, stackLightWithBuzzer).Success;
-            state.AlarmButton.Type = "Error";
-        }
+        #region 工具方法
 
         private bool IsStackLightCurrentState(StackLightState state, bool stackLightWithBuzzer)
         {
@@ -1251,17 +1356,6 @@ namespace AM.PageModel.Motion
                 default:
                     return false;
             }
-        }
-
-        private void UpdateSummary(IList<MotionActuatorSnapshot> list)
-        {
-            var source = list ?? new List<MotionActuatorSnapshot>();
-
-            TotalCount = source.Count;
-            CylinderCount = source.Count(x => x.ActuatorType == "Cylinder");
-            VacuumCount = source.Count(x => x.ActuatorType == "Vacuum");
-            GripperCount = source.Count(x => x.ActuatorType == "Gripper");
-            StackLightCount = source.Count(x => x.ActuatorType == "StackLight");
         }
 
         private static string ResolvePrimaryActionButtonText(MotionActuatorSnapshot snapshot, bool waitWorkpiece)
@@ -1442,5 +1536,7 @@ namespace AM.PageModel.Motion
 
             return "操作失败：" + result.Message;
         }
+
+        #endregion
     }
 }
