@@ -1,5 +1,6 @@
 using AM.Model.Common;
 using AM.PageModel.Motion;
+using AM.PageModel.Motion.Axis;
 using AMControlWinF.Views.MotionConfig;
 using System;
 using System.Linq;
@@ -195,7 +196,7 @@ namespace AMControlWinF.Views.Motion
         /// 4. 绝对定位默认值取当前规划位置；
         /// 5. 相对移动默认值固定回到 10。
         /// </summary>
-        private void ApplyParameterDefaultsIfAxisChanged(MotionAxisPageModel.MotionAxisSelectedViewItem axisItem)
+        private void ApplyParameterDefaultsIfAxisChanged(MotionAxisSelectedViewItem axisItem)
         {
             var logicalAxis = axisItem == null ? (short?)null : axisItem.LogicalAxis;
             if (_lastParameterLogicalAxis == logicalAxis)

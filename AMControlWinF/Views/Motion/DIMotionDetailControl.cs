@@ -1,4 +1,5 @@
 ﻿using AM.PageModel.Motion;
+using AM.PageModel.Motion.DI;
 using AntdUI;
 using System;
 using System.ComponentModel;
@@ -38,7 +39,7 @@ namespace AMControlWinF.Views.Motion
         /// <summary>
         /// 绑定当前选中 DI 项。
         /// </summary>
-        public void Bind(DIMotionPageModel.DIMotionIoViewItem item)
+        public void Bind(DIMotionIoViewItem item)
         {
             if (item == null)
             {
@@ -128,7 +129,7 @@ namespace AMControlWinF.Views.Motion
         /// 生成当前详情快照键。
         /// 相同内容不重复刷新，减少打开页面时的闪烁。
         /// </summary>
-        private static string BuildSnapshotKey(DIMotionPageModel.DIMotionIoViewItem item)
+        private static string BuildSnapshotKey(DIMotionIoViewItem item)
         {
             return string.Join("|", new[]
             {

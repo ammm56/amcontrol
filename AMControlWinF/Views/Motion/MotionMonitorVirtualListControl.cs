@@ -1,4 +1,5 @@
 ﻿using AM.PageModel.Motion;
+using AM.PageModel.Motion.Monitor;
 using AntdUI;
 using System;
 using System.Collections.Generic;
@@ -76,12 +77,12 @@ namespace AMControlWinF.Views.Motion
         /// <param name="items">当前页要显示的轴集合</param>
         /// <param name="selectedItem">当前选中的轴，用于绘制选中态</param>
         public void BindItems(
-            IList<MotionMonitorPageModel.MotionAxisViewItem> items,
-            MotionMonitorPageModel.MotionAxisViewItem selectedItem)
+            IList<MotionAxisViewItem> items,
+            MotionAxisViewItem selectedItem)
         {
             // 防御性处理：
             // 页面层即使传 null，这里也统一转为空集合，避免后面反复判空。
-            var sourceItems = items ?? new List<MotionMonitorPageModel.MotionAxisViewItem>();
+            var sourceItems = items ?? new List<MotionAxisViewItem>();
 
             // 当前选中的逻辑轴号。
             // 这里只比较逻辑轴，不直接比较对象引用，
@@ -159,7 +160,7 @@ namespace AMControlWinF.Views.Motion
         /// - 刷新后即使对象实例变了，逻辑轴仍然不变；
         /// - 用它做结构比对最稳定，成本也最低。
         /// </summary>
-        private bool CanUpdateInPlace(IList<MotionMonitorPageModel.MotionAxisViewItem> items)
+        private bool CanUpdateInPlace(IList<MotionAxisViewItem> items)
         {
             if (items == null)
                 return virtualPanelInputs.Items.Count == 0;
@@ -199,7 +200,7 @@ namespace AMControlWinF.Views.Motion
         /// - 卡片位置不变；
         /// - 只更新 Enable/Disable、Alarm/Moving/Ready、位置值等内容。
         /// </summary>
-        private void UpdateItemsInPlace(IList<MotionMonitorPageModel.MotionAxisViewItem> items, short? selectedLogicalAxis)
+        private void UpdateItemsInPlace(IList<MotionAxisViewItem> items, short? selectedLogicalAxis)
         {
             for (var i = 0; i < items.Count; i++)
             {
@@ -234,7 +235,7 @@ namespace AMControlWinF.Views.Motion
         /// - 避免 Clear/AddRange 过程中重复计算布局；
         /// - 最后一次性恢复布局，提高效率。
         /// </summary>
-        private void RebuildItems(IList<MotionMonitorPageModel.MotionAxisViewItem> items, short? selectedLogicalAxis)
+        private void RebuildItems(IList<MotionAxisViewItem> items, short? selectedLogicalAxis)
         {
             virtualPanelInputs.PauseLayout = true;
             try
@@ -321,19 +322,19 @@ namespace AMControlWinF.Views.Motion
             /// </summary>
             private bool _selected;
 
-            public MotionAxisVirtualCardItem(MotionMonitorPageModel.MotionAxisViewItem item, bool selected)
+            public MotionAxisVirtualCardItem(MotionAxisViewItem item, bool selected)
             {
                 Bind(item, selected);
                 CanClick = true;
             }
 
-            public MotionMonitorPageModel.MotionAxisViewItem Item { get; private set; }
+            public MotionAxisViewItem Item { get; private set; }
 
             /// <summary>
             /// 原地更新卡片数据。
             /// 这里不会重建对象，只更新卡片内容与选中态。
             /// </summary>
-            public void Bind(MotionMonitorPageModel.MotionAxisViewItem item, bool selected)
+            public void Bind(MotionAxisViewItem item, bool selected)
             {
                 Item = item;
                 _selected = selected;

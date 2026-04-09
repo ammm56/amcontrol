@@ -61,8 +61,13 @@
     <Compile Include="Motion\Actuator\MotionActuatorFilter.cs" />
     <Compile Include="Motion\Actuator\MotionActuatorListItem.cs" />
     <Compile Include="Motion\Actuator\MotionActuatorSnapshot.cs" />
+    <Compile Include="Motion\Axis\MotionAxisActionViewItem.cs" />
+    <Compile Include="Motion\Axis\MotionAxisSelectedViewItem.cs" />
     <Compile Include="Motion\DIMotionPageModel.cs" />
+    <Compile Include="Motion\DI\DIMotionIoViewItem.cs" />
     <Compile Include="Motion\DOMotionPageModel.cs" />
+    <Compile Include="Motion\DO\DOMotionIoViewItem.cs" />
+    <Compile Include="Motion\Monitor\MotionAxisViewItem.cs" />
     <Compile Include="Motion\MotionActuatorPageModel.cs" />
     <Compile Include="Motion\MotionAxisPageModel.cs" />
     <Compile Include="Motion\MotionMonitorPageModel.cs" />

@@ -1,4 +1,5 @@
 ﻿using AM.PageModel.Motion;
+using AM.PageModel.Motion.Axis;
 using AntdUI;
 using System;
 using System.Windows.Forms;
@@ -11,7 +12,7 @@ namespace AMControlWinF.Views.Motion
     /// </summary>
     public partial class MotionAxisParameterActionControl : UserControl
     {
-        private MotionAxisPageModel.MotionAxisActionViewItem _item;
+        private MotionAxisActionViewItem _item;
         private TTypeMini _badgeType = TTypeMini.Primary;
         private string _buttonText = string.Empty;
 
@@ -59,7 +60,7 @@ namespace AMControlWinF.Views.Motion
         /// <summary>
         /// 绑定运行态动作项，只刷新状态，不做业务执行。
         /// </summary>
-        public void BindItem(MotionAxisPageModel.MotionAxisActionViewItem item)
+        public void BindItem(MotionAxisActionViewItem item)
         {
             _item = item;
 

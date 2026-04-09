@@ -1,4 +1,5 @@
 ﻿using AM.PageModel.Motion;
+using AM.PageModel.Motion.Monitor;
 using AntdUI;
 using System;
 using System.Reflection;
@@ -38,7 +39,7 @@ namespace AMControlWinF.Views.Motion
         /// 当前已绑定的轴项。
         /// 主要用于外部调试或后续扩展。
         /// </summary>
-        private MotionMonitorPageModel.MotionAxisViewItem _currentItem;
+        private MotionAxisViewItem _currentItem;
 
         public MotionMonitorDetailControl()
         {
@@ -66,7 +67,7 @@ namespace AMControlWinF.Views.Motion
         /// <summary>
         /// 当前已绑定的轴项。
         /// </summary>
-        public MotionMonitorPageModel.MotionAxisViewItem CurrentItem
+        public MotionAxisViewItem CurrentItem
         {
             get { return _currentItem; }
         }
@@ -79,7 +80,7 @@ namespace AMControlWinF.Views.Motion
         /// 2. 如果逻辑轴相同且快照完全一致，则不刷新；
         /// 3. 否则批量更新右侧所有标签。
         /// </summary>
-        public void Bind(MotionMonitorPageModel.MotionAxisViewItem item)
+        public void Bind(MotionAxisViewItem item)
         {
             // 没有选中轴时，显示空态并清空缓存快照。
             if (item == null)
@@ -188,7 +189,7 @@ namespace AMControlWinF.Views.Motion
         /// 生成当前详情内容的快照键。
         /// 只要这些文本都没有变化，就不重复刷新右侧详情区。
         /// </summary>
-        private static string BuildSnapshotKey(MotionMonitorPageModel.MotionAxisViewItem item)
+        private static string BuildSnapshotKey(MotionAxisViewItem item)
         {
             return string.Join("|", new[]
             {

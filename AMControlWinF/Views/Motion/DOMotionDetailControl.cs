@@ -1,4 +1,5 @@
 ﻿using AM.PageModel.Motion;
+using AM.PageModel.Motion.DO;
 using AntdUI;
 using System;
 using System.Drawing;
@@ -50,7 +51,7 @@ namespace AMControlWinF.Views.Motion
         /// <summary>
         /// 绑定当前选中 DO 项。
         /// </summary>
-        public void Bind(DOMotionPageModel.DOMotionIoViewItem item)
+        public void Bind(DOMotionIoViewItem item)
         {
             // 无选中项时显示空态，并清空上一次渲染快照。
             if (item == null)
@@ -153,7 +154,7 @@ namespace AMControlWinF.Views.Motion
         /// 生成当前详情内容的快照键。
         /// 相同快照不重复刷新，从而减少打开页面和定时刷新时的闪烁。
         /// </summary>
-        private static string BuildSnapshotKey(DOMotionPageModel.DOMotionIoViewItem item)
+        private static string BuildSnapshotKey(DOMotionIoViewItem item)
         {
             return string.Join("|", new[]
             {

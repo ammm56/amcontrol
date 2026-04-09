@@ -1,4 +1,5 @@
 ﻿using AM.PageModel.Motion;
+using AM.PageModel.Motion.DO;
 using AntdUI;
 using System;
 using System.Collections.Generic;
@@ -31,9 +32,9 @@ namespace AMControlWinF.Views.Motion
         /// 1. 定时刷新时尽量原地更新，避免 VirtualPanel 重建导致滚动位置回顶；
         /// 2. 仅当分页/筛选/数据结构变化时，才执行整批重建。
         /// </summary>
-        public void BindItems(IList<DOMotionPageModel.DOMotionIoViewItem> items, DOMotionPageModel.DOMotionIoViewItem selectedItem)
+        public void BindItems(IList<DOMotionIoViewItem> items, DOMotionIoViewItem selectedItem)
         {
-            var sourceItems = items ?? new List<DOMotionPageModel.DOMotionIoViewItem>();
+            var sourceItems = items ?? new List<DOMotionIoViewItem>();
             var selectedLogicalBit = selectedItem == null
                 ? (short?)null
                 : selectedItem.LogicalBit;
@@ -67,7 +68,7 @@ namespace AMControlWinF.Views.Motion
                 handler(this, new DOMotionItemSelectedEventArgs(cardItem.Item.LogicalBit));
         }
 
-        private bool CanUpdateInPlace(IList<DOMotionPageModel.DOMotionIoViewItem> items)
+        private bool CanUpdateInPlace(IList<DOMotionIoViewItem> items)
         {
             if (items == null)
                 return virtualPanelInputs.Items.Count == 0;
@@ -88,7 +89,7 @@ namespace AMControlWinF.Views.Motion
             return true;
         }
 
-        private void UpdateItemsInPlace(IList<DOMotionPageModel.DOMotionIoViewItem> items, short? selectedLogicalBit)
+        private void UpdateItemsInPlace(IList<DOMotionIoViewItem> items, short? selectedLogicalBit)
         {
             for (var i = 0; i < items.Count; i++)
             {
@@ -104,7 +105,7 @@ namespace AMControlWinF.Views.Motion
             virtualPanelInputs.Invalidate();
         }
 
-        private void RebuildItems(IList<DOMotionPageModel.DOMotionIoViewItem> items, short? selectedLogicalBit)
+        private void RebuildItems(IList<DOMotionIoViewItem> items, short? selectedLogicalBit)
         {
             virtualPanelInputs.PauseLayout = true;
             try
@@ -149,15 +150,15 @@ namespace AMControlWinF.Views.Motion
 
             private bool _selected;
 
-            public DOMotionVirtualCardItem(DOMotionPageModel.DOMotionIoViewItem item, bool selected)
+            public DOMotionVirtualCardItem(DOMotionIoViewItem item, bool selected)
             {
                 Bind(item, selected);
                 CanClick = true;
             }
 
-            public DOMotionPageModel.DOMotionIoViewItem Item { get; private set; }
+            public DOMotionIoViewItem Item { get; private set; }
 
-            public void Bind(DOMotionPageModel.DOMotionIoViewItem item, bool selected)
+            public void Bind(DOMotionIoViewItem item, bool selected)
             {
                 Item = item;
                 _selected = selected;

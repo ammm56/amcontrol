@@ -1,5 +1,6 @@
 using AM.Core.Context;
 using AM.PageModel.Motion;
+using AM.PageModel.Motion.Axis;
 using System;
 using System.ComponentModel;
 using System.Reflection;
@@ -15,7 +16,7 @@ namespace AMControlWinF.Views.Motion
     {
         private string _lastSnapshotKey = string.Empty;
         private short? _lastLogicalAxis;
-        private MotionAxisPageModel.MotionAxisSelectedViewItem _currentAxis;
+        private MotionAxisSelectedViewItem _currentAxis;
 
         // 先保留这三个属性，兼容当前页面层调用。
         // 后续把参数输入迁到左侧参数动作卡片后，可一并删除。
@@ -41,7 +42,7 @@ namespace AMControlWinF.Views.Motion
             panelEmpty.Visible = true;
         }
 
-        public MotionAxisPageModel.MotionAxisSelectedViewItem CurrentAxis
+        public MotionAxisSelectedViewItem CurrentAxis
         {
             get { return _currentAxis; }
         }
@@ -64,7 +65,7 @@ namespace AMControlWinF.Views.Motion
         /// <summary>
         /// 绑定当前轴实时信息。
         /// </summary>
-        public void Bind(MotionAxisPageModel.MotionAxisSelectedViewItem axisItem)
+        public void Bind(MotionAxisSelectedViewItem axisItem)
         {
             if (axisItem == null)
             {
@@ -146,7 +147,7 @@ namespace AMControlWinF.Views.Motion
             }
         }
 
-        private void ResetDefaultValues(MotionAxisPageModel.MotionAxisSelectedViewItem axisItem)
+        private void ResetDefaultValues(MotionAxisSelectedViewItem axisItem)
         {
             if (axisItem == null)
             {
@@ -172,7 +173,7 @@ namespace AMControlWinF.Views.Motion
                 : "已停止";
         }
 
-        private static string GetStateDisplayText(MotionAxisPageModel.MotionAxisSelectedViewItem axisItem)
+        private static string GetStateDisplayText(MotionAxisSelectedViewItem axisItem)
         {
             if (axisItem == null)
                 return "运行态未建立";
@@ -192,7 +193,7 @@ namespace AMControlWinF.Views.Motion
             return "空闲";
         }
 
-        private static string GetInterlockText(MotionAxisPageModel.MotionAxisSelectedViewItem axisItem)
+        private static string GetInterlockText(MotionAxisSelectedViewItem axisItem)
         {
             if (axisItem == null)
                 return "运行态未建立，禁止操作";
@@ -230,7 +231,7 @@ namespace AMControlWinF.Views.Motion
             valueLabel.Text = string.IsNullOrWhiteSpace(valueText) ? "—" : valueText;
         }
 
-        private static string BuildSnapshotKey(MotionAxisPageModel.MotionAxisSelectedViewItem axisItem)
+        private static string BuildSnapshotKey(MotionAxisSelectedViewItem axisItem)
         {
             return string.Join("|", new[]
             {

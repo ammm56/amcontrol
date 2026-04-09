@@ -1,4 +1,5 @@
 using AM.PageModel.Motion;
+using AM.PageModel.Motion.Axis;
 using AntdUI;
 using System;
 using System.Collections.Generic;
@@ -32,9 +33,9 @@ namespace AMControlWinF.Views.Motion
         /// <summary>
         /// 绑定当前要显示的简单动作卡片集合。
         /// </summary>
-        public void BindItems(IList<MotionAxisPageModel.MotionAxisActionViewItem> items)
+        public void BindItems(IList<MotionAxisActionViewItem> items)
         {
-            var sourceItems = items ?? new List<MotionAxisPageModel.MotionAxisActionViewItem>();
+            var sourceItems = items ?? new List<MotionAxisActionViewItem>();
 
             virtualPanelActions.EmptyText = sourceItems.Count == 0
                 ? "当前筛选条件下没有动作卡片"
@@ -71,7 +72,7 @@ namespace AMControlWinF.Views.Motion
                 handler(this, new MotionAxisActionExecuteRequestedEventArgs(cardItem.Item.ActionKey));
         }
 
-        private bool CanUpdateInPlace(IList<MotionAxisPageModel.MotionAxisActionViewItem> items)
+        private bool CanUpdateInPlace(IList<MotionAxisActionViewItem> items)
         {
             if (items == null)
                 return virtualPanelActions.Items.Count == 0;
@@ -92,7 +93,7 @@ namespace AMControlWinF.Views.Motion
             return true;
         }
 
-        private void UpdateItemsInPlace(IList<MotionAxisPageModel.MotionAxisActionViewItem> items)
+        private void UpdateItemsInPlace(IList<MotionAxisActionViewItem> items)
         {
             for (var i = 0; i < items.Count; i++)
             {
@@ -106,7 +107,7 @@ namespace AMControlWinF.Views.Motion
             virtualPanelActions.Invalidate();
         }
 
-        private void RebuildItems(IList<MotionAxisPageModel.MotionAxisActionViewItem> items)
+        private void RebuildItems(IList<MotionAxisActionViewItem> items)
         {
             virtualPanelActions.PauseLayout = true;
             try
@@ -170,17 +171,17 @@ namespace AMControlWinF.Views.Motion
             /// </summary>
             private Timer _clickFeedbackTimer;
 
-            public MotionAxisActionVirtualCardItem(MotionAxisPageModel.MotionAxisActionViewItem item)
+            public MotionAxisActionVirtualCardItem(MotionAxisActionViewItem item)
             {
                 Bind(item);
             }
 
-            public MotionAxisPageModel.MotionAxisActionViewItem Item { get; private set; }
+            public MotionAxisActionViewItem Item { get; private set; }
 
             /// <summary>
             /// 绑定动作项，并同步是否允许点击。
             /// </summary>
-            public void Bind(MotionAxisPageModel.MotionAxisActionViewItem item)
+            public void Bind(MotionAxisActionViewItem item)
             {
                 Item = item;
                 Tag = item;

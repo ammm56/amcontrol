@@ -1,5 +1,6 @@
 ﻿using AM.Model.Common;
 using AM.PageModel.Motion;
+using AM.PageModel.Motion.DI;
 using AMControlWinF.Views.MotionConfig;
 using AntdUI;
 using System;

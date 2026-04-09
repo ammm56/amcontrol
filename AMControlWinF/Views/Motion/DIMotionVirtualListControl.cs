@@ -1,4 +1,5 @@
 ﻿using AM.PageModel.Motion;
+using AM.PageModel.Motion.DI;
 using AntdUI;
 using System;
 using System.Collections.Generic;
@@ -72,11 +73,11 @@ namespace AMControlWinF.Views.Motion
         /// </summary>
         /// <param name="items">当前页要显示的 DI 点位集合</param>
         /// <param name="selectedItem">当前选中的 DI 点位，用于绘制选中态</param>
-        public void BindItems(IList<DIMotionPageModel.DIMotionIoViewItem> items, DIMotionPageModel.DIMotionIoViewItem selectedItem)
+        public void BindItems(IList<DIMotionIoViewItem> items, DIMotionIoViewItem selectedItem)
         {
             // 防御性处理：
             // 页面层即使传 null，这里也统一转成空集合，避免后面反复判空。
-            var sourceItems = items ?? new List<DIMotionPageModel.DIMotionIoViewItem>();
+            var sourceItems = items ?? new List<DIMotionIoViewItem>();
 
             // 当前选中的逻辑位号。
             // 这里只保存逻辑位，不直接比较对象引用，
@@ -154,7 +155,7 @@ namespace AMControlWinF.Views.Motion
         /// - 刷新后同一张卡片即使对象实例变了，逻辑位仍然不变；
         /// - 用它判断比对最稳定、成本也最低。
         /// </summary>
-        private bool CanUpdateInPlace(IList<DIMotionPageModel.DIMotionIoViewItem> items)
+        private bool CanUpdateInPlace(IList<DIMotionIoViewItem> items)
         {
             if (items == null)
                 return virtualPanelInputs.Items.Count == 0;
@@ -194,7 +195,7 @@ namespace AMControlWinF.Views.Motion
         /// - 卡片位置不变；
         /// - 只更新卡片里面的文字、颜色、ON/OFF 状态、选中边框。
         /// </summary>
-        private void UpdateItemsInPlace(IList<DIMotionPageModel.DIMotionIoViewItem> items, short? selectedLogicalBit)
+        private void UpdateItemsInPlace(IList<DIMotionIoViewItem> items, short? selectedLogicalBit)
         {
             for (var i = 0; i < items.Count; i++)
             {
@@ -229,7 +230,7 @@ namespace AMControlWinF.Views.Motion
         /// - 避免 Clear/AddRange 过程中重复计算布局；
         /// - 最后一次性恢复布局，提高效率。
         /// </summary>
-        private void RebuildItems(IList<DIMotionPageModel.DIMotionIoViewItem> items, short? selectedLogicalBit)
+        private void RebuildItems(IList<DIMotionIoViewItem> items, short? selectedLogicalBit)
         {
             virtualPanelInputs.PauseLayout = true;
             try
@@ -316,7 +317,7 @@ namespace AMControlWinF.Views.Motion
             /// </summary>
             private bool _selected;
 
-            public DIMotionVirtualCardItem(DIMotionPageModel.DIMotionIoViewItem item, bool selected)
+            public DIMotionVirtualCardItem(DIMotionIoViewItem item, bool selected)
             {
                 Bind(item, selected);
 
@@ -328,7 +329,7 @@ namespace AMControlWinF.Views.Motion
             /// 当前卡片绑定的数据项。
             /// Paint() 中显示的所有内容都从这里读取。
             /// </summary>
-            public DIMotionPageModel.DIMotionIoViewItem Item { get; private set; }
+            public DIMotionIoViewItem Item { get; private set; }
 
             /// <summary>
             /// 原地更新卡片数据。
@@ -340,7 +341,7 @@ namespace AMControlWinF.Views.Motion
             ///
             /// 这也是保留滚动位置的关键之一。
             /// </summary>
-            public void Bind(DIMotionPageModel.DIMotionIoViewItem item, bool selected)
+            public void Bind(DIMotionIoViewItem item, bool selected)
             {
                 Item = item;
                 _selected = selected;
