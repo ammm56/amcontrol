@@ -31,22 +31,8 @@ namespace AMControlWinF.Views.Motion
         private readonly MotionActuatorPageModel _model;
         private readonly Timer _refreshTimer;
 
-        /// <summary>
-        /// 是否首次加载。
-        /// 页面缓存复用场景下，避免重复初始化。
-        /// </summary>
         private bool _isFirstLoad;
-
-        /// <summary>
-        /// 当前是否正在刷新运行态。
-        /// 防止定时器重入。
-        /// </summary>
         private bool _isRefreshing;
-
-        /// <summary>
-        /// 当前是否正在执行动作。
-        /// 动作执行期间禁止定时刷新和重复点击。
-        /// </summary>
         private bool _isExecutingAction;
 
         public MotionActuatorPage()
@@ -67,9 +53,6 @@ namespace AMControlWinF.Views.Motion
             };
         }
 
-        /// <summary>
-        /// 绑定页面级事件。
-        /// </summary>
         private void BindEvents()
         {
             Load += MotionActuatorPage_Load;
@@ -77,11 +60,11 @@ namespace AMControlWinF.Views.Motion
 
             _refreshTimer.Tick += RefreshTimer_Tick;
 
-            buttonFilterAll.Click += delegate { ChangeTypeFilter("All"); };
-            buttonFilterCylinder.Click += delegate { ChangeTypeFilter("Cylinder"); };
-            buttonFilterVacuum.Click += delegate { ChangeTypeFilter("Vacuum"); };
-            buttonFilterGripper.Click += delegate { ChangeTypeFilter("Gripper"); };
-            buttonFilterStackLight.Click += delegate { ChangeTypeFilter("StackLight"); };
+            buttonFilterAll.Click += (s, e) => ChangeTypeFilter("All");
+            buttonFilterCylinder.Click += (s, e) => ChangeTypeFilter("Cylinder");
+            buttonFilterVacuum.Click += (s, e) => ChangeTypeFilter("Vacuum");
+            buttonFilterGripper.Click += (s, e) => ChangeTypeFilter("Gripper");
+            buttonFilterStackLight.Click += (s, e) => ChangeTypeFilter("StackLight");
 
             inputSearch.TextChanged += InputSearch_TextChanged;
             actuatorVirtualListControl.ItemSelected += ActuatorVirtualListControl_ItemSelected;
@@ -106,18 +89,12 @@ namespace AMControlWinF.Views.Motion
             UpdateRefreshTimerState();
         }
 
-        /// <summary>
-        /// 首次进入页面时加载数据。
-        /// </summary>
         private async Task InitializePageAsync()
         {
             await ReloadRuntimeAsync(true);
             UpdateRefreshTimerState();
         }
 
-        /// <summary>
-        /// 首次加载和定时刷新共用同一刷新入口。
-        /// </summary>
         private async Task ReloadRuntimeAsync(bool useLoadMethod)
         {
             if (_isRefreshing)
@@ -141,10 +118,6 @@ namespace AMControlWinF.Views.Motion
             }
         }
 
-        /// <summary>
-        /// 将页面模型状态同步到界面。
-        /// 第二阶段开始页面只负责 Bind，不再直接参与动作面板状态组装。
-        /// </summary>
         private void RefreshView()
         {
             BindSummary();
@@ -157,9 +130,6 @@ namespace AMControlWinF.Views.Motion
             UpdateFilterButtonStyles();
         }
 
-        /// <summary>
-        /// 绑定顶部统计信息。
-        /// </summary>
         private void BindSummary()
         {
             labelCylinderCount.Text = _model.CylinderCount.ToString();
@@ -168,9 +138,6 @@ namespace AMControlWinF.Views.Motion
             labelStackLightCount.Text = _model.StackLightCount.ToString();
         }
 
-        /// <summary>
-        /// 绑定左侧列表区。
-        /// </summary>
         private void BindList()
         {
             actuatorVirtualListControl.BindItems(
@@ -178,22 +145,12 @@ namespace AMControlWinF.Views.Motion
                 _model.SelectedItemKey);
         }
 
-        /// <summary>
-        /// 绑定右侧选中对象相关区域。
-        /// 包括：
-        /// - 动作面板
-        /// - 详情区
-        /// </summary>
         private void BindSelection()
         {
             actuatorActionPanelControl.Bind(_model.SelectedActionPanel);
             actuatorDetailControl.Bind(_model.SelectedDetail);
         }
 
-        /// <summary>
-        /// 将动作区当前选项同步到 PageModel。
-        /// 第二阶段开始，动作面板状态由模型内部统一维护。
-        /// </summary>
         private void UpdateActionPanelOptions()
         {
             _model.UpdateActionPanelOptions(
@@ -202,19 +159,12 @@ namespace AMControlWinF.Views.Motion
                 actuatorActionPanelControl.StackLightWithBuzzer);
         }
 
-        /// <summary>
-        /// 切换类型筛选。
-        /// 当前筛选属于页面内状态变化，不需要重新构造页面。
-        /// </summary>
         private void ChangeTypeFilter(string typeFilter)
         {
             _model.SetTypeFilter(typeFilter);
             RefreshView();
         }
 
-        /// <summary>
-        /// 根据当前筛选状态刷新顶部按钮样式。
-        /// </summary>
         private void UpdateFilterButtonStyles()
         {
             ApplyFilterButtonStyle(buttonFilterAll, string.Equals(_model.TypeFilter, "All", StringComparison.OrdinalIgnoreCase));
@@ -238,10 +188,6 @@ namespace AMControlWinF.Views.Motion
             RefreshView();
         }
 
-        /// <summary>
-        /// 左侧卡片选中后，仅更新当前选中对象相关区域。
-        /// 不做整页重载。
-        /// </summary>
         private void ActuatorVirtualListControl_ItemSelected(
             object sender,
             MotionActuatorVirtualListControl.MotionActuatorItemSelectedEventArgs e)
@@ -256,10 +202,6 @@ namespace AMControlWinF.Views.Motion
             BindSelection();
         }
 
-        /// <summary>
-        /// 右侧动作区选项变化后，只同步模型并刷新右侧选中区。
-        /// 不做整页刷新。
-        /// </summary>
         private void ActuatorActionPanelControl_OptionsChanged(object sender, EventArgs e)
         {
             UpdateActionPanelOptions();
@@ -268,36 +210,29 @@ namespace AMControlWinF.Views.Motion
 
         private async void ActuatorActionPanelControl_PrimaryActionRequested(object sender, EventArgs e)
         {
+            UpdateActionPanelOptions();
             await ExecuteActionAsync(_model.ExecutePrimaryActionAsync);
         }
 
         private async void ActuatorActionPanelControl_SecondaryActionRequested(object sender, EventArgs e)
         {
+            UpdateActionPanelOptions();
             await ExecuteActionAsync(_model.ExecuteSecondaryActionAsync);
         }
 
-        private async void ActuatorActionPanelControl_StackLightStateRequested(
-            object sender,
-            MotionActuatorActionPanelControl.StackLightStateRequestedEventArgs e)
+        private async void ActuatorActionPanelControl_StackLightStateRequested(object sender, MotionActuatorActionPanelControl.StackLightStateRequestedEventArgs e)
         {
             if (e == null)
                 return;
 
-            await ExecuteActionAsync(delegate
+            UpdateActionPanelOptions();
+
+            await ExecuteActionAsync(()=>
             {
-                return _model.SetStackLightStateAsync(e.StateKey);
+                return _model.SetStackLightStateAsync(e.State);
             });
         }
 
-        /// <summary>
-        /// 统一动作执行入口。
-        ///
-        /// 设计说明：
-        /// 1. 页面上的所有执行器动作都从这里进入；
-        /// 2. 动作执行期间禁止重复触发；
-        /// 3. 动作执行后先刷新当前右侧显示；
-        /// 4. 成功后再刷新一次运行态，保持页面显示与实际设备状态一致。
-        /// </summary>
         private async Task ExecuteActionAsync(Func<Task<Result>> executeFunc)
         {
             if (_isExecutingAction || executeFunc == null)
@@ -320,10 +255,6 @@ namespace AMControlWinF.Views.Motion
             }
         }
 
-        /// <summary>
-        /// 页面可见时启动定时刷新，不可见时停止。
-        /// 缓存页面复用场景下保持逻辑简单直接。
-        /// </summary>
         private void UpdateRefreshTimerState()
         {
             if (IsDisposed)

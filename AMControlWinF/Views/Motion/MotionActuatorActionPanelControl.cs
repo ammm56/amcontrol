@@ -1,4 +1,5 @@
-﻿using AM.PageModel.Motion.Actuator;
+﻿using AM.Model.MotionCard.Actuator;
+using AM.PageModel.Motion.Actuator;
 using AntdUI;
 using System;
 using System.Drawing;
@@ -21,25 +22,10 @@ namespace AMControlWinF.Views.Motion
     /// 4. 显示普通执行器动作按钮或灯塔状态按钮；
     /// 5. 不直接调用服务层，只抛出事件给页面层处理。
     ///
-    /// 【设计原则】
-    /// 1. 结构固定为三行：
-    ///    - 第一行：当前对象标题 + 副标题；
-    ///    - 第二行：控制选项；
-    ///    - 第三行：动作按钮区；
-    /// 2. 所有动作按钮统一放在同一个 FlowPanel 中；
-    /// 3. 不同执行器只通过 Visible / Enabled / Text / Type 控制显示；
-    /// 4. 外部只通过 Bind(...) 单入口刷新，避免重复状态同步。
-    ///
-    /// 【本轮重构意义】
-    /// 旧实现依赖 PageModel 中嵌套类型：
-    /// - MotionActuatorPageModel.MotionActuatorActionPanelState
-    /// - MotionActuatorPageModel.MotionActuatorButtonState
-    ///
-    /// 第一轮适配后：
-    /// - 控件改为直接依赖独立的页面显示模型：
-    ///   MotionActuatorActionPanelState / MotionActuatorButtonState
-    /// - 动作面板显示对象与 PageModel 主类解耦；
-    /// - 更利于后续持续拆分页面状态模型。
+    /// 【当前收口说明】
+    /// - 动作面板只负责显示状态和抛出事件；
+    /// - 灯塔按钮事件已从 string 改为 StackLightState 枚举；
+    /// - 这样避免字符串中转、TryParse 和额外桥接逻辑。
     /// </summary>
     public partial class MotionActuatorActionPanelControl : UserControl
     {
@@ -118,10 +104,7 @@ namespace AMControlWinF.Views.Motion
                 ApplyButtonState(buttonStateWarning, state.WarningButton);
                 ApplyButtonState(buttonStateAlarm, state.AlarmButton);
 
-                // 根据按钮文本重新计算宽度，适配“（当前）”等文案变化。
                 UpdateButtonWidths();
-
-                // 主动触发布局，保证缓存页面复用时显示稳定。
                 RefreshLayoutState();
             }
             finally
@@ -138,12 +121,11 @@ namespace AMControlWinF.Views.Motion
             buttonPrimary.Click += ButtonPrimary_Click;
             buttonSecondary.Click += ButtonSecondary_Click;
 
-            buttonStateOff.Click += delegate { RaiseStackLightStateRequested("Off"); };
-            buttonStateIdle.Click += delegate { RaiseStackLightStateRequested("Idle"); };
-            buttonStateRunning.Click += delegate { RaiseStackLightStateRequested("Running"); };
-            buttonStateWarning.Click += delegate { RaiseStackLightStateRequested("Warning"); };
-            buttonStateAlarm.Click += delegate { RaiseStackLightStateRequested("Alarm"); };
-
+            buttonStateOff.Click += (s, e) => RaiseStackLightStateRequested(StackLightState.Off);
+            buttonStateIdle.Click += (s, e) => RaiseStackLightStateRequested(StackLightState.Idle);
+            buttonStateRunning.Click += (s, e) => RaiseStackLightStateRequested(StackLightState.Running);
+            buttonStateWarning.Click += (s, e) => RaiseStackLightStateRequested(StackLightState.Warning);
+            buttonStateAlarm.Click += (s, e) => RaiseStackLightStateRequested(StackLightState.Alarm);
             checkStackLightWithBuzzer.CheckedChanged += OptionControl_CheckedChanged;
             checkWaitWorkpiece.CheckedChanged += OptionControl_CheckedChanged;
             checkWaitFeedback.CheckedChanged += OptionControl_CheckedChanged;
@@ -192,23 +174,17 @@ namespace AMControlWinF.Views.Motion
 
         private void ButtonPrimary_Click(object sender, EventArgs e)
         {
-            var handler = PrimaryActionRequested;
-            if (handler != null)
-                handler(this, EventArgs.Empty);
+            PrimaryActionRequested?.Invoke(this, EventArgs.Empty);
         }
 
         private void ButtonSecondary_Click(object sender, EventArgs e)
         {
-            var handler = SecondaryActionRequested;
-            if (handler != null)
-                handler(this, EventArgs.Empty);
+            SecondaryActionRequested?.Invoke(this, EventArgs.Empty);
         }
 
-        private void RaiseStackLightStateRequested(string stateKey)
+        private void RaiseStackLightStateRequested(StackLightState state)
         {
-            var handler = StackLightStateRequested;
-            if (handler != null)
-                handler(this, new StackLightStateRequestedEventArgs(stateKey));
+            StackLightStateRequested?.Invoke(this, new StackLightStateRequestedEventArgs(state));
         }
 
         /// <summary>
@@ -220,9 +196,7 @@ namespace AMControlWinF.Views.Motion
             if (_suppressOptionChanged)
                 return;
 
-            var handler = OptionsChanged;
-            if (handler != null)
-                handler(this, EventArgs.Empty);
+            OptionsChanged?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -294,12 +268,12 @@ namespace AMControlWinF.Views.Motion
 
         public sealed class StackLightStateRequestedEventArgs : EventArgs
         {
-            public StackLightStateRequestedEventArgs(string stateKey)
+            public StackLightStateRequestedEventArgs(StackLightState state)
             {
-                StateKey = stateKey;
+                State = state;
             }
 
-            public string StateKey { get; private set; }
+            public StackLightState State { get; private set; }
         }
     }
 }
