@@ -26,7 +26,13 @@ namespace AM.PageModel.Motion
     /// - 当前层：WinForms 页面模型层；
     /// - 下游：`MotionRuntimeQueryService`、`MotionAxisOperationService`。
     ///
-    /// 【设计说明】
+    /// 【调用关系】
+    /// 1. 页面首次加载和定时刷新时调用 `LoadAsync` / `RefreshAsync`；
+    /// 2. 页面模型统一重建轴快照、动作卡片状态与当前选中轴；
+    /// 3. 页面读取 `PageItems`、`SelectedAxis` 和参数动作项直接绑定到控件；
+    /// 4. 页面收集输入后通过 `ExecuteActionAsync` 回到本模型完成动作执行。
+    ///
+    /// 【架构设计】
     /// 本类保持 WinForms 直接事件驱动下的轻量页面模型定位：
     /// - 页面层负责事件接线与 `Bind`；
     /// - 页面模型负责状态维护、动作校验与动作执行；

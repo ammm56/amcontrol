@@ -1,9 +1,5 @@
-﻿using AM.PageModel.Motion;
-using AM.PageModel.Motion.DI;
-using AntdUI;
+﻿using AM.PageModel.Motion.DI;
 using System;
-using System.ComponentModel;
-using System.Drawing;
 using System.Reflection;
 using System.Windows.Forms;
 
@@ -11,13 +7,53 @@ namespace AMControlWinF.Views.Motion
 {
     /// <summary>
     /// DI 详情展示控件。
-    /// 使用静态标签控件承载详情，避免定时刷新时频繁创建/销毁控件。
+    ///
+    /// 【当前职责】
+    /// 1. 负责显示当前选中 DI 点位的详细信息；
+    /// 2. 使用固定标签控件承载详情内容，避免定时刷新时频繁创建控件；
+    /// 3. 通过快照去重、暂停布局和双缓冲降低高频刷新闪烁；
+    /// 4. 仅负责显示，不参与数据查询、筛选和动作执行。
+    ///
+    /// 【层级关系】
+    /// - 上游：DIMotionPage、DIMotionPageModel；
+    /// - 当前层：WinForms 详情显示控件；
+    /// - 下游：固定标签控件与空态占位区域。
+    ///
+    /// 【调用关系】
+    /// 1. 页面在列表选中变化或定时刷新后调用 `Bind`；
+    /// 2. 控件根据当前项构建快照键并判断是否需要刷新；
+    /// 3. 仅当显示内容变化时才批量更新标签文本；
+    /// 4. 页面无需逐项设置标签，只需传入当前选中 DI 项对象。
+    ///
+    /// 【架构设计】
+    /// 本控件保持 WinForms 下“整体 Bind + 内部差量刷新”的简单设计：
+    /// - 页面模型负责准备显示数据；
+    /// - 控件负责显示与刷新优化；
+    /// - 不引入额外中间状态对象与复杂绘制逻辑。
     /// </summary>
     public partial class DIMotionDetailControl : UserControl
     {
+        #region 字段
+
+        /// <summary>
+        /// 上一次已渲染的逻辑位号。
+        /// 用于判断当前刷新是否仍然是同一个 DI 点。
+        /// </summary>
         private short? _lastLogicalBit;
+
+        /// <summary>
+        /// 上一次已渲染的内容快照。
+        /// 当本次快照与上次完全一致时，直接跳过 UI 刷新，减少闪烁。
+        /// </summary>
         private string _lastSnapshotKey = string.Empty;
 
+        #endregion
+
+        #region 构造与绑定
+
+        /// <summary>
+        /// 初始化详情控件并启用双缓冲显示策略。
+        /// </summary>
         public DIMotionDetailControl()
         {
             InitializeComponent();
@@ -66,9 +102,9 @@ namespace AMControlWinF.Views.Motion
             }
 
             var snapshotKey = BuildSnapshotKey(item);
-            if (_lastLogicalBit.HasValue &&
-                _lastLogicalBit.Value == item.LogicalBit &&
-                string.Equals(_lastSnapshotKey, snapshotKey, StringComparison.Ordinal))
+            if (_lastLogicalBit.HasValue
+                && _lastLogicalBit.Value == item.LogicalBit
+                && string.Equals(_lastSnapshotKey, snapshotKey, StringComparison.Ordinal))
             {
                 return;
             }
@@ -111,6 +147,10 @@ namespace AMControlWinF.Views.Motion
                 Invalidate();
             }
         }
+
+        #endregion
+
+        #region 辅助方法
 
         /// <summary>
         /// 设置一行“键 + 值”标签样式。
@@ -155,18 +195,14 @@ namespace AMControlWinF.Views.Motion
             if (control == null)
                 return;
 
-            try
-            {
-                var property = typeof(Control).GetProperty(
-                    "DoubleBuffered",
-                    BindingFlags.Instance | BindingFlags.NonPublic);
+            var property = typeof(Control).GetProperty(
+                "DoubleBuffered",
+                BindingFlags.Instance | BindingFlags.NonPublic);
 
-                if (property != null)
-                    property.SetValue(control, true, null);
-            }
-            catch
-            {
-            }
+            if (property != null && property.CanWrite)
+                property.SetValue(control, true, null);
         }
+
+        #endregion
     }
 }

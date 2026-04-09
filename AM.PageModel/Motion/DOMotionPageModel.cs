@@ -13,15 +13,36 @@ using System.Threading.Tasks;
 namespace AM.PageModel.Motion
 {
     /// <summary>
-    /// WinForms DO 监视页页面模型。
-    /// 负责：
-    /// 1. 查询 DO 运行态快照；
-    /// 2. 按控制卡与关键字筛选；
-    /// 3. 计算分页、统计信息；
-    /// 4. 维护当前选中项。
+    /// WinForms DO 监视页面模型。
+    ///
+    /// 【当前职责】
+    /// 1. 查询 DO 运行态快照并转换为页面显示集合；
+    /// 2. 维护控制卡筛选、关键字筛选、分页与统计信息；
+    /// 3. 维护当前选中 DO 点位，供右侧详情区直接绑定；
+    /// 4. 将运行时扫描状态转换为页面摘要区显示文本。
+    ///
+    /// 【层级关系】
+    /// - 上游：DOMotionPage；
+    /// - 当前层：WinForms 页面模型层，负责状态整理与显示数据编排；
+    /// - 下游：MotionRuntimeQueryService、ConfigContext、RuntimeContext。
+    ///
+    /// 【调用关系】
+    /// 1. 页面首次加载或定时刷新时调用 LoadAsync / RefreshAsync；
+    /// 2. 页面模型统一重建快照、筛选结果、分页结果与选中项；
+    /// 3. 页面读取 PageItems、SelectedItem、统计属性直接绑定到控件；
+    /// 4. 搜索、分页、控制卡切换仍由页面事件直接驱动回本模型。
+    ///
+    /// 【架构设计】
+    /// 本类延续 WinForms 直接事件驱动下的轻量页面模型设计：
+    /// - 页面负责事件接线与 Bind；
+    /// - 页面模型负责状态维护与显示结果计算；
+    /// - 服务层负责运行态查询；
+    /// - 不引入额外命令系统与多余抽象层。
     /// </summary>
     public class DOMotionPageModel : BindableBase
     {
+        #region 构造与属性
+
         private readonly MotionRuntimeQueryService _runtimeQueryService;
 
         private List<DOMotionIoViewItem> _allItems;
@@ -152,6 +173,10 @@ namespace AM.PageModel.Motion
                 return "第 " + start + " - " + end + " 项，共 " + FilteredCount + " 项";
             }
         }
+
+        #endregion
+
+        #region 页面状态入口
 
         public async Task<Result> LoadAsync()
         {
@@ -291,6 +316,10 @@ namespace AM.PageModel.Motion
             OnPropertyChanged(nameof(SelectedCardText));
         }
 
+        #endregion
+
+        #region 筛选与分页
+
         private void ApplyFilterAndPaging()
         {
             var scopedItems = GetCardScopedItems();
@@ -384,6 +413,10 @@ namespace AM.PageModel.Motion
                 ?? (_pageItems.Count > 0 ? _pageItems[0] : null);
         }
 
+        #endregion
+
+        #region 辅助方法
+
         private void UpdateScanState()
         {
             var runtime = RuntimeContext.Instance.MotionIo;
@@ -435,6 +468,6 @@ namespace AM.PageModel.Motion
             };
         }
 
-        
+        #endregion
     }
 }

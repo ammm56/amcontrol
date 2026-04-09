@@ -1,8 +1,6 @@
 using AM.Core.Context;
-using AM.PageModel.Motion;
 using AM.PageModel.Motion.Axis;
 using System;
-using System.ComponentModel;
 using System.Reflection;
 using System.Windows.Forms;
 
@@ -10,20 +8,49 @@ namespace AMControlWinF.Views.Motion
 {
     /// <summary>
     /// 单轴控制右侧实时监视控件。
-    /// 右侧只显示当前轴的运行状态信息，不承载参数输入。
+    ///
+    /// 【当前职责】
+    /// 1. 负责显示当前选中轴的实时监视信息；
+    /// 2. 使用固定标签控件承载详情内容，避免定时刷新时频繁创建控件；
+    /// 3. 通过快照去重、暂停布局和双缓冲降低高频刷新闪烁；
+    /// 4. 只负责显示监视信息和维护默认参数缓存，不参与动作执行。
+    ///
+    /// 【层级关系】
+    /// - 上游：MotionAxisPage、MotionAxisPageModel；
+    /// - 当前层：WinForms 详情显示控件；
+    /// - 下游：固定标签控件与空态占位区域。
+    ///
+    /// 【调用关系】
+    /// 1. 页面在轴选中变化或定时刷新后调用 `Bind`；
+    /// 2. 控件根据当前项构建快照键并判断是否需要刷新；
+    /// 3. 当切换到新轴时同步重置默认参数缓存；
+    /// 4. 页面仅读取显示结果和默认参数，不逐项操作标签。
+    ///
+    /// 【架构设计】
+    /// 本控件保持 WinForms 下“整体 Bind + 内部差量刷新”的简单设计：
+    /// - 页面模型负责准备显示数据；
+    /// - 控件负责显示与刷新优化；
+    /// - 不引入额外中间状态对象与复杂绘制逻辑。
     /// </summary>
     public partial class MotionAxisDetailControl : UserControl
     {
+        #region 字段
+
         private string _lastSnapshotKey = string.Empty;
         private short? _lastLogicalAxis;
         private MotionAxisSelectedViewItem _currentAxis;
 
-        // 先保留这三个属性，兼容当前页面层调用。
-        // 后续把参数输入迁到左侧参数动作卡片后，可一并删除。
         private string _velocityText = "10";
         private string _targetPositionText = "0";
         private string _moveDistanceText = "10";
 
+        #endregion
+
+        #region 构造与属性
+
+        /// <summary>
+        /// 初始化详情控件并启用双缓冲显示策略。
+        /// </summary>
         public MotionAxisDetailControl()
         {
             InitializeComponent();
@@ -42,25 +69,45 @@ namespace AMControlWinF.Views.Motion
             panelEmpty.Visible = true;
         }
 
+        /// <summary>
+        /// 当前已绑定的轴项。
+        /// 页面层可在需要时读取当前实时快照对象。
+        /// </summary>
         public MotionAxisSelectedViewItem CurrentAxis
         {
             get { return _currentAxis; }
         }
 
+        /// <summary>
+        /// 当前默认速度文本。
+        /// 仅用于兼容页面层读取默认参数。
+        /// </summary>
         public string VelocityText
         {
             get { return _velocityText; }
         }
 
+        /// <summary>
+        /// 当前默认目标位置文本。
+        /// 仅用于兼容页面层读取默认参数。
+        /// </summary>
         public string TargetPositionText
         {
             get { return _targetPositionText; }
         }
 
+        /// <summary>
+        /// 当前默认相对移动距离文本。
+        /// 仅用于兼容页面层读取默认参数。
+        /// </summary>
         public string MoveDistanceText
         {
             get { return _moveDistanceText; }
         }
+
+        #endregion
+
+        #region 绑定与界面刷新
 
         /// <summary>
         /// 绑定当前轴实时信息。
@@ -147,6 +194,13 @@ namespace AMControlWinF.Views.Motion
             }
         }
 
+        #endregion
+
+        #region 辅助方法
+
+        /// <summary>
+        /// 当切换到新轴时，按当前轴运行态重置默认参数缓存。
+        /// </summary>
         private void ResetDefaultValues(MotionAxisSelectedViewItem axisItem)
         {
             if (axisItem == null)
@@ -165,6 +219,9 @@ namespace AMControlWinF.Views.Motion
             _moveDistanceText = "10";
         }
 
+        /// <summary>
+        /// 获取当前轴扫描任务的运行状态文本。
+        /// </summary>
         private static string GetScanStateText()
         {
             var runtime = RuntimeContext.Instance.MotionAxis;
@@ -173,6 +230,9 @@ namespace AMControlWinF.Views.Motion
                 : "已停止";
         }
 
+        /// <summary>
+        /// 根据当前轴运行态生成概要状态文本。
+        /// </summary>
         private static string GetStateDisplayText(MotionAxisSelectedViewItem axisItem)
         {
             if (axisItem == null)
@@ -193,6 +253,9 @@ namespace AMControlWinF.Views.Motion
             return "空闲";
         }
 
+        /// <summary>
+        /// 根据当前轴运行态生成动作联锁提示文本。
+        /// </summary>
         private static string GetInterlockText(MotionAxisSelectedViewItem axisItem)
         {
             if (axisItem == null)
@@ -216,11 +279,9 @@ namespace AMControlWinF.Views.Motion
             return "当前轴允许操作";
         }
 
-        private static string FormatNumber(double value)
-        {
-            return value.ToString("0.###");
-        }
-
+        /// <summary>
+        /// 设置一行“键 + 值”标签文本。
+        /// </summary>
         private static void SetTagRow(
             AntdUI.Label keyLabel,
             AntdUI.Label valueLabel,
@@ -231,6 +292,10 @@ namespace AMControlWinF.Views.Motion
             valueLabel.Text = string.IsNullOrWhiteSpace(valueText) ? "—" : valueText;
         }
 
+        /// <summary>
+        /// 生成当前详情内容的快照键。
+        /// 相同快照不重复刷新，从而减少页面闪烁。
+        /// </summary>
         private static string BuildSnapshotKey(MotionAxisSelectedViewItem axisItem)
         {
             return string.Join("|", new[]
@@ -257,23 +322,23 @@ namespace AMControlWinF.Views.Motion
             });
         }
 
+        /// <summary>
+        /// 通过反射为指定控件开启双缓冲。
+        /// WinForms 某些原生容器未公开 DoubleBuffered，此处统一兼容处理。
+        /// </summary>
         private static void EnableDoubleBuffer(Control control)
         {
             if (control == null)
                 return;
 
-            try
-            {
-                var property = typeof(Control).GetProperty(
-                    "DoubleBuffered",
-                    BindingFlags.Instance | BindingFlags.NonPublic);
+            var property = typeof(Control).GetProperty(
+                "DoubleBuffered",
+                BindingFlags.Instance | BindingFlags.NonPublic);
 
-                if (property != null)
-                    property.SetValue(control, true, null);
-            }
-            catch
-            {
-            }
+            if (property != null && property.CanWrite)
+                property.SetValue(control, true, null);
         }
+
+        #endregion
     }
 }

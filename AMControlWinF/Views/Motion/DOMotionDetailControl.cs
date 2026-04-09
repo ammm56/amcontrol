@@ -1,8 +1,5 @@
-﻿using AM.PageModel.Motion;
-using AM.PageModel.Motion.DO;
-using AntdUI;
+﻿using AM.PageModel.Motion.DO;
 using System;
-using System.Drawing;
 using System.Reflection;
 using System.Windows.Forms;
 
@@ -10,10 +7,34 @@ namespace AMControlWinF.Views.Motion
 {
     /// <summary>
     /// DO 详情展示控件。
-    /// 使用静态标签控件承载详情，避免定时刷新时频繁创建/销毁控件。
+    ///
+    /// 【当前职责】
+    /// 1. 负责显示当前选中 DO 点位的详细信息；
+    /// 2. 使用固定标签控件承载详情内容，避免定时刷新时频繁创建控件；
+    /// 3. 通过快照去重、暂停布局和双缓冲降低高频刷新闪烁；
+    /// 4. 仅负责显示，不参与数据查询、筛选和动作执行。
+    ///
+    /// 【层级关系】
+    /// - 上游：DOMotionPage、DOMotionPageModel；
+    /// - 当前层：WinForms 详情显示控件；
+    /// - 下游：固定标签控件与空态占位区域。
+    ///
+    /// 【调用关系】
+    /// 1. 页面在列表选中变化或定时刷新后调用 `Bind`；
+    /// 2. 控件根据当前项构建快照键并判断是否需要刷新；
+    /// 3. 仅当显示内容变化时才批量更新标签文本；
+    /// 4. 页面无需逐项设置标签，只需传入当前选中 DO 项对象。
+    ///
+    /// 【架构设计】
+    /// 本控件保持 WinForms 下“整体 Bind + 内部差量刷新”的简单设计：
+    /// - 页面模型负责准备显示数据；
+    /// - 控件负责显示与刷新优化；
+    /// - 不引入额外中间状态对象与复杂绘制逻辑。
     /// </summary>
     public partial class DOMotionDetailControl : UserControl
     {
+        #region 字段
+
         /// <summary>
         /// 上一次已渲染的逻辑位号。
         /// 用于判断当前刷新是否仍然是同一个 DO 点。
@@ -26,11 +47,17 @@ namespace AMControlWinF.Views.Motion
         /// </summary>
         private string _lastSnapshotKey = string.Empty;
 
+        #endregion
+
+        #region 构造与绑定
+
+        /// <summary>
+        /// 初始化详情控件并启用双缓冲显示策略。
+        /// </summary>
         public DOMotionDetailControl()
         {
             InitializeComponent();
 
-            // 为整个详情控件开启双缓冲，降低首次显示和内容切换时的闪烁。
             SetStyle(
                 ControlStyles.AllPaintingInWmPaint |
                 ControlStyles.OptimizedDoubleBuffer |
@@ -39,11 +66,8 @@ namespace AMControlWinF.Views.Motion
                 true);
             UpdateStyles();
 
-            // 为滚动宿主开启双缓冲。
-            // panelScroll 中承载了多行标签，定时刷新时这里最容易出现闪烁。
             EnableDoubleBuffer(panelScroll);
 
-            // 初始状态下显示空态，占位提示更稳定。
             panelDetail.Visible = false;
             panelEmpty.Visible = true;
         }
@@ -53,14 +77,11 @@ namespace AMControlWinF.Views.Motion
         /// </summary>
         public void Bind(DOMotionIoViewItem item)
         {
-            // 无选中项时显示空态，并清空上一次渲染快照。
             if (item == null)
             {
                 _lastLogicalBit = null;
                 _lastSnapshotKey = string.Empty;
 
-                // 只有当前确实不是空态时，才执行切换。
-                // 避免重复设置 Visible 造成额外重绘。
                 if (!panelEmpty.Visible)
                 {
                     SuspendLayout();
@@ -80,12 +101,10 @@ namespace AMControlWinF.Views.Motion
                 return;
             }
 
-            // 生成当前数据快照。
-            // 如果逻辑位相同且快照相同，说明页面显示内容没有变化，直接跳过刷新。
             var snapshotKey = BuildSnapshotKey(item);
-            if (_lastLogicalBit.HasValue &&
-                _lastLogicalBit.Value == item.LogicalBit &&
-                string.Equals(_lastSnapshotKey, snapshotKey, StringComparison.Ordinal))
+            if (_lastLogicalBit.HasValue
+                && _lastLogicalBit.Value == item.LogicalBit
+                && string.Equals(_lastSnapshotKey, snapshotKey, StringComparison.Ordinal))
             {
                 return;
             }
@@ -93,25 +112,21 @@ namespace AMControlWinF.Views.Motion
             _lastLogicalBit = item.LogicalBit;
             _lastSnapshotKey = snapshotKey;
 
-            // 批量更新前先暂停布局，减少逐个 Label 改值导致的连续重排与闪烁。
             SuspendLayout();
             panelDetail.SuspendLayout();
             panelHeader.SuspendLayout();
             panelScroll.SuspendLayout();
             try
             {
-                // 首次切入详情态时，仅切换一次可见性。
                 if (!panelDetail.Visible)
                 {
                     panelEmpty.Visible = false;
                     panelDetail.Visible = true;
                 }
 
-                // 头部标题
                 labelTitle.Text = item.DisplayTitle;
                 labelSubTitle.Text = string.IsNullOrWhiteSpace(item.Name) ? "—" : item.Name;
 
-                // 标签行
                 SetTagRow(labelTagLogicKey, labelTagLogicValue, "逻辑位", item.LogicalBit.ToString());
                 SetTagRow(labelTagCategoryKey, labelTagCategoryValue, "分类", item.TypeText);
                 SetTagRow(labelTagCardKey, labelTagCardValue, "控制卡", item.CardText);
@@ -121,7 +136,6 @@ namespace AMControlWinF.Views.Motion
                 SetTagRow(labelTagOutputModeKey, labelTagOutputModeValue, "输出模式", item.OutputModeText);
                 SetTagRow(labelTagLinkKey, labelTagLinkValue, "使用对象", item.LinkObjectDisplayText);
 
-                // 说明与备注
                 labelDescriptionValue.Text = item.DescriptionText;
                 labelRemarkValue.Text = item.RemarkText;
             }
@@ -131,11 +145,13 @@ namespace AMControlWinF.Views.Motion
                 panelHeader.ResumeLayout(false);
                 panelDetail.ResumeLayout(false);
                 ResumeLayout(false);
-
-                // 最后统一重绘一次，避免中间多次闪动。
                 Invalidate();
             }
         }
+
+        #endregion
+
+        #region 辅助方法
 
         /// <summary>
         /// 设置一行“键 + 值”标签文本。
@@ -182,19 +198,14 @@ namespace AMControlWinF.Views.Motion
             if (control == null)
                 return;
 
-            try
-            {
-                var property = typeof(Control).GetProperty(
-                    "DoubleBuffered",
-                    BindingFlags.Instance | BindingFlags.NonPublic);
+            var property = typeof(Control).GetProperty(
+                "DoubleBuffered",
+                BindingFlags.Instance | BindingFlags.NonPublic);
 
-                if (property != null)
-                    property.SetValue(control, true, null);
-            }
-            catch
-            {
-                // 反射失败时忽略，不影响主流程。
-            }
+            if (property != null && property.CanWrite)
+                property.SetValue(control, true, null);
         }
+
+        #endregion
     }
 }

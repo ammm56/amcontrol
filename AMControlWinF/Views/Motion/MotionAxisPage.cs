@@ -24,7 +24,13 @@ namespace AMControlWinF.Views.Motion
     /// - 下游：`MotionAxisPageModel`、`MotionAxisVirtualListControl`、
     ///   `MotionAxisParameterActionControl`、`MotionAxisDetailControl`。
     ///
-    /// 【设计说明】
+    /// 【调用关系】
+    /// 1. 页面首次加载和定时刷新时调用 `LoadAsync` / `RefreshAsync`；
+    /// 2. 页面从模型读取动作卡片、参数卡片和右侧详情数据直接 Bind；
+    /// 3. 页面负责收集参数输入并构建 `MotionAxisActionRequest`；
+    /// 4. 所有动作执行最终都回到 `MotionAxisPageModel` 统一校验和执行。
+    ///
+    /// 【架构设计】
     /// 本页保持 WinForms 直接事件驱动模式：
     /// - 页面只做事件、调用和 Bind；
     /// - 页面模型负责轴状态维护、动作校验与动作执行；
@@ -246,18 +252,18 @@ namespace AMControlWinF.Views.Motion
         /// 选择轴。
         /// 当前先复用现有轴选择窗口。
         /// </summary>
-        private async Task SelectAxisAsync()
+        private Task SelectAxisAsync()
         {
             using (var dialog = new MotionAxisSelectDialog(_model.SelectedLogicalAxis))
             {
                 if (dialog.ShowDialog(FindForm()) != DialogResult.OK)
-                    return;
+                    return Task.CompletedTask;
 
                 _model.SetSelectedLogicalAxis(dialog.SelectedLogicalAxis);
                 RefreshView();
             }
 
-            await Task.CompletedTask;
+            return Task.CompletedTask;
         }
 
         /// <summary>

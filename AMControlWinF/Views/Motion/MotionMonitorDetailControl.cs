@@ -1,6 +1,4 @@
-﻿using AM.PageModel.Motion;
-using AM.PageModel.Motion.Monitor;
-using AntdUI;
+﻿using AM.PageModel.Motion.Monitor;
 using System;
 using System.Reflection;
 using System.Windows.Forms;
@@ -10,19 +8,33 @@ namespace AMControlWinF.Views.Motion
     /// <summary>
     /// 多轴总览右侧详情控件。
     ///
-    /// 设计目标：
-    /// 1. 使用固定标签控件显示选中轴的详细信息；
-    /// 2. 避免每次刷新都动态创建控件，降低闪烁与内存抖动；
-    /// 3. 与 DI/DO 详情区保持一致，使用“快照去重 + SuspendLayout + 双缓冲”策略；
-    /// 4. 当用户在左侧切换轴，或运行态发生变化时，仅刷新真正变化的内容。
+    /// 【当前职责】
+    /// 1. 负责显示当前选中轴的详细信息；
+    /// 2. 使用固定标签控件承载详情内容，避免定时刷新时频繁创建控件；
+    /// 3. 通过快照去重、暂停布局和双缓冲降低高频刷新闪烁；
+    /// 4. 仅负责显示，不参与数据查询、筛选和动作执行。
     ///
-    /// 说明：
-    /// - 该控件不负责数据查询；
-    /// - 只负责将页面模型中的 MotionAxisViewItem 显示到右侧；
-    /// - 页面层传入当前选中项即可。
+    /// 【层级关系】
+    /// - 上游：MotionMonitorPage、MotionMonitorPageModel；
+    /// - 当前层：WinForms 详情显示控件；
+    /// - 下游：固定标签控件与空态占位区域。
+    ///
+    /// 【调用关系】
+    /// 1. 页面在轴选中变化或定时刷新后调用 `Bind`；
+    /// 2. 控件根据当前项构建快照键并判断是否需要刷新；
+    /// 3. 仅当显示内容变化时才批量更新标签文本；
+    /// 4. 页面无需逐项设置标签，只需传入当前选中轴对象。
+    ///
+    /// 【架构设计】
+    /// 本控件保持 WinForms 下“整体 Bind + 内部差量刷新”的简单设计：
+    /// - 页面模型负责准备显示数据；
+    /// - 控件负责显示与刷新优化；
+    /// - 不引入额外中间状态对象与复杂绘制逻辑。
     /// </summary>
     public partial class MotionMonitorDetailControl : UserControl
     {
+        #region 字段
+
         /// <summary>
         /// 上一次已渲染的逻辑轴编号。
         /// 用于判断本次刷新是否仍然是同一条轴详情。
@@ -41,12 +53,17 @@ namespace AMControlWinF.Views.Motion
         /// </summary>
         private MotionAxisViewItem _currentItem;
 
+        #endregion
+
+        #region 构造与属性
+
+        /// <summary>
+        /// 初始化详情控件并启用双缓冲显示策略。
+        /// </summary>
         public MotionMonitorDetailControl()
         {
             InitializeComponent();
 
-            // 为整个详情控件开启双缓冲。
-            // 这样在频繁刷新文本、切换空态/详情态时，闪烁会明显降低。
             SetStyle(
                 ControlStyles.AllPaintingInWmPaint |
                 ControlStyles.OptimizedDoubleBuffer |
@@ -55,11 +72,8 @@ namespace AMControlWinF.Views.Motion
                 true);
             UpdateStyles();
 
-            // 为滚动宿主开启双缓冲。
-            // panelScroll 中承载了多行标签，是最容易发生重绘抖动的区域。
             EnableDoubleBuffer(panelScroll);
 
-            // 初始状态下显示空态。
             panelDetail.Visible = false;
             panelEmpty.Visible = true;
         }
@@ -72,17 +86,15 @@ namespace AMControlWinF.Views.Motion
             get { return _currentItem; }
         }
 
+        #endregion
+
+        #region 绑定与界面刷新
+
         /// <summary>
         /// 绑定当前选中的轴。
-        ///
-        /// 刷新策略：
-        /// 1. 如果没有选中轴，显示空态；
-        /// 2. 如果逻辑轴相同且快照完全一致，则不刷新；
-        /// 3. 否则批量更新右侧所有标签。
         /// </summary>
         public void Bind(MotionAxisViewItem item)
         {
-            // 没有选中轴时，显示空态并清空缓存快照。
             if (item == null)
             {
                 _lastLogicalAxis = null;
@@ -108,12 +120,10 @@ namespace AMControlWinF.Views.Motion
                 return;
             }
 
-            // 生成本次详情快照。
-            // 如果当前逻辑轴和快照都与上一次一致，说明右侧内容无变化，直接跳过。
             var snapshotKey = BuildSnapshotKey(item);
-            if (_lastLogicalAxis.HasValue &&
-                _lastLogicalAxis.Value == item.LogicalAxis &&
-                string.Equals(_lastSnapshotKey, snapshotKey, StringComparison.Ordinal))
+            if (_lastLogicalAxis.HasValue
+                && _lastLogicalAxis.Value == item.LogicalAxis
+                && string.Equals(_lastSnapshotKey, snapshotKey, StringComparison.Ordinal))
             {
                 return;
             }
@@ -122,25 +132,21 @@ namespace AMControlWinF.Views.Motion
             _lastSnapshotKey = snapshotKey;
             _currentItem = item;
 
-            // 批量更新前暂停布局，避免多次文本赋值导致连续重排。
             SuspendLayout();
             panelDetail.SuspendLayout();
             panelHeader.SuspendLayout();
             panelScroll.SuspendLayout();
             try
             {
-                // 首次从空态切到详情态时，只做一次显隐切换。
                 if (!panelDetail.Visible)
                 {
                     panelEmpty.Visible = false;
                     panelDetail.Visible = true;
                 }
 
-                // 标题区
                 labelTitle.Text = item.DisplayTitle;
                 labelSubTitle.Text = item.CardText;
 
-                // 标签行
                 SetTagRow(labelTagLogicalAxisKey, labelTagLogicalAxisValue, "逻辑轴", "L#" + item.LogicalAxis);
                 SetTagRow(labelTagAxisTypeKey, labelTagAxisTypeValue, "轴类型", item.AxisCategoryText);
                 SetTagRow(labelTagPhysicalKey, labelTagPhysicalValue, "物理映射", item.PhysicalText);
@@ -157,7 +163,6 @@ namespace AMControlWinF.Views.Motion
                 SetTagRow(labelTagDefaultVelKey, labelTagDefaultVelValue, "默认速度", item.DefaultVelocityText);
                 SetTagRow(labelTagJogVelKey, labelTagJogVelValue, "点动速度", item.JogVelocityText);
                 SetTagRow(labelTagLastUpdateKey, labelTagLastUpdateValue, "最后更新", item.UpdateTimeText);
-
             }
             finally
             {
@@ -165,11 +170,13 @@ namespace AMControlWinF.Views.Motion
                 panelHeader.ResumeLayout(false);
                 panelDetail.ResumeLayout(false);
                 ResumeLayout(false);
-
-                // 最后统一重绘一次，避免中间多次闪动。
                 Invalidate();
             }
         }
+
+        #endregion
+
+        #region 辅助方法
 
         /// <summary>
         /// 设置一行“键 + 值”标签文本。
@@ -223,19 +230,14 @@ namespace AMControlWinF.Views.Motion
             if (control == null)
                 return;
 
-            try
-            {
-                var property = typeof(Control).GetProperty(
-                    "DoubleBuffered",
-                    BindingFlags.Instance | BindingFlags.NonPublic);
+            var property = typeof(Control).GetProperty(
+                "DoubleBuffered",
+                BindingFlags.Instance | BindingFlags.NonPublic);
 
-                if (property != null)
-                    property.SetValue(control, true, null);
-            }
-            catch
-            {
-                // 忽略反射失败，不影响主流程。
-            }
+            if (property != null && property.CanWrite)
+                property.SetValue(control, true, null);
         }
+
+        #endregion
     }
 }

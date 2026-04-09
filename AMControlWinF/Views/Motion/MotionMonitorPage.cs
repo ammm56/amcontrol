@@ -10,16 +10,34 @@ namespace AMControlWinF.Views.Motion
 {
     /// <summary>
     /// 多轴总览页面。
-    /// 第一阶段先完成：
-    /// 1. 页面级数据刷新逻辑；
-    /// 2. 控制卡筛选、搜索、分页；
-    /// 3. 左侧虚拟列表与右侧详情占位控件绑定；
-    /// 4. 500ms 定时低频刷新运行态。
     ///
-    /// 下一步再补 Designer 和更完整的详情布局。
+    /// 【当前职责】
+    /// 1. 负责页面生命周期、缓存页复用下的首次加载控制与低频定时刷新；
+    /// 2. 负责 WinForms 直接事件接线；
+    /// 3. 调用 `MotionMonitorPageModel` 完成数据加载、筛选、分页和选中维护；
+    /// 4. 将页面模型结果绑定到顶部摘要区、左侧轴列表和右侧详情区。
+    ///
+    /// 【层级关系】
+    /// - 上游：MainWindow 页面缓存与导航切换；
+    /// - 当前层：WinForms 页面协调层；
+    /// - 下游：MotionMonitorPageModel、MotionMonitorVirtualListControl、MotionMonitorDetailControl。
+    ///
+    /// 【调用关系】
+    /// 1. 页面首次进入时调用 `LoadAsync` 建立初始显示；
+    /// 2. 定时器与页面交互事件都回到页面模型重建显示结果；
+    /// 3. 页面只负责读取模型属性并调用子控件 `Bind`；
+    /// 4. 控制卡选择、搜索、分页、轴选中切换都保持 WinForms 直接事件驱动。
+    ///
+    /// 【架构设计】
+    /// 本页保持 WinForms 下“事件 + 页面模型 + 绑定”的轻量实现：
+    /// - 页面不直接计算筛选与分页；
+    /// - 页面模型不直接访问控件；
+    /// - 控件只负责显示与回传用户操作。
     /// </summary>
     public partial class MotionMonitorPage : UserControl
     {
+        #region 构造与初始化
+
         private readonly MotionMonitorPageModel _model;
         private readonly Timer _refreshTimer;
 
@@ -34,7 +52,7 @@ namespace AMControlWinF.Views.Motion
             _model = new MotionMonitorPageModel();
 
             _refreshTimer = new Timer();
-            _refreshTimer.Interval = 100;
+            _refreshTimer.Interval = 500;
 
             InitializePagination();
             BindEvents();
@@ -64,6 +82,10 @@ namespace AMControlWinF.Views.Motion
         {
             paginationAxes.PageSizeOptions = new int[] { 6, 12, 24, 36, 48, 96 };
         }
+
+        #endregion
+
+        #region 页面生命周期
 
         private async void MotionMonitorPage_Load(object sender, EventArgs e)
         {
@@ -114,6 +136,32 @@ namespace AMControlWinF.Views.Motion
             }
         }
 
+        /// <summary>
+        /// 页面可见时启动刷新，不可见时停止，避免缓存页在后台持续刷新。
+        /// </summary>
+        private void UpdateRefreshTimerState()
+        {
+            if (IsDisposed)
+                return;
+
+            if (_isFirstLoad && Visible)
+                _refreshTimer.Start();
+            else
+                _refreshTimer.Stop();
+        }
+
+        private async void RefreshTimer_Tick(object sender, EventArgs e)
+        {
+            if (!Visible || _isRefreshing)
+                return;
+
+            await ReloadRuntimeAsync(false);
+        }
+
+        #endregion
+
+        #region 视图绑定
+
         private void RefreshView()
         {
             labelSelectedCard.Text = "当前：" + _model.SelectedCardText;
@@ -145,45 +193,27 @@ namespace AMControlWinF.Views.Motion
             }
         }
 
-        /// <summary>
-        /// 页面可见时启动刷新，不可见时停止。
-        /// </summary>
-        private void UpdateRefreshTimerState()
-        {
-            if (IsDisposed)
-                return;
+        #endregion
 
-            if (_isFirstLoad && Visible)
-                _refreshTimer.Start();
-            else
-                _refreshTimer.Stop();
-        }
-
-        private async void RefreshTimer_Tick(object sender, EventArgs e)
-        {
-            if (!Visible || _isRefreshing)
-                return;
-
-            await ReloadRuntimeAsync(false);
-        }
+        #region 页面事件处理
 
         /// <summary>
         /// 选择控制卡。
         /// 第一阶段先复用现有控制卡选择窗口。
         /// 下一阶段如需复用控制卡配置页 UserControl，可在此替换弹窗实现。
         /// </summary>
-        private async Task SelectCardAsync()
+        private Task SelectCardAsync()
         {
             using (var dialog = new MotionCardSelectDialog(_model.SelectedCardId))
             {
                 if (dialog.ShowDialog(FindForm()) != DialogResult.OK)
-                    return;
+                    return Task.CompletedTask;
 
                 _model.SetSelectedCardId(dialog.SelectedCardId);
                 RefreshView();
             }
 
-            await Task.CompletedTask;
+            return Task.CompletedTask;
         }
 
         private void InputSearch_TextChanged(object sender, EventArgs e)
@@ -210,5 +240,7 @@ namespace AMControlWinF.Views.Motion
             motionMonitorVirtualListControl.BindItems(_model.PageItems, _model.SelectedItem);
             motionMonitorDetailControl.Bind(_model.SelectedItem);
         }
+
+        #endregion
     }
 }
