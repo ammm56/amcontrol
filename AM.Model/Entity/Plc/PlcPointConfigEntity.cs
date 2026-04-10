@@ -6,8 +6,8 @@ namespace AM.Model.Entity.Plc
     /// PLC 点位配置表。
     /// 当前版本采用最简模型：
     /// - 直接使用 Address 保存完整协议地址；
-    /// - 不再拆分 AreaType、BitIndex；
-    /// - 不在点位主表中承载缩放、偏移、批量规划等处理逻辑。
+    /// - 长度统一使用 Length；
+    /// - 不再拆分字符串长度、数组长度、单位、读取模式等扩展字段。
     /// </summary>
     [SugarTable("plc_point")]
     public class PlcPointConfigEntity
@@ -44,55 +44,32 @@ namespace AM.Model.Entity.Plc
         /// <summary>
         /// 完整地址文本。
         /// 直接保存协议可识别地址，例如：
-        /// - Modbus: 00001 / 10001 / 30001 / 40001
+        /// - Modbus: 00001 / 40001 / 40040
         /// - S7: DB1.0 / DB1.20 / M10.0
-        /// - MC: D200 / M100 / X0 / Y10
         /// </summary>
         public string Address { get; set; }
 
         /// <summary>
         /// 数据类型。
-        /// 例如：Bool / Short / UShort / Int / UInt / Float / Double / String / ByteArray。
+        /// 统一使用字符串表示，例如：
+        /// bool、uint8、int8、uint16、int16、uint32、int32、uint64、int64、float、double、string。
+        /// 数组类型使用 type[] 表示。
         /// </summary>
         public string DataType { get; set; }
 
         /// <summary>
-        /// 字符串长度。
-        /// DataType=String 时使用。
+        /// 长度。
+        /// - 标量：1
+        /// - 字符串：字符长度
+        /// - 数组：元素个数
         /// </summary>
-        public int StringLength { get; set; }
-
-        /// <summary>
-        /// 数组长度。
-        /// DataType=ByteArray 时使用。
-        /// </summary>
-        public int ArrayLength { get; set; }
-
-        /// <summary>
-        /// 单位。
-        /// 仅用于显示，不参与协议读写。
-        /// </summary>
-        [SugarColumn(IsNullable = true)]
-        public string Unit { get; set; }
+        public int Length { get; set; }
 
         /// <summary>
         /// 访问模式。
         /// ReadOnly / ReadWrite / WriteOnly。
         /// </summary>
         public string AccessMode { get; set; }
-
-        /// <summary>
-        /// 读取策略。
-        /// 当前阶段推荐统一使用 Single。
-        /// </summary>
-        public string ReadMode { get; set; }
-
-        /// <summary>
-        /// 字符串编码。
-        /// 例如：ASCII / UTF8 / Unicode。
-        /// </summary>
-        [SugarColumn(IsNullable = true)]
-        public string StringEncoding { get; set; }
 
         /// <summary>
         /// 是否启用。

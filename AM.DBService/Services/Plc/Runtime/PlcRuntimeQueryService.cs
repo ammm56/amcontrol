@@ -16,11 +16,6 @@ namespace AM.DBService.Services.Plc.Runtime
     /// 对上层提供两类能力：
     /// 1. 扫描控制：启动、停止、单轮扫描；
     /// 2. 运行态查询：站状态、点位状态、全量快照。
-    ///
-    /// 设计说明：
-    /// - 页面层不直接访问 PlcScanWorker，统一通过本服务获取运行态；
-    /// - 查询优先返回 RuntimeContext 中的最新快照；
-    /// - 若尚未扫描，也会基于 ConfigContext 补齐静态定义，避免状态页初次进入时列表为空。
     /// </summary>
     public class PlcRuntimeQueryService : ServiceBase, IPlcRuntimeService
     {
@@ -55,33 +50,21 @@ namespace AM.DBService.Services.Plc.Runtime
             _plcScanWorker = plcScanWorker;
         }
 
-        /// <summary>
-        /// 启动 PLC 扫描服务。
-        /// </summary>
         public Result Start()
         {
             return _plcScanWorker.Start();
         }
 
-        /// <summary>
-        /// 停止 PLC 扫描服务。
-        /// </summary>
         public Result Stop()
         {
             return _plcScanWorker.Stop();
         }
 
-        /// <summary>
-        /// 手动执行一轮扫描。
-        /// </summary>
         public Result ScanOnce()
         {
             return _plcScanWorker.ScanOnce();
         }
 
-        /// <summary>
-        /// 查询指定 PLC 站运行态。
-        /// </summary>
         public Result<PlcStationRuntimeSnapshot> QueryStation(string plcName)
         {
             try
@@ -118,9 +101,6 @@ namespace AM.DBService.Services.Plc.Runtime
             }
         }
 
-        /// <summary>
-        /// 查询指定 PLC 点位运行态。
-        /// </summary>
         public Result<PlcPointRuntimeSnapshot> QueryPoint(string pointName)
         {
             try
@@ -157,9 +137,6 @@ namespace AM.DBService.Services.Plc.Runtime
             }
         }
 
-        /// <summary>
-        /// 查询全部 PLC 站运行态。
-        /// </summary>
         public Result<PlcStationRuntimeSnapshot> QueryAllStations()
         {
             try
@@ -208,9 +185,6 @@ namespace AM.DBService.Services.Plc.Runtime
             }
         }
 
-        /// <summary>
-        /// 查询全部 PLC 点位运行态。
-        /// </summary>
         public Result<PlcPointRuntimeSnapshot> QueryAllPoints()
         {
             try
@@ -260,9 +234,6 @@ namespace AM.DBService.Services.Plc.Runtime
             }
         }
 
-        /// <summary>
-        /// 创建默认站点快照。
-        /// </summary>
         private static PlcStationRuntimeSnapshot CreateDefaultStationSnapshot(PlcStationConfig station, PlcRuntimeState runtime)
         {
             return new PlcStationRuntimeSnapshot
@@ -284,9 +255,6 @@ namespace AM.DBService.Services.Plc.Runtime
             };
         }
 
-        /// <summary>
-        /// 合并站点配置与运行时快照。
-        /// </summary>
         private static PlcStationRuntimeSnapshot MergeStationSnapshot(PlcStationConfig station, PlcStationRuntimeSnapshot runtimeSnapshot)
         {
             var snapshot = runtimeSnapshot == null ? new PlcStationRuntimeSnapshot() : runtimeSnapshot.Clone();
@@ -303,9 +271,6 @@ namespace AM.DBService.Services.Plc.Runtime
             return snapshot;
         }
 
-        /// <summary>
-        /// 创建默认点位快照。
-        /// </summary>
         private static PlcPointRuntimeSnapshot CreateDefaultPointSnapshot(PlcPointConfig point, PlcRuntimeState runtime)
         {
             return new PlcPointRuntimeSnapshot
@@ -326,9 +291,6 @@ namespace AM.DBService.Services.Plc.Runtime
             };
         }
 
-        /// <summary>
-        /// 合并点位配置与运行时快照。
-        /// </summary>
         private static PlcPointRuntimeSnapshot MergePointSnapshot(PlcPointConfig point, PlcPointRuntimeSnapshot runtimeSnapshot)
         {
             var snapshot = runtimeSnapshot == null ? new PlcPointRuntimeSnapshot() : runtimeSnapshot.Clone();

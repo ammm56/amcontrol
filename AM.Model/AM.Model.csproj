@@ -162,5 +162,11 @@
   <ItemGroup>
     <Folder Include="Entity\Vision\" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ProtocolLib\Common\CommonLib\CommonLib.csproj">
+      <Project>{146ef3fa-e6c7-41e9-715d-93015b0e875a}</Project>
+      <Name>CommonLib</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

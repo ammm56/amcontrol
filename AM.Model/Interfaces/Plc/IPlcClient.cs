@@ -1,11 +1,13 @@
 ﻿using AM.Model.Common;
 using AM.Model.Plc;
+using ProtocolLib.CommonLib.Model;
 
 namespace AM.Model.Interfaces.Plc
 {
     /// <summary>
     /// AM 侧统一 PLC 客户端门面。
     /// 负责统一上层调用入口，不负责协议行为实现。
+    /// 当前版本直接复用 ProtocolLib 的点位请求/结果模型。
     /// </summary>
     public interface IPlcClient
     {
@@ -51,22 +53,14 @@ namespace AM.Model.Interfaces.Plc
 
         /// <summary>
         /// 点位读取。
+        /// 单值、字符串、数组统一使用该接口。
         /// </summary>
-        Result<PlcPointReadResult> ReadPoint(PlcPointReadRequest request);
+        Result<M_PointData> ReadPoint(M_PointReadRequest request);
 
         /// <summary>
         /// 点位写入。
+        /// 单值、字符串、数组统一使用该接口。
         /// </summary>
-        Result<PlcPointReadResult> WritePoint(PlcPointWriteRequest request);
-
-        /// <summary>
-        /// 块读取。
-        /// </summary>
-        Result<PlcRawDataBlock> ReadBlock(PlcBlockReadRequest request);
-
-        /// <summary>
-        /// 块写入。
-        /// </summary>
-        Result<PlcRawDataBlock> WriteBlock(PlcBlockWriteRequest request);
+        Result<M_PointData> WritePoint(M_PointWriteRequest request);
     }
 }

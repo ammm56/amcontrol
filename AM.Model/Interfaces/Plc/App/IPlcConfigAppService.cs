@@ -5,9 +5,10 @@ namespace AM.Model.Interfaces.Plc.App
 {
     /// <summary>
     /// PLC 配置应用服务接口。
-    /// 负责将数据库中的 PLC 配置装配到 ConfigContext / MachineContext。
-    /// 该接口虽然由数据库配置装配实现，但其职责属于 PLC 领域应用层，
-    /// 因此放置在 Interfaces\Plc 下而不是 Interfaces\DB 下。
+    /// 负责将数据库中的 PLC 配置装配到 ConfigContext 与 MachineContext。
+    /// 当前版本 PLC 配置仅包含：
+    /// - 站配置
+    /// - 点位配置
     /// </summary>
     public interface IPlcConfigAppService
     {

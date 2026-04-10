@@ -6,9 +6,9 @@ using AM.Model.Interfaces.Plc;
 using AM.Model.Interfaces.Plc.Runtime;
 using AM.Model.Plc;
 using AM.Model.Runtime;
+using ProtocolLib.CommonLib.Model;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,35 +21,16 @@ namespace AM.DBService.Services.Plc.Runtime
     /// 1. 按站点逐个扫描；
     /// 2. 按点位逐个读取；
     /// 3. Address 直接表达完整协议地址；
-    /// 4. 不做 AreaType、BitIndex、块切片与复杂映射；
+    /// 4. 统一使用 Length；
     /// 5. 扫描过程中复用 MachineContext 中的 PLC 客户端；
     /// 6. 配置采用引用级缓存，避免每轮重复分组装配。
     /// </summary>
     public class PlcScanWorker : ServiceBase, IPlcScanWorker
     {
-        /// <summary>
-        /// 默认主循环周期，单位毫秒。
-        /// </summary>
         private const int DefaultLoopIntervalMs = 100;
-
-        /// <summary>
-        /// 最小主循环周期，单位毫秒。
-        /// </summary>
         private const int MinLoopIntervalMs = 20;
-
-        /// <summary>
-        /// 点位质量：成功。
-        /// </summary>
         private const string QualityGood = "Good";
-
-        /// <summary>
-        /// 点位质量：站点断开。
-        /// </summary>
         private const string QualityDisconnected = "Disconnected";
-
-        /// <summary>
-        /// 点位质量：读取失败。
-        /// </summary>
         private const string QualityError = "Error";
 
         /// <summary>
@@ -59,7 +40,6 @@ namespace AM.DBService.Services.Plc.Runtime
 
         /// <summary>
         /// 扫描同步锁。
-        /// 确保同一时刻只有一轮扫描在运行。
         /// </summary>
         private readonly object _scanSyncRoot;
 
@@ -85,7 +65,6 @@ namespace AM.DBService.Services.Plc.Runtime
 
         /// <summary>
         /// 当前缓存对应的 PLC 配置对象引用。
-        /// 仅当配置对象整体被替换时重建缓存。
         /// </summary>
         private PlcConfig _cachedPlcConfig;
 
@@ -126,17 +105,11 @@ namespace AM.DBService.Services.Plc.Runtime
             LastError = string.Empty;
         }
 
-        /// <summary>
-        /// 后台工作单元名称。
-        /// </summary>
         public string Name
         {
             get { return "PlcScanWorker"; }
         }
 
-        /// <summary>
-        /// 当前是否正在运行。
-        /// </summary>
         public bool IsRunning
         {
             get
@@ -148,19 +121,10 @@ namespace AM.DBService.Services.Plc.Runtime
             }
         }
 
-        /// <summary>
-        /// 最近一次成功运行时间。
-        /// </summary>
         public DateTime? LastRunTime { get; private set; }
 
-        /// <summary>
-        /// 最近一次错误信息。
-        /// </summary>
         public string LastError { get; private set; }
 
-        /// <summary>
-        /// 启动 PLC 扫描。
-        /// </summary>
         public Result Start()
         {
             lock (_stateSyncRoot)
@@ -184,17 +148,11 @@ namespace AM.DBService.Services.Plc.Runtime
             return OkLogOnly("PLC 扫描工作单元启动成功");
         }
 
-        /// <summary>
-        /// 异步停止 PLC 扫描。
-        /// </summary>
         public Task<Result> StopAsync()
         {
             return Task.FromResult(Stop());
         }
 
-        /// <summary>
-        /// 同步停止 PLC 扫描。
-        /// </summary>
         public Result Stop()
         {
             CancellationTokenSource cts;
@@ -236,9 +194,6 @@ namespace AM.DBService.Services.Plc.Runtime
             return OkLogOnly("PLC 扫描工作单元已停止");
         }
 
-        /// <summary>
-        /// 手动执行单轮完整扫描。
-        /// </summary>
         public Result ScanOnce()
         {
             try
@@ -264,9 +219,6 @@ namespace AM.DBService.Services.Plc.Runtime
             }
         }
 
-        /// <summary>
-        /// 后台扫描循环。
-        /// </summary>
         private async Task ScanLoopAsync(CancellationToken cancellationToken)
         {
             try
@@ -310,9 +262,6 @@ namespace AM.DBService.Services.Plc.Runtime
             }
         }
 
-        /// <summary>
-        /// 执行一轮扫描调度。
-        /// </summary>
         private Result ScanStations(bool forceAll, DateTime now)
         {
             lock (_scanSyncRoot)
@@ -350,10 +299,6 @@ namespace AM.DBService.Services.Plc.Runtime
             }
         }
 
-        /// <summary>
-        /// 刷新扫描缓存。
-        /// 仅在配置对象引用变化时重建。
-        /// </summary>
         private void RefreshScanCacheIfNeeded()
         {
             PlcConfig plcConfig = ConfigContext.Instance.Config.PlcConfig ?? new PlcConfig();
@@ -367,10 +312,6 @@ namespace AM.DBService.Services.Plc.Runtime
             _cachedPointsByPlc = BuildPointsByPlc(plcConfig);
         }
 
-        /// <summary>
-        /// 扫描单个 PLC 站。
-        /// 客户端对象直接复用 MachineContext 中已经创建好的实例。
-        /// </summary>
         private void ScanStation(
             MachineContext machine,
             PlcRuntimeState runtime,
@@ -411,9 +352,6 @@ namespace AM.DBService.Services.Plc.Runtime
             runtime.NotifyStationSnapshotChanged(station.Name);
         }
 
-        /// <summary>
-        /// 将整个站点更新为断开状态。
-        /// </summary>
         private void UpdateStationDisconnected(
             PlcRuntimeState runtime,
             PlcStationConfig station,
@@ -457,9 +395,6 @@ namespace AM.DBService.Services.Plc.Runtime
             runtime.NotifyStationSnapshotChanged(station.Name);
         }
 
-        /// <summary>
-        /// 更新单个点位运行态快照。
-        /// </summary>
         private void UpdatePointSnapshot(
             PlcRuntimeState runtime,
             IPlcClient client,
@@ -469,13 +404,11 @@ namespace AM.DBService.Services.Plc.Runtime
             ref bool stationHadReadFailure,
             IList<string> stationErrors)
         {
-            Result<PlcPointReadResult> readResult = client.ReadPoint(new PlcPointReadRequest
+            Result<M_PointData> readResult = client.ReadPoint(new M_PointReadRequest
             {
-                PlcName = point.PlcName,
-                Address = point.Address,
-                DataType = point.DataType,
-                StringLength = point.StringLength,
-                ArrayLength = point.ArrayLength
+                address = point.Address,
+                dataType = NormalizeDataType(point.DataType),
+                length = ResolvePointLength(point)
             });
 
             if (!readResult.Success || readResult.Item == null)
@@ -505,7 +438,7 @@ namespace AM.DBService.Services.Plc.Runtime
                 return;
             }
 
-            string rawValueText = readResult.Item.ValueText ?? string.Empty;
+            string rawValueText = readResult.Item.value ?? string.Empty;
             string displayValueText = BuildReadDisplay(point, rawValueText);
 
             runtime.SetPointSnapshot(new PlcPointRuntimeSnapshot
@@ -518,7 +451,7 @@ namespace AM.DBService.Services.Plc.Runtime
                 DataType = point.DataType,
                 ValueText = displayValueText,
                 RawValue = rawValueText,
-                Quality = QualityGood,
+                Quality = string.IsNullOrWhiteSpace(readResult.Item.quality) ? QualityGood : readResult.Item.quality,
                 UpdateTime = now,
                 IsConnected = true,
                 HasError = false,
@@ -526,9 +459,6 @@ namespace AM.DBService.Services.Plc.Runtime
             });
         }
 
-        /// <summary>
-        /// 组装站点运行态快照。
-        /// </summary>
         private PlcStationRuntimeSnapshot BuildStationSnapshot(
             PlcRuntimeState runtime,
             PlcStationConfig station,
@@ -574,10 +504,6 @@ namespace AM.DBService.Services.Plc.Runtime
             };
         }
 
-        /// <summary>
-        /// 确保客户端已连接。
-        /// 使用简单重连节流，避免扫描线程高频反复连接。
-        /// </summary>
         private void TryEnsureClientConnected(
             IPlcClient client,
             PlcStationConfig station,
@@ -621,10 +547,6 @@ namespace AM.DBService.Services.Plc.Runtime
             _stationNextReconnectTimes[station.Name] = now.AddMilliseconds(GetReconnectIntervalMs(station));
         }
 
-        /// <summary>
-        /// 构建点位显示值。
-        /// 仅做最小显示转换。
-        /// </summary>
         private static string BuildReadDisplay(PlcPointConfig point, string rawValueText)
         {
             if (point == null)
@@ -637,8 +559,7 @@ namespace AM.DBService.Services.Plc.Runtime
                 return string.Empty;
             }
 
-            if (string.Equals(point.DataType, "Bit", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(point.DataType, "Bool", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(NormalizeDataType(point.DataType), "bool", StringComparison.OrdinalIgnoreCase))
             {
                 bool boolValue;
                 if (TryConvertToBooleanText(rawValueText, out boolValue))
@@ -647,19 +568,9 @@ namespace AM.DBService.Services.Plc.Runtime
                 }
             }
 
-            double numericValue;
-            if (!string.IsNullOrWhiteSpace(point.Unit) &&
-                TryConvertToDoubleText(rawValueText, out numericValue))
-            {
-                return string.Format(CultureInfo.InvariantCulture, "{0} {1}", rawValueText, point.Unit);
-            }
-
             return rawValueText;
         }
 
-        /// <summary>
-        /// 将文本解析为布尔值。
-        /// </summary>
         private static bool TryConvertToBooleanText(string valueText, out bool result)
         {
             result = false;
@@ -687,17 +598,16 @@ namespace AM.DBService.Services.Plc.Runtime
             return bool.TryParse(valueText, out result);
         }
 
-        /// <summary>
-        /// 将文本解析为数值。
-        /// </summary>
-        private static bool TryConvertToDoubleText(string valueText, out double result)
+        private static int ResolvePointLength(PlcPointConfig point)
         {
-            return double.TryParse(valueText, NumberStyles.Any, CultureInfo.InvariantCulture, out result);
+            if (point == null || point.Length <= 0)
+            {
+                return 1;
+            }
+
+            return point.Length;
         }
 
-        /// <summary>
-        /// 判断当前站点本轮是否需要参与扫描。
-        /// </summary>
         private bool ShouldScanStation(PlcStationConfig station, DateTime now)
         {
             DateTime lastScanTime;
@@ -709,10 +619,6 @@ namespace AM.DBService.Services.Plc.Runtime
             return (now - lastScanTime).TotalMilliseconds >= GetScanIntervalMs(station);
         }
 
-        /// <summary>
-        /// 获取主循环周期。
-        /// 取所有启用站点扫描周期中的最小值。
-        /// </summary>
         private static int GetLoopIntervalMs(IList<PlcStationConfig> stations)
         {
             if (stations == null || stations.Count == 0)
@@ -729,9 +635,6 @@ namespace AM.DBService.Services.Plc.Runtime
             return min < MinLoopIntervalMs ? MinLoopIntervalMs : min;
         }
 
-        /// <summary>
-        /// 获取站点扫描周期。
-        /// </summary>
         private static int GetScanIntervalMs(PlcStationConfig station)
         {
             if (station == null || station.ScanIntervalMs <= 0)
@@ -742,9 +645,6 @@ namespace AM.DBService.Services.Plc.Runtime
             return station.ScanIntervalMs < MinLoopIntervalMs ? MinLoopIntervalMs : station.ScanIntervalMs;
         }
 
-        /// <summary>
-        /// 获取站点重连节流周期。
-        /// </summary>
         private static int GetReconnectIntervalMs(PlcStationConfig station)
         {
             if (station == null || station.ReconnectIntervalMs <= 0)
@@ -755,9 +655,6 @@ namespace AM.DBService.Services.Plc.Runtime
             return station.ReconnectIntervalMs;
         }
 
-        /// <summary>
-        /// 构建启用站点缓存。
-        /// </summary>
         private static IList<PlcStationConfig> BuildEnabledStations(PlcConfig plcConfig)
         {
             var stations = plcConfig == null ? null : plcConfig.Stations;
@@ -773,10 +670,6 @@ namespace AM.DBService.Services.Plc.Runtime
                 .ToList();
         }
 
-        /// <summary>
-        /// 构建按 PLC 分组的点位缓存。
-        /// 只在配置引用变化时重建，不在每轮扫描中重复分组。
-        /// </summary>
         private static IDictionary<string, IList<PlcPointConfig>> BuildPointsByPlc(PlcConfig plcConfig)
         {
             var points = plcConfig == null ? null : plcConfig.Points;
@@ -797,9 +690,13 @@ namespace AM.DBService.Services.Plc.Runtime
                     StringComparer.OrdinalIgnoreCase);
         }
 
-        /// <summary>
-        /// 计算平滑平均读取耗时。
-        /// </summary>
+        private static string NormalizeDataType(string dataType)
+        {
+            return string.IsNullOrWhiteSpace(dataType)
+                ? string.Empty
+                : dataType.Trim().Replace(" ", string.Empty).ToLowerInvariant();
+        }
+
         private double CalculateAverageReadMs(PlcRuntimeState runtime, string plcName, double currentElapsedMs)
         {
             PlcStationRuntimeSnapshot snapshot;

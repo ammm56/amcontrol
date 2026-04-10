@@ -15,10 +15,16 @@ namespace AM.DBService.Services.Plc.Config
     /// <summary>
     /// PLC 点位配置 CRUD 服务。
     /// 对应数据库表：plc_point。
-    /// 当前版本采用最简点位模型，Address 直接保存完整协议地址。
+    /// 当前版本采用最简点位模型：
+    /// - Address 直接保存完整协议地址；
+    /// - Length 统一表达长度；
+    /// - 不再承载字符串长度、数组长度、单位、读取模式等扩展字段。
     /// </summary>
     public class PlcPointCrudService : ServiceBase, IPlcPointCrudService
     {
+        /// <summary>
+        /// 数据库上下文。
+        /// </summary>
         private readonly DBContext _dbContext;
 
         protected override string MessageSourceName
@@ -46,7 +52,7 @@ namespace AM.DBService.Services.Plc.Config
         {
             try
             {
-                var db = CreateDb();
+                SqlSugarClient db = CreateDb();
                 EnsureTables(db);
 
                 var items = db.Queryable<PlcPointConfigEntity>()
@@ -73,8 +79,8 @@ namespace AM.DBService.Services.Plc.Config
                     return Fail<PlcPointConfigEntity>((int)DbErrorCode.InvalidArgument, "PLC 名称不能为空");
                 }
 
-                var normalizedPlcName = NormalizeText(plcName);
-                var db = CreateDb();
+                string normalizedPlcName = NormalizeText(plcName);
+                SqlSugarClient db = CreateDb();
                 EnsureTables(db);
 
                 var items = db.Queryable<PlcPointConfigEntity>()
@@ -101,13 +107,13 @@ namespace AM.DBService.Services.Plc.Config
                     return Fail<PlcPointConfigEntity>((int)DbErrorCode.InvalidArgument, "PLC 名称或点位名称不能为空");
                 }
 
-                var normalizedPlcName = NormalizeText(plcName);
-                var normalizedName = NormalizeText(name);
+                string normalizedPlcName = NormalizeText(plcName);
+                string normalizedName = NormalizeText(name);
 
-                var db = CreateDb();
+                SqlSugarClient db = CreateDb();
                 EnsureTables(db);
 
-                var item = db.Queryable<PlcPointConfigEntity>()
+                PlcPointConfigEntity item = db.Queryable<PlcPointConfigEntity>()
                     .First(p => p.PlcName == normalizedPlcName && p.Name == normalizedName);
 
                 if (item == null)
@@ -134,16 +140,16 @@ namespace AM.DBService.Services.Plc.Config
 
                 Normalize(entity);
 
-                var validateResult = Validate(entity);
+                Result validateResult = Validate(entity);
                 if (!validateResult.Success)
                 {
                     return validateResult;
                 }
 
-                var db = CreateDb();
+                SqlSugarClient db = CreateDb();
                 EnsureTables(db);
 
-                var stationExists = db.Queryable<PlcStationConfigEntity>()
+                bool stationExists = db.Queryable<PlcStationConfigEntity>()
                     .Any(p => p.Name == entity.PlcName);
 
                 if (!stationExists)
@@ -151,7 +157,7 @@ namespace AM.DBService.Services.Plc.Config
                     return Fail((int)DbErrorCode.InvalidArgument, "所属 PLC 站不存在: " + entity.PlcName);
                 }
 
-                var existing = db.Queryable<PlcPointConfigEntity>()
+                PlcPointConfigEntity existing = db.Queryable<PlcPointConfigEntity>()
                     .First(p => p.PlcName == entity.PlcName && p.Name == entity.Name && p.Id != entity.Id);
 
                 if (existing != null)
@@ -185,13 +191,13 @@ namespace AM.DBService.Services.Plc.Config
                     return Fail((int)DbErrorCode.InvalidArgument, "PLC 名称或点位名称不能为空");
                 }
 
-                var normalizedPlcName = NormalizeText(plcName);
-                var normalizedName = NormalizeText(name);
+                string normalizedPlcName = NormalizeText(plcName);
+                string normalizedName = NormalizeText(name);
 
-                var db = CreateDb();
+                SqlSugarClient db = CreateDb();
                 EnsureTables(db);
 
-                var count = db.Deleteable<PlcPointConfigEntity>()
+                int count = db.Deleteable<PlcPointConfigEntity>()
                     .Where(p => p.PlcName == normalizedPlcName && p.Name == normalizedName)
                     .ExecuteCommand();
 
@@ -233,11 +239,8 @@ namespace AM.DBService.Services.Plc.Config
             entity.DisplayName = NormalizeText(entity.DisplayName);
             entity.GroupName = NormalizeText(entity.GroupName);
             entity.Address = NormalizeText(entity.Address);
-            entity.DataType = NormalizeText(entity.DataType);
-            entity.Unit = NormalizeText(entity.Unit);
+            entity.DataType = NormalizeDataType(entity.DataType);
             entity.AccessMode = NormalizeText(entity.AccessMode);
-            entity.ReadMode = NormalizeText(entity.ReadMode);
-            entity.StringEncoding = NormalizeText(entity.StringEncoding);
             entity.Description = NormalizeText(entity.Description);
             entity.Remark = NormalizeText(entity.Remark);
 
@@ -246,9 +249,15 @@ namespace AM.DBService.Services.Plc.Config
                 entity.DisplayName = entity.Name;
             }
 
-            if (entity.StringLength < 0) entity.StringLength = 0;
-            if (entity.ArrayLength < 0) entity.ArrayLength = 0;
-            if (entity.SortOrder < 0) entity.SortOrder = 0;
+            if (entity.Length <= 0)
+            {
+                entity.Length = 1;
+            }
+
+            if (entity.SortOrder < 0)
+            {
+                entity.SortOrder = 0;
+            }
         }
 
         private Result Validate(PlcPointConfigEntity entity)
@@ -273,27 +282,85 @@ namespace AM.DBService.Services.Plc.Config
                 return Fail((int)DbErrorCode.InvalidArgument, "数据类型不能为空");
             }
 
+            if (!IsSupportedDataType(entity.DataType))
+            {
+                return Fail((int)DbErrorCode.InvalidArgument, "不支持的数据类型: " + entity.DataType);
+            }
+
             if (string.IsNullOrWhiteSpace(entity.AccessMode))
             {
                 return Fail((int)DbErrorCode.InvalidArgument, "访问模式不能为空");
             }
 
-            if (string.IsNullOrWhiteSpace(entity.ReadMode))
+            if (!IsSupportedAccessMode(entity.AccessMode))
             {
-                return Fail((int)DbErrorCode.InvalidArgument, "读取模式不能为空");
+                return Fail((int)DbErrorCode.InvalidArgument, "不支持的访问模式: " + entity.AccessMode);
             }
 
-            if (string.Equals(entity.DataType, "String", StringComparison.OrdinalIgnoreCase) && entity.StringLength <= 0)
+            if (entity.Length <= 0)
             {
-                return Fail((int)DbErrorCode.InvalidArgument, "String 类型点位必须配置大于 0 的字符串长度");
+                return Fail((int)DbErrorCode.InvalidArgument, "Length 必须大于 0");
             }
 
-            if (string.Equals(entity.DataType, "ByteArray", StringComparison.OrdinalIgnoreCase) && entity.ArrayLength <= 0)
+            if (string.Equals(entity.DataType, "string", StringComparison.OrdinalIgnoreCase) && entity.Length <= 0)
             {
-                return Fail((int)DbErrorCode.InvalidArgument, "ByteArray 类型点位必须配置大于 0 的数组长度");
+                return Fail((int)DbErrorCode.InvalidArgument, "String 类型点位必须配置大于 0 的长度");
             }
 
             return OkSilent("PLC 点位配置校验通过");
+        }
+
+        private static bool IsSupportedDataType(string dataType)
+        {
+            if (string.IsNullOrWhiteSpace(dataType))
+            {
+                return false;
+            }
+
+            string normalized = NormalizeDataType(dataType);
+            switch (normalized)
+            {
+                case "bool":
+                case "uint8":
+                case "int8":
+                case "uint16":
+                case "int16":
+                case "uint32":
+                case "int32":
+                case "uint64":
+                case "int64":
+                case "float":
+                case "double":
+                case "string":
+                case "bool[]":
+                case "uint8[]":
+                case "int8[]":
+                case "uint16[]":
+                case "int16[]":
+                case "uint32[]":
+                case "int32[]":
+                case "uint64[]":
+                case "int64[]":
+                case "float[]":
+                case "double[]":
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private static bool IsSupportedAccessMode(string accessMode)
+        {
+            return string.Equals(accessMode, "ReadOnly", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(accessMode, "ReadWrite", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(accessMode, "WriteOnly", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static string NormalizeDataType(string value)
+        {
+            return string.IsNullOrWhiteSpace(value)
+                ? null
+                : value.Trim().Replace(" ", string.Empty).ToLowerInvariant();
         }
 
         private static string NormalizeText(string value)

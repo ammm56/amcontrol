@@ -13,7 +13,10 @@ namespace AM.DBService.Services.Plc.App
     /// <summary>
     /// PLC 配置种子服务。
     /// 启动时自动补一组最小默认 ModbusTcp 测试数据。
-    /// 当前版本点位地址直接使用完整协议地址。
+    /// 当前版本点位使用单一 Length 字段表达长度：
+    /// - 标量：1
+    /// - 字符串：字符长度
+    /// - 数组：元素个数
     /// </summary>
     public class PlcConfigSeedService
     {
@@ -41,8 +44,7 @@ namespace AM.DBService.Services.Plc.App
 
                 db.CodeFirst.InitTables(
                     typeof(PlcStationConfigEntity),
-                    typeof(PlcPointConfigEntity),
-                    typeof(PlcReadBlockConfigEntity));
+                    typeof(PlcPointConfigEntity));
 
                 EnsureIndexes(db);
 
@@ -96,19 +98,12 @@ namespace AM.DBService.Services.Plc.App
 
             db.Ado.ExecuteCommand(
                 "CREATE INDEX IF NOT EXISTS ix_plc_point_plcname_sortorder ON plc_point(PlcName, SortOrder)");
-
-            db.Ado.ExecuteCommand(
-                "CREATE UNIQUE INDEX IF NOT EXISTS ux_plc_read_block_plcname_blockname ON plc_read_block(PlcName, BlockName)");
-
-            db.Ado.ExecuteCommand(
-                "CREATE INDEX IF NOT EXISTS ix_plc_read_block_plcname_priority_sortorder ON plc_read_block(PlcName, Priority, SortOrder)");
         }
 
         private static bool HasAnyPlcConfigData(SqlSugarClient db)
         {
             return db.Queryable<PlcStationConfigEntity>().Any()
-                || db.Queryable<PlcPointConfigEntity>().Any()
-                || db.Queryable<PlcReadBlockConfigEntity>().Any();
+                || db.Queryable<PlcPointConfigEntity>().Any();
         }
 
         private static List<PlcStationConfigEntity> CreateDefaultStations()
@@ -161,13 +156,9 @@ namespace AM.DBService.Services.Plc.App
                     DisplayName = "PLC就绪",
                     GroupName = "Default",
                     Address = "00001",
-                    DataType = "Bool",
-                    StringLength = 0,
-                    ArrayLength = 0,
-                    Unit = null,
+                    DataType = "bool",
+                    Length = 1,
                     AccessMode = "ReadWrite",
-                    ReadMode = "Single",
-                    StringEncoding = "ASCII",
                     IsEnabled = true,
                     SortOrder = 1,
                     Description = "默认布尔测试点",
@@ -180,13 +171,9 @@ namespace AM.DBService.Services.Plc.App
                     DisplayName = "心跳计数",
                     GroupName = "Default",
                     Address = "40010",
-                    DataType = "UShort",
-                    StringLength = 0,
-                    ArrayLength = 0,
-                    Unit = null,
+                    DataType = "uint16",
+                    Length = 1,
                     AccessMode = "ReadWrite",
-                    ReadMode = "Single",
-                    StringEncoding = "ASCII",
                     IsEnabled = true,
                     SortOrder = 2,
                     Description = "默认无符号整型测试点",
@@ -199,13 +186,9 @@ namespace AM.DBService.Services.Plc.App
                     DisplayName = "温度值",
                     GroupName = "Default",
                     Address = "40020",
-                    DataType = "Float",
-                    StringLength = 0,
-                    ArrayLength = 0,
-                    Unit = "℃",
+                    DataType = "float",
+                    Length = 1,
                     AccessMode = "ReadWrite",
-                    ReadMode = "Single",
-                    StringEncoding = "ASCII",
                     IsEnabled = true,
                     SortOrder = 3,
                     Description = "默认浮点测试点",
@@ -217,14 +200,10 @@ namespace AM.DBService.Services.Plc.App
                     Name = "ProductCode",
                     DisplayName = "产品编码",
                     GroupName = "Default",
-                    Address = "40040[20]",
-                    DataType = "String",
-                    StringLength = 20,
-                    ArrayLength = 0,
-                    Unit = null,
+                    Address = "40040",
+                    DataType = "string",
+                    Length = 20,
                     AccessMode = "ReadWrite",
-                    ReadMode = "Single",
-                    StringEncoding = "ASCII",
                     IsEnabled = true,
                     SortOrder = 4,
                     Description = "默认字符串测试点",

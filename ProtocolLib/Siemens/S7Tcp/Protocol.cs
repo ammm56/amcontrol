@@ -10,7 +10,8 @@ namespace ProtocolLib.S7Tcp
 {
     /// <summary>
     /// Siemens S7 协议统一入口。
-    /// 当前版本直接使用 Address 作为完整协议地址，不再拆分和拼接地址区域。
+    /// 当前版本直接使用 Address 作为完整协议地址。
+    /// 点位、字符串、同类型连续数组统一走点位读写接口。
     /// </summary>
     public class Protocol : IProtocol
     {
@@ -164,13 +165,26 @@ namespace ProtocolLib.S7Tcp
                     return M_Return<M_PointData>.Error("协议未连接");
                 }
 
-                if (string.IsNullOrWhiteSpace(request.address))
+                string address = NormalizeAddress(request.address);
+                string dataType = NormalizeDataType(request.dataType);
+                int length = NormalizeLength(request.length);
+
+                if (string.IsNullOrWhiteSpace(address))
                 {
                     return M_Return<M_PointData>.Error("点位地址不能为空");
                 }
 
-                string dataType = NormalizeDataType(request.dataType);
-                M_Return<M_GatherData> result = _collectionUtil.ReadData(_siemensS7, string.Empty, request.address.Trim(), dataType);
+                if (IsStringType(dataType))
+                {
+                    return ReadStringPoint(address, length);
+                }
+
+                if (IsArrayType(dataType))
+                {
+                    return ReadArrayPoint(address, dataType, length);
+                }
+
+                M_Return<M_GatherData> result = _collectionUtil.ReadData(_siemensS7, string.Empty, address, dataType);
                 if (!result.Status)
                 {
                     return M_Return<M_PointData>.Error(result.DescMsg);
@@ -180,8 +194,9 @@ namespace ProtocolLib.S7Tcp
                 return M_Return<M_PointData>.OK(
                     new M_PointData
                     {
-                        address = request.address ?? string.Empty,
-                        dataType = request.dataType ?? string.Empty,
+                        address = address,
+                        dataType = dataType,
+                        length = length,
                         value = gatherData.value ?? string.Empty,
                         rawBuffer = new byte[0],
                         quality = "Good"
@@ -207,13 +222,26 @@ namespace ProtocolLib.S7Tcp
                     return M_Return<M_PointData>.Error("协议未连接");
                 }
 
-                if (string.IsNullOrWhiteSpace(request.address))
+                string address = NormalizeAddress(request.address);
+                string dataType = NormalizeDataType(request.dataType);
+                int length = NormalizeLength(request.length);
+
+                if (string.IsNullOrWhiteSpace(address))
                 {
                     return M_Return<M_PointData>.Error("点位地址不能为空");
                 }
 
-                string dataType = NormalizeDataType(request.dataType);
-                M_Return<M_GatherData> result = _collectionUtil.WriteData(_siemensS7, request.address.Trim(), request.value, dataType);
+                if (IsStringType(dataType))
+                {
+                    return WriteStringPoint(address, length, request.value);
+                }
+
+                if (IsArrayType(dataType))
+                {
+                    return WriteArrayPoint(address, dataType, length, request.value);
+                }
+
+                M_Return<M_GatherData> result = _collectionUtil.WriteData(_siemensS7, address, request.value, dataType);
                 if (!result.Status)
                 {
                     return M_Return<M_PointData>.Error(result.DescMsg);
@@ -223,8 +251,9 @@ namespace ProtocolLib.S7Tcp
                 return M_Return<M_PointData>.OK(
                     new M_PointData
                     {
-                        address = request.address ?? string.Empty,
-                        dataType = request.dataType ?? string.Empty,
+                        address = address,
+                        dataType = dataType,
+                        length = length,
                         value = gatherData.value ?? string.Empty,
                         rawBuffer = new byte[0],
                         quality = "Good"
@@ -236,96 +265,99 @@ namespace ProtocolLib.S7Tcp
             }
         }
 
-        public M_Return<M_BlockData> ReadBlock(M_BlockReadRequest request)
+        private M_Return<M_PointData> ReadStringPoint(string address, int length)
         {
-            try
+            string actualAddress = AppendStringLength(address, length);
+            M_Return<M_GatherData> result = _collectionUtil.ReadData(_siemensS7, string.Empty, actualAddress, "string");
+            if (!result.Status)
             {
-                if (request == null)
-                {
-                    return M_Return<M_BlockData>.Error("块读取请求不能为空");
-                }
-
-                if (_siemensS7 == null)
-                {
-                    return M_Return<M_BlockData>.Error("协议未连接");
-                }
-
-                if (string.IsNullOrWhiteSpace(request.startAddress))
-                {
-                    return M_Return<M_BlockData>.Error("块起始地址不能为空");
-                }
-
-                string dataType = NormalizeDataType(request.dataType);
-                int byteLength = ResolveReadByteLength(dataType, request.length, request.stringLength, request.arrayLength);
-
-                M_OperateResult<byte[]> read = _siemensS7.Read(request.startAddress.Trim(), (ushort)Math.Max(1, byteLength));
-                if (!read.IsSuccess)
-                {
-                    return M_Return<M_BlockData>.Error(read.Message);
-                }
-
-                byte[] buffer = TrimBlockBuffer(read.Content, dataType, request.length, request.stringLength, request.arrayLength);
-
-                return M_Return<M_BlockData>.OK(
-                    new M_BlockData
-                    {
-                        startAddress = request.startAddress ?? string.Empty,
-                        length = request.length,
-                        dataType = request.dataType ?? string.Empty,
-                        buffer = buffer ?? new byte[0],
-                        valueText = BuildBlockValueText(buffer)
-                    });
+                return M_Return<M_PointData>.Error(result.DescMsg);
             }
-            catch (Exception ex)
-            {
-                return M_Return<M_BlockData>.Error("块读取异常: " + ex.Message);
-            }
+
+            M_GatherData gatherData = result.Result ?? new M_GatherData();
+            return M_Return<M_PointData>.OK(
+                new M_PointData
+                {
+                    address = address,
+                    dataType = "string",
+                    length = length,
+                    value = gatherData.value ?? string.Empty,
+                    rawBuffer = new byte[0],
+                    quality = "Good"
+                });
         }
 
-        public M_Return<M_BlockData> WriteBlock(M_BlockWriteRequest request)
+        private M_Return<M_PointData> WriteStringPoint(string address, int length, object value)
         {
-            try
+            string actualAddress = AppendStringLength(address, length);
+            M_Return<M_GatherData> result = _collectionUtil.WriteData(_siemensS7, actualAddress, value, "string");
+            if (!result.Status)
             {
-                if (request == null)
-                {
-                    return M_Return<M_BlockData>.Error("块写入请求不能为空");
-                }
-
-                if (_siemensS7 == null)
-                {
-                    return M_Return<M_BlockData>.Error("协议未连接");
-                }
-
-                if (string.IsNullOrWhiteSpace(request.startAddress))
-                {
-                    return M_Return<M_BlockData>.Error("块起始地址不能为空");
-                }
-
-                if (request.buffer == null || request.buffer.Length == 0)
-                {
-                    return M_Return<M_BlockData>.Error("块写入缓冲区不能为空");
-                }
-
-                M_OperateResult writeResult = _siemensS7.Write(request.startAddress.Trim(), request.buffer);
-                if (!writeResult.IsSuccess)
-                {
-                    return M_Return<M_BlockData>.Error(writeResult.Message);
-                }
-
-                return M_Return<M_BlockData>.OK(
-                    new M_BlockData
-                    {
-                        startAddress = request.startAddress ?? string.Empty,
-                        length = request.buffer.Length,
-                        dataType = request.dataType ?? string.Empty,
-                        buffer = request.buffer,
-                        valueText = BuildBlockValueText(request.buffer)
-                    });
+                return M_Return<M_PointData>.Error(result.DescMsg);
             }
-            catch (Exception ex)
+
+            M_GatherData gatherData = result.Result ?? new M_GatherData();
+            return M_Return<M_PointData>.OK(
+                new M_PointData
+                {
+                    address = address,
+                    dataType = "string",
+                    length = length,
+                    value = gatherData.value ?? string.Empty,
+                    rawBuffer = new byte[0],
+                    quality = "Good"
+                });
+        }
+
+        private M_Return<M_PointData> ReadArrayPoint(string address, string dataType, int length)
+        {
+            string elementType = GetElementType(dataType);
+            int byteLength = ResolveReadByteLengthForArray(elementType, length);
+
+            M_OperateResult<byte[]> read = _siemensS7.Read(address, (ushort)Math.Max(1, byteLength));
+            if (!read.IsSuccess)
             {
-                return M_Return<M_BlockData>.Error("块写入异常: " + ex.Message);
+                return M_Return<M_PointData>.Error(read.Message);
             }
+
+            byte[] buffer = TrimArrayBuffer(read.Content, elementType, length);
+
+            return M_Return<M_PointData>.OK(
+                new M_PointData
+                {
+                    address = address,
+                    dataType = dataType,
+                    length = length,
+                    value = BuildBufferValueText(buffer),
+                    rawBuffer = buffer,
+                    quality = "Good"
+                });
+        }
+
+        private M_Return<M_PointData> WriteArrayPoint(string address, string dataType, int length, object value)
+        {
+            byte[] buffer = value as byte[];
+            if (buffer == null)
+            {
+                return M_Return<M_PointData>.Error("数组写入值当前必须为 byte[]");
+            }
+
+            M_OperateResult writeResult = _siemensS7.Write(address, buffer);
+            if (!writeResult.IsSuccess)
+            {
+                return M_Return<M_PointData>.Error(writeResult.Message);
+            }
+
+            return M_Return<M_PointData>.OK(
+                new M_PointData
+                {
+                    address = address,
+                    dataType = dataType,
+                    length = length,
+                    value = BuildBufferValueText(buffer),
+                    rawBuffer = buffer,
+                    quality = "Good"
+                });
         }
 
         private static E_SiemensPLCS ResolvePlcType(M_ProtocolOptions options)
@@ -341,87 +373,94 @@ namespace ProtocolLib.S7Tcp
             return E_SiemensPLCS.S1200;
         }
 
-        private static string NormalizeDataType(string dataType)
+        private static string NormalizeAddress(string address)
         {
-            string type = (dataType ?? string.Empty).Trim().Replace(" ", string.Empty).ToLowerInvariant();
-
-            switch (type)
-            {
-                case "bit":
-                    return "bool";
-                case "short":
-                    return "int16";
-                case "ushort":
-                    return "uint16";
-                case "int":
-                    return "int32";
-                case "uint":
-                    return "uint32";
-                case "float":
-                    return "single";
-                case "long":
-                    return "int64";
-                case "ulong":
-                    return "uint64";
-                default:
-                    return type;
-            }
+            return string.IsNullOrWhiteSpace(address) ? string.Empty : address.Trim();
         }
 
-        private static int ResolveReadByteLength(string dataType, int length, int stringLength, int arrayLength)
+        private static string NormalizeDataType(string dataType)
+        {
+            return string.IsNullOrWhiteSpace(dataType)
+                ? string.Empty
+                : dataType.Trim().Replace(" ", string.Empty).ToLowerInvariant();
+        }
+
+        private static int NormalizeLength(int length)
+        {
+            return length <= 0 ? 1 : length;
+        }
+
+        private static bool IsStringType(string dataType)
+        {
+            return string.Equals(dataType, "string", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool IsArrayType(string dataType)
+        {
+            return !string.IsNullOrWhiteSpace(dataType) && dataType.EndsWith("[]", StringComparison.Ordinal);
+        }
+
+        private static string GetElementType(string dataType)
+        {
+            return IsArrayType(dataType) ? dataType.Substring(0, dataType.Length - 2) : dataType;
+        }
+
+        private static string AppendStringLength(string address, int length)
+        {
+            if (string.IsNullOrWhiteSpace(address) || length <= 0)
+            {
+                return address;
+            }
+
+            if (address.IndexOf('[') >= 0)
+            {
+                return address;
+            }
+
+            return address + "[" + length + "]";
+        }
+
+        private static int ResolveReadByteLengthForArray(string dataType, int length)
         {
             switch (dataType)
             {
                 case "bool":
-                case "byte":
+                case "uint8":
+                case "int8":
                     return Math.Max(1, length);
-                case "int16":
                 case "uint16":
+                case "int16":
                     return Math.Max(1, length) * 2;
-                case "int32":
                 case "uint32":
-                case "single":
+                case "int32":
+                case "float":
                     return Math.Max(1, length) * 4;
-                case "int64":
                 case "uint64":
+                case "int64":
                 case "double":
                     return Math.Max(1, length) * 8;
                 case "string":
-                    return Math.Max(1, stringLength > 0 ? stringLength : length);
-                case "bytearray":
-                    return Math.Max(1, arrayLength > 0 ? arrayLength : length);
+                    return Math.Max(1, length);
                 default:
                     return Math.Max(1, length);
             }
         }
 
-        private static byte[] TrimBlockBuffer(byte[] buffer, string dataType, int length, int stringLength, int arrayLength)
+        private static byte[] TrimArrayBuffer(byte[] buffer, string dataType, int length)
         {
             if (buffer == null)
             {
                 return new byte[0];
             }
 
-            int targetLength;
-            switch (dataType)
-            {
-                case "string":
-                    targetLength = stringLength > 0 ? stringLength : length;
-                    break;
-                case "bytearray":
-                    targetLength = arrayLength > 0 ? arrayLength : length;
-                    break;
-                default:
-                    return buffer;
-            }
-
-            int actualLength = Math.Min(buffer.Length, Math.Max(0, targetLength));
+            int byteLength = ResolveReadByteLengthForArray(dataType, length);
+            int actualLength = Math.Min(buffer.Length, Math.Max(0, byteLength));
             byte[] result = new byte[actualLength];
             Array.Copy(buffer, 0, result, 0, actualLength);
             return result;
         }
 
-        private static string BuildBlockValueText(byte[] buffer)
+        private static string BuildBufferValueText(byte[] buffer)
         {
             if (buffer == null || buffer.Length == 0)
             {

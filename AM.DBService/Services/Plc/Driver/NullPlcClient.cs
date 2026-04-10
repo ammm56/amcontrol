@@ -1,6 +1,7 @@
 ﻿using AM.Model.Common;
 using AM.Model.Interfaces.Plc;
 using AM.Model.Plc;
+using ProtocolLib.CommonLib.Model;
 
 namespace AM.DBService.Services.Plc.Driver
 {
@@ -10,7 +11,14 @@ namespace AM.DBService.Services.Plc.Driver
     /// </summary>
     internal class NullPlcClient : IPlcClient
     {
+        /// <summary>
+        /// PLC 站配置。
+        /// </summary>
         private readonly PlcStationConfig _stationConfig;
+
+        /// <summary>
+        /// 最近一次配置。
+        /// </summary>
         private PlcProtocolClientOptions _options;
 
         public NullPlcClient(PlcStationConfig stationConfig)
@@ -63,24 +71,14 @@ namespace AM.DBService.Services.Plc.Driver
                 .WithNotifyMode(ResultNotifyMode.Silent);
         }
 
-        public Result<PlcPointReadResult> ReadPoint(PlcPointReadRequest request)
+        public Result<M_PointData> ReadPoint(M_PointReadRequest request)
         {
-            return Result<PlcPointReadResult>.Fail(-3206, "PLC 点位读取功能尚未实现: " + PlcName, ResultSource.Plc);
+            return Result<M_PointData>.Fail(-3206, "PLC 点位读取功能尚未实现: " + PlcName, ResultSource.Plc);
         }
 
-        public Result<PlcPointReadResult> WritePoint(PlcPointWriteRequest request)
+        public Result<M_PointData> WritePoint(M_PointWriteRequest request)
         {
-            return Result<PlcPointReadResult>.Fail(-3207, "PLC 点位写入功能尚未实现: " + PlcName, ResultSource.Plc);
-        }
-
-        public Result<PlcRawDataBlock> ReadBlock(PlcBlockReadRequest request)
-        {
-            return Result<PlcRawDataBlock>.Fail(-3202, "PLC 读块功能尚未实现: " + PlcName, ResultSource.Plc);
-        }
-
-        public Result<PlcRawDataBlock> WriteBlock(PlcBlockWriteRequest request)
-        {
-            return Result<PlcRawDataBlock>.Fail(-3204, "PLC 块写入功能尚未实现: " + PlcName, ResultSource.Plc);
+            return Result<M_PointData>.Fail(-3207, "PLC 点位写入功能尚未实现: " + PlcName, ResultSource.Plc);
         }
     }
 }

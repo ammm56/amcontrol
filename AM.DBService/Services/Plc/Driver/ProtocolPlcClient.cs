@@ -12,7 +12,7 @@ namespace AM.DBService.Services.Plc.Driver
     /// 当前版本仅负责：
     /// 1. 从协议注册表解析协议实现；
     /// 2. 创建并复用协议实例；
-    /// 3. 完成 AM 与 ProtocolLib 间的请求/结果转换。
+    /// 3. 将 AM 层调用直接转发到 ProtocolLib 模型。
     /// </summary>
     internal class ProtocolPlcClient : IPlcClient
     {
@@ -181,177 +181,69 @@ namespace AM.DBService.Services.Plc.Driver
             }
         }
 
-        public Result<PlcPointReadResult> ReadPoint(PlcPointReadRequest request)
+        public Result<M_PointData> ReadPoint(M_PointReadRequest request)
         {
             try
             {
                 if (request == null)
                 {
-                    return Result<PlcPointReadResult>.Fail(-3612, "点位读取请求不能为空", ResultSource.Plc);
+                    return Result<M_PointData>.Fail(-3612, "点位读取请求不能为空", ResultSource.Plc);
                 }
 
                 Result ensureResult = EnsureProtocol();
                 if (!ensureResult.Success)
                 {
-                    return Result<PlcPointReadResult>.Fail(ensureResult.Code, ensureResult.Message, ResultSource.Plc);
+                    return Result<M_PointData>.Fail(ensureResult.Code, ensureResult.Message, ResultSource.Plc);
                 }
 
-                M_Return<M_PointData> result = _protocol.ReadPoint(ToProtocolPointReadRequest(request));
+                M_Return<M_PointData> result = _protocol.ReadPoint(request);
                 if (result == null || !result.Status || result.Result == null)
                 {
-                    return Result<PlcPointReadResult>.Fail(
+                    return Result<M_PointData>.Fail(
                         -3613,
                         result == null || string.IsNullOrWhiteSpace(result.DescMsg) ? "PLC 点位读取失败" : result.DescMsg,
                         ResultSource.Plc);
                 }
 
-                return Result<PlcPointReadResult>.OkItem(
-                        new PlcPointReadResult
-                        {
-                            PlcName = string.IsNullOrWhiteSpace(request.PlcName) ? PlcName : request.PlcName,
-                            Address = request.Address,
-                            DataType = request.DataType,
-                            ValueText = result.Result.value ?? string.Empty,
-                            RawBuffer = result.Result.rawBuffer ?? new byte[0]
-                        },
-                        "PLC 点位读取成功",
-                        ResultSource.Plc)
+                return Result<M_PointData>.OkItem(result.Result, "PLC 点位读取成功", ResultSource.Plc)
                     .WithNotifyMode(ResultNotifyMode.Silent);
             }
             catch (Exception ex)
             {
-                return Result<PlcPointReadResult>.Fail(-3614, "PLC 点位读取异常: " + ex.Message, ResultSource.Plc);
+                return Result<M_PointData>.Fail(-3614, "PLC 点位读取异常: " + ex.Message, ResultSource.Plc);
             }
         }
 
-        public Result<PlcPointReadResult> WritePoint(PlcPointWriteRequest request)
+        public Result<M_PointData> WritePoint(M_PointWriteRequest request)
         {
             try
             {
                 if (request == null)
                 {
-                    return Result<PlcPointReadResult>.Fail(-3615, "点位写入请求不能为空", ResultSource.Plc);
+                    return Result<M_PointData>.Fail(-3615, "点位写入请求不能为空", ResultSource.Plc);
                 }
 
                 Result ensureResult = EnsureProtocol();
                 if (!ensureResult.Success)
                 {
-                    return Result<PlcPointReadResult>.Fail(ensureResult.Code, ensureResult.Message, ResultSource.Plc);
+                    return Result<M_PointData>.Fail(ensureResult.Code, ensureResult.Message, ResultSource.Plc);
                 }
 
-                M_Return<M_PointData> result = _protocol.WritePoint(ToProtocolPointWriteRequest(request));
+                M_Return<M_PointData> result = _protocol.WritePoint(request);
                 if (result == null || !result.Status || result.Result == null)
                 {
-                    return Result<PlcPointReadResult>.Fail(
+                    return Result<M_PointData>.Fail(
                         -3616,
                         result == null || string.IsNullOrWhiteSpace(result.DescMsg) ? "PLC 点位写入失败" : result.DescMsg,
                         ResultSource.Plc);
                 }
 
-                return Result<PlcPointReadResult>.OkItem(
-                        new PlcPointReadResult
-                        {
-                            PlcName = string.IsNullOrWhiteSpace(request.PlcName) ? PlcName : request.PlcName,
-                            Address = request.Address,
-                            DataType = request.DataType,
-                            ValueText = result.Result.value ?? string.Empty,
-                            RawBuffer = result.Result.rawBuffer ?? new byte[0]
-                        },
-                        "PLC 点位写入成功",
-                        ResultSource.Plc)
+                return Result<M_PointData>.OkItem(result.Result, "PLC 点位写入成功", ResultSource.Plc)
                     .WithNotifyMode(ResultNotifyMode.Silent);
             }
             catch (Exception ex)
             {
-                return Result<PlcPointReadResult>.Fail(-3617, "PLC 点位写入异常: " + ex.Message, ResultSource.Plc);
-            }
-        }
-
-        public Result<PlcRawDataBlock> ReadBlock(PlcBlockReadRequest request)
-        {
-            try
-            {
-                if (request == null)
-                {
-                    return Result<PlcRawDataBlock>.Fail(-3618, "块读取请求不能为空", ResultSource.Plc);
-                }
-
-                Result ensureResult = EnsureProtocol();
-                if (!ensureResult.Success)
-                {
-                    return Result<PlcRawDataBlock>.Fail(ensureResult.Code, ensureResult.Message, ResultSource.Plc);
-                }
-
-                M_Return<M_BlockData> result = _protocol.ReadBlock(ToProtocolBlockReadRequest(request));
-                if (result == null || !result.Status || result.Result == null)
-                {
-                    return Result<PlcRawDataBlock>.Fail(
-                        -3619,
-                        result == null || string.IsNullOrWhiteSpace(result.DescMsg) ? "PLC 块读取失败" : result.DescMsg,
-                        ResultSource.Plc);
-                }
-
-                return Result<PlcRawDataBlock>.OkItem(
-                        new PlcRawDataBlock
-                        {
-                            PlcName = string.IsNullOrWhiteSpace(request.PlcName) ? PlcName : request.PlcName,
-                            StartAddress = request.StartAddress,
-                            Length = request.Length,
-                            DataType = request.DataType,
-                            Buffer = result.Result.buffer ?? new byte[0],
-                            ReadTime = DateTime.Now
-                        },
-                        "PLC 块读取成功",
-                        ResultSource.Plc)
-                    .WithNotifyMode(ResultNotifyMode.Silent);
-            }
-            catch (Exception ex)
-            {
-                return Result<PlcRawDataBlock>.Fail(-3620, "PLC 块读取异常: " + ex.Message, ResultSource.Plc);
-            }
-        }
-
-        public Result<PlcRawDataBlock> WriteBlock(PlcBlockWriteRequest request)
-        {
-            try
-            {
-                if (request == null)
-                {
-                    return Result<PlcRawDataBlock>.Fail(-3621, "块写入请求不能为空", ResultSource.Plc);
-                }
-
-                Result ensureResult = EnsureProtocol();
-                if (!ensureResult.Success)
-                {
-                    return Result<PlcRawDataBlock>.Fail(ensureResult.Code, ensureResult.Message, ResultSource.Plc);
-                }
-
-                M_Return<M_BlockData> result = _protocol.WriteBlock(ToProtocolBlockWriteRequest(request));
-                if (result == null || !result.Status || result.Result == null)
-                {
-                    return Result<PlcRawDataBlock>.Fail(
-                        -3622,
-                        result == null || string.IsNullOrWhiteSpace(result.DescMsg) ? "PLC 块写入失败" : result.DescMsg,
-                        ResultSource.Plc);
-                }
-
-                return Result<PlcRawDataBlock>.OkItem(
-                        new PlcRawDataBlock
-                        {
-                            PlcName = string.IsNullOrWhiteSpace(request.PlcName) ? PlcName : request.PlcName,
-                            StartAddress = request.StartAddress,
-                            Length = request.Buffer == null ? 0 : request.Buffer.Length,
-                            DataType = request.DataType,
-                            Buffer = result.Result.buffer ?? new byte[0],
-                            ReadTime = DateTime.Now
-                        },
-                        "PLC 块写入成功",
-                        ResultSource.Plc)
-                    .WithNotifyMode(ResultNotifyMode.Silent);
-            }
-            catch (Exception ex)
-            {
-                return Result<PlcRawDataBlock>.Fail(-3623, "PLC 块写入异常: " + ex.Message, ResultSource.Plc);
+                return Result<M_PointData>.Fail(-3617, "PLC 点位写入异常: " + ex.Message, ResultSource.Plc);
             }
         }
 
@@ -444,53 +336,6 @@ namespace AM.DBService.Services.Plc.Driver
                 byteOrder = options.ByteOrder ?? string.Empty,
                 wordOrder = options.WordOrder ?? string.Empty,
                 stringEncoding = options.StringEncoding ?? string.Empty
-            };
-        }
-
-        private static M_PointReadRequest ToProtocolPointReadRequest(PlcPointReadRequest request)
-        {
-            return new M_PointReadRequest
-            {
-                address = request.Address ?? string.Empty,
-                dataType = request.DataType ?? string.Empty,
-                stringLength = request.StringLength,
-                arrayLength = request.ArrayLength
-            };
-        }
-
-        private static M_PointWriteRequest ToProtocolPointWriteRequest(PlcPointWriteRequest request)
-        {
-            return new M_PointWriteRequest
-            {
-                address = request.Address ?? string.Empty,
-                dataType = request.DataType ?? string.Empty,
-                value = request.Value,
-                stringLength = request.StringLength,
-                arrayLength = request.ArrayLength
-            };
-        }
-
-        private static M_BlockReadRequest ToProtocolBlockReadRequest(PlcBlockReadRequest request)
-        {
-            return new M_BlockReadRequest
-            {
-                startAddress = request.StartAddress ?? string.Empty,
-                length = request.Length,
-                dataType = request.DataType ?? string.Empty,
-                stringLength = request.StringLength,
-                arrayLength = request.ArrayLength
-            };
-        }
-
-        private static M_BlockWriteRequest ToProtocolBlockWriteRequest(PlcBlockWriteRequest request)
-        {
-            return new M_BlockWriteRequest
-            {
-                startAddress = request.StartAddress ?? string.Empty,
-                dataType = request.DataType ?? string.Empty,
-                buffer = request.Buffer ?? new byte[0],
-                stringLength = request.StringLength,
-                arrayLength = request.ArrayLength
             };
         }
 

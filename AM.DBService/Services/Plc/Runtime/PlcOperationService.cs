@@ -5,8 +5,9 @@ using AM.Model.Common;
 using AM.Model.Interfaces.Plc;
 using AM.Model.Plc;
 using AM.Model.Runtime;
+using ProtocolLib.CommonLib.Model;
 using System;
-using System.Globalization;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace AM.DBService.Services.Plc.Runtime
@@ -15,8 +16,9 @@ namespace AM.DBService.Services.Plc.Runtime
     /// PLC 运行时操作服务。
     /// 当前版本只保留最小职责：
     /// 1. 按点位配置直接读写；
-    /// 2. 调试页直接地址读写统一走 Address；
-    /// 3. 不再承担 AreaType、BitIndex、缩放、块切片等复杂逻辑。
+    /// 2. 调试页直接地址读写统一走 M_PointRequest；
+    /// 3. 统一使用 Length；
+    /// 4. 不再承担 AreaType、BitIndex、块切片等复杂逻辑。
     /// </summary>
     public class PlcOperationService : ServiceBase
     {
@@ -75,22 +77,20 @@ namespace AM.DBService.Services.Plc.Runtime
                     return Fail(clientResult.Code, clientResult.Message);
                 }
 
-                Result<PlcPointReadResult> writeResult = clientResult.Item.WritePoint(new PlcPointWriteRequest
+                Result<M_PointData> writeResult = clientResult.Item.WritePoint(new M_PointWriteRequest
                 {
-                    PlcName = point.PlcName,
-                    Address = point.Address,
-                    DataType = point.DataType,
-                    Value = value,
-                    StringLength = point.StringLength,
-                    ArrayLength = point.ArrayLength
+                    address = point.Address,
+                    dataType = NormalizeDataType(point.DataType),
+                    value = value,
+                    length = ResolvePointLength(point)
                 });
 
-                if (!writeResult.Success)
+                if (!writeResult.Success || writeResult.Item == null)
                 {
                     return Fail(writeResult.Code, writeResult.Message);
                 }
 
-                UpdatePointRuntimeAfterWrite(point, value);
+                UpdatePointRuntimeAfterWrite(point, writeResult.Item);
                 return OkLogOnly("PLC 点位写入成功");
             }
             catch (Exception ex)
@@ -101,7 +101,7 @@ namespace AM.DBService.Services.Plc.Runtime
 
         /// <summary>
         /// 按直接地址执行写入。
-        /// 保留兼容签名，areaType 与 bitIndex 参数当前不参与执行。
+        /// 保留兼容签名，内部仅使用 address/dataType/length。
         /// </summary>
         public Result WriteAddress(
             string plcName,
@@ -116,14 +116,15 @@ namespace AM.DBService.Services.Plc.Runtime
         {
             try
             {
+                int length = ResolveLengthByArguments(dataType, stringLength, arrayLength);
+
                 Result validateResult = ValidateDirectAddressArguments(
                     plcName,
                     address,
                     dataType,
                     value,
                     confirmed,
-                    stringLength,
-                    arrayLength);
+                    length);
 
                 if (!validateResult.Success)
                 {
@@ -136,17 +137,15 @@ namespace AM.DBService.Services.Plc.Runtime
                     return Fail(clientResult.Code, clientResult.Message);
                 }
 
-                Result<PlcPointReadResult> writeResult = clientResult.Item.WritePoint(new PlcPointWriteRequest
+                Result<M_PointData> writeResult = clientResult.Item.WritePoint(new M_PointWriteRequest
                 {
-                    PlcName = plcName.Trim(),
-                    Address = address.Trim(),
-                    DataType = dataType.Trim(),
-                    Value = value,
-                    StringLength = stringLength,
-                    ArrayLength = arrayLength
+                    address = address.Trim(),
+                    dataType = NormalizeDataType(dataType),
+                    value = value,
+                    length = length
                 });
 
-                if (!writeResult.Success)
+                if (!writeResult.Success || writeResult.Item == null)
                 {
                     return Fail(writeResult.Code, writeResult.Message);
                 }
@@ -195,7 +194,7 @@ namespace AM.DBService.Services.Plc.Runtime
 
         /// <summary>
         /// 按直接地址执行测试读取。
-        /// 保留兼容签名，areaType 与 bitIndex 参数当前不参与执行。
+        /// 保留兼容签名，内部仅使用 address/dataType/length。
         /// </summary>
         public Result<PlcPointRuntimeSnapshot> TestReadAddress(
             string plcName,
@@ -208,7 +207,9 @@ namespace AM.DBService.Services.Plc.Runtime
         {
             try
             {
-                Result validateResult = ValidateDirectReadArguments(plcName, address, dataType, stringLength, arrayLength);
+                int length = ResolveLengthByArguments(dataType, stringLength, arrayLength);
+
+                Result validateResult = ValidateDirectReadArguments(plcName, address, dataType, length);
                 if (!validateResult.Success)
                 {
                     return Fail<PlcPointRuntimeSnapshot>(validateResult.Code, validateResult.Message);
@@ -227,13 +228,9 @@ namespace AM.DBService.Services.Plc.Runtime
                     DisplayName = "地址测试读取",
                     GroupName = "Debug",
                     Address = address.Trim(),
-                    DataType = dataType.Trim(),
-                    StringLength = stringLength,
-                    ArrayLength = arrayLength,
-                    Unit = null,
+                    DataType = NormalizeDataType(dataType),
+                    Length = length,
                     AccessMode = "ReadOnly",
-                    ReadMode = "Single",
-                    StringEncoding = "ASCII",
                     IsEnabled = true
                 };
 
@@ -272,14 +269,9 @@ namespace AM.DBService.Services.Plc.Runtime
                 return Fail((int)DbErrorCode.InvalidArgument, "点位数据类型不能为空");
             }
 
-            if (string.Equals(point.DataType, "String", StringComparison.OrdinalIgnoreCase) && point.StringLength <= 0)
+            if (ResolvePointLength(point) <= 0)
             {
-                return Fail((int)DbErrorCode.InvalidArgument, "String 类型点位必须配置大于 0 的字符串长度");
-            }
-
-            if (string.Equals(point.DataType, "ByteArray", StringComparison.OrdinalIgnoreCase) && point.ArrayLength <= 0)
-            {
-                return Fail((int)DbErrorCode.InvalidArgument, "ByteArray 类型点位必须配置大于 0 的数组长度");
+                return Fail((int)DbErrorCode.InvalidArgument, "点位 Length 必须大于 0");
             }
 
             return OkSilent("PLC 点位写入校验通过");
@@ -291,8 +283,7 @@ namespace AM.DBService.Services.Plc.Runtime
             string dataType,
             object value,
             bool confirmed,
-            int stringLength,
-            int arrayLength)
+            int length)
         {
             if (string.IsNullOrWhiteSpace(plcName))
             {
@@ -319,14 +310,9 @@ namespace AM.DBService.Services.Plc.Runtime
                 return Fail((int)DbErrorCode.InvalidArgument, "直接地址写入属于高风险操作，必须显式确认后才能执行");
             }
 
-            if (string.Equals(dataType.Trim(), "String", StringComparison.OrdinalIgnoreCase) && stringLength <= 0)
+            if (length <= 0)
             {
-                return Fail((int)DbErrorCode.InvalidArgument, "String 类型直接写入必须提供大于 0 的字符串长度");
-            }
-
-            if (string.Equals(dataType.Trim(), "ByteArray", StringComparison.OrdinalIgnoreCase) && arrayLength <= 0)
-            {
-                return Fail((int)DbErrorCode.InvalidArgument, "ByteArray 类型直接写入必须提供大于 0 的数组长度");
+                return Fail((int)DbErrorCode.InvalidArgument, "Length 必须大于 0");
             }
 
             return OkSilent("PLC 地址写入校验通过");
@@ -336,8 +322,7 @@ namespace AM.DBService.Services.Plc.Runtime
             string plcName,
             string address,
             string dataType,
-            int stringLength,
-            int arrayLength)
+            int length)
         {
             if (string.IsNullOrWhiteSpace(plcName))
             {
@@ -354,14 +339,9 @@ namespace AM.DBService.Services.Plc.Runtime
                 return Fail((int)DbErrorCode.InvalidArgument, "数据类型不能为空");
             }
 
-            if (string.Equals(dataType.Trim(), "String", StringComparison.OrdinalIgnoreCase) && stringLength <= 0)
+            if (length <= 0)
             {
-                return Fail((int)DbErrorCode.InvalidArgument, "String 类型测试读取必须提供大于 0 的字符串长度");
-            }
-
-            if (string.Equals(dataType.Trim(), "ByteArray", StringComparison.OrdinalIgnoreCase) && arrayLength <= 0)
-            {
-                return Fail((int)DbErrorCode.InvalidArgument, "ByteArray 类型测试读取必须提供大于 0 的数组长度");
+                return Fail((int)DbErrorCode.InvalidArgument, "Length 必须大于 0");
             }
 
             return OkSilent("PLC 地址测试读取校验通过");
@@ -398,7 +378,7 @@ namespace AM.DBService.Services.Plc.Runtime
         private PlcPointConfig FindPointConfig(string pointName)
         {
             PlcConfig config = ConfigContext.Instance.Config.PlcConfig ?? new PlcConfig();
-            var points = config.Points ?? new System.Collections.Generic.List<PlcPointConfig>();
+            var points = config.Points ?? new List<PlcPointConfig>();
             return points.FirstOrDefault(p => p != null && string.Equals(p.Name, pointName, StringComparison.OrdinalIgnoreCase));
         }
 
@@ -415,13 +395,11 @@ namespace AM.DBService.Services.Plc.Runtime
 
         private Result<PlcPointRuntimeSnapshot> ReadPointWithClient(IPlcClient client, PlcPointConfig point)
         {
-            Result<PlcPointReadResult> readResult = client.ReadPoint(new PlcPointReadRequest
+            Result<M_PointData> readResult = client.ReadPoint(new M_PointReadRequest
             {
-                PlcName = point.PlcName,
-                Address = point.Address,
-                DataType = point.DataType,
-                StringLength = point.StringLength,
-                ArrayLength = point.ArrayLength
+                address = point.Address,
+                dataType = NormalizeDataType(point.DataType),
+                length = ResolvePointLength(point)
             });
 
             if (!readResult.Success || readResult.Item == null)
@@ -429,7 +407,7 @@ namespace AM.DBService.Services.Plc.Runtime
                 return Fail<PlcPointRuntimeSnapshot>(readResult.Code, readResult.Message);
             }
 
-            string rawValueText = readResult.Item.ValueText ?? string.Empty;
+            string rawValueText = readResult.Item.value ?? string.Empty;
             string displayValueText = BuildReadDisplay(point, rawValueText);
 
             PlcPointRuntimeSnapshot snapshot = new PlcPointRuntimeSnapshot
@@ -442,7 +420,7 @@ namespace AM.DBService.Services.Plc.Runtime
                 DataType = point.DataType,
                 ValueText = displayValueText,
                 RawValue = rawValueText,
-                Quality = "Good",
+                Quality = string.IsNullOrWhiteSpace(readResult.Item.quality) ? "Good" : readResult.Item.quality,
                 UpdateTime = DateTime.Now,
                 IsConnected = true,
                 HasError = false,
@@ -452,16 +430,15 @@ namespace AM.DBService.Services.Plc.Runtime
             return OkSilent(snapshot, "PLC 点位读取成功");
         }
 
-        private void UpdatePointRuntimeAfterWrite(PlcPointConfig point, object value)
+        private void UpdatePointRuntimeAfterWrite(PlcPointConfig point, M_PointData pointData)
         {
             if (point == null)
             {
                 return;
             }
 
-            string rawValueText;
-            string displayValueText;
-            BuildWriteDisplay(point, value, out rawValueText, out displayValueText);
+            string rawValueText = pointData == null ? string.Empty : (pointData.value ?? string.Empty);
+            string displayValueText = BuildReadDisplay(point, rawValueText);
 
             RuntimeContext.Instance.Plc.SetPointSnapshot(new PlcPointRuntimeSnapshot
             {
@@ -473,7 +450,7 @@ namespace AM.DBService.Services.Plc.Runtime
                 DataType = point.DataType,
                 ValueText = displayValueText,
                 RawValue = rawValueText,
-                Quality = "Good",
+                Quality = pointData == null || string.IsNullOrWhiteSpace(pointData.quality) ? "Good" : pointData.quality,
                 UpdateTime = DateTime.Now,
                 IsConnected = true,
                 HasError = false,
@@ -495,13 +472,7 @@ namespace AM.DBService.Services.Plc.Runtime
                 return true;
             }
 
-            if (string.Equals(point.DataType, "String", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(point.DataType, "ByteArray", StringComparison.OrdinalIgnoreCase))
-            {
-                return true;
-            }
-
-            return point.ArrayLength > 1;
+            return ResolvePointLength(point) > 1;
         }
 
         private static string BuildReadDisplay(PlcPointConfig point, string rawValueText)
@@ -516,8 +487,7 @@ namespace AM.DBService.Services.Plc.Runtime
                 return string.Empty;
             }
 
-            if (string.Equals(point.DataType, "Bit", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(point.DataType, "Bool", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(NormalizeDataType(point.DataType), "bool", StringComparison.OrdinalIgnoreCase))
             {
                 bool boolValue;
                 if (TryConvertToBooleanText(rawValueText, out boolValue))
@@ -526,86 +496,39 @@ namespace AM.DBService.Services.Plc.Runtime
                 }
             }
 
-            double numericValue;
-            if (!string.IsNullOrWhiteSpace(point.Unit) &&
-                TryConvertToDoubleText(rawValueText, out numericValue))
-            {
-                return string.Format(CultureInfo.InvariantCulture, "{0} {1}", rawValueText, point.Unit);
-            }
-
             return rawValueText;
         }
 
-        private static void BuildWriteDisplay(PlcPointConfig point, object value, out string rawValueText, out string displayValueText)
+        private static int ResolvePointLength(PlcPointConfig point)
         {
-            rawValueText = value == null ? string.Empty : Convert.ToString(value, CultureInfo.InvariantCulture);
-            displayValueText = rawValueText;
-
-            if (value == null || point == null)
+            if (point == null || point.Length <= 0)
             {
-                return;
+                return 1;
             }
 
-            if (string.Equals(point.DataType, "Bit", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(point.DataType, "Bool", StringComparison.OrdinalIgnoreCase))
-            {
-                bool boolValue;
-                if (TryConvertToBoolean(value, out boolValue))
-                {
-                    rawValueText = boolValue ? "True" : "False";
-                    displayValueText = boolValue ? "ON" : "OFF";
-                }
-                return;
-            }
-
-            if (string.Equals(point.DataType, "ByteArray", StringComparison.OrdinalIgnoreCase))
-            {
-                byte[] bytes = value as byte[];
-                if (bytes != null)
-                {
-                    rawValueText = ToHexString(bytes);
-                    displayValueText = rawValueText;
-                }
-                return;
-            }
-
-            if (!string.IsNullOrWhiteSpace(point.Unit))
-            {
-                double numericValue;
-                if (TryConvertToDouble(value, out numericValue))
-                {
-                    displayValueText = string.Format(
-                        CultureInfo.InvariantCulture,
-                        "{0} {1}",
-                        numericValue.ToString("0.########", CultureInfo.InvariantCulture),
-                        point.Unit);
-                }
-            }
+            return point.Length;
         }
 
-        private static bool TryConvertToBoolean(object value, out bool result)
+        private static int ResolveLengthByArguments(string dataType, int stringLength, int arrayLength)
         {
-            result = false;
-            if (value is bool)
+            if (string.Equals(NormalizeDataType(dataType), "string", StringComparison.OrdinalIgnoreCase))
             {
-                result = (bool)value;
-                return true;
+                return stringLength > 0 ? stringLength : 1;
             }
 
-            if (value is string)
+            if (arrayLength > 0)
             {
-                return TryConvertToBooleanText((string)value, out result);
+                return arrayLength;
             }
 
-            try
-            {
-                result = Convert.ToDouble(value, CultureInfo.InvariantCulture) != 0D;
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+            return 1;
+        }
+
+        private static string NormalizeDataType(string dataType)
+        {
+            return string.IsNullOrWhiteSpace(dataType)
+                ? string.Empty
+                : dataType.Trim().Replace(" ", string.Empty).ToLowerInvariant();
         }
 
         private static bool TryConvertToBooleanText(string valueText, out bool result)
@@ -633,40 +556,6 @@ namespace AM.DBService.Services.Plc.Runtime
             }
 
             return bool.TryParse(valueText, out result);
-        }
-
-        private static bool TryConvertToDouble(object value, out double result)
-        {
-            result = 0D;
-            if (value == null)
-            {
-                return false;
-            }
-
-            try
-            {
-                result = Convert.ToDouble(value, CultureInfo.InvariantCulture);
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        private static bool TryConvertToDoubleText(string valueText, out double result)
-        {
-            return double.TryParse(valueText, NumberStyles.Any, CultureInfo.InvariantCulture, out result);
-        }
-
-        private static string ToHexString(byte[] bytes)
-        {
-            if (bytes == null || bytes.Length == 0)
-            {
-                return string.Empty;
-            }
-
-            return BitConverter.ToString(bytes).Replace("-", " ");
         }
     }
 }

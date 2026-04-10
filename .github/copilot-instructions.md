@@ -135,6 +135,12 @@ DevAlarmRecordEntity
 - 实体目录按类别组织：Entity/Auth、Entity/Motion/Topology、Entity/Motion/Actuator、Entity/Motion/Point、Entity/Plc、Entity/Dev
 - 旧版运动配置实体与实现直接废弃删除，不做过渡兼容
 
+### 4.9 PLC 点位/请求模型规范
+
+- PLC 点位模型进一步极简：不需要 PlcName；长度字段不应拆成 StringLength 与 ArrayLength，倾向统一为 Length；
+- DataType 统一为 bool、uint8、int8、uint16、int16、uint32、int32、uint64、int64、float、double、string，数组用 Length 表达；
+- 避免协议层再做单位或类型重映射。
+
 ---
 
 ## 五、导航体系
