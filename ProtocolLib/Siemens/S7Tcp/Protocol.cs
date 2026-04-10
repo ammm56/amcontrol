@@ -123,8 +123,16 @@ namespace ProtocolLib.S7Tcp
         /// <returns></returns>
         public int SetCFG(M_NetConfig netconfig)
         {
-            // 这里需要转换
-            M_ProtocolConfig newconfig = new M_ProtocolConfig();
+            M_ProtocolConfig newconfig = new M_ProtocolConfig
+            {
+                equipmentid = netconfig.equipmentid,
+                protocoltype = netconfig.protocoltype,
+                ip = netconfig.ip,
+                port = netconfig.port,
+                byteorder = netconfig.byteorder,
+                pointinfo = netconfig.pointinfo == null ? new List<Point>() : new List<Point>(netconfig.pointinfo)
+            };
+
             if (_siementS7 != null && (newconfig.ip != _protocolConfig.ip || newconfig.port != _protocolConfig.port))
             {
                 _protocolConfig = newconfig;

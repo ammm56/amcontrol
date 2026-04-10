@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Modbus.tcp
+namespace ProtocolLib.ModbusTcp
 {
     public class Protocol : IProtocol
     {
@@ -99,6 +99,7 @@ namespace Modbus.tcp
                 return M_Return<M_GatherData>.Error($"读取错误 {ex.Message}");
             }
         }
+
         /// <summary>
         /// 写入
         /// </summary>
@@ -131,31 +132,41 @@ namespace Modbus.tcp
         /// <returns></returns>
         public int SetCFG(M_NetConfig netconfig)
         {
-            // 这里需要转换
-            M_ProtocolConfig newconfig = new M_ProtocolConfig();
-            if (_modbusTCPClient != null && (newconfig.ip != _protocolConfig.ip || newconfig.port != _protocolConfig.port))
+            M_ProtocolConfig newconfig = new M_ProtocolConfig
+            {
+                equipmentid = netconfig.equipmentid,
+                protocoltype = netconfig.protocoltype,
+                ip = netconfig.ip,
+                port = netconfig.port,
+                byteorder = netconfig.byteorder,
+                pointinfo = netconfig.pointinfo == null ? new List<Point>() : new List<Point>(netconfig.pointinfo)
+            };
+
+            if (_modbusTCPClient != null && (_protocolConfig == null || newconfig.ip != _protocolConfig.ip || newconfig.port != _protocolConfig.port))
             {
                 _protocolConfig = newconfig;
                 _modbusTCPClient.UpdateConnectionInfo(_protocolConfig.ip, _protocolConfig.port, 1);
 
-                var reres = Reconnect();
+                M_Return<string> reres = Reconnect();
                 if (!reres.Status)
                 {
                     return 1;
                 }
             }
+
             _protocolConfig = newconfig;
             if (_modbusTCPClient != null)
             {
                 _modbusTCPClient.UpdateConnectionInfo(_protocolConfig.ip, _protocolConfig.port, 1);
             }
-            M_Return<List<Point>> res = _collectionUtil.DecodePoints4Rule(ref this._protocolConfig);
 
+            M_Return<List<Point>> res = _collectionUtil.DecodePoints4Rule(ref _protocolConfig);
             if (res.Status)
             {
-                this._firstPoints = res.Result;
+                _firstPoints = res.Result;
                 return 0;
             }
+
             return 1;
         }
 
@@ -163,12 +174,11 @@ namespace Modbus.tcp
         /// 重连
         /// </summary>
         /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
         public M_Return<string> Reconnect()
         {
             try
             {
-                var closeres = CloseConnected();
+                M_Return<string> closeres = CloseConnected();
                 if (closeres.Status)
                 {
                     if (_modbusTCPClient == null)
@@ -202,7 +212,7 @@ namespace Modbus.tcp
                 {
                     M_OperateResult res = _modbusTCPClient.ConnectClose();
                     if (res.IsSuccess) return M_Return<string>.OK("关闭连接成功");
-                    else return M_Return<string>.Error("关闭连接错误");
+                    return M_Return<string>.Error("关闭连接错误");
                 }
                 return M_Return<string>.OK("连接已关闭");
             }
@@ -211,6 +221,5 @@ namespace Modbus.tcp
                 return M_Return<string>.Error($"关闭连接错误，异常={ex.Message}");
             }
         }
-
     }
 }
