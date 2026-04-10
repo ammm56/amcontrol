@@ -23,12 +23,6 @@ namespace ProtocolLib.ModbusTcp.Common
         /// <summary>
         /// 读取数据
         /// </summary>
-        /// <param name="modbusTCP"></param>
-        /// <param name="functioncode"></param>
-        /// <param name="address"></param>
-        /// <param name="type"></param>
-        /// <param name="len"></param>
-        /// <returns></returns>
         public M_Return<M_GatherData> ReadData(ModbusTCP modbusTCP, string functioncode, string address, string type, ushort len = 1)
         {
             string value = string.Empty;
@@ -91,7 +85,7 @@ namespace ProtocolLib.ModbusTcp.Common
                         break;
                     case "string":
                         M_OperateResult<string> result_string = modbusTCP.ReadString(address, 10, Encoding.UTF8);
-                        if (result_string.IsSuccess) value = ToolBasic.ArrayFormat(result_string.Content.Trim().Replace("\u0000", "")); 
+                        if (result_string.IsSuccess) value = ToolBasic.ArrayFormat(result_string.Content.Trim().Replace("\u0000", ""));
                         else descmsg = result_string.Message;
                         break;
                     default:
@@ -105,16 +99,15 @@ namespace ProtocolLib.ModbusTcp.Common
                     DescMsg = descmsg,
                     Result = new M_GatherData
                     {
-                        //functioncode = functioncode,
                         point = address,
-                        //lastvalue = "",
-                        value = value
+                        value = value,
+                        type = type
                     }
                 };
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"CollectionUtil ReadData ex={ex.Message}");
+                Console.WriteLine(string.Format("CollectionUtil ReadData ex={0}", ex.Message));
                 return M_Return<M_GatherData>.Error();
             }
         }
@@ -122,17 +115,13 @@ namespace ProtocolLib.ModbusTcp.Common
         /// <summary>
         /// 写入
         /// </summary>
-        /// <param name="modbusTCP"></param>
-        /// <param name="address"></param>
-        /// <param name="value"></param>
-        /// <param name="type"></param>
-        /// <param name="len"></param>
-        /// <returns></returns>
         public M_Return<M_GatherData> WriteData(ModbusTCP modbusTCP, string address, object value, string type, ushort len = 10)
         {
             try
             {
                 M_OperateResult operateResult = null;
+                string valueText = GetValueText(value);
+
                 for (int item = 1; item <= 3; item++)
                 {
                     try
@@ -144,7 +133,8 @@ namespace ProtocolLib.ModbusTcp.Common
                                 new M_GatherData
                                 {
                                     point = address,
-                                    value = Convert.ToString(value),
+                                    value = valueText,
+                                    type = type
                                 });
                         }
                     }
@@ -165,30 +155,32 @@ namespace ProtocolLib.ModbusTcp.Common
 
         private M_OperateResult WriteByType(ModbusTCP modbusTCP, string address, object value, string type, ushort len)
         {
+            object actualValue = UnwrapValue(value, type);
+
             switch (type)
             {
                 case "bool":
-                    return modbusTCP.Write(address, Convert.ToBoolean(value));
+                    return modbusTCP.Write(address, Convert.ToBoolean(actualValue));
                 case "byte":
-                    return modbusTCP.Write(address, new byte[] { Convert.ToByte(value) });
+                    return modbusTCP.Write(address, new byte[] { Convert.ToByte(actualValue) });
                 case "int16":
-                    return modbusTCP.Write(address, Convert.ToInt16(value));
+                    return modbusTCP.Write(address, Convert.ToInt16(actualValue));
                 case "uint16":
-                    return modbusTCP.Write(address, Convert.ToUInt16(value));
+                    return modbusTCP.Write(address, Convert.ToUInt16(actualValue));
                 case "int32":
-                    return modbusTCP.Write(address, Convert.ToInt32(value));
+                    return modbusTCP.Write(address, Convert.ToInt32(actualValue));
                 case "uint32":
-                    return modbusTCP.Write(address, Convert.ToUInt32(value));
+                    return modbusTCP.Write(address, Convert.ToUInt32(actualValue));
                 case "int64":
-                    return modbusTCP.Write(address, Convert.ToInt64(value));
+                    return modbusTCP.Write(address, Convert.ToInt64(actualValue));
                 case "uint64":
-                    return modbusTCP.Write(address, Convert.ToUInt64(value));
+                    return modbusTCP.Write(address, Convert.ToUInt64(actualValue));
                 case "single":
-                    return modbusTCP.Write(address, Convert.ToSingle(value));
+                    return modbusTCP.Write(address, Convert.ToSingle(actualValue));
                 case "double":
-                    return modbusTCP.Write(address, Convert.ToDouble(value));
+                    return modbusTCP.Write(address, Convert.ToDouble(actualValue));
                 case "string":
-                    string valuestr = Convert.ToString(value) ?? string.Empty;
+                    string valuestr = Convert.ToString(actualValue) ?? string.Empty;
                     int templen = Math.Min(valuestr.Length, len);
                     valuestr = valuestr.Substring(0, templen);
                     return modbusTCP.Write(address, valuestr);
@@ -197,11 +189,46 @@ namespace ProtocolLib.ModbusTcp.Common
             }
         }
 
+        private static object UnwrapValue(object value, string type)
+        {
+            if (value is M_GatherData gatherData)
+            {
+                return UnwrapValue(gatherData.value, string.IsNullOrEmpty(type) ? gatherData.type : type);
+            }
+
+            if (value is M_TypedValue typedValue)
+            {
+                if (!string.IsNullOrEmpty(typedValue.type) &&
+                    !string.IsNullOrEmpty(type) &&
+                    !string.Equals(typedValue.type, type, StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new InvalidOperationException("写入值类型与目标类型不一致");
+                }
+
+                return UnwrapValue(typedValue.value, string.IsNullOrEmpty(type) ? typedValue.type : type);
+            }
+
+            return value;
+        }
+
+        private static string GetValueText(object value)
+        {
+            if (value is M_GatherData gatherData)
+            {
+                return gatherData.value ?? string.Empty;
+            }
+
+            if (value is M_TypedValue typedValue)
+            {
+                return typedValue.value ?? string.Empty;
+            }
+
+            return Convert.ToString(value) ?? string.Empty;
+        }
+
         /// <summary>
         /// 从采集协议配置中解析规则地址
         /// </summary>
-        /// <param name="protocolConfig"></param>
-        /// <returns></returns>
         public M_Return<List<Point>> DecodePoints4Rule(ref M_ProtocolConfig protocolConfig)
         {
             try
@@ -211,9 +238,8 @@ namespace ProtocolLib.ModbusTcp.Common
             }
             catch (Exception ex)
             {
-                return M_Return<List<Point>>.Error($"从采集协议配置中解析规则地址错误，异常={ex.Message}");
+                return M_Return<List<Point>>.Error(string.Format("从采集协议配置中解析规则地址错误，异常={0}", ex.Message));
             }
         }
-
     }
 }

@@ -3,6 +3,7 @@ using ProtocolLib.CommonLib.Model;
 using ProtocolLib.CommonLib.Model.Enum;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -1186,6 +1187,53 @@ namespace ProtocolLib.CommonLib.Common
             {"double[]",typeof(double[]) }
         };
 
+        public static object GetComparableValue(string value, string type)
+        {
+            string dataType = (type ?? "string").ToLowerInvariant();
+            string text = value ?? string.Empty;
+
+            switch (dataType)
+            {
+                case "bool":
+                    return ParseBoolean(text) ? (byte)1 : (byte)0;
+                case "byte":
+                    return byte.Parse(text, CultureInfo.InvariantCulture);
+                case "int16":
+                    return short.Parse(text, CultureInfo.InvariantCulture);
+                case "uint16":
+                    return ushort.Parse(text, CultureInfo.InvariantCulture);
+                case "int32":
+                    return int.Parse(text, CultureInfo.InvariantCulture);
+                case "uint32":
+                    return uint.Parse(text, CultureInfo.InvariantCulture);
+                case "int64":
+                    return long.Parse(text, CultureInfo.InvariantCulture);
+                case "uint64":
+                    return ulong.Parse(text, CultureInfo.InvariantCulture);
+                case "single":
+                    return float.Parse(text, CultureInfo.InvariantCulture);
+                case "double":
+                    return double.Parse(text, CultureInfo.InvariantCulture);
+                default:
+                    return text;
+            }
+        }
+
+        private static bool ParseBoolean(string value)
+        {
+            string text = (value ?? string.Empty).Trim();
+
+            if (text == "1") return true;
+            if (text == "0") return false;
+
+            bool result;
+            if (bool.TryParse(text, out result))
+            {
+                return result;
+            }
+
+            throw new FormatException("布尔值转换失败:" + value);
+        }
 
         #endregion
     }

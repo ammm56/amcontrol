@@ -18,12 +18,6 @@ namespace ProtocolLib.S7Tcp.Common
         /// <summary>
         /// 读取数据
         /// </summary>
-        /// <param name="siemensS7"></param>
-        /// <param name="functioncode"></param>
-        /// <param name="address"></param>
-        /// <param name="type"></param>
-        /// <param name="len"></param>
-        /// <returns></returns>
         public M_Return<M_GatherData> ReadData(SiemensS7 siemensS7, string functioncode, string address, string type, ushort len = 1)
         {
             string value = string.Empty;
@@ -101,13 +95,14 @@ namespace ProtocolLib.S7Tcp.Common
                     Result = new M_GatherData
                     {
                         point = address,
-                        value = value
+                        value = value,
+                        type = type
                     }
                 };
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"CollectionUtil ReadData ex={ex.Message}");
+                Console.WriteLine(string.Format("CollectionUtil ReadData ex={0}", ex.Message));
                 return M_Return<M_GatherData>.Error();
             }
         }
@@ -115,17 +110,13 @@ namespace ProtocolLib.S7Tcp.Common
         /// <summary>
         /// 写入
         /// </summary>
-        /// <param name="siemensS7"></param>
-        /// <param name="address"></param>
-        /// <param name="value"></param>
-        /// <param name="type"></param>
-        /// <param name="len"></param>
-        /// <returns></returns>
         public M_Return<M_GatherData> WriteData(SiemensS7 siemensS7, string address, object value, string type, ushort len = 10)
         {
             try
             {
                 M_OperateResult operateResult = null;
+                string valueText = GetValueText(value);
+
                 for (int item = 1; item <= 3; item++)
                 {
                     try
@@ -137,7 +128,8 @@ namespace ProtocolLib.S7Tcp.Common
                                 new M_GatherData
                                 {
                                     point = address,
-                                    value = Convert.ToString(value),
+                                    value = valueText,
+                                    type = type
                                 });
                         }
                     }
@@ -152,42 +144,81 @@ namespace ProtocolLib.S7Tcp.Common
             }
             catch (Exception ex)
             {
-                return M_Return<M_GatherData>.Error($"写入错误:{ex.Message}");
+                return M_Return<M_GatherData>.Error("写入错误:" + ex.Message);
             }
         }
 
         private M_OperateResult WriteByType(SiemensS7 siemensS7, string address, object value, string type, ushort len)
         {
+            object actualValue = UnwrapValue(value, type);
+
             switch (type)
             {
                 case "bool":
-                    return siemensS7.Write(address, Convert.ToBoolean(value));
+                    return siemensS7.Write(address, Convert.ToBoolean(actualValue));
                 case "byte":
-                    return siemensS7.Write(address, new byte[] { Convert.ToByte(value) });
+                    return siemensS7.Write(address, new byte[] { Convert.ToByte(actualValue) });
                 case "int16":
-                    return siemensS7.Write(address, Convert.ToInt16(value));
+                    return siemensS7.Write(address, Convert.ToInt16(actualValue));
                 case "uint16":
-                    return siemensS7.Write(address, Convert.ToUInt16(value));
+                    return siemensS7.Write(address, Convert.ToUInt16(actualValue));
                 case "int32":
-                    return siemensS7.Write(address, Convert.ToInt32(value));
+                    return siemensS7.Write(address, Convert.ToInt32(actualValue));
                 case "uint32":
-                    return siemensS7.Write(address, Convert.ToUInt32(value));
+                    return siemensS7.Write(address, Convert.ToUInt32(actualValue));
                 case "int64":
-                    return siemensS7.Write(address, Convert.ToInt64(value));
+                    return siemensS7.Write(address, Convert.ToInt64(actualValue));
                 case "uint64":
-                    return siemensS7.Write(address, Convert.ToUInt64(value));
+                    return siemensS7.Write(address, Convert.ToUInt64(actualValue));
                 case "single":
-                    return siemensS7.Write(address, Convert.ToSingle(value));
+                    return siemensS7.Write(address, Convert.ToSingle(actualValue));
                 case "double":
-                    return siemensS7.Write(address, Convert.ToDouble(value));
+                    return siemensS7.Write(address, Convert.ToDouble(actualValue));
                 case "string":
-                    string valuestr = Convert.ToString(value) ?? string.Empty;
+                    string valuestr = Convert.ToString(actualValue) ?? string.Empty;
                     int templen = Math.Min(valuestr.Length, len);
                     valuestr = valuestr.Substring(0, templen);
                     return siemensS7.Write(address, valuestr);
                 default:
                     return new M_OperateResult("不支持的数据类型:" + type);
             }
+        }
+
+        private static object UnwrapValue(object value, string type)
+        {
+            if (value is M_GatherData gatherData)
+            {
+                return UnwrapValue(gatherData.value, string.IsNullOrEmpty(type) ? gatherData.type : type);
+            }
+
+            if (value is M_TypedValue typedValue)
+            {
+                if (!string.IsNullOrEmpty(typedValue.type) &&
+                    !string.IsNullOrEmpty(type) &&
+                    !string.Equals(typedValue.type, type, StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new InvalidOperationException("写入值类型与目标类型不一致");
+                }
+
+                return UnwrapValue(typedValue.value, string.IsNullOrEmpty(type) ? typedValue.type : type);
+            }
+
+            return value;
+        }
+
+        private static string GetValueText(object value)
+        {
+            if (value is M_GatherData gatherData)
+            {
+                return gatherData.value ?? string.Empty;
+            }
+
+            if (value is M_TypedValue typedValue)
+            {
+                return typedValue.value ?? string.Empty;
+            }
+
+            return Convert.ToString(value) ?? string.Empty;
         }
 
         public M_Return<List<Point>> DecodePoints4Rule(ref M_ProtocolConfig protocolConfig)
@@ -199,9 +230,8 @@ namespace ProtocolLib.S7Tcp.Common
             }
             catch (Exception ex)
             {
-                return M_Return<List<Point>>.Error($"解析规则地址错误，异常={ex.Message}");
+                return M_Return<List<Point>>.Error(string.Format("解析规则地址错误，异常={0}", ex.Message));
             }
         }
-
     }
 }

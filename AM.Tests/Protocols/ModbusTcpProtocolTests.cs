@@ -65,14 +65,16 @@ namespace AM.Tests.Protocols
             Assert.That(readResult2, Is.Not.Null);
             Assert.That(readResult2.Status, Is.True, readResult2.DescMsg);
 
-            M_Return<M_GatherData> writeResult = protocol.Set("40010", "uint16", readResult.Result.value + readResult2.Result.value);
+            M_TypedValue expectedValue = readResult.Result.TypedValue + readResult2.Result.TypedValue;
+            M_Return<M_GatherData> writeResult = protocol.Set("40010", "uint16", expectedValue);
             Assert.That(writeResult, Is.Not.Null);
             Assert.That(writeResult.Status, Is.True, writeResult.DescMsg);
 
             M_Return<M_GatherData> readResultRes = protocol.Get("40010", "uint16");
             Assert.That(readResultRes, Is.Not.Null);
             Assert.That(readResultRes.Status, Is.True, readResultRes.DescMsg);
-            Assert.That(readResultRes.Result.value, Is.EqualTo((int.Parse(readResult.Result.value) + int.Parse(readResult2.Result.value)).ToString()), "写入值与读取值不匹配");
+            Assert.That(readResultRes.Result.type, Is.EqualTo("uint16"));
+            Assert.That(readResultRes.Result.value, Is.EqualTo(expectedValue.value), "写入值与读取值不匹配");
 
             M_Return<string> closeResult = protocol.CloseConnected();
             Assert.That(closeResult, Is.Not.Null);
