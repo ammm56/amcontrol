@@ -118,6 +118,10 @@
       <Project>{b214d482-19d9-f1ba-37a5-4126a3bb6732}</Project>
       <Name>ModbusTcp</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ProtocolLib\Siemens\S7Tcp\S7Tcp.csproj">
+      <Project>{3db3c110-d05e-6231-7221-40dbfc2ba049}</Project>
+      <Name>S7Tcp</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
