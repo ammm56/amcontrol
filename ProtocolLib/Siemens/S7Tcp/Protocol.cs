@@ -133,26 +133,26 @@ namespace ProtocolLib.S7Tcp
                 pointinfo = netconfig.pointinfo == null ? new List<Point>() : new List<Point>(netconfig.pointinfo)
             };
 
-            if (_siementS7 != null && (newconfig.ip != _protocolConfig.ip || newconfig.port != _protocolConfig.port))
+            if (_siementS7 != null && (_protocolConfig == null || newconfig.ip != _protocolConfig.ip || newconfig.port != _protocolConfig.port))
             {
                 _protocolConfig = newconfig;
                 _siementS7.UpdateIPPortInfo(_protocolConfig.ip, _protocolConfig.port);
 
-                var reres = Reconnect();
+                M_Return<string> reres = Reconnect();
                 if (!reres.Status)
                 {
                     return 1;
                 }
             }
+
             _protocolConfig = newconfig;
             if (_siementS7 != null)
             {
                 _siementS7.UpdateIPPortInfo(_protocolConfig.ip, _protocolConfig.port);
             }
-            M_Return<List<Point>> res = _collectionUtil.DecodePoints4Rule(ref this._protocolConfig);
 
-            if (res.Status) return 0;
-            return 1;
+            M_Return<List<Point>> res = _collectionUtil.DecodePoints4Rule(ref _protocolConfig);
+            return res.Status ? 0 : 1;
         }
 
         /// <summary>

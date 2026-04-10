@@ -56,9 +56,16 @@ namespace AM.Tests.Protocols
             Assert.That(readResult, Is.Not.Null);
             Assert.That(readResult.Status, Is.True, readResult.DescMsg);
 
-            M_Return<M_GatherData> writeResult = protocol.Set("DB1.2", "uint16", readResult.Result.value);
+            M_TypedValue expectedValue = readResult.Result.TypedValue;
+            M_Return<M_GatherData> writeResult = protocol.Set("DB1.2", "uint16", expectedValue);
             Assert.That(writeResult, Is.Not.Null);
             Assert.That(writeResult.Status, Is.True, writeResult.DescMsg);
+
+            M_Return<M_GatherData> readBackResult = protocol.Get("DB1.2", "uint16");
+            Assert.That(readBackResult, Is.Not.Null);
+            Assert.That(readBackResult.Status, Is.True, readBackResult.DescMsg);
+            Assert.That(readBackResult.Result.type, Is.EqualTo("uint16"));
+            Assert.That(readBackResult.Result.value, Is.EqualTo(expectedValue.value), "写入值与读取值不匹配");
 
             M_Return<string> closeResult = protocol.CloseConnected();
             Assert.That(closeResult, Is.Not.Null);
