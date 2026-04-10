@@ -9,6 +9,7 @@ using AM.DBService.Services.Dev;
 using AM.DBService.Services.Motion.App;
 using AM.DBService.Services.Plc.App;
 using AM.DBService.Services.Plc.Driver;
+using AM.DBService.Services.Plc.Runtime;
 using AM.DBService.Services.Runtime;
 using AM.Model.Alarm;
 using AM.Model.Common;
@@ -131,6 +132,15 @@ namespace AM.App.Bootstrap
             if (!axisRegisterResult.Success)
             {
                 reporter.Error("AppBootstrap", "轴运行态采样服务注册失败，应用启动终止", axisRegisterResult.Code);
+                return;
+            }
+
+            // 8.2 注册后台工作单元（此时 PLC 上下文已重建，autoStart 扫描安全）
+            var plcScanWorker = new PlcScanWorker(reporter);
+            var plcRegisterResult = runtimeTaskManager.Register(plcScanWorker, true);
+            if (!plcRegisterResult.Success)
+            {
+                reporter.Error("AppBootstrap", "PLC 扫描工作单元注册失败，应用启动终止", plcRegisterResult.Code);
                 return;
             }
 
