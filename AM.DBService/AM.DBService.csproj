@@ -84,6 +84,7 @@
     <Compile Include="Services\Motion\Topology\MotionCardCrudService.cs" />
     <Compile Include="Services\Motion\Topology\MotionIoMapCrudService.cs" />
     <Compile Include="Services\Plc\App\PlcConfigAppService.cs" />
+    <Compile Include="Services\Plc\App\PlcConfigSeedService.cs" />
     <Compile Include="Services\Plc\Config\PlcPointCrudService.cs" />
     <Compile Include="Services\Plc\Config\PlcReadBlockCrudService.cs" />
     <Compile Include="Services\Plc\Config\PlcStationCrudService.cs" />

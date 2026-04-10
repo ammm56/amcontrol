@@ -7,6 +7,7 @@ using AM.DBService.Services;
 using AM.DBService.Services.Auth;
 using AM.DBService.Services.Dev;
 using AM.DBService.Services.Motion.App;
+using AM.DBService.Services.Plc.App;
 using AM.DBService.Services.Runtime;
 using AM.Model.Alarm;
 using AM.Model.Common;
@@ -43,7 +44,6 @@ namespace AM.App.Bootstrap
 
             // 2. 构造系统基础设施
             IAMLogger logger = new NLogLogger("System");
-            //IMessageBus messageBus = new MessageBusToolkit();
             IMessageBus messageBus = new MessageBus();
             IErrorCatalog errorCatalog = new JsonErrorCatalog();
 
@@ -71,6 +71,15 @@ namespace AM.App.Bootstrap
                 return;
             }
 
+            // 5.1 初始化 PLC 配置种子数据
+            var plcConfigSeedService = new PlcConfigSeedService(reporter);
+            var plcSeedResult = plcConfigSeedService.EnsureSeedData();
+            if (!plcSeedResult.Success)
+            {
+                reporter.Error("AppBootstrap", "默认 PLC 配置种子初始化失败，应用启动终止", plcSeedResult.Code);
+                return;
+            }
+
             // 6. 从数据库加载完整设备配置并重建 MachineContext
             //    完成后 MachineContext 中已有所有控制卡服务实例、轴/DI/DO 映射、执行器配置
             //    但控制卡尚未物理连接
@@ -82,6 +91,16 @@ namespace AM.App.Bootstrap
                 return;
             }
             reporter.Info("AppBootstrap", "数据库运动控制配置加载并完成设备上下文重建");
+
+            // 6.1 从数据库加载 PLC 配置并重建 PLC 客户端上下文
+            var plcConfigAppService = new PlcConfigAppService();
+            var plcReloadResult = plcConfigAppService.ReloadFromDatabase();
+            if (!plcReloadResult.Success)
+            {
+                reporter.Error("AppBootstrap", "数据库 PLC 配置加载或 PLC 上下文重建失败，应用启动终止", plcReloadResult.Code);
+                return;
+            }
+            reporter.Info("AppBootstrap", "数据库 PLC 配置加载并完成 PLC 上下文重建");
 
             // 7. 建立硬件连接（必须在 IoScanWorker 注册前完成，确保 autoStart 时卡已就绪）
             var machineResult = InitializeMachine();
@@ -130,7 +149,7 @@ namespace AM.App.Bootstrap
 
             if (machine.MotionCards.Count == 0)
             {
-                reporter?.Info("AppBootstrap", "当前无运动控制卡注册，跳过硬件初始化");
+                reporter.Info("AppBootstrap", "当前无运动控制卡注册，跳过硬件初始化");
                 return Result.Ok("无运动控制卡，跳过硬件初始化");
             }
 
@@ -149,9 +168,7 @@ namespace AM.App.Bootstrap
                 var initResult = card.Initialize(null);
                 if (!initResult.Success)
                 {
-                    reporter?.Error("AppBootstrap",
-                        string.Format("控制卡 {0} 驱动初始化失败: {1}", label, initResult.Message),
-                        initResult.Code);
+                    reporter.Error("AppBootstrap", string.Format("控制卡 {0} 驱动初始化失败: {1}", label, initResult.Message), initResult.Code);
                     return initResult;
                 }
 
@@ -159,17 +176,14 @@ namespace AM.App.Bootstrap
                 var connectResult = card.Connect();
                 if (!connectResult.Success)
                 {
-                    reporter?.Error("AppBootstrap",
-                        string.Format("控制卡 {0} 连接失败: {1}", label, connectResult.Message),
-                        connectResult.Code);
+                    reporter.Error("AppBootstrap", string.Format("控制卡 {0} 连接失败: {1}", label, connectResult.Message), connectResult.Code);
                     return connectResult;
                 }
 
-                reporter?.Info("AppBootstrap", string.Format("控制卡 {0} 连接成功", label));
+                reporter.Info("AppBootstrap", string.Format("控制卡 {0} 连接成功", label));
             }
 
-            reporter?.Info("AppBootstrap",
-                string.Format("全部 {0} 张控制卡初始化完成", ordered.Count));
+            reporter.Info("AppBootstrap", string.Format("全部 {0} 张控制卡初始化完成", ordered.Count));
             return Result.Ok("所有控制卡初始化成功");
         }
 
@@ -208,11 +222,11 @@ namespace AM.App.Bootstrap
                 }
 
                 alarmManager.RestoreUnclearedAlarms(infos);
-                logger?.Info("AppBootstrap 已从数据库恢复 " + infos.Count + " 条未清除报警到活动报警面板");
+                logger.Info("AppBootstrap 已从数据库恢复 " + infos.Count + " 条未清除报警到活动报警面板");
             }
             catch (Exception ex)
             {
-                logger?.Error(ex, "从数据库恢复未清除报警失败，此次忽略，不影响启动流程");
+                logger.Error(ex, "从数据库恢复未清除报警失败，此次忽略，不影响启动流程");
             }
         }
     }
