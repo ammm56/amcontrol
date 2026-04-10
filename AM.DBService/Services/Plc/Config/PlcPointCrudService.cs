@@ -14,7 +14,8 @@ namespace AM.DBService.Services.Plc.Config
 {
     /// <summary>
     /// PLC 点位配置 CRUD 服务。
-    /// 对应数据库表：plc_point
+    /// 对应数据库表：plc_point。
+    /// 当前版本采用最简点位模型，Address 直接保存完整协议地址。
     /// </summary>
     public class PlcPointCrudService : ServiceBase, IPlcPointCrudService
     {
@@ -55,11 +56,11 @@ namespace AM.DBService.Services.Plc.Config
                     .ThenBy(p => p.Name)
                     .ToList();
 
-                return OkListLogOnly(items, "PLC点位配置查询成功");
+                return OkListLogOnly(items, "PLC 点位配置查询成功");
             }
             catch (Exception ex)
             {
-                return HandleException<PlcPointConfigEntity>(ex, (int)DbErrorCode.QueryFailed, "PLC点位配置查询失败");
+                return HandleException<PlcPointConfigEntity>(ex, (int)DbErrorCode.QueryFailed, "PLC 点位配置查询失败");
             }
         }
 
@@ -69,7 +70,7 @@ namespace AM.DBService.Services.Plc.Config
             {
                 if (string.IsNullOrWhiteSpace(plcName))
                 {
-                    return Fail<PlcPointConfigEntity>((int)DbErrorCode.InvalidArgument, "PLC名称不能为空");
+                    return Fail<PlcPointConfigEntity>((int)DbErrorCode.InvalidArgument, "PLC 名称不能为空");
                 }
 
                 var normalizedPlcName = NormalizeText(plcName);
@@ -83,7 +84,7 @@ namespace AM.DBService.Services.Plc.Config
                     .ThenBy(p => p.Name)
                     .ToList();
 
-                return OkListLogOnly(items, "PLC点位配置查询成功");
+                return OkListLogOnly(items, "PLC 点位配置查询成功");
             }
             catch (Exception ex)
             {
@@ -97,7 +98,7 @@ namespace AM.DBService.Services.Plc.Config
             {
                 if (string.IsNullOrWhiteSpace(plcName) || string.IsNullOrWhiteSpace(name))
                 {
-                    return Fail<PlcPointConfigEntity>((int)DbErrorCode.InvalidArgument, "PLC名称或点位名称不能为空");
+                    return Fail<PlcPointConfigEntity>((int)DbErrorCode.InvalidArgument, "PLC 名称或点位名称不能为空");
                 }
 
                 var normalizedPlcName = NormalizeText(plcName);
@@ -114,7 +115,7 @@ namespace AM.DBService.Services.Plc.Config
                     return Warn<PlcPointConfigEntity>((int)DbErrorCode.NotFound, "未找到对应 PLC 点位配置");
                 }
 
-                return OkLogOnly(item, "PLC点位配置查询成功");
+                return OkLogOnly(item, "PLC 点位配置查询成功");
             }
             catch (Exception ex)
             {
@@ -128,7 +129,7 @@ namespace AM.DBService.Services.Plc.Config
             {
                 if (entity == null)
                 {
-                    return Fail((int)DbErrorCode.InvalidArgument, "PLC点位配置不能为空");
+                    return Fail((int)DbErrorCode.InvalidArgument, "PLC 点位配置不能为空");
                 }
 
                 Normalize(entity);
@@ -155,7 +156,7 @@ namespace AM.DBService.Services.Plc.Config
 
                 if (existing != null)
                 {
-                    return Fail((int)DbErrorCode.InvalidArgument, "PLC点位名称已存在: " + entity.Name);
+                    return Fail((int)DbErrorCode.InvalidArgument, "PLC 点位名称已存在: " + entity.Name);
                 }
 
                 if (entity.Id > 0)
@@ -167,11 +168,11 @@ namespace AM.DBService.Services.Plc.Config
                     db.Insertable(entity).ExecuteCommand();
                 }
 
-                return Ok("PLC点位配置保存成功");
+                return Ok("PLC 点位配置保存成功");
             }
             catch (Exception ex)
             {
-                return HandleException(ex, (int)DbErrorCode.SaveFailed, "PLC点位配置保存失败");
+                return HandleException(ex, (int)DbErrorCode.SaveFailed, "PLC 点位配置保存失败");
             }
         }
 
@@ -181,7 +182,7 @@ namespace AM.DBService.Services.Plc.Config
             {
                 if (string.IsNullOrWhiteSpace(plcName) || string.IsNullOrWhiteSpace(name))
                 {
-                    return Fail((int)DbErrorCode.InvalidArgument, "PLC名称或点位名称不能为空");
+                    return Fail((int)DbErrorCode.InvalidArgument, "PLC 名称或点位名称不能为空");
                 }
 
                 var normalizedPlcName = NormalizeText(plcName);
@@ -199,11 +200,11 @@ namespace AM.DBService.Services.Plc.Config
                     return Warn((int)DbErrorCode.NotFound, "未找到要删除的 PLC 点位配置");
                 }
 
-                return Ok("PLC点位配置删除成功");
+                return Ok("PLC 点位配置删除成功");
             }
             catch (Exception ex)
             {
-                return HandleException(ex, (int)DbErrorCode.DeleteFailed, "PLC点位配置删除失败");
+                return HandleException(ex, (int)DbErrorCode.DeleteFailed, "PLC 点位配置删除失败");
             }
         }
 
@@ -231,15 +232,11 @@ namespace AM.DBService.Services.Plc.Config
             entity.Name = NormalizeText(entity.Name);
             entity.DisplayName = NormalizeText(entity.DisplayName);
             entity.GroupName = NormalizeText(entity.GroupName);
-            entity.AreaType = NormalizeText(entity.AreaType);
             entity.Address = NormalizeText(entity.Address);
             entity.DataType = NormalizeText(entity.DataType);
             entity.Unit = NormalizeText(entity.Unit);
             entity.AccessMode = NormalizeText(entity.AccessMode);
             entity.ReadMode = NormalizeText(entity.ReadMode);
-            entity.BatchKey = NormalizeText(entity.BatchKey);
-            entity.ByteOrder = NormalizeText(entity.ByteOrder);
-            entity.WordOrder = NormalizeText(entity.WordOrder);
             entity.StringEncoding = NormalizeText(entity.StringEncoding);
             entity.Description = NormalizeText(entity.Description);
             entity.Remark = NormalizeText(entity.Remark);
@@ -251,13 +248,7 @@ namespace AM.DBService.Services.Plc.Config
 
             if (entity.StringLength < 0) entity.StringLength = 0;
             if (entity.ArrayLength < 0) entity.ArrayLength = 0;
-            if (entity.ReadLength < 0) entity.ReadLength = 0;
             if (entity.SortOrder < 0) entity.SortOrder = 0;
-
-            if (entity.Scale == 0)
-            {
-                entity.Scale = 1D;
-            }
         }
 
         private Result Validate(PlcPointConfigEntity entity)
@@ -270,11 +261,6 @@ namespace AM.DBService.Services.Plc.Config
             if (string.IsNullOrWhiteSpace(entity.Name))
             {
                 return Fail((int)DbErrorCode.InvalidArgument, "点位名称不能为空");
-            }
-
-            if (string.IsNullOrWhiteSpace(entity.AreaType))
-            {
-                return Fail((int)DbErrorCode.InvalidArgument, "地址区域不能为空");
             }
 
             if (string.IsNullOrWhiteSpace(entity.Address))
@@ -307,7 +293,7 @@ namespace AM.DBService.Services.Plc.Config
                 return Fail((int)DbErrorCode.InvalidArgument, "ByteArray 类型点位必须配置大于 0 的数组长度");
             }
 
-            return OkSilent("PLC点位配置校验通过");
+            return OkSilent("PLC 点位配置校验通过");
         }
 
         private static string NormalizeText(string value)

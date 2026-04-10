@@ -68,7 +68,7 @@ IMotionCardService（聚合接口）
 ├── IMotionCardConnection      Initialize / Connect / Disconnect
 ├── IMotionCardConfiguration   LoadAxisConfig(List<AxisConfig>)
 ├── IMotionAxisControl         Enable / Stop / StopAll / Home / HomeAsync
-├── IMotionAxisMotion          MoveRelative / MoveAbsolute / JogMove（脉冲 + 毫米双套）
+├── IMotionAxisMotion          MoveRelative / MoveAbsolute / JogMove（脉冲 + 毫米双套餐）
 ├── IMotionDigitalIO           SetDO / GetDI / GetDO
 ├── IMotionAxisParameter       SetVel / SetAcc / SetDec
 ├── IMotionAxisState           GetAxisStatus / Get[Command|Encoder]Position[Mm] / IsMoving
@@ -110,6 +110,7 @@ SysUserEntity、SysRoleEntity、SysUserRoleEntity、SysLoginLogEntity、SysPageP
 ### 4.4 Motion IO 点位
 
 - `motion_io_point_config` / MotionIoPointConfigEntity
+- PLC 当前阶段彻底简化数据结构：点位建模以单一 Address 直接表达协议地址，删除 AreaType 等冗余拆分字段；规则引擎、前后处理暂不考虑，先不要引入。
 
 ### 4.5 执行器（第三层对象，4 张表）
 

@@ -20,8 +20,8 @@ namespace AM.DBService.Services.Plc.App
 {
     /// <summary>
     /// PLC 配置应用服务。
-    /// 负责将数据库中的 PLC 站、点位与读块配置装配成运行时配置，并同步到全局上下文。
-    /// 该服务位于 App 层，体现“数据库配置 -> 运行时配置 -> 全局上下文”的聚合装配职责。
+    /// 负责将数据库中的 PLC 配置装配为运行时配置，并同步到全局上下文。
+    /// 当前版本按最简模型实现，点位使用 Address 直接表达完整协议地址。
     /// </summary>
     public class PlcConfigAppService : ServiceBase, IPlcConfigAppService
     {
@@ -66,9 +66,6 @@ namespace AM.DBService.Services.Plc.App
             _plcClientFactory = plcClientFactory;
         }
 
-        /// <summary>
-        /// 初始化 PLC 配置相关表与索引。
-        /// </summary>
         public Result EnsureTables()
         {
             try
@@ -90,9 +87,6 @@ namespace AM.DBService.Services.Plc.App
             }
         }
 
-        /// <summary>
-        /// 从数据库读取并装配全部 PLC 配置。
-        /// </summary>
         public Result<PlcConfig> QueryAll()
         {
             try
@@ -140,7 +134,6 @@ namespace AM.DBService.Services.Plc.App
                 }
 
                 var plcConfig = BuildPlcConfig(stationEntities, pointEntities, readBlockEntities);
-
                 return OkLogOnly(plcConfig, "读取数据库 PLC 配置成功");
             }
             catch (Exception ex)
@@ -149,9 +142,6 @@ namespace AM.DBService.Services.Plc.App
             }
         }
 
-        /// <summary>
-        /// 从数据库重载 PLC 配置并同步到全局上下文。
-        /// </summary>
         public Result ReloadFromDatabase()
         {
             var queryResult = QueryAll();
@@ -227,6 +217,16 @@ namespace AM.DBService.Services.Plc.App
                     return Fail((int)DbErrorCode.InvalidArgument, "点位所属 PLC 不存在或未启用: " + point.PlcName + " / " + point.Name);
                 }
 
+                if (string.IsNullOrWhiteSpace(point.Address))
+                {
+                    return Fail((int)DbErrorCode.InvalidArgument, "点位地址不能为空: " + point.Name);
+                }
+
+                if (string.IsNullOrWhiteSpace(point.DataType))
+                {
+                    return Fail((int)DbErrorCode.InvalidArgument, "点位数据类型不能为空: " + point.Name);
+                }
+
                 if (string.Equals(point.DataType, "String", StringComparison.OrdinalIgnoreCase) && point.StringLength <= 0)
                 {
                     return Fail((int)DbErrorCode.InvalidArgument, "String 类型点位必须配置大于 0 的字符串长度: " + point.Name);
@@ -248,6 +248,11 @@ namespace AM.DBService.Services.Plc.App
                 if (!stationNameSet.Contains(readBlock.PlcName))
                 {
                     return Fail((int)DbErrorCode.InvalidArgument, "读块所属 PLC 不存在或未启用: " + readBlock.PlcName + " / " + readBlock.BlockName);
+                }
+
+                if (string.IsNullOrWhiteSpace(readBlock.StartAddress))
+                {
+                    return Fail((int)DbErrorCode.InvalidArgument, "读块起始地址不能为空: " + readBlock.BlockName);
                 }
 
                 if (readBlock.Length <= 0)
@@ -369,21 +374,13 @@ namespace AM.DBService.Services.Plc.App
                 Name = entity.Name,
                 DisplayName = entity.DisplayName,
                 GroupName = entity.GroupName,
-                AreaType = entity.AreaType,
                 Address = entity.Address,
-                BitIndex = entity.BitIndex,
                 DataType = entity.DataType,
                 StringLength = entity.StringLength,
                 ArrayLength = entity.ArrayLength,
-                ReadLength = entity.ReadLength,
-                Scale = entity.Scale,
-                Offset = entity.Offset,
                 Unit = entity.Unit,
                 AccessMode = entity.AccessMode,
                 ReadMode = entity.ReadMode,
-                BatchKey = entity.BatchKey,
-                ByteOrder = entity.ByteOrder,
-                WordOrder = entity.WordOrder,
                 StringEncoding = entity.StringEncoding,
                 IsEnabled = entity.IsEnabled,
                 SortOrder = entity.SortOrder,

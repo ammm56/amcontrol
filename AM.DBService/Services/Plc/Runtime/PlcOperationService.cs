@@ -13,12 +13,10 @@ namespace AM.DBService.Services.Plc.Runtime
 {
     /// <summary>
     /// PLC 运行时操作服务。
-    /// 统一承载调试页与运行时业务层的读写入口，避免页面直接访问底层客户端。
-    ///
-    /// 当前版本采用最简单实现：
-    /// 1. 优先按点位配置逐点读写；
-    /// 2. 直接地址调试也统一走点位请求模型；
-    /// 3. 不再在服务层做协议块切片与字节解析。
+    /// 当前版本只保留最小职责：
+    /// 1. 按点位配置直接读写；
+    /// 2. 调试页直接地址读写统一走 Address；
+    /// 3. 不再承担 AreaType、BitIndex、缩放、块切片等复杂逻辑。
     /// </summary>
     public class PlcOperationService : ServiceBase
     {
@@ -59,32 +57,30 @@ namespace AM.DBService.Services.Plc.Runtime
                     return Fail((int)DbErrorCode.InvalidArgument, "写入值不能为空");
                 }
 
-                var point = FindPointConfig(pointName.Trim());
+                PlcPointConfig point = FindPointConfig(pointName.Trim());
                 if (point == null)
                 {
                     return Warn((int)DbErrorCode.NotFound, "未找到对应 PLC 点位配置");
                 }
 
-                var safetyResult = ValidatePointWrite(point, confirmed);
-                if (!safetyResult.Success)
+                Result validateResult = ValidatePointWrite(point, confirmed);
+                if (!validateResult.Success)
                 {
-                    return safetyResult;
+                    return validateResult;
                 }
 
-                var clientResult = GetConnectedClient(point.PlcName);
+                Result<IPlcClient> clientResult = GetConnectedClient(point.PlcName);
                 if (!clientResult.Success)
                 {
                     return Fail(clientResult.Code, clientResult.Message);
                 }
 
-                var writeResult = clientResult.Item.WritePoint(new PlcPointWriteRequest
+                Result<PlcPointReadResult> writeResult = clientResult.Item.WritePoint(new PlcPointWriteRequest
                 {
                     PlcName = point.PlcName,
-                    AreaType = point.AreaType,
                     Address = point.Address,
                     DataType = point.DataType,
                     Value = value,
-                    BitIndex = point.BitIndex,
                     StringLength = point.StringLength,
                     ArrayLength = point.ArrayLength
                 });
@@ -95,16 +91,17 @@ namespace AM.DBService.Services.Plc.Runtime
                 }
 
                 UpdatePointRuntimeAfterWrite(point, value);
-                return OkLogOnly("PLC点位写入成功");
+                return OkLogOnly("PLC 点位写入成功");
             }
             catch (Exception ex)
             {
-                return HandleException(ex, (int)DbErrorCode.Unknown, "PLC点位写入失败");
+                return HandleException(ex, (int)DbErrorCode.Unknown, "PLC 点位写入失败");
             }
         }
 
         /// <summary>
         /// 按直接地址执行写入。
+        /// 保留兼容签名，areaType 与 bitIndex 参数当前不参与执行。
         /// </summary>
         public Result WriteAddress(
             string plcName,
@@ -119,34 +116,32 @@ namespace AM.DBService.Services.Plc.Runtime
         {
             try
             {
-                var validateResult = ValidateDirectAddressArguments(
+                Result validateResult = ValidateDirectAddressArguments(
                     plcName,
-                    areaType,
                     address,
                     dataType,
                     value,
                     confirmed,
                     stringLength,
                     arrayLength);
+
                 if (!validateResult.Success)
                 {
                     return validateResult;
                 }
 
-                var clientResult = GetConnectedClient(plcName.Trim());
+                Result<IPlcClient> clientResult = GetConnectedClient(plcName.Trim());
                 if (!clientResult.Success)
                 {
                     return Fail(clientResult.Code, clientResult.Message);
                 }
 
-                var writeResult = clientResult.Item.WritePoint(new PlcPointWriteRequest
+                Result<PlcPointReadResult> writeResult = clientResult.Item.WritePoint(new PlcPointWriteRequest
                 {
                     PlcName = plcName.Trim(),
-                    AreaType = areaType.Trim(),
                     Address = address.Trim(),
                     DataType = dataType.Trim(),
                     Value = value,
-                    BitIndex = bitIndex,
                     StringLength = stringLength,
                     ArrayLength = arrayLength
                 });
@@ -156,11 +151,11 @@ namespace AM.DBService.Services.Plc.Runtime
                     return Fail(writeResult.Code, writeResult.Message);
                 }
 
-                return OkLogOnly("PLC地址写入成功");
+                return OkLogOnly("PLC 地址写入成功");
             }
             catch (Exception ex)
             {
-                return HandleException(ex, (int)DbErrorCode.Unknown, "PLC地址写入失败");
+                return HandleException(ex, (int)DbErrorCode.Unknown, "PLC 地址写入失败");
             }
         }
 
@@ -176,13 +171,13 @@ namespace AM.DBService.Services.Plc.Runtime
                     return Fail<PlcPointRuntimeSnapshot>((int)DbErrorCode.InvalidArgument, "点位名称不能为空");
                 }
 
-                var point = FindPointConfig(pointName.Trim());
+                PlcPointConfig point = FindPointConfig(pointName.Trim());
                 if (point == null)
                 {
                     return Warn<PlcPointRuntimeSnapshot>((int)DbErrorCode.NotFound, "未找到对应 PLC 点位配置");
                 }
 
-                var readResult = ReadPointInternal(point);
+                Result<PlcPointRuntimeSnapshot> readResult = ReadPointInternal(point);
                 if (!readResult.Success)
                 {
                     return readResult;
@@ -190,16 +185,17 @@ namespace AM.DBService.Services.Plc.Runtime
 
                 RuntimeContext.Instance.Plc.SetPointSnapshot(readResult.Item);
                 RuntimeContext.Instance.Plc.NotifyPointSnapshotChanged(point.Name);
-                return OkLogOnly(readResult.Item, "PLC点位测试读取成功");
+                return OkLogOnly(readResult.Item, "PLC 点位测试读取成功");
             }
             catch (Exception ex)
             {
-                return HandleException<PlcPointRuntimeSnapshot>(ex, (int)DbErrorCode.Unknown, "PLC点位测试读取失败");
+                return HandleException<PlcPointRuntimeSnapshot>(ex, (int)DbErrorCode.Unknown, "PLC 点位测试读取失败");
             }
         }
 
         /// <summary>
         /// 按直接地址执行测试读取。
+        /// 保留兼容签名，areaType 与 bitIndex 参数当前不参与执行。
         /// </summary>
         public Result<PlcPointRuntimeSnapshot> TestReadAddress(
             string plcName,
@@ -212,36 +208,32 @@ namespace AM.DBService.Services.Plc.Runtime
         {
             try
             {
-                var validateResult = ValidateDirectReadArguments(plcName, areaType, address, dataType, stringLength, arrayLength);
+                Result validateResult = ValidateDirectReadArguments(plcName, address, dataType, stringLength, arrayLength);
                 if (!validateResult.Success)
                 {
                     return Fail<PlcPointRuntimeSnapshot>(validateResult.Code, validateResult.Message);
                 }
 
-                var clientResult = GetConnectedClient(plcName.Trim());
+                Result<IPlcClient> clientResult = GetConnectedClient(plcName.Trim());
                 if (!clientResult.Success)
                 {
                     return Fail<PlcPointRuntimeSnapshot>(clientResult.Code, clientResult.Message);
                 }
 
-                var tempPoint = new PlcPointConfig
+                PlcPointConfig tempPoint = new PlcPointConfig
                 {
                     PlcName = plcName.Trim(),
-                    Name = string.Format("{0}_{1}_{2}", plcName.Trim(), areaType.Trim(), address.Trim()),
+                    Name = string.Format("{0}_{1}", plcName.Trim(), address.Trim()),
                     DisplayName = "地址测试读取",
                     GroupName = "Debug",
-                    AreaType = areaType.Trim(),
                     Address = address.Trim(),
-                    BitIndex = bitIndex,
                     DataType = dataType.Trim(),
                     StringLength = stringLength,
                     ArrayLength = arrayLength,
-                    ReadLength = 0,
-                    Scale = 1D,
-                    Offset = 0D,
                     Unit = null,
                     AccessMode = "ReadOnly",
                     ReadMode = "Single",
+                    StringEncoding = "ASCII",
                     IsEnabled = true
                 };
 
@@ -249,7 +241,7 @@ namespace AM.DBService.Services.Plc.Runtime
             }
             catch (Exception ex)
             {
-                return HandleException<PlcPointRuntimeSnapshot>(ex, (int)DbErrorCode.Unknown, "PLC地址测试读取失败");
+                return HandleException<PlcPointRuntimeSnapshot>(ex, (int)DbErrorCode.Unknown, "PLC 地址测试读取失败");
             }
         }
 
@@ -270,6 +262,16 @@ namespace AM.DBService.Services.Plc.Runtime
                 return Fail((int)DbErrorCode.InvalidArgument, "该点位写入属于高风险操作，必须显式确认后才能执行");
             }
 
+            if (string.IsNullOrWhiteSpace(point.Address))
+            {
+                return Fail((int)DbErrorCode.InvalidArgument, "点位地址不能为空");
+            }
+
+            if (string.IsNullOrWhiteSpace(point.DataType))
+            {
+                return Fail((int)DbErrorCode.InvalidArgument, "点位数据类型不能为空");
+            }
+
             if (string.Equals(point.DataType, "String", StringComparison.OrdinalIgnoreCase) && point.StringLength <= 0)
             {
                 return Fail((int)DbErrorCode.InvalidArgument, "String 类型点位必须配置大于 0 的字符串长度");
@@ -280,12 +282,11 @@ namespace AM.DBService.Services.Plc.Runtime
                 return Fail((int)DbErrorCode.InvalidArgument, "ByteArray 类型点位必须配置大于 0 的数组长度");
             }
 
-            return OkSilent("PLC点位写入校验通过");
+            return OkSilent("PLC 点位写入校验通过");
         }
 
         private Result ValidateDirectAddressArguments(
             string plcName,
-            string areaType,
             string address,
             string dataType,
             object value,
@@ -295,12 +296,7 @@ namespace AM.DBService.Services.Plc.Runtime
         {
             if (string.IsNullOrWhiteSpace(plcName))
             {
-                return Fail((int)DbErrorCode.InvalidArgument, "PLC名称不能为空");
-            }
-
-            if (string.IsNullOrWhiteSpace(areaType))
-            {
-                return Fail((int)DbErrorCode.InvalidArgument, "区域类型不能为空");
+                return Fail((int)DbErrorCode.InvalidArgument, "PLC 名称不能为空");
             }
 
             if (string.IsNullOrWhiteSpace(address))
@@ -333,12 +329,11 @@ namespace AM.DBService.Services.Plc.Runtime
                 return Fail((int)DbErrorCode.InvalidArgument, "ByteArray 类型直接写入必须提供大于 0 的数组长度");
             }
 
-            return OkSilent("PLC地址写入校验通过");
+            return OkSilent("PLC 地址写入校验通过");
         }
 
         private Result ValidateDirectReadArguments(
             string plcName,
-            string areaType,
             string address,
             string dataType,
             int stringLength,
@@ -346,12 +341,7 @@ namespace AM.DBService.Services.Plc.Runtime
         {
             if (string.IsNullOrWhiteSpace(plcName))
             {
-                return Fail((int)DbErrorCode.InvalidArgument, "PLC名称不能为空");
-            }
-
-            if (string.IsNullOrWhiteSpace(areaType))
-            {
-                return Fail((int)DbErrorCode.InvalidArgument, "区域类型不能为空");
+                return Fail((int)DbErrorCode.InvalidArgument, "PLC 名称不能为空");
             }
 
             if (string.IsNullOrWhiteSpace(address))
@@ -374,14 +364,14 @@ namespace AM.DBService.Services.Plc.Runtime
                 return Fail((int)DbErrorCode.InvalidArgument, "ByteArray 类型测试读取必须提供大于 0 的数组长度");
             }
 
-            return OkSilent("PLC地址测试读取校验通过");
+            return OkSilent("PLC 地址测试读取校验通过");
         }
 
         private Result<IPlcClient> GetConnectedClient(string plcName)
         {
             if (string.IsNullOrWhiteSpace(plcName))
             {
-                return Fail<IPlcClient>((int)DbErrorCode.InvalidArgument, "PLC名称不能为空");
+                return Fail<IPlcClient>((int)DbErrorCode.InvalidArgument, "PLC 名称不能为空");
             }
 
             IPlcClient client;
@@ -390,31 +380,31 @@ namespace AM.DBService.Services.Plc.Runtime
                 return Fail<IPlcClient>((int)DbErrorCode.NotFound, "未找到对应 PLC 客户端: " + plcName);
             }
 
-            var isConnectedResult = client.IsConnected();
+            Result<bool> isConnectedResult = client.IsConnected();
             if (isConnectedResult.Success && isConnectedResult.Item)
             {
-                return OkSilent(client, "PLC客户端获取成功");
+                return OkSilent(client, "PLC 客户端获取成功");
             }
 
-            var connectResult = client.Connect();
+            Result connectResult = client.Connect();
             if (!connectResult.Success)
             {
                 return Fail<IPlcClient>(connectResult.Code, connectResult.Message);
             }
 
-            return OkSilent(client, "PLC客户端连接成功");
+            return OkSilent(client, "PLC 客户端连接成功");
         }
 
         private PlcPointConfig FindPointConfig(string pointName)
         {
-            var config = ConfigContext.Instance.Config.PlcConfig ?? new PlcConfig();
+            PlcConfig config = ConfigContext.Instance.Config.PlcConfig ?? new PlcConfig();
             var points = config.Points ?? new System.Collections.Generic.List<PlcPointConfig>();
             return points.FirstOrDefault(p => p != null && string.Equals(p.Name, pointName, StringComparison.OrdinalIgnoreCase));
         }
 
         private Result<PlcPointRuntimeSnapshot> ReadPointInternal(PlcPointConfig point)
         {
-            var clientResult = GetConnectedClient(point.PlcName);
+            Result<IPlcClient> clientResult = GetConnectedClient(point.PlcName);
             if (!clientResult.Success)
             {
                 return Fail<PlcPointRuntimeSnapshot>(clientResult.Code, clientResult.Message);
@@ -425,13 +415,11 @@ namespace AM.DBService.Services.Plc.Runtime
 
         private Result<PlcPointRuntimeSnapshot> ReadPointWithClient(IPlcClient client, PlcPointConfig point)
         {
-            var readResult = client.ReadPoint(new PlcPointReadRequest
+            Result<PlcPointReadResult> readResult = client.ReadPoint(new PlcPointReadRequest
             {
                 PlcName = point.PlcName,
-                AreaType = point.AreaType,
                 Address = point.Address,
                 DataType = point.DataType,
-                BitIndex = point.BitIndex,
                 StringLength = point.StringLength,
                 ArrayLength = point.ArrayLength
             });
@@ -444,14 +432,13 @@ namespace AM.DBService.Services.Plc.Runtime
             string rawValueText = readResult.Item.ValueText ?? string.Empty;
             string displayValueText = BuildReadDisplay(point, rawValueText);
 
-            var snapshot = new PlcPointRuntimeSnapshot
+            PlcPointRuntimeSnapshot snapshot = new PlcPointRuntimeSnapshot
             {
                 PlcName = point.PlcName,
                 PointName = point.Name,
                 DisplayName = point.DisplayName,
                 GroupName = point.GroupName,
                 AddressText = point.AddressText,
-                AreaType = point.AreaType,
                 DataType = point.DataType,
                 ValueText = displayValueText,
                 RawValue = rawValueText,
@@ -462,7 +449,7 @@ namespace AM.DBService.Services.Plc.Runtime
                 ErrorMessage = null
             };
 
-            return OkSilent(snapshot, "PLC点位读取成功");
+            return OkSilent(snapshot, "PLC 点位读取成功");
         }
 
         private void UpdatePointRuntimeAfterWrite(PlcPointConfig point, object value)
@@ -483,7 +470,6 @@ namespace AM.DBService.Services.Plc.Runtime
                 DisplayName = point.DisplayName,
                 GroupName = point.GroupName,
                 AddressText = point.AddressText,
-                AreaType = point.AreaType,
                 DataType = point.DataType,
                 ValueText = displayValueText,
                 RawValue = rawValueText,
@@ -538,23 +524,13 @@ namespace AM.DBService.Services.Plc.Runtime
                 {
                     return boolValue ? "ON" : "OFF";
                 }
-
-                return rawValueText;
-            }
-
-            if (string.Equals(point.DataType, "String", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(point.DataType, "ByteArray", StringComparison.OrdinalIgnoreCase))
-            {
-                return rawValueText;
             }
 
             double numericValue;
-            if (TryConvertToDoubleText(rawValueText, out numericValue))
+            if (!string.IsNullOrWhiteSpace(point.Unit) &&
+                TryConvertToDoubleText(rawValueText, out numericValue))
             {
-                string rawText;
-                string displayText;
-                BuildNumericDisplay(point, numericValue, out rawText, out displayText);
-                return displayText;
+                return string.Format(CultureInfo.InvariantCulture, "{0} {1}", rawValueText, point.Unit);
             }
 
             return rawValueText;
@@ -582,15 +558,9 @@ namespace AM.DBService.Services.Plc.Runtime
                 return;
             }
 
-            if (string.Equals(point.DataType, "String", StringComparison.OrdinalIgnoreCase))
-            {
-                displayValueText = rawValueText;
-                return;
-            }
-
             if (string.Equals(point.DataType, "ByteArray", StringComparison.OrdinalIgnoreCase))
             {
-                var bytes = value as byte[];
+                byte[] bytes = value as byte[];
                 if (bytes != null)
                 {
                     rawValueText = ToHexString(bytes);
@@ -599,21 +569,18 @@ namespace AM.DBService.Services.Plc.Runtime
                 return;
             }
 
-            double numericValue;
-            if (TryConvertToDouble(value, out numericValue))
+            if (!string.IsNullOrWhiteSpace(point.Unit))
             {
-                BuildNumericDisplay(point, numericValue, out rawValueText, out displayValueText);
+                double numericValue;
+                if (TryConvertToDouble(value, out numericValue))
+                {
+                    displayValueText = string.Format(
+                        CultureInfo.InvariantCulture,
+                        "{0} {1}",
+                        numericValue.ToString("0.########", CultureInfo.InvariantCulture),
+                        point.Unit);
+                }
             }
-        }
-
-        private static bool BuildNumericDisplay(PlcPointConfig point, double rawNumeric, out string rawValueText, out string displayValueText)
-        {
-            rawValueText = rawNumeric.ToString("0.########", CultureInfo.InvariantCulture);
-            var scaled = (rawNumeric * (point == null || point.Scale == 0D ? 1D : point.Scale)) + (point == null ? 0D : point.Offset);
-            displayValueText = point == null || string.IsNullOrWhiteSpace(point.Unit)
-                ? scaled.ToString("0.########", CultureInfo.InvariantCulture)
-                : string.Format(CultureInfo.InvariantCulture, "{0:0.########} {1}", scaled, point.Unit);
-            return true;
         }
 
         private static bool TryConvertToBoolean(object value, out bool result)

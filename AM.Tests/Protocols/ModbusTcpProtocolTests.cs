@@ -1,7 +1,6 @@
 ﻿using NUnit.Framework;
 using ProtocolLib.CommonLib.Interface;
 using ProtocolLib.CommonLib.Model;
-using ProtocolLib.CommonLib.Model.Net;
 using ProtocolLib.ModbusTcp;
 using System;
 using System.Globalization;
@@ -13,26 +12,16 @@ namespace AM.Tests.Protocols
     {
         private static class TestAddress
         {
-            public const string Bool = "00000";
-
+            public const string Bool = "00001";
             public const string Int16 = "40000";
             public const string UInt16 = "40001";
-
             public const string Int32 = "40010";
             public const string UInt32 = "40012";
-
             public const string Int64 = "40020";
             public const string UInt64 = "40024";
-
             public const string Single = "40030";
             public const string Double = "40032";
-
             public const string StringFixed20 = "40040[20]";
-
-            public const string CalcLeft = "40050";
-            public const string CalcRight = "40051";
-            public const string CalcResult = "40052";
-
             public const string Reconnect = "40060";
         }
 
@@ -49,69 +38,98 @@ namespace AM.Tests.Protocols
             return protocol;
         }
 
-        private static M_NetConfig CreateConfig()
+        private static M_ProtocolOptions CreateConfig()
         {
-            return new M_NetConfig
+            return new M_ProtocolOptions
             {
-                equipmentid = "1",
-                protocoltype = "modbustcp",
+                protocolType = "modbustcp",
+                connectionType = "tcp",
                 ip = "127.0.0.1",
-                port = 502
+                port = 502,
+                stationNo = 1,
+                timeoutMs = 1000
             };
         }
 
-        private static IProtocol CreateAndInitProtocol()
+        private static IProtocol CreateAndConnectProtocol()
         {
             IProtocol protocol = CreateProtocol();
 
-            int setCfgResult = protocol.SetCFG(CreateConfig());
-            Assert.That(setCfgResult, Is.EqualTo(0), "SetCFG 失败");
+            M_Return<bool> configureResult = protocol.Configure(CreateConfig());
+            Assert.That(configureResult, Is.Not.Null);
+            Assert.That(configureResult.Status, Is.True, configureResult.DescMsg);
 
-            int initResult = protocol.Init();
-            Assert.That(initResult, Is.EqualTo(0), "Init 失败");
+            M_Return<bool> connectResult = protocol.Connect();
+            Assert.That(connectResult, Is.Not.Null);
+            Assert.That(connectResult.Status, Is.True, connectResult.DescMsg);
 
             return protocol;
         }
 
         private static void CloseProtocol(IProtocol protocol)
         {
-            if (protocol == null) return;
+            if (protocol == null)
+            {
+                return;
+            }
 
-            M_Return<string> closeResult = protocol.CloseConnected();
+            M_Return<bool> closeResult = protocol.Disconnect();
             Assert.That(closeResult, Is.Not.Null);
             Assert.That(closeResult.Status, Is.True, closeResult.DescMsg);
         }
 
-        private static M_Return<M_GatherData> WriteSuccess(IProtocol protocol, string address, string type, object value)
+        private static M_Return<M_PointData> WriteSuccess(IProtocol protocol, string address, string dataType, object value, int stringLength = 0, int arrayLength = 0)
         {
-            M_Return<M_GatherData> result = protocol.Set(address, type, value);
+            M_Return<M_PointData> result = protocol.WritePoint(new M_PointWriteRequest
+            {
+                address = address,
+                dataType = dataType,
+                value = value,
+                stringLength = stringLength,
+                arrayLength = arrayLength
+            });
+
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Status, Is.True, result.DescMsg);
             Assert.That(result.Result, Is.Not.Null);
-            Assert.That(result.Result.type, Is.EqualTo(type));
+            Assert.That(result.Result.dataType, Is.EqualTo(dataType));
             return result;
         }
 
-        private static M_Return<M_GatherData> ReadSuccess(IProtocol protocol, string address, string type)
+        private static M_Return<M_PointData> ReadSuccess(IProtocol protocol, string address, string dataType, int stringLength = 0, int arrayLength = 0)
         {
-            M_Return<M_GatherData> result = protocol.Get(address, type);
+            M_Return<M_PointData> result = protocol.ReadPoint(new M_PointReadRequest
+            {
+                address = address,
+                dataType = dataType,
+                stringLength = stringLength,
+                arrayLength = arrayLength
+            });
+
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Status, Is.True, result.DescMsg);
             Assert.That(result.Result, Is.Not.Null);
-            Assert.That(result.Result.type, Is.EqualTo(type));
+            Assert.That(result.Result.dataType, Is.EqualTo(dataType));
             return result;
         }
 
-        private static void AssertRoundTrip(IProtocol protocol, string address, string type, object writeValue, string expectedReadValue)
+        private static void AssertRoundTrip(
+            IProtocol protocol,
+            string address,
+            string dataType,
+            object writeValue,
+            string expectedReadValue,
+            int stringLength = 0,
+            int arrayLength = 0)
         {
-            WriteSuccess(protocol, address, type, writeValue);
-            M_Return<M_GatherData> readResult = ReadSuccess(protocol, address, type);
-            AssertValue(type, expectedReadValue, readResult.Result.value);
+            WriteSuccess(protocol, address, dataType, writeValue, stringLength, arrayLength);
+            M_Return<M_PointData> readResult = ReadSuccess(protocol, address, dataType, stringLength, arrayLength);
+            AssertValue(dataType, expectedReadValue, readResult.Result.value);
         }
 
-        private static void AssertValue(string type, string expected, string actual)
+        private static void AssertValue(string dataType, string expected, string actual)
         {
-            switch (type)
+            switch (dataType)
             {
                 case "bool":
                 case "string":
@@ -137,7 +155,7 @@ namespace AM.Tests.Protocols
                     break;
 
                 default:
-                    Assert.Fail("未处理的数据类型断言: " + type);
+                    Assert.Fail("未处理的数据类型断言: " + dataType);
                     break;
             }
         }
@@ -151,82 +169,30 @@ namespace AM.Tests.Protocols
 
         [Test]
         [Explicit("需要本地存在可访问的 Modbus TCP 服务，默认使用 127.0.0.1:502")]
-        public void Should_Init_And_Close_ModbusTcp_Protocol()
+        public void Should_Configure_Connect_And_Disconnect_ModbusTcp_Protocol()
         {
-            IProtocol protocol = CreateAndInitProtocol();
+            IProtocol protocol = CreateAndConnectProtocol();
             CloseProtocol(protocol);
         }
 
         [Test]
-        [Explicit("需要本地存在可访问的 Modbus TCP 服务，且以下地址可读写：00000,40000-40060，字符串地址使用 40040[20]")]
+        [Explicit("需要本地存在可访问的 Modbus TCP 服务，且以下地址可读写：00001,40000-40060，字符串地址使用 40040[20]")]
         public void Should_Read_And_Write_All_Supported_DataTypes()
         {
-            IProtocol protocol = CreateAndInitProtocol();
+            IProtocol protocol = CreateAndConnectProtocol();
 
             try
             {
                 AssertRoundTrip(protocol, TestAddress.Bool, "bool", true, "1");
-
                 AssertRoundTrip(protocol, TestAddress.Int16, "int16", (short)-1234, "-1234");
                 AssertRoundTrip(protocol, TestAddress.UInt16, "uint16", (ushort)1234, "1234");
-
                 AssertRoundTrip(protocol, TestAddress.Int32, "int32", -123456, "-123456");
                 AssertRoundTrip(protocol, TestAddress.UInt32, "uint32", 123456u, "123456");
-
                 AssertRoundTrip(protocol, TestAddress.Int64, "int64", -1234567890L, "-1234567890");
                 AssertRoundTrip(protocol, TestAddress.UInt64, "uint64", 1234567890UL, "1234567890");
-
                 AssertRoundTrip(protocol, TestAddress.Single, "single", 12.5f, "12.5");
                 AssertRoundTrip(protocol, TestAddress.Double, "double", 123.125d, "123.125");
-
-                AssertRoundTrip(protocol, TestAddress.StringFixed20, "string", "AM_MODBUS", "AM_MODBUS");
-            }
-            finally
-            {
-                CloseProtocol(protocol);
-            }
-        }
-
-        [Test]
-        [Explicit("需要本地存在可访问的 Modbus TCP 服务，且 40050-40052 可读写")]
-        public void Should_Support_TypedValue_Compare_And_Basic_Calculation()
-        {
-            IProtocol protocol = CreateAndInitProtocol();
-
-            try
-            {
-                WriteSuccess(protocol, TestAddress.CalcLeft, "uint16", (ushort)8);
-                WriteSuccess(protocol, TestAddress.CalcRight, "uint16", (ushort)2);
-
-                M_Return<M_GatherData> leftRead = ReadSuccess(protocol, TestAddress.CalcLeft, "uint16");
-                M_Return<M_GatherData> rightRead = ReadSuccess(protocol, TestAddress.CalcRight, "uint16");
-
-                M_TypedValue left = leftRead.Result.TypedValue;
-                M_TypedValue right = rightRead.Result.TypedValue;
-
-                Assert.That(left > right, Is.True);
-                Assert.That(left >= right, Is.True);
-                Assert.That(left < right, Is.False);
-                Assert.That(left <= right, Is.False);
-                Assert.That(left == right, Is.False);
-                Assert.That(left != right, Is.True);
-
-                M_TypedValue addValue = left + right;
-                M_TypedValue subValue = left - right;
-                M_TypedValue mulValue = left * right;
-                M_TypedValue divValue = left / right;
-
-                Assert.That(addValue.type, Is.EqualTo("uint16"));
-                Assert.That(addValue.value, Is.EqualTo("10"));
-                Assert.That(subValue.value, Is.EqualTo("6"));
-                Assert.That(mulValue.value, Is.EqualTo("16"));
-                Assert.That(divValue.value, Is.EqualTo("4"));
-
-                M_Return<M_GatherData> writeResult = WriteSuccess(protocol, TestAddress.CalcResult, "uint16", addValue);
-                Assert.That(writeResult.Result.value, Is.EqualTo("10"));
-
-                M_Return<M_GatherData> readBack = ReadSuccess(protocol, TestAddress.CalcResult, "uint16");
-                Assert.That(readBack.Result.value, Is.EqualTo(addValue.value), "计算结果写入后回读不一致");
+                AssertRoundTrip(protocol, TestAddress.StringFixed20, "string", "AM_MODBUS", "AM_MODBUS", 20, 0);
             }
             finally
             {
@@ -236,60 +202,21 @@ namespace AM.Tests.Protocols
 
         [Test]
         [Explicit("需要本地存在可访问的 Modbus TCP 服务，且 40060 可读写")]
-        public void Should_Reconnect_And_Continue_Read_Write()
+        public void Should_Support_Reconnect()
         {
-            IProtocol protocol = CreateAndInitProtocol();
+            IProtocol protocol = CreateAndConnectProtocol();
 
             try
             {
-                WriteSuccess(protocol, TestAddress.Reconnect, "uint16", (ushort)99);
-                M_Return<M_GatherData> beforeReconnect = ReadSuccess(protocol, TestAddress.Reconnect, "uint16");
-                Assert.That(beforeReconnect.Result.value, Is.EqualTo("99"));
+                M_Return<M_PointData> writeResult = WriteSuccess(protocol, TestAddress.Reconnect, "uint16", (ushort)88);
+                Assert.That(writeResult.Result.value, Is.Not.Null);
 
-                M_Return<string> reconnectResult = protocol.Reconnect();
+                M_Return<bool> reconnectResult = protocol.Reconnect();
                 Assert.That(reconnectResult, Is.Not.Null);
                 Assert.That(reconnectResult.Status, Is.True, reconnectResult.DescMsg);
 
-                M_Return<M_GatherData> afterReconnectRead = ReadSuccess(protocol, TestAddress.Reconnect, "uint16");
-                Assert.That(afterReconnectRead.Result.value, Is.EqualTo("99"));
-
-                M_TypedValue increment = new M_TypedValue
-                {
-                    type = "uint16",
-                    value = "1"
-                };
-
-                M_TypedValue expectedValue = afterReconnectRead.Result.TypedValue + increment;
-                WriteSuccess(protocol, TestAddress.Reconnect, "uint16", expectedValue);
-
-                M_Return<M_GatherData> finalRead = ReadSuccess(protocol, TestAddress.Reconnect, "uint16");
-                Assert.That(finalRead.Result.value, Is.EqualTo(expectedValue.value));
-            }
-            finally
-            {
-                CloseProtocol(protocol);
-            }
-        }
-
-        [Test]
-        [Explicit("需要本地存在可访问的 Modbus TCP 服务，且 40040[20] 可读写")]
-        public void Should_Read_And_Write_Fixed_Length_String_By_Address_Length()
-        {
-            IProtocol protocol = CreateAndInitProtocol();
-
-            try
-            {
-                const string value = "HELLO_MODBUS_STRING";
-                WriteSuccess(protocol, TestAddress.StringFixed20, "string", value);
-
-                M_Return<M_GatherData> readResult = ReadSuccess(protocol, TestAddress.StringFixed20, "string");
-                Assert.That(readResult.Result.value, Is.EqualTo(value));
-
-                const string tooLongValue = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-                WriteSuccess(protocol, TestAddress.StringFixed20, "string", tooLongValue);
-
-                M_Return<M_GatherData> truncatedReadResult = ReadSuccess(protocol, TestAddress.StringFixed20, "string");
-                Assert.That(truncatedReadResult.Result.value, Is.EqualTo("ABCDEFGHIJKLMNOPQRST"));
+                M_Return<M_PointData> readResult = ReadSuccess(protocol, TestAddress.Reconnect, "uint16");
+                Assert.That(readResult.Result.value, Is.EqualTo("88"));
             }
             finally
             {

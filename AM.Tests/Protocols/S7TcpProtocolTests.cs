@@ -1,7 +1,7 @@
 ﻿using NUnit.Framework;
 using ProtocolLib.CommonLib.Interface;
 using ProtocolLib.CommonLib.Model;
-using ProtocolLib.CommonLib.Model.Net;
+using ProtocolLib.S7Tcp;
 using System;
 using System.Globalization;
 
@@ -15,11 +15,12 @@ namespace AM.Tests.Protocols
             public const string UInt16Read = "DB1.0";
             public const string UInt16Write = "DB1.2";
             public const string StringFixed20 = "DB1.20[20]";
+            public const string Reconnect = "DB1.4";
         }
 
         private static IProtocol CreateProtocol()
         {
-            Type protocolType = typeof(ProtocolLib.S7Tcp.Protocol);
+            Type protocolType = typeof(Protocol);
             object instance = Activator.CreateInstance(protocolType);
 
             Assert.That(instance, Is.Not.Null, "Protocol 实例创建失败");
@@ -30,62 +31,97 @@ namespace AM.Tests.Protocols
             return protocol;
         }
 
-        private static M_NetConfig CreateConfig()
+        private static M_ProtocolOptions CreateConfig()
         {
-            return new M_NetConfig
+            return new M_ProtocolOptions
             {
-                equipmentid = "1",
-                protocoltype = "s71200tcp",
+                protocolType = "s71200tcp",
+                connectionType = "tcp",
                 ip = "127.0.0.1",
-                port = 102
+                port = 102,
+                timeoutMs = 1000
             };
         }
 
-        private static IProtocol CreateAndInitProtocol()
+        private static IProtocol CreateAndConnectProtocol()
         {
             IProtocol protocol = CreateProtocol();
 
-            int setCfgResult = protocol.SetCFG(CreateConfig());
-            Assert.That(setCfgResult, Is.EqualTo(0), "SetCFG 失败");
+            M_Return<bool> configureResult = protocol.Configure(CreateConfig());
+            Assert.That(configureResult, Is.Not.Null);
+            Assert.That(configureResult.Status, Is.True, configureResult.DescMsg);
 
-            int initResult = protocol.Init();
-            Assert.That(initResult, Is.EqualTo(0), "Init 失败");
+            M_Return<bool> connectResult = protocol.Connect();
+            Assert.That(connectResult, Is.Not.Null);
+            Assert.That(connectResult.Status, Is.True, connectResult.DescMsg);
 
             return protocol;
         }
 
         private static void CloseProtocol(IProtocol protocol)
         {
-            if (protocol == null) return;
+            if (protocol == null)
+            {
+                return;
+            }
 
-            M_Return<string> closeResult = protocol.CloseConnected();
+            M_Return<bool> closeResult = protocol.Disconnect();
             Assert.That(closeResult, Is.Not.Null);
             Assert.That(closeResult.Status, Is.True, closeResult.DescMsg);
         }
 
-        private static M_Return<M_GatherData> WriteSuccess(IProtocol protocol, string address, string type, object value)
+        private static M_Return<M_PointData> WriteSuccess(IProtocol protocol, string address, string dataType, object value, int stringLength = 0, int arrayLength = 0)
         {
-            M_Return<M_GatherData> result = protocol.Set(address, type, value);
+            M_Return<M_PointData> result = protocol.WritePoint(new M_PointWriteRequest
+            {
+                address = address,
+                dataType = dataType,
+                value = value,
+                stringLength = stringLength,
+                arrayLength = arrayLength
+            });
+
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Status, Is.True, result.DescMsg);
             Assert.That(result.Result, Is.Not.Null);
-            Assert.That(result.Result.type, Is.EqualTo(type));
+            Assert.That(result.Result.dataType, Is.EqualTo(dataType));
             return result;
         }
 
-        private static M_Return<M_GatherData> ReadSuccess(IProtocol protocol, string address, string type)
+        private static M_Return<M_PointData> ReadSuccess(IProtocol protocol, string address, string dataType, int stringLength = 0, int arrayLength = 0)
         {
-            M_Return<M_GatherData> result = protocol.Get(address, type);
+            M_Return<M_PointData> result = protocol.ReadPoint(new M_PointReadRequest
+            {
+                address = address,
+                dataType = dataType,
+                stringLength = stringLength,
+                arrayLength = arrayLength
+            });
+
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Status, Is.True, result.DescMsg);
             Assert.That(result.Result, Is.Not.Null);
-            Assert.That(result.Result.type, Is.EqualTo(type));
+            Assert.That(result.Result.dataType, Is.EqualTo(dataType));
             return result;
         }
 
-        private static void AssertValue(string type, string expected, string actual)
+        private static void AssertRoundTrip(
+            IProtocol protocol,
+            string address,
+            string dataType,
+            object writeValue,
+            string expectedReadValue,
+            int stringLength = 0,
+            int arrayLength = 0)
         {
-            switch (type)
+            WriteSuccess(protocol, address, dataType, writeValue, stringLength, arrayLength);
+            M_Return<M_PointData> readResult = ReadSuccess(protocol, address, dataType, stringLength, arrayLength);
+            AssertValue(dataType, expectedReadValue, readResult.Result.value);
+        }
+
+        private static void AssertValue(string dataType, string expected, string actual)
+        {
+            switch (dataType)
             {
                 case "single":
                     Assert.That(
@@ -114,20 +150,36 @@ namespace AM.Tests.Protocols
 
         [Test]
         [Explicit("需要本地存在可访问的西门子 S7 服务，默认使用 127.0.0.1:102")]
-        public void Should_Init_And_Read_Write_Once()
+        public void Should_Configure_Connect_And_Disconnect_S7Tcp_Protocol()
         {
-            IProtocol protocol = CreateAndInitProtocol();
+            IProtocol protocol = CreateAndConnectProtocol();
+            CloseProtocol(protocol);
+        }
+
+        [Test]
+        [Explicit("需要本地存在可访问的西门子 S7 服务，且 DB1.0、DB1.2、DB1.20[20] 可读写")]
+        public void Should_Read_And_Write_S7Tcp_Points()
+        {
+            IProtocol protocol = CreateAndConnectProtocol();
 
             try
             {
-                M_Return<M_GatherData> readResult = ReadSuccess(protocol, TestAddress.UInt16Read, "uint16");
+                M_Return<M_PointData> readResult = ReadSuccess(protocol, TestAddress.UInt16Read, "uint16");
+                Assert.That(readResult.Result.value, Is.Not.Null);
 
-                M_TypedValue expectedValue = readResult.Result.TypedValue;
-                M_Return<M_GatherData> writeResult = WriteSuccess(protocol, TestAddress.UInt16Write, "uint16", expectedValue);
-                Assert.That(writeResult, Is.Not.Null);
+                ushort writeValue;
+                Assert.That(ushort.TryParse(readResult.Result.value, out writeValue), Is.True, "读取值无法转换为 uint16");
 
-                M_Return<M_GatherData> readBackResult = ReadSuccess(protocol, TestAddress.UInt16Write, "uint16");
-                Assert.That(readBackResult.Result.value, Is.EqualTo(expectedValue.value), "写入值与读取值不匹配");
+                AssertRoundTrip(protocol, TestAddress.UInt16Write, "uint16", writeValue, writeValue.ToString(CultureInfo.InvariantCulture));
+
+                const string value = "HELLO_S7_STRING";
+                AssertRoundTrip(protocol, TestAddress.StringFixed20, "string", value, value, 20, 0);
+
+                const string tooLongValue = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+                WriteSuccess(protocol, TestAddress.StringFixed20, "string", tooLongValue, 20, 0);
+
+                M_Return<M_PointData> truncatedReadResult = ReadSuccess(protocol, TestAddress.StringFixed20, "string", 20, 0);
+                Assert.That(truncatedReadResult.Result.value, Is.EqualTo("ABCDEFGHIJKLMNOPQRST"));
             }
             finally
             {
@@ -136,24 +188,22 @@ namespace AM.Tests.Protocols
         }
 
         [Test]
-        [Explicit("需要本地存在可访问的西门子 S7 服务，且 DB1.20[20] 可读写")]
-        public void Should_Read_And_Write_Fixed_Length_String_By_Address_Length()
+        [Explicit("需要本地存在可访问的西门子 S7 服务，且 DB1.4 可读写")]
+        public void Should_Support_S7Tcp_Reconnect()
         {
-            IProtocol protocol = CreateAndInitProtocol();
+            IProtocol protocol = CreateAndConnectProtocol();
 
             try
             {
-                const string value = "HELLO_S7_STRING";
-                WriteSuccess(protocol, TestAddress.StringFixed20, "string", value);
+                M_Return<M_PointData> writeResult = WriteSuccess(protocol, TestAddress.Reconnect, "uint16", (ushort)88);
+                Assert.That(writeResult.Result.value, Is.Not.Null);
 
-                M_Return<M_GatherData> readResult = ReadSuccess(protocol, TestAddress.StringFixed20, "string");
-                AssertValue("string", value, readResult.Result.value);
+                M_Return<bool> reconnectResult = protocol.Reconnect();
+                Assert.That(reconnectResult, Is.Not.Null);
+                Assert.That(reconnectResult.Status, Is.True, reconnectResult.DescMsg);
 
-                const string tooLongValue = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-                WriteSuccess(protocol, TestAddress.StringFixed20, "string", tooLongValue);
-
-                M_Return<M_GatherData> truncatedReadResult = ReadSuccess(protocol, TestAddress.StringFixed20, "string");
-                Assert.That(truncatedReadResult.Result.value, Is.EqualTo("ABCDEFGHIJKLMNOPQRST"));
+                M_Return<M_PointData> readResult = ReadSuccess(protocol, TestAddress.Reconnect, "uint16");
+                Assert.That(readResult.Result.value, Is.EqualTo("88"));
             }
             finally
             {

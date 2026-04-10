@@ -9,13 +9,33 @@ namespace AM.DBService.Services.Plc.Driver
 {
     /// <summary>
     /// PLC 协议统一门面客户端。
-    /// 负责从协议注册表获取协议实现，并完成 AM 与 ProtocolLib 之间的请求/结果转换。
+    /// 当前版本仅负责：
+    /// 1. 从协议注册表解析协议实现；
+    /// 2. 创建并复用协议实例；
+    /// 3. 完成 AM 与 ProtocolLib 间的请求/结果转换。
     /// </summary>
     internal class ProtocolPlcClient : IPlcClient
     {
+        /// <summary>
+        /// PLC 站配置。
+        /// </summary>
         private readonly PlcStationConfig _stationConfig;
+
+        /// <summary>
+        /// 客户端配置。
+        /// </summary>
         private PlcProtocolClientOptions _options;
+
+        /// <summary>
+        /// 协议实例。
+        /// 单个客户端生命周期内复用，不重复创建。
+        /// </summary>
         private IProtocol _protocol;
+
+        /// <summary>
+        /// 协议实例创建同步锁。
+        /// </summary>
+        private readonly object _protocolSyncRoot = new object();
 
         public ProtocolPlcClient(PlcStationConfig stationConfig)
         {
@@ -46,7 +66,20 @@ namespace AM.DBService.Services.Plc.Driver
                     return Result.Fail(-3601, "PLC 客户端配置不能为空", ResultSource.Plc);
                 }
 
+                bool protocolTypeChanged = !string.Equals(
+                    NormalizeProtocolType(GetEffectiveProtocolType(_options)),
+                    NormalizeProtocolType(options.ProtocolType),
+                    StringComparison.OrdinalIgnoreCase);
+
                 _options = options;
+
+                if (protocolTypeChanged)
+                {
+                    lock (_protocolSyncRoot)
+                    {
+                        _protocol = null;
+                    }
+                }
 
                 Result ensureResult = EnsureProtocol();
                 if (!ensureResult.Success)
@@ -131,11 +164,11 @@ namespace AM.DBService.Services.Plc.Driver
                 }
 
                 M_Return<bool> result = _protocol.IsConnected();
-                if (!result.Status)
+                if (result == null || !result.Status)
                 {
                     return Result<bool>.Fail(
                         -3610,
-                        string.IsNullOrWhiteSpace(result.DescMsg) ? "PLC 连接状态查询失败" : result.DescMsg,
+                        result == null || string.IsNullOrWhiteSpace(result.DescMsg) ? "PLC 连接状态查询失败" : result.DescMsg,
                         ResultSource.Plc);
                 }
 
@@ -164,19 +197,18 @@ namespace AM.DBService.Services.Plc.Driver
                 }
 
                 M_Return<M_PointData> result = _protocol.ReadPoint(ToProtocolPointReadRequest(request));
-                if (!result.Status || result.Result == null)
+                if (result == null || !result.Status || result.Result == null)
                 {
                     return Result<PlcPointReadResult>.Fail(
                         -3613,
-                        string.IsNullOrWhiteSpace(result.DescMsg) ? "PLC 点位读取失败" : result.DescMsg,
+                        result == null || string.IsNullOrWhiteSpace(result.DescMsg) ? "PLC 点位读取失败" : result.DescMsg,
                         ResultSource.Plc);
                 }
 
                 return Result<PlcPointReadResult>.OkItem(
                         new PlcPointReadResult
                         {
-                            PlcName = request.PlcName ?? PlcName,
-                            AreaType = request.AreaType,
+                            PlcName = string.IsNullOrWhiteSpace(request.PlcName) ? PlcName : request.PlcName,
                             Address = request.Address,
                             DataType = request.DataType,
                             ValueText = result.Result.value ?? string.Empty,
@@ -208,19 +240,18 @@ namespace AM.DBService.Services.Plc.Driver
                 }
 
                 M_Return<M_PointData> result = _protocol.WritePoint(ToProtocolPointWriteRequest(request));
-                if (!result.Status || result.Result == null)
+                if (result == null || !result.Status || result.Result == null)
                 {
                     return Result<PlcPointReadResult>.Fail(
                         -3616,
-                        string.IsNullOrWhiteSpace(result.DescMsg) ? "PLC 点位写入失败" : result.DescMsg,
+                        result == null || string.IsNullOrWhiteSpace(result.DescMsg) ? "PLC 点位写入失败" : result.DescMsg,
                         ResultSource.Plc);
                 }
 
                 return Result<PlcPointReadResult>.OkItem(
                         new PlcPointReadResult
                         {
-                            PlcName = request.PlcName ?? PlcName,
-                            AreaType = request.AreaType,
+                            PlcName = string.IsNullOrWhiteSpace(request.PlcName) ? PlcName : request.PlcName,
                             Address = request.Address,
                             DataType = request.DataType,
                             ValueText = result.Result.value ?? string.Empty,
@@ -252,19 +283,18 @@ namespace AM.DBService.Services.Plc.Driver
                 }
 
                 M_Return<M_BlockData> result = _protocol.ReadBlock(ToProtocolBlockReadRequest(request));
-                if (!result.Status || result.Result == null)
+                if (result == null || !result.Status || result.Result == null)
                 {
                     return Result<PlcRawDataBlock>.Fail(
                         -3619,
-                        string.IsNullOrWhiteSpace(result.DescMsg) ? "PLC 块读取失败" : result.DescMsg,
+                        result == null || string.IsNullOrWhiteSpace(result.DescMsg) ? "PLC 块读取失败" : result.DescMsg,
                         ResultSource.Plc);
                 }
 
                 return Result<PlcRawDataBlock>.OkItem(
                         new PlcRawDataBlock
                         {
-                            PlcName = request.PlcName ?? PlcName,
-                            AreaType = request.AreaType,
+                            PlcName = string.IsNullOrWhiteSpace(request.PlcName) ? PlcName : request.PlcName,
                             StartAddress = request.StartAddress,
                             Length = request.Length,
                             DataType = request.DataType,
@@ -297,19 +327,18 @@ namespace AM.DBService.Services.Plc.Driver
                 }
 
                 M_Return<M_BlockData> result = _protocol.WriteBlock(ToProtocolBlockWriteRequest(request));
-                if (!result.Status || result.Result == null)
+                if (result == null || !result.Status || result.Result == null)
                 {
                     return Result<PlcRawDataBlock>.Fail(
                         -3622,
-                        string.IsNullOrWhiteSpace(result.DescMsg) ? "PLC 块写入失败" : result.DescMsg,
+                        result == null || string.IsNullOrWhiteSpace(result.DescMsg) ? "PLC 块写入失败" : result.DescMsg,
                         ResultSource.Plc);
                 }
 
                 return Result<PlcRawDataBlock>.OkItem(
                         new PlcRawDataBlock
                         {
-                            PlcName = request.PlcName ?? PlcName,
-                            AreaType = request.AreaType,
+                            PlcName = string.IsNullOrWhiteSpace(request.PlcName) ? PlcName : request.PlcName,
                             StartAddress = request.StartAddress,
                             Length = request.Buffer == null ? 0 : request.Buffer.Length,
                             DataType = request.DataType,
@@ -326,6 +355,10 @@ namespace AM.DBService.Services.Plc.Driver
             }
         }
 
+        /// <summary>
+        /// 确保协议实例已创建。
+        /// 协议实例在客户端生命周期内复用。
+        /// </summary>
         private Result EnsureProtocol()
         {
             if (_protocol != null)
@@ -334,48 +367,66 @@ namespace AM.DBService.Services.Plc.Driver
                     .WithNotifyMode(ResultNotifyMode.Silent);
             }
 
-            string protocolType = _options == null ? _stationConfig.ProtocolType : _options.ProtocolType;
-            if (string.IsNullOrWhiteSpace(protocolType))
+            lock (_protocolSyncRoot)
             {
-                return Result.Fail(-3624, "PLC 协议类型不能为空", ResultSource.Plc);
+                if (_protocol != null)
+                {
+                    return Result.Ok("协议实例已存在", ResultSource.Plc)
+                        .WithNotifyMode(ResultNotifyMode.Silent);
+                }
+
+                string protocolType = GetEffectiveProtocolType(_options);
+                if (string.IsNullOrWhiteSpace(protocolType))
+                {
+                    return Result.Fail(-3624, "PLC 协议类型不能为空", ResultSource.Plc);
+                }
+
+                Type protocolImplType;
+                if (!ProtocolAssemblyRegistry.TryResolve(protocolType, out protocolImplType) || protocolImplType == null)
+                {
+                    string keys = string.Join(", ", ProtocolAssemblyRegistry.GetRegisteredKeys());
+                    string message = string.IsNullOrWhiteSpace(keys)
+                        ? "未发现任何已注册 PLC 协议实现"
+                        : "未找到匹配的 PLC 协议实现，当前已注册: " + keys;
+
+                    return Result.Fail(-3625, message + "；请求协议类型: " + protocolType, ResultSource.Plc);
+                }
+
+                object instance;
+                try
+                {
+                    instance = Activator.CreateInstance(protocolImplType);
+                }
+                catch (Exception ex)
+                {
+                    return Result.Fail(-3626, "协议实例创建失败: " + protocolImplType.FullName + "，异常: " + ex.Message, ResultSource.Plc);
+                }
+
+                IProtocol protocol = instance as IProtocol;
+                if (protocol == null)
+                {
+                    return Result.Fail(-3627, "协议实现未正确实现 IProtocol: " + protocolImplType.FullName, ResultSource.Plc);
+                }
+
+                _protocol = protocol;
+                return Result.Ok("协议实例创建成功", ResultSource.Plc)
+                    .WithNotifyMode(ResultNotifyMode.Silent);
+            }
+        }
+
+        private string GetEffectiveProtocolType(PlcProtocolClientOptions options)
+        {
+            if (options != null && !string.IsNullOrWhiteSpace(options.ProtocolType))
+            {
+                return options.ProtocolType;
             }
 
-            Type protocolImplType;
-            if (!ProtocolAssemblyRegistry.TryResolve(protocolType, out protocolImplType) || protocolImplType == null)
-            {
-                string keys = string.Join(", ", ProtocolAssemblyRegistry.GetRegisteredKeys());
-                string message = string.IsNullOrWhiteSpace(keys)
-                    ? "未发现任何已注册 PLC 协议实现"
-                    : "未找到匹配的 PLC 协议实现，当前已注册: " + keys;
+            return _stationConfig.ProtocolType;
+        }
 
-                return Result.Fail(-3625, message + "；请求协议类型: " + protocolType, ResultSource.Plc);
-            }
-
-            object instance;
-            try
-            {
-                instance = Activator.CreateInstance(protocolImplType);
-            }
-            catch (Exception ex)
-            {
-                return Result.Fail(
-                    -3626,
-                    "协议实例创建失败: " + protocolImplType.FullName + "，异常: " + ex.Message,
-                    ResultSource.Plc);
-            }
-
-            IProtocol protocol = instance as IProtocol;
-            if (protocol == null)
-            {
-                return Result.Fail(
-                    -3627,
-                    "协议实现未正确实现 IProtocol: " + protocolImplType.FullName,
-                    ResultSource.Plc);
-            }
-
-            _protocol = protocol;
-            return Result.Ok("协议实例创建成功", ResultSource.Plc)
-                .WithNotifyMode(ResultNotifyMode.Silent);
+        private static string NormalizeProtocolType(string value)
+        {
+            return string.IsNullOrWhiteSpace(value) ? string.Empty : value.Trim();
         }
 
         private static M_ProtocolOptions ToProtocolOptions(PlcProtocolClientOptions options)
@@ -400,10 +451,8 @@ namespace AM.DBService.Services.Plc.Driver
         {
             return new M_PointReadRequest
             {
-                areaType = request.AreaType ?? string.Empty,
                 address = request.Address ?? string.Empty,
                 dataType = request.DataType ?? string.Empty,
-                bitIndex = request.BitIndex,
                 stringLength = request.StringLength,
                 arrayLength = request.ArrayLength
             };
@@ -413,11 +462,9 @@ namespace AM.DBService.Services.Plc.Driver
         {
             return new M_PointWriteRequest
             {
-                areaType = request.AreaType ?? string.Empty,
                 address = request.Address ?? string.Empty,
                 dataType = request.DataType ?? string.Empty,
                 value = request.Value,
-                bitIndex = request.BitIndex,
                 stringLength = request.StringLength,
                 arrayLength = request.ArrayLength
             };
@@ -427,7 +474,6 @@ namespace AM.DBService.Services.Plc.Driver
         {
             return new M_BlockReadRequest
             {
-                areaType = request.AreaType ?? string.Empty,
                 startAddress = request.StartAddress ?? string.Empty,
                 length = request.Length,
                 dataType = request.DataType ?? string.Empty,
@@ -440,7 +486,6 @@ namespace AM.DBService.Services.Plc.Driver
         {
             return new M_BlockWriteRequest
             {
-                areaType = request.AreaType ?? string.Empty,
                 startAddress = request.StartAddress ?? string.Empty,
                 dataType = request.DataType ?? string.Empty,
                 buffer = request.Buffer ?? new byte[0],

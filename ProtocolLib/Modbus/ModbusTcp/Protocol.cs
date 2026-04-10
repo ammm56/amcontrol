@@ -1,44 +1,41 @@
-﻿using ProtocolLib.ModbusTcp.Common;
-using ProtocolLib.ModbusTcp.Core;
-using ProtocolLib.CommonLib.Interface;
+﻿using ProtocolLib.CommonLib.Interface;
 using ProtocolLib.CommonLib.Model;
 using ProtocolLib.CommonLib.Model.Net;
+using ProtocolLib.ModbusTcp.Common;
+using ProtocolLib.ModbusTcp.Core;
 using System;
-using System.Collections.Generic;
 
 namespace ProtocolLib.ModbusTcp
 {
     /// <summary>
     /// Modbus TCP 协议统一入口。
-    /// 对外暴露结构化点位/块读写接口，协议细节在内部完成转换。
+    /// 当前版本直接使用 Address 作为完整协议地址，不再拆分和拼接地址区域。
     /// </summary>
     public class Protocol : IProtocol
     {
         /// <summary>
-        /// 协议名
+        /// 协议名。
         /// </summary>
         public static readonly string ProtocolName = "modbustcp";
 
         /// <summary>
-        /// 协议客户端
+        /// 协议客户端。
         /// </summary>
-        private ModbusTCP _modbusTCPClient = null;
+        private ModbusTCP _modbusTCPClient;
 
         /// <summary>
-        /// 连接结果
+        /// 连接结果。
         /// </summary>
-        private M_OperateResult _connect = null;
+        private M_OperateResult _connect;
 
         /// <summary>
-        /// 协议配置
+        /// 协议配置。
         /// </summary>
-        private M_ProtocolConfig _protocolConfig = null;
+        private M_ProtocolOptions _options;
 
         /// <summary>
-        /// 条件采集点表
+        /// 点位读写辅助工具。
         /// </summary>
-        private List<Point> _firstPoints = new List<Point>();
-
         private readonly CollectionUtil _collectionUtil = new CollectionUtil();
 
         public Protocol()
@@ -54,28 +51,14 @@ namespace ProtocolLib.ModbusTcp
                     return M_Return<bool>.Error("协议配置不能为空");
                 }
 
-                _protocolConfig = new M_ProtocolConfig
-                {
-                    equipmentid = string.Empty,
-                    protocoltype = string.IsNullOrWhiteSpace(options.protocolType) ? ProtocolName : options.protocolType.Trim(),
-                    ip = options.ip ?? string.Empty,
-                    port = options.port <= 0 ? 502 : options.port,
-                    byteorder = 0,
-                    pointinfo = new List<Point>()
-                };
+                _options = options;
 
                 if (_modbusTCPClient != null)
                 {
                     _modbusTCPClient.UpdateConnectionInfo(
-                        _protocolConfig.ip,
-                        _protocolConfig.port,
-                        GetStationNo(options));
-                }
-
-                M_Return<List<Point>> res = _collectionUtil.DecodePoints4Rule(ref _protocolConfig);
-                if (res.Status)
-                {
-                    _firstPoints = res.Result ?? new List<Point>();
+                        _options.ip ?? string.Empty,
+                        _options.port <= 0 ? 502 : _options.port,
+                        GetStationNo(_options));
                 }
 
                 return M_Return<bool>.OK(true);
@@ -90,24 +73,28 @@ namespace ProtocolLib.ModbusTcp
         {
             try
             {
-                if (_protocolConfig == null)
+                if (_options == null)
                 {
                     return M_Return<bool>.Error("协议未配置");
                 }
 
+                string ip = _options.ip ?? string.Empty;
+                int port = _options.port <= 0 ? 502 : _options.port;
+                byte stationNo = GetStationNo(_options);
+
                 if (_modbusTCPClient == null)
                 {
-                    _modbusTCPClient = new ModbusTCP(_protocolConfig.ip, _protocolConfig.port, 1);
+                    _modbusTCPClient = new ModbusTCP(ip, port, stationNo);
                 }
                 else
                 {
-                    _modbusTCPClient.UpdateConnectionInfo(_protocolConfig.ip, _protocolConfig.port, 1);
+                    _modbusTCPClient.UpdateConnectionInfo(ip, port, stationNo);
                 }
 
                 _connect = _modbusTCPClient.Connection();
-                if (!_connect.IsSuccess)
+                if (_connect == null || !_connect.IsSuccess)
                 {
-                    return M_Return<bool>.Error("连接错误 " + _connect.Message);
+                    return M_Return<bool>.Error("连接错误 " + (_connect == null ? string.Empty : _connect.Message));
                 }
 
                 return M_Return<bool>.OK(true);
@@ -128,8 +115,8 @@ namespace ProtocolLib.ModbusTcp
                     return M_Return<bool>.OK(true);
                 }
 
-                M_OperateResult res = _modbusTCPClient.ConnectClose();
-                if (!res.IsSuccess)
+                M_OperateResult result = _modbusTCPClient.ConnectClose();
+                if (!result.IsSuccess)
                 {
                     return M_Return<bool>.Error("关闭连接错误");
                 }
@@ -147,10 +134,10 @@ namespace ProtocolLib.ModbusTcp
         {
             try
             {
-                M_Return<bool> closeRes = Disconnect();
-                if (!closeRes.Status)
+                M_Return<bool> closeResult = Disconnect();
+                if (!closeResult.Status)
                 {
-                    return closeRes;
+                    return closeResult;
                 }
 
                 return Connect();
@@ -163,8 +150,7 @@ namespace ProtocolLib.ModbusTcp
 
         public M_Return<bool> IsConnected()
         {
-            bool isConnected = _connect != null && _connect.IsSuccess;
-            return M_Return<bool>.OK(isConnected);
+            return M_Return<bool>.OK(_connect != null && _connect.IsSuccess);
         }
 
         public M_Return<M_PointData> ReadPoint(M_PointReadRequest request)
@@ -176,25 +162,32 @@ namespace ProtocolLib.ModbusTcp
                     return M_Return<M_PointData>.Error("点位读取请求不能为空");
                 }
 
-                string mappedAddress = BuildPointAddress(request);
-                string mappedType = NormalizeDataType(request.dataType);
-
-                M_Return<M_GatherData> res = _collectionUtil.ReadData(_modbusTCPClient, string.Empty, mappedAddress, mappedType);
-                if (!res.Status)
+                if (_modbusTCPClient == null)
                 {
-                    return M_Return<M_PointData>.Error(res.DescMsg);
+                    return M_Return<M_PointData>.Error("协议未连接");
                 }
 
-                M_GatherData gatherData = res.Result ?? new M_GatherData();
+                if (string.IsNullOrWhiteSpace(request.address))
+                {
+                    return M_Return<M_PointData>.Error("点位地址不能为空");
+                }
+
+                string dataType = NormalizeDataType(request.dataType);
+                M_Return<M_GatherData> result = _collectionUtil.ReadData(_modbusTCPClient, string.Empty, request.address.Trim(), dataType);
+                if (!result.Status)
+                {
+                    return M_Return<M_PointData>.Error(result.DescMsg);
+                }
+
+                M_GatherData gatherData = result.Result ?? new M_GatherData();
                 return M_Return<M_PointData>.OK(
                     new M_PointData
                     {
-                        areaType = request.areaType ?? string.Empty,
                         address = request.address ?? string.Empty,
                         dataType = request.dataType ?? string.Empty,
                         value = gatherData.value ?? string.Empty,
                         rawBuffer = new byte[0],
-                        quality = res.Status ? "Good" : "Error"
+                        quality = "Good"
                     });
             }
             catch (Exception ex)
@@ -212,20 +205,27 @@ namespace ProtocolLib.ModbusTcp
                     return M_Return<M_PointData>.Error("点位写入请求不能为空");
                 }
 
-                string mappedAddress = BuildPointAddress(request);
-                string mappedType = NormalizeDataType(request.dataType);
-
-                M_Return<M_GatherData> res = _collectionUtil.WriteData(_modbusTCPClient, mappedAddress, request.value, mappedType);
-                if (!res.Status)
+                if (_modbusTCPClient == null)
                 {
-                    return M_Return<M_PointData>.Error(res.DescMsg);
+                    return M_Return<M_PointData>.Error("协议未连接");
                 }
 
-                M_GatherData gatherData = res.Result ?? new M_GatherData();
+                if (string.IsNullOrWhiteSpace(request.address))
+                {
+                    return M_Return<M_PointData>.Error("点位地址不能为空");
+                }
+
+                string dataType = NormalizeDataType(request.dataType);
+                M_Return<M_GatherData> result = _collectionUtil.WriteData(_modbusTCPClient, request.address.Trim(), request.value, dataType);
+                if (!result.Status)
+                {
+                    return M_Return<M_PointData>.Error(result.DescMsg);
+                }
+
+                M_GatherData gatherData = result.Result ?? new M_GatherData();
                 return M_Return<M_PointData>.OK(
                     new M_PointData
                     {
-                        areaType = request.areaType ?? string.Empty,
                         address = request.address ?? string.Empty,
                         dataType = request.dataType ?? string.Empty,
                         value = gatherData.value ?? string.Empty,
@@ -248,15 +248,23 @@ namespace ProtocolLib.ModbusTcp
                     return M_Return<M_BlockData>.Error("块读取请求不能为空");
                 }
 
-                string normalizedAreaType = NormalizeAreaType(request.areaType);
-                string normalizedDataType = NormalizeDataType(request.dataType);
-                string mappedAddress = BuildBlockAddress(request);
+                if (_modbusTCPClient == null)
+                {
+                    return M_Return<M_BlockData>.Error("协议未连接");
+                }
 
+                if (string.IsNullOrWhiteSpace(request.startAddress))
+                {
+                    return M_Return<M_BlockData>.Error("块起始地址不能为空");
+                }
+
+                string startAddress = request.startAddress.Trim();
+                string dataType = NormalizeDataType(request.dataType);
                 byte[] buffer;
 
-                if (IsBitArea(normalizedAreaType))
+                if (IsBitAddress(startAddress))
                 {
-                    M_OperateResult<bool[]> readBool = _modbusTCPClient.ReadBool(mappedAddress, (ushort)Math.Max(1, request.length));
+                    M_OperateResult<bool[]> readBool = _modbusTCPClient.ReadBool(startAddress, (ushort)Math.Max(1, request.length));
                     if (!readBool.IsSuccess)
                     {
                         return M_Return<M_BlockData>.Error(readBool.Message);
@@ -266,20 +274,19 @@ namespace ProtocolLib.ModbusTcp
                 }
                 else
                 {
-                    int registerLength = ResolveRegisterLength(normalizedDataType, request.length, request.stringLength, request.arrayLength);
-                    M_OperateResult<byte[]> read = _modbusTCPClient.Read(mappedAddress, (ushort)Math.Max(1, registerLength));
+                    int registerLength = ResolveRegisterLength(dataType, request.length, request.stringLength, request.arrayLength);
+                    M_OperateResult<byte[]> read = _modbusTCPClient.Read(startAddress, (ushort)Math.Max(1, registerLength));
                     if (!read.IsSuccess)
                     {
                         return M_Return<M_BlockData>.Error(read.Message);
                     }
 
-                    buffer = TrimBlockBuffer(read.Content, normalizedDataType, request.length, request.stringLength, request.arrayLength);
+                    buffer = TrimBlockBuffer(read.Content, dataType, request.length, request.stringLength, request.arrayLength);
                 }
 
                 return M_Return<M_BlockData>.OK(
                     new M_BlockData
                     {
-                        areaType = request.areaType ?? string.Empty,
                         startAddress = request.startAddress ?? string.Empty,
                         length = request.length,
                         dataType = request.dataType ?? string.Empty,
@@ -302,36 +309,43 @@ namespace ProtocolLib.ModbusTcp
                     return M_Return<M_BlockData>.Error("块写入请求不能为空");
                 }
 
+                if (_modbusTCPClient == null)
+                {
+                    return M_Return<M_BlockData>.Error("协议未连接");
+                }
+
+                if (string.IsNullOrWhiteSpace(request.startAddress))
+                {
+                    return M_Return<M_BlockData>.Error("块起始地址不能为空");
+                }
+
                 if (request.buffer == null || request.buffer.Length == 0)
                 {
                     return M_Return<M_BlockData>.Error("块写入缓冲区不能为空");
                 }
 
-                string normalizedAreaType = NormalizeAreaType(request.areaType);
-                string mappedAddress = BuildBlockAddress(request);
+                string startAddress = request.startAddress.Trim();
+                M_OperateResult writeResult;
 
-                M_OperateResult writeRes;
-
-                if (IsBitArea(normalizedAreaType))
+                if (IsBitAddress(startAddress))
                 {
                     bool[] bools = ByteToBoolArray(request.buffer);
-                    writeRes = _modbusTCPClient.Write(mappedAddress, bools);
+                    writeResult = _modbusTCPClient.Write(startAddress, bools);
                 }
                 else
                 {
                     byte[] writeBuffer = EnsureEvenLength(request.buffer);
-                    writeRes = _modbusTCPClient.Write(mappedAddress, writeBuffer);
+                    writeResult = _modbusTCPClient.Write(startAddress, writeBuffer);
                 }
 
-                if (!writeRes.IsSuccess)
+                if (!writeResult.IsSuccess)
                 {
-                    return M_Return<M_BlockData>.Error(writeRes.Message);
+                    return M_Return<M_BlockData>.Error(writeResult.Message);
                 }
 
                 return M_Return<M_BlockData>.OK(
                     new M_BlockData
                     {
-                        areaType = request.areaType ?? string.Empty,
                         startAddress = request.startAddress ?? string.Empty,
                         length = request.buffer.Length,
                         dataType = request.dataType ?? string.Empty,
@@ -353,11 +367,6 @@ namespace ProtocolLib.ModbusTcp
             }
 
             return (byte)options.stationNo.Value;
-        }
-
-        private static string NormalizeAreaType(string areaType)
-        {
-            return (areaType ?? string.Empty).Trim().Replace(" ", string.Empty).ToLowerInvariant();
         }
 
         private static string NormalizeDataType(string dataType)
@@ -387,120 +396,15 @@ namespace ProtocolLib.ModbusTcp
             }
         }
 
-        private static bool IsBitArea(string areaType)
+        private static bool IsBitAddress(string address)
         {
-            return string.Equals(areaType, "coil", StringComparison.OrdinalIgnoreCase) ||
-                   string.Equals(areaType, "discreteinput", StringComparison.OrdinalIgnoreCase);
-        }
-
-        private static string BuildPointAddress(M_PointReadRequest request)
-        {
-            return BuildAddress(request.areaType, request.address, request.bitIndex, request.dataType, request.stringLength);
-        }
-
-        private static string BuildPointAddress(M_PointWriteRequest request)
-        {
-            return BuildAddress(request.areaType, request.address, request.bitIndex, request.dataType, request.stringLength);
-        }
-
-        private static string BuildBlockAddress(M_BlockReadRequest request)
-        {
-            return BuildAddress(request.areaType, request.startAddress, null, request.dataType, request.stringLength);
-        }
-
-        private static string BuildBlockAddress(M_BlockWriteRequest request)
-        {
-            return BuildAddress(request.areaType, request.startAddress, null, request.dataType, request.stringLength);
-        }
-
-        private static string BuildAddress(string areaType, string address, short? bitIndex, string dataType, int stringLength)
-        {
-            string normalizedAreaType = NormalizeAreaType(areaType);
-            string normalizedDataType = NormalizeDataType(dataType);
-            string rawAddress = (address ?? string.Empty).Trim();
-
-            if (string.IsNullOrWhiteSpace(rawAddress))
+            string text = (address ?? string.Empty).Trim();
+            if (text.Length >= 5 && char.IsDigit(text[0]))
             {
-                throw new InvalidOperationException("地址不能为空");
+                return text[0] == '0' || text[0] == '1';
             }
 
-            if (rawAddress.IndexOf(';') >= 0)
-            {
-                return AppendStringLength(rawAddress, normalizedDataType, stringLength);
-            }
-
-            string mappedAddress;
-
-            switch (normalizedAreaType)
-            {
-                case "coil":
-                    mappedAddress = NormalizePrefixedAddress(rawAddress, '0');
-                    break;
-                case "discreteinput":
-                    mappedAddress = NormalizePrefixedAddress(rawAddress, '1');
-                    break;
-                case "inputregister":
-                    mappedAddress = NormalizePrefixedAddress(rawAddress, '3');
-                    break;
-                case "holdingregister":
-                default:
-                    mappedAddress = NormalizePrefixedAddress(rawAddress, '4');
-                    break;
-            }
-
-            if (bitIndex.HasValue &&
-                bitIndex.Value >= 0 &&
-                !IsBitArea(normalizedAreaType) &&
-                string.Equals(normalizedDataType, "bool", StringComparison.OrdinalIgnoreCase) &&
-                mappedAddress.IndexOf('.') < 0)
-            {
-                mappedAddress = mappedAddress + "." + bitIndex.Value;
-            }
-
-            return AppendStringLength(mappedAddress, normalizedDataType, stringLength);
-        }
-
-        private static string NormalizePrefixedAddress(string rawAddress, char areaPrefix)
-        {
-            string text = (rawAddress ?? string.Empty).Trim();
-
-            if (text.IndexOf('[') > 0 || text.IndexOf('.') > 0)
-            {
-                return text;
-            }
-
-            if (text.Length == 5 && text[0] == areaPrefix)
-            {
-                return text;
-            }
-
-            int number;
-            if (int.TryParse(text, out number))
-            {
-                return areaPrefix + number.ToString("0000");
-            }
-
-            return text;
-        }
-
-        private static string AppendStringLength(string address, string dataType, int stringLength)
-        {
-            if (!string.Equals(dataType, "string", StringComparison.OrdinalIgnoreCase))
-            {
-                return address;
-            }
-
-            if (stringLength <= 0)
-            {
-                return address;
-            }
-
-            if (address.IndexOf('[') >= 0)
-            {
-                return address;
-            }
-
-            return address + "[" + stringLength + "]";
+            return false;
         }
 
         private static int ResolveRegisterLength(string dataType, int length, int stringLength, int arrayLength)

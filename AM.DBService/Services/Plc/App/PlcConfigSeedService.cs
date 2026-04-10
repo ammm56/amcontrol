@@ -13,7 +13,7 @@ namespace AM.DBService.Services.Plc.App
     /// <summary>
     /// PLC 配置种子服务。
     /// 启动时自动补一组最小默认 ModbusTcp 测试数据。
-    /// 仅在 PLC 配置相关表均为空时写入默认种子。
+    /// 当前版本点位地址直接使用完整协议地址。
     /// </summary>
     public class PlcConfigSeedService
     {
@@ -160,26 +160,18 @@ namespace AM.DBService.Services.Plc.App
                     Name = "PlcReady",
                     DisplayName = "PLC就绪",
                     GroupName = "Default",
-                    AreaType = "Coil",
-                    Address = "1",
-                    BitIndex = null,
+                    Address = "00001",
                     DataType = "Bool",
                     StringLength = 0,
                     ArrayLength = 0,
-                    ReadLength = 1,
-                    Scale = 1D,
-                    Offset = 0D,
                     Unit = null,
                     AccessMode = "ReadWrite",
                     ReadMode = "Single",
-                    BatchKey = null,
-                    ByteOrder = null,
-                    WordOrder = null,
                     StringEncoding = "ASCII",
                     IsEnabled = true,
                     SortOrder = 1,
                     Description = "默认布尔测试点",
-                    Remark = "Coil 00001"
+                    Remark = "Modbus Coil"
                 },
                 new PlcPointConfigEntity
                 {
@@ -187,26 +179,18 @@ namespace AM.DBService.Services.Plc.App
                     Name = "Heartbeat",
                     DisplayName = "心跳计数",
                     GroupName = "Default",
-                    AreaType = "HoldingRegister",
-                    Address = "10",
-                    BitIndex = null,
+                    Address = "40010",
                     DataType = "UShort",
                     StringLength = 0,
                     ArrayLength = 0,
-                    ReadLength = 1,
-                    Scale = 1D,
-                    Offset = 0D,
                     Unit = null,
                     AccessMode = "ReadWrite",
                     ReadMode = "Single",
-                    BatchKey = null,
-                    ByteOrder = null,
-                    WordOrder = null,
                     StringEncoding = "ASCII",
                     IsEnabled = true,
                     SortOrder = 2,
                     Description = "默认无符号整型测试点",
-                    Remark = "HoldingRegister 40010"
+                    Remark = "Modbus Holding Register"
                 },
                 new PlcPointConfigEntity
                 {
@@ -214,26 +198,18 @@ namespace AM.DBService.Services.Plc.App
                     Name = "Temperature",
                     DisplayName = "温度值",
                     GroupName = "Default",
-                    AreaType = "HoldingRegister",
-                    Address = "20",
-                    BitIndex = null,
+                    Address = "40020",
                     DataType = "Float",
                     StringLength = 0,
                     ArrayLength = 0,
-                    ReadLength = 2,
-                    Scale = 1D,
-                    Offset = 0D,
                     Unit = "℃",
                     AccessMode = "ReadWrite",
                     ReadMode = "Single",
-                    BatchKey = null,
-                    ByteOrder = null,
-                    WordOrder = null,
                     StringEncoding = "ASCII",
                     IsEnabled = true,
                     SortOrder = 3,
                     Description = "默认浮点测试点",
-                    Remark = "HoldingRegister 40020"
+                    Remark = "Modbus Holding Register"
                 },
                 new PlcPointConfigEntity
                 {
@@ -241,26 +217,18 @@ namespace AM.DBService.Services.Plc.App
                     Name = "ProductCode",
                     DisplayName = "产品编码",
                     GroupName = "Default",
-                    AreaType = "HoldingRegister",
-                    Address = "40",
-                    BitIndex = null,
+                    Address = "40040[20]",
                     DataType = "String",
                     StringLength = 20,
                     ArrayLength = 0,
-                    ReadLength = 20,
-                    Scale = 1D,
-                    Offset = 0D,
                     Unit = null,
                     AccessMode = "ReadWrite",
                     ReadMode = "Single",
-                    BatchKey = null,
-                    ByteOrder = null,
-                    WordOrder = null,
                     StringEncoding = "ASCII",
                     IsEnabled = true,
                     SortOrder = 4,
                     Description = "默认字符串测试点",
-                    Remark = "HoldingRegister 40040"
+                    Remark = "Modbus Fixed String"
                 }
             };
         }

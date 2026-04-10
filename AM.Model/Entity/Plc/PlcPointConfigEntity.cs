@@ -4,7 +4,10 @@ namespace AM.Model.Entity.Plc
 {
     /// <summary>
     /// PLC 点位配置表。
-    /// 描述逻辑点位、地址、数据类型、长度、读写权限与批量读取归属。
+    /// 当前版本采用最简模型：
+    /// - 直接使用 Address 保存完整协议地址；
+    /// - 不再拆分 AreaType、BitIndex；
+    /// - 不在点位主表中承载缩放、偏移、批量规划等处理逻辑。
     /// </summary>
     [SugarTable("plc_point")]
     public class PlcPointConfigEntity
@@ -39,27 +42,17 @@ namespace AM.Model.Entity.Plc
         public string GroupName { get; set; }
 
         /// <summary>
-        /// 地址区域。
-        /// 例如：X / Y / M / D / DB / Coil / HoldingRegister。
-        /// </summary>
-        public string AreaType { get; set; }
-
-        /// <summary>
-        /// 地址文本。
-        /// 例如：100 / DB1.0 / D200 / 40001。
+        /// 完整地址文本。
+        /// 直接保存协议可识别地址，例如：
+        /// - Modbus: 00001 / 10001 / 30001 / 40001
+        /// - S7: DB1.0 / DB1.20 / M10.0
+        /// - MC: D200 / M100 / X0 / Y10
         /// </summary>
         public string Address { get; set; }
 
         /// <summary>
-        /// 位索引。
-        /// 字地址内位访问时使用，可空。
-        /// </summary>
-        [SugarColumn(IsNullable = true)]
-        public short? BitIndex { get; set; }
-
-        /// <summary>
         /// 数据类型。
-        /// 例如：Bit / Int / Float / String / ByteArray。
+        /// 例如：Bool / Short / UShort / Int / UInt / Float / Double / String / ByteArray。
         /// </summary>
         public string DataType { get; set; }
 
@@ -71,29 +64,13 @@ namespace AM.Model.Entity.Plc
 
         /// <summary>
         /// 数组长度。
-        /// DataType 为数组、块或 ByteArray 时使用。
+        /// DataType=ByteArray 时使用。
         /// </summary>
         public int ArrayLength { get; set; }
 
         /// <summary>
-        /// 读取长度。
-        /// 用于明确单次读取长度，便于批量块规划。
-        /// </summary>
-        public int ReadLength { get; set; }
-
-        /// <summary>
-        /// 缩放系数。
-        /// 原始值 * Scale + Offset = 显示值。
-        /// </summary>
-        public double Scale { get; set; }
-
-        /// <summary>
-        /// 偏移量。
-        /// </summary>
-        public double Offset { get; set; }
-
-        /// <summary>
         /// 单位。
+        /// 仅用于显示，不参与协议读写。
         /// </summary>
         [SugarColumn(IsNullable = true)]
         public string Unit { get; set; }
@@ -106,34 +83,13 @@ namespace AM.Model.Entity.Plc
 
         /// <summary>
         /// 读取策略。
-        /// Single / BatchByAddress / BatchByDataType / BatchByWordLength / BatchByByteLength。
+        /// 当前阶段推荐统一使用 Single。
         /// </summary>
         public string ReadMode { get; set; }
 
         /// <summary>
-        /// 批量读取分组键。
-        /// 相同 BatchKey 的点位可优先归并为同一读块。
-        /// </summary>
-        [SugarColumn(IsNullable = true)]
-        public string BatchKey { get; set; }
-
-        /// <summary>
-        /// 字节序。
-        /// 例如：LittleEndian / BigEndian。
-        /// </summary>
-        [SugarColumn(IsNullable = true)]
-        public string ByteOrder { get; set; }
-
-        /// <summary>
-        /// 字序。
-        /// 例如：LowHigh / HighLow。
-        /// </summary>
-        [SugarColumn(IsNullable = true)]
-        public string WordOrder { get; set; }
-
-        /// <summary>
         /// 字符串编码。
-        /// 例如：Ascii / Utf8 / Unicode。
+        /// 例如：ASCII / UTF8 / Unicode。
         /// </summary>
         [SugarColumn(IsNullable = true)]
         public string StringEncoding { get; set; }

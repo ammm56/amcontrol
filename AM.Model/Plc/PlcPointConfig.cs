@@ -2,6 +2,7 @@
 {
     /// <summary>
     /// PLC 点位运行时配置对象。
+    /// 当前版本采用最简模型，直接使用 Address 表示完整协议地址。
     /// </summary>
     public class PlcPointConfig
     {
@@ -15,11 +16,7 @@
 
         public string GroupName { get; set; }
 
-        public string AreaType { get; set; }
-
         public string Address { get; set; }
-
-        public short? BitIndex { get; set; }
 
         public string DataType { get; set; }
 
@@ -27,23 +24,11 @@
 
         public int ArrayLength { get; set; }
 
-        public int ReadLength { get; set; }
-
-        public double Scale { get; set; }
-
-        public double Offset { get; set; }
-
         public string Unit { get; set; }
 
         public string AccessMode { get; set; }
 
         public string ReadMode { get; set; }
-
-        public string BatchKey { get; set; }
-
-        public string ByteOrder { get; set; }
-
-        public string WordOrder { get; set; }
 
         public string StringEncoding { get; set; }
 
@@ -70,15 +55,7 @@
 
         public string AddressText
         {
-            get
-            {
-                if (BitIndex.HasValue)
-                {
-                    return string.Format("{0} {1}.{2}", AreaType, Address, BitIndex.Value);
-                }
-
-                return string.Format("{0} {1}", AreaType, Address);
-            }
+            get { return Address ?? string.Empty; }
         }
     }
 }
