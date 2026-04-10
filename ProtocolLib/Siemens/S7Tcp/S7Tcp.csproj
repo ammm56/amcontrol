@@ -8,6 +8,16 @@
     <Authors>Am</Authors>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <OutputPath>..\..\..\AMControlWinF\bin\Debug\Protocols\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <OutputPath>..\..\..\AMControlWinF\bin\Release\Protocols\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+
   <ItemGroup>
     <Folder Include="Interface\" />
   </ItemGroup>

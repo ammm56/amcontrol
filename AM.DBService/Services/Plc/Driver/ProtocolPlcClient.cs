@@ -9,7 +9,7 @@ namespace AM.DBService.Services.Plc.Driver
 {
     /// <summary>
     /// PLC 协议统一门面客户端。
-    /// 负责反射创建协议库实现，并完成 AM 与 ProtocolLib 之间的请求/结果转换。
+    /// 负责从协议注册表获取协议实现，并完成 AM 与 ProtocolLib 之间的请求/结果转换。
     /// </summary>
     internal class ProtocolPlcClient : IPlcClient
     {
@@ -133,7 +133,10 @@ namespace AM.DBService.Services.Plc.Driver
                 M_Return<bool> result = _protocol.IsConnected();
                 if (!result.Status)
                 {
-                    return Result<bool>.Fail(-3610, string.IsNullOrWhiteSpace(result.DescMsg) ? "PLC 连接状态查询失败" : result.DescMsg, ResultSource.Plc);
+                    return Result<bool>.Fail(
+                        -3610,
+                        string.IsNullOrWhiteSpace(result.DescMsg) ? "PLC 连接状态查询失败" : result.DescMsg,
+                        ResultSource.Plc);
                 }
 
                 return Result<bool>.OkItem(result.Result, "PLC 连接状态查询成功", ResultSource.Plc)
@@ -163,7 +166,10 @@ namespace AM.DBService.Services.Plc.Driver
                 M_Return<M_PointData> result = _protocol.ReadPoint(ToProtocolPointReadRequest(request));
                 if (!result.Status || result.Result == null)
                 {
-                    return Result<PlcPointReadResult>.Fail(-3613, string.IsNullOrWhiteSpace(result.DescMsg) ? "PLC 点位读取失败" : result.DescMsg, ResultSource.Plc);
+                    return Result<PlcPointReadResult>.Fail(
+                        -3613,
+                        string.IsNullOrWhiteSpace(result.DescMsg) ? "PLC 点位读取失败" : result.DescMsg,
+                        ResultSource.Plc);
                 }
 
                 return Result<PlcPointReadResult>.OkItem(
@@ -204,7 +210,10 @@ namespace AM.DBService.Services.Plc.Driver
                 M_Return<M_PointData> result = _protocol.WritePoint(ToProtocolPointWriteRequest(request));
                 if (!result.Status || result.Result == null)
                 {
-                    return Result<PlcPointReadResult>.Fail(-3616, string.IsNullOrWhiteSpace(result.DescMsg) ? "PLC 点位写入失败" : result.DescMsg, ResultSource.Plc);
+                    return Result<PlcPointReadResult>.Fail(
+                        -3616,
+                        string.IsNullOrWhiteSpace(result.DescMsg) ? "PLC 点位写入失败" : result.DescMsg,
+                        ResultSource.Plc);
                 }
 
                 return Result<PlcPointReadResult>.OkItem(
@@ -245,7 +254,10 @@ namespace AM.DBService.Services.Plc.Driver
                 M_Return<M_BlockData> result = _protocol.ReadBlock(ToProtocolBlockReadRequest(request));
                 if (!result.Status || result.Result == null)
                 {
-                    return Result<PlcRawDataBlock>.Fail(-3619, string.IsNullOrWhiteSpace(result.DescMsg) ? "PLC 块读取失败" : result.DescMsg, ResultSource.Plc);
+                    return Result<PlcRawDataBlock>.Fail(
+                        -3619,
+                        string.IsNullOrWhiteSpace(result.DescMsg) ? "PLC 块读取失败" : result.DescMsg,
+                        ResultSource.Plc);
                 }
 
                 return Result<PlcRawDataBlock>.OkItem(
@@ -287,7 +299,10 @@ namespace AM.DBService.Services.Plc.Driver
                 M_Return<M_BlockData> result = _protocol.WriteBlock(ToProtocolBlockWriteRequest(request));
                 if (!result.Status || result.Result == null)
                 {
-                    return Result<PlcRawDataBlock>.Fail(-3622, string.IsNullOrWhiteSpace(result.DescMsg) ? "PLC 块写入失败" : result.DescMsg, ResultSource.Plc);
+                    return Result<PlcRawDataBlock>.Fail(
+                        -3622,
+                        string.IsNullOrWhiteSpace(result.DescMsg) ? "PLC 块写入失败" : result.DescMsg,
+                        ResultSource.Plc);
                 }
 
                 return Result<PlcRawDataBlock>.OkItem(
@@ -319,46 +334,48 @@ namespace AM.DBService.Services.Plc.Driver
                     .WithNotifyMode(ResultNotifyMode.Silent);
             }
 
-            string assemblyQualifiedName = ResolveProtocolTypeName(_options == null ? _stationConfig.ProtocolType : _options.ProtocolType);
-            if (string.IsNullOrWhiteSpace(assemblyQualifiedName))
+            string protocolType = _options == null ? _stationConfig.ProtocolType : _options.ProtocolType;
+            if (string.IsNullOrWhiteSpace(protocolType))
             {
-                return Result.Fail(-3624, "不支持的 PLC 协议类型: " + (_stationConfig.ProtocolType ?? string.Empty), ResultSource.Plc);
+                return Result.Fail(-3624, "PLC 协议类型不能为空", ResultSource.Plc);
             }
 
-            Type protocolType = Type.GetType(assemblyQualifiedName, false);
-            if (protocolType == null)
+            Type protocolImplType;
+            if (!ProtocolAssemblyRegistry.TryResolve(protocolType, out protocolImplType) || protocolImplType == null)
             {
-                return Result.Fail(-3625, "未找到协议实现类型: " + assemblyQualifiedName, ResultSource.Plc);
+                string keys = string.Join(", ", ProtocolAssemblyRegistry.GetRegisteredKeys());
+                string message = string.IsNullOrWhiteSpace(keys)
+                    ? "未发现任何已注册 PLC 协议实现"
+                    : "未找到匹配的 PLC 协议实现，当前已注册: " + keys;
+
+                return Result.Fail(-3625, message + "；请求协议类型: " + protocolType, ResultSource.Plc);
             }
 
-            object instance = Activator.CreateInstance(protocolType);
+            object instance;
+            try
+            {
+                instance = Activator.CreateInstance(protocolImplType);
+            }
+            catch (Exception ex)
+            {
+                return Result.Fail(
+                    -3626,
+                    "协议实例创建失败: " + protocolImplType.FullName + "，异常: " + ex.Message,
+                    ResultSource.Plc);
+            }
+
             IProtocol protocol = instance as IProtocol;
             if (protocol == null)
             {
-                return Result.Fail(-3626, "协议实现未正确实现 IProtocol: " + protocolType.FullName, ResultSource.Plc);
+                return Result.Fail(
+                    -3627,
+                    "协议实现未正确实现 IProtocol: " + protocolImplType.FullName,
+                    ResultSource.Plc);
             }
 
             _protocol = protocol;
             return Result.Ok("协议实例创建成功", ResultSource.Plc)
                 .WithNotifyMode(ResultNotifyMode.Silent);
-        }
-
-        private static string ResolveProtocolTypeName(string protocolType)
-        {
-            string value = (protocolType ?? string.Empty).Trim();
-
-            if (value.IndexOf("modbus", StringComparison.OrdinalIgnoreCase) >= 0 &&
-                value.IndexOf("tcp", StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                return "ProtocolLib.ModbusTcp.Protocol, ProtocolLib.ModbusTcp";
-            }
-
-            if (value.IndexOf("s7", StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                return "ProtocolLib.S7Tcp.Protocol, ProtocolLib.S7Tcp";
-            }
-
-            return null;
         }
 
         private static M_ProtocolOptions ToProtocolOptions(PlcProtocolClientOptions options)

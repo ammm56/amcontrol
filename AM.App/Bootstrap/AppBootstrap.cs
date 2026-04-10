@@ -8,6 +8,7 @@ using AM.DBService.Services.Auth;
 using AM.DBService.Services.Dev;
 using AM.DBService.Services.Motion.App;
 using AM.DBService.Services.Plc.App;
+using AM.DBService.Services.Plc.Driver;
 using AM.DBService.Services.Runtime;
 using AM.Model.Alarm;
 using AM.Model.Common;
@@ -79,6 +80,9 @@ namespace AM.App.Bootstrap
                 reporter.Error("AppBootstrap", "默认 PLC 配置种子初始化失败，应用启动终止", plcSeedResult.Code);
                 return;
             }
+
+            // 5.2 加载协议实现程序集
+            ProtocolAssemblyRegistry.Reload();
 
             // 6. 从数据库加载完整设备配置并重建 MachineContext
             //    完成后 MachineContext 中已有所有控制卡服务实例、轴/DI/DO 映射、执行器配置

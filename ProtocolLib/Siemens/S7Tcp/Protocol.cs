@@ -18,7 +18,7 @@ namespace ProtocolLib.S7Tcp
         /// <summary>
         /// 协议名
         /// </summary>
-        public static readonly string ProtocolName = "s71200tcp";
+        public static readonly string ProtocolName = "s7tcp";
 
         /// <summary>
         /// 协议客户端
