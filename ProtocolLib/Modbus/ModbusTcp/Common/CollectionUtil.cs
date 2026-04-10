@@ -4,9 +4,7 @@ using ProtocolLib.CommonLib.Model;
 using ProtocolLib.CommonLib.Model.Net;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace ProtocolLib.ModbusTcp.Common
 {
@@ -26,79 +24,117 @@ namespace ProtocolLib.ModbusTcp.Common
         public M_Return<M_GatherData> ReadData(ModbusTCP modbusTCP, string functioncode, string address, string type, ushort len = 1)
         {
             string value = string.Empty;
-            string descmsg = "";
+            string descmsg = string.Empty;
+            bool status = false;
+
             try
             {
                 switch (type)
                 {
                     case "int16":
                         M_OperateResult<short[]> result_short = modbusTCP.ReadInt16(address, len);
-                        if (result_short.IsSuccess) value = ToolBasic.ArrayFormatValue(result_short.Content);
+                        status = result_short.IsSuccess;
+                        if (status) value = ToolBasic.ArrayFormatValue(result_short.Content);
                         else descmsg = result_short.Message;
                         break;
+
                     case "uint16":
                         M_OperateResult<ushort[]> result_ushort = modbusTCP.ReadUInt16(address, len);
-                        if (result_ushort.IsSuccess) value = ToolBasic.ArrayFormatValue(result_ushort.Content);
+                        status = result_ushort.IsSuccess;
+                        if (status) value = ToolBasic.ArrayFormatValue(result_ushort.Content);
                         else descmsg = result_ushort.Message;
                         break;
+
                     case "int32":
                         M_OperateResult<int[]> result_int = modbusTCP.ReadInt32(address, len);
-                        if (result_int.IsSuccess) value = ToolBasic.ArrayFormatValue(result_int.Content);
+                        status = result_int.IsSuccess;
+                        if (status) value = ToolBasic.ArrayFormatValue(result_int.Content);
                         else descmsg = result_int.Message;
                         break;
+
                     case "uint32":
                         M_OperateResult<uint[]> result_uint = modbusTCP.ReadUInt32(address, len);
-                        if (result_uint.IsSuccess) value = ToolBasic.ArrayFormatValue(result_uint.Content);
+                        status = result_uint.IsSuccess;
+                        if (status) value = ToolBasic.ArrayFormatValue(result_uint.Content);
                         else descmsg = result_uint.Message;
                         break;
+
                     case "int64":
                         M_OperateResult<long[]> result_long = modbusTCP.ReadInt64(address, len);
-                        if (result_long.IsSuccess) value = ToolBasic.ArrayFormatValue(result_long.Content);
+                        status = result_long.IsSuccess;
+                        if (status) value = ToolBasic.ArrayFormatValue(result_long.Content);
                         else descmsg = result_long.Message;
                         break;
+
                     case "uint64":
                         M_OperateResult<ulong[]> result_ulong = modbusTCP.ReadUInt64(address, len);
-                        if (result_ulong.IsSuccess) value = ToolBasic.ArrayFormatValue(result_ulong.Content);
+                        status = result_ulong.IsSuccess;
+                        if (status) value = ToolBasic.ArrayFormatValue(result_ulong.Content);
                         else descmsg = result_ulong.Message;
                         break;
+
                     case "single":
                         M_OperateResult<float[]> result_single = modbusTCP.ReadFloat(address, len);
-                        if (result_single.IsSuccess) value = ToolBasic.ArrayFormatValue(result_single.Content);
+                        status = result_single.IsSuccess;
+                        if (status) value = ToolBasic.ArrayFormatValue(result_single.Content);
                         else descmsg = result_single.Message;
                         break;
+
                     case "double":
                         M_OperateResult<double[]> result_double = modbusTCP.ReadDouble(address, len);
-                        if (result_double.IsSuccess) value = ToolBasic.ArrayFormatValue(result_double.Content);
+                        status = result_double.IsSuccess;
+                        if (status) value = ToolBasic.ArrayFormatValue(result_double.Content);
                         else descmsg = result_double.Message;
                         break;
+
                     case "bool":
                         M_OperateResult<bool[]> result_bool = modbusTCP.ReadBool(address, len);
-                        if (result_bool.IsSuccess) value = ToolBasic.ArrayFormatValue(result_bool.Content);
-                        else descmsg = result_bool.Message;
-                        value = value.Replace("False", "0");
-                        value = value.Replace("True", "1");
+                        status = result_bool.IsSuccess;
+                        if (status)
+                        {
+                            value = ToolBasic.ArrayFormatValue(result_bool.Content);
+                            value = value.Replace("False", "0");
+                            value = value.Replace("True", "1");
+                        }
+                        else
+                        {
+                            descmsg = result_bool.Message;
+                        }
                         break;
+
                     case "byte":
                         M_OperateResult<byte[]> result_byte = modbusTCP.Read(address, len);
-                        if (result_byte.IsSuccess) value = ToolBasic.ArrayFormatValue(result_byte.Content);
+                        status = result_byte.IsSuccess;
+                        if (status) value = ToolBasic.ArrayFormatValue(result_byte.Content);
                         else descmsg = result_byte.Message;
                         break;
+
                     case "string":
                         M_OperateResult<string> result_string = modbusTCP.ReadString(address, 10, Encoding.UTF8);
-                        if (result_string.IsSuccess) value = ToolBasic.ArrayFormat(result_string.Content.Trim().Replace("\u0000", ""));
-                        else descmsg = result_string.Message;
+                        status = result_string.IsSuccess;
+                        if (status)
+                        {
+                            value = (result_string.Content ?? string.Empty).Trim().Replace("\u0000", "");
+                        }
+                        else
+                        {
+                            descmsg = result_string.Message;
+                        }
                         break;
+
                     default:
+                        descmsg = "不支持的数据类型:" + type;
+                        status = false;
                         break;
                 }
 
-                bool status = value.Equals(string.Empty) ? false : true;
                 return new M_Return<M_GatherData>
                 {
                     Status = status,
                     DescMsg = descmsg,
                     Result = new M_GatherData
                     {
+                        functioncode = functioncode,
                         point = address,
                         value = value,
                         type = type
@@ -108,7 +144,7 @@ namespace ProtocolLib.ModbusTcp.Common
             catch (Exception ex)
             {
                 Console.WriteLine(string.Format("CollectionUtil ReadData ex={0}", ex.Message));
-                return M_Return<M_GatherData>.Error();
+                return M_Return<M_GatherData>.Error("读取错误:" + ex.Message);
             }
         }
 
