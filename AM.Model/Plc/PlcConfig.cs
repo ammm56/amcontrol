@@ -17,11 +17,5 @@ namespace AM.Model.Plc
         /// PLC 点位配置集合。
         /// </summary>
         public List<PlcPointConfig> Points { get; set; } = new List<PlcPointConfig>();
-
-        /// <summary>
-        /// 批量读取块配置集合。
-        /// 首版可为空，后续由配置页逐步维护。
-        /// </summary>
-        public List<PlcReadBlockConfig> ReadBlocks { get; set; } = new List<PlcReadBlockConfig>();
     }
 }

@@ -7,7 +7,7 @@ namespace AM.Model.Entity.Plc
     /// 当前版本采用最简模型：
     /// - 直接使用 Address 保存完整协议地址；
     /// - 长度统一使用 Length；
-    /// - 不再拆分字符串长度、数组长度、单位、读取模式等扩展字段。
+    /// - 不在点位主表中承载批量规划与显示扩展字段。
     /// </summary>
     [SugarTable("plc_point")]
     public class PlcPointConfigEntity

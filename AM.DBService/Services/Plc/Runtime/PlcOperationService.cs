@@ -101,7 +101,7 @@ namespace AM.DBService.Services.Plc.Runtime
 
         /// <summary>
         /// 按直接地址执行写入。
-        /// 保留兼容签名，内部仅使用 address/dataType/length。
+        /// 保留兼容签名，内部仅使用 address、dataType、length。
         /// </summary>
         public Result WriteAddress(
             string plcName,
@@ -194,7 +194,7 @@ namespace AM.DBService.Services.Plc.Runtime
 
         /// <summary>
         /// 按直接地址执行测试读取。
-        /// 保留兼容签名，内部仅使用 address/dataType/length。
+        /// 保留兼容签名，内部仅使用 address、dataType、length。
         /// </summary>
         public Result<PlcPointRuntimeSnapshot> TestReadAddress(
             string plcName,

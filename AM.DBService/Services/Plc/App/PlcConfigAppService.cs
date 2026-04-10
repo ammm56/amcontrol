@@ -21,14 +21,13 @@ namespace AM.DBService.Services.Plc.App
     /// <summary>
     /// PLC 配置应用服务。
     /// 负责将数据库中的 PLC 配置装配为运行时配置，并同步到全局上下文。
-    /// 当前版本按最简模型实现，点位使用 Address 直接表达完整协议地址。
+    /// 当前版本按最简模型实现，仅保留 PLC 站与点位配置。
     /// </summary>
     public class PlcConfigAppService : ServiceBase, IPlcConfigAppService
     {
         private readonly DBContext _dbContext;
         private readonly IPlcStationCrudService _plcStationCrudService;
         private readonly IPlcPointCrudService _plcPointCrudService;
-        private readonly IPlcReadBlockCrudService _plcReadBlockCrudService;
         private readonly IPlcClientFactory _plcClientFactory;
 
         protected override string MessageSourceName
@@ -45,7 +44,6 @@ namespace AM.DBService.Services.Plc.App
             : this(
                 new PlcStationCrudService(),
                 new PlcPointCrudService(),
-                new PlcReadBlockCrudService(),
                 new PlcClientFactory(),
                 SystemContext.Instance.Reporter)
         {
@@ -54,7 +52,6 @@ namespace AM.DBService.Services.Plc.App
         public PlcConfigAppService(
             IPlcStationCrudService plcStationCrudService,
             IPlcPointCrudService plcPointCrudService,
-            IPlcReadBlockCrudService plcReadBlockCrudService,
             IPlcClientFactory plcClientFactory,
             IAppReporter reporter)
             : base(reporter)
@@ -62,7 +59,6 @@ namespace AM.DBService.Services.Plc.App
             _dbContext = new DBContext();
             _plcStationCrudService = plcStationCrudService;
             _plcPointCrudService = plcPointCrudService;
-            _plcReadBlockCrudService = plcReadBlockCrudService;
             _plcClientFactory = plcClientFactory;
         }
 
@@ -74,8 +70,7 @@ namespace AM.DBService.Services.Plc.App
 
                 db.CodeFirst.InitTables(
                     typeof(PlcStationConfigEntity),
-                    typeof(PlcPointConfigEntity),
-                    typeof(PlcReadBlockConfigEntity));
+                    typeof(PlcPointConfigEntity));
 
                 EnsureIndexes(db);
 
@@ -109,12 +104,6 @@ namespace AM.DBService.Services.Plc.App
                     return Fail<PlcConfig>(pointResult.Code, "读取 PLC 点位配置失败");
                 }
 
-                var readBlockResult = _plcReadBlockCrudService.QueryAll();
-                if (!readBlockResult.Success && readBlockResult.Code != (int)DbErrorCode.NotFound)
-                {
-                    return Fail<PlcConfig>(readBlockResult.Code, "读取 PLC 读块配置失败");
-                }
-
                 var stationEntities = stationResult.Success
                     ? stationResult.Items.Where(p => p != null && p.IsEnabled).ToList()
                     : new List<PlcStationConfigEntity>();
@@ -123,17 +112,13 @@ namespace AM.DBService.Services.Plc.App
                     ? pointResult.Items.Where(p => p != null && p.IsEnabled).ToList()
                     : new List<PlcPointConfigEntity>();
 
-                var readBlockEntities = readBlockResult.Success
-                    ? readBlockResult.Items.Where(p => p != null && p.IsEnabled).ToList()
-                    : new List<PlcReadBlockConfigEntity>();
-
-                var validateResult = ValidateEntities(stationEntities, pointEntities, readBlockEntities);
+                var validateResult = ValidateEntities(stationEntities, pointEntities);
                 if (!validateResult.Success)
                 {
                     return Fail<PlcConfig>(validateResult.Code, validateResult.Message);
                 }
 
-                var plcConfig = BuildPlcConfig(stationEntities, pointEntities, readBlockEntities);
+                var plcConfig = BuildPlcConfig(stationEntities, pointEntities);
                 return OkLogOnly(plcConfig, "读取数据库 PLC 配置成功");
             }
             catch (Exception ex)
@@ -177,18 +162,11 @@ namespace AM.DBService.Services.Plc.App
 
             db.Ado.ExecuteCommand(
                 "CREATE INDEX IF NOT EXISTS ix_plc_point_plcname_sortorder ON plc_point(PlcName, SortOrder)");
-
-            db.Ado.ExecuteCommand(
-                "CREATE UNIQUE INDEX IF NOT EXISTS ux_plc_read_block_plcname_blockname ON plc_read_block(PlcName, BlockName)");
-
-            db.Ado.ExecuteCommand(
-                "CREATE INDEX IF NOT EXISTS ix_plc_read_block_plcname_priority_sortorder ON plc_read_block(PlcName, Priority, SortOrder)");
         }
 
         private Result ValidateEntities(
             IList<PlcStationConfigEntity> stationEntities,
-            IList<PlcPointConfigEntity> pointEntities,
-            IList<PlcReadBlockConfigEntity> readBlockEntities)
+            IList<PlcPointConfigEntity> pointEntities)
         {
             var stationNameSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -227,37 +205,9 @@ namespace AM.DBService.Services.Plc.App
                     return Fail((int)DbErrorCode.InvalidArgument, "点位数据类型不能为空: " + point.Name);
                 }
 
-                if (string.Equals(point.DataType, "String", StringComparison.OrdinalIgnoreCase) && point.StringLength <= 0)
+                if (point.Length <= 0)
                 {
-                    return Fail((int)DbErrorCode.InvalidArgument, "String 类型点位必须配置大于 0 的字符串长度: " + point.Name);
-                }
-
-                if (string.Equals(point.DataType, "ByteArray", StringComparison.OrdinalIgnoreCase) && point.ArrayLength <= 0)
-                {
-                    return Fail((int)DbErrorCode.InvalidArgument, "ByteArray 类型点位必须配置大于 0 的数组长度: " + point.Name);
-                }
-            }
-
-            foreach (var readBlock in readBlockEntities)
-            {
-                if (string.IsNullOrWhiteSpace(readBlock.PlcName))
-                {
-                    return Fail((int)DbErrorCode.InvalidArgument, "存在未关联 PLC 的读块配置: " + readBlock.BlockName);
-                }
-
-                if (!stationNameSet.Contains(readBlock.PlcName))
-                {
-                    return Fail((int)DbErrorCode.InvalidArgument, "读块所属 PLC 不存在或未启用: " + readBlock.PlcName + " / " + readBlock.BlockName);
-                }
-
-                if (string.IsNullOrWhiteSpace(readBlock.StartAddress))
-                {
-                    return Fail((int)DbErrorCode.InvalidArgument, "读块起始地址不能为空: " + readBlock.BlockName);
-                }
-
-                if (readBlock.Length <= 0)
-                {
-                    return Fail((int)DbErrorCode.InvalidArgument, "读块长度必须大于 0: " + readBlock.BlockName);
+                    return Fail((int)DbErrorCode.InvalidArgument, "点位 Length 必须大于 0: " + point.Name);
                 }
             }
 
@@ -266,8 +216,7 @@ namespace AM.DBService.Services.Plc.App
 
         private static PlcConfig BuildPlcConfig(
             IList<PlcStationConfigEntity> stationEntities,
-            IList<PlcPointConfigEntity> pointEntities,
-            IList<PlcReadBlockConfigEntity> readBlockEntities)
+            IList<PlcPointConfigEntity> pointEntities)
         {
             var stationList = stationEntities
                 .OrderBy(p => p.SortOrder)
@@ -285,20 +234,10 @@ namespace AM.DBService.Services.Plc.App
                 .Select(ToPointConfig)
                 .ToList();
 
-            var readBlockList = readBlockEntities
-                .Where(p => stationNameSet.Contains(p.PlcName))
-                .OrderBy(p => p.PlcName)
-                .ThenBy(p => p.Priority)
-                .ThenBy(p => p.SortOrder)
-                .ThenBy(p => p.BlockName)
-                .Select(ToReadBlockConfig)
-                .ToList();
-
             return new PlcConfig
             {
                 Stations = stationList,
-                Points = pointList,
-                ReadBlocks = readBlockList
+                Points = pointList
             };
         }
 
@@ -376,33 +315,8 @@ namespace AM.DBService.Services.Plc.App
                 GroupName = entity.GroupName,
                 Address = entity.Address,
                 DataType = entity.DataType,
-                StringLength = entity.StringLength,
-                ArrayLength = entity.ArrayLength,
-                Unit = entity.Unit,
-                AccessMode = entity.AccessMode,
-                ReadMode = entity.ReadMode,
-                StringEncoding = entity.StringEncoding,
-                IsEnabled = entity.IsEnabled,
-                SortOrder = entity.SortOrder,
-                Description = entity.Description,
-                Remark = entity.Remark
-            };
-        }
-
-        private static PlcReadBlockConfig ToReadBlockConfig(PlcReadBlockConfigEntity entity)
-        {
-            return new PlcReadBlockConfig
-            {
-                Id = entity.Id,
-                PlcName = entity.PlcName,
-                BlockName = entity.BlockName,
-                AreaType = entity.AreaType,
-                StartAddress = entity.StartAddress,
                 Length = entity.Length,
-                ReadUnit = entity.ReadUnit,
-                DataType = entity.DataType,
-                ReadMode = entity.ReadMode,
-                Priority = entity.Priority,
+                AccessMode = entity.AccessMode,
                 IsEnabled = entity.IsEnabled,
                 SortOrder = entity.SortOrder,
                 Description = entity.Description,

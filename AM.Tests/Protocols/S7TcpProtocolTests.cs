@@ -70,15 +70,14 @@ namespace AM.Tests.Protocols
             Assert.That(closeResult.Status, Is.True, closeResult.DescMsg);
         }
 
-        private static M_Return<M_PointData> WriteSuccess(IProtocol protocol, string address, string dataType, object value, int stringLength = 0, int arrayLength = 0)
+        private static M_Return<M_PointData> WriteSuccess(IProtocol protocol, string address, string dataType, object value, int length = 0)
         {
             M_Return<M_PointData> result = protocol.WritePoint(new M_PointWriteRequest
             {
                 address = address,
                 dataType = dataType,
                 value = value,
-                stringLength = stringLength,
-                arrayLength = arrayLength
+                length = length
             });
 
             Assert.That(result, Is.Not.Null);
@@ -88,14 +87,13 @@ namespace AM.Tests.Protocols
             return result;
         }
 
-        private static M_Return<M_PointData> ReadSuccess(IProtocol protocol, string address, string dataType, int stringLength = 0, int arrayLength = 0)
+        private static M_Return<M_PointData> ReadSuccess(IProtocol protocol, string address, string dataType, int length = 0)
         {
             M_Return<M_PointData> result = protocol.ReadPoint(new M_PointReadRequest
             {
                 address = address,
                 dataType = dataType,
-                stringLength = stringLength,
-                arrayLength = arrayLength
+                length = length
             });
 
             Assert.That(result, Is.Not.Null);
@@ -111,11 +109,10 @@ namespace AM.Tests.Protocols
             string dataType,
             object writeValue,
             string expectedReadValue,
-            int stringLength = 0,
-            int arrayLength = 0)
+            int length = 0)
         {
-            WriteSuccess(protocol, address, dataType, writeValue, stringLength, arrayLength);
-            M_Return<M_PointData> readResult = ReadSuccess(protocol, address, dataType, stringLength, arrayLength);
+            WriteSuccess(protocol, address, dataType, writeValue, length);
+            M_Return<M_PointData> readResult = ReadSuccess(protocol, address, dataType, length);
             AssertValue(dataType, expectedReadValue, readResult.Result.value);
         }
 
@@ -123,7 +120,7 @@ namespace AM.Tests.Protocols
         {
             switch (dataType)
             {
-                case "single":
+                case "float":
                     Assert.That(
                         Math.Abs(float.Parse(actual, CultureInfo.InvariantCulture) - float.Parse(expected, CultureInfo.InvariantCulture)),
                         Is.LessThan(0.0001f));
@@ -173,12 +170,12 @@ namespace AM.Tests.Protocols
                 AssertRoundTrip(protocol, TestAddress.UInt16Write, "uint16", writeValue, writeValue.ToString(CultureInfo.InvariantCulture));
 
                 const string value = "HELLO_S7_STRING";
-                AssertRoundTrip(protocol, TestAddress.StringFixed20, "string", value, value, 20, 0);
+                AssertRoundTrip(protocol, TestAddress.StringFixed20, "string", value, value, 20);
 
                 const string tooLongValue = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-                WriteSuccess(protocol, TestAddress.StringFixed20, "string", tooLongValue, 20, 0);
+                WriteSuccess(protocol, TestAddress.StringFixed20, "string", tooLongValue, 20);
 
-                M_Return<M_PointData> truncatedReadResult = ReadSuccess(protocol, TestAddress.StringFixed20, "string", 20, 0);
+                M_Return<M_PointData> truncatedReadResult = ReadSuccess(protocol, TestAddress.StringFixed20, "string", 20);
                 Assert.That(truncatedReadResult.Result.value, Is.EqualTo("ABCDEFGHIJKLMNOPQRST"));
             }
             finally

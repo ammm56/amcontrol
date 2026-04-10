@@ -196,7 +196,7 @@ namespace ProtocolLib.S7Tcp
                     {
                         address = address,
                         dataType = dataType,
-                        length = length,
+                        length = 1,
                         value = gatherData.value ?? string.Empty,
                         rawBuffer = new byte[0],
                         quality = "Good"
@@ -253,7 +253,7 @@ namespace ProtocolLib.S7Tcp
                     {
                         address = address,
                         dataType = dataType,
-                        length = length,
+                        length = 1,
                         value = gatherData.value ?? string.Empty,
                         rawBuffer = new byte[0],
                         quality = "Good"

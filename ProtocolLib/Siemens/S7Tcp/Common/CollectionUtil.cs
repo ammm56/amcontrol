@@ -70,7 +70,7 @@ namespace ProtocolLib.S7Tcp.Common
                         else descmsg = result_ulong.Message;
                         break;
 
-                    case "single":
+                    case "float":
                         M_OperateResult<float[]> result_single = siemensS7.ReadFloat(actualAddress, len);
                         status = result_single.IsSuccess;
                         if (status) value = ToolBasic.ArrayFormatValue(result_single.Content);
@@ -222,7 +222,7 @@ namespace ProtocolLib.S7Tcp.Common
                     return siemensS7.Write(address, Convert.ToInt64(actualValue));
                 case "uint64":
                     return siemensS7.Write(address, Convert.ToUInt64(actualValue));
-                case "single":
+                case "float":
                     return siemensS7.Write(address, Convert.ToSingle(actualValue));
                 case "double":
                     return siemensS7.Write(address, Convert.ToDouble(actualValue));

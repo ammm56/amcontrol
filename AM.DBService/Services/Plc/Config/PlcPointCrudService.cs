@@ -22,9 +22,6 @@ namespace AM.DBService.Services.Plc.Config
     /// </summary>
     public class PlcPointCrudService : ServiceBase, IPlcPointCrudService
     {
-        /// <summary>
-        /// 数据库上下文。
-        /// </summary>
         private readonly DBContext _dbContext;
 
         protected override string MessageSourceName
@@ -52,7 +49,7 @@ namespace AM.DBService.Services.Plc.Config
         {
             try
             {
-                SqlSugarClient db = CreateDb();
+                var db = CreateDb();
                 EnsureTables(db);
 
                 var items = db.Queryable<PlcPointConfigEntity>()
@@ -79,8 +76,8 @@ namespace AM.DBService.Services.Plc.Config
                     return Fail<PlcPointConfigEntity>((int)DbErrorCode.InvalidArgument, "PLC 名称不能为空");
                 }
 
-                string normalizedPlcName = NormalizeText(plcName);
-                SqlSugarClient db = CreateDb();
+                var normalizedPlcName = NormalizeText(plcName);
+                var db = CreateDb();
                 EnsureTables(db);
 
                 var items = db.Queryable<PlcPointConfigEntity>()
@@ -107,13 +104,13 @@ namespace AM.DBService.Services.Plc.Config
                     return Fail<PlcPointConfigEntity>((int)DbErrorCode.InvalidArgument, "PLC 名称或点位名称不能为空");
                 }
 
-                string normalizedPlcName = NormalizeText(plcName);
-                string normalizedName = NormalizeText(name);
+                var normalizedPlcName = NormalizeText(plcName);
+                var normalizedName = NormalizeText(name);
 
-                SqlSugarClient db = CreateDb();
+                var db = CreateDb();
                 EnsureTables(db);
 
-                PlcPointConfigEntity item = db.Queryable<PlcPointConfigEntity>()
+                var item = db.Queryable<PlcPointConfigEntity>()
                     .First(p => p.PlcName == normalizedPlcName && p.Name == normalizedName);
 
                 if (item == null)
@@ -140,16 +137,16 @@ namespace AM.DBService.Services.Plc.Config
 
                 Normalize(entity);
 
-                Result validateResult = Validate(entity);
+                var validateResult = Validate(entity);
                 if (!validateResult.Success)
                 {
                     return validateResult;
                 }
 
-                SqlSugarClient db = CreateDb();
+                var db = CreateDb();
                 EnsureTables(db);
 
-                bool stationExists = db.Queryable<PlcStationConfigEntity>()
+                var stationExists = db.Queryable<PlcStationConfigEntity>()
                     .Any(p => p.Name == entity.PlcName);
 
                 if (!stationExists)
@@ -157,7 +154,7 @@ namespace AM.DBService.Services.Plc.Config
                     return Fail((int)DbErrorCode.InvalidArgument, "所属 PLC 站不存在: " + entity.PlcName);
                 }
 
-                PlcPointConfigEntity existing = db.Queryable<PlcPointConfigEntity>()
+                var existing = db.Queryable<PlcPointConfigEntity>()
                     .First(p => p.PlcName == entity.PlcName && p.Name == entity.Name && p.Id != entity.Id);
 
                 if (existing != null)
@@ -191,13 +188,13 @@ namespace AM.DBService.Services.Plc.Config
                     return Fail((int)DbErrorCode.InvalidArgument, "PLC 名称或点位名称不能为空");
                 }
 
-                string normalizedPlcName = NormalizeText(plcName);
-                string normalizedName = NormalizeText(name);
+                var normalizedPlcName = NormalizeText(plcName);
+                var normalizedName = NormalizeText(name);
 
-                SqlSugarClient db = CreateDb();
+                var db = CreateDb();
                 EnsureTables(db);
 
-                int count = db.Deleteable<PlcPointConfigEntity>()
+                var count = db.Deleteable<PlcPointConfigEntity>()
                     .Where(p => p.PlcName == normalizedPlcName && p.Name == normalizedName)
                     .ExecuteCommand();
 
@@ -317,8 +314,7 @@ namespace AM.DBService.Services.Plc.Config
                 return false;
             }
 
-            string normalized = NormalizeDataType(dataType);
-            switch (normalized)
+            switch (NormalizeDataType(dataType))
             {
                 case "bool":
                 case "uint8":

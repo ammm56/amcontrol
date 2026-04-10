@@ -200,7 +200,7 @@ namespace ProtocolLib.ModbusTcp
                     {
                         address = address,
                         dataType = dataType,
-                        length = length,
+                        length = 1,
                         value = gatherData.value ?? string.Empty,
                         rawBuffer = new byte[0],
                         quality = "Good"
@@ -257,7 +257,7 @@ namespace ProtocolLib.ModbusTcp
                     {
                         address = address,
                         dataType = dataType,
-                        length = length,
+                        length = 1,
                         value = gatherData.value ?? string.Empty,
                         rawBuffer = new byte[0],
                         quality = "Good"

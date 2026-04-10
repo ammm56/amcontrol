@@ -9,7 +9,7 @@ namespace AM.DBService.Services.Plc.Driver
 {
     /// <summary>
     /// PLC 协议程序集注册表。
-    /// 负责从目录扫描协议库 DLL，发现 IProtocol 实现，并按协议名注册到字典。
+    /// 负责从 Protocols 目录扫描协议库 DLL，发现 IProtocol 实现，并按协议名注册到字典。
     /// </summary>
     public static class ProtocolAssemblyRegistry
     {
@@ -85,7 +85,7 @@ namespace AM.DBService.Services.Plc.Driver
                     return;
                 }
 
-                foreach (var directory in GetProbeDirectories())
+                foreach (string directory in GetProbeDirectories())
                 {
                     ScanDirectory(directory);
                 }
@@ -97,15 +97,15 @@ namespace AM.DBService.Services.Plc.Driver
         private static IEnumerable<string> GetProbeDirectories()
         {
             string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            if (!string.IsNullOrWhiteSpace(baseDirectory))
+            if (string.IsNullOrWhiteSpace(baseDirectory))
             {
-                yield return baseDirectory;
+                yield break;
+            }
 
-                string protocolsDirectory = Path.Combine(baseDirectory, "Protocols");
-                if (Directory.Exists(protocolsDirectory))
-                {
-                    yield return protocolsDirectory;
-                }
+            string protocolsDirectory = Path.Combine(baseDirectory, "Protocols");
+            if (Directory.Exists(protocolsDirectory))
+            {
+                yield return protocolsDirectory;
             }
         }
 
@@ -116,8 +116,8 @@ namespace AM.DBService.Services.Plc.Driver
                 return;
             }
 
-            var dllFiles = Directory.GetFiles(directory, "ProtocolLib.*.dll", SearchOption.TopDirectoryOnly);
-            foreach (var dllFile in dllFiles)
+            string[] dllFiles = Directory.GetFiles(directory, "ProtocolLib.*.dll", SearchOption.TopDirectoryOnly);
+            foreach (string dllFile in dllFiles)
             {
                 LoadProtocolAssembly(dllFile);
             }
@@ -173,7 +173,7 @@ namespace AM.DBService.Services.Plc.Driver
                     : ex.Types.Where(p => p != null).ToArray();
             }
 
-            foreach (var type in types)
+            foreach (Type type in types)
             {
                 if (type == null || !type.IsClass || type.IsAbstract)
                 {
@@ -214,7 +214,7 @@ namespace AM.DBService.Services.Plc.Driver
 
             keys.Add(type.Name);
 
-            foreach (var rawKey in keys)
+            foreach (string rawKey in keys)
             {
                 string key = NormalizeKey(rawKey);
                 if (string.IsNullOrWhiteSpace(key))
@@ -222,30 +222,19 @@ namespace AM.DBService.Services.Plc.Driver
                     continue;
                 }
 
-                if (!ProtocolTypeMap.ContainsKey(key))
-                {
-                    ProtocolTypeMap[key] = type;
-                }
+                ProtocolTypeMap[key] = type;
             }
         }
 
         private static string GetStaticProtocolName(Type type)
         {
-            const BindingFlags flags = BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy;
-
-            var field = type.GetField("ProtocolName", flags);
-            if (field != null && field.FieldType == typeof(string))
+            FieldInfo field = type.GetField("ProtocolName", BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
+            if (field == null || field.FieldType != typeof(string))
             {
-                return field.GetValue(null) as string;
+                return null;
             }
 
-            var property = type.GetProperty("ProtocolName", flags);
-            if (property != null && property.PropertyType == typeof(string) && property.GetIndexParameters().Length == 0)
-            {
-                return property.GetValue(null, null) as string;
-            }
-
-            return null;
+            return field.GetValue(null) as string;
         }
 
         private static bool IsCommonAssembly(string assemblyPath)
@@ -256,18 +245,9 @@ namespace AM.DBService.Services.Plc.Driver
 
         private static string NormalizeKey(string value)
         {
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                return string.Empty;
-            }
-
-            var chars = value
-                .Trim()
-                .Where(ch => char.IsLetterOrDigit(ch))
-                .Select(char.ToLowerInvariant)
-                .ToArray();
-
-            return new string(chars);
+            return string.IsNullOrWhiteSpace(value)
+                ? string.Empty
+                : value.Trim().Replace(" ", string.Empty).ToLowerInvariant();
         }
     }
 }

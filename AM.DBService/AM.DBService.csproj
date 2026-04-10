@@ -87,7 +87,6 @@
     <Compile Include="Services\Plc\App\PlcConfigSeedService.cs" />
     <Compile Include="Services\Plc\App\ProtocolAssemblyRegistry.cs" />
     <Compile Include="Services\Plc\Config\PlcPointCrudService.cs" />
-    <Compile Include="Services\Plc\Config\PlcReadBlockCrudService.cs" />
     <Compile Include="Services\Plc\Config\PlcStationCrudService.cs" />
     <Compile Include="Services\Plc\Driver\NullPlcClient.cs" />
     <Compile Include="Services\Plc\Driver\PlcClientFactory.cs" />

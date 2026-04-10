@@ -75,7 +75,7 @@ namespace ProtocolLib.ModbusTcp.Common
                         else descmsg = result_ulong.Message;
                         break;
 
-                    case "single":
+                    case "float":
                         M_OperateResult<float[]> result_single = modbusTCP.ReadFloat(actualAddress, len);
                         status = result_single.IsSuccess;
                         if (status) value = ToolBasic.ArrayFormatValue(result_single.Content);
@@ -228,7 +228,7 @@ namespace ProtocolLib.ModbusTcp.Common
                     return modbusTCP.Write(address, Convert.ToInt64(actualValue));
                 case "uint64":
                     return modbusTCP.Write(address, Convert.ToUInt64(actualValue));
-                case "single":
+                case "float":
                     return modbusTCP.Write(address, Convert.ToSingle(actualValue));
                 case "double":
                     return modbusTCP.Write(address, Convert.ToDouble(actualValue));
