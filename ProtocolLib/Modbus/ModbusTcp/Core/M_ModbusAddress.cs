@@ -100,7 +100,7 @@ namespace ProtocolLib.ModbusTcp.Core
                 case 0:
                     //x=1;0000
                     //读
-                    this.Function = byte.Parse("1");
+                    if (this.Function < 0) this.Function = 1;
                     this.Address = ushort.Parse(endValue);
                     //写
                     break;
@@ -108,29 +108,32 @@ namespace ProtocolLib.ModbusTcp.Core
                 case 1:
                     //x=2;0000
                     //读
-                    this.Function = byte.Parse("2");
+                    if (this.Function < 0) this.Function = 2;
                     this.Address = ushort.Parse(endValue);
                     break;
                 //读取输入寄存器 3区 04功能码-读取
                 case 3:
                     //x=4;0000
                     //读
-                    this.Function = byte.Parse("4");
+                    if (this.Function < 0) this.Function = 4;
                     this.Address = ushort.Parse(endValue);
                     break;
                 //保持寄存器 4区 03功能码-读取 06-功能码-写入
                 case 4:
                     //x=3;0000
                     //读
-                    this.Function = byte.Parse("3");
+                    if (this.Function < 0) this.Function = 3;
                     this.Address = ushort.Parse(endValue);
                     //写
                     break;
+
+                default:
+                    throw new Exception("不支持的Modbus地址格式:" + addrss);
             }
         }
 
         /// <summary>
-        /// 地址便宜指定的位置，返回一个新地址
+        /// 返回一个新地址
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>

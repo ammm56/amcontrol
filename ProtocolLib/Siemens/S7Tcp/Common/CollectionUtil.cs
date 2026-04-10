@@ -3,9 +3,7 @@ using ProtocolLib.CommonLib.Model.Net;
 using ProtocolLib.CommonLib.Model;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using ProtocolLib.S7Tcp.Core;
 
 namespace ProtocolLib.S7Tcp.Common
@@ -21,79 +19,124 @@ namespace ProtocolLib.S7Tcp.Common
         public M_Return<M_GatherData> ReadData(SiemensS7 siemensS7, string functioncode, string address, string type, ushort len = 1)
         {
             string value = string.Empty;
-            string descmsg = "";
+            string descmsg = string.Empty;
+            bool status = false;
+
             try
             {
+                string actualAddress = address;
+
                 switch (type)
                 {
                     case "int16":
-                        M_OperateResult<short[]> result_short = siemensS7.ReadInt16(address, len);
-                        if (result_short.IsSuccess) value = ToolBasic.ArrayFormatValue(result_short.Content);
+                        M_OperateResult<short[]> result_short = siemensS7.ReadInt16(actualAddress, len);
+                        status = result_short.IsSuccess;
+                        if (status) value = ToolBasic.ArrayFormatValue(result_short.Content);
                         else descmsg = result_short.Message;
                         break;
+
                     case "uint16":
-                        M_OperateResult<ushort[]> result_ushort = siemensS7.ReadUInt16(address, len);
-                        if (result_ushort.IsSuccess) value = ToolBasic.ArrayFormatValue(result_ushort.Content);
+                        M_OperateResult<ushort[]> result_ushort = siemensS7.ReadUInt16(actualAddress, len);
+                        status = result_ushort.IsSuccess;
+                        if (status) value = ToolBasic.ArrayFormatValue(result_ushort.Content);
                         else descmsg = result_ushort.Message;
                         break;
+
                     case "int32":
-                        M_OperateResult<int[]> result_int = siemensS7.ReadInt32(address, len);
-                        if (result_int.IsSuccess) value = ToolBasic.ArrayFormatValue(result_int.Content);
+                        M_OperateResult<int[]> result_int = siemensS7.ReadInt32(actualAddress, len);
+                        status = result_int.IsSuccess;
+                        if (status) value = ToolBasic.ArrayFormatValue(result_int.Content);
                         else descmsg = result_int.Message;
                         break;
+
                     case "uint32":
-                        M_OperateResult<uint[]> result_uint = siemensS7.ReadUInt32(address, len);
-                        if (result_uint.IsSuccess) value = ToolBasic.ArrayFormatValue(result_uint.Content);
+                        M_OperateResult<uint[]> result_uint = siemensS7.ReadUInt32(actualAddress, len);
+                        status = result_uint.IsSuccess;
+                        if (status) value = ToolBasic.ArrayFormatValue(result_uint.Content);
                         else descmsg = result_uint.Message;
                         break;
+
                     case "int64":
-                        M_OperateResult<long[]> result_long = siemensS7.ReadInt64(address, len);
-                        if (result_long.IsSuccess) value = ToolBasic.ArrayFormatValue(result_long.Content);
+                        M_OperateResult<long[]> result_long = siemensS7.ReadInt64(actualAddress, len);
+                        status = result_long.IsSuccess;
+                        if (status) value = ToolBasic.ArrayFormatValue(result_long.Content);
                         else descmsg = result_long.Message;
                         break;
+
                     case "uint64":
-                        M_OperateResult<ulong[]> result_ulong = siemensS7.ReadUInt64(address, len);
-                        if (result_ulong.IsSuccess) value = ToolBasic.ArrayFormatValue(result_ulong.Content);
+                        M_OperateResult<ulong[]> result_ulong = siemensS7.ReadUInt64(actualAddress, len);
+                        status = result_ulong.IsSuccess;
+                        if (status) value = ToolBasic.ArrayFormatValue(result_ulong.Content);
                         else descmsg = result_ulong.Message;
                         break;
+
                     case "single":
-                        M_OperateResult<float[]> result_single = siemensS7.ReadFloat(address, len);
-                        if (result_single.IsSuccess) value = ToolBasic.ArrayFormatValue(result_single.Content);
+                        M_OperateResult<float[]> result_single = siemensS7.ReadFloat(actualAddress, len);
+                        status = result_single.IsSuccess;
+                        if (status) value = ToolBasic.ArrayFormatValue(result_single.Content);
                         else descmsg = result_single.Message;
                         break;
+
                     case "double":
-                        M_OperateResult<double[]> result_double = siemensS7.ReadDouble(address, len);
-                        if (result_double.IsSuccess) value = ToolBasic.ArrayFormatValue(result_double.Content);
+                        M_OperateResult<double[]> result_double = siemensS7.ReadDouble(actualAddress, len);
+                        status = result_double.IsSuccess;
+                        if (status) value = ToolBasic.ArrayFormatValue(result_double.Content);
                         else descmsg = result_double.Message;
                         break;
+
                     case "bool":
-                        M_OperateResult<bool[]> result_bool = siemensS7.ReadBool(address, len);
-                        if (result_bool.IsSuccess) value = ToolBasic.ArrayFormatValue(result_bool.Content);
-                        else descmsg = result_bool.Message;
-                        value = value.Replace("False", "0");
-                        value = value.Replace("True", "1");
+                        M_OperateResult<bool[]> result_bool = siemensS7.ReadBool(actualAddress, len);
+                        status = result_bool.IsSuccess;
+                        if (status)
+                        {
+                            value = ToolBasic.ArrayFormatValue(result_bool.Content);
+                            value = value.Replace("False", "0");
+                            value = value.Replace("True", "1");
+                        }
+                        else
+                        {
+                            descmsg = result_bool.Message;
+                        }
                         break;
+
                     case "byte":
-                        M_OperateResult<byte[]> result_byte = siemensS7.Read(address, len);
-                        if (result_byte.IsSuccess) value = ToolBasic.ArrayFormatValue(result_byte.Content);
+                        M_OperateResult<byte[]> result_byte = siemensS7.Read(actualAddress, len);
+                        status = result_byte.IsSuccess;
+                        if (status) value = ToolBasic.ArrayFormatValue(result_byte.Content);
                         else descmsg = result_byte.Message;
                         break;
+
                     case "string":
-                        M_OperateResult<string> result_string = siemensS7.ReadString(address, 10, Encoding.UTF8);
-                        if (result_string.IsSuccess) value = ToolBasic.ArrayFormat(result_string.Content.Trim().Replace("\u0000", ""));
-                        else descmsg = result_string.Message;
+                        int readStringLength = ResolveStringLength(ref actualAddress, 10);
+                        M_OperateResult<string> result_string = siemensS7.ReadString(actualAddress, (ushort)readStringLength, Encoding.ASCII);
+                        status = result_string.IsSuccess;
+                        if (status)
+                        {
+                            value = (result_string.Content ?? string.Empty).TrimEnd('\0');
+                            if (value.Length > readStringLength)
+                            {
+                                value = value.Substring(0, readStringLength);
+                            }
+                        }
+                        else
+                        {
+                            descmsg = result_string.Message;
+                        }
                         break;
+
                     default:
+                        descmsg = "不支持的数据类型:" + type;
+                        status = false;
                         break;
                 }
 
-                bool status = value.Equals(string.Empty) ? false : true;
                 return new M_Return<M_GatherData>
                 {
                     Status = status,
                     DescMsg = descmsg,
                     Result = new M_GatherData
                     {
+                        functioncode = functioncode,
                         point = address,
                         value = value,
                         type = type
@@ -103,7 +146,7 @@ namespace ProtocolLib.S7Tcp.Common
             catch (Exception ex)
             {
                 Console.WriteLine(string.Format("CollectionUtil ReadData ex={0}", ex.Message));
-                return M_Return<M_GatherData>.Error();
+                return M_Return<M_GatherData>.Error("读取错误:" + ex.Message);
             }
         }
 
@@ -115,13 +158,22 @@ namespace ProtocolLib.S7Tcp.Common
             try
             {
                 M_OperateResult operateResult = null;
-                string valueText = GetValueText(value);
 
                 for (int item = 1; item <= 3; item++)
                 {
                     try
                     {
-                        operateResult = WriteByType(siemensS7, address, value, type, len);
+                        string currentAddress = address;
+                        int resolvedStringLength = len;
+
+                        if (string.Equals(type, "string", StringComparison.OrdinalIgnoreCase))
+                        {
+                            resolvedStringLength = ResolveStringLength(ref currentAddress, len);
+                        }
+
+                        string valueText = GetValueText(value, type, resolvedStringLength);
+                        operateResult = WriteByType(siemensS7, currentAddress, value, type, resolvedStringLength);
+
                         if (operateResult != null && operateResult.IsSuccess)
                         {
                             return M_Return<M_GatherData>.OK(
@@ -148,7 +200,7 @@ namespace ProtocolLib.S7Tcp.Common
             }
         }
 
-        private M_OperateResult WriteByType(SiemensS7 siemensS7, string address, object value, string type, ushort len)
+        private M_OperateResult WriteByType(SiemensS7 siemensS7, string address, object value, string type, int len)
         {
             object actualValue = UnwrapValue(value, type);
 
@@ -176,9 +228,7 @@ namespace ProtocolLib.S7Tcp.Common
                     return siemensS7.Write(address, Convert.ToDouble(actualValue));
                 case "string":
                     string valuestr = Convert.ToString(actualValue) ?? string.Empty;
-                    int templen = Math.Min(valuestr.Length, len);
-                    valuestr = valuestr.Substring(0, templen);
-                    return siemensS7.Write(address, valuestr);
+                    return siemensS7.Write(address, valuestr, len, Encoding.ASCII);
                 default:
                     return new M_OperateResult("不支持的数据类型:" + type);
             }
@@ -206,19 +256,30 @@ namespace ProtocolLib.S7Tcp.Common
             return value;
         }
 
-        private static string GetValueText(object value)
+        private static string GetValueText(object value, string type, int stringLength)
         {
+            string text;
+
             if (value is M_GatherData gatherData)
             {
-                return gatherData.value ?? string.Empty;
+                text = gatherData.value ?? string.Empty;
             }
-
-            if (value is M_TypedValue typedValue)
+            else if (value is M_TypedValue typedValue)
             {
-                return typedValue.value ?? string.Empty;
+                text = typedValue.value ?? string.Empty;
+            }
+            else
+            {
+                text = Convert.ToString(value) ?? string.Empty;
             }
 
-            return Convert.ToString(value) ?? string.Empty;
+            if (string.Equals(type, "string", StringComparison.OrdinalIgnoreCase))
+            {
+                int textLength = Math.Min(text.Length, stringLength);
+                return text.Substring(0, textLength);
+            }
+
+            return text;
         }
 
         public M_Return<List<Point>> DecodePoints4Rule(ref M_ProtocolConfig protocolConfig)
@@ -232,6 +293,12 @@ namespace ProtocolLib.S7Tcp.Common
             {
                 return M_Return<List<Point>>.Error(string.Format("解析规则地址错误，异常={0}", ex.Message));
             }
+        }
+
+        private static int ResolveStringLength(ref string address, int defaultLength)
+        {
+            int length = ToolBasic.ExtractStartIndex(ref address);
+            return length > 0 ? length : defaultLength;
         }
     }
 }
