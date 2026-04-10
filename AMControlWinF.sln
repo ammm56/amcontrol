@@ -39,6 +39,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Siemens", "Siemens", "{8D8F
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "S7Tcp", "ProtocolLib\Siemens\S7Tcp\S7Tcp.csproj", "{3DB3C110-D05E-6231-7221-40DBFC2BA049}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AM.Tests", "AM.Tests\AM.Tests.csproj", "{F52D6187-858A-5A7C-FEFD-8314146F60CB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -93,6 +95,10 @@ Global
 		{3DB3C110-D05E-6231-7221-40DBFC2BA049}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3DB3C110-D05E-6231-7221-40DBFC2BA049}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3DB3C110-D05E-6231-7221-40DBFC2BA049}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F52D6187-858A-5A7C-FEFD-8314146F60CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F52D6187-858A-5A7C-FEFD-8314146F60CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F52D6187-858A-5A7C-FEFD-8314146F60CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F52D6187-858A-5A7C-FEFD-8314146F60CB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
