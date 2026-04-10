@@ -89,6 +89,7 @@
     <Compile Include="Services\Plc\Config\PlcStationCrudService.cs" />
     <Compile Include="Services\Plc\Driver\NullPlcClient.cs" />
     <Compile Include="Services\Plc\Driver\PlcClientFactory.cs" />
+    <Compile Include="Services\Plc\Driver\ProtocolPlcClient.cs" />
     <Compile Include="Services\Plc\Runtime\PlcOperationService.cs" />
     <Compile Include="Services\Plc\Runtime\PlcRuntimeQueryService.cs" />
     <Compile Include="Services\Plc\Runtime\PlcScanWorker.cs" />
@@ -114,13 +115,9 @@
       <Project>{c3fca058-3848-457d-82c6-bee3dba7ec76}</Project>
       <Name>AM.Tools</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ProtocolLib\Modbus\ModbusTcp\ModbusTcp.csproj">
-      <Project>{b214d482-19d9-f1ba-37a5-4126a3bb6732}</Project>
-      <Name>ModbusTcp</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ProtocolLib\Siemens\S7Tcp\S7Tcp.csproj">
-      <Project>{3db3c110-d05e-6231-7221-40dbfc2ba049}</Project>
-      <Name>S7Tcp</Name>
+    <ProjectReference Include="..\ProtocolLib\Common\CommonLib\CommonLib.csproj">
+      <Project>{146ef3fa-e6c7-41e9-715d-93015b0e875a}</Project>
+      <Name>CommonLib</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

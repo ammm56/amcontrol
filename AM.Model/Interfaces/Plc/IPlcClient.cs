@@ -4,8 +4,8 @@ using AM.Model.Plc;
 namespace AM.Model.Interfaces.Plc
 {
     /// <summary>
-    /// PLC 通用客户端接口。
-    /// 屏蔽不同厂商、协议与连接方式的底层差异。
+    /// AM 侧统一 PLC 客户端门面。
+    /// 负责统一上层调用入口，不负责协议行为实现。
     /// </summary>
     public interface IPlcClient
     {
@@ -25,6 +25,11 @@ namespace AM.Model.Interfaces.Plc
         string ConnectionType { get; }
 
         /// <summary>
+        /// 配置客户端。
+        /// </summary>
+        Result Configure(PlcProtocolClientOptions options);
+
+        /// <summary>
         /// 建立连接。
         /// </summary>
         Result Connect();
@@ -35,37 +40,33 @@ namespace AM.Model.Interfaces.Plc
         Result Disconnect();
 
         /// <summary>
+        /// 重连。
+        /// </summary>
+        Result Reconnect();
+
+        /// <summary>
         /// 查询当前是否已连接。
         /// </summary>
         Result<bool> IsConnected();
 
         /// <summary>
-        /// 按地址块读取原始数据。
+        /// 点位读取。
         /// </summary>
-        Result<PlcRawDataBlock> ReadBlock(
-            string areaType,
-            string startAddress,
-            int length,
-            string dataType);
+        Result<PlcPointReadResult> ReadPoint(PlcPointReadRequest request);
 
         /// <summary>
-        /// 单值写入。
+        /// 点位写入。
         /// </summary>
-        Result Write(
-            string areaType,
-            string address,
-            string dataType,
-            object value,
-            short? bitIndex = null,
-            int stringLength = 0,
-            int arrayLength = 0);
+        Result<PlcPointReadResult> WritePoint(PlcPointWriteRequest request);
+
+        /// <summary>
+        /// 块读取。
+        /// </summary>
+        Result<PlcRawDataBlock> ReadBlock(PlcBlockReadRequest request);
 
         /// <summary>
         /// 块写入。
         /// </summary>
-        Result WriteBlock(
-            string areaType,
-            string startAddress,
-            byte[] buffer);
+        Result<PlcRawDataBlock> WriteBlock(PlcBlockWriteRequest request);
     }
 }

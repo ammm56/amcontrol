@@ -139,8 +139,14 @@
     <Compile Include="Plc\Enums\PlcProtocolType.cs" />
     <Compile Include="Plc\Enums\PlcReadMode.cs" />
     <Compile Include="Plc\Enums\PlcVendorType.cs" />
+    <Compile Include="Plc\PlcBlockReadRequest.cs" />
+    <Compile Include="Plc\PlcBlockWriteRequest.cs" />
     <Compile Include="Plc\PlcConfig.cs" />
     <Compile Include="Plc\PlcPointConfig.cs" />
+    <Compile Include="Plc\PlcPointReadRequest.cs" />
+    <Compile Include="Plc\PlcPointReadResult.cs" />
+    <Compile Include="Plc\PlcPointWriteRequest.cs" />
+    <Compile Include="Plc\PlcProtocolClientOptions.cs" />
     <Compile Include="Plc\PlcRawDataBlock.cs" />
     <Compile Include="Plc\PlcReadBlockConfig.cs" />
     <Compile Include="Plc\PlcStationConfig.cs" />

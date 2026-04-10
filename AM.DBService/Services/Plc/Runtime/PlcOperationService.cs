@@ -8,7 +8,6 @@ using AM.Model.Runtime;
 using System;
 using System.Globalization;
 using System.Linq;
-using System.Text;
 
 namespace AM.DBService.Services.Plc.Runtime
 {
@@ -16,11 +15,10 @@ namespace AM.DBService.Services.Plc.Runtime
     /// PLC 运行时操作服务。
     /// 统一承载调试页与运行时业务层的读写入口，避免页面直接访问底层客户端。
     ///
-    /// 设计原则：
-    /// 1. 配置点位写入优先，先走配置校验再调用驱动；
-    /// 2. 直接地址写入视为高风险操作，要求显式确认；
-    /// 3. 成功操作记日志但不弹消息，避免工程调试频繁干扰；
-    /// 4. 成功读取/写入后尽量同步更新 PLC 运行态缓存，便于监视页立即可见。
+    /// 当前版本采用最简单实现：
+    /// 1. 优先按点位配置逐点读写；
+    /// 2. 直接地址调试也统一走点位请求模型；
+    /// 3. 不再在服务层做协议块切片与字节解析。
     /// </summary>
     public class PlcOperationService : ServiceBase
     {
@@ -79,14 +77,17 @@ namespace AM.DBService.Services.Plc.Runtime
                     return Fail(clientResult.Code, clientResult.Message);
                 }
 
-                var writeResult = clientResult.Item.Write(
-                    point.AreaType,
-                    point.Address,
-                    point.DataType,
-                    value,
-                    point.BitIndex,
-                    point.StringLength,
-                    point.ArrayLength);
+                var writeResult = clientResult.Item.WritePoint(new PlcPointWriteRequest
+                {
+                    PlcName = point.PlcName,
+                    AreaType = point.AreaType,
+                    Address = point.Address,
+                    DataType = point.DataType,
+                    Value = value,
+                    BitIndex = point.BitIndex,
+                    StringLength = point.StringLength,
+                    ArrayLength = point.ArrayLength
+                });
 
                 if (!writeResult.Success)
                 {
@@ -138,14 +139,17 @@ namespace AM.DBService.Services.Plc.Runtime
                     return Fail(clientResult.Code, clientResult.Message);
                 }
 
-                var writeResult = clientResult.Item.Write(
-                    areaType.Trim(),
-                    address.Trim(),
-                    dataType.Trim(),
-                    value,
-                    bitIndex,
-                    stringLength,
-                    arrayLength);
+                var writeResult = clientResult.Item.WritePoint(new PlcPointWriteRequest
+                {
+                    PlcName = plcName.Trim(),
+                    AreaType = areaType.Trim(),
+                    Address = address.Trim(),
+                    DataType = dataType.Trim(),
+                    Value = value,
+                    BitIndex = bitIndex,
+                    StringLength = stringLength,
+                    ArrayLength = arrayLength
+                });
 
                 if (!writeResult.Success)
                 {
@@ -404,7 +408,8 @@ namespace AM.DBService.Services.Plc.Runtime
         private PlcPointConfig FindPointConfig(string pointName)
         {
             var config = ConfigContext.Instance.Config.PlcConfig ?? new PlcConfig();
-            return config.Points.FirstOrDefault(p => p != null && string.Equals(p.Name, pointName, StringComparison.OrdinalIgnoreCase));
+            var points = config.Points ?? new System.Collections.Generic.List<PlcPointConfig>();
+            return points.FirstOrDefault(p => p != null && string.Equals(p.Name, pointName, StringComparison.OrdinalIgnoreCase));
         }
 
         private Result<PlcPointRuntimeSnapshot> ReadPointInternal(PlcPointConfig point)
@@ -420,25 +425,24 @@ namespace AM.DBService.Services.Plc.Runtime
 
         private Result<PlcPointRuntimeSnapshot> ReadPointWithClient(IPlcClient client, PlcPointConfig point)
         {
-            var readResult = client.ReadBlock(
-                point.AreaType,
-                point.Address,
-                GetPointReadLength(point),
-                point.DataType);
+            var readResult = client.ReadPoint(new PlcPointReadRequest
+            {
+                PlcName = point.PlcName,
+                AreaType = point.AreaType,
+                Address = point.Address,
+                DataType = point.DataType,
+                BitIndex = point.BitIndex,
+                StringLength = point.StringLength,
+                ArrayLength = point.ArrayLength
+            });
 
-            if (!readResult.Success || readResult.Item == null || readResult.Item.Buffer == null)
+            if (!readResult.Success || readResult.Item == null)
             {
                 return Fail<PlcPointRuntimeSnapshot>(readResult.Code, readResult.Message);
             }
 
-            object rawValue;
-            string rawValueText;
-            string displayValueText;
-            string errorMessage;
-            if (!TryParsePointValue(point, readResult.Item.Buffer, out rawValue, out rawValueText, out displayValueText, out errorMessage))
-            {
-                return Fail<PlcPointRuntimeSnapshot>((int)DbErrorCode.QueryFailed, string.IsNullOrWhiteSpace(errorMessage) ? "PLC点位解析失败" : errorMessage);
-            }
+            string rawValueText = readResult.Item.ValueText ?? string.Empty;
+            string displayValueText = BuildReadDisplay(point, rawValueText);
 
             var snapshot = new PlcPointRuntimeSnapshot
             {
@@ -514,119 +518,46 @@ namespace AM.DBService.Services.Plc.Runtime
             return point.ArrayLength > 1;
         }
 
-        private static int GetPointReadLength(PlcPointConfig point)
+        private static string BuildReadDisplay(PlcPointConfig point, string rawValueText)
         {
-            if (point.ReadLength > 0)
+            if (point == null)
             {
-                return point.ReadLength;
+                return rawValueText ?? string.Empty;
             }
 
-            switch ((point.DataType ?? string.Empty).Trim())
+            if (string.IsNullOrWhiteSpace(rawValueText))
             {
-                case "Bit":
-                case "Bool":
-                case "Byte":
-                    return 1;
-                case "Short":
-                case "UShort":
-                    return 1;
-                case "Int":
-                case "UInt":
-                case "Float":
-                    return 2;
-                case "Double":
-                case "Long":
-                case "ULong":
-                    return 4;
-                case "String":
-                    return point.StringLength > 0 ? point.StringLength : 1;
-                case "ByteArray":
-                    return point.ArrayLength > 0 ? point.ArrayLength : 1;
-                default:
-                    return 1;
-            }
-        }
-
-        private static bool TryParsePointValue(
-            PlcPointConfig point,
-            byte[] bytes,
-            out object rawValue,
-            out string rawValueText,
-            out string displayValueText,
-            out string errorMessage)
-        {
-            rawValue = null;
-            rawValueText = null;
-            displayValueText = null;
-            errorMessage = null;
-
-            if (bytes == null || bytes.Length == 0)
-            {
-                errorMessage = "原始字节为空";
-                return false;
+                return string.Empty;
             }
 
-            try
+            if (string.Equals(point.DataType, "Bit", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(point.DataType, "Bool", StringComparison.OrdinalIgnoreCase))
             {
-                switch ((point.DataType ?? string.Empty).Trim())
+                bool boolValue;
+                if (TryConvertToBooleanText(rawValueText, out boolValue))
                 {
-                    case "Bit":
-                    case "Bool":
-                        rawValue = ReadBooleanValue(point, bytes);
-                        rawValueText = ((bool)rawValue) ? "True" : "False";
-                        displayValueText = ((bool)rawValue) ? "ON" : "OFF";
-                        return true;
-                    case "Byte":
-                        rawValue = bytes[0];
-                        rawValueText = Convert.ToString(rawValue, CultureInfo.InvariantCulture);
-                        displayValueText = rawValueText;
-                        return true;
-                    case "Short":
-                        rawValue = BitConverter.ToInt16(ApplyEndian(bytes, point, 2), 0);
-                        return BuildNumericDisplay(point, Convert.ToDouble(rawValue, CultureInfo.InvariantCulture), out rawValueText, out displayValueText);
-                    case "UShort":
-                        rawValue = BitConverter.ToUInt16(ApplyEndian(bytes, point, 2), 0);
-                        return BuildNumericDisplay(point, Convert.ToDouble(rawValue, CultureInfo.InvariantCulture), out rawValueText, out displayValueText);
-                    case "Int":
-                        rawValue = BitConverter.ToInt32(ApplyEndian(bytes, point, 4), 0);
-                        return BuildNumericDisplay(point, Convert.ToDouble(rawValue, CultureInfo.InvariantCulture), out rawValueText, out displayValueText);
-                    case "UInt":
-                        rawValue = BitConverter.ToUInt32(ApplyEndian(bytes, point, 4), 0);
-                        return BuildNumericDisplay(point, Convert.ToDouble(rawValue, CultureInfo.InvariantCulture), out rawValueText, out displayValueText);
-                    case "Float":
-                        rawValue = BitConverter.ToSingle(ApplyEndian(bytes, point, 4), 0);
-                        return BuildNumericDisplay(point, Convert.ToDouble(rawValue, CultureInfo.InvariantCulture), out rawValueText, out displayValueText);
-                    case "Double":
-                        rawValue = BitConverter.ToDouble(ApplyEndian(bytes, point, 8), 0);
-                        return BuildNumericDisplay(point, Convert.ToDouble(rawValue, CultureInfo.InvariantCulture), out rawValueText, out displayValueText);
-                    case "Long":
-                        rawValue = BitConverter.ToInt64(ApplyEndian(bytes, point, 8), 0);
-                        return BuildNumericDisplay(point, Convert.ToDouble(rawValue, CultureInfo.InvariantCulture), out rawValueText, out displayValueText);
-                    case "ULong":
-                        rawValue = BitConverter.ToUInt64(ApplyEndian(bytes, point, 8), 0);
-                        return BuildNumericDisplay(point, Convert.ToDouble(rawValue, CultureInfo.InvariantCulture), out rawValueText, out displayValueText);
-                    case "String":
-                        rawValue = ReadStringValue(point, bytes);
-                        rawValueText = rawValue == null ? string.Empty : rawValue.ToString();
-                        displayValueText = rawValueText;
-                        return true;
-                    case "ByteArray":
-                        rawValue = bytes.ToArray();
-                        rawValueText = ToHexString(bytes);
-                        displayValueText = rawValueText;
-                        return true;
-                    default:
-                        rawValue = bytes.ToArray();
-                        rawValueText = ToHexString(bytes);
-                        displayValueText = rawValueText;
-                        return true;
+                    return boolValue ? "ON" : "OFF";
                 }
+
+                return rawValueText;
             }
-            catch (Exception ex)
+
+            if (string.Equals(point.DataType, "String", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(point.DataType, "ByteArray", StringComparison.OrdinalIgnoreCase))
             {
-                errorMessage = ex.Message;
-                return false;
+                return rawValueText;
             }
+
+            double numericValue;
+            if (TryConvertToDoubleText(rawValueText, out numericValue))
+            {
+                string rawText;
+                string displayText;
+                BuildNumericDisplay(point, numericValue, out rawText, out displayText);
+                return displayText;
+            }
+
+            return rawValueText;
         }
 
         private static void BuildWriteDisplay(PlcPointConfig point, object value, out string rawValueText, out string displayValueText)
@@ -634,7 +565,7 @@ namespace AM.DBService.Services.Plc.Runtime
             rawValueText = value == null ? string.Empty : Convert.ToString(value, CultureInfo.InvariantCulture);
             displayValueText = rawValueText;
 
-            if (value == null)
+            if (value == null || point == null)
             {
                 return;
             }
@@ -651,97 +582,38 @@ namespace AM.DBService.Services.Plc.Runtime
                 return;
             }
 
+            if (string.Equals(point.DataType, "String", StringComparison.OrdinalIgnoreCase))
+            {
+                displayValueText = rawValueText;
+                return;
+            }
+
+            if (string.Equals(point.DataType, "ByteArray", StringComparison.OrdinalIgnoreCase))
+            {
+                var bytes = value as byte[];
+                if (bytes != null)
+                {
+                    rawValueText = ToHexString(bytes);
+                    displayValueText = rawValueText;
+                }
+                return;
+            }
+
             double numericValue;
             if (TryConvertToDouble(value, out numericValue))
             {
                 BuildNumericDisplay(point, numericValue, out rawValueText, out displayValueText);
-                return;
-            }
-
-            if (value is byte[])
-            {
-                rawValueText = ToHexString((byte[])value);
-                displayValueText = rawValueText;
             }
         }
 
         private static bool BuildNumericDisplay(PlcPointConfig point, double rawNumeric, out string rawValueText, out string displayValueText)
         {
             rawValueText = rawNumeric.ToString("0.########", CultureInfo.InvariantCulture);
-            var scaled = (rawNumeric * (point.Scale == 0D ? 1D : point.Scale)) + point.Offset;
-            displayValueText = string.IsNullOrWhiteSpace(point.Unit)
+            var scaled = (rawNumeric * (point == null || point.Scale == 0D ? 1D : point.Scale)) + (point == null ? 0D : point.Offset);
+            displayValueText = point == null || string.IsNullOrWhiteSpace(point.Unit)
                 ? scaled.ToString("0.########", CultureInfo.InvariantCulture)
                 : string.Format(CultureInfo.InvariantCulture, "{0:0.########} {1}", scaled, point.Unit);
             return true;
-        }
-
-        private static bool ReadBooleanValue(PlcPointConfig point, byte[] bytes)
-        {
-            if (!point.BitIndex.HasValue)
-            {
-                return bytes[0] != 0;
-            }
-
-            var bitIndex = point.BitIndex.Value;
-            if (bitIndex < 0)
-            {
-                bitIndex = 0;
-            }
-
-            if (bytes.Length >= 2 && bitIndex < 16)
-            {
-                var word = BitConverter.ToUInt16(bytes.Length >= 2 ? bytes : new[] { bytes[0], (byte)0 }, 0);
-                return (word & (1 << bitIndex)) != 0;
-            }
-
-            if (bitIndex > 7)
-            {
-                bitIndex = 7;
-            }
-
-            return (bytes[0] & (1 << bitIndex)) != 0;
-        }
-
-        private static string ReadStringValue(PlcPointConfig point, byte[] bytes)
-        {
-            var buffer = bytes;
-            if (point.StringLength > 0 && point.StringLength < buffer.Length)
-            {
-                buffer = buffer.Take(point.StringLength).ToArray();
-            }
-
-            Encoding encoding;
-            try
-            {
-                encoding = Encoding.GetEncoding(string.IsNullOrWhiteSpace(point.StringEncoding) ? "ASCII" : point.StringEncoding.Trim());
-            }
-            catch
-            {
-                encoding = Encoding.ASCII;
-            }
-
-            return encoding.GetString(buffer).TrimEnd('\0', ' ');
-        }
-
-        private static byte[] ApplyEndian(byte[] bytes, PlcPointConfig point, int expectedLength)
-        {
-            var buffer = bytes.Take(expectedLength).ToArray();
-            var wordOrder = point.WordOrder ?? string.Empty;
-            if (buffer.Length == 4 && string.Equals(wordOrder, "HighLow", StringComparison.OrdinalIgnoreCase))
-            {
-                buffer = new[] { buffer[2], buffer[3], buffer[0], buffer[1] };
-            }
-            else if (buffer.Length == 8 && string.Equals(wordOrder, "HighLow", StringComparison.OrdinalIgnoreCase))
-            {
-                buffer = new[] { buffer[6], buffer[7], buffer[4], buffer[5], buffer[2], buffer[3], buffer[0], buffer[1] };
-            }
-
-            if (string.Equals(point.ByteOrder, "BigEndian", StringComparison.OrdinalIgnoreCase))
-            {
-                Array.Reverse(buffer);
-            }
-
-            return buffer;
         }
 
         private static bool TryConvertToBoolean(object value, out bool result)
@@ -755,7 +627,7 @@ namespace AM.DBService.Services.Plc.Runtime
 
             if (value is string)
             {
-                return bool.TryParse((string)value, out result);
+                return TryConvertToBooleanText((string)value, out result);
             }
 
             try
@@ -767,6 +639,33 @@ namespace AM.DBService.Services.Plc.Runtime
             {
                 return false;
             }
+        }
+
+        private static bool TryConvertToBooleanText(string valueText, out bool result)
+        {
+            result = false;
+            if (string.IsNullOrWhiteSpace(valueText))
+            {
+                return false;
+            }
+
+            if (string.Equals(valueText, "1", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(valueText, "true", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(valueText, "on", StringComparison.OrdinalIgnoreCase))
+            {
+                result = true;
+                return true;
+            }
+
+            if (string.Equals(valueText, "0", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(valueText, "false", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(valueText, "off", StringComparison.OrdinalIgnoreCase))
+            {
+                result = false;
+                return true;
+            }
+
+            return bool.TryParse(valueText, out result);
         }
 
         private static bool TryConvertToDouble(object value, out double result)
@@ -786,6 +685,11 @@ namespace AM.DBService.Services.Plc.Runtime
             {
                 return false;
             }
+        }
+
+        private static bool TryConvertToDoubleText(string valueText, out double result)
+        {
+            return double.TryParse(valueText, NumberStyles.Any, CultureInfo.InvariantCulture, out result);
         }
 
         private static string ToHexString(byte[] bytes)

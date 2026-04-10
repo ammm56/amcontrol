@@ -317,13 +317,13 @@ namespace AM.DBService.Services.Plc.App
                     continue;
                 }
 
-                var client = _plcClientFactory.Create(station);
-                if (client == null)
+                var createResult = _plcClientFactory.Create(station);
+                if (!createResult.Success || createResult.Item == null)
                 {
                     continue;
                 }
 
-                machine.Plcs[station.Name] = client;
+                machine.Plcs[station.Name] = createResult.Item;
             }
         }
 

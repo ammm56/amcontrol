@@ -1,59 +1,56 @@
 ﻿using ProtocolLib.CommonLib.Model;
-using ProtocolLib.CommonLib.Model.Net;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ProtocolLib.CommonLib.Interface
 {
     /// <summary>
-    /// 库
+    /// 协议库统一接口。
+    /// 协议差异应在协议库内部完成屏蔽，AM 上层只依赖该接口。
     /// </summary>
     public interface IProtocol
     {
         /// <summary>
-        /// 初始化
+        /// 配置协议连接参数。
         /// </summary>
-        /// <returns></returns>
-        int Init();
+        M_Return<bool> Configure(M_ProtocolOptions options);
 
         /// <summary>
-        /// 单次采集
+        /// 建立连接。
         /// </summary>
-        /// <param name="address"></param>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        M_Return<M_GatherData> Get(string address, string type);
+        M_Return<bool> Connect();
 
         /// <summary>
-        /// 单次写入
+        /// 断开连接。
         /// </summary>
-        /// <param name="address"></param>
-        /// <param name="type"></param>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        M_Return<M_GatherData> Set(string address, string type, object value);
+        M_Return<bool> Disconnect();
 
         /// <summary>
-        /// 更新连接配置
-        /// 更新点表配置
+        /// 重连。
         /// </summary>
-        /// <param name="netconfig"></param>
-        /// <returns></returns>
-        int SetCFG(M_NetConfig netconfig);
+        M_Return<bool> Reconnect();
 
         /// <summary>
-        /// 重连
+        /// 查询当前连接状态。
         /// </summary>
-        /// <returns></returns>
-        M_Return<string> Reconnect();
+        M_Return<bool> IsConnected();
 
         /// <summary>
-        /// 关闭连接
+        /// 按点位读取。
         /// </summary>
-        /// <returns></returns>
-        M_Return<string> CloseConnected();
+        M_Return<M_PointData> ReadPoint(M_PointReadRequest request);
+
+        /// <summary>
+        /// 按点位写入。
+        /// </summary>
+        M_Return<M_PointData> WritePoint(M_PointWriteRequest request);
+
+        /// <summary>
+        /// 按连续地址块读取。
+        /// </summary>
+        M_Return<M_BlockData> ReadBlock(M_BlockReadRequest request);
+
+        /// <summary>
+        /// 按连续地址块写入。
+        /// </summary>
+        M_Return<M_BlockData> WriteBlock(M_BlockWriteRequest request);
     }
 }
