@@ -168,9 +168,181 @@ PlcClientFactory.Create(stationConfig)
 | 方法 | 说明 |
 |------|------|
 | `WritePoint(pointName, value, confirmed)` | 按配置点位名称写入（含写保护校验） |
-| `ReadPoint(pointName)` | 按配置点位名称读取 |
-| `WriteRaw(plcName, address, dataType, value, length)` | 调试页直接地址写入 |
-| `ReadRaw(plcName, address, dataType, length)` | 调试页直接地址读取 |
+| `TestReadPoint(pointName)` | 按配置点位名称测试读取 |
+| `WriteAddress(plcName, address, dataType, value, length)` | 调试页直接地址写入 |
+| `TestReadAddress(plcName, address, dataType, length)` | 调试页直接地址读取 |
+
+---
+
+## 5.9 WinForms 页面层级规划
+
+### 页面归属决策
+
+PLC 相关页面在 WinForms 中分为两类：
+
+1. 运行期页面：放在一级导航 `PLC`
+2. 配置期页面：放在一级导航 `SysConfig`
+
+具体归属如下：
+
+| 一级导航 | 二级页面 | 说明 |
+|----------|----------|------|
+| `PLC` | `PLC.Status` | 站级通讯状态与扫描状态 |
+| `PLC` | `PLC.Monitor` | 点位实时监视 |
+| `PLC` | `PLC.Register` | 原始地址/点位读取调试 |
+| `PLC` | `PLC.Write` | 原始地址/点位写入调试 |
+| `SysConfig` | `SysConfig.Plc` | PLC 站/点位配置与重载 |
+
+保留 `SysConfig.Plc` 在系统配置下的原因：
+
+- PLC 站与点位本质上属于系统接入配置；
+- 配置修改后需要执行 `PlcConfigAppService.ReloadFromDatabase()` 重建运行时上下文；
+- 与 `Camera / Sensor / Scanner / Mes / Runtime` 同类页面职责一致；
+- 可避免运行页与配置页混在同一一级导航下导致操作语义混乱。
+
+### 页面层级树
+
+```text
+PLC
+├── PLC.Status
+├── PLC.Monitor
+├── PLC.Register
+└── PLC.Write
+
+SysConfig
+└── SysConfig.Plc
+```
+
+### 页面实现顺序建议
+
+1. `SysConfig.Plc`
+2. `PLC.Status`
+3. `PLC.Monitor`
+4. `PLC.Register`
+5. `PLC.Write`
+
+顺序理由：先完成配置闭环，再完成运行状态可视化，最后进入工程读写调试。
+
+---
+
+## 5.10 WinForms 页面结构规划
+
+### `PLC.Status`
+
+- 顶部工具栏：刷新、单轮扫描、启动扫描、停止扫描、搜索站名
+- 顶部统计卡：总站数、在线数、离线数、扫描状态
+- 主体区：左侧站列表，右侧站详情
+- 服务来源：`PlcRuntimeQueryService.QueryAllStations()`
+
+### `PLC.Monitor`
+
+- 顶部工具栏：站筛选、分组筛选、关键字搜索
+- 顶部统计卡：点位总数、Good 数、Error 数、Disconnected 数
+- 主体区：左侧点位列表，右侧点位详情
+- 服务来源：`PlcRuntimeQueryService.QueryAllPoints()`
+- 刷新策略：~500ms 低频采样刷新，不直接对每次快照变化整页重绘
+
+### `PLC.Register`
+
+- 顶部模式区：配置点位读取 / 原始地址读取切换
+- 左侧区：配置点位列表
+- 右侧区：读取调试面板
+- 底部区：最近读取结果
+- 服务来源：`PlcOperationService.TestReadPoint(...)`、`PlcOperationService.TestReadAddress(...)`
+
+### `PLC.Write`
+
+- 顶部风险提示区：明确高风险写入
+- 左侧区：可写点位列表
+- 右侧区：写入调试面板
+- 底部区：最近写入结果
+- 服务来源：`PlcOperationService.WritePoint(...)`、`PlcOperationService.WriteAddress(...)`
+- 权限：`Engineer / Am`
+
+### `SysConfig.Plc`
+
+- 第一段：PLC 站配置区
+- 第二段：点位配置区
+- 第三段：配置重载与扫描控制区
+- 服务来源：`PlcStationCrudService`、`PlcPointCrudService`、`PlcConfigAppService`
+- 当前阶段保持为单个二级页面，不再拆分 `Station` / `Point` / `Runtime` 多页结构
+
+---
+
+## 5.11 WinForms 文件清单规划
+
+### PageModel 文件
+
+```text
+AM.PageModel/
+├── Plc/
+│   ├── PlcStatusPageModel.cs
+│   ├── PlcMonitorPageModel.cs
+│   ├── PlcRegisterPageModel.cs
+│   ├── PlcWritePageModel.cs
+│   ├── PlcStationViewItem.cs
+│   ├── PlcPointViewItem.cs
+│   ├── PlcRegisterReadResultItem.cs
+│   └── PlcWriteResultItem.cs
+└── SysConfig/
+    ├── PlcConfigManagementPageModel.cs
+    ├── PlcStationEditorModel.cs
+    └── PlcPointEditorModel.cs
+```
+
+### WinForms 页面文件
+
+```text
+AMControlWinF/Views/
+├── Plc/
+│   ├── PlcStatusPage.cs
+│   ├── PlcStatusPage.Designer.cs
+│   ├── PlcMonitorPage.cs
+│   ├── PlcMonitorPage.Designer.cs
+│   ├── PlcRegisterPage.cs
+│   ├── PlcRegisterPage.Designer.cs
+│   ├── PlcWritePage.cs
+│   └── PlcWritePage.Designer.cs
+└── SysConfig/
+    ├── PlcConfigManagementPage.cs
+    └── PlcConfigManagementPage.Designer.cs
+```
+
+### WinForms 子控件与对话框文件
+
+```text
+AMControlWinF/Views/
+├── Plc/
+│   ├── PlcStationCardControl.cs
+│   ├── PlcStationCardControl.Designer.cs
+│   ├── PlcStationDetailControl.cs
+│   ├── PlcStationDetailControl.Designer.cs
+│   ├── PlcPointVirtualListControl.cs
+│   ├── PlcPointVirtualListControl.Designer.cs
+│   ├── PlcPointDetailControl.cs
+│   ├── PlcPointDetailControl.Designer.cs
+│   ├── PlcReadDebugPanelControl.cs
+│   ├── PlcReadDebugPanelControl.Designer.cs
+│   ├── PlcWriteDebugPanelControl.cs
+│   └── PlcWriteDebugPanelControl.Designer.cs
+└── SysConfig/
+    ├── PlcStationListControl.cs
+    ├── PlcStationListControl.Designer.cs
+    ├── PlcPointListControl.cs
+    ├── PlcPointListControl.Designer.cs
+    ├── PlcConfigActionPanelControl.cs
+    ├── PlcConfigActionPanelControl.Designer.cs
+    ├── PlcStationEditDialog.cs
+    ├── PlcStationEditDialog.Designer.cs
+    ├── PlcPointEditDialog.cs
+    ├── PlcPointEditDialog.Designer.cs
+    ├── PlcStationDeleteConfirmDialog.cs
+    ├── PlcStationDeleteConfirmDialog.Designer.cs
+    ├── PlcPointDeleteConfirmDialog.cs
+    └── PlcPointDeleteConfirmDialog.Designer.cs
+```
+
+以上文件清单用于后续代码落地前的结构预留与任务拆分，不代表当前已实现。
 
 ---
 

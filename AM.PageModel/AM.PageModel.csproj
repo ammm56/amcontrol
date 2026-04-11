@@ -78,7 +78,9 @@
     <Compile Include="Navigation\NavPrimaryDef.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Plc\" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AM.Core\AM.Core.csproj">
       <Project>{7b305eb1-7403-4c0c-82d4-c871b4c2d877}</Project>

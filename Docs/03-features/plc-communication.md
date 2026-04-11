@@ -174,30 +174,171 @@ public Result<M_PointData> ReadPoint(M_PointReadRequest request)
 
 ## 7. 下一步（UI 页面开发参考）
 
-### 7.1 PLC.Monitor 站状态总览
+### 7.0 页面层级与导航归属
 
-- 数据来源：`PlcRuntimeQueryService.QueryAllStations()`
-- 刷新方式：订阅 `RuntimeContext.Instance.Plc.SnapshotChanged`，~500ms 低频采样
-- 显示内容：站名/协议/连接状态/最近扫描时间/错误信息/读取统计
+当前 WinForms 分支中，PLC 页面层级建议固定为以下结构：
 
-### 7.2 PLC.Register 点位实时监视
+- 一级导航 `PLC`
+  - `PLC.Status`：通讯状态
+  - `PLC.Monitor`：点位监视
+  - `PLC.Register`：寄存器监视
+  - `PLC.Write`：写入调试
+- 一级导航 `SysConfig`
+  - `SysConfig.Plc`：PLC 配置
+
+页面归属原则：
+
+- `PLC.*` 统一承载运行期页面，面向设备在线状态查看、点位监视、调试读取与调试写入；
+- `SysConfig.Plc` 统一承载配置期页面，面向 PLC 站、点位、重载与扫描控制；
+- 当前阶段不建议把 `SysConfig.Plc` 并入 `PLC` 一级导航，避免运行页与配置页混在同一工作区语义下。
+
+当前页面层级树如下：
+
+```text
+PLC
+├── PLC.Status      通讯状态
+├── PLC.Monitor     点位监视
+├── PLC.Register    寄存器监视
+└── PLC.Write       写入调试
+
+SysConfig
+└── SysConfig.Plc   PLC 配置
+```
+
+### 7.1 PLC.Monitor 点位实时监视
 
 - 数据来源：`PlcRuntimeQueryService.QueryAllPoints()`
-- 刷新方式：同上 SnapshotChanged 事件
-- 按 PlcName + GroupName 分组显示
-- 列：点位名/地址/类型/当前值/质量/更新时间
+- 刷新方式：以 ~500ms 低频采样刷新为主，不将每次缓存变化直接驱动整页刷新
+- 页面定位：PLC 点位运行态总览页，面向操作员、工程师、管理员
+- 建议布局：顶部工具栏 + 顶部统计卡 + 左侧点位列表 + 右侧点位详情
+- 建议筛选：PLC 站筛选、分组筛选、关键字搜索（点位名/显示名/地址）
+- 建议显示列：点位名 / 地址 / 数据类型 / 当前值 / Quality / 更新时间
+- 建议详情字段：PLC 名称 / 分组 / Address / DataType / ValueText / RawValue / ErrorMessage
+
+### 7.2 PLC.Register 寄存器读取调试
+
+- 页面定位：工程调试读页面，不承担配置职责
+- 数据来源：
+  - 配置点位读取：`PlcOperationService.TestReadPoint(...)`
+  - 原始地址读取：`PlcOperationService.TestReadAddress(...)`
+- 建议布局：顶部模式切换区 + 左侧配置点位列表 + 右侧读取调试面板 + 底部最近读取结果
+- 建议模式：
+  - 按配置点位读取
+  - 按直接地址读取
+- 建议输入项：PLC 站、Address、DataType、Length
 
 ### 7.3 PLC.Write 手动写入
 
-- 服务：`PlcOperationService.WriteRaw(plcName, address, dataType, value, length)`
-- 权限：Engineer / Am 角色
-- 交互：选择站 → 输入地址/类型/值 → 确认写入 → 显示写入结果
+- 服务：
+  - 配置点位写入：`PlcOperationService.WritePoint(...)`
+  - 原始地址写入：`PlcOperationService.WriteAddress(...)`
+- 权限：`Engineer / Am`
+- 页面定位：高风险调试写页面，默认不对操作员开放
+- 建议布局：顶部风险提示区 + 左侧可写点位列表 + 右侧写入调试面板 + 底部最近写入结果
+- 建议交互：选择站 / 点位 → 输入类型与值 → 显式确认 → 写入 → 可选写后回读
 
 ### 7.4 SysConfig.Plc 配置管理
 
 - 站列表：`IPlcStationCrudService.QueryAll()`，增删改保存后调用 `PlcConfigAppService.ReloadFromDatabase()`
 - 点位列表：`IPlcPointCrudService.QueryByPlcName(plcName)`，关联所选站
 - 重载配置：配置变更后调用 `ReloadFromDatabase()` 重建 MachineContext.Plcs
+
+页面定位补充：
+
+- `SysConfig.Plc` 为 PLC 唯一配置入口，放置在 `SysConfig` 一级导航下；
+- 当前阶段建议保持单个二级页面，不再拆成 `Station` / `Point` / `Runtime` 多个子页面；
+- 页面内部采用三段式布局：
+  1. 站配置区
+  2. 点位配置区
+  3. 配置重载与扫描控制区
+
+建议字段范围：
+
+- 站配置：Name、DisplayName、ProtocolType、ConnectionType、IpAddress、Port、TimeoutMs、ReconnectIntervalMs、ScanIntervalMs、IsEnabled
+- 点位配置：PlcName、Name、DisplayName、GroupName、Address、DataType、Length、AccessMode、IsEnabled
+
+### 7.5 PLC.Status 通讯状态页
+
+- 数据来源：`PlcRuntimeQueryService.QueryAllStations()`
+- 页面定位：PLC 站级运行态总览页
+- 建议布局：顶部工具栏 + 顶部统计卡 + 左侧站列表 + 右侧站详情
+- 建议工具栏动作：刷新、单轮扫描、启动扫描、停止扫描、关键字搜索
+- 建议显示内容：站名 / 协议 / 连接方式 / 在线状态 / 最近扫描时间 / 最近错误 / 平均读取耗时 / 成功失败计数
+
+### 7.6 WinForms 页面文件规划
+
+为后续 WinForms 实现，建议预留以下文件清单。
+
+#### 7.6.1 PageModel
+
+```text
+AM.PageModel/
+├── Plc/
+│   ├── PlcStatusPageModel.cs
+│   ├── PlcMonitorPageModel.cs
+│   ├── PlcRegisterPageModel.cs
+│   ├── PlcWritePageModel.cs
+│   ├── PlcStationViewItem.cs
+│   ├── PlcPointViewItem.cs
+│   ├── PlcRegisterReadResultItem.cs
+│   └── PlcWriteResultItem.cs
+└── SysConfig/
+    ├── PlcConfigManagementPageModel.cs
+    ├── PlcStationEditorModel.cs
+    └── PlcPointEditorModel.cs
+```
+
+#### 7.6.2 WinForms 页面
+
+```text
+AMControlWinF/Views/
+├── Plc/
+│   ├── PlcStatusPage.cs
+│   ├── PlcStatusPage.Designer.cs
+│   ├── PlcMonitorPage.cs
+│   ├── PlcMonitorPage.Designer.cs
+│   ├── PlcRegisterPage.cs
+│   ├── PlcRegisterPage.Designer.cs
+│   ├── PlcWritePage.cs
+│   └── PlcWritePage.Designer.cs
+└── SysConfig/
+    ├── PlcConfigManagementPage.cs
+    └── PlcConfigManagementPage.Designer.cs
+```
+
+#### 7.6.3 WinForms 子控件与对话框
+
+```text
+AMControlWinF/Views/
+├── Plc/
+│   ├── PlcStationCardControl.cs
+│   ├── PlcStationCardControl.Designer.cs
+│   ├── PlcStationDetailControl.cs
+│   ├── PlcStationDetailControl.Designer.cs
+│   ├── PlcPointVirtualListControl.cs
+│   ├── PlcPointVirtualListControl.Designer.cs
+│   ├── PlcPointDetailControl.cs
+│   ├── PlcPointDetailControl.Designer.cs
+│   ├── PlcReadDebugPanelControl.cs
+│   ├── PlcReadDebugPanelControl.Designer.cs
+│   ├── PlcWriteDebugPanelControl.cs
+│   └── PlcWriteDebugPanelControl.Designer.cs
+└── SysConfig/
+    ├── PlcStationListControl.cs
+    ├── PlcStationListControl.Designer.cs
+    ├── PlcPointListControl.cs
+    ├── PlcPointListControl.Designer.cs
+    ├── PlcConfigActionPanelControl.cs
+    ├── PlcConfigActionPanelControl.Designer.cs
+    ├── PlcStationEditDialog.cs
+    ├── PlcStationEditDialog.Designer.cs
+    ├── PlcPointEditDialog.cs
+    ├── PlcPointEditDialog.Designer.cs
+    ├── PlcStationDeleteConfirmDialog.cs
+    ├── PlcStationDeleteConfirmDialog.Designer.cs
+    ├── PlcPointDeleteConfirmDialog.cs
+    └── PlcPointDeleteConfirmDialog.Designer.cs
+```
 
 ---
 
