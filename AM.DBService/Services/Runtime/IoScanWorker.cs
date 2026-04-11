@@ -167,7 +167,7 @@ namespace AM.DBService.Services.Runtime
             if (motionHub == null)
             {
                 LastError = "MotionHub 未初始化，无法执行 IO 扫描";
-                return Fail((int)MotionErrorCode.IoMapNotFound, LastError);
+                return FailSilent((int)MotionErrorCode.IoMapNotFound, LastError);
             }
 
             var now = DateTime.Now;
@@ -180,7 +180,7 @@ namespace AM.DBService.Services.Runtime
                 if (!diResult.Success)
                 {
                     LastError = string.Format("扫描 DI 失败: Bit={0}，{1}", bit, diResult.Message);
-                    return Fail(diResult.Code, LastError);
+                    return FailSilent(diResult.Code, LastError);
                 }
 
                 var logicalValue = ApplyLogicalTransform(bit, true, diResult.Item);
@@ -193,7 +193,7 @@ namespace AM.DBService.Services.Runtime
                 if (!doResult.Success)
                 {
                     LastError = string.Format("扫描 DO 失败: Bit={0}，{1}", bit, doResult.Message);
-                    return Fail(doResult.Code, LastError);
+                    return FailSilent(doResult.Code, LastError);
                 }
 
                 var logicalValue = ApplyLogicalTransform(bit, false, doResult.Item);

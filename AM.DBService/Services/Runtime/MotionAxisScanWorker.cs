@@ -21,6 +21,11 @@ namespace AM.DBService.Services.Runtime
         private const int MinScanIntervalMs = 10;
         private const int DefaultScanIntervalMs = 100;
 
+        /// <summary>
+        /// 重复错误日志节流周期。
+        /// </summary>
+        private const int ErrorLogThrottleIntervalMs = 30000;
+
         private readonly object _syncRoot;
         private CancellationTokenSource _cancellationTokenSource;
         private Task _scanLoopTask;
@@ -77,7 +82,7 @@ namespace AM.DBService.Services.Runtime
             {
                 if (_isRunning)
                 {
-                    return Warn(-1200, "轴运行态采样服务已在运行");
+                    return Warn((int)MotionErrorCode.Unknown, "轴运行态采样服务已在运行");
                 }
 
                 _cancellationTokenSource?.Dispose();
@@ -113,7 +118,7 @@ namespace AM.DBService.Services.Runtime
             try
             {
                 cts.Cancel();
-                await loopTask;
+                await loopTask.ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {
@@ -142,7 +147,7 @@ namespace AM.DBService.Services.Runtime
             if (motionHub == null)
             {
                 LastError = "MotionHub 未初始化，无法执行轴运行态采样";
-                return Fail(-1202, LastError);
+                return FailSilent(-1202, LastError);
             }
 
             var cards = ConfigContext.Instance.Config.MotionCardsConfig ?? new List<AM.Model.MotionCard.MotionCardConfig>();
@@ -229,8 +234,19 @@ namespace AM.DBService.Services.Runtime
             {
                 while (!cancellationToken.IsCancellationRequested)
                 {
-                    ScanOnce();
-                    await Task.Delay(ScanIntervalMs, cancellationToken);
+                    var scanResult = ScanOnce();
+                    if (!scanResult.Success)
+                    {
+                        LastError = scanResult.Message;
+
+                        string reportKey = "MotionAxisScanWorker-" + scanResult.Code + "-" + (scanResult.Message ?? string.Empty);
+                        if (ShouldReportRepeated(reportKey, ErrorLogThrottleIntervalMs))
+                        {
+                            FailLogOnly(scanResult.Code, "轴运行态采样失败: " + scanResult.Message);
+                        }
+                    }
+
+                    await Task.Delay(ScanIntervalMs, cancellationToken).ConfigureAwait(false);
                 }
             }
             catch (OperationCanceledException)
@@ -239,7 +255,12 @@ namespace AM.DBService.Services.Runtime
             catch (Exception ex)
             {
                 LastError = ex.Message;
-                HandleException(ex, -1203, "轴运行态采样循环异常");
+
+                string reportKey = "MotionAxisScanWorker-LoopException-" + ex.Message;
+                if (ShouldReportRepeated(reportKey, ErrorLogThrottleIntervalMs))
+                {
+                    FailLogOnly(-1203, "轴运行态采样循环异常", ex);
+                }
             }
             finally
             {
