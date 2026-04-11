@@ -40,6 +40,8 @@
 |------|------|
 | [winf-auth-login.md](winf-auth-login.md) | WinForms 用户认证与登录（角色体系、LoginForm、切换用户/退出登录流程、PopoverCard 安全关闭） |
 | [winf-mainwindow-shell.md](winf-mainwindow-shell.md) | WinForms 主窗体壳层（布局结构、主题/语言切换、系统消息、用户菜单交互） |
+| [plc-communication.md](plc-communication.md) | PLC 通信模块实现说明（模型设计、服务层、协议库、快照查询、UI 开发参考） |
+| [plc-communication-planning.md](plc-communication-planning.md) | PLC 通信模块功能文档（配置模型、数据库实体、服务职责边界、页面规划与实现状态） |
 
 ---
 

@@ -44,6 +44,12 @@
 - **主窗体壳层** → [03-features/winf-mainwindow-shell.md](03-features/winf-mainwindow-shell.md)
 - **开发进展记录** → [07-release-notes/winf-development-progress.md](07-release-notes/winf-development-progress.md)
 
+### PLC 通信模块
+
+- **PLC 协议库架构设计** → [01-architecture/plc-protocol-integration-design.md](01-architecture/plc-protocol-integration-design.md)
+- **PLC 功能文档（实现）** → [03-features/plc-communication.md](03-features/plc-communication.md)
+- **PLC 功能文档（规划→已落地）** → [03-features/plc-communication-planning.md](03-features/plc-communication-planning.md)
+
 ---
 
 ## 文档维护说明

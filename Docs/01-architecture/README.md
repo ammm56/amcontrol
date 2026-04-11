@@ -26,6 +26,7 @@
 | [winf-application-lifecycle.md](winf-application-lifecycle.md) | WinForms 应用生命周期与登录流程（Program.cs while 主循环、ExitReason、三条退出路径） |
 | [winf-theme-system.md](winf-theme-system.md) | WinForms 主题系统（AppThemeHelper、AntdUI 原生渲染、卡片面板规范） |
 | [winf-navigation-system.md](winf-navigation-system.md) | WinForms 导航系统与页面缓存（NavigationCatalog、两级导航、页面工厂与缓存策略） |
+| [plc-protocol-integration-design.md](plc-protocol-integration-design.md) | PLC 协议库与 AM 上层分层架构（分层边界、接口定义、数据流、协议插件机制） |
 
 ---
 

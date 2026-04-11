@@ -1,735 +1,296 @@
-# PLC 协议库与 AM 上层重新分层设计草案
+﻿# PLC 协议库与 AM 上层分层架构
 
 **文档编号**：ARCH-PLC-001  
-**版本**：1.0.0  
-**状态**：待落地  
-**最后更新**：2026-04-10  
+**版本**：2.0.0  
+**状态**：已实现  
+**最后更新**：2026-05-09  
 **维护人**：Am
 
 ---
 
 ## 1. 文档目的
 
-本文档用于明确 PLC 协议库与 `AMControlWinF` 上层之间的最终分层边界，并给出下一阶段编码前的接口草案、模型草案、数据流与类关系说明。
-
-本文档的核心目标是解决以下问题：
-
-- 避免 `AM.DBService` 直接操作 `ModbusTCP`、`SiemensS7` 等协议底层客户端；
-- 让协议地址解析、字符串长度、位索引、块读写等协议行为全部收敛到 `ProtocolLib` 内部；
-- 保留 `AM.Model.Interfaces.Plc.IPlcClient` 作为系统统一入口，但只做薄门面，不承载协议实现；
-- 支持“默认按点位读写、明确连续块时才走块读写”的运行策略；
-- 为后续 `PlcScanWorker`、`PlcOperationService`、`PLC.Status`、`PLC.Monitor`、`PLC.Write` 页面落地提供统一接口基础。
+本文档描述 PLC 协议库与 AM 上层之间已落地的分层边界、类关系、数据流与关键设计决策。
 
 ---
 
-## 2. 当前状态与设计决议
+## 2. 核心设计决策
 
-### 2.1 已有基础
-
-当前解决方案已经具备以下基础：
-
-- `AM.Model` 中已存在：
-  - `IPlcClient`
-  - `IPlcClientFactory`
-  - `PlcConfig`
-  - `PlcStationConfig`
-  - `PlcPointConfig`
-  - `PlcReadBlockConfig`
-  - `PlcRawDataBlock`
-  - `PlcRuntimeState`
-- `AM.DBService` 中已存在：
-  - `PlcConfigAppService`
-  - `PlcRuntimeQueryService`
-  - `PlcOperationService`
-  - `PlcScanWorker`
-  - `PlcClientFactory`
-- 协议库已导入并通过基本测试：
-  - `ProtocolLib.ModbusTcp`
-  - `ProtocolLib.S7Tcp`
-
-### 2.2 设计决议
-
-本轮设计明确以下决议：
-
-1. **协议读写行为必须在协议库中实现**  
-   `AM.DBService` 不直接操作 `ModbusTCP`、`SiemensS7` 等底层客户端。
-
-2. **AM 上层只通过协议库公开接口使用 PLC 能力**  
-   上层不自行拼接 `40040[20]`、`40001.2`、`DB1.20[20]` 等协议表达式。
-
-3. **保留 `IPlcClient`，但它只是 AM 的薄门面**  
-   它负责生命周期管理、反射实例化协议实现、结果对象转换，不负责协议行为。
-
-4. **默认按点位读写**  
-   只有在明确连续地址、区域一致、类型一致且存在显式块配置时，才走块读写。
-
-5. **结构化请求优先**  
-   AM 上层传递 `AreaType / Address / DataType / BitIndex / StringLength / ArrayLength` 等结构化字段，由协议库内部解释为具体协议表达式。
+| 决策 | 说明 |
+|------|------|
+| 协议行为全部收敛到 ProtocolLib | AM.DBService 不直接操作 ModbusTCP、SiemensS7 等底层对象 |
+| IPlcClient 是 AM 侧薄门面 | 负责生命周期管理和结果转换，不承载协议实现 |
+| 无 AreaType / BlockRead | 当前版本极简：Address 直接表示完整协议地址，不拆分区域字段；无块读写接口 |
+| DataType 统一字符串表达 | bool/uint8/int8/uint16/int16/uint32/int32/uint64/int64/float/double/string，不使用枚举 |
+| Length 统一长度字段 | 标量=1，字符串=字符长度，数组=元素个数 |
+| 协议插件化加载 | ProtocolAssemblyRegistry 从 Protocols/ 目录扫描 DLL，反射发现 IProtocol 实现 |
+| NullPlcClient 保障链路完整 | 协议库不可用时返回占位客户端，保证上下文装配和启动流程不中断 |
 
 ---
 
 ## 3. 总体分层结构
 
-### 3.1 分层边界
-
-#### `ProtocolLib`
-
-职责：
-
-- 协议连接管理；
-- 单点读写；
-- 连续块读写；
-- 地址解释；
-- 类型解释；
-- 字符串长度解释；
-- 位索引解释；
-- 协议结果模型返回。
-
-#### `AM.DBService / AM.Core / AM.Model`
-
-职责：
-
-- 配置装配；
-- 运行时调度；
-- 点位与读块策略选择；
-- 结果缓存到 `RuntimeContext.Instance.Plc`；
-- 页面与业务服务调用。
-
-### 3.2 类关系
-
-```text
-AM.DBService
-  PlcConfigAppService
-  PlcScanWorker
-  PlcOperationService
-  PlcClientFactory
-  ProtocolPlcClient
+```
+AMControlWinF / AM.DBService
+  PlcConfigAppService          DB → ConfigContext + MachineContext 装配
+  PlcScanWorker                100ms 后台循环 → RuntimeContext.Plc 更新
+  PlcRuntimeQueryService       运行时快照查询（站 / 点位 / 全量）
+  PlcOperationService          手动读写（按名称 or 直接地址）
+  PlcClientFactory             创建 ProtocolPlcClient，BuildProtocolOptions 映射
+  ProtocolPlcClient            AM 侧门面（反射实例化 IProtocol → 统一转发）
+  NullPlcClient                占位客户端（协议不可用时保持链路完整）
         |
         v
 ProtocolLib.CommonLib.Interface
-  IProtocol
+  IProtocol                    统一协议接口（Configure/Connect/Disconnect/Reconnect/IsConnected/ReadPoint/WritePoint）
         |
-        +---- ProtocolLib.ModbusTcp.Protocol
+        +---- ProtocolLib.ModbusTcp.Protocol    Modbus TCP 完整实现
         |
-        +---- ProtocolLib.S7Tcp.Protocol
+        +---- ProtocolLib.S7Tcp.Protocol        Siemens S7 TCP 完整实现
 ```
 
-### 3.3 数据流
+### 3.1 分层职责边界
 
-#### 点位读取
+#### ProtocolLib 负责
 
-```text
-PlcOperationService
-  -> IPlcClient.ReadPoint(...)
-  -> ProtocolPlcClient
-  -> IProtocol.ReadPoint(...)
-  -> ModbusTcp.Protocol / S7Tcp.Protocol
-  -> 返回统一结果
-  -> RuntimeContext.Instance.Plc
-```
+- 协议连接生命周期管理
+- 单点读写（标量 / 字符串 / 数组）
+- 地址解释（完整协议地址字符串，内部解析）
+- 类型解释（string 类型名 → 协议对应类型）
+- 协议结果模型返回（M_Return\<M_PointData\>）
 
-#### 点位写入
+#### AM.DBService / AM.Core / AM.Model 负责
 
-```text
-PlcOperationService
-  -> IPlcClient.WritePoint(...)
-  -> ProtocolPlcClient
-  -> IProtocol.WritePoint(...)
-  -> 协议库内部完成地址与类型处理
-  -> 返回结果
-```
-
-#### 块读取
-
-```text
-PlcScanWorker
-  -> IPlcClient.ReadBlock(...)
-  -> IProtocol.ReadBlock(...)
-  -> 协议库返回 M_BlockData
-  -> AM 解析块中点位
-  -> 更新 RuntimeContext.Instance.Plc
-```
+- 配置装配（DB → PlcConfig → MachineContext.Plcs）
+- 运行时调度（PlcScanWorker 周期扫描）
+- 结果缓存（PlcRuntimeState → RuntimeContext.Instance.Plc）
+- 页面与业务服务调用（PlcRuntimeQueryService / PlcOperationService）
 
 ---
 
-## 4. 协议库层最终接口草案
+## 4. 接口定义
 
-### 4.1 `IProtocol` 最终职责
-
-`IProtocol` 从当前的“初始化 + 单点 Get/Set”升级为：
-
-- 生命周期统一接口；
-- 单点读写统一接口；
-- 块读写统一接口；
-- 结构化请求模型；
-- 结构化返回模型。
-
-### 4.2 `IProtocol` 最终方法签名设计表
-
-| 分类 | 方法 | 说明 |
-|---|---|---|
-| 生命周期 | `M_Return<bool> Configure(M_ProtocolOptions options)` | 设置协议连接参数 |
-| 生命周期 | `M_Return<bool> Connect()` | 建立连接 |
-| 生命周期 | `M_Return<bool> Disconnect()` | 断开连接 |
-| 生命周期 | `M_Return<bool> Reconnect()` | 重连 |
-| 生命周期 | `M_Return<bool> IsConnected()` | 查询连接状态 |
-| 单点读取 | `M_Return<M_PointData> ReadPoint(M_PointReadRequest request)` | 单点读取 |
-| 单点写入 | `M_Return<M_PointData> WritePoint(M_PointWriteRequest request)` | 单点写入 |
-| 块读取 | `M_Return<M_BlockData> ReadBlock(M_BlockReadRequest request)` | 连续块读取 |
-| 块写入 | `M_Return<M_BlockData> WriteBlock(M_BlockWriteRequest request)` | 连续块写入 |
-
-### 4.3 `IProtocol` 最终代码草案
+### 4.1 IProtocol（ProtocolLib.CommonLib.Interface）
 
 ```csharp
-using ProtocolLib.CommonLib.Model;
-
-namespace ProtocolLib.CommonLib.Interface
+public interface IProtocol
 {
-    /// <summary>
-    /// 协议库统一接口。
-    /// 协议差异应在协议库内部完成屏蔽，AM 上层只依赖该接口。
-    /// </summary>
-    public interface IProtocol
-    {
-        /// <summary>
-        /// 配置协议连接参数。
-        /// </summary>
-        M_Return<bool> Configure(M_ProtocolOptions options);
-
-        /// <summary>
-        /// 建立连接。
-        /// </summary>
-        M_Return<bool> Connect();
-
-        /// <summary>
-        /// 断开连接。
-        /// </summary>
-        M_Return<bool> Disconnect();
-
-        /// <summary>
-        /// 重连。
-        /// </summary>
-        M_Return<bool> Reconnect();
-
-        /// <summary>
-        /// 查询当前连接状态。
-        /// </summary>
-        M_Return<bool> IsConnected();
-
-        /// <summary>
-        /// 按点位读取。
-        /// </summary>
-        M_Return<M_PointData> ReadPoint(M_PointReadRequest request);
-
-        /// <summary>
-        /// 按点位写入。
-        /// </summary>
-        M_Return<M_PointData> WritePoint(M_PointWriteRequest request);
-
-        /// <summary>
-        /// 按连续地址块读取。
-        /// </summary>
-        M_Return<M_BlockData> ReadBlock(M_BlockReadRequest request);
-
-        /// <summary>
-        /// 按连续地址块写入。
-        /// </summary>
-        M_Return<M_BlockData> WriteBlock(M_BlockWriteRequest request);
-    }
+    M_Return<bool>        Configure(M_ProtocolOptions options);
+    M_Return<bool>        Connect();
+    M_Return<bool>        Disconnect();
+    M_Return<bool>        Reconnect();
+    M_Return<bool>        IsConnected();
+    M_Return<M_PointData> ReadPoint(M_PointReadRequest request);
+    M_Return<M_PointData> WritePoint(M_PointWriteRequest request);
 }
 ```
 
-### 4.4 旧接口处理原则
-
-当前已有：
-
-- `Init()`
-- `Get(...)`
-- `Set(...)`
-- `SetCFG(...)`
-- `Reconnect()`
-- `CloseConnected()`
-
-这些接口建议视为**过渡接口**：
-
-- 短期内可在协议库内部保留兼容；
-- 中期统一迁移到 `Configure / Connect / Disconnect / ReadPoint / WritePoint / ReadBlock / WriteBlock`；
-- 新增实现与新测试均以新接口为准。
-
----
-
-## 5. 协议库模型草案
-
-### 5.1 `M_ProtocolOptions`
-
-用途：协议连接配置模型。
+### 4.2 IPlcClient（AM.Model.Interfaces.Plc）
 
 ```csharp
-namespace ProtocolLib.CommonLib.Model
+public interface IPlcClient
 {
-    /// <summary>
-    /// 协议连接配置参数。
-    /// </summary>
-    public class M_ProtocolOptions
-    {
-        public string protocolType { get; set; } = string.Empty;
-        public string connectionType { get; set; } = string.Empty;
-        public string ip { get; set; } = string.Empty;
-        public int port { get; set; }
-        public short? stationNo { get; set; }
-        public short? rack { get; set; }
-        public short? slot { get; set; }
-        public int timeoutMs { get; set; }
-        public string byteOrder { get; set; } = string.Empty;
-        public string wordOrder { get; set; } = string.Empty;
-        public string stringEncoding { get; set; } = string.Empty;
-    }
-}
-```
+    string PlcName         { get; }
+    string ProtocolType    { get; }
+    string ConnectionType  { get; }
 
-### 5.2 `M_PointReadRequest`
-
-```csharp
-namespace ProtocolLib.CommonLib.Model
-{
-    /// <summary>
-    /// 点位读取请求。
-    /// </summary>
-    public class M_PointReadRequest
-    {
-        public string areaType { get; set; } = string.Empty;
-        public string address { get; set; } = string.Empty;
-        public string dataType { get; set; } = string.Empty;
-        public short? bitIndex { get; set; }
-        public int stringLength { get; set; }
-        public int arrayLength { get; set; }
-    }
-}
-```
-
-### 5.3 `M_PointWriteRequest`
-
-```csharp
-namespace ProtocolLib.CommonLib.Model
-{
-    /// <summary>
-    /// 点位写入请求。
-    /// </summary>
-    public class M_PointWriteRequest
-    {
-        public string areaType { get; set; } = string.Empty;
-        public string address { get; set; } = string.Empty;
-        public string dataType { get; set; } = string.Empty;
-        public object value { get; set; }
-        public short? bitIndex { get; set; }
-        public int stringLength { get; set; }
-        public int arrayLength { get; set; }
-    }
-}
-```
-
-### 5.4 `M_BlockReadRequest`
-
-```csharp
-namespace ProtocolLib.CommonLib.Model
-{
-    /// <summary>
-    /// 连续地址块读取请求。
-    /// </summary>
-    public class M_BlockReadRequest
-    {
-        public string areaType { get; set; } = string.Empty;
-        public string startAddress { get; set; } = string.Empty;
-        public int length { get; set; }
-        public string dataType { get; set; } = string.Empty;
-        public int stringLength { get; set; }
-        public int arrayLength { get; set; }
-    }
-}
-```
-
-### 5.5 `M_BlockWriteRequest`
-
-```csharp
-namespace ProtocolLib.CommonLib.Model
-{
-    /// <summary>
-    /// 连续地址块写入请求。
-    /// </summary>
-    public class M_BlockWriteRequest
-    {
-        public string areaType { get; set; } = string.Empty;
-        public string startAddress { get; set; } = string.Empty;
-        public string dataType { get; set; } = string.Empty;
-        public byte[] buffer { get; set; } = new byte[0];
-        public int stringLength { get; set; }
-        public int arrayLength { get; set; }
-    }
-}
-```
-
-### 5.6 `M_PointData`
-
-```csharp
-namespace ProtocolLib.CommonLib.Model
-{
-    /// <summary>
-    /// 点位读写结果。
-    /// </summary>
-    public class M_PointData
-    {
-        public string areaType { get; set; } = string.Empty;
-        public string address { get; set; } = string.Empty;
-        public string dataType { get; set; } = string.Empty;
-        public string value { get; set; } = string.Empty;
-        public byte[] rawBuffer { get; set; } = new byte[0];
-        public string quality { get; set; } = string.Empty;
-    }
-}
-```
-
-### 5.7 `M_BlockData`
-
-```csharp
-namespace ProtocolLib.CommonLib.Model
-{
-    /// <summary>
-    /// 连续地址块读写结果。
-    /// </summary>
-    public class M_BlockData
-    {
-        public string areaType { get; set; } = string.Empty;
-        public string startAddress { get; set; } = string.Empty;
-        public int length { get; set; }
-        public string dataType { get; set; } = string.Empty;
-        public byte[] buffer { get; set; } = new byte[0];
-        public string valueText { get; set; } = string.Empty;
-    }
+    Result               Configure(M_ProtocolOptions options);
+    Result               Connect();
+    Result               Disconnect();
+    Result               Reconnect();
+    Result<bool>         IsConnected();
+    Result<M_PointData>  ReadPoint(M_PointReadRequest request);
+    Result<M_PointData>  WritePoint(M_PointWriteRequest request);
 }
 ```
 
 ---
 
-## 6. AM 上层 `IPlcClient` 最终草案
+## 5. 协议模型（ProtocolLib.CommonLib.Model）
 
-### 6.1 设计原则
-
-`IPlcClient` 保留，但重新定位为：
-
-- `AM` 上层统一门面；
-- 反射创建协议库实现；
-- `Result/Result<T>` 与 `M_Return<T>` 转换；
-- 生命周期管理；
-- 不承载协议读写实现。
-
-### 6.2 `IPlcClient` 最终方法签名设计表
-
-| 分类 | 方法 | 说明 |
-|---|---|---|
-| 生命周期 | `Result Configure(PlcProtocolClientOptions options)` | 配置客户端 |
-| 生命周期 | `Result Connect()` | 建立连接 |
-| 生命周期 | `Result Disconnect()` | 断开连接 |
-| 生命周期 | `Result Reconnect()` | 重连 |
-| 生命周期 | `Result<bool> IsConnected()` | 查询连接状态 |
-| 单点读取 | `Result<PlcPointReadResult> ReadPoint(PlcPointReadRequest request)` | 单点读取 |
-| 单点写入 | `Result<PlcPointReadResult> WritePoint(PlcPointWriteRequest request)` | 单点写入 |
-| 块读取 | `Result<PlcRawDataBlock> ReadBlock(PlcBlockReadRequest request)` | 块读取 |
-| 块写入 | `Result<PlcRawDataBlock> WriteBlock(PlcBlockWriteRequest request)` | 块写入 |
-
-### 6.3 `IPlcClient` 最终代码草案
+### 5.1 M_ProtocolOptions — 协议连接配置
 
 ```csharp
-using AM.Model.Common;
-using AM.Model.Plc;
-
-namespace AM.Model.Interfaces.Plc
+public class M_ProtocolOptions
 {
-    /// <summary>
-    /// AM 侧统一 PLC 客户端门面。
-    /// 负责统一上层调用入口，不负责协议行为实现。
-    /// </summary>
-    public interface IPlcClient
-    {
-        string PlcName { get; }
+    public string  protocolType    { get; set; }  // 协议名，例如 modbustcp / s7tcp
+    public string  connectionType  { get; set; }  // 连接方式，例如 tcp
+    public string  ip              { get; set; }
+    public int     port            { get; set; }
+    public short?  stationNo       { get; set; }
+    public short?  rack            { get; set; }
+    public short?  slot            { get; set; }
+    public int     timeoutMs       { get; set; }
+    public string  byteOrder       { get; set; }
+    public string  wordOrder       { get; set; }
+    public string  stringEncoding  { get; set; }
+}
+```
 
-        string ProtocolType { get; }
+### 5.2 M_PointReadRequest — 点位读取请求
 
-        string ConnectionType { get; }
+```csharp
+public class M_PointReadRequest
+{
+    public string address   { get; set; }  // 完整协议地址，例如 40001 / DB1.0 / 40040[20]
+    public string dataType  { get; set; }  // 字符串类型名，例如 uint16 / string / bool
+    public int    length    { get; set; }  // 标量=1，字符串=字符长度，数组=元素个数
+}
+```
 
-        Result Configure(PlcProtocolClientOptions options);
+### 5.3 M_PointWriteRequest — 点位写入请求
 
-        Result Connect();
+```csharp
+public class M_PointWriteRequest
+{
+    public string address   { get; set; }
+    public string dataType  { get; set; }
+    public object value     { get; set; }  // 标量 / 字符串 / 数组均通过此字段传入
+    public int    length    { get; set; }
+}
+```
 
-        Result Disconnect();
+### 5.4 M_PointData — 读写结果
 
-        Result Reconnect();
-
-        Result<bool> IsConnected();
-
-        Result<PlcPointReadResult> ReadPoint(PlcPointReadRequest request);
-
-        Result<PlcPointReadResult> WritePoint(PlcPointWriteRequest request);
-
-        Result<PlcRawDataBlock> ReadBlock(PlcBlockReadRequest request);
-
-        Result<PlcRawDataBlock> WriteBlock(PlcBlockWriteRequest request);
-    }
+```csharp
+public class M_PointData
+{
+    public string  address    { get; set; }
+    public string  dataType   { get; set; }
+    public int     length     { get; set; }
+    public string  value      { get; set; }   // 统一文本承载，数组由协议层序列化
+    public byte[]  rawBuffer  { get; set; }   // 原始字节，需要底层结果时使用
+    public string  quality    { get; set; }   // Good / Error / Disconnected
 }
 ```
 
 ---
 
-## 7. AM 侧模型草案
+## 6. 数据流
 
-### 7.1 `PlcProtocolClientOptions`
+### 6.1 启动装配流程
 
-```csharp
-namespace AM.Model.Plc
-{
-    /// <summary>
-    /// AM 侧 PLC 客户端配置参数。
-    /// 用于将运行时站配置转换成客户端可消费的结构化参数。
-    /// </summary>
-    public class PlcProtocolClientOptions
-    {
-        public string PlcName { get; set; } = string.Empty;
-        public string ProtocolType { get; set; } = string.Empty;
-        public string ConnectionType { get; set; } = string.Empty;
-        public string IpAddress { get; set; } = string.Empty;
-        public int Port { get; set; }
-        public short? StationNo { get; set; }
-        public short? Rack { get; set; }
-        public short? Slot { get; set; }
-        public int TimeoutMs { get; set; }
-        public string ByteOrder { get; set; } = string.Empty;
-        public string WordOrder { get; set; } = string.Empty;
-        public string StringEncoding { get; set; } = string.Empty;
-    }
-}
+```
+AppBootstrap.Initialize()
+  → PlcConfigSeedService.EnsureSeedData()    // 初始化默认测试种子数据
+  → ProtocolAssemblyRegistry.Reload()        // 扫描 Protocols/ 目录，反射注册协议实现
+  → PlcConfigAppService.ReloadFromDatabase() // DB → PlcConfig → ConfigContext + MachineContext.Plcs
+  → PlcScanWorker 注册到 RuntimeTaskManager  // autoStart=true，服务启动即开始扫描
 ```
 
-### 7.2 `PlcPointReadRequest`
+### 6.2 后台扫描流程（PlcScanWorker，100ms）
 
-```csharp
-namespace AM.Model.Plc
-{
-    /// <summary>
-    /// AM 侧点位读取请求。
-    /// </summary>
-    public class PlcPointReadRequest
-    {
-        public string PlcName { get; set; } = string.Empty;
-        public string AreaType { get; set; } = string.Empty;
-        public string Address { get; set; } = string.Empty;
-        public string DataType { get; set; } = string.Empty;
-        public short? BitIndex { get; set; }
-        public int StringLength { get; set; }
-        public int ArrayLength { get; set; }
-    }
-}
+```
+ScanLoopAsync(CancellationToken)
+  → RefreshScanCacheIfNeeded()               // 引用级比较，PlcConfig 对象未变则跳过重建
+  → ScanStations(forceAll=false, now)
+      foreach 启用站点：
+        ShouldScanStation(station, now)       // 按各站 ScanIntervalMs 控制扫描频率
+        GetClient(MachineContext.Plcs)        // 复用 MachineContext 中已建立的客户端
+        TryEnsureClientConnected()            // 自动重连，NextReconnectTime 控制频率
+        foreach 站下点位：
+          client.ReadPoint(request)
+          runtime.SetPointSnapshot(...)      // 写入 RuntimeContext.Plc 点位快照
+        runtime.SetStationSnapshot(...)      // 写入 RuntimeContext.Plc 站快照
+  → runtime.MarkScanTime(now)
+  → runtime.NotifySnapshotChanged()          // 触发 UI 刷新事件（低频采样，~500ms）
 ```
 
-### 7.3 `PlcPointWriteRequest`
+### 6.3 点位手动写入流程（PlcOperationService）
 
-```csharp
-namespace AM.Model.Plc
-{
-    /// <summary>
-    /// AM 侧点位写入请求。
-    /// </summary>
-    public class PlcPointWriteRequest
-    {
-        public string PlcName { get; set; } = string.Empty;
-        public string AreaType { get; set; } = string.Empty;
-        public string Address { get; set; } = string.Empty;
-        public string DataType { get; set; } = string.Empty;
-        public object Value { get; set; }
-        public short? BitIndex { get; set; }
-        public int StringLength { get; set; }
-        public int ArrayLength { get; set; }
-    }
-}
+```
+PlcOperationService.WritePoint(pointName, value, confirmed)
+  → FindPointConfig(pointName)               // 从 ConfigContext.PlcConfig.Points 查找
+  → ValidatePointWrite(point, confirmed)     // 写保护校验
+  → GetConnectedClient(point.PlcName)        // 从 MachineContext.Plcs 获取已连接客户端
+  → client.WritePoint(M_PointWriteRequest)   // ProtocolPlcClient → IProtocol.WritePoint
+  → UpdatePointRuntimeAfterWrite(...)        // 更新 RuntimeContext 写入后快照
 ```
 
-### 7.4 `PlcBlockReadRequest`
+### 6.4 运行时查询流程（PlcRuntimeQueryService）
 
-```csharp
-namespace AM.Model.Plc
-{
-    /// <summary>
-    /// AM 侧块读取请求。
-    /// </summary>
-    public class PlcBlockReadRequest
-    {
-        public string PlcName { get; set; } = string.Empty;
-        public string AreaType { get; set; } = string.Empty;
-        public string StartAddress { get; set; } = string.Empty;
-        public int Length { get; set; }
-        public string DataType { get; set; } = string.Empty;
-        public int StringLength { get; set; }
-        public int ArrayLength { get; set; }
-    }
-}
 ```
+QueryAllStations()
+  → ConfigContext.PlcConfig.Stations         // 配置来源（保证顺序和完整性）
+  → RuntimeContext.Plc.GetStationSnapshots() // 运行时快照来源
+  → MergeStationSnapshot(config, runtime)    // 合并：配置侧补全 DisplayName/Protocol/Enabled
+  → 返回 List<PlcStationRuntimeSnapshot>
 
-### 7.5 `PlcBlockWriteRequest`
-
-```csharp
-namespace AM.Model.Plc
-{
-    /// <summary>
-    /// AM 侧块写入请求。
-    /// </summary>
-    public class PlcBlockWriteRequest
-    {
-        public string PlcName { get; set; } = string.Empty;
-        public string AreaType { get; set; } = string.Empty;
-        public string StartAddress { get; set; } = string.Empty;
-        public string DataType { get; set; } = string.Empty;
-        public byte[] Buffer { get; set; } = new byte[0];
-        public int StringLength { get; set; }
-        public int ArrayLength { get; set; }
-    }
-}
-```
-
-### 7.6 `PlcPointReadResult`
-
-```csharp
-namespace AM.Model.Plc
-{
-    /// <summary>
-    /// AM 侧点位读写结果。
-    /// </summary>
-    public class PlcPointReadResult
-    {
-        public string PlcName { get; set; } = string.Empty;
-        public string AreaType { get; set; } = string.Empty;
-        public string Address { get; set; } = string.Empty;
-        public string DataType { get; set; } = string.Empty;
-        public string ValueText { get; set; } = string.Empty;
-        public byte[] RawBuffer { get; set; } = new byte[0];
-    }
-}
+QueryAllPoints()
+  → ConfigContext.PlcConfig.Points
+  → RuntimeContext.Plc.GetPointSnapshots()
+  → MergePointSnapshot(config, runtime)
+  → 返回 List<PlcPointRuntimeSnapshot>
 ```
 
 ---
 
-## 8. 结构化字段与协议表达式的职责边界
+## 7. 协议插件加载机制
 
-### 8.1 AM 上层负责提供的字段
+`ProtocolAssemblyRegistry`（AM.DBService.Services.Plc.Driver）负责：
 
-- `AreaType`
-- `Address`
-- `DataType`
-- `BitIndex`
-- `StringLength`
-- `ArrayLength`
+1. 启动时扫描 `AppDomain.CurrentDomain.BaseDirectory/Protocols/` 目录；
+2. 加载匹配 `ProtocolLib.*.dll` 的程序集（排除 `CommonLib`）；
+3. 反射枚举程序集中实现 `IProtocol` 的具体类型；
+4. 按协议名（取 `static ProtocolName` 字段或类名，小写）注册到内部字典；
+5. `ProtocolPlcClient.Configure()` 调用 `TryResolve(protocolType)` 解析对应类型，`Activator.CreateInstance` 创建实例。
 
-### 8.2 协议库内部负责解释的内容
+已注册协议：
 
-#### Modbus
-
-- `HoldingRegister / Coil / InputRegister / DiscreteInput`
-- `40040[20]`
-- `40001.2`
-- 字符串长度到寄存器长度换算
-- 位索引写入
-
-#### S7
-
-- `DB / M / I / Q / V / T / C`
-- `DB1.20[20]`
-- `DB1.0.2`
-- 固定长度字符串地址解释
-- 后续标准 `STRING` / `WSTRING` 扩展
-
-### 8.3 决策
-
-`40040[20]` 这类表达式是**协议内部表达式**，不是 AM 上层配置表达式。
-
-上层配置中应保存：
-
-- `Address = 40040`
-- `StringLength = 20`
-
-由协议库在内部组合成实际协议地址。
+| 协议名 | DLL | 类 |
+|--------|-----|----|
+| `modbustcp` | ProtocolLib.ModbusTcp.dll | ProtocolLib.ModbusTcp.Protocol |
+| `s7tcp` | ProtocolLib.S7Tcp.dll | ProtocolLib.S7Tcp.Protocol |
 
 ---
 
-## 9. 运行策略
+## 8. 运行时状态缓存（RuntimeContext.Plc）
 
-### 9.1 默认点位读写
+`PlcRuntimeState`（AM.Model.Runtime）维护：
 
-默认业务路径：
-
-- `PlcOperationService.WritePoint(...)`
-- `PlcOperationService.TestReadPoint(...)`
-- `PlcScanWorker` 对未落块的点位读取
-
-都优先使用：
-
-- `ReadPoint`
-- `WritePoint`
-
-### 9.2 块读写仅在以下场景使用
-
-- 存在显式 `PlcReadBlockConfig`
-- 明确连续地址
-- 区域一致
-- 类型一致或块解释方式一致
-- 扫描性能优化需要
-
-### 9.3 原则
-
-- 块读取不能替代点位读取；
-- 块读取是扫描优化手段，不是上层默认编程模型；
-- 点位写入始终优先使用单点写入。
+| 字段 | 说明 |
+|------|------|
+| `IsScanServiceRunning` | 扫描服务运行状态 |
+| `ScanIntervalMs` | 当前扫描间隔 |
+| `LastScanTime` | 最后一次整体扫描时间 |
+| `StationSnapshots` | 站快照字典（ConcurrentDictionary，按 PlcName 索引） |
+| `PointSnapshots` | 点位快照字典（ConcurrentDictionary，按 PointName 索引） |
+| `SnapshotChanged` | 全局快照变化事件（UI 订阅，~500ms 低频采样） |
+| `StationSnapshotChanged` | 站级快照变化事件（按 PlcName 分发） |
 
 ---
 
-## 10. 推荐实施顺序
+## 9. 已实现的服务层接口
 
-### 第一阶段：只落接口与模型
-
-1. 新增协议库请求/结果模型；
-2. 扩展 `ProtocolLib.CommonLib.Interface.IProtocol`；
-3. 保留旧接口过渡，不立即删除。
-
-### 第二阶段：补协议库实现
-
-1. `ProtocolLib.ModbusTcp.Protocol`
-   - `Configure`
-   - `Connect`
-   - `Disconnect`
-   - `IsConnected`
-   - `ReadPoint`
-   - `WritePoint`
-   - `ReadBlock`
-   - `WriteBlock`
-2. `ProtocolLib.S7Tcp.Protocol`
-   - 同步实现同名接口
-
-### 第三阶段：改 AM 上层
-
-1. `IPlcClient` 调整为门面接口；
-2. `PlcClientFactory` 反射创建协议实例；
-3. `ProtocolPlcClient` 负责 `Result <-> M_Return` 转换；
-4. `PlcScanWorker` 与 `PlcOperationService` 切换到新接口。
-
-### 第四阶段：补测试
-
-1. 协议库接口测试；
-2. `IPlcClient` 门面测试；
-3. 运行时扫描与操作服务测试。
+| 接口 | 实现 | 说明 |
+|------|------|------|
+| `IPlcClient` | `ProtocolPlcClient`、`NullPlcClient` | AM 侧 PLC 客户端门面 |
+| `IPlcClientFactory` | `PlcClientFactory` | 工厂，BuildProtocolOptions 映射后 Create |
+| `IPlcStationCrudService` | `PlcStationCrudService` | 站 CRUD（plc_station 表） |
+| `IPlcPointCrudService` | `PlcPointCrudService` | 点位 CRUD（plc_point 表） |
+| `IPlcConfigAppService` | `PlcConfigAppService` | DB → Context 装配 |
+| `IPlcScanWorker` | `PlcScanWorker` | 后台扫描工作单元 |
+| `IPlcRuntimeService` | `PlcRuntimeQueryService` | 运行时快照查询 |
+| —（无独立接口） | `PlcOperationService` | 手动读写 |
 
 ---
 
-## 11. 与主规划文档的关系
+## 10. 待实现（UI 层）
 
-本文件是协议接口与分层的细化架构文档。  
-总体模块规划、目录落位、页面职责与实施顺序仍以：
+后端链路全部贯通，以下均为 WinForms 页面待开发：
 
-- `Docs/03-features/plc-communication-planning.md`
+| 导航 | 页面 | 所需后端能力 |
+|------|------|-------------|
+| PLC > Monitor | 站状态总览 | `QueryAllStations()` |
+| PLC > Register | 点位实时监视 | `QueryAllPoints()` + SnapshotChanged 事件 |
+| PLC > Status | 连接状态详情 | `QueryStation(plcName)` |
+| PLC > Write | 手动写入调试 | `PlcOperationService.WritePoint()` |
+| SysConfig > Plc | 站 & 点位配置管理 | `IPlcStationCrudService` / `IPlcPointCrudService` / `PlcConfigAppService.ReloadFromDatabase()` |
 
-为主；协议接口、请求模型、返回模型与分层边界的详细定义以本文为准。
+---
+
+## 相关文档
+
+- [PLC 通信功能文档](../03-features/plc-communication.md)
+- [数据库表结构](../09-database-config/README.md)
+- [开发进展记录](../07-release-notes/winf-development-progress.md)
