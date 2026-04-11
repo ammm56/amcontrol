@@ -397,6 +397,12 @@
     <Compile Include="Views\Motion\MotionMonitorVirtualListControl.Designer.cs">
       <DependentUpon>MotionMonitorVirtualListControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\SysConfig\PlcConfigManagementPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\SysConfig\PlcConfigManagementPage.Designer.cs">
+      <DependentUpon>PlcConfigManagementPage.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </EmbeddedResource>

@@ -77,6 +77,9 @@
     <Compile Include="Navigation\NavPageDef.cs" />
     <Compile Include="Navigation\NavPrimaryDef.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SysConfig\PlcConfigManagementPageModel.cs" />
+    <Compile Include="SysConfig\PlcPointEditorModel.cs" />
+    <Compile Include="SysConfig\PlcStationEditorModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Plc\" />

@@ -10,6 +10,7 @@ using AMControlWinF.Views.Auth;
 using AMControlWinF.Views.Main;
 using AMControlWinF.Views.Motion;
 using AMControlWinF.Views.MotionConfig;
+using AMControlWinF.Views.SysConfig;
 using AntdUI;
 using System;
 using System.Collections.Generic;
@@ -476,6 +477,8 @@ namespace AMControlWinF
                 { "MotionConfig.IoMap",     () => new MotionIoMapManagementPage() },
                 { "MotionConfig.AxisParam", () => new MotionAxisParamManagementPage() },
                 { "MotionConfig.Actuator",  () => new ActuatorManagementPage() },
+
+                { "SysConfig.Plc",          () => new PlcConfigManagementPage() },
 
                 { "AlarmLog.Current",       () => CreatePlaceholderPage("报警与日志 / 当前报警") },
                 { "AlarmLog.History",       () => CreatePlaceholderPage("报警与日志 / 报警历史") },
