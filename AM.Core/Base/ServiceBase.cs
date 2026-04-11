@@ -4,6 +4,7 @@ using AM.Model.Alarm;
 using AM.Model.Common;
 using System;
 using System.Collections.Concurrent;
+using System.Threading;
 
 namespace AM.Core.Base
 {
@@ -18,6 +19,12 @@ namespace AM.Core.Base
         /// <summary>重复消息节流缓存。</summary>
         private readonly ConcurrentDictionary<string, DateTime> _reportThrottleTimes =
             new ConcurrentDictionary<string, DateTime>(StringComparer.OrdinalIgnoreCase);
+
+        private const int ReportThrottleMaxEntries = 2048;
+        private const int ReportThrottleCleanupTriggerCount = 128;
+        private static readonly TimeSpan ReportThrottleRetention = TimeSpan.FromMinutes(30);
+
+        private int _reportThrottleWriteCount;
 
         protected virtual string MessageSourceName
         {
@@ -262,6 +269,14 @@ namespace AM.Core.Base
             }
 
             _reportThrottleTimes[reportKey] = now;
+
+            int currentWriteCount = Interlocked.Increment(ref _reportThrottleWriteCount);
+            if (_reportThrottleTimes.Count > ReportThrottleMaxEntries
+                || currentWriteCount % ReportThrottleCleanupTriggerCount == 0)
+            {
+                CleanupReportThrottleCache(now);
+            }
+
             return true;
         }
 
@@ -298,6 +313,28 @@ namespace AM.Core.Base
             if (hasLog) return ResultNotifyMode.LogOnly;
             if (hasMsg) return ResultNotifyMode.MessageOnly;
             return ResultNotifyMode.Silent;
+        }
+
+        /// <summary>
+        /// 清理节流缓存：
+        /// 1. 优先删除超出保留时间的旧键；
+        /// 2. 若数量仍过大，则整体清空，避免缓存无限增长。
+        /// </summary>
+        private void CleanupReportThrottleCache(DateTime now)
+        {
+            foreach (var pair in _reportThrottleTimes)
+            {
+                if ((now - pair.Value) > ReportThrottleRetention)
+                {
+                    DateTime removedTime;
+                    _reportThrottleTimes.TryRemove(pair.Key, out removedTime);
+                }
+            }
+
+            if (_reportThrottleTimes.Count > ReportThrottleMaxEntries * 2)
+            {
+                _reportThrottleTimes.Clear();
+            }
         }
     }
 }

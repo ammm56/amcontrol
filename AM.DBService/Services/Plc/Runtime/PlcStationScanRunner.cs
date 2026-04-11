@@ -27,6 +27,7 @@ namespace AM.DBService.Services.Plc.Runtime
         private const int DefaultScanIntervalMs = 100;
         private const int MinScanIntervalMs = 20;
         private const int DefaultReconnectIntervalMs = 2000;
+        private const int DisconnectSteadyLogIntervalMs = 30000;
 
         /// <summary>
         /// 运行器状态同步锁。
@@ -75,6 +76,18 @@ namespace AM.DBService.Services.Plc.Runtime
         /// 只在 Connect 成功时更新，不在 IsConnected 成功时刷新。
         /// </summary>
         private DateTime? _lastConnectTime;
+
+        /// <summary>
+        /// 上一轮是否处于离线状态。
+        /// 用于做“在线 → 离线”“离线 → 在线”的边沿通知。
+        /// </summary>
+        private bool _wasDisconnected;
+
+        /// <summary>
+        /// 最近一次已上报的离线错误文本。
+        /// 若错误文本变化，允许立即再次上报一次边沿日志/消息。
+        /// </summary>
+        private string _lastDisconnectMessage = string.Empty;
 
         protected override string MessageSourceName
         {
@@ -163,6 +176,7 @@ namespace AM.DBService.Services.Plc.Runtime
                     return Warn((int)DbErrorCode.InvalidArgument, "PLC 站扫描运行器已在运行: " + PlcName);
                 }
 
+                ResetDisconnectReportState();
                 _cancellationTokenSource = new CancellationTokenSource();
                 _scanLoopTask = Task.Run(() => ScanLoopAsync(_cancellationTokenSource.Token));
             }
@@ -207,6 +221,7 @@ namespace AM.DBService.Services.Plc.Runtime
             finally
             {
                 cts.Dispose();
+                ResetDisconnectReportState();
             }
 
             return OkLogOnly("PLC 站扫描运行器已停止: " + PlcName);
@@ -269,14 +284,17 @@ namespace AM.DBService.Services.Plc.Runtime
 
             if (station == null || string.IsNullOrWhiteSpace(station.Name))
             {
-                return Fail((int)DbErrorCode.InvalidArgument, "PLC 站配置无效");
+                return FailSilent((int)DbErrorCode.InvalidArgument, "PLC 站配置无效");
             }
 
             IPlcClient client = ResolveClient(station.Name);
             if (client == null)
             {
-                UpdateStationDisconnected(station, points, startedAt, "PLC 客户端未注册到 MachineContext");
-                return Warn((int)DbErrorCode.NotFound, "PLC 客户端未注册到 MachineContext: " + station.Name);
+                const string message = "PLC 客户端未注册到 MachineContext";
+                UpdateStationDisconnected(station, points, startedAt, message);
+                LastError = message;
+                ReportDisconnectIfNeeded(station, (int)DbErrorCode.NotFound, message);
+                return WarnSilent((int)DbErrorCode.NotFound, message);
             }
 
             bool isConnected;
@@ -285,17 +303,14 @@ namespace AM.DBService.Services.Plc.Runtime
 
             if (!isConnected)
             {
-                UpdateStationDisconnected(station, points, startedAt, connectError);
-
-                var message = string.IsNullOrWhiteSpace(connectError) ? "PLC 未连接" : connectError;
+                string message = string.IsNullOrWhiteSpace(connectError) ? "PLC 未连接" : connectError;
+                UpdateStationDisconnected(station, points, startedAt, message);
                 LastError = message;
-
-                if (ShouldReportRepeated($"PLC-DISCONNECT-{station.Name}-{message}", 30000))
-                {
-                    WarnLogOnly((int)DbErrorCode.Unknown, station.Name + " 离线: " + message);
-                }
+                ReportDisconnectIfNeeded(station, (int)DbErrorCode.Unknown, message);
                 return WarnSilent((int)DbErrorCode.Unknown, message);
             }
+
+            ReportReconnectIfNeeded(station);
 
             bool stationHadReadFailure = false;
             List<string> stationErrors = new List<string>();
@@ -333,6 +348,7 @@ namespace AM.DBService.Services.Plc.Runtime
             RuntimeContext.Instance.Plc.NotifySnapshotChanged();
 
             LastRunTime = finishedAt;
+            LastError = string.Empty;
             return OkSilent("PLC 单站扫描成功: " + station.Name);
         }
 
@@ -681,6 +697,62 @@ namespace AM.DBService.Services.Plc.Runtime
             return string.IsNullOrWhiteSpace(dataType)
                 ? string.Empty
                 : dataType.Trim().Replace(" ", string.Empty).ToLowerInvariant();
+        }
+
+        /// <summary>
+        /// 按“边沿通知 + 稳态节流”上报离线信息。
+        /// 规则：
+        /// 1. 首次离线：日志 + 消息；
+        /// 2. 错误文本变化：日志 + 消息；
+        /// 3. 持续离线：仅按固定周期记录一条日志，不再弹消息。
+        /// </summary>
+        private void ReportDisconnectIfNeeded(PlcStationConfig station, int code, string message)
+        {
+            string finalMessage = string.IsNullOrWhiteSpace(message) ? "PLC 未连接" : message;
+            string displayName = station == null ? PlcName : station.DisplayTitle;
+
+            bool isEdgeDisconnect = !_wasDisconnected;
+            bool errorChanged = !string.Equals(_lastDisconnectMessage, finalMessage, StringComparison.Ordinal);
+
+            if (isEdgeDisconnect || errorChanged)
+            {
+                Warn(code, "PLC 站离线: " + displayName + "，" + finalMessage, ReportChannels.Log | ReportChannels.Message);
+            }
+            else if (ShouldReportRepeated("PLC-DISCONNECT-" + PlcName + "-" + finalMessage, DisconnectSteadyLogIntervalMs))
+            {
+                WarnLogOnly(code, "PLC 站持续离线: " + displayName + "，" + finalMessage);
+            }
+
+            _wasDisconnected = true;
+            _lastDisconnectMessage = finalMessage;
+        }
+
+        /// <summary>
+        /// 从离线恢复到在线时记录一条恢复日志。
+        /// 恢复通常只写日志，不弹消息，避免干扰操作员。
+        /// </summary>
+        private void ReportReconnectIfNeeded(PlcStationConfig station)
+        {
+            if (!_wasDisconnected)
+            {
+                return;
+            }
+
+            string displayName = station == null ? PlcName : station.DisplayTitle;
+            OkLogOnly("PLC 站恢复在线: " + displayName);
+
+            _wasDisconnected = false;
+            _lastDisconnectMessage = string.Empty;
+        }
+
+        /// <summary>
+        /// 停止时重置离线状态记忆。
+        /// 避免下次重新启动时沿用旧的边沿状态。
+        /// </summary>
+        private void ResetDisconnectReportState()
+        {
+            _wasDisconnected = false;
+            _lastDisconnectMessage = string.Empty;
         }
     }
 }
