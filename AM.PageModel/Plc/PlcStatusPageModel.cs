@@ -241,8 +241,8 @@ namespace AM.PageModel.Plc
             DateTime? lastScanTime = runtimeState == null ? null : runtimeState.LastScanTime;
 
             RuntimeSummaryText = scanRunning
-                ? "运行中 最近完成 " + FormatTime(lastScanTime)
-                : "已停止 最近完成 " + FormatTime(lastScanTime);
+                ? "运行中 " + FormatTime(lastScanTime)
+                : "已停止 " + FormatTime(lastScanTime);
         }
 
         private void ClearAll()

@@ -82,7 +82,7 @@ namespace AM.DBService.Services.Runtime
             {
                 if (_isRunning)
                 {
-                    return Warn((int)MotionErrorCode.Unknown, "轴运行态采样服务已在运行");
+                    return Warn(-1200, "轴运行态采样服务已在运行");
                 }
 
                 _cancellationTokenSource?.Dispose();

@@ -389,7 +389,7 @@ namespace AM.DBService.Services.Plc.Runtime
             if (_nextReconnectTime.HasValue && now < _nextReconnectTime.Value)
             {
                 errorMessage = stateResult.Success
-                    ? "PLC 尚未连接，等待下一次重连窗口"
+                    ? "PLC 离线，等待下一次重连"
                     : stateResult.Message;
                 return;
             }
@@ -403,7 +403,7 @@ namespace AM.DBService.Services.Plc.Runtime
                 return;
             }
 
-            errorMessage = connectResult.Message;
+            errorMessage = "PLC 离线，等待下一次重连";
             _nextReconnectTime = now.AddMilliseconds(GetReconnectIntervalMs(station));
         }
 
