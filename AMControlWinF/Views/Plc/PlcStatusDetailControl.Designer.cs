@@ -175,7 +175,7 @@
             this.labelTagFailedKey.Name = "labelTagFailedKey";
             this.labelTagFailedKey.Size = new System.Drawing.Size(72, 24);
             this.labelTagFailedKey.TabIndex = 0;
-            this.labelTagFailedKey.Text = "失败次数";
+            this.labelTagFailedKey.Text = "失败轮次";
             this.labelTagFailedKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // panelTagSuccess
@@ -206,7 +206,7 @@
             this.labelTagSuccessKey.Name = "labelTagSuccessKey";
             this.labelTagSuccessKey.Size = new System.Drawing.Size(72, 24);
             this.labelTagSuccessKey.TabIndex = 0;
-            this.labelTagSuccessKey.Text = "成功次数";
+            this.labelTagSuccessKey.Text = "成功轮次";
             this.labelTagSuccessKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // panelTagAverageWrite
@@ -268,7 +268,7 @@
             this.labelTagAverageReadKey.Name = "labelTagAverageReadKey";
             this.labelTagAverageReadKey.Size = new System.Drawing.Size(72, 24);
             this.labelTagAverageReadKey.TabIndex = 0;
-            this.labelTagAverageReadKey.Text = "平均读取";
+            this.labelTagAverageReadKey.Text = "扫描均值";
             this.labelTagAverageReadKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // panelTagLastConnect
@@ -330,7 +330,7 @@
             this.labelTagLastScanKey.Name = "labelTagLastScanKey";
             this.labelTagLastScanKey.Size = new System.Drawing.Size(72, 24);
             this.labelTagLastScanKey.TabIndex = 0;
-            this.labelTagLastScanKey.Text = "更新时间";
+            this.labelTagLastScanKey.Text = "扫描开始时间";
             this.labelTagLastScanKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // panelTagScan

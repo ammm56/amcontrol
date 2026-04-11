@@ -34,9 +34,9 @@ namespace AM.PageModel.Navigation
             D("Vision",      "视觉",       "Vision.Result",          "检测结果",        "查看视觉检测结果、OK/NG 记录与图像回放。",               "Operator,Engineer,Am", "低", 20),
             D("Vision",      "视觉",       "Vision.Calibrate",       "标定管理",        "执行相机标定与精度验证操作。",                           "Engineer,Am",          "高", 30),
 
+            D("PLC",         "PLC",        "PLC.Status",             "通讯状态",        "查看 PLC 通讯链路状态与诊断信息。",                      "Operator,Engineer,Am", "低", 30),
             D("PLC",         "PLC",        "PLC.Monitor",            "点位监视",        "查看 PLC 数字输入/输出点位实时状态。",                   "Operator,Engineer,Am", "低", 10),
             D("PLC",         "PLC",        "PLC.Register",           "寄存器监视",      "查看 PLC 寄存器地址与数据值。",                          "Engineer,Am",          "中", 20),
-            D("PLC",         "PLC",        "PLC.Status",             "通讯状态",        "查看 PLC 通讯链路状态与诊断信息。",                      "Operator,Engineer,Am", "低", 30),
             D("PLC",         "PLC",        "PLC.Write",              "写入调试",        "手动向 PLC 寄存器写入调试值，仅限工程调试使用。",        "Engineer,Am",          "高", 40),
 
             D("Peripheral",  "外设",       "Peripheral.Scanner",     "扫码监视",        "查看扫码器在线状态与最近扫码记录。",                     "Operator,Engineer,Am", "低", 10),
