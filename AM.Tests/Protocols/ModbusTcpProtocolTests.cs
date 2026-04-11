@@ -19,7 +19,7 @@ namespace AM.Tests.Protocols
             public const string UInt32 = "40012";
             public const string Int64 = "40020";
             public const string UInt64 = "40024";
-            public const string Single = "40030";
+            public const string Float = "40030";
             public const string Double = "40032";
             public const string StringFixed20 = "40040[20]";
             public const string Reconnect = "40060";
@@ -187,7 +187,7 @@ namespace AM.Tests.Protocols
                 AssertRoundTrip(protocol, TestAddress.UInt32, "uint32", 123456u, "123456");
                 AssertRoundTrip(protocol, TestAddress.Int64, "int64", -1234567890L, "-1234567890");
                 AssertRoundTrip(protocol, TestAddress.UInt64, "uint64", 1234567890UL, "1234567890");
-                AssertRoundTrip(protocol, TestAddress.Single, "float", 12.5f, "12.5");
+                AssertRoundTrip(protocol, TestAddress.Float, "float", 12.5f, "12.5");
                 AssertRoundTrip(protocol, TestAddress.Double, "double", 123.125d, "123.125");
                 AssertRoundTrip(protocol, TestAddress.StringFixed20, "string", "AM_MODBUS", "AM_MODBUS", 20);
             }

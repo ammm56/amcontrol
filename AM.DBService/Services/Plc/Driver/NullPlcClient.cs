@@ -19,7 +19,7 @@ namespace AM.DBService.Services.Plc.Driver
         /// <summary>
         /// 最近一次配置。
         /// </summary>
-        private PlcProtocolClientOptions _options;
+        private M_ProtocolOptions _options;
 
         public NullPlcClient(PlcStationConfig stationConfig)
         {
@@ -41,7 +41,7 @@ namespace AM.DBService.Services.Plc.Driver
             get { return _stationConfig.ConnectionType ?? string.Empty; }
         }
 
-        public Result Configure(PlcProtocolClientOptions options)
+        public Result Configure(M_ProtocolOptions options)
         {
             _options = options;
 

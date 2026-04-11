@@ -141,6 +141,10 @@ DevAlarmRecordEntity
 - DataType 统一为 bool、uint8、int8、uint16、int16、uint32、int32、uint64、int64、float、double、string，数组用 Length 表达；
 - 避免协议层再做单位或类型重映射。
 
+### 4.10 数据模型映射
+
+- 删除类似 `BuildOptions(PlcStationConfig)` 这类 AM 层到协议层的重复模型映射，协议层应直接使用协议模型，避免定义多份相同含义的数据结构。
+
 ---
 
 ## 五、导航体系

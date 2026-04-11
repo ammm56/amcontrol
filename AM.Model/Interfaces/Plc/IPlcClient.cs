@@ -29,7 +29,7 @@ namespace AM.Model.Interfaces.Plc
         /// <summary>
         /// 配置客户端。
         /// </summary>
-        Result Configure(PlcProtocolClientOptions options);
+        Result Configure(M_ProtocolOptions options);
 
         /// <summary>
         /// 建立连接。

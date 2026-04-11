@@ -1,6 +1,7 @@
 ﻿using AM.Model.Common;
 using AM.Model.Interfaces.Plc;
 using AM.Model.Plc;
+using ProtocolLib.CommonLib.Model;
 using System;
 
 namespace AM.DBService.Services.Plc.Driver
@@ -37,7 +38,7 @@ namespace AM.DBService.Services.Plc.Driver
 
                 IPlcClient client = new ProtocolPlcClient(stationConfig);
 
-                Result configureResult = client.Configure(BuildOptions(stationConfig));
+                Result configureResult = client.Configure(BuildProtocolOptions(stationConfig));
                 if (!configureResult.Success)
                 {
                     return Result<IPlcClient>.Fail(configureResult.Code, configureResult.Message, ResultSource.Plc);
@@ -52,22 +53,21 @@ namespace AM.DBService.Services.Plc.Driver
             }
         }
 
-        private static PlcProtocolClientOptions BuildOptions(PlcStationConfig stationConfig)
+        private static M_ProtocolOptions BuildProtocolOptions(PlcStationConfig stationConfig)
         {
-            return new PlcProtocolClientOptions
+            return new M_ProtocolOptions
             {
-                PlcName = stationConfig.Name,
-                ProtocolType = stationConfig.ProtocolType,
-                ConnectionType = stationConfig.ConnectionType,
-                IpAddress = stationConfig.IpAddress,
-                Port = stationConfig.Port ?? GetDefaultPort(stationConfig.ProtocolType),
-                StationNo = stationConfig.StationNo,
-                Rack = stationConfig.Rack,
-                Slot = stationConfig.Slot,
-                TimeoutMs = stationConfig.TimeoutMs,
-                ByteOrder = string.Empty,
-                WordOrder = string.Empty,
-                StringEncoding = "ASCII"
+                protocolType = stationConfig.ProtocolType ?? string.Empty,
+                connectionType = stationConfig.ConnectionType ?? string.Empty,
+                ip = stationConfig.IpAddress ?? string.Empty,
+                port = stationConfig.Port ?? GetDefaultPort(stationConfig.ProtocolType),
+                stationNo = stationConfig.StationNo,
+                rack = stationConfig.Rack,
+                slot = stationConfig.Slot,
+                timeoutMs = stationConfig.TimeoutMs,
+                byteOrder = string.Empty,
+                wordOrder = string.Empty,
+                stringEncoding = "ASCII"
             };
         }
 

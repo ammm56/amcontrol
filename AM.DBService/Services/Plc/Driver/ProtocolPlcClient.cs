@@ -24,7 +24,7 @@ namespace AM.DBService.Services.Plc.Driver
         /// <summary>
         /// 客户端配置。
         /// </summary>
-        private PlcProtocolClientOptions _options;
+        private M_ProtocolOptions _options;
 
         /// <summary>
         /// 协议实例。
@@ -57,7 +57,7 @@ namespace AM.DBService.Services.Plc.Driver
             get { return _stationConfig.ConnectionType ?? string.Empty; }
         }
 
-        public Result Configure(PlcProtocolClientOptions options)
+        public Result Configure(M_ProtocolOptions options)
         {
             try
             {
@@ -68,7 +68,7 @@ namespace AM.DBService.Services.Plc.Driver
 
                 bool protocolTypeChanged = !string.Equals(
                     NormalizeProtocolType(GetEffectiveProtocolType(_options)),
-                    NormalizeProtocolType(options.ProtocolType),
+                    NormalizeProtocolType(options.protocolType),
                     StringComparison.OrdinalIgnoreCase);
 
                 _options = options;
@@ -87,7 +87,7 @@ namespace AM.DBService.Services.Plc.Driver
                     return ensureResult;
                 }
 
-                M_Return<bool> configureResult = _protocol.Configure(ToProtocolOptions(options));
+                M_Return<bool> configureResult = _protocol.Configure(options);
                 return ToResult(configureResult, "PLC 客户端配置成功", -3602, "PLC 客户端配置失败");
             }
             catch (Exception ex)
@@ -306,11 +306,11 @@ namespace AM.DBService.Services.Plc.Driver
             }
         }
 
-        private string GetEffectiveProtocolType(PlcProtocolClientOptions options)
+        private string GetEffectiveProtocolType(M_ProtocolOptions options)
         {
-            if (options != null && !string.IsNullOrWhiteSpace(options.ProtocolType))
+            if (options != null && !string.IsNullOrWhiteSpace(options.protocolType))
             {
-                return options.ProtocolType;
+                return options.protocolType;
             }
 
             return _stationConfig.ProtocolType;
@@ -319,24 +319,6 @@ namespace AM.DBService.Services.Plc.Driver
         private static string NormalizeProtocolType(string value)
         {
             return string.IsNullOrWhiteSpace(value) ? string.Empty : value.Trim();
-        }
-
-        private static M_ProtocolOptions ToProtocolOptions(PlcProtocolClientOptions options)
-        {
-            return new M_ProtocolOptions
-            {
-                protocolType = options.ProtocolType ?? string.Empty,
-                connectionType = options.ConnectionType ?? string.Empty,
-                ip = options.IpAddress ?? string.Empty,
-                port = options.Port,
-                stationNo = options.StationNo,
-                rack = options.Rack,
-                slot = options.Slot,
-                timeoutMs = options.TimeoutMs,
-                byteOrder = options.ByteOrder ?? string.Empty,
-                wordOrder = options.WordOrder ?? string.Empty,
-                stringEncoding = options.StringEncoding ?? string.Empty
-            };
         }
 
         private static Result ToResult(M_Return<bool> result, string successMessage, int failCode, string failMessage)
