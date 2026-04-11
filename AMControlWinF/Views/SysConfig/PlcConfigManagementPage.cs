@@ -1,23 +1,23 @@
 ﻿using AM.Model.Common;
+using AM.Model.Entity.Plc;
 using AM.PageModel.SysConfig;
 using AMControlWinF.Tools;
 using AntdUI;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
-using WinLabel = System.Windows.Forms.Label;
 
 namespace AMControlWinF.Views.SysConfig
 {
     /// <summary>
     /// PLC 配置管理页面。
-    /// 第一版先完成：
+    /// 当前职责：
     /// 1. 站/点位列表与搜索；
     /// 2. 站选择驱动点位列表联动；
     /// 3. 配置重载、扫描启停、单轮扫描；
-    /// 4. 页面内 Modal 新增/编辑；
+    /// 4. 打开独立新增/编辑对话框；
     /// 5. 删除与刷新。
     /// </summary>
     public partial class PlcConfigManagementPage : UserControl
@@ -101,7 +101,7 @@ namespace AMControlWinF.Views.SysConfig
                 new Column("Name", "名称", ColumnAlign.Left)
                 {
                     Width = "150"
-                },
+                }
             };
 
             tablePoints.Columns = new ColumnCollection()
@@ -138,7 +138,7 @@ namespace AMControlWinF.Views.SysConfig
                 new Column("GroupText", "分组", ColumnAlign.Center)
                 {
                     Width = "80"
-                },
+                }
             };
         }
 
@@ -196,7 +196,7 @@ namespace AMControlWinF.Views.SysConfig
                 return;
             }
 
-            ShowStationEditorDialog(null);
+            await EditStationAsync(null);
         }
 
         private async void ButtonEditStation_Click(object sender, EventArgs e)
@@ -206,7 +206,7 @@ namespace AMControlWinF.Views.SysConfig
                 return;
             }
 
-            ShowStationEditorDialog(_model.SelectedStation);
+            await EditStationAsync(_model.SelectedStation);
         }
 
         private async void ButtonAddPoint_Click(object sender, EventArgs e)
@@ -222,7 +222,7 @@ namespace AMControlWinF.Views.SysConfig
                 return;
             }
 
-            ShowPointEditorDialog(null);
+            await EditPointAsync(null);
         }
 
         private async void ButtonEditPoint_Click(object sender, EventArgs e)
@@ -232,10 +232,10 @@ namespace AMControlWinF.Views.SysConfig
                 return;
             }
 
-            ShowPointEditorDialog(_model.SelectedPoint);
+            await EditPointAsync(_model.SelectedPoint);
         }
 
-        private async System.Threading.Tasks.Task ReloadAsync(string preferredStationName, string preferredPointName)
+        private async Task ReloadAsync(string preferredStationName, string preferredPointName)
         {
             if (_isBusy)
             {
@@ -260,7 +260,7 @@ namespace AMControlWinF.Views.SysConfig
             }
         }
 
-        private async System.Threading.Tasks.Task ExecuteAsync(Func<Result> action, string preferredStationName, string preferredPointName)
+        private async Task ExecuteAsync(Func<Result> action, string preferredStationName, string preferredPointName)
         {
             if (_isBusy || action == null)
             {
@@ -270,7 +270,7 @@ namespace AMControlWinF.Views.SysConfig
             SetBusyState(true);
             try
             {
-                var result = await System.Threading.Tasks.Task.Run(action);
+                var result = await Task.Run(action);
                 if (!result.Success)
                 {
                     return;
@@ -284,7 +284,7 @@ namespace AMControlWinF.Views.SysConfig
             }
         }
 
-        private async System.Threading.Tasks.Task ReloadRuntimeConfigAsync()
+        private async Task ReloadRuntimeConfigAsync()
         {
             await ExecuteAsync(
                 () => _model.ReloadConfig(),
@@ -292,7 +292,135 @@ namespace AMControlWinF.Views.SysConfig
                 _model.SelectedPointName);
         }
 
-        private async System.Threading.Tasks.Task DeleteSelectedStationAsync()
+        private async Task EditStationAsync(PlcConfigManagementPageModel.StationViewItem item)
+        {
+            using (var dialog = new PlcStationEditDialog())
+            {
+                dialog.IsCreateMode = item == null;
+                dialog.SetEntity(item == null ? null : item.ToEntity());
+
+                if (dialog.ShowDialog(FindForm()) != DialogResult.OK || dialog.ResultEntity == null)
+                {
+                    return;
+                }
+
+                SetBusyState(true);
+                try
+                {
+                    var saveResult = await Task.Run(() => _model.SaveStation(dialog.ResultEntity));
+                    if (!saveResult.Success)
+                    {
+                        return;
+                    }
+
+                    var reloadResult = await Task.Run(() => _model.ReloadConfig());
+                    if (!reloadResult.Success)
+                    {
+                        return;
+                    }
+
+                    await ReloadAsync(dialog.ResultEntity.Name, null);
+                }
+                finally
+                {
+                    SetBusyState(false);
+                }
+            }
+        }
+
+        private async Task EditPointAsync(PlcConfigManagementPageModel.PointViewItem item)
+        {
+            using (var dialog = new PlcPointEditDialog())
+            {
+                dialog.IsCreateMode = item == null;
+                dialog.SetStationNames(BuildStationNameList(item == null ? null : item.PlcName));
+                dialog.SetEntity(item == null ? BuildDefaultPointEntity() : item.ToEntity());
+
+                if (dialog.ShowDialog(FindForm()) != DialogResult.OK || dialog.ResultEntity == null)
+                {
+                    return;
+                }
+
+                SetBusyState(true);
+                try
+                {
+                    var saveResult = await Task.Run(() => _model.SavePoint(dialog.ResultEntity));
+                    if (!saveResult.Success)
+                    {
+                        return;
+                    }
+
+                    var reloadResult = await Task.Run(() => _model.ReloadConfig());
+                    if (!reloadResult.Success)
+                    {
+                        return;
+                    }
+
+                    await ReloadAsync(dialog.ResultEntity.PlcName, dialog.ResultEntity.Name);
+                }
+                finally
+                {
+                    SetBusyState(false);
+                }
+            }
+        }
+
+        private PlcPointConfigEntity BuildDefaultPointEntity()
+        {
+            return new PlcPointConfigEntity
+            {
+                PlcName = _model.SelectedStation == null ? string.Empty : _model.SelectedStation.Name,
+                Name = string.Empty,
+                DisplayName = string.Empty,
+                GroupName = "Default",
+                Address = string.Empty,
+                DataType = "bool",
+                Length = 1,
+                AccessMode = "ReadWrite",
+                IsEnabled = true,
+                SortOrder = 1,
+                Description = string.Empty,
+                Remark = string.Empty
+            };
+        }
+
+        private IList<string> BuildStationNameList(string extraStationName)
+        {
+            var list = new List<string>();
+
+            foreach (var item in _model.Stations)
+            {
+                if (item == null || string.IsNullOrWhiteSpace(item.Name))
+                {
+                    continue;
+                }
+
+                if (!list.Any(x => string.Equals(x, item.Name, StringComparison.OrdinalIgnoreCase)))
+                {
+                    list.Add(item.Name);
+                }
+            }
+
+            if (_model.SelectedStation != null && !string.IsNullOrWhiteSpace(_model.SelectedStation.Name))
+            {
+                if (!list.Any(x => string.Equals(x, _model.SelectedStation.Name, StringComparison.OrdinalIgnoreCase)))
+                {
+                    list.Add(_model.SelectedStation.Name);
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(extraStationName))
+            {
+                if (!list.Any(x => string.Equals(x, extraStationName, StringComparison.OrdinalIgnoreCase)))
+                {
+                    list.Add(extraStationName);
+                }
+            }
+
+            return list.OrderBy(x => x).ToList();
+        }
+
+        private async Task DeleteSelectedStationAsync()
         {
             if (_isBusy || _model.SelectedStation == null)
             {
@@ -312,13 +440,13 @@ namespace AMControlWinF.Views.SysConfig
             SetBusyState(true);
             try
             {
-                var deleteResult = await System.Threading.Tasks.Task.Run(() => _model.DeleteStation(_model.SelectedStation.Name));
+                var deleteResult = await Task.Run(() => _model.DeleteStation(_model.SelectedStation.Name));
                 if (!deleteResult.Success)
                 {
                     return;
                 }
 
-                var reloadResult = await System.Threading.Tasks.Task.Run(() => _model.ReloadConfig());
+                var reloadResult = await Task.Run(() => _model.ReloadConfig());
                 if (!reloadResult.Success)
                 {
                     return;
@@ -332,7 +460,7 @@ namespace AMControlWinF.Views.SysConfig
             }
         }
 
-        private async System.Threading.Tasks.Task DeleteSelectedPointAsync()
+        private async Task DeleteSelectedPointAsync()
         {
             if (_isBusy || _model.SelectedPoint == null)
             {
@@ -354,13 +482,13 @@ namespace AMControlWinF.Views.SysConfig
             SetBusyState(true);
             try
             {
-                var deleteResult = await System.Threading.Tasks.Task.Run(() => _model.DeletePoint(_model.SelectedPoint.PlcName, _model.SelectedPoint.Name));
+                var deleteResult = await Task.Run(() => _model.DeletePoint(_model.SelectedPoint.PlcName, _model.SelectedPoint.Name));
                 if (!deleteResult.Success)
                 {
                     return;
                 }
 
-                var reloadResult = await System.Threading.Tasks.Task.Run(() => _model.ReloadConfig());
+                var reloadResult = await Task.Run(() => _model.ReloadConfig());
                 if (!reloadResult.Success)
                 {
                     return;
@@ -480,385 +608,6 @@ namespace AMControlWinF.Views.SysConfig
                 default:
                     return new CellTag("读写", TTypeMini.Primary);
             }
-        }
-
-        private void ShowStationEditorDialog(PlcConfigManagementPageModel.StationViewItem item)
-        {
-            var editorModel = new PlcStationEditorModel();
-            if (item == null)
-            {
-                editorModel.ResetForCreate();
-            }
-            else
-            {
-                editorModel.LoadFrom(item.ToEntity());
-            }
-
-            Action applyValues;
-            Control content = BuildStationEditorContent(editorModel, out applyValues);
-
-            AntdUI.Modal.open(new AntdUI.Modal.Config(FindForm(), item == null ? "新增 PLC 站" : "编辑 PLC 站", (object)content)
-            {
-                Width = 920,
-                OkText = "保存",
-                CancelText = "取消",
-                CloseIcon = true,
-                Keyboard = true,
-                MaskClosable = false,
-                Draggable = true,
-                DefaultFocus = false,
-                OnOk = cfg =>
-                {
-                    applyValues();
-
-                    var entityResult = editorModel.BuildEntity();
-                    if (!entityResult.Success)
-                    {
-                        PageDialogHelper.ShowWarn(this, "PLC 站校验", entityResult.Message);
-                        return false;
-                    }
-
-                    var saveResult = _model.SaveStation(entityResult.Item);
-                    if (!saveResult.Success)
-                    {
-                        return false;
-                    }
-
-                    var reloadResult = _model.ReloadConfig();
-                    if (!reloadResult.Success)
-                    {
-                        return false;
-                    }
-
-                    BeginInvoke(new Action(() => ReloadAfterSave(entityResult.Item.Name, null)));
-                    return true;
-                }
-            });
-        }
-
-        private void ShowPointEditorDialog(PlcConfigManagementPageModel.PointViewItem item)
-        {
-            var editorModel = new PlcPointEditorModel();
-            if (item == null)
-            {
-                editorModel.ResetForCreate();
-                editorModel.PlcName = _model.SelectedStation == null ? string.Empty : _model.SelectedStation.Name;
-            }
-            else
-            {
-                editorModel.LoadFrom(item.ToEntity());
-            }
-
-            Action applyValues;
-            Control content = BuildPointEditorContent(editorModel, _model.Stations.Select(x => x.Name).ToList(), out applyValues);
-
-            AntdUI.Modal.open(new AntdUI.Modal.Config(FindForm(), item == null ? "新增 PLC 点位" : "编辑 PLC 点位", (object)content)
-            {
-                Width = 900,
-                OkText = "保存",
-                CancelText = "取消",
-                CloseIcon = true,
-                Keyboard = true,
-                MaskClosable = false,
-                Draggable = true,
-                DefaultFocus = false,
-                OnOk = cfg =>
-                {
-                    applyValues();
-
-                    var entityResult = editorModel.BuildEntity();
-                    if (!entityResult.Success)
-                    {
-                        PageDialogHelper.ShowWarn(this, "PLC 点位校验", entityResult.Message);
-                        return false;
-                    }
-
-                    var saveResult = _model.SavePoint(entityResult.Item);
-                    if (!saveResult.Success)
-                    {
-                        return false;
-                    }
-
-                    var reloadResult = _model.ReloadConfig();
-                    if (!reloadResult.Success)
-                    {
-                        return false;
-                    }
-
-                    BeginInvoke(new Action(() => ReloadAfterSave(entityResult.Item.PlcName, entityResult.Item.Name)));
-                    return true;
-                }
-            });
-        }
-
-        private async void ReloadAfterSave(string stationName, string pointName)
-        {
-            await ReloadAsync(stationName, pointName);
-        }
-
-        private Control BuildStationEditorContent(PlcStationEditorModel model, out Action applyValues)
-        {
-            var panel = new System.Windows.Forms.Panel();
-            panel.Dock = DockStyle.Fill;
-            panel.Padding = new Padding(0);
-
-            var scrollHost = new System.Windows.Forms.Panel();
-            scrollHost.Dock = DockStyle.Fill;
-            scrollHost.AutoScroll = true;
-
-            var layout = new TableLayoutPanel();
-            layout.AutoSize = true;
-            layout.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            layout.ColumnCount = 4;
-            layout.RowCount = 0;
-            layout.Dock = DockStyle.Top;
-            layout.Padding = new Padding(8);
-            layout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 110F));
-            layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            layout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 110F));
-            layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-
-            var txtName = CreateEditorTextBox(model.Name);
-            var txtDisplayName = CreateEditorTextBox(model.DisplayName);
-            var txtVendor = CreateEditorTextBox(model.Vendor);
-            var txtModel = CreateEditorTextBox(model.Model);
-            var cmbConnectionType = CreateEditorComboBox(PlcStationEditorModel.ConnectionTypes, model.ConnectionType);
-            var cmbProtocolType = CreateEditorComboBox(PlcStationEditorModel.ProtocolTypes, model.ProtocolType);
-            var txtIp = CreateEditorTextBox(model.IpAddress);
-            var txtPort = CreateEditorTextBox(model.PortText);
-            var txtComPort = CreateEditorTextBox(model.ComPort);
-            var txtBaudRate = CreateEditorTextBox(model.BaudRateText);
-            var txtDataBits = CreateEditorTextBox(model.DataBitsText);
-            var cmbParity = CreateEditorComboBox(PlcStationEditorModel.ParityOptions, model.Parity);
-            var cmbStopBits = CreateEditorComboBox(PlcStationEditorModel.StopBitsOptions, model.StopBits);
-            var txtStationNo = CreateEditorTextBox(model.StationNoText);
-            var txtNetworkNo = CreateEditorTextBox(model.NetworkNoText);
-            var txtPcNo = CreateEditorTextBox(model.PcNoText);
-            var txtRack = CreateEditorTextBox(model.RackText);
-            var txtSlot = CreateEditorTextBox(model.SlotText);
-            var txtTimeoutMs = CreateEditorTextBox(model.TimeoutMsText);
-            var txtReconnectMs = CreateEditorTextBox(model.ReconnectIntervalMsText);
-            var txtScanMs = CreateEditorTextBox(model.ScanIntervalMsText);
-            var txtSortOrder = CreateEditorTextBox(model.SortOrderText);
-            var chkEnabled = CreateEditorCheckBox("启用该 PLC 站", model.IsEnabled);
-            var txtDescription = CreateEditorMultiLineTextBox(model.Description);
-            var txtRemark = CreateEditorMultiLineTextBox(model.Remark);
-
-            AddEditorRow(layout, "名称", txtName, "显示名", txtDisplayName);
-            AddEditorRow(layout, "厂商", txtVendor, "型号", txtModel);
-            AddEditorRow(layout, "连接方式", cmbConnectionType, "协议类型", cmbProtocolType);
-            AddEditorRow(layout, "IP地址", txtIp, "端口", txtPort);
-            AddEditorRow(layout, "串口号", txtComPort, "波特率", txtBaudRate);
-            AddEditorRow(layout, "数据位", txtDataBits, "校验位", cmbParity);
-            AddEditorRow(layout, "停止位", cmbStopBits, "站号", txtStationNo);
-            AddEditorRow(layout, "网络号", txtNetworkNo, "PC号", txtPcNo);
-            AddEditorRow(layout, "机架号", txtRack, "插槽号", txtSlot);
-            AddEditorRow(layout, "通讯超时", txtTimeoutMs, "重连周期", txtReconnectMs);
-            AddEditorRow(layout, "扫描周期", txtScanMs, "排序号", txtSortOrder);
-            AddSingleEditorRow(layout, "启用", chkEnabled, 3);
-            AddMultiLineEditorRow(layout, "描述", txtDescription);
-            AddMultiLineEditorRow(layout, "备注", txtRemark);
-
-            scrollHost.Controls.Add(layout);
-            panel.Controls.Add(scrollHost);
-
-            applyValues = () =>
-            {
-                model.Name = txtName.Text;
-                model.DisplayName = txtDisplayName.Text;
-                model.Vendor = txtVendor.Text;
-                model.Model = txtModel.Text;
-                model.ConnectionType = cmbConnectionType.Text;
-                model.ProtocolType = cmbProtocolType.Text;
-                model.IpAddress = txtIp.Text;
-                model.PortText = txtPort.Text;
-                model.ComPort = txtComPort.Text;
-                model.BaudRateText = txtBaudRate.Text;
-                model.DataBitsText = txtDataBits.Text;
-                model.Parity = cmbParity.Text;
-                model.StopBits = cmbStopBits.Text;
-                model.StationNoText = txtStationNo.Text;
-                model.NetworkNoText = txtNetworkNo.Text;
-                model.PcNoText = txtPcNo.Text;
-                model.RackText = txtRack.Text;
-                model.SlotText = txtSlot.Text;
-                model.TimeoutMsText = txtTimeoutMs.Text;
-                model.ReconnectIntervalMsText = txtReconnectMs.Text;
-                model.ScanIntervalMsText = txtScanMs.Text;
-                model.SortOrderText = txtSortOrder.Text;
-                model.IsEnabled = chkEnabled.Checked;
-                model.Description = txtDescription.Text;
-                model.Remark = txtRemark.Text;
-            };
-
-            return panel;
-        }
-
-        private Control BuildPointEditorContent(PlcPointEditorModel model, IList<string> stationNames, out Action applyValues)
-        {
-            var panel = new System.Windows.Forms.Panel();
-            panel.Dock = DockStyle.Fill;
-
-            var scrollHost = new System.Windows.Forms.Panel();
-            scrollHost.Dock = DockStyle.Fill;
-            scrollHost.AutoScroll = true;
-
-            var layout = new TableLayoutPanel();
-            layout.AutoSize = true;
-            layout.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            layout.ColumnCount = 4;
-            layout.RowCount = 0;
-            layout.Dock = DockStyle.Top;
-            layout.Padding = new Padding(8);
-            layout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 110F));
-            layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            layout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 110F));
-            layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-
-            var cmbPlcName = CreateEditorComboBox(stationNames, model.PlcName);
-            var txtName = CreateEditorTextBox(model.Name);
-            var txtDisplayName = CreateEditorTextBox(model.DisplayName);
-            var txtGroup = CreateEditorTextBox(model.GroupName);
-            var txtAddress = CreateEditorTextBox(model.Address);
-            var cmbDataType = CreateEditorComboBox(PlcPointEditorModel.DataTypes, model.DataType);
-            var txtLength = CreateEditorTextBox(model.LengthText);
-            var cmbAccessMode = CreateEditorComboBox(PlcPointEditorModel.AccessModes, model.AccessMode);
-            var txtSortOrder = CreateEditorTextBox(model.SortOrderText);
-            var chkEnabled = CreateEditorCheckBox("启用该点位", model.IsEnabled);
-            var txtDescription = CreateEditorMultiLineTextBox(model.Description);
-            var txtRemark = CreateEditorMultiLineTextBox(model.Remark);
-
-            AddEditorRow(layout, "所属PLC", cmbPlcName, "名称", txtName);
-            AddEditorRow(layout, "显示名", txtDisplayName, "分组", txtGroup);
-            AddEditorRow(layout, "地址", txtAddress, "数据类型", cmbDataType);
-            AddEditorRow(layout, "Length", txtLength, "访问模式", cmbAccessMode);
-            AddEditorRow(layout, "排序号", txtSortOrder, "状态", chkEnabled);
-            AddMultiLineEditorRow(layout, "描述", txtDescription);
-            AddMultiLineEditorRow(layout, "备注", txtRemark);
-
-            scrollHost.Controls.Add(layout);
-            panel.Controls.Add(scrollHost);
-
-            applyValues = () =>
-            {
-                model.PlcName = cmbPlcName.Text;
-                model.Name = txtName.Text;
-                model.DisplayName = txtDisplayName.Text;
-                model.GroupName = txtGroup.Text;
-                model.Address = txtAddress.Text;
-                model.DataType = cmbDataType.Text;
-                model.LengthText = txtLength.Text;
-                model.AccessMode = cmbAccessMode.Text;
-                model.SortOrderText = txtSortOrder.Text;
-                model.IsEnabled = chkEnabled.Checked;
-                model.Description = txtDescription.Text;
-                model.Remark = txtRemark.Text;
-            };
-
-            return panel;
-        }
-
-        private static TextBox CreateEditorTextBox(string value)
-        {
-            return new TextBox
-            {
-                Text = value ?? string.Empty,
-                Dock = DockStyle.Fill,
-                Margin = new Padding(0, 4, 0, 4)
-            };
-        }
-
-        private static TextBox CreateEditorMultiLineTextBox(string value)
-        {
-            return new TextBox
-            {
-                Text = value ?? string.Empty,
-                Dock = DockStyle.Fill,
-                Margin = new Padding(0, 4, 0, 4),
-                Multiline = true,
-                Height = 72,
-                ScrollBars = ScrollBars.Vertical
-            };
-        }
-
-        private static ComboBox CreateEditorComboBox(IEnumerable<string> items, string value)
-        {
-            var combo = new ComboBox
-            {
-                Dock = DockStyle.Fill,
-                Margin = new Padding(0, 4, 0, 4),
-                DropDownStyle = ComboBoxStyle.DropDown
-            };
-
-            if (items != null)
-            {
-                foreach (var item in items.Distinct(StringComparer.OrdinalIgnoreCase))
-                {
-                    combo.Items.Add(item);
-                }
-            }
-
-            combo.Text = value ?? string.Empty;
-            return combo;
-        }
-
-        private static CheckBox CreateEditorCheckBox(string text, bool isChecked)
-        {
-            return new CheckBox
-            {
-                Text = text ?? string.Empty,
-                Checked = isChecked,
-                Dock = DockStyle.Left,
-                AutoSize = true,
-                Margin = new Padding(0, 8, 0, 4)
-            };
-        }
-
-        private static WinLabel CreateEditorLabel(string text)
-        {
-            return new WinLabel
-            {
-                Text = text ?? string.Empty,
-                Dock = DockStyle.Fill,
-                TextAlign = ContentAlignment.MiddleLeft,
-                AutoSize = false,
-                Margin = new Padding(0, 4, 8, 4),
-                Font = new Font("Microsoft YaHei UI", 9F, FontStyle.Regular)
-            };
-        }
-
-        private static void AddEditorRow(TableLayoutPanel layout, string leftLabel, Control leftControl, string rightLabel, Control rightControl)
-        {
-            int rowIndex = layout.RowCount;
-            layout.RowCount += 1;
-            layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-
-            layout.Controls.Add(CreateEditorLabel(leftLabel), 0, rowIndex);
-            layout.Controls.Add(leftControl, 1, rowIndex);
-            layout.Controls.Add(CreateEditorLabel(rightLabel), 2, rowIndex);
-            layout.Controls.Add(rightControl, 3, rowIndex);
-        }
-
-        private static void AddSingleEditorRow(TableLayoutPanel layout, string label, Control control, int columnSpan)
-        {
-            int rowIndex = layout.RowCount;
-            layout.RowCount += 1;
-            layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-
-            layout.Controls.Add(CreateEditorLabel(label), 0, rowIndex);
-            layout.Controls.Add(control, 1, rowIndex);
-            layout.SetColumnSpan(control, columnSpan);
-        }
-
-        private static void AddMultiLineEditorRow(TableLayoutPanel layout, string label, Control control)
-        {
-            int rowIndex = layout.RowCount;
-            layout.RowCount += 1;
-            layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-
-            layout.Controls.Add(CreateEditorLabel(label), 0, rowIndex);
-            layout.Controls.Add(control, 1, rowIndex);
-            layout.SetColumnSpan(control, 3);
         }
 
         private sealed class StationTableRow

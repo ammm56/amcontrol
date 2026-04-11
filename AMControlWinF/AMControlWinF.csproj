@@ -403,6 +403,18 @@
     <Compile Include="Views\SysConfig\PlcConfigManagementPage.Designer.cs">
       <DependentUpon>PlcConfigManagementPage.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\SysConfig\PlcPointEditDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\SysConfig\PlcPointEditDialog.Designer.cs">
+      <DependentUpon>PlcPointEditDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SysConfig\PlcStationEditDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\SysConfig\PlcStationEditDialog.Designer.cs">
+      <DependentUpon>PlcStationEditDialog.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </EmbeddedResource>
