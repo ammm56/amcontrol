@@ -235,6 +235,12 @@ namespace AMControlWinF.Views.SysConfig
             await EditPointAsync(_model.SelectedPoint);
         }
 
+        /// <summary>
+        /// 对外刷新入口：
+        /// - 负责防重入；
+        /// - 负责统一设置忙碌状态；
+        /// - 真正的刷新逻辑下沉到 ReloadCoreAsync。
+        /// </summary>
         private async Task ReloadAsync(string preferredStationName, string preferredPointName)
         {
             if (_isBusy)
@@ -245,19 +251,30 @@ namespace AMControlWinF.Views.SysConfig
             SetBusyState(true);
             try
             {
-                var result = await _model.LoadAsync(preferredStationName, preferredPointName);
-                if (!result.Success)
-                {
-                    RefreshPage();
-                    return;
-                }
-
-                RefreshPage();
+                await ReloadCoreAsync(preferredStationName, preferredPointName);
             }
             finally
             {
                 SetBusyState(false);
             }
+        }
+
+        /// <summary>
+        /// 内部刷新核心逻辑：
+        /// - 不再判断 _isBusy；
+        /// - 供已经处于忙碌流程中的方法复用；
+        /// - 避免保存后调用 ReloadAsync 被 _isBusy 拦截。
+        /// </summary>
+        private async Task ReloadCoreAsync(string preferredStationName, string preferredPointName)
+        {
+            var result = await _model.LoadAsync(preferredStationName, preferredPointName);
+            if (!result.Success)
+            {
+                RefreshPage();
+                return;
+            }
+
+            RefreshPage();
         }
 
         private async Task ExecuteAsync(Func<Result> action, string preferredStationName, string preferredPointName)
@@ -276,7 +293,7 @@ namespace AMControlWinF.Views.SysConfig
                     return;
                 }
 
-                await ReloadAsync(preferredStationName, preferredPointName);
+                await ReloadCoreAsync(preferredStationName, preferredPointName);
             }
             finally
             {
@@ -319,7 +336,7 @@ namespace AMControlWinF.Views.SysConfig
                         return;
                     }
 
-                    await ReloadAsync(dialog.ResultEntity.Name, null);
+                    await ReloadCoreAsync(dialog.ResultEntity.Name, null);
                 }
                 finally
                 {
@@ -356,7 +373,7 @@ namespace AMControlWinF.Views.SysConfig
                         return;
                     }
 
-                    await ReloadAsync(dialog.ResultEntity.PlcName, dialog.ResultEntity.Name);
+                    await ReloadCoreAsync(dialog.ResultEntity.PlcName, dialog.ResultEntity.Name);
                 }
                 finally
                 {
@@ -452,7 +469,7 @@ namespace AMControlWinF.Views.SysConfig
                     return;
                 }
 
-                await ReloadAsync(null, null);
+                await ReloadCoreAsync(null, null);
             }
             finally
             {
@@ -494,7 +511,7 @@ namespace AMControlWinF.Views.SysConfig
                     return;
                 }
 
-                await ReloadAsync(stationName, null);
+                await ReloadCoreAsync(stationName, null);
             }
             finally
             {

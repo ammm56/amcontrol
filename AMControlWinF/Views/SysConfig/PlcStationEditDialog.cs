@@ -11,12 +11,11 @@ namespace AMControlWinF.Views.SysConfig
 {
     /// <summary>
     /// PLC 站新增/编辑对话框。
-    /// 风格与现有 UserEditDialog 保持一致：
+    /// 采用运控配置页统一风格：
     /// - 纹理背景
-    /// - 中央大卡片
     /// - 顶部标题说明
-    /// - 中间滚动表单区
-    /// - 底部右对齐按钮栏
+    /// - 中间横向四列参数区
+    /// - 底部固定按钮区
     /// </summary>
     public partial class PlcStationEditDialog : AntdUI.Window
     {
@@ -36,9 +35,6 @@ namespace AMControlWinF.Views.SysConfig
             ApplyConnectionMode();
         }
 
-        /// <summary>
-        /// 是否新增模式。
-        /// </summary>
         public bool IsCreateMode
         {
             get { return _isCreateMode; }
@@ -49,14 +45,8 @@ namespace AMControlWinF.Views.SysConfig
             }
         }
 
-        /// <summary>
-        /// 保存成功后的结果实体。
-        /// </summary>
         public PlcStationConfigEntity ResultEntity { get; private set; }
 
-        /// <summary>
-        /// 装载待编辑实体；传 null 表示新增。
-        /// </summary>
         public void SetEntity(PlcStationConfigEntity entity)
         {
             if (entity == null)
@@ -68,30 +58,41 @@ namespace AMControlWinF.Views.SysConfig
                 _model.LoadFrom(entity);
             }
 
-            ApplyEditorToUi();
+            ApplyModelToUi();
             ApplyConnectionMode();
         }
 
         private void InitializeDropdowns()
         {
             dropdownConnectionType.Items.Clear();
-            dropdownConnectionType.Items.AddRange(PlcStationEditorModel.ConnectionTypes.Select(x => (object)x).ToArray());
+            dropdownConnectionType.Items.AddRange(
+                PlcStationEditorModel.ConnectionTypes
+                    .Select(x => (object)x)
+                    .ToArray());
 
             dropdownProtocolType.Items.Clear();
-            dropdownProtocolType.Items.AddRange(PlcStationEditorModel.ProtocolTypes.Select(x => (object)x).ToArray());
+            dropdownProtocolType.Items.AddRange(
+                PlcStationEditorModel.ProtocolTypes
+                    .Select(x => (object)x)
+                    .ToArray());
 
             dropdownParity.Items.Clear();
-            dropdownParity.Items.AddRange(PlcStationEditorModel.ParityOptions.Select(x => (object)x).ToArray());
+            dropdownParity.Items.AddRange(
+                PlcStationEditorModel.ParityOptions
+                    .Select(x => (object)x)
+                    .ToArray());
 
             dropdownStopBits.Items.Clear();
-            dropdownStopBits.Items.AddRange(PlcStationEditorModel.StopBitsOptions.Select(x => (object)x).ToArray());
+            dropdownStopBits.Items.AddRange(
+                PlcStationEditorModel.StopBitsOptions
+                    .Select(x => (object)x)
+                    .ToArray());
         }
 
         private void BindEvents()
         {
             buttonOk.Click += ButtonOk_Click;
             buttonCancel.Click += ButtonCancel_Click;
-
             dropdownConnectionType.SelectedValueChanged += DropdownConnectionType_SelectedValueChanged;
 
             Shown += PlcStationEditDialog_Shown;
@@ -102,8 +103,16 @@ namespace AMControlWinF.Views.SysConfig
 
         private void PlcStationEditDialog_Shown(object sender, EventArgs e)
         {
-            inputName.Focus();
-            inputName.SelectAll();
+            if (_isCreateMode)
+            {
+                inputName.Focus();
+                inputName.SelectAll();
+            }
+            else
+            {
+                inputDisplayName.Focus();
+                inputDisplayName.SelectAll();
+            }
         }
 
         private void DropdownConnectionType_SelectedValueChanged(object sender, ObjectNEventArgs e)
@@ -113,25 +122,16 @@ namespace AMControlWinF.Views.SysConfig
 
         private void ApplyMode()
         {
-            if (_isCreateMode)
-            {
-                Text = "新增 PLC 站";
-                labelDialogTitle.Text = "新增 PLC 站";
-                labelDialogDescription.Text = "创建 PLC 站连接对象并配置协议、连接参数与扫描周期。";
-                Size = new System.Drawing.Size(680, 860);
-                buttonOk.Text = "保存";
-            }
-            else
-            {
-                Text = "编辑 PLC 站";
-                labelDialogTitle.Text = "编辑 PLC 站";
-                labelDialogDescription.Text = "修改 PLC 站的连接参数、协议类型和运行配置。";
-                Size = new System.Drawing.Size(680, 820);
-                buttonOk.Text = "保存";
-            }
+            Text = _isCreateMode ? "新增 PLC 站" : "编辑 PLC 站";
+            labelDialogTitle.Text = _isCreateMode ? "新增 PLC 站" : "编辑 PLC 站";
+            labelDialogDescription.Text = _isCreateMode
+                ? "配置 PLC 站的协议、连接参数与运行参数。"
+                : "修改 PLC 站的协议、连接参数与运行参数。";
+
+            buttonOk.Text = "保存";
         }
 
-        private void ApplyEditorToUi()
+        private void ApplyModelToUi()
         {
             inputName.Text = _model.Name;
             inputDisplayName.Text = _model.DisplayName;
@@ -143,11 +143,9 @@ namespace AMControlWinF.Views.SysConfig
 
             inputIpAddress.Text = _model.IpAddress;
             inputPort.Text = _model.PortText;
-
             inputComPort.Text = _model.ComPort;
             inputBaudRate.Text = _model.BaudRateText;
             inputDataBits.Text = _model.DataBitsText;
-
             SetSelectValue(dropdownParity, _model.Parity);
             SetSelectValue(dropdownStopBits, _model.StopBits);
 
@@ -161,13 +159,12 @@ namespace AMControlWinF.Views.SysConfig
             inputReconnectIntervalMs.Text = _model.ReconnectIntervalMsText;
             inputScanIntervalMs.Text = _model.ScanIntervalMsText;
             inputSortOrder.Text = _model.SortOrderText;
-
-            checkEnabled.Checked = _model.IsEnabled;
             inputDescription.Text = _model.Description;
             inputRemark.Text = _model.Remark;
+            checkEnabled.Checked = _model.IsEnabled;
         }
 
-        private void SyncUiToModel()
+        private void ApplyUiToModel()
         {
             _model.Name = inputName.Text;
             _model.DisplayName = inputDisplayName.Text;
@@ -179,11 +176,9 @@ namespace AMControlWinF.Views.SysConfig
 
             _model.IpAddress = inputIpAddress.Text;
             _model.PortText = inputPort.Text;
-
             _model.ComPort = inputComPort.Text;
             _model.BaudRateText = inputBaudRate.Text;
             _model.DataBitsText = inputDataBits.Text;
-
             _model.Parity = GetSelectValue(dropdownParity);
             _model.StopBits = GetSelectValue(dropdownStopBits);
 
@@ -197,10 +192,9 @@ namespace AMControlWinF.Views.SysConfig
             _model.ReconnectIntervalMsText = inputReconnectIntervalMs.Text;
             _model.ScanIntervalMsText = inputScanIntervalMs.Text;
             _model.SortOrderText = inputSortOrder.Text;
-
-            _model.IsEnabled = checkEnabled.Checked;
             _model.Description = inputDescription.Text;
             _model.Remark = inputRemark.Text;
+            _model.IsEnabled = checkEnabled.Checked;
         }
 
         private void ApplyConnectionMode()
@@ -222,7 +216,7 @@ namespace AMControlWinF.Views.SysConfig
 
         private void ButtonOk_Click(object sender, EventArgs e)
         {
-            SyncUiToModel();
+            ApplyUiToModel();
 
             var result = _model.BuildEntity();
             if (!result.Success || result.Item == null)

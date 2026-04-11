@@ -12,49 +12,39 @@
             base.Dispose(disposing);
         }
 
-        #region Windows Form Designer generated code
-
         private void InitializeComponent()
         {
             this.textureBackgroundDialog = new AMControlWinF.Views.Main.TextureBackgroundControl();
             this.panelShell = new AntdUI.Panel();
             this.panelContent = new AntdUI.Panel();
-            this.stackFormRows = new AntdUI.StackPanel();
-            this.panelRowRemark = new AntdUI.Panel();
+            this.gridMainSections = new AntdUI.GridPanel();
+            this.stackSectionRemark = new AntdUI.StackPanel();
             this.inputRemark = new AntdUI.Input();
             this.labelRemark = new AntdUI.Label();
-            this.panelRowDescription = new AntdUI.Panel();
             this.inputDescription = new AntdUI.Input();
             this.labelDescription = new AntdUI.Label();
-            this.panelRowEnabled = new AntdUI.Panel();
-            this.flowEnabledHost = new AntdUI.FlowPanel();
-            this.checkEnabled = new AntdUI.Checkbox();
-            this.labelEnabled = new AntdUI.Label();
-            this.panelRowSortOrder = new AntdUI.Panel();
             this.inputSortOrder = new AntdUI.Input();
             this.labelSortOrder = new AntdUI.Label();
-            this.panelRowScanIntervalMs = new AntdUI.Panel();
+            this.checkEnabled = new AntdUI.Checkbox();
+            this.labelEnabled = new AntdUI.Label();
+            this.labelSectionRemark = new AntdUI.Label();
+            this.stackSectionRuntime = new AntdUI.StackPanel();
             this.inputScanIntervalMs = new AntdUI.Input();
             this.labelScanIntervalMs = new AntdUI.Label();
-            this.panelRowReconnectIntervalMs = new AntdUI.Panel();
             this.inputReconnectIntervalMs = new AntdUI.Input();
             this.labelReconnectIntervalMs = new AntdUI.Label();
-            this.panelRowTimeoutMs = new AntdUI.Panel();
             this.inputTimeoutMs = new AntdUI.Input();
             this.labelTimeoutMs = new AntdUI.Label();
-            this.panelRowSlot = new AntdUI.Panel();
             this.inputSlot = new AntdUI.Input();
             this.labelSlot = new AntdUI.Label();
-            this.panelRowRack = new AntdUI.Panel();
             this.inputRack = new AntdUI.Input();
             this.labelRack = new AntdUI.Label();
-            this.panelRowPcNo = new AntdUI.Panel();
+            this.labelSectionRuntime = new AntdUI.Label();
+            this.stackSectionAddress = new AntdUI.StackPanel();
             this.inputPcNo = new AntdUI.Input();
             this.labelPcNo = new AntdUI.Label();
-            this.panelRowNetworkNo = new AntdUI.Panel();
             this.inputNetworkNo = new AntdUI.Input();
             this.labelNetworkNo = new AntdUI.Label();
-            this.panelRowStationNo = new AntdUI.Panel();
             this.inputStationNo = new AntdUI.Input();
             this.labelStationNo = new AntdUI.Label();
             this.panelRowStopBits = new AntdUI.Panel();
@@ -78,24 +68,23 @@
             this.panelRowIpAddress = new AntdUI.Panel();
             this.inputIpAddress = new AntdUI.Input();
             this.labelIpAddress = new AntdUI.Label();
+            this.labelSectionAddress = new AntdUI.Label();
+            this.stackSectionBasic = new AntdUI.StackPanel();
             this.panelRowProtocolType = new AntdUI.Panel();
             this.dropdownProtocolType = new AntdUI.Select();
             this.labelProtocolType = new AntdUI.Label();
             this.panelRowConnectionType = new AntdUI.Panel();
             this.dropdownConnectionType = new AntdUI.Select();
             this.labelConnectionType = new AntdUI.Label();
-            this.panelRowModel = new AntdUI.Panel();
             this.inputModel = new AntdUI.Input();
             this.labelModel = new AntdUI.Label();
-            this.panelRowVendor = new AntdUI.Panel();
             this.inputVendor = new AntdUI.Input();
             this.labelVendor = new AntdUI.Label();
-            this.panelRowDisplayName = new AntdUI.Panel();
             this.inputDisplayName = new AntdUI.Input();
             this.labelDisplayName = new AntdUI.Label();
-            this.panelRowName = new AntdUI.Panel();
             this.inputName = new AntdUI.Input();
             this.labelName = new AntdUI.Label();
+            this.labelSectionBasic = new AntdUI.Label();
             this.panelFooter = new AntdUI.Panel();
             this.flowFooterButtons = new AntdUI.FlowPanel();
             this.buttonOk = new AntdUI.Button();
@@ -108,20 +97,10 @@
             this.textureBackgroundDialog.SuspendLayout();
             this.panelShell.SuspendLayout();
             this.panelContent.SuspendLayout();
-            this.stackFormRows.SuspendLayout();
-            this.panelRowRemark.SuspendLayout();
-            this.panelRowDescription.SuspendLayout();
-            this.panelRowEnabled.SuspendLayout();
-            this.flowEnabledHost.SuspendLayout();
-            this.panelRowSortOrder.SuspendLayout();
-            this.panelRowScanIntervalMs.SuspendLayout();
-            this.panelRowReconnectIntervalMs.SuspendLayout();
-            this.panelRowTimeoutMs.SuspendLayout();
-            this.panelRowSlot.SuspendLayout();
-            this.panelRowRack.SuspendLayout();
-            this.panelRowPcNo.SuspendLayout();
-            this.panelRowNetworkNo.SuspendLayout();
-            this.panelRowStationNo.SuspendLayout();
+            this.gridMainSections.SuspendLayout();
+            this.stackSectionRemark.SuspendLayout();
+            this.stackSectionRuntime.SuspendLayout();
+            this.stackSectionAddress.SuspendLayout();
             this.panelRowStopBits.SuspendLayout();
             this.panelRowParity.SuspendLayout();
             this.panelRowDataBits.SuspendLayout();
@@ -129,12 +108,9 @@
             this.panelRowComPort.SuspendLayout();
             this.panelRowPort.SuspendLayout();
             this.panelRowIpAddress.SuspendLayout();
+            this.stackSectionBasic.SuspendLayout();
             this.panelRowProtocolType.SuspendLayout();
             this.panelRowConnectionType.SuspendLayout();
-            this.panelRowModel.SuspendLayout();
-            this.panelRowVendor.SuspendLayout();
-            this.panelRowDisplayName.SuspendLayout();
-            this.panelRowName.SuspendLayout();
             this.panelFooter.SuspendLayout();
             this.flowFooterButtons.SuspendLayout();
             this.panelHeader.SuspendLayout();
@@ -149,7 +125,7 @@
             this.textureBackgroundDialog.Location = new System.Drawing.Point(0, 0);
             this.textureBackgroundDialog.Margin = new System.Windows.Forms.Padding(0);
             this.textureBackgroundDialog.Name = "textureBackgroundDialog";
-            this.textureBackgroundDialog.Size = new System.Drawing.Size(680, 820);
+            this.textureBackgroundDialog.Size = new System.Drawing.Size(1080, 660);
             this.textureBackgroundDialog.TabIndex = 0;
             // 
             // panelShell
@@ -165,471 +141,370 @@
             this.panelShell.Padding = new System.Windows.Forms.Padding(12);
             this.panelShell.Radius = 16;
             this.panelShell.Shadow = 16;
+            this.panelShell.ShadowOpacity = 0.2F;
             this.panelShell.ShadowOpacityAnimation = true;
-            this.panelShell.ShadowOpacityHover = 0.2F;
-            this.panelShell.Size = new System.Drawing.Size(680, 820);
+            this.panelShell.Size = new System.Drawing.Size(1080, 660);
             this.panelShell.TabIndex = 0;
             // 
             // panelContent
             // 
-            this.panelContent.Controls.Add(this.stackFormRows);
+            this.panelContent.Controls.Add(this.gridMainSections);
             this.panelContent.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelContent.Location = new System.Drawing.Point(28, 84);
             this.panelContent.Margin = new System.Windows.Forms.Padding(0);
             this.panelContent.Name = "panelContent";
             this.panelContent.Padding = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.panelContent.Radius = 0;
-            this.panelContent.Size = new System.Drawing.Size(624, 651);
+            this.panelContent.Size = new System.Drawing.Size(1024, 463);
             this.panelContent.TabIndex = 1;
             // 
-            // stackFormRows
+            // gridMainSections
             // 
-            this.stackFormRows.AutoScroll = true;
-            this.stackFormRows.Controls.Add(this.panelRowRemark);
-            this.stackFormRows.Controls.Add(this.panelRowDescription);
-            this.stackFormRows.Controls.Add(this.panelRowEnabled);
-            this.stackFormRows.Controls.Add(this.panelRowSortOrder);
-            this.stackFormRows.Controls.Add(this.panelRowScanIntervalMs);
-            this.stackFormRows.Controls.Add(this.panelRowReconnectIntervalMs);
-            this.stackFormRows.Controls.Add(this.panelRowTimeoutMs);
-            this.stackFormRows.Controls.Add(this.panelRowSlot);
-            this.stackFormRows.Controls.Add(this.panelRowRack);
-            this.stackFormRows.Controls.Add(this.panelRowPcNo);
-            this.stackFormRows.Controls.Add(this.panelRowNetworkNo);
-            this.stackFormRows.Controls.Add(this.panelRowStationNo);
-            this.stackFormRows.Controls.Add(this.panelRowStopBits);
-            this.stackFormRows.Controls.Add(this.panelRowParity);
-            this.stackFormRows.Controls.Add(this.panelRowDataBits);
-            this.stackFormRows.Controls.Add(this.panelRowBaudRate);
-            this.stackFormRows.Controls.Add(this.panelRowComPort);
-            this.stackFormRows.Controls.Add(this.panelRowPort);
-            this.stackFormRows.Controls.Add(this.panelRowIpAddress);
-            this.stackFormRows.Controls.Add(this.panelRowProtocolType);
-            this.stackFormRows.Controls.Add(this.panelRowConnectionType);
-            this.stackFormRows.Controls.Add(this.panelRowModel);
-            this.stackFormRows.Controls.Add(this.panelRowVendor);
-            this.stackFormRows.Controls.Add(this.panelRowDisplayName);
-            this.stackFormRows.Controls.Add(this.panelRowName);
-            this.stackFormRows.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.stackFormRows.Gap = 4;
-            this.stackFormRows.Location = new System.Drawing.Point(4, 0);
-            this.stackFormRows.Margin = new System.Windows.Forms.Padding(0);
-            this.stackFormRows.Name = "stackFormRows";
-            this.stackFormRows.Size = new System.Drawing.Size(616, 651);
-            this.stackFormRows.TabIndex = 0;
-            this.stackFormRows.Text = "stackFormRows";
-            this.stackFormRows.Vertical = true;
+            this.gridMainSections.Controls.Add(this.stackSectionRemark);
+            this.gridMainSections.Controls.Add(this.stackSectionRuntime);
+            this.gridMainSections.Controls.Add(this.stackSectionAddress);
+            this.gridMainSections.Controls.Add(this.stackSectionBasic);
+            this.gridMainSections.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.gridMainSections.Location = new System.Drawing.Point(4, 0);
+            this.gridMainSections.Margin = new System.Windows.Forms.Padding(0);
+            this.gridMainSections.Name = "gridMainSections";
+            this.gridMainSections.Size = new System.Drawing.Size(1016, 463);
+            this.gridMainSections.Span = "25% 25% 25% 25%";
+            this.gridMainSections.TabIndex = 0;
+            this.gridMainSections.Text = "gridMainSections";
             // 
-            // panelRowRemark
+            // stackSectionRemark
             // 
-            this.panelRowRemark.Controls.Add(this.inputRemark);
-            this.panelRowRemark.Controls.Add(this.labelRemark);
-            this.panelRowRemark.Location = new System.Drawing.Point(0, 1440);
-            this.panelRowRemark.Margin = new System.Windows.Forms.Padding(0);
-            this.panelRowRemark.Name = "panelRowRemark";
-            this.panelRowRemark.Radius = 0;
-            this.panelRowRemark.Size = new System.Drawing.Size(616, 92);
-            this.panelRowRemark.TabIndex = 24;
+            this.stackSectionRemark.Controls.Add(this.inputRemark);
+            this.stackSectionRemark.Controls.Add(this.labelRemark);
+            this.stackSectionRemark.Controls.Add(this.inputDescription);
+            this.stackSectionRemark.Controls.Add(this.labelDescription);
+            this.stackSectionRemark.Controls.Add(this.inputSortOrder);
+            this.stackSectionRemark.Controls.Add(this.labelSortOrder);
+            this.stackSectionRemark.Controls.Add(this.checkEnabled);
+            this.stackSectionRemark.Controls.Add(this.labelEnabled);
+            this.stackSectionRemark.Controls.Add(this.labelSectionRemark);
+            this.stackSectionRemark.Gap = 4;
+            this.stackSectionRemark.Location = new System.Drawing.Point(762, 0);
+            this.stackSectionRemark.Margin = new System.Windows.Forms.Padding(0);
+            this.stackSectionRemark.Name = "stackSectionRemark";
+            this.stackSectionRemark.Padding = new System.Windows.Forms.Padding(4);
+            this.stackSectionRemark.Size = new System.Drawing.Size(254, 463);
+            this.stackSectionRemark.TabIndex = 3;
+            this.stackSectionRemark.Text = "stackSectionRemark";
+            this.stackSectionRemark.Vertical = true;
             // 
             // inputRemark
             // 
-            this.inputRemark.AutoScroll = true;
-            this.inputRemark.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.inputRemark.Location = new System.Drawing.Point(0, 26);
+            this.inputRemark.Location = new System.Drawing.Point(4, 336);
             this.inputRemark.Margin = new System.Windows.Forms.Padding(0);
             this.inputRemark.Multiline = true;
             this.inputRemark.Name = "inputRemark";
-            this.inputRemark.PlaceholderText = "请输入备注（可选）";
-            this.inputRemark.Size = new System.Drawing.Size(616, 66);
-            this.inputRemark.TabIndex = 1;
+            this.inputRemark.PlaceholderText = "请输入备注";
+            this.inputRemark.Size = new System.Drawing.Size(246, 90);
+            this.inputRemark.TabIndex = 8;
             this.inputRemark.WaveSize = 0;
             // 
             // labelRemark
             // 
-            this.labelRemark.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelRemark.Location = new System.Drawing.Point(0, 0);
+            this.labelRemark.Location = new System.Drawing.Point(4, 310);
             this.labelRemark.Margin = new System.Windows.Forms.Padding(0);
             this.labelRemark.Name = "labelRemark";
-            this.labelRemark.Size = new System.Drawing.Size(616, 22);
-            this.labelRemark.TabIndex = 0;
+            this.labelRemark.Size = new System.Drawing.Size(246, 22);
+            this.labelRemark.TabIndex = 7;
             this.labelRemark.Text = "备注";
-            // 
-            // panelRowDescription
-            // 
-            this.panelRowDescription.Controls.Add(this.inputDescription);
-            this.panelRowDescription.Controls.Add(this.labelDescription);
-            this.panelRowDescription.Location = new System.Drawing.Point(0, 1344);
-            this.panelRowDescription.Margin = new System.Windows.Forms.Padding(0);
-            this.panelRowDescription.Name = "panelRowDescription";
-            this.panelRowDescription.Radius = 0;
-            this.panelRowDescription.Size = new System.Drawing.Size(616, 92);
-            this.panelRowDescription.TabIndex = 23;
             // 
             // inputDescription
             // 
-            this.inputDescription.AutoScroll = true;
-            this.inputDescription.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.inputDescription.Location = new System.Drawing.Point(0, 26);
+            this.inputDescription.Location = new System.Drawing.Point(4, 216);
             this.inputDescription.Margin = new System.Windows.Forms.Padding(0);
             this.inputDescription.Multiline = true;
             this.inputDescription.Name = "inputDescription";
-            this.inputDescription.PlaceholderText = "请输入描述（可选）";
-            this.inputDescription.Size = new System.Drawing.Size(616, 66);
-            this.inputDescription.TabIndex = 1;
+            this.inputDescription.PlaceholderText = "请输入描述";
+            this.inputDescription.Size = new System.Drawing.Size(246, 90);
+            this.inputDescription.TabIndex = 6;
             this.inputDescription.WaveSize = 0;
             // 
             // labelDescription
             // 
-            this.labelDescription.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelDescription.Location = new System.Drawing.Point(0, 0);
+            this.labelDescription.Location = new System.Drawing.Point(4, 190);
             this.labelDescription.Margin = new System.Windows.Forms.Padding(0);
             this.labelDescription.Name = "labelDescription";
-            this.labelDescription.Size = new System.Drawing.Size(616, 22);
-            this.labelDescription.TabIndex = 0;
+            this.labelDescription.Size = new System.Drawing.Size(246, 22);
+            this.labelDescription.TabIndex = 5;
             this.labelDescription.Text = "描述";
             // 
-            // panelRowEnabled
+            // inputSortOrder
             // 
-            this.panelRowEnabled.Controls.Add(this.flowEnabledHost);
-            this.panelRowEnabled.Controls.Add(this.labelEnabled);
-            this.panelRowEnabled.Location = new System.Drawing.Point(0, 1284);
-            this.panelRowEnabled.Margin = new System.Windows.Forms.Padding(0);
-            this.panelRowEnabled.Name = "panelRowEnabled";
-            this.panelRowEnabled.Radius = 0;
-            this.panelRowEnabled.Size = new System.Drawing.Size(616, 56);
-            this.panelRowEnabled.TabIndex = 22;
+            this.inputSortOrder.Location = new System.Drawing.Point(4, 154);
+            this.inputSortOrder.Margin = new System.Windows.Forms.Padding(0);
+            this.inputSortOrder.Name = "inputSortOrder";
+            this.inputSortOrder.PlaceholderText = "请输入排序号";
+            this.inputSortOrder.Size = new System.Drawing.Size(246, 32);
+            this.inputSortOrder.TabIndex = 4;
+            this.inputSortOrder.WaveSize = 0;
             // 
-            // flowEnabledHost
+            // labelSortOrder
             // 
-            this.flowEnabledHost.Controls.Add(this.checkEnabled);
-            this.flowEnabledHost.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flowEnabledHost.Location = new System.Drawing.Point(0, 22);
-            this.flowEnabledHost.Margin = new System.Windows.Forms.Padding(0);
-            this.flowEnabledHost.Name = "flowEnabledHost";
-            this.flowEnabledHost.Size = new System.Drawing.Size(616, 34);
-            this.flowEnabledHost.TabIndex = 1;
-            this.flowEnabledHost.Text = "flowEnabledHost";
+            this.labelSortOrder.Location = new System.Drawing.Point(4, 128);
+            this.labelSortOrder.Margin = new System.Windows.Forms.Padding(0);
+            this.labelSortOrder.Name = "labelSortOrder";
+            this.labelSortOrder.Size = new System.Drawing.Size(246, 22);
+            this.labelSortOrder.TabIndex = 3;
+            this.labelSortOrder.Text = "排序号";
             // 
             // checkEnabled
             // 
             this.checkEnabled.AutoSizeMode = AntdUI.TAutoSize.Auto;
             this.checkEnabled.Checked = true;
             this.checkEnabled.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkEnabled.Location = new System.Drawing.Point(0, 0);
+            this.checkEnabled.Location = new System.Drawing.Point(4, 90);
             this.checkEnabled.Margin = new System.Windows.Forms.Padding(0);
             this.checkEnabled.Name = "checkEnabled";
-            this.checkEnabled.Size = new System.Drawing.Size(61, 34);
-            this.checkEnabled.TabIndex = 0;
-            this.checkEnabled.Text = "启用";
+            this.checkEnabled.Size = new System.Drawing.Size(77, 34);
+            this.checkEnabled.TabIndex = 2;
+            this.checkEnabled.Text = "启用站";
             // 
             // labelEnabled
             // 
-            this.labelEnabled.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelEnabled.Location = new System.Drawing.Point(0, 0);
+            this.labelEnabled.Location = new System.Drawing.Point(4, 64);
             this.labelEnabled.Margin = new System.Windows.Forms.Padding(0);
             this.labelEnabled.Name = "labelEnabled";
-            this.labelEnabled.Size = new System.Drawing.Size(616, 22);
-            this.labelEnabled.TabIndex = 0;
+            this.labelEnabled.Size = new System.Drawing.Size(246, 22);
+            this.labelEnabled.TabIndex = 1;
             this.labelEnabled.Text = "启用状态";
             // 
-            // panelRowSortOrder
+            // labelSectionRemark
             // 
-            this.panelRowSortOrder.Controls.Add(this.inputSortOrder);
-            this.panelRowSortOrder.Controls.Add(this.labelSortOrder);
-            this.panelRowSortOrder.Location = new System.Drawing.Point(0, 1224);
-            this.panelRowSortOrder.Margin = new System.Windows.Forms.Padding(0);
-            this.panelRowSortOrder.Name = "panelRowSortOrder";
-            this.panelRowSortOrder.Radius = 0;
-            this.panelRowSortOrder.Size = new System.Drawing.Size(616, 56);
-            this.panelRowSortOrder.TabIndex = 21;
+            this.labelSectionRemark.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Bold);
+            this.labelSectionRemark.Location = new System.Drawing.Point(4, 4);
+            this.labelSectionRemark.Margin = new System.Windows.Forms.Padding(0);
+            this.labelSectionRemark.Name = "labelSectionRemark";
+            this.labelSectionRemark.Size = new System.Drawing.Size(246, 26);
+            this.labelSectionRemark.TabIndex = 0;
+            this.labelSectionRemark.Text = "运行与说明";
             // 
-            // inputSortOrder
+            // stackSectionRuntime
             // 
-            this.inputSortOrder.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.inputSortOrder.Location = new System.Drawing.Point(0, 20);
-            this.inputSortOrder.Margin = new System.Windows.Forms.Padding(0);
-            this.inputSortOrder.Name = "inputSortOrder";
-            this.inputSortOrder.PlaceholderText = "请输入排序号";
-            this.inputSortOrder.Size = new System.Drawing.Size(616, 36);
-            this.inputSortOrder.TabIndex = 1;
-            this.inputSortOrder.WaveSize = 0;
-            // 
-            // labelSortOrder
-            // 
-            this.labelSortOrder.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelSortOrder.Location = new System.Drawing.Point(0, 0);
-            this.labelSortOrder.Margin = new System.Windows.Forms.Padding(0);
-            this.labelSortOrder.Name = "labelSortOrder";
-            this.labelSortOrder.Size = new System.Drawing.Size(616, 22);
-            this.labelSortOrder.TabIndex = 0;
-            this.labelSortOrder.Text = "排序号";
-            // 
-            // panelRowScanIntervalMs
-            // 
-            this.panelRowScanIntervalMs.Controls.Add(this.inputScanIntervalMs);
-            this.panelRowScanIntervalMs.Controls.Add(this.labelScanIntervalMs);
-            this.panelRowScanIntervalMs.Location = new System.Drawing.Point(0, 1164);
-            this.panelRowScanIntervalMs.Margin = new System.Windows.Forms.Padding(0);
-            this.panelRowScanIntervalMs.Name = "panelRowScanIntervalMs";
-            this.panelRowScanIntervalMs.Radius = 0;
-            this.panelRowScanIntervalMs.Size = new System.Drawing.Size(616, 56);
-            this.panelRowScanIntervalMs.TabIndex = 20;
+            this.stackSectionRuntime.Controls.Add(this.inputScanIntervalMs);
+            this.stackSectionRuntime.Controls.Add(this.labelScanIntervalMs);
+            this.stackSectionRuntime.Controls.Add(this.inputReconnectIntervalMs);
+            this.stackSectionRuntime.Controls.Add(this.labelReconnectIntervalMs);
+            this.stackSectionRuntime.Controls.Add(this.inputTimeoutMs);
+            this.stackSectionRuntime.Controls.Add(this.labelTimeoutMs);
+            this.stackSectionRuntime.Controls.Add(this.inputSlot);
+            this.stackSectionRuntime.Controls.Add(this.labelSlot);
+            this.stackSectionRuntime.Controls.Add(this.inputRack);
+            this.stackSectionRuntime.Controls.Add(this.labelRack);
+            this.stackSectionRuntime.Controls.Add(this.labelSectionRuntime);
+            this.stackSectionRuntime.Gap = 4;
+            this.stackSectionRuntime.Location = new System.Drawing.Point(508, 0);
+            this.stackSectionRuntime.Margin = new System.Windows.Forms.Padding(0);
+            this.stackSectionRuntime.Name = "stackSectionRuntime";
+            this.stackSectionRuntime.Padding = new System.Windows.Forms.Padding(4);
+            this.stackSectionRuntime.Size = new System.Drawing.Size(254, 463);
+            this.stackSectionRuntime.TabIndex = 2;
+            this.stackSectionRuntime.Text = "stackSectionRuntime";
+            this.stackSectionRuntime.Vertical = true;
             // 
             // inputScanIntervalMs
             // 
-            this.inputScanIntervalMs.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.inputScanIntervalMs.Location = new System.Drawing.Point(0, 20);
+            this.inputScanIntervalMs.Location = new System.Drawing.Point(4, 278);
             this.inputScanIntervalMs.Margin = new System.Windows.Forms.Padding(0);
             this.inputScanIntervalMs.Name = "inputScanIntervalMs";
-            this.inputScanIntervalMs.PlaceholderText = "请输入扫描周期(ms)";
-            this.inputScanIntervalMs.Size = new System.Drawing.Size(616, 36);
-            this.inputScanIntervalMs.TabIndex = 1;
+            this.inputScanIntervalMs.PlaceholderText = "请输入扫描周期";
+            this.inputScanIntervalMs.Size = new System.Drawing.Size(246, 32);
+            this.inputScanIntervalMs.TabIndex = 10;
             this.inputScanIntervalMs.WaveSize = 0;
             // 
             // labelScanIntervalMs
             // 
-            this.labelScanIntervalMs.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelScanIntervalMs.Location = new System.Drawing.Point(0, 0);
+            this.labelScanIntervalMs.Location = new System.Drawing.Point(4, 252);
             this.labelScanIntervalMs.Margin = new System.Windows.Forms.Padding(0);
             this.labelScanIntervalMs.Name = "labelScanIntervalMs";
-            this.labelScanIntervalMs.Size = new System.Drawing.Size(616, 22);
-            this.labelScanIntervalMs.TabIndex = 0;
+            this.labelScanIntervalMs.Size = new System.Drawing.Size(246, 22);
+            this.labelScanIntervalMs.TabIndex = 9;
             this.labelScanIntervalMs.Text = "扫描周期(ms)";
-            // 
-            // panelRowReconnectIntervalMs
-            // 
-            this.panelRowReconnectIntervalMs.Controls.Add(this.inputReconnectIntervalMs);
-            this.panelRowReconnectIntervalMs.Controls.Add(this.labelReconnectIntervalMs);
-            this.panelRowReconnectIntervalMs.Location = new System.Drawing.Point(0, 1104);
-            this.panelRowReconnectIntervalMs.Margin = new System.Windows.Forms.Padding(0);
-            this.panelRowReconnectIntervalMs.Name = "panelRowReconnectIntervalMs";
-            this.panelRowReconnectIntervalMs.Radius = 0;
-            this.panelRowReconnectIntervalMs.Size = new System.Drawing.Size(616, 56);
-            this.panelRowReconnectIntervalMs.TabIndex = 19;
             // 
             // inputReconnectIntervalMs
             // 
-            this.inputReconnectIntervalMs.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.inputReconnectIntervalMs.Location = new System.Drawing.Point(0, 20);
+            this.inputReconnectIntervalMs.Location = new System.Drawing.Point(4, 216);
             this.inputReconnectIntervalMs.Margin = new System.Windows.Forms.Padding(0);
             this.inputReconnectIntervalMs.Name = "inputReconnectIntervalMs";
-            this.inputReconnectIntervalMs.PlaceholderText = "请输入重连周期(ms)";
-            this.inputReconnectIntervalMs.Size = new System.Drawing.Size(616, 36);
-            this.inputReconnectIntervalMs.TabIndex = 1;
+            this.inputReconnectIntervalMs.PlaceholderText = "请输入重连周期";
+            this.inputReconnectIntervalMs.Size = new System.Drawing.Size(246, 32);
+            this.inputReconnectIntervalMs.TabIndex = 8;
             this.inputReconnectIntervalMs.WaveSize = 0;
             // 
             // labelReconnectIntervalMs
             // 
-            this.labelReconnectIntervalMs.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelReconnectIntervalMs.Location = new System.Drawing.Point(0, 0);
+            this.labelReconnectIntervalMs.Location = new System.Drawing.Point(4, 190);
             this.labelReconnectIntervalMs.Margin = new System.Windows.Forms.Padding(0);
             this.labelReconnectIntervalMs.Name = "labelReconnectIntervalMs";
-            this.labelReconnectIntervalMs.Size = new System.Drawing.Size(616, 22);
-            this.labelReconnectIntervalMs.TabIndex = 0;
+            this.labelReconnectIntervalMs.Size = new System.Drawing.Size(246, 22);
+            this.labelReconnectIntervalMs.TabIndex = 7;
             this.labelReconnectIntervalMs.Text = "重连周期(ms)";
-            // 
-            // panelRowTimeoutMs
-            // 
-            this.panelRowTimeoutMs.Controls.Add(this.inputTimeoutMs);
-            this.panelRowTimeoutMs.Controls.Add(this.labelTimeoutMs);
-            this.panelRowTimeoutMs.Location = new System.Drawing.Point(0, 1044);
-            this.panelRowTimeoutMs.Margin = new System.Windows.Forms.Padding(0);
-            this.panelRowTimeoutMs.Name = "panelRowTimeoutMs";
-            this.panelRowTimeoutMs.Radius = 0;
-            this.panelRowTimeoutMs.Size = new System.Drawing.Size(616, 56);
-            this.panelRowTimeoutMs.TabIndex = 18;
             // 
             // inputTimeoutMs
             // 
-            this.inputTimeoutMs.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.inputTimeoutMs.Location = new System.Drawing.Point(0, 20);
+            this.inputTimeoutMs.Location = new System.Drawing.Point(4, 154);
             this.inputTimeoutMs.Margin = new System.Windows.Forms.Padding(0);
             this.inputTimeoutMs.Name = "inputTimeoutMs";
-            this.inputTimeoutMs.PlaceholderText = "请输入通讯超时(ms)";
-            this.inputTimeoutMs.Size = new System.Drawing.Size(616, 36);
-            this.inputTimeoutMs.TabIndex = 1;
+            this.inputTimeoutMs.PlaceholderText = "请输入通讯超时";
+            this.inputTimeoutMs.Size = new System.Drawing.Size(246, 32);
+            this.inputTimeoutMs.TabIndex = 6;
             this.inputTimeoutMs.WaveSize = 0;
             // 
             // labelTimeoutMs
             // 
-            this.labelTimeoutMs.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelTimeoutMs.Location = new System.Drawing.Point(0, 0);
+            this.labelTimeoutMs.Location = new System.Drawing.Point(4, 128);
             this.labelTimeoutMs.Margin = new System.Windows.Forms.Padding(0);
             this.labelTimeoutMs.Name = "labelTimeoutMs";
-            this.labelTimeoutMs.Size = new System.Drawing.Size(616, 22);
-            this.labelTimeoutMs.TabIndex = 0;
+            this.labelTimeoutMs.Size = new System.Drawing.Size(246, 22);
+            this.labelTimeoutMs.TabIndex = 5;
             this.labelTimeoutMs.Text = "通讯超时(ms)";
-            // 
-            // panelRowSlot
-            // 
-            this.panelRowSlot.Controls.Add(this.inputSlot);
-            this.panelRowSlot.Controls.Add(this.labelSlot);
-            this.panelRowSlot.Location = new System.Drawing.Point(0, 984);
-            this.panelRowSlot.Margin = new System.Windows.Forms.Padding(0);
-            this.panelRowSlot.Name = "panelRowSlot";
-            this.panelRowSlot.Radius = 0;
-            this.panelRowSlot.Size = new System.Drawing.Size(616, 56);
-            this.panelRowSlot.TabIndex = 17;
             // 
             // inputSlot
             // 
-            this.inputSlot.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.inputSlot.Location = new System.Drawing.Point(0, 20);
+            this.inputSlot.Location = new System.Drawing.Point(4, 92);
             this.inputSlot.Margin = new System.Windows.Forms.Padding(0);
             this.inputSlot.Name = "inputSlot";
-            this.inputSlot.PlaceholderText = "请输入插槽号（可选）";
-            this.inputSlot.Size = new System.Drawing.Size(616, 36);
-            this.inputSlot.TabIndex = 1;
+            this.inputSlot.PlaceholderText = "请输入插槽号";
+            this.inputSlot.Size = new System.Drawing.Size(246, 32);
+            this.inputSlot.TabIndex = 4;
             this.inputSlot.WaveSize = 0;
             // 
             // labelSlot
             // 
-            this.labelSlot.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelSlot.Location = new System.Drawing.Point(0, 0);
+            this.labelSlot.Location = new System.Drawing.Point(4, 66);
             this.labelSlot.Margin = new System.Windows.Forms.Padding(0);
             this.labelSlot.Name = "labelSlot";
-            this.labelSlot.Size = new System.Drawing.Size(616, 22);
-            this.labelSlot.TabIndex = 0;
+            this.labelSlot.Size = new System.Drawing.Size(246, 22);
+            this.labelSlot.TabIndex = 3;
             this.labelSlot.Text = "插槽号";
-            // 
-            // panelRowRack
-            // 
-            this.panelRowRack.Controls.Add(this.inputRack);
-            this.panelRowRack.Controls.Add(this.labelRack);
-            this.panelRowRack.Location = new System.Drawing.Point(0, 924);
-            this.panelRowRack.Margin = new System.Windows.Forms.Padding(0);
-            this.panelRowRack.Name = "panelRowRack";
-            this.panelRowRack.Radius = 0;
-            this.panelRowRack.Size = new System.Drawing.Size(616, 56);
-            this.panelRowRack.TabIndex = 16;
             // 
             // inputRack
             // 
-            this.inputRack.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.inputRack.Location = new System.Drawing.Point(0, 20);
+            this.inputRack.Location = new System.Drawing.Point(4, 34);
             this.inputRack.Margin = new System.Windows.Forms.Padding(0);
             this.inputRack.Name = "inputRack";
-            this.inputRack.PlaceholderText = "请输入机架号（可选）";
-            this.inputRack.Size = new System.Drawing.Size(616, 36);
-            this.inputRack.TabIndex = 1;
+            this.inputRack.PlaceholderText = "请输入机架号";
+            this.inputRack.Size = new System.Drawing.Size(246, 32);
+            this.inputRack.TabIndex = 2;
             this.inputRack.WaveSize = 0;
             // 
             // labelRack
             // 
-            this.labelRack.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelRack.Location = new System.Drawing.Point(0, 0);
+            this.labelRack.Location = new System.Drawing.Point(4, 4);
             this.labelRack.Margin = new System.Windows.Forms.Padding(0);
             this.labelRack.Name = "labelRack";
-            this.labelRack.Size = new System.Drawing.Size(616, 22);
-            this.labelRack.TabIndex = 0;
+            this.labelRack.Size = new System.Drawing.Size(246, 22);
+            this.labelRack.TabIndex = 1;
             this.labelRack.Text = "机架号";
             // 
-            // panelRowPcNo
+            // labelSectionRuntime
             // 
-            this.panelRowPcNo.Controls.Add(this.inputPcNo);
-            this.panelRowPcNo.Controls.Add(this.labelPcNo);
-            this.panelRowPcNo.Location = new System.Drawing.Point(0, 864);
-            this.panelRowPcNo.Margin = new System.Windows.Forms.Padding(0);
-            this.panelRowPcNo.Name = "panelRowPcNo";
-            this.panelRowPcNo.Radius = 0;
-            this.panelRowPcNo.Size = new System.Drawing.Size(616, 56);
-            this.panelRowPcNo.TabIndex = 15;
+            this.labelSectionRuntime.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Bold);
+            this.labelSectionRuntime.Location = new System.Drawing.Point(4, 4);
+            this.labelSectionRuntime.Margin = new System.Windows.Forms.Padding(0);
+            this.labelSectionRuntime.Name = "labelSectionRuntime";
+            this.labelSectionRuntime.Size = new System.Drawing.Size(246, 26);
+            this.labelSectionRuntime.TabIndex = 0;
+            this.labelSectionRuntime.Text = "运行参数";
+            // 
+            // stackSectionAddress
+            // 
+            this.stackSectionAddress.Controls.Add(this.inputPcNo);
+            this.stackSectionAddress.Controls.Add(this.labelPcNo);
+            this.stackSectionAddress.Controls.Add(this.inputNetworkNo);
+            this.stackSectionAddress.Controls.Add(this.labelNetworkNo);
+            this.stackSectionAddress.Controls.Add(this.inputStationNo);
+            this.stackSectionAddress.Controls.Add(this.labelStationNo);
+            this.stackSectionAddress.Controls.Add(this.panelRowStopBits);
+            this.stackSectionAddress.Controls.Add(this.panelRowParity);
+            this.stackSectionAddress.Controls.Add(this.panelRowDataBits);
+            this.stackSectionAddress.Controls.Add(this.panelRowBaudRate);
+            this.stackSectionAddress.Controls.Add(this.panelRowComPort);
+            this.stackSectionAddress.Controls.Add(this.panelRowPort);
+            this.stackSectionAddress.Controls.Add(this.panelRowIpAddress);
+            this.stackSectionAddress.Controls.Add(this.labelSectionAddress);
+            this.stackSectionAddress.Gap = 4;
+            this.stackSectionAddress.Location = new System.Drawing.Point(254, 0);
+            this.stackSectionAddress.Margin = new System.Windows.Forms.Padding(0);
+            this.stackSectionAddress.Name = "stackSectionAddress";
+            this.stackSectionAddress.Padding = new System.Windows.Forms.Padding(4);
+            this.stackSectionAddress.Size = new System.Drawing.Size(254, 463);
+            this.stackSectionAddress.TabIndex = 1;
+            this.stackSectionAddress.Text = "stackSectionAddress";
+            this.stackSectionAddress.Vertical = true;
             // 
             // inputPcNo
             // 
-            this.inputPcNo.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.inputPcNo.Location = new System.Drawing.Point(0, 20);
+            this.inputPcNo.Location = new System.Drawing.Point(4, 420);
             this.inputPcNo.Margin = new System.Windows.Forms.Padding(0);
             this.inputPcNo.Name = "inputPcNo";
-            this.inputPcNo.PlaceholderText = "请输入PC号（可选）";
-            this.inputPcNo.Size = new System.Drawing.Size(616, 36);
-            this.inputPcNo.TabIndex = 1;
+            this.inputPcNo.PlaceholderText = "请输入PC号";
+            this.inputPcNo.Size = new System.Drawing.Size(246, 32);
+            this.inputPcNo.TabIndex = 13;
             this.inputPcNo.WaveSize = 0;
             // 
             // labelPcNo
             // 
-            this.labelPcNo.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelPcNo.Location = new System.Drawing.Point(0, 0);
+            this.labelPcNo.Location = new System.Drawing.Point(4, 394);
             this.labelPcNo.Margin = new System.Windows.Forms.Padding(0);
             this.labelPcNo.Name = "labelPcNo";
-            this.labelPcNo.Size = new System.Drawing.Size(616, 22);
-            this.labelPcNo.TabIndex = 0;
+            this.labelPcNo.Size = new System.Drawing.Size(246, 22);
+            this.labelPcNo.TabIndex = 12;
             this.labelPcNo.Text = "PC号";
-            // 
-            // panelRowNetworkNo
-            // 
-            this.panelRowNetworkNo.Controls.Add(this.inputNetworkNo);
-            this.panelRowNetworkNo.Controls.Add(this.labelNetworkNo);
-            this.panelRowNetworkNo.Location = new System.Drawing.Point(0, 804);
-            this.panelRowNetworkNo.Margin = new System.Windows.Forms.Padding(0);
-            this.panelRowNetworkNo.Name = "panelRowNetworkNo";
-            this.panelRowNetworkNo.Radius = 0;
-            this.panelRowNetworkNo.Size = new System.Drawing.Size(616, 56);
-            this.panelRowNetworkNo.TabIndex = 14;
             // 
             // inputNetworkNo
             // 
-            this.inputNetworkNo.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.inputNetworkNo.Location = new System.Drawing.Point(0, 20);
+            this.inputNetworkNo.Location = new System.Drawing.Point(4, 358);
             this.inputNetworkNo.Margin = new System.Windows.Forms.Padding(0);
             this.inputNetworkNo.Name = "inputNetworkNo";
-            this.inputNetworkNo.PlaceholderText = "请输入网络号（可选）";
-            this.inputNetworkNo.Size = new System.Drawing.Size(616, 36);
-            this.inputNetworkNo.TabIndex = 1;
+            this.inputNetworkNo.PlaceholderText = "请输入网络号";
+            this.inputNetworkNo.Size = new System.Drawing.Size(246, 32);
+            this.inputNetworkNo.TabIndex = 11;
             this.inputNetworkNo.WaveSize = 0;
             // 
             // labelNetworkNo
             // 
-            this.labelNetworkNo.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelNetworkNo.Location = new System.Drawing.Point(0, 0);
+            this.labelNetworkNo.Location = new System.Drawing.Point(4, 332);
             this.labelNetworkNo.Margin = new System.Windows.Forms.Padding(0);
             this.labelNetworkNo.Name = "labelNetworkNo";
-            this.labelNetworkNo.Size = new System.Drawing.Size(616, 22);
-            this.labelNetworkNo.TabIndex = 0;
+            this.labelNetworkNo.Size = new System.Drawing.Size(246, 22);
+            this.labelNetworkNo.TabIndex = 10;
             this.labelNetworkNo.Text = "网络号";
-            // 
-            // panelRowStationNo
-            // 
-            this.panelRowStationNo.Controls.Add(this.inputStationNo);
-            this.panelRowStationNo.Controls.Add(this.labelStationNo);
-            this.panelRowStationNo.Location = new System.Drawing.Point(0, 744);
-            this.panelRowStationNo.Margin = new System.Windows.Forms.Padding(0);
-            this.panelRowStationNo.Name = "panelRowStationNo";
-            this.panelRowStationNo.Radius = 0;
-            this.panelRowStationNo.Size = new System.Drawing.Size(616, 56);
-            this.panelRowStationNo.TabIndex = 13;
             // 
             // inputStationNo
             // 
-            this.inputStationNo.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.inputStationNo.Location = new System.Drawing.Point(0, 20);
+            this.inputStationNo.Location = new System.Drawing.Point(4, 296);
             this.inputStationNo.Margin = new System.Windows.Forms.Padding(0);
             this.inputStationNo.Name = "inputStationNo";
-            this.inputStationNo.PlaceholderText = "请输入站号（可选）";
-            this.inputStationNo.Size = new System.Drawing.Size(616, 36);
-            this.inputStationNo.TabIndex = 1;
+            this.inputStationNo.PlaceholderText = "请输入站号";
+            this.inputStationNo.Size = new System.Drawing.Size(246, 32);
+            this.inputStationNo.TabIndex = 9;
             this.inputStationNo.WaveSize = 0;
             // 
             // labelStationNo
             // 
-            this.labelStationNo.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelStationNo.Location = new System.Drawing.Point(0, 0);
+            this.labelStationNo.Location = new System.Drawing.Point(4, 270);
             this.labelStationNo.Margin = new System.Windows.Forms.Padding(0);
             this.labelStationNo.Name = "labelStationNo";
-            this.labelStationNo.Size = new System.Drawing.Size(616, 22);
-            this.labelStationNo.TabIndex = 0;
+            this.labelStationNo.Size = new System.Drawing.Size(246, 22);
+            this.labelStationNo.TabIndex = 8;
             this.labelStationNo.Text = "站号";
             // 
             // panelRowStopBits
             // 
             this.panelRowStopBits.Controls.Add(this.dropdownStopBits);
             this.panelRowStopBits.Controls.Add(this.labelStopBits);
-            this.panelRowStopBits.Location = new System.Drawing.Point(0, 684);
+            this.panelRowStopBits.Location = new System.Drawing.Point(4, 214);
             this.panelRowStopBits.Margin = new System.Windows.Forms.Padding(0);
             this.panelRowStopBits.Name = "panelRowStopBits";
             this.panelRowStopBits.Radius = 0;
-            this.panelRowStopBits.Size = new System.Drawing.Size(616, 56);
-            this.panelRowStopBits.TabIndex = 12;
+            this.panelRowStopBits.Size = new System.Drawing.Size(246, 52);
+            this.panelRowStopBits.TabIndex = 7;
             // 
             // dropdownStopBits
             // 
@@ -637,7 +512,7 @@
             this.dropdownStopBits.Location = new System.Drawing.Point(0, 20);
             this.dropdownStopBits.Margin = new System.Windows.Forms.Padding(0);
             this.dropdownStopBits.Name = "dropdownStopBits";
-            this.dropdownStopBits.Size = new System.Drawing.Size(616, 36);
+            this.dropdownStopBits.Size = new System.Drawing.Size(246, 32);
             this.dropdownStopBits.TabIndex = 1;
             this.dropdownStopBits.WaveSize = 0;
             // 
@@ -647,7 +522,7 @@
             this.labelStopBits.Location = new System.Drawing.Point(0, 0);
             this.labelStopBits.Margin = new System.Windows.Forms.Padding(0);
             this.labelStopBits.Name = "labelStopBits";
-            this.labelStopBits.Size = new System.Drawing.Size(616, 22);
+            this.labelStopBits.Size = new System.Drawing.Size(246, 22);
             this.labelStopBits.TabIndex = 0;
             this.labelStopBits.Text = "停止位";
             // 
@@ -655,12 +530,12 @@
             // 
             this.panelRowParity.Controls.Add(this.dropdownParity);
             this.panelRowParity.Controls.Add(this.labelParity);
-            this.panelRowParity.Location = new System.Drawing.Point(0, 624);
+            this.panelRowParity.Location = new System.Drawing.Point(4, 158);
             this.panelRowParity.Margin = new System.Windows.Forms.Padding(0);
             this.panelRowParity.Name = "panelRowParity";
             this.panelRowParity.Radius = 0;
-            this.panelRowParity.Size = new System.Drawing.Size(616, 56);
-            this.panelRowParity.TabIndex = 11;
+            this.panelRowParity.Size = new System.Drawing.Size(246, 52);
+            this.panelRowParity.TabIndex = 6;
             // 
             // dropdownParity
             // 
@@ -668,7 +543,7 @@
             this.dropdownParity.Location = new System.Drawing.Point(0, 20);
             this.dropdownParity.Margin = new System.Windows.Forms.Padding(0);
             this.dropdownParity.Name = "dropdownParity";
-            this.dropdownParity.Size = new System.Drawing.Size(616, 36);
+            this.dropdownParity.Size = new System.Drawing.Size(246, 32);
             this.dropdownParity.TabIndex = 1;
             this.dropdownParity.WaveSize = 0;
             // 
@@ -678,7 +553,7 @@
             this.labelParity.Location = new System.Drawing.Point(0, 0);
             this.labelParity.Margin = new System.Windows.Forms.Padding(0);
             this.labelParity.Name = "labelParity";
-            this.labelParity.Size = new System.Drawing.Size(616, 22);
+            this.labelParity.Size = new System.Drawing.Size(246, 22);
             this.labelParity.TabIndex = 0;
             this.labelParity.Text = "校验位";
             // 
@@ -686,12 +561,12 @@
             // 
             this.panelRowDataBits.Controls.Add(this.inputDataBits);
             this.panelRowDataBits.Controls.Add(this.labelDataBits);
-            this.panelRowDataBits.Location = new System.Drawing.Point(0, 564);
+            this.panelRowDataBits.Location = new System.Drawing.Point(4, 102);
             this.panelRowDataBits.Margin = new System.Windows.Forms.Padding(0);
             this.panelRowDataBits.Name = "panelRowDataBits";
             this.panelRowDataBits.Radius = 0;
-            this.panelRowDataBits.Size = new System.Drawing.Size(616, 56);
-            this.panelRowDataBits.TabIndex = 10;
+            this.panelRowDataBits.Size = new System.Drawing.Size(246, 52);
+            this.panelRowDataBits.TabIndex = 5;
             // 
             // inputDataBits
             // 
@@ -699,8 +574,8 @@
             this.inputDataBits.Location = new System.Drawing.Point(0, 20);
             this.inputDataBits.Margin = new System.Windows.Forms.Padding(0);
             this.inputDataBits.Name = "inputDataBits";
-            this.inputDataBits.PlaceholderText = "请输入数据位（可选）";
-            this.inputDataBits.Size = new System.Drawing.Size(616, 36);
+            this.inputDataBits.PlaceholderText = "请输入数据位";
+            this.inputDataBits.Size = new System.Drawing.Size(246, 32);
             this.inputDataBits.TabIndex = 1;
             this.inputDataBits.WaveSize = 0;
             // 
@@ -710,7 +585,7 @@
             this.labelDataBits.Location = new System.Drawing.Point(0, 0);
             this.labelDataBits.Margin = new System.Windows.Forms.Padding(0);
             this.labelDataBits.Name = "labelDataBits";
-            this.labelDataBits.Size = new System.Drawing.Size(616, 22);
+            this.labelDataBits.Size = new System.Drawing.Size(246, 22);
             this.labelDataBits.TabIndex = 0;
             this.labelDataBits.Text = "数据位";
             // 
@@ -718,12 +593,12 @@
             // 
             this.panelRowBaudRate.Controls.Add(this.inputBaudRate);
             this.panelRowBaudRate.Controls.Add(this.labelBaudRate);
-            this.panelRowBaudRate.Location = new System.Drawing.Point(0, 504);
+            this.panelRowBaudRate.Location = new System.Drawing.Point(4, 46);
             this.panelRowBaudRate.Margin = new System.Windows.Forms.Padding(0);
             this.panelRowBaudRate.Name = "panelRowBaudRate";
             this.panelRowBaudRate.Radius = 0;
-            this.panelRowBaudRate.Size = new System.Drawing.Size(616, 56);
-            this.panelRowBaudRate.TabIndex = 9;
+            this.panelRowBaudRate.Size = new System.Drawing.Size(246, 52);
+            this.panelRowBaudRate.TabIndex = 4;
             // 
             // inputBaudRate
             // 
@@ -731,8 +606,8 @@
             this.inputBaudRate.Location = new System.Drawing.Point(0, 20);
             this.inputBaudRate.Margin = new System.Windows.Forms.Padding(0);
             this.inputBaudRate.Name = "inputBaudRate";
-            this.inputBaudRate.PlaceholderText = "请输入波特率（可选）";
-            this.inputBaudRate.Size = new System.Drawing.Size(616, 36);
+            this.inputBaudRate.PlaceholderText = "请输入波特率";
+            this.inputBaudRate.Size = new System.Drawing.Size(246, 32);
             this.inputBaudRate.TabIndex = 1;
             this.inputBaudRate.WaveSize = 0;
             // 
@@ -742,7 +617,7 @@
             this.labelBaudRate.Location = new System.Drawing.Point(0, 0);
             this.labelBaudRate.Margin = new System.Windows.Forms.Padding(0);
             this.labelBaudRate.Name = "labelBaudRate";
-            this.labelBaudRate.Size = new System.Drawing.Size(616, 22);
+            this.labelBaudRate.Size = new System.Drawing.Size(246, 22);
             this.labelBaudRate.TabIndex = 0;
             this.labelBaudRate.Text = "波特率";
             // 
@@ -750,12 +625,12 @@
             // 
             this.panelRowComPort.Controls.Add(this.inputComPort);
             this.panelRowComPort.Controls.Add(this.labelComPort);
-            this.panelRowComPort.Location = new System.Drawing.Point(0, 444);
+            this.panelRowComPort.Location = new System.Drawing.Point(4, 270);
             this.panelRowComPort.Margin = new System.Windows.Forms.Padding(0);
             this.panelRowComPort.Name = "panelRowComPort";
             this.panelRowComPort.Radius = 0;
-            this.panelRowComPort.Size = new System.Drawing.Size(616, 56);
-            this.panelRowComPort.TabIndex = 8;
+            this.panelRowComPort.Size = new System.Drawing.Size(246, 52);
+            this.panelRowComPort.TabIndex = 3;
             // 
             // inputComPort
             // 
@@ -763,8 +638,8 @@
             this.inputComPort.Location = new System.Drawing.Point(0, 20);
             this.inputComPort.Margin = new System.Windows.Forms.Padding(0);
             this.inputComPort.Name = "inputComPort";
-            this.inputComPort.PlaceholderText = "请输入串口号（可选）";
-            this.inputComPort.Size = new System.Drawing.Size(616, 36);
+            this.inputComPort.PlaceholderText = "请输入串口号";
+            this.inputComPort.Size = new System.Drawing.Size(246, 32);
             this.inputComPort.TabIndex = 1;
             this.inputComPort.WaveSize = 0;
             // 
@@ -774,7 +649,7 @@
             this.labelComPort.Location = new System.Drawing.Point(0, 0);
             this.labelComPort.Margin = new System.Windows.Forms.Padding(0);
             this.labelComPort.Name = "labelComPort";
-            this.labelComPort.Size = new System.Drawing.Size(616, 22);
+            this.labelComPort.Size = new System.Drawing.Size(246, 22);
             this.labelComPort.TabIndex = 0;
             this.labelComPort.Text = "串口号";
             // 
@@ -782,12 +657,12 @@
             // 
             this.panelRowPort.Controls.Add(this.inputPort);
             this.panelRowPort.Controls.Add(this.labelPort);
-            this.panelRowPort.Location = new System.Drawing.Point(0, 384);
+            this.panelRowPort.Location = new System.Drawing.Point(4, 214);
             this.panelRowPort.Margin = new System.Windows.Forms.Padding(0);
             this.panelRowPort.Name = "panelRowPort";
             this.panelRowPort.Radius = 0;
-            this.panelRowPort.Size = new System.Drawing.Size(616, 56);
-            this.panelRowPort.TabIndex = 7;
+            this.panelRowPort.Size = new System.Drawing.Size(246, 52);
+            this.panelRowPort.TabIndex = 2;
             // 
             // inputPort
             // 
@@ -796,7 +671,7 @@
             this.inputPort.Margin = new System.Windows.Forms.Padding(0);
             this.inputPort.Name = "inputPort";
             this.inputPort.PlaceholderText = "请输入端口";
-            this.inputPort.Size = new System.Drawing.Size(616, 36);
+            this.inputPort.Size = new System.Drawing.Size(246, 32);
             this.inputPort.TabIndex = 1;
             this.inputPort.WaveSize = 0;
             // 
@@ -806,7 +681,7 @@
             this.labelPort.Location = new System.Drawing.Point(0, 0);
             this.labelPort.Margin = new System.Windows.Forms.Padding(0);
             this.labelPort.Name = "labelPort";
-            this.labelPort.Size = new System.Drawing.Size(616, 22);
+            this.labelPort.Size = new System.Drawing.Size(246, 22);
             this.labelPort.TabIndex = 0;
             this.labelPort.Text = "端口";
             // 
@@ -814,12 +689,12 @@
             // 
             this.panelRowIpAddress.Controls.Add(this.inputIpAddress);
             this.panelRowIpAddress.Controls.Add(this.labelIpAddress);
-            this.panelRowIpAddress.Location = new System.Drawing.Point(0, 324);
+            this.panelRowIpAddress.Location = new System.Drawing.Point(4, 158);
             this.panelRowIpAddress.Margin = new System.Windows.Forms.Padding(0);
             this.panelRowIpAddress.Name = "panelRowIpAddress";
             this.panelRowIpAddress.Radius = 0;
-            this.panelRowIpAddress.Size = new System.Drawing.Size(616, 56);
-            this.panelRowIpAddress.TabIndex = 6;
+            this.panelRowIpAddress.Size = new System.Drawing.Size(246, 52);
+            this.panelRowIpAddress.TabIndex = 1;
             // 
             // inputIpAddress
             // 
@@ -828,7 +703,7 @@
             this.inputIpAddress.Margin = new System.Windows.Forms.Padding(0);
             this.inputIpAddress.Name = "inputIpAddress";
             this.inputIpAddress.PlaceholderText = "请输入IP地址";
-            this.inputIpAddress.Size = new System.Drawing.Size(616, 36);
+            this.inputIpAddress.Size = new System.Drawing.Size(246, 32);
             this.inputIpAddress.TabIndex = 1;
             this.inputIpAddress.WaveSize = 0;
             // 
@@ -838,20 +713,53 @@
             this.labelIpAddress.Location = new System.Drawing.Point(0, 0);
             this.labelIpAddress.Margin = new System.Windows.Forms.Padding(0);
             this.labelIpAddress.Name = "labelIpAddress";
-            this.labelIpAddress.Size = new System.Drawing.Size(616, 22);
+            this.labelIpAddress.Size = new System.Drawing.Size(246, 22);
             this.labelIpAddress.TabIndex = 0;
             this.labelIpAddress.Text = "IP地址";
+            // 
+            // labelSectionAddress
+            // 
+            this.labelSectionAddress.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Bold);
+            this.labelSectionAddress.Location = new System.Drawing.Point(4, 4);
+            this.labelSectionAddress.Margin = new System.Windows.Forms.Padding(0);
+            this.labelSectionAddress.Name = "labelSectionAddress";
+            this.labelSectionAddress.Size = new System.Drawing.Size(246, 26);
+            this.labelSectionAddress.TabIndex = 0;
+            this.labelSectionAddress.Text = "通讯参数";
+            // 
+            // stackSectionBasic
+            // 
+            this.stackSectionBasic.Controls.Add(this.panelRowProtocolType);
+            this.stackSectionBasic.Controls.Add(this.panelRowConnectionType);
+            this.stackSectionBasic.Controls.Add(this.inputModel);
+            this.stackSectionBasic.Controls.Add(this.labelModel);
+            this.stackSectionBasic.Controls.Add(this.inputVendor);
+            this.stackSectionBasic.Controls.Add(this.labelVendor);
+            this.stackSectionBasic.Controls.Add(this.inputDisplayName);
+            this.stackSectionBasic.Controls.Add(this.labelDisplayName);
+            this.stackSectionBasic.Controls.Add(this.inputName);
+            this.stackSectionBasic.Controls.Add(this.labelName);
+            this.stackSectionBasic.Controls.Add(this.labelSectionBasic);
+            this.stackSectionBasic.Gap = 4;
+            this.stackSectionBasic.Location = new System.Drawing.Point(0, 0);
+            this.stackSectionBasic.Margin = new System.Windows.Forms.Padding(0);
+            this.stackSectionBasic.Name = "stackSectionBasic";
+            this.stackSectionBasic.Padding = new System.Windows.Forms.Padding(4);
+            this.stackSectionBasic.Size = new System.Drawing.Size(254, 463);
+            this.stackSectionBasic.TabIndex = 0;
+            this.stackSectionBasic.Text = "stackSectionBasic";
+            this.stackSectionBasic.Vertical = true;
             // 
             // panelRowProtocolType
             // 
             this.panelRowProtocolType.Controls.Add(this.dropdownProtocolType);
             this.panelRowProtocolType.Controls.Add(this.labelProtocolType);
-            this.panelRowProtocolType.Location = new System.Drawing.Point(0, 264);
+            this.panelRowProtocolType.Location = new System.Drawing.Point(4, 282);
             this.panelRowProtocolType.Margin = new System.Windows.Forms.Padding(0);
             this.panelRowProtocolType.Name = "panelRowProtocolType";
             this.panelRowProtocolType.Radius = 0;
-            this.panelRowProtocolType.Size = new System.Drawing.Size(616, 56);
-            this.panelRowProtocolType.TabIndex = 5;
+            this.panelRowProtocolType.Size = new System.Drawing.Size(246, 52);
+            this.panelRowProtocolType.TabIndex = 10;
             // 
             // dropdownProtocolType
             // 
@@ -859,7 +767,7 @@
             this.dropdownProtocolType.Location = new System.Drawing.Point(0, 20);
             this.dropdownProtocolType.Margin = new System.Windows.Forms.Padding(0);
             this.dropdownProtocolType.Name = "dropdownProtocolType";
-            this.dropdownProtocolType.Size = new System.Drawing.Size(616, 36);
+            this.dropdownProtocolType.Size = new System.Drawing.Size(246, 32);
             this.dropdownProtocolType.TabIndex = 1;
             this.dropdownProtocolType.WaveSize = 0;
             // 
@@ -869,7 +777,7 @@
             this.labelProtocolType.Location = new System.Drawing.Point(0, 0);
             this.labelProtocolType.Margin = new System.Windows.Forms.Padding(0);
             this.labelProtocolType.Name = "labelProtocolType";
-            this.labelProtocolType.Size = new System.Drawing.Size(616, 22);
+            this.labelProtocolType.Size = new System.Drawing.Size(246, 22);
             this.labelProtocolType.TabIndex = 0;
             this.labelProtocolType.Text = "协议类型";
             // 
@@ -877,12 +785,12 @@
             // 
             this.panelRowConnectionType.Controls.Add(this.dropdownConnectionType);
             this.panelRowConnectionType.Controls.Add(this.labelConnectionType);
-            this.panelRowConnectionType.Location = new System.Drawing.Point(0, 204);
+            this.panelRowConnectionType.Location = new System.Drawing.Point(4, 226);
             this.panelRowConnectionType.Margin = new System.Windows.Forms.Padding(0);
             this.panelRowConnectionType.Name = "panelRowConnectionType";
             this.panelRowConnectionType.Radius = 0;
-            this.panelRowConnectionType.Size = new System.Drawing.Size(616, 56);
-            this.panelRowConnectionType.TabIndex = 4;
+            this.panelRowConnectionType.Size = new System.Drawing.Size(246, 52);
+            this.panelRowConnectionType.TabIndex = 9;
             // 
             // dropdownConnectionType
             // 
@@ -890,7 +798,7 @@
             this.dropdownConnectionType.Location = new System.Drawing.Point(0, 20);
             this.dropdownConnectionType.Margin = new System.Windows.Forms.Padding(0);
             this.dropdownConnectionType.Name = "dropdownConnectionType";
-            this.dropdownConnectionType.Size = new System.Drawing.Size(616, 36);
+            this.dropdownConnectionType.Size = new System.Drawing.Size(246, 32);
             this.dropdownConnectionType.TabIndex = 1;
             this.dropdownConnectionType.WaveSize = 0;
             // 
@@ -900,148 +808,106 @@
             this.labelConnectionType.Location = new System.Drawing.Point(0, 0);
             this.labelConnectionType.Margin = new System.Windows.Forms.Padding(0);
             this.labelConnectionType.Name = "labelConnectionType";
-            this.labelConnectionType.Size = new System.Drawing.Size(616, 22);
+            this.labelConnectionType.Size = new System.Drawing.Size(246, 22);
             this.labelConnectionType.TabIndex = 0;
             this.labelConnectionType.Text = "连接方式";
             // 
-            // panelRowModel
-            // 
-            this.panelRowModel.Controls.Add(this.inputModel);
-            this.panelRowModel.Controls.Add(this.labelModel);
-            this.panelRowModel.Location = new System.Drawing.Point(0, 144);
-            this.panelRowModel.Margin = new System.Windows.Forms.Padding(0);
-            this.panelRowModel.Name = "panelRowModel";
-            this.panelRowModel.Radius = 0;
-            this.panelRowModel.Size = new System.Drawing.Size(616, 56);
-            this.panelRowModel.TabIndex = 3;
-            // 
             // inputModel
             // 
-            this.inputModel.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.inputModel.Location = new System.Drawing.Point(0, 20);
+            this.inputModel.Location = new System.Drawing.Point(4, 190);
             this.inputModel.Margin = new System.Windows.Forms.Padding(0);
             this.inputModel.Name = "inputModel";
-            this.inputModel.PlaceholderText = "请输入型号（可选）";
-            this.inputModel.Size = new System.Drawing.Size(616, 36);
-            this.inputModel.TabIndex = 1;
+            this.inputModel.PlaceholderText = "请输入型号";
+            this.inputModel.Size = new System.Drawing.Size(246, 32);
+            this.inputModel.TabIndex = 8;
             this.inputModel.WaveSize = 0;
             // 
             // labelModel
             // 
-            this.labelModel.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelModel.Location = new System.Drawing.Point(0, 0);
+            this.labelModel.Location = new System.Drawing.Point(4, 164);
             this.labelModel.Margin = new System.Windows.Forms.Padding(0);
             this.labelModel.Name = "labelModel";
-            this.labelModel.Size = new System.Drawing.Size(616, 22);
-            this.labelModel.TabIndex = 0;
+            this.labelModel.Size = new System.Drawing.Size(246, 22);
+            this.labelModel.TabIndex = 7;
             this.labelModel.Text = "型号";
-            // 
-            // panelRowVendor
-            // 
-            this.panelRowVendor.Controls.Add(this.inputVendor);
-            this.panelRowVendor.Controls.Add(this.labelVendor);
-            this.panelRowVendor.Location = new System.Drawing.Point(0, 84);
-            this.panelRowVendor.Margin = new System.Windows.Forms.Padding(0);
-            this.panelRowVendor.Name = "panelRowVendor";
-            this.panelRowVendor.Radius = 0;
-            this.panelRowVendor.Size = new System.Drawing.Size(616, 56);
-            this.panelRowVendor.TabIndex = 2;
             // 
             // inputVendor
             // 
-            this.inputVendor.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.inputVendor.Location = new System.Drawing.Point(0, 20);
+            this.inputVendor.Location = new System.Drawing.Point(4, 128);
             this.inputVendor.Margin = new System.Windows.Forms.Padding(0);
             this.inputVendor.Name = "inputVendor";
-            this.inputVendor.PlaceholderText = "请输入厂商（可选）";
-            this.inputVendor.Size = new System.Drawing.Size(616, 36);
-            this.inputVendor.TabIndex = 1;
+            this.inputVendor.PlaceholderText = "请输入厂商";
+            this.inputVendor.Size = new System.Drawing.Size(246, 32);
+            this.inputVendor.TabIndex = 6;
             this.inputVendor.WaveSize = 0;
             // 
             // labelVendor
             // 
-            this.labelVendor.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelVendor.Location = new System.Drawing.Point(0, 0);
+            this.labelVendor.Location = new System.Drawing.Point(4, 102);
             this.labelVendor.Margin = new System.Windows.Forms.Padding(0);
             this.labelVendor.Name = "labelVendor";
-            this.labelVendor.Size = new System.Drawing.Size(616, 22);
-            this.labelVendor.TabIndex = 0;
+            this.labelVendor.Size = new System.Drawing.Size(246, 22);
+            this.labelVendor.TabIndex = 5;
             this.labelVendor.Text = "厂商";
-            // 
-            // panelRowDisplayName
-            // 
-            this.panelRowDisplayName.Controls.Add(this.inputDisplayName);
-            this.panelRowDisplayName.Controls.Add(this.labelDisplayName);
-            this.panelRowDisplayName.Location = new System.Drawing.Point(0, 24);
-            this.panelRowDisplayName.Margin = new System.Windows.Forms.Padding(0);
-            this.panelRowDisplayName.Name = "panelRowDisplayName";
-            this.panelRowDisplayName.Radius = 0;
-            this.panelRowDisplayName.Size = new System.Drawing.Size(616, 56);
-            this.panelRowDisplayName.TabIndex = 1;
             // 
             // inputDisplayName
             // 
-            this.inputDisplayName.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.inputDisplayName.Location = new System.Drawing.Point(0, 20);
+            this.inputDisplayName.Location = new System.Drawing.Point(4, 66);
             this.inputDisplayName.Margin = new System.Windows.Forms.Padding(0);
             this.inputDisplayName.Name = "inputDisplayName";
             this.inputDisplayName.PlaceholderText = "请输入显示名";
-            this.inputDisplayName.Size = new System.Drawing.Size(616, 36);
-            this.inputDisplayName.TabIndex = 1;
+            this.inputDisplayName.Size = new System.Drawing.Size(246, 32);
+            this.inputDisplayName.TabIndex = 4;
             this.inputDisplayName.WaveSize = 0;
             // 
             // labelDisplayName
             // 
-            this.labelDisplayName.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelDisplayName.Location = new System.Drawing.Point(0, 0);
+            this.labelDisplayName.Location = new System.Drawing.Point(4, 40);
             this.labelDisplayName.Margin = new System.Windows.Forms.Padding(0);
             this.labelDisplayName.Name = "labelDisplayName";
-            this.labelDisplayName.Size = new System.Drawing.Size(616, 22);
-            this.labelDisplayName.TabIndex = 0;
+            this.labelDisplayName.Size = new System.Drawing.Size(246, 22);
+            this.labelDisplayName.TabIndex = 3;
             this.labelDisplayName.Text = "显示名";
-            // 
-            // panelRowName
-            // 
-            this.panelRowName.Controls.Add(this.inputName);
-            this.panelRowName.Controls.Add(this.labelName);
-            this.panelRowName.Location = new System.Drawing.Point(0, 0);
-            this.panelRowName.Margin = new System.Windows.Forms.Padding(0);
-            this.panelRowName.Name = "panelRowName";
-            this.panelRowName.Radius = 0;
-            this.panelRowName.Size = new System.Drawing.Size(616, 56);
-            this.panelRowName.TabIndex = 0;
             // 
             // inputName
             // 
-            this.inputName.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.inputName.Location = new System.Drawing.Point(0, 20);
+            this.inputName.Location = new System.Drawing.Point(4, 4);
             this.inputName.Margin = new System.Windows.Forms.Padding(0);
             this.inputName.Name = "inputName";
             this.inputName.PlaceholderText = "请输入 PLC 名称";
-            this.inputName.Size = new System.Drawing.Size(616, 36);
-            this.inputName.TabIndex = 1;
+            this.inputName.Size = new System.Drawing.Size(246, 32);
+            this.inputName.TabIndex = 2;
             this.inputName.WaveSize = 0;
             // 
             // labelName
             // 
-            this.labelName.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelName.Location = new System.Drawing.Point(0, 0);
+            this.labelName.Location = new System.Drawing.Point(4, 4);
             this.labelName.Margin = new System.Windows.Forms.Padding(0);
             this.labelName.Name = "labelName";
-            this.labelName.Size = new System.Drawing.Size(616, 22);
-            this.labelName.TabIndex = 0;
+            this.labelName.Size = new System.Drawing.Size(246, 22);
+            this.labelName.TabIndex = 1;
             this.labelName.Text = "名称";
+            // 
+            // labelSectionBasic
+            // 
+            this.labelSectionBasic.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Bold);
+            this.labelSectionBasic.Location = new System.Drawing.Point(4, 4);
+            this.labelSectionBasic.Margin = new System.Windows.Forms.Padding(0);
+            this.labelSectionBasic.Name = "labelSectionBasic";
+            this.labelSectionBasic.Size = new System.Drawing.Size(246, 26);
+            this.labelSectionBasic.TabIndex = 0;
+            this.labelSectionBasic.Text = "基础信息";
             // 
             // panelFooter
             // 
             this.panelFooter.Controls.Add(this.flowFooterButtons);
             this.panelFooter.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panelFooter.Location = new System.Drawing.Point(28, 735);
+            this.panelFooter.Location = new System.Drawing.Point(28, 547);
             this.panelFooter.Margin = new System.Windows.Forms.Padding(0);
             this.panelFooter.Name = "panelFooter";
             this.panelFooter.Padding = new System.Windows.Forms.Padding(4, 10, 4, 0);
             this.panelFooter.Radius = 0;
-            this.panelFooter.Size = new System.Drawing.Size(624, 57);
+            this.panelFooter.Size = new System.Drawing.Size(1024, 85);
             this.panelFooter.TabIndex = 2;
             // 
             // flowFooterButtons
@@ -1050,10 +916,10 @@
             this.flowFooterButtons.Controls.Add(this.buttonCancel);
             this.flowFooterButtons.Dock = System.Windows.Forms.DockStyle.Right;
             this.flowFooterButtons.Gap = 10;
-            this.flowFooterButtons.Location = new System.Drawing.Point(376, 10);
+            this.flowFooterButtons.Location = new System.Drawing.Point(776, 10);
             this.flowFooterButtons.Margin = new System.Windows.Forms.Padding(0);
             this.flowFooterButtons.Name = "flowFooterButtons";
-            this.flowFooterButtons.Size = new System.Drawing.Size(244, 47);
+            this.flowFooterButtons.Size = new System.Drawing.Size(244, 75);
             this.flowFooterButtons.TabIndex = 0;
             this.flowFooterButtons.Text = "flowFooterButtons";
             // 
@@ -1090,18 +956,18 @@
             this.panelHeader.Name = "panelHeader";
             this.panelHeader.Padding = new System.Windows.Forms.Padding(4, 0, 4, 8);
             this.panelHeader.Radius = 0;
-            this.panelHeader.Size = new System.Drawing.Size(624, 56);
+            this.panelHeader.Size = new System.Drawing.Size(1024, 56);
             this.panelHeader.TabIndex = 0;
             // 
             // flowHeaderRight
             // 
             this.flowHeaderRight.Controls.Add(this.labelDialogDescription);
             this.flowHeaderRight.Dock = System.Windows.Forms.DockStyle.Right;
-            this.flowHeaderRight.Location = new System.Drawing.Point(276, 0);
+            this.flowHeaderRight.Location = new System.Drawing.Point(640, 0);
             this.flowHeaderRight.Margin = new System.Windows.Forms.Padding(0);
             this.flowHeaderRight.Name = "flowHeaderRight";
             this.flowHeaderRight.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.flowHeaderRight.Size = new System.Drawing.Size(344, 48);
+            this.flowHeaderRight.Size = new System.Drawing.Size(380, 48);
             this.flowHeaderRight.TabIndex = 1;
             this.flowHeaderRight.Text = "flowHeaderRight";
             // 
@@ -1110,9 +976,9 @@
             this.labelDialogDescription.Location = new System.Drawing.Point(0, 0);
             this.labelDialogDescription.Margin = new System.Windows.Forms.Padding(0);
             this.labelDialogDescription.Name = "labelDialogDescription";
-            this.labelDialogDescription.Size = new System.Drawing.Size(344, 48);
+            this.labelDialogDescription.Size = new System.Drawing.Size(380, 48);
             this.labelDialogDescription.TabIndex = 0;
-            this.labelDialogDescription.Text = "创建 PLC 站连接对象并配置协议、连接参数与扫描周期。";
+            this.labelDialogDescription.Text = "配置 PLC 站的协议、连接参数与运行参数。";
             this.labelDialogDescription.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // flowHeaderLeft
@@ -1122,7 +988,7 @@
             this.flowHeaderLeft.Location = new System.Drawing.Point(4, 0);
             this.flowHeaderLeft.Margin = new System.Windows.Forms.Padding(0);
             this.flowHeaderLeft.Name = "flowHeaderLeft";
-            this.flowHeaderLeft.Size = new System.Drawing.Size(220, 48);
+            this.flowHeaderLeft.Size = new System.Drawing.Size(240, 48);
             this.flowHeaderLeft.TabIndex = 0;
             this.flowHeaderLeft.Text = "flowHeaderLeft";
             // 
@@ -1132,13 +998,13 @@
             this.labelDialogTitle.Location = new System.Drawing.Point(0, 0);
             this.labelDialogTitle.Margin = new System.Windows.Forms.Padding(0);
             this.labelDialogTitle.Name = "labelDialogTitle";
-            this.labelDialogTitle.Size = new System.Drawing.Size(220, 48);
+            this.labelDialogTitle.Size = new System.Drawing.Size(240, 48);
             this.labelDialogTitle.TabIndex = 0;
             this.labelDialogTitle.Text = "新增 PLC 站";
             // 
             // PlcStationEditDialog
             // 
-            this.ClientSize = new System.Drawing.Size(680, 820);
+            this.ClientSize = new System.Drawing.Size(1080, 660);
             this.Controls.Add(this.textureBackgroundDialog);
             this.Font = new System.Drawing.Font("Microsoft YaHei UI", 10F);
             this.MaximizeBox = false;
@@ -1149,21 +1015,10 @@
             this.textureBackgroundDialog.ResumeLayout(false);
             this.panelShell.ResumeLayout(false);
             this.panelContent.ResumeLayout(false);
-            this.stackFormRows.ResumeLayout(false);
-            this.panelRowRemark.ResumeLayout(false);
-            this.panelRowDescription.ResumeLayout(false);
-            this.panelRowEnabled.ResumeLayout(false);
-            this.flowEnabledHost.ResumeLayout(false);
-            this.flowEnabledHost.PerformLayout();
-            this.panelRowSortOrder.ResumeLayout(false);
-            this.panelRowScanIntervalMs.ResumeLayout(false);
-            this.panelRowReconnectIntervalMs.ResumeLayout(false);
-            this.panelRowTimeoutMs.ResumeLayout(false);
-            this.panelRowSlot.ResumeLayout(false);
-            this.panelRowRack.ResumeLayout(false);
-            this.panelRowPcNo.ResumeLayout(false);
-            this.panelRowNetworkNo.ResumeLayout(false);
-            this.panelRowStationNo.ResumeLayout(false);
+            this.gridMainSections.ResumeLayout(false);
+            this.stackSectionRemark.ResumeLayout(false);
+            this.stackSectionRuntime.ResumeLayout(false);
+            this.stackSectionAddress.ResumeLayout(false);
             this.panelRowStopBits.ResumeLayout(false);
             this.panelRowParity.ResumeLayout(false);
             this.panelRowDataBits.ResumeLayout(false);
@@ -1171,22 +1026,16 @@
             this.panelRowComPort.ResumeLayout(false);
             this.panelRowPort.ResumeLayout(false);
             this.panelRowIpAddress.ResumeLayout(false);
+            this.stackSectionBasic.ResumeLayout(false);
             this.panelRowProtocolType.ResumeLayout(false);
             this.panelRowConnectionType.ResumeLayout(false);
-            this.panelRowModel.ResumeLayout(false);
-            this.panelRowVendor.ResumeLayout(false);
-            this.panelRowDisplayName.ResumeLayout(false);
-            this.panelRowName.ResumeLayout(false);
             this.panelFooter.ResumeLayout(false);
             this.flowFooterButtons.ResumeLayout(false);
             this.panelHeader.ResumeLayout(false);
             this.flowHeaderRight.ResumeLayout(false);
             this.flowHeaderLeft.ResumeLayout(false);
             this.ResumeLayout(false);
-
         }
-
-        #endregion
 
         private AMControlWinF.Views.Main.TextureBackgroundControl textureBackgroundDialog;
         private AntdUI.Panel panelShell;
@@ -1196,17 +1045,15 @@
         private AntdUI.FlowPanel flowHeaderRight;
         private AntdUI.Label labelDialogDescription;
         private AntdUI.Panel panelContent;
-        private AntdUI.StackPanel stackFormRows;
-        private AntdUI.Panel panelRowName;
+        private AntdUI.GridPanel gridMainSections;
+        private AntdUI.StackPanel stackSectionBasic;
+        private AntdUI.Label labelSectionBasic;
         private AntdUI.Input inputName;
         private AntdUI.Label labelName;
-        private AntdUI.Panel panelRowDisplayName;
         private AntdUI.Input inputDisplayName;
         private AntdUI.Label labelDisplayName;
-        private AntdUI.Panel panelRowVendor;
         private AntdUI.Input inputVendor;
         private AntdUI.Label labelVendor;
-        private AntdUI.Panel panelRowModel;
         private AntdUI.Input inputModel;
         private AntdUI.Label labelModel;
         private AntdUI.Panel panelRowConnectionType;
@@ -1215,6 +1062,8 @@
         private AntdUI.Panel panelRowProtocolType;
         private AntdUI.Select dropdownProtocolType;
         private AntdUI.Label labelProtocolType;
+        private AntdUI.StackPanel stackSectionAddress;
+        private AntdUI.Label labelSectionAddress;
         private AntdUI.Panel panelRowIpAddress;
         private AntdUI.Input inputIpAddress;
         private AntdUI.Label labelIpAddress;
@@ -1236,41 +1085,32 @@
         private AntdUI.Panel panelRowStopBits;
         private AntdUI.Select dropdownStopBits;
         private AntdUI.Label labelStopBits;
-        private AntdUI.Panel panelRowStationNo;
         private AntdUI.Input inputStationNo;
         private AntdUI.Label labelStationNo;
-        private AntdUI.Panel panelRowNetworkNo;
         private AntdUI.Input inputNetworkNo;
         private AntdUI.Label labelNetworkNo;
-        private AntdUI.Panel panelRowPcNo;
         private AntdUI.Input inputPcNo;
         private AntdUI.Label labelPcNo;
-        private AntdUI.Panel panelRowRack;
+        private AntdUI.StackPanel stackSectionRuntime;
+        private AntdUI.Label labelSectionRuntime;
         private AntdUI.Input inputRack;
         private AntdUI.Label labelRack;
-        private AntdUI.Panel panelRowSlot;
         private AntdUI.Input inputSlot;
         private AntdUI.Label labelSlot;
-        private AntdUI.Panel panelRowTimeoutMs;
         private AntdUI.Input inputTimeoutMs;
         private AntdUI.Label labelTimeoutMs;
-        private AntdUI.Panel panelRowReconnectIntervalMs;
         private AntdUI.Input inputReconnectIntervalMs;
         private AntdUI.Label labelReconnectIntervalMs;
-        private AntdUI.Panel panelRowScanIntervalMs;
         private AntdUI.Input inputScanIntervalMs;
         private AntdUI.Label labelScanIntervalMs;
-        private AntdUI.Panel panelRowSortOrder;
+        private AntdUI.StackPanel stackSectionRemark;
+        private AntdUI.Label labelSectionRemark;
+        private AntdUI.Label labelEnabled;
+        private AntdUI.Checkbox checkEnabled;
         private AntdUI.Input inputSortOrder;
         private AntdUI.Label labelSortOrder;
-        private AntdUI.Panel panelRowEnabled;
-        private AntdUI.FlowPanel flowEnabledHost;
-        private AntdUI.Checkbox checkEnabled;
-        private AntdUI.Label labelEnabled;
-        private AntdUI.Panel panelRowDescription;
         private AntdUI.Input inputDescription;
         private AntdUI.Label labelDescription;
-        private AntdUI.Panel panelRowRemark;
         private AntdUI.Input inputRemark;
         private AntdUI.Label labelRemark;
         private AntdUI.Panel panelFooter;

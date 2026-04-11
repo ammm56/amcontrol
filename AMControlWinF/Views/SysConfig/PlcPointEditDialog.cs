@@ -12,7 +12,11 @@ namespace AMControlWinF.Views.SysConfig
 {
     /// <summary>
     /// PLC 点位新增/编辑对话框。
-    /// 风格与现有 UserEditDialog 保持一致。
+    /// 采用运控配置统一风格：
+    /// - 纹理背景
+    /// - 顶部标题说明
+    /// - 中间横向四列参数区
+    /// - 底部固定按钮区
     /// </summary>
     public partial class PlcPointEditDialog : AntdUI.Window
     {
@@ -50,11 +54,12 @@ namespace AMControlWinF.Views.SysConfig
             dropdownPlcName.Items.Clear();
             if (stationNames != null)
             {
-                dropdownPlcName.Items.AddRange(stationNames
-                    .Where(x => !string.IsNullOrWhiteSpace(x))
-                    .Distinct(StringComparer.OrdinalIgnoreCase)
-                    .Select(x => (object)x)
-                    .ToArray());
+                dropdownPlcName.Items.AddRange(
+                    stationNames
+                        .Where(x => !string.IsNullOrWhiteSpace(x))
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .Select(x => (object)x)
+                        .ToArray());
             }
 
             SetSelectValue(dropdownPlcName, selected);
@@ -71,16 +76,22 @@ namespace AMControlWinF.Views.SysConfig
                 _model.LoadFrom(entity);
             }
 
-            ApplyEditorToUi();
+            ApplyModelToUi();
         }
 
         private void InitializeDropdowns()
         {
             dropdownDataType.Items.Clear();
-            dropdownDataType.Items.AddRange(PlcPointEditorModel.DataTypes.Select(x => (object)x).ToArray());
+            dropdownDataType.Items.AddRange(
+                PlcPointEditorModel.DataTypes
+                    .Select(x => (object)x)
+                    .ToArray());
 
             dropdownAccessMode.Items.Clear();
-            dropdownAccessMode.Items.AddRange(PlcPointEditorModel.AccessModes.Select(x => (object)x).ToArray());
+            dropdownAccessMode.Items.AddRange(
+                PlcPointEditorModel.AccessModes
+                    .Select(x => (object)x)
+                    .ToArray());
         }
 
         private void BindEvents()
@@ -98,10 +109,7 @@ namespace AMControlWinF.Views.SysConfig
         {
             if (_isCreateMode)
             {
-                if (dropdownPlcName.Visible)
-                {
-                    dropdownPlcName.Focus();
-                }
+                dropdownPlcName.Focus();
             }
             else
             {
@@ -112,25 +120,16 @@ namespace AMControlWinF.Views.SysConfig
 
         private void ApplyMode()
         {
-            if (_isCreateMode)
-            {
-                Text = "新增 PLC 点位";
-                labelDialogTitle.Text = "新增 PLC 点位";
-                labelDialogDescription.Text = "配置点位地址、数据类型、长度与访问模式。";
-                Size = new System.Drawing.Size(620, 700);
-                buttonOk.Text = "保存";
-            }
-            else
-            {
-                Text = "编辑 PLC 点位";
-                labelDialogTitle.Text = "编辑 PLC 点位";
-                labelDialogDescription.Text = "修改点位地址、类型、长度和访问方式。";
-                Size = new System.Drawing.Size(620, 680);
-                buttonOk.Text = "保存";
-            }
+            Text = _isCreateMode ? "新增 PLC 点位" : "编辑 PLC 点位";
+            labelDialogTitle.Text = _isCreateMode ? "新增 PLC 点位" : "编辑 PLC 点位";
+            labelDialogDescription.Text = _isCreateMode
+                ? "配置点位地址、数据类型、长度与访问模式。"
+                : "修改点位地址、数据类型、长度与访问模式。";
+
+            buttonOk.Text = "保存";
         }
 
-        private void ApplyEditorToUi()
+        private void ApplyModelToUi()
         {
             SetSelectValue(dropdownPlcName, _model.PlcName);
             inputName.Text = _model.Name;
@@ -146,7 +145,7 @@ namespace AMControlWinF.Views.SysConfig
             inputRemark.Text = _model.Remark;
         }
 
-        private void SyncUiToModel()
+        private void ApplyUiToModel()
         {
             _model.PlcName = GetSelectValue(dropdownPlcName);
             _model.Name = inputName.Text;
@@ -164,7 +163,7 @@ namespace AMControlWinF.Views.SysConfig
 
         private void ButtonOk_Click(object sender, EventArgs e)
         {
-            SyncUiToModel();
+            ApplyUiToModel();
 
             var result = _model.BuildEntity();
             if (!result.Success || result.Item == null)

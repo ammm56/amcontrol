@@ -654,7 +654,7 @@
             // 
             // MotionCardEditDialog
             // 
-            this.ClientSize = new System.Drawing.Size(900, 600);
+            this.ClientSize = new System.Drawing.Size(1125, 750);
             this.Controls.Add(this.textureBackgroundDialog);
             this.Font = new System.Drawing.Font("Microsoft YaHei UI", 10F);
             this.MaximizeBox = false;

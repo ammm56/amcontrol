@@ -604,7 +604,7 @@
             // 
             // MotionAxisParamEditDialog
             // 
-            this.ClientSize = new System.Drawing.Size(960, 600);
+            this.ClientSize = new System.Drawing.Size(1200, 750);
             this.Controls.Add(this.textureBackgroundDialog);
             this.Name = "MotionAxisParamEditDialog";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
