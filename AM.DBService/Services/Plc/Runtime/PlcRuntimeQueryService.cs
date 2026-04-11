@@ -90,7 +90,7 @@ namespace AM.DBService.Services.Plc.Runtime
                 }
 
                 PlcStationRuntimeSnapshot snapshot = hasRuntimeSnapshot
-                    ? MergeStationSnapshot(stationConfig, runtimeSnapshot)
+                    ? MergeStationSnapshot(stationConfig, runtimeSnapshot, runtime)
                     : CreateDefaultStationSnapshot(stationConfig, runtime);
 
                 return OkSilent(snapshot, "PLC 站运行态查询成功");
@@ -162,7 +162,7 @@ namespace AM.DBService.Services.Plc.Runtime
 
                     items.Add(runtimeSnapshot == null
                         ? CreateDefaultStationSnapshot(station, runtime)
-                        : MergeStationSnapshot(station, runtimeSnapshot));
+                        : MergeStationSnapshot(station, runtimeSnapshot, runtime));
 
                     processed.Add(station.Name);
                 }
@@ -174,7 +174,8 @@ namespace AM.DBService.Services.Plc.Runtime
                         continue;
                     }
 
-                    items.Add(pair.Value == null ? null : pair.Value.Clone());
+                    var snapshot = pair.Value == null ? null : pair.Value.Clone();
+                    items.Add(ApplyScanServiceState(snapshot, runtime));
                 }
 
                 return OkListSilent(items.Where(p => p != null).ToList(), "PLC 站运行态查询成功");
@@ -242,9 +243,9 @@ namespace AM.DBService.Services.Plc.Runtime
                 DisplayName = station == null ? null : station.DisplayTitle,
                 IsEnabled = station != null && station.IsEnabled,
                 IsConnected = false,
-                IsScanRunning = runtime.IsScanServiceRunning,
+                IsScanRunning = runtime != null && runtime.IsScanServiceRunning,
                 LastConnectTime = null,
-                LastScanTime = runtime.LastScanTime,
+                LastScanTime = runtime == null ? null : runtime.LastScanTime,
                 LastError = runtime.IsScanServiceRunning ? null : "尚未建立运行态快照",
                 SuccessReadCount = 0,
                 FailedReadCount = 0,
@@ -255,19 +256,41 @@ namespace AM.DBService.Services.Plc.Runtime
             };
         }
 
-        private static PlcStationRuntimeSnapshot MergeStationSnapshot(PlcStationConfig station, PlcStationRuntimeSnapshot runtimeSnapshot)
+        private static PlcStationRuntimeSnapshot MergeStationSnapshot(
+            PlcStationConfig station,
+            PlcStationRuntimeSnapshot runtimeSnapshot,
+            PlcRuntimeState runtime)
         {
             var snapshot = runtimeSnapshot == null ? new PlcStationRuntimeSnapshot() : runtimeSnapshot.Clone();
-            if (station == null)
+
+            if (station != null)
             {
-                return snapshot;
+                snapshot.PlcName = string.IsNullOrWhiteSpace(snapshot.PlcName) ? station.Name : snapshot.PlcName;
+                snapshot.DisplayName = string.IsNullOrWhiteSpace(snapshot.DisplayName) ? station.DisplayTitle : snapshot.DisplayName;
+                snapshot.IsEnabled = station.IsEnabled;
+                snapshot.CurrentProtocol = string.IsNullOrWhiteSpace(snapshot.CurrentProtocol) ? station.ProtocolType : snapshot.CurrentProtocol;
+                snapshot.CurrentConnectionType = string.IsNullOrWhiteSpace(snapshot.CurrentConnectionType) ? station.ConnectionType : snapshot.CurrentConnectionType;
             }
 
-            snapshot.PlcName = string.IsNullOrWhiteSpace(snapshot.PlcName) ? station.Name : snapshot.PlcName;
-            snapshot.DisplayName = string.IsNullOrWhiteSpace(snapshot.DisplayName) ? station.DisplayTitle : snapshot.DisplayName;
-            snapshot.IsEnabled = station.IsEnabled;
-            snapshot.CurrentProtocol = string.IsNullOrWhiteSpace(snapshot.CurrentProtocol) ? station.ProtocolType : snapshot.CurrentProtocol;
-            snapshot.CurrentConnectionType = string.IsNullOrWhiteSpace(snapshot.CurrentConnectionType) ? station.ConnectionType : snapshot.CurrentConnectionType;
+            return ApplyScanServiceState(snapshot, runtime);
+        }
+
+        private static PlcStationRuntimeSnapshot ApplyScanServiceState(
+            PlcStationRuntimeSnapshot snapshot,
+            PlcRuntimeState runtime)
+        {
+            if (snapshot == null)
+            {
+                return null;
+            }
+
+            snapshot.IsScanRunning = runtime != null && runtime.IsScanServiceRunning;
+
+            if (!snapshot.LastScanTime.HasValue && runtime != null)
+            {
+                snapshot.LastScanTime = runtime.LastScanTime;
+            }
+
             return snapshot;
         }
 

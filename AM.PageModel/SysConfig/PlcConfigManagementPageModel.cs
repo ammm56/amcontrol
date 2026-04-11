@@ -319,10 +319,14 @@ namespace AM.PageModel.SysConfig
         {
             try
             {
+                PlcRuntimeState runtimeState = RuntimeContext.Instance.Plc;
+                bool scanRunning = runtimeState != null && runtimeState.IsScanServiceRunning;
+                DateTime? lastScanTime = runtimeState == null ? null : runtimeState.LastScanTime;
+
                 var runtimeResult = new PlcRuntimeQueryService().QueryAllStations();
                 if (!runtimeResult.Success || runtimeResult.Items == null)
                 {
-                    RuntimeSummaryText = "未获取到运行时快照";
+                    RuntimeSummaryText = "状态未知";
                     return;
                 }
 
@@ -330,13 +334,16 @@ namespace AM.PageModel.SysConfig
                     .Where(x => x != null && !string.IsNullOrWhiteSpace(x.PlcName))
                     .ToDictionary(x => x.PlcName, x => x, StringComparer.OrdinalIgnoreCase);
 
-                bool scanRunning = runtimeResult.Items.Any(x => x != null && x.IsScanRunning);
-
                 foreach (var station in _allStations)
                 {
                     PlcStationRuntimeSnapshot snapshot;
                     if (!runtimeLookup.TryGetValue(station.Name ?? string.Empty, out snapshot) || snapshot == null)
                     {
+                        station.IsConnected = false;
+                        station.LastError = string.Empty;
+                        station.AverageReadMs = 0D;
+                        station.LastScanTime = lastScanTime;
+                        station.IsScanRunning = scanRunning;
                         continue;
                     }
 
@@ -344,17 +351,23 @@ namespace AM.PageModel.SysConfig
                     station.LastError = snapshot.LastError ?? string.Empty;
                     station.AverageReadMs = snapshot.AverageReadMs;
                     station.LastScanTime = snapshot.LastScanTime;
-                    station.IsScanRunning = snapshot.IsScanRunning;
+                    station.IsScanRunning = scanRunning;
                 }
 
                 RuntimeSummaryText = scanRunning
-                    ? "扫描中"
-                    : "扫描已停止";
+                    ? "运行中 " + FormatRuntimeSummaryTime(lastScanTime)
+                    : "已停止 " + FormatRuntimeSummaryTime(lastScanTime);
             }
             catch
             {
-                RuntimeSummaryText = "查询失败";
+                RuntimeSummaryText = "状态未知";
             }
+        }
+
+        private static string FormatRuntimeSummaryTime(DateTime? time)
+        {
+            return "";
+            //return time.HasValue ? time.Value.ToString("yyyy-MM-dd HH:mm:ss") : "-";
         }
 
         private void ClearAll()
@@ -660,16 +673,6 @@ namespace AM.PageModel.SysConfig
                     }
 
                     return "-";
-                }
-            }
-
-            public string LastScanTimeText
-            {
-                get
-                {
-                    return LastScanTime.HasValue
-                        ? LastScanTime.Value.ToString("yyyy-MM-dd HH:mm:ss")
-                        : "-";
                 }
             }
 

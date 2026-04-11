@@ -95,7 +95,7 @@
             this.panelRoot.Name = "panelRoot";
             this.panelRoot.Padding = new System.Windows.Forms.Padding(8);
             this.panelRoot.Radius = 0;
-            this.panelRoot.Size = new System.Drawing.Size(920, 544);
+            this.panelRoot.Size = new System.Drawing.Size(1150, 680);
             this.panelRoot.TabIndex = 0;
             // 
             // panelContentCard
@@ -109,7 +109,7 @@
             this.panelContentCard.Radius = 0;
             this.panelContentCard.ShadowOpacity = 0F;
             this.panelContentCard.ShadowOpacityHover = 0F;
-            this.panelContentCard.Size = new System.Drawing.Size(904, 396);
+            this.panelContentCard.Size = new System.Drawing.Size(1134, 532);
             this.panelContentCard.TabIndex = 2;
             // 
             // gridContent
@@ -120,7 +120,7 @@
             this.gridContent.Location = new System.Drawing.Point(0, 0);
             this.gridContent.Margin = new System.Windows.Forms.Padding(0);
             this.gridContent.Name = "gridContent";
-            this.gridContent.Size = new System.Drawing.Size(904, 396);
+            this.gridContent.Size = new System.Drawing.Size(1134, 532);
             this.gridContent.Span = "40% 60%";
             this.gridContent.TabIndex = 0;
             // 
@@ -130,14 +130,14 @@
             this.panelPointCard.Controls.Add(this.tablePoints);
             this.panelPointCard.Controls.Add(this.panelPointHeader);
             this.panelPointCard.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelPointCard.Location = new System.Drawing.Point(362, 0);
+            this.panelPointCard.Location = new System.Drawing.Point(454, 0);
             this.panelPointCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelPointCard.Name = "panelPointCard";
             this.panelPointCard.Padding = new System.Windows.Forms.Padding(8);
             this.panelPointCard.Radius = 12;
             this.panelPointCard.Shadow = 4;
             this.panelPointCard.ShadowOpacity = 0.15F;
-            this.panelPointCard.Size = new System.Drawing.Size(542, 396);
+            this.panelPointCard.Size = new System.Drawing.Size(680, 532);
             this.panelPointCard.TabIndex = 1;
             // 
             // tablePoints
@@ -152,7 +152,7 @@
             this.tablePoints.Margin = new System.Windows.Forms.Padding(0);
             this.tablePoints.Name = "tablePoints";
             this.tablePoints.ShowTip = false;
-            this.tablePoints.Size = new System.Drawing.Size(518, 328);
+            this.tablePoints.Size = new System.Drawing.Size(656, 464);
             this.tablePoints.TabIndex = 1;
             this.tablePoints.Text = "tablePoints";
             // 
@@ -166,7 +166,7 @@
             this.panelPointHeader.Name = "panelPointHeader";
             this.panelPointHeader.Padding = new System.Windows.Forms.Padding(0, 0, 0, 8);
             this.panelPointHeader.Radius = 0;
-            this.panelPointHeader.Size = new System.Drawing.Size(518, 44);
+            this.panelPointHeader.Size = new System.Drawing.Size(656, 44);
             this.panelPointHeader.TabIndex = 0;
             // 
             // flowPointActionsRight
@@ -177,7 +177,7 @@
             this.flowPointActionsRight.Controls.Add(this.buttonDeletePoint);
             this.flowPointActionsRight.Dock = System.Windows.Forms.DockStyle.Right;
             this.flowPointActionsRight.Gap = 8;
-            this.flowPointActionsRight.Location = new System.Drawing.Point(198, 0);
+            this.flowPointActionsRight.Location = new System.Drawing.Point(336, 0);
             this.flowPointActionsRight.Margin = new System.Windows.Forms.Padding(0);
             this.flowPointActionsRight.Name = "flowPointActionsRight";
             this.flowPointActionsRight.Size = new System.Drawing.Size(320, 36);
@@ -265,7 +265,7 @@
             this.panelStationCard.Radius = 12;
             this.panelStationCard.Shadow = 4;
             this.panelStationCard.ShadowOpacity = 0.15F;
-            this.panelStationCard.Size = new System.Drawing.Size(362, 396);
+            this.panelStationCard.Size = new System.Drawing.Size(454, 532);
             this.panelStationCard.TabIndex = 0;
             // 
             // tableStations
@@ -280,7 +280,7 @@
             this.tableStations.Margin = new System.Windows.Forms.Padding(0);
             this.tableStations.Name = "tableStations";
             this.tableStations.ShowTip = false;
-            this.tableStations.Size = new System.Drawing.Size(338, 328);
+            this.tableStations.Size = new System.Drawing.Size(430, 464);
             this.tableStations.TabIndex = 1;
             this.tableStations.Text = "tableStations";
             // 
@@ -294,7 +294,7 @@
             this.panelStationHeader.Name = "panelStationHeader";
             this.panelStationHeader.Padding = new System.Windows.Forms.Padding(0, 0, 0, 8);
             this.panelStationHeader.Radius = 0;
-            this.panelStationHeader.Size = new System.Drawing.Size(338, 44);
+            this.panelStationHeader.Size = new System.Drawing.Size(430, 44);
             this.panelStationHeader.TabIndex = 0;
             // 
             // flowStationActionsRight
@@ -305,7 +305,7 @@
             this.flowStationActionsRight.Controls.Add(this.buttonDeleteStation);
             this.flowStationActionsRight.Dock = System.Windows.Forms.DockStyle.Right;
             this.flowStationActionsRight.Gap = 8;
-            this.flowStationActionsRight.Location = new System.Drawing.Point(15, 0);
+            this.flowStationActionsRight.Location = new System.Drawing.Point(107, 0);
             this.flowStationActionsRight.Margin = new System.Windows.Forms.Padding(0);
             this.flowStationActionsRight.Name = "flowStationActionsRight";
             this.flowStationActionsRight.Size = new System.Drawing.Size(323, 36);
@@ -392,7 +392,7 @@
             this.flowStats.Margin = new System.Windows.Forms.Padding(0);
             this.flowStats.Name = "flowStats";
             this.flowStats.Padding = new System.Windows.Forms.Padding(4, 6, 4, 6);
-            this.flowStats.Size = new System.Drawing.Size(904, 88);
+            this.flowStats.Size = new System.Drawing.Size(1134, 88);
             this.flowStats.TabIndex = 1;
             // 
             // panelCurrentStationPointCard
@@ -559,7 +559,7 @@
             this.panelToolbar.Name = "panelToolbar";
             this.panelToolbar.Padding = new System.Windows.Forms.Padding(4);
             this.panelToolbar.Radius = 0;
-            this.panelToolbar.Size = new System.Drawing.Size(904, 44);
+            this.panelToolbar.Size = new System.Drawing.Size(1134, 44);
             this.panelToolbar.TabIndex = 0;
             // 
             // flowToolbarLeft
@@ -573,26 +573,26 @@
             this.flowToolbarLeft.Location = new System.Drawing.Point(4, 4);
             this.flowToolbarLeft.Margin = new System.Windows.Forms.Padding(0);
             this.flowToolbarLeft.Name = "flowToolbarLeft";
-            this.flowToolbarLeft.Size = new System.Drawing.Size(381, 36);
+            this.flowToolbarLeft.Size = new System.Drawing.Size(313, 36);
             this.flowToolbarLeft.TabIndex = 0;
             // 
             // labelRuntimeSummary
             // 
             this.labelRuntimeSummary.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
-            this.labelRuntimeSummary.Location = new System.Drawing.Point(244, 0);
+            this.labelRuntimeSummary.Location = new System.Drawing.Point(237, 0);
             this.labelRuntimeSummary.Margin = new System.Windows.Forms.Padding(0);
             this.labelRuntimeSummary.Name = "labelRuntimeSummary";
-            this.labelRuntimeSummary.Size = new System.Drawing.Size(118, 36);
+            this.labelRuntimeSummary.Size = new System.Drawing.Size(59, 36);
             this.labelRuntimeSummary.TabIndex = 2;
             this.labelRuntimeSummary.Text = "未加载";
             // 
             // inputPointSearch
             // 
-            this.inputPointSearch.Location = new System.Drawing.Point(127, 0);
+            this.inputPointSearch.Location = new System.Drawing.Point(124, 0);
             this.inputPointSearch.Margin = new System.Windows.Forms.Padding(8, 0, 0, 0);
             this.inputPointSearch.Name = "inputPointSearch";
             this.inputPointSearch.PlaceholderText = "搜索点位名 / 分组 / 地址";
-            this.inputPointSearch.Size = new System.Drawing.Size(109, 36);
+            this.inputPointSearch.Size = new System.Drawing.Size(105, 36);
             this.inputPointSearch.TabIndex = 1;
             this.inputPointSearch.WaveSize = 0;
             // 
@@ -602,7 +602,7 @@
             this.inputStationSearch.Margin = new System.Windows.Forms.Padding(0);
             this.inputStationSearch.Name = "inputStationSearch";
             this.inputStationSearch.PlaceholderText = "搜索 PLC 名称 / 协议 / 端点";
-            this.inputStationSearch.Size = new System.Drawing.Size(111, 36);
+            this.inputStationSearch.Size = new System.Drawing.Size(108, 36);
             this.inputStationSearch.TabIndex = 0;
             this.inputStationSearch.WaveSize = 0;
             // 
@@ -616,7 +616,7 @@
             this.flowToolbarRight.Controls.Add(this.buttonRefresh);
             this.flowToolbarRight.Dock = System.Windows.Forms.DockStyle.Right;
             this.flowToolbarRight.Gap = 8;
-            this.flowToolbarRight.Location = new System.Drawing.Point(360, 4);
+            this.flowToolbarRight.Location = new System.Drawing.Point(590, 4);
             this.flowToolbarRight.Margin = new System.Windows.Forms.Padding(0);
             this.flowToolbarRight.Name = "flowToolbarRight";
             this.flowToolbarRight.Size = new System.Drawing.Size(540, 36);
