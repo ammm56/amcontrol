@@ -286,7 +286,15 @@ namespace AM.DBService.Services.Plc.Runtime
             if (!isConnected)
             {
                 UpdateStationDisconnected(station, points, startedAt, connectError);
-                return Warn((int)DbErrorCode.Unknown, string.IsNullOrWhiteSpace(connectError) ? "PLC 未连接" : connectError);
+
+                var message = string.IsNullOrWhiteSpace(connectError) ? "PLC 未连接" : connectError;
+                LastError = message;
+
+                if (ShouldReportRepeated($"PLC-DISCONNECT-{station.Name}-{message}", 30000))
+                {
+                    WarnLogOnly((int)DbErrorCode.Unknown, station.Name + " 离线: " + message);
+                }
+                return WarnSilent((int)DbErrorCode.Unknown, message);
             }
 
             bool stationHadReadFailure = false;
