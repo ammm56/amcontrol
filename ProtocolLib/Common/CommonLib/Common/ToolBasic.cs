@@ -801,25 +801,6 @@ namespace ProtocolLib.CommonLib.Common
             return (byte)(data & (~temp));
         }
         /// <summary>
-        /// 将bool数组转换到byte数组
-        /// </summary>
-        /// <param name="array"></param>
-        /// <returns></returns>
-        public static byte[] BoolArrayToByte(bool[] array)
-        {
-            if (array == null) return null;
-            int length = array.Length % 8 == 0 ? array.Length / 8 : array.Length / 8 + 1;
-            byte[] buffer = new byte[length];
-            for (int i = 0; i < array.Length; i++)
-            {
-                if (array[i])
-                {
-                    buffer[i / 8] += GetDataByBitIndex(i % 8);
-                }
-            }
-            return buffer;
-        }
-        /// <summary>
         /// 从字节数组中提取所有的位数组
         /// </summary>
         /// <param name="InBytes"></param>
@@ -1187,52 +1168,181 @@ namespace ProtocolLib.CommonLib.Common
             {"double[]",typeof(double[]) }
         };
 
-        public static object GetComparableValue(string value, string type)
+        /// <summary>
+        /// 统一解析点位请求。
+        /// 规则：
+        /// 1. 标量类型长度固定为 1；
+        /// 2. string 的长度优先取显式 length，其次取地址中 [n]；
+        /// 3. 数组类型长度优先取显式 length，其次取地址中 [n]；
+        /// 4. 返回的 normalizedAddress：
+        ///    - string 一律补全为带 [length] 的地址；
+        ///    - 标量与数组返回去掉 [n] 后的基础地址。
+        /// </summary>
+        public static void ResolvePointRequest(
+            string address,
+            string dataType,
+            int length,
+            out string normalizedAddress,
+            out string normalizedDataType,
+            out int normalizedLength,
+            out bool isString,
+            out bool isArray,
+            out string elementType)
         {
-            string dataType = (type ?? "string").ToLowerInvariant();
-            string text = value ?? string.Empty;
+            string workingAddress = string.IsNullOrWhiteSpace(address) ? string.Empty : address.Trim();
+            int declaredLength = ExtractStartIndex(ref workingAddress);
 
-            switch (dataType)
+            normalizedDataType = NormalizeProtocolDataType(dataType);
+            isString = string.Equals(normalizedDataType, "string", StringComparison.OrdinalIgnoreCase);
+            isArray = !string.IsNullOrWhiteSpace(normalizedDataType) && normalizedDataType.EndsWith("[]", StringComparison.Ordinal);
+            elementType = isArray
+                ? normalizedDataType.Substring(0, normalizedDataType.Length - 2)
+                : normalizedDataType;
+
+            if (isString)
             {
-                case "bool":
-                    return ParseBoolean(text) ? (byte)1 : (byte)0;
-                case "byte":
-                    return byte.Parse(text, CultureInfo.InvariantCulture);
-                case "int16":
-                    return short.Parse(text, CultureInfo.InvariantCulture);
-                case "uint16":
-                    return ushort.Parse(text, CultureInfo.InvariantCulture);
-                case "int32":
-                    return int.Parse(text, CultureInfo.InvariantCulture);
-                case "uint32":
-                    return uint.Parse(text, CultureInfo.InvariantCulture);
-                case "int64":
-                    return long.Parse(text, CultureInfo.InvariantCulture);
-                case "uint64":
-                    return ulong.Parse(text, CultureInfo.InvariantCulture);
-                case "single":
-                    return float.Parse(text, CultureInfo.InvariantCulture);
-                case "double":
-                    return double.Parse(text, CultureInfo.InvariantCulture);
-                default:
-                    return text;
+                normalizedLength = length > 0
+                    ? length
+                    : (declaredLength > 0 ? declaredLength : 1);
+
+                normalizedAddress = string.IsNullOrWhiteSpace(workingAddress)
+                    ? string.Empty
+                    : workingAddress + "[" + normalizedLength + "]";
+                return;
             }
+
+            if (isArray)
+            {
+                normalizedLength = length > 0
+                    ? length
+                    : (declaredLength > 0 ? declaredLength : 1);
+
+                normalizedAddress = workingAddress;
+                return;
+            }
+
+            normalizedLength = 1;
+            normalizedAddress = workingAddress;
         }
 
-        private static bool ParseBoolean(string value)
+        /// <summary>
+        /// 统一规范化协议数据类型。
+        /// 只做格式收敛，不做别名映射。
+        /// </summary>
+        public static string NormalizeProtocolDataType(string dataType)
         {
-            string text = (value ?? string.Empty).Trim();
+            return string.IsNullOrWhiteSpace(dataType)
+                ? string.Empty
+                : dataType.Trim().Replace(" ", string.Empty).ToLowerInvariant();
+        }
 
-            if (text == "1") return true;
-            if (text == "0") return false;
-
-            bool result;
-            if (bool.TryParse(text, out result))
+        /// <summary>
+        /// 将bool数组转换到byte数组
+        /// </summary>
+        /// <param name="array"></param>
+        /// <returns></returns>
+        public static byte[] BoolArrayToByte(bool[] array)
+        {
+            if (array == null) return new byte[0];
+            int length = array.Length % 8 == 0 ? array.Length / 8 : array.Length / 8 + 1;
+            byte[] buffer = new byte[length];
+            for (int i = 0; i < array.Length; i++)
             {
-                return result;
+                if (array[i])
+                {
+                    buffer[i / 8] += GetDataByBitIndex(i % 8);
+                }
+            }
+            return buffer;
+        }
+
+        /// <summary>
+        /// 保障字节数组长度为偶数。
+        /// </summary>
+        public static byte[] EnsureEvenLength(byte[] buffer)
+        {
+            if (buffer == null)
+            {
+                return new byte[0];
             }
 
-            throw new FormatException("布尔值转换失败:" + value);
+            if (buffer.Length % 2 == 0)
+            {
+                return buffer;
+            }
+
+            byte[] result = new byte[buffer.Length + 1];
+            Array.Copy(buffer, result, buffer.Length);
+            return result;
+        }
+
+        /// <summary>
+        /// 按指定长度裁剪字节数组。
+        /// </summary>
+        public static byte[] TrimBuffer(byte[] buffer, int length)
+        {
+            if (buffer == null)
+            {
+                return new byte[0];
+            }
+
+            int actualLength = Math.Min(buffer.Length, Math.Max(0, length));
+            byte[] result = new byte[actualLength];
+            Array.Copy(buffer, 0, result, 0, actualLength);
+            return result;
+        }
+
+        /// <summary>
+        /// 将字节数组转为十六进制文本。
+        /// </summary>
+        public static string BuildBufferValueText(byte[] buffer)
+        {
+            if (buffer == null || buffer.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            return BitConverter.ToString(buffer).Replace("-", " ");
+        }
+        /// <summary>
+        /// 计算指定基础类型数组在内存中理论应占用的字节数。
+        /// 该方法仅描述“数据类型宽度”，与具体协议的地址单位无关。
+        ///
+        /// 适用说明：
+        /// 1. 可用于按字节寻址的协议，例如 S7 原始字节读取；
+        /// 2. 也可用于按寄存器读取后，对返回原始缓冲区进行结果裁剪；
+        /// 3. 不负责计算寄存器数量，不应替代按 word/register 读取协议的长度换算。
+        /// </summary>
+        /// <param name="elementType">数组元素基础类型，例如 uint16、int32、float。</param>
+        /// <param name="length">元素个数，小于等于 0 时按 1 处理。</param>
+        /// <returns>理论字节数。</returns>
+        public static int ResolveByteLengthForArray(string elementType, int length)
+        {
+            int actualLength = length <= 0 ? 1 : length;
+
+            switch (elementType)
+            {
+                case "uint8":
+                case "int8":
+                    return actualLength;
+
+                case "uint16":
+                case "int16":
+                    return actualLength * 2;
+
+                case "uint32":
+                case "int32":
+                case "float":
+                    return actualLength * 4;
+
+                case "uint64":
+                case "int64":
+                case "double":
+                    return actualLength * 8;
+
+                default:
+                    return actualLength;
+            }
         }
 
         #endregion
