@@ -70,7 +70,7 @@ namespace ProtocolLib.CommonLib.Net.NetworkBase
         public virtual int connectTimeout
         {
             get { return _connectTimeOut; }
-            set => connectTimeout = Math.Max(value, 0);
+            set { _connectTimeOut = Math.Max(value, 0); }
         }
         /// <summary>
         /// 唯一ID

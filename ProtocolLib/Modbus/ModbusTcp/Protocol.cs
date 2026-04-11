@@ -79,6 +79,8 @@ namespace ProtocolLib.ModbusTcp
                         _options.ip ?? string.Empty,
                         _options.port <= 0 ? 502 : _options.port,
                         GetStationNo(_options));
+
+                    ApplyTimeoutOptions(_modbusTCPClient, _options);
                 }
 
                 return M_Return<bool>.OK(true);
@@ -115,6 +117,8 @@ namespace ProtocolLib.ModbusTcp
                 {
                     _modbusTCPClient.UpdateConnectionInfo(ip, port, stationNo);
                 }
+
+                ApplyTimeoutOptions(_modbusTCPClient, _options);
 
                 _connect = _modbusTCPClient.Connection();
                 if (_connect == null || !_connect.IsSuccess)
@@ -518,6 +522,38 @@ namespace ProtocolLib.ModbusTcp
             }
 
             return (byte)options.stationNo.Value;
+        }
+
+        /// <summary>
+        /// 应用连接超时选项。
+        /// </summary>
+        /// <param name="client">ModbusTCP 客户端实例。</param>
+        /// <param name="options">协议配置。</param>
+        private static void ApplyTimeoutOptions(ModbusTCP client, M_ProtocolOptions options)
+        {
+            if (client == null || options == null)
+            {
+                return;
+            }
+
+            int timeoutMs = ResolveTimeoutMs(options);
+            client.connectTimeout = timeoutMs;
+            client.receiveTimeout = timeoutMs;
+        }
+
+        /// <summary>
+        /// 解析超时时间，单位：毫秒。
+        /// </summary>
+        /// <param name="options">协议配置。</param>
+        /// <returns>超时时间（毫秒）。</returns>
+        private static int ResolveTimeoutMs(M_ProtocolOptions options)
+        {
+            if (options == null || options.timeoutMs <= 0)
+            {
+                return 3000;
+            }
+
+            return options.timeoutMs;
         }
     }
 }

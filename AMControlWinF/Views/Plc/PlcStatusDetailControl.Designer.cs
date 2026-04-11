@@ -268,7 +268,7 @@
             this.labelTagAverageReadKey.Name = "labelTagAverageReadKey";
             this.labelTagAverageReadKey.Size = new System.Drawing.Size(72, 24);
             this.labelTagAverageReadKey.TabIndex = 0;
-            this.labelTagAverageReadKey.Text = "扫描均值";
+            this.labelTagAverageReadKey.Text = "整轮读取均值";
             this.labelTagAverageReadKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // panelTagLastConnect
@@ -330,7 +330,7 @@
             this.labelTagLastScanKey.Name = "labelTagLastScanKey";
             this.labelTagLastScanKey.Size = new System.Drawing.Size(72, 24);
             this.labelTagLastScanKey.TabIndex = 0;
-            this.labelTagLastScanKey.Text = "扫描开始时间";
+            this.labelTagLastScanKey.Text = "扫描完成时间";
             this.labelTagLastScanKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // panelTagScan

@@ -90,12 +90,12 @@ namespace AMControlWinF.Views.Plc
                 SetTagRow(labelTagConfigKey, labelTagConfigValue, "配置", item.ConfigStatusText);
                 SetTagRow(labelTagRuntimeKey, labelTagRuntimeValue, "通讯", item.ConnectionStatusText);
                 SetTagRow(labelTagScanKey, labelTagScanValue, "扫描", item.ScanStatusText);
-                SetTagRow(labelTagLastScanKey, labelTagLastScanValue, "更新时间", item.LastScanTimeText);
+                SetTagRow(labelTagLastScanKey, labelTagLastScanValue, "扫描完成时间", item.LastScanTimeText);
                 SetTagRow(labelTagLastConnectKey, labelTagLastConnectValue, "连接时间", item.LastConnectTimeText);
-                SetTagRow(labelTagAverageReadKey, labelTagAverageReadValue, "平均读取", item.AverageReadMsText);
+                SetTagRow(labelTagAverageReadKey, labelTagAverageReadValue, "整轮读取均值", item.AverageReadMsText);
                 SetTagRow(labelTagAverageWriteKey, labelTagAverageWriteValue, "平均写入", item.AverageWriteMsText);
-                SetTagRow(labelTagSuccessKey, labelTagSuccessValue, "成功次数", item.SuccessReadCountText);
-                SetTagRow(labelTagFailedKey, labelTagFailedValue, "失败次数", item.FailedReadCountText);
+                SetTagRow(labelTagSuccessKey, labelTagSuccessValue, "成功轮次", item.SuccessReadCountText);
+                SetTagRow(labelTagFailedKey, labelTagFailedValue, "失败轮次", item.FailedReadCountText);
 
                 labelErrorValue.Text = item.LastErrorText;
             }

@@ -230,6 +230,10 @@ namespace AM.PageModel.Plc
             return new PlcScanWorker().ScanOnce();
         }
 
+        /// <summary>
+        /// 页面顶部摘要显示：
+        /// 当前是否运行 + 最近一轮扫描完成时间。
+        /// </summary>
         private void ApplyRuntimeSummary()
         {
             PlcRuntimeState runtimeState = RuntimeContext.Instance.Plc;
@@ -237,8 +241,8 @@ namespace AM.PageModel.Plc
             DateTime? lastScanTime = runtimeState == null ? null : runtimeState.LastScanTime;
 
             RuntimeSummaryText = scanRunning
-                ? "运行中 " + FormatTime(lastScanTime)
-                : "已停止 " + FormatTime(lastScanTime);
+                ? "运行中 最近完成 " + FormatTime(lastScanTime)
+                : "已停止 最近完成 " + FormatTime(lastScanTime);
         }
 
         private void ClearAll()
@@ -422,16 +426,28 @@ namespace AM.PageModel.Plc
 
             public DateTime? LastConnectTime { get; set; }
 
+            /// <summary>
+            /// 最近一轮扫描完成时间。
+            /// </summary>
             public DateTime? LastScanTime { get; set; }
 
             public string LastError { get; set; }
 
+            /// <summary>
+            /// 整轮读取耗时平滑均值，不是单点平均耗时。
+            /// </summary>
             public double AverageReadMs { get; set; }
 
             public double AverageWriteMs { get; set; }
 
+            /// <summary>
+            /// 成功扫描轮次。
+            /// </summary>
             public long SuccessReadCount { get; set; }
 
+            /// <summary>
+            /// 失败扫描轮次。
+            /// </summary>
             public long FailedReadCount { get; set; }
 
             public string DisplayTitle
@@ -497,6 +513,9 @@ namespace AM.PageModel.Plc
                 }
             }
 
+            /// <summary>
+            /// 最近一轮扫描完成时间文本。
+            /// </summary>
             public string LastScanTimeText
             {
                 get

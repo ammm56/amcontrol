@@ -79,6 +79,8 @@ namespace ProtocolLib.S7Tcp
                     _siemensS7.UpdateIPPortInfo(
                         _options.ip ?? string.Empty,
                         _options.port <= 0 ? 102 : _options.port);
+
+                    ApplyTimeoutOptions(_siemensS7, _options);
                 }
 
                 return M_Return<bool>.OK(true);
@@ -114,6 +116,8 @@ namespace ProtocolLib.S7Tcp
                 {
                     _siemensS7.UpdateIPPortInfo(ip, port);
                 }
+
+                ApplyTimeoutOptions(_siemensS7, _options);
 
                 _connect = _siemensS7.Connection();
                 if (_connect == null || !_connect.IsSuccess)
@@ -524,6 +528,28 @@ namespace ProtocolLib.S7Tcp
             if (protocolType.Contains("200")) return E_SiemensPLCS.S200;
 
             return E_SiemensPLCS.S1200;
+        }
+
+        private static void ApplyTimeoutOptions(SiemensS7 client, M_ProtocolOptions options)
+        {
+            if (client == null || options == null)
+            {
+                return;
+            }
+
+            int timeoutMs = ResolveTimeoutMs(options);
+            client.connectTimeout = timeoutMs;
+            client.receiveTimeout = timeoutMs;
+        }
+
+        private static int ResolveTimeoutMs(M_ProtocolOptions options)
+        {
+            if (options == null || options.timeoutMs <= 0)
+            {
+                return 3000;
+            }
+
+            return options.timeoutMs;
         }
     }
 }
