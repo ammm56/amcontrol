@@ -52,7 +52,7 @@ namespace AM.PageModel.SysConfig
 
             _stationSearchText = string.Empty;
             _pointSearchText = string.Empty;
-            _runtimeSummaryText = "PLC 运行态：未加载";
+            _runtimeSummaryText = "未加载";
         }
 
         public IList<StationViewItem> Stations
@@ -141,8 +141,8 @@ namespace AM.PageModel.SysConfig
             get
             {
                 return SelectedStation == null
-                    ? "当前站：未选择 PLC"
-                    : "当前站：" + SelectedStation.DisplayTitle;
+                    ? "未选择 PLC"
+                    : SelectedStation.DisplayTitle;
             }
         }
 
@@ -151,8 +151,8 @@ namespace AM.PageModel.SysConfig
             get
             {
                 return SelectedPoint == null
-                    ? "当前点位：未选择"
-                    : "当前点位：" + SelectedPoint.DisplayTitle;
+                    ? "未选择"
+                    : SelectedPoint.DisplayTitle;
             }
         }
 
@@ -322,7 +322,7 @@ namespace AM.PageModel.SysConfig
                 var runtimeResult = new PlcRuntimeQueryService().QueryAllStations();
                 if (!runtimeResult.Success || runtimeResult.Items == null)
                 {
-                    RuntimeSummaryText = "PLC 运行态：未获取到运行时快照";
+                    RuntimeSummaryText = "未获取到运行时快照";
                     return;
                 }
 
@@ -348,12 +348,12 @@ namespace AM.PageModel.SysConfig
                 }
 
                 RuntimeSummaryText = scanRunning
-                    ? "PLC 运行态：扫描中"
-                    : "PLC 运行态：扫描已停止";
+                    ? "扫描中"
+                    : "扫描已停止";
             }
             catch
             {
-                RuntimeSummaryText = "PLC 运行态：查询失败";
+                RuntimeSummaryText = "查询失败";
             }
         }
 
@@ -365,7 +365,7 @@ namespace AM.PageModel.SysConfig
             _points = new List<PointViewItem>();
             SelectedStation = null;
             SelectedPoint = null;
-            RuntimeSummaryText = "PLC 运行态：未加载";
+            RuntimeSummaryText = "未加载";
             RaiseSummaryChanged();
             OnPropertyChanged(nameof(Stations));
             OnPropertyChanged(nameof(Points));

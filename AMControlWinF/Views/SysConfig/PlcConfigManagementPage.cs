@@ -74,70 +74,71 @@ namespace AMControlWinF.Views.SysConfig
             {
                 new Column("DisplayName", "显示名", ColumnAlign.Left)
                 {
-                    Width = "160",
+                    Width = "110",
                     Fixed = true
+                },
+                new Column("ProtocolType", "协议", ColumnAlign.Center)
+                {
+                    Width = "90"
+                },
+                new Column("ConnectionType", "连接", ColumnAlign.Center)
+                {
+                    Width = "80"
+                },
+                new Column("EndpointText", "端点", ColumnAlign.Left)
+                {
+                    Width = "150"
+                },
+                new Column("RuntimeTag", "运行态", ColumnAlign.Center)
+                {
+                    Width = "70",
+                    Fixed = true
+                },
+                new Column("PointCountText", "点位数", ColumnAlign.Center)
+                {
+                    Width = "80"
                 },
                 new Column("Name", "名称", ColumnAlign.Left)
                 {
                     Width = "150"
                 },
-                new Column("ProtocolType", "协议", ColumnAlign.Center)
-                {
-                    Width = "110"
-                },
-                new Column("ConnectionType", "连接", ColumnAlign.Center)
-                {
-                    Width = "100"
-                },
-                new Column("EndpointText", "端点", ColumnAlign.Left)
-                {
-                    Width = "170"
-                },
-                new Column("RuntimeTag", "运行态", ColumnAlign.Center)
-                {
-                    Width = "110"
-                },
-                new Column("PointCountText", "点位数", ColumnAlign.Center)
-                {
-                    Width = "80"
-                }
             };
 
             tablePoints.Columns = new ColumnCollection()
             {
                 new Column("DisplayName", "显示名", ColumnAlign.Left)
                 {
-                    Width = "150",
+                    Width = "110",
                     Fixed = true
-                },
-                new Column("Name", "名称", ColumnAlign.Left)
-                {
-                    Width = "150"
-                },
-                new Column("GroupText", "分组", ColumnAlign.Center)
-                {
-                    Width = "120"
                 },
                 new Column("AddressText", "地址", ColumnAlign.Left)
                 {
-                    Width = "140"
+                    Width = "90"
                 },
                 new Column("DataTypeText", "类型", ColumnAlign.Center)
                 {
-                    Width = "100"
+                    Width = "80"
                 },
                 new Column("LengthText", "长度", ColumnAlign.Center)
                 {
-                    Width = "70"
+                    Width = "50"
                 },
                 new Column("AccessModeTag", "访问", ColumnAlign.Center)
                 {
-                    Width = "110"
+                    Width = "80"
                 },
                 new Column("EnabledTag", "状态", ColumnAlign.Center)
                 {
-                    Width = "100"
-                }
+                    Width = "70"
+                },
+                new Column("Name", "名称", ColumnAlign.Left)
+                {
+                    Width = "120"
+                },
+                new Column("GroupText", "分组", ColumnAlign.Center)
+                {
+                    Width = "80"
+                },
             };
         }
 

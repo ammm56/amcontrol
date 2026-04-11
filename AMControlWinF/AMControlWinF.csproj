@@ -550,6 +550,9 @@
     <EmbeddedResource Include="Views\Motion\MotionMonitorPage.resx">
       <DependentUpon>MotionMonitorPage.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\SysConfig\PlcConfigManagementPage.resx">
+      <DependentUpon>PlcConfigManagementPage.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="app.manifest" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

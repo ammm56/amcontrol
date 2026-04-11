@@ -23,9 +23,9 @@
             this.tablePoints = new AntdUI.Table();
             this.panelPointHeader = new AntdUI.Panel();
             this.flowPointActionsRight = new AntdUI.FlowPanel();
-            this.buttonDeletePoint = new AntdUI.Button();
-            this.buttonEditPoint = new AntdUI.Button();
             this.buttonAddPoint = new AntdUI.Button();
+            this.buttonEditPoint = new AntdUI.Button();
+            this.buttonDeletePoint = new AntdUI.Button();
             this.flowPointActionsLeft = new AntdUI.FlowPanel();
             this.labelSelectedPoint = new AntdUI.Label();
             this.labelPointTitle = new AntdUI.Label();
@@ -33,9 +33,9 @@
             this.tableStations = new AntdUI.Table();
             this.panelStationHeader = new AntdUI.Panel();
             this.flowStationActionsRight = new AntdUI.FlowPanel();
-            this.buttonDeleteStation = new AntdUI.Button();
-            this.buttonEditStation = new AntdUI.Button();
             this.buttonAddStation = new AntdUI.Button();
+            this.buttonEditStation = new AntdUI.Button();
+            this.buttonDeleteStation = new AntdUI.Button();
             this.flowStationActionsLeft = new AntdUI.FlowPanel();
             this.labelSelectedStation = new AntdUI.Label();
             this.labelStationTitle = new AntdUI.Label();
@@ -53,16 +53,16 @@
             this.labelStationTotalCount = new AntdUI.Label();
             this.labelStationTotalTitle = new AntdUI.Label();
             this.panelToolbar = new AntdUI.Panel();
+            this.flowToolbarLeft = new AntdUI.FlowPanel();
+            this.labelRuntimeSummary = new AntdUI.Label();
+            this.inputPointSearch = new AntdUI.Input();
+            this.inputStationSearch = new AntdUI.Input();
             this.flowToolbarRight = new AntdUI.FlowPanel();
             this.buttonStopScan = new AntdUI.Button();
             this.buttonStartScan = new AntdUI.Button();
             this.buttonScanOnce = new AntdUI.Button();
             this.buttonReloadConfig = new AntdUI.Button();
             this.buttonRefresh = new AntdUI.Button();
-            this.flowToolbarLeft = new AntdUI.FlowPanel();
-            this.labelRuntimeSummary = new AntdUI.Label();
-            this.inputPointSearch = new AntdUI.Input();
-            this.inputStationSearch = new AntdUI.Input();
             this.panelRoot.SuspendLayout();
             this.panelContentCard.SuspendLayout();
             this.gridContent.SuspendLayout();
@@ -80,8 +80,8 @@
             this.panelOnlineStationCard.SuspendLayout();
             this.panelStationTotalCard.SuspendLayout();
             this.panelToolbar.SuspendLayout();
-            this.flowToolbarRight.SuspendLayout();
             this.flowToolbarLeft.SuspendLayout();
+            this.flowToolbarRight.SuspendLayout();
             this.SuspendLayout();
             // 
             // panelRoot
@@ -95,7 +95,7 @@
             this.panelRoot.Name = "panelRoot";
             this.panelRoot.Padding = new System.Windows.Forms.Padding(8);
             this.panelRoot.Radius = 0;
-            this.panelRoot.Size = new System.Drawing.Size(1180, 720);
+            this.panelRoot.Size = new System.Drawing.Size(920, 544);
             this.panelRoot.TabIndex = 0;
             // 
             // panelContentCard
@@ -106,10 +106,10 @@
             this.panelContentCard.Location = new System.Drawing.Point(8, 140);
             this.panelContentCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelContentCard.Name = "panelContentCard";
-            this.panelContentCard.Padding = new System.Windows.Forms.Padding(8);
-            this.panelContentCard.Radius = 12;
-            this.panelContentCard.Shadow = 4;
-            this.panelContentCard.Size = new System.Drawing.Size(1164, 572);
+            this.panelContentCard.Radius = 0;
+            this.panelContentCard.ShadowOpacity = 0F;
+            this.panelContentCard.ShadowOpacityHover = 0F;
+            this.panelContentCard.Size = new System.Drawing.Size(904, 396);
             this.panelContentCard.TabIndex = 2;
             // 
             // gridContent
@@ -117,10 +117,10 @@
             this.gridContent.Controls.Add(this.panelPointCard);
             this.gridContent.Controls.Add(this.panelStationCard);
             this.gridContent.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gridContent.Location = new System.Drawing.Point(12, 12);
+            this.gridContent.Location = new System.Drawing.Point(0, 0);
             this.gridContent.Margin = new System.Windows.Forms.Padding(0);
             this.gridContent.Name = "gridContent";
-            this.gridContent.Size = new System.Drawing.Size(1140, 548);
+            this.gridContent.Size = new System.Drawing.Size(904, 396);
             this.gridContent.Span = "40% 60%";
             this.gridContent.TabIndex = 0;
             // 
@@ -130,14 +130,14 @@
             this.panelPointCard.Controls.Add(this.tablePoints);
             this.panelPointCard.Controls.Add(this.panelPointHeader);
             this.panelPointCard.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelPointCard.Location = new System.Drawing.Point(456, 0);
+            this.panelPointCard.Location = new System.Drawing.Point(362, 0);
             this.panelPointCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelPointCard.Name = "panelPointCard";
             this.panelPointCard.Padding = new System.Windows.Forms.Padding(8);
             this.panelPointCard.Radius = 12;
             this.panelPointCard.Shadow = 4;
             this.panelPointCard.ShadowOpacity = 0.15F;
-            this.panelPointCard.Size = new System.Drawing.Size(684, 548);
+            this.panelPointCard.Size = new System.Drawing.Size(542, 396);
             this.panelPointCard.TabIndex = 1;
             // 
             // tablePoints
@@ -152,7 +152,7 @@
             this.tablePoints.Margin = new System.Windows.Forms.Padding(0);
             this.tablePoints.Name = "tablePoints";
             this.tablePoints.ShowTip = false;
-            this.tablePoints.Size = new System.Drawing.Size(660, 480);
+            this.tablePoints.Size = new System.Drawing.Size(518, 328);
             this.tablePoints.TabIndex = 1;
             this.tablePoints.Text = "tablePoints";
             // 
@@ -166,58 +166,59 @@
             this.panelPointHeader.Name = "panelPointHeader";
             this.panelPointHeader.Padding = new System.Windows.Forms.Padding(0, 0, 0, 8);
             this.panelPointHeader.Radius = 0;
-            this.panelPointHeader.Size = new System.Drawing.Size(660, 44);
+            this.panelPointHeader.Size = new System.Drawing.Size(518, 44);
             this.panelPointHeader.TabIndex = 0;
             // 
             // flowPointActionsRight
             // 
-            this.flowPointActionsRight.Controls.Add(this.buttonDeletePoint);
-            this.flowPointActionsRight.Controls.Add(this.buttonEditPoint);
+            this.flowPointActionsRight.Align = AntdUI.TAlignFlow.RightCenter;
             this.flowPointActionsRight.Controls.Add(this.buttonAddPoint);
+            this.flowPointActionsRight.Controls.Add(this.buttonEditPoint);
+            this.flowPointActionsRight.Controls.Add(this.buttonDeletePoint);
             this.flowPointActionsRight.Dock = System.Windows.Forms.DockStyle.Right;
             this.flowPointActionsRight.Gap = 8;
-            this.flowPointActionsRight.Location = new System.Drawing.Point(340, 0);
+            this.flowPointActionsRight.Location = new System.Drawing.Point(198, 0);
             this.flowPointActionsRight.Margin = new System.Windows.Forms.Padding(0);
             this.flowPointActionsRight.Name = "flowPointActionsRight";
             this.flowPointActionsRight.Size = new System.Drawing.Size(320, 36);
             this.flowPointActionsRight.TabIndex = 1;
             // 
-            // buttonDeletePoint
-            // 
-            this.buttonDeletePoint.IconSvg = "DeleteOutlined";
-            this.buttonDeletePoint.Location = new System.Drawing.Point(224, 0);
-            this.buttonDeletePoint.Margin = new System.Windows.Forms.Padding(0);
-            this.buttonDeletePoint.Name = "buttonDeletePoint";
-            this.buttonDeletePoint.Radius = 8;
-            this.buttonDeletePoint.Size = new System.Drawing.Size(96, 36);
-            this.buttonDeletePoint.TabIndex = 2;
-            this.buttonDeletePoint.Text = "删除";
-            this.buttonDeletePoint.WaveSize = 0;
-            // 
-            // buttonEditPoint
-            // 
-            this.buttonEditPoint.IconSvg = "EditOutlined";
-            this.buttonEditPoint.Location = new System.Drawing.Point(112, 0);
-            this.buttonEditPoint.Margin = new System.Windows.Forms.Padding(0);
-            this.buttonEditPoint.Name = "buttonEditPoint";
-            this.buttonEditPoint.Radius = 8;
-            this.buttonEditPoint.Size = new System.Drawing.Size(104, 36);
-            this.buttonEditPoint.TabIndex = 1;
-            this.buttonEditPoint.Text = "编辑";
-            this.buttonEditPoint.WaveSize = 0;
-            // 
             // buttonAddPoint
             // 
             this.buttonAddPoint.IconSvg = "PlusOutlined";
-            this.buttonAddPoint.Location = new System.Drawing.Point(0, 0);
+            this.buttonAddPoint.Location = new System.Drawing.Point(239, 0);
             this.buttonAddPoint.Margin = new System.Windows.Forms.Padding(0);
             this.buttonAddPoint.Name = "buttonAddPoint";
             this.buttonAddPoint.Radius = 8;
-            this.buttonAddPoint.Size = new System.Drawing.Size(104, 36);
+            this.buttonAddPoint.Size = new System.Drawing.Size(81, 36);
             this.buttonAddPoint.TabIndex = 0;
             this.buttonAddPoint.Text = "新增";
             this.buttonAddPoint.Type = AntdUI.TTypeMini.Primary;
             this.buttonAddPoint.WaveSize = 0;
+            // 
+            // buttonEditPoint
+            // 
+            this.buttonEditPoint.IconSvg = "EditOutlined";
+            this.buttonEditPoint.Location = new System.Drawing.Point(151, 0);
+            this.buttonEditPoint.Margin = new System.Windows.Forms.Padding(0);
+            this.buttonEditPoint.Name = "buttonEditPoint";
+            this.buttonEditPoint.Radius = 8;
+            this.buttonEditPoint.Size = new System.Drawing.Size(80, 36);
+            this.buttonEditPoint.TabIndex = 1;
+            this.buttonEditPoint.Text = "编辑";
+            this.buttonEditPoint.WaveSize = 0;
+            // 
+            // buttonDeletePoint
+            // 
+            this.buttonDeletePoint.IconSvg = "DeleteOutlined";
+            this.buttonDeletePoint.Location = new System.Drawing.Point(62, 0);
+            this.buttonDeletePoint.Margin = new System.Windows.Forms.Padding(0);
+            this.buttonDeletePoint.Name = "buttonDeletePoint";
+            this.buttonDeletePoint.Radius = 8;
+            this.buttonDeletePoint.Size = new System.Drawing.Size(81, 36);
+            this.buttonDeletePoint.TabIndex = 2;
+            this.buttonDeletePoint.Text = "删除";
+            this.buttonDeletePoint.WaveSize = 0;
             // 
             // flowPointActionsLeft
             // 
@@ -228,18 +229,18 @@
             this.flowPointActionsLeft.Location = new System.Drawing.Point(0, 0);
             this.flowPointActionsLeft.Margin = new System.Windows.Forms.Padding(0);
             this.flowPointActionsLeft.Name = "flowPointActionsLeft";
-            this.flowPointActionsLeft.Size = new System.Drawing.Size(420, 36);
+            this.flowPointActionsLeft.Size = new System.Drawing.Size(252, 36);
             this.flowPointActionsLeft.TabIndex = 0;
             // 
             // labelSelectedPoint
             // 
             this.labelSelectedPoint.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
-            this.labelSelectedPoint.Location = new System.Drawing.Point(84, 0);
+            this.labelSelectedPoint.Location = new System.Drawing.Point(72, 0);
             this.labelSelectedPoint.Margin = new System.Windows.Forms.Padding(0);
             this.labelSelectedPoint.Name = "labelSelectedPoint";
-            this.labelSelectedPoint.Size = new System.Drawing.Size(320, 36);
+            this.labelSelectedPoint.Size = new System.Drawing.Size(180, 36);
             this.labelSelectedPoint.TabIndex = 1;
-            this.labelSelectedPoint.Text = "当前点位：未选择";
+            this.labelSelectedPoint.Text = "未选择";
             // 
             // labelPointTitle
             // 
@@ -247,7 +248,7 @@
             this.labelPointTitle.Location = new System.Drawing.Point(0, 0);
             this.labelPointTitle.Margin = new System.Windows.Forms.Padding(0);
             this.labelPointTitle.Name = "labelPointTitle";
-            this.labelPointTitle.Size = new System.Drawing.Size(80, 36);
+            this.labelPointTitle.Size = new System.Drawing.Size(64, 36);
             this.labelPointTitle.TabIndex = 0;
             this.labelPointTitle.Text = "点位配置";
             // 
@@ -264,7 +265,7 @@
             this.panelStationCard.Radius = 12;
             this.panelStationCard.Shadow = 4;
             this.panelStationCard.ShadowOpacity = 0.15F;
-            this.panelStationCard.Size = new System.Drawing.Size(456, 548);
+            this.panelStationCard.Size = new System.Drawing.Size(362, 396);
             this.panelStationCard.TabIndex = 0;
             // 
             // tableStations
@@ -279,7 +280,7 @@
             this.tableStations.Margin = new System.Windows.Forms.Padding(0);
             this.tableStations.Name = "tableStations";
             this.tableStations.ShowTip = false;
-            this.tableStations.Size = new System.Drawing.Size(432, 480);
+            this.tableStations.Size = new System.Drawing.Size(338, 328);
             this.tableStations.TabIndex = 1;
             this.tableStations.Text = "tableStations";
             // 
@@ -293,58 +294,59 @@
             this.panelStationHeader.Name = "panelStationHeader";
             this.panelStationHeader.Padding = new System.Windows.Forms.Padding(0, 0, 0, 8);
             this.panelStationHeader.Radius = 0;
-            this.panelStationHeader.Size = new System.Drawing.Size(432, 44);
+            this.panelStationHeader.Size = new System.Drawing.Size(338, 44);
             this.panelStationHeader.TabIndex = 0;
             // 
             // flowStationActionsRight
             // 
-            this.flowStationActionsRight.Controls.Add(this.buttonDeleteStation);
-            this.flowStationActionsRight.Controls.Add(this.buttonEditStation);
+            this.flowStationActionsRight.Align = AntdUI.TAlignFlow.RightCenter;
             this.flowStationActionsRight.Controls.Add(this.buttonAddStation);
+            this.flowStationActionsRight.Controls.Add(this.buttonEditStation);
+            this.flowStationActionsRight.Controls.Add(this.buttonDeleteStation);
             this.flowStationActionsRight.Dock = System.Windows.Forms.DockStyle.Right;
             this.flowStationActionsRight.Gap = 8;
-            this.flowStationActionsRight.Location = new System.Drawing.Point(112, 0);
+            this.flowStationActionsRight.Location = new System.Drawing.Point(15, 0);
             this.flowStationActionsRight.Margin = new System.Windows.Forms.Padding(0);
             this.flowStationActionsRight.Name = "flowStationActionsRight";
-            this.flowStationActionsRight.Size = new System.Drawing.Size(320, 36);
+            this.flowStationActionsRight.Size = new System.Drawing.Size(323, 36);
             this.flowStationActionsRight.TabIndex = 1;
-            // 
-            // buttonDeleteStation
-            // 
-            this.buttonDeleteStation.IconSvg = "DeleteOutlined";
-            this.buttonDeleteStation.Location = new System.Drawing.Point(224, 0);
-            this.buttonDeleteStation.Margin = new System.Windows.Forms.Padding(0);
-            this.buttonDeleteStation.Name = "buttonDeleteStation";
-            this.buttonDeleteStation.Radius = 8;
-            this.buttonDeleteStation.Size = new System.Drawing.Size(96, 36);
-            this.buttonDeleteStation.TabIndex = 2;
-            this.buttonDeleteStation.Text = "删除";
-            this.buttonDeleteStation.WaveSize = 0;
-            // 
-            // buttonEditStation
-            // 
-            this.buttonEditStation.IconSvg = "EditOutlined";
-            this.buttonEditStation.Location = new System.Drawing.Point(112, 0);
-            this.buttonEditStation.Margin = new System.Windows.Forms.Padding(0);
-            this.buttonEditStation.Name = "buttonEditStation";
-            this.buttonEditStation.Radius = 8;
-            this.buttonEditStation.Size = new System.Drawing.Size(104, 36);
-            this.buttonEditStation.TabIndex = 1;
-            this.buttonEditStation.Text = "编辑";
-            this.buttonEditStation.WaveSize = 0;
             // 
             // buttonAddStation
             // 
             this.buttonAddStation.IconSvg = "PlusOutlined";
-            this.buttonAddStation.Location = new System.Drawing.Point(0, 0);
+            this.buttonAddStation.Location = new System.Drawing.Point(243, 0);
             this.buttonAddStation.Margin = new System.Windows.Forms.Padding(0);
             this.buttonAddStation.Name = "buttonAddStation";
             this.buttonAddStation.Radius = 8;
-            this.buttonAddStation.Size = new System.Drawing.Size(104, 36);
+            this.buttonAddStation.Size = new System.Drawing.Size(80, 36);
             this.buttonAddStation.TabIndex = 0;
             this.buttonAddStation.Text = "新增";
             this.buttonAddStation.Type = AntdUI.TTypeMini.Primary;
             this.buttonAddStation.WaveSize = 0;
+            // 
+            // buttonEditStation
+            // 
+            this.buttonEditStation.IconSvg = "EditOutlined";
+            this.buttonEditStation.Location = new System.Drawing.Point(149, 0);
+            this.buttonEditStation.Margin = new System.Windows.Forms.Padding(0);
+            this.buttonEditStation.Name = "buttonEditStation";
+            this.buttonEditStation.Radius = 8;
+            this.buttonEditStation.Size = new System.Drawing.Size(86, 36);
+            this.buttonEditStation.TabIndex = 1;
+            this.buttonEditStation.Text = "编辑";
+            this.buttonEditStation.WaveSize = 0;
+            // 
+            // buttonDeleteStation
+            // 
+            this.buttonDeleteStation.IconSvg = "DeleteOutlined";
+            this.buttonDeleteStation.Location = new System.Drawing.Point(59, 0);
+            this.buttonDeleteStation.Margin = new System.Windows.Forms.Padding(0);
+            this.buttonDeleteStation.Name = "buttonDeleteStation";
+            this.buttonDeleteStation.Radius = 8;
+            this.buttonDeleteStation.Size = new System.Drawing.Size(82, 36);
+            this.buttonDeleteStation.TabIndex = 2;
+            this.buttonDeleteStation.Text = "删除";
+            this.buttonDeleteStation.WaveSize = 0;
             // 
             // flowStationActionsLeft
             // 
@@ -361,12 +363,12 @@
             // labelSelectedStation
             // 
             this.labelSelectedStation.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
-            this.labelSelectedStation.Location = new System.Drawing.Point(76, 0);
+            this.labelSelectedStation.Location = new System.Drawing.Point(62, 0);
             this.labelSelectedStation.Margin = new System.Windows.Forms.Padding(0);
             this.labelSelectedStation.Name = "labelSelectedStation";
             this.labelSelectedStation.Size = new System.Drawing.Size(170, 36);
             this.labelSelectedStation.TabIndex = 1;
-            this.labelSelectedStation.Text = "当前站：未选择 PLC";
+            this.labelSelectedStation.Text = "未选择 PLC";
             // 
             // labelStationTitle
             // 
@@ -374,7 +376,7 @@
             this.labelStationTitle.Location = new System.Drawing.Point(0, 0);
             this.labelStationTitle.Margin = new System.Windows.Forms.Padding(0);
             this.labelStationTitle.Name = "labelStationTitle";
-            this.labelStationTitle.Size = new System.Drawing.Size(72, 36);
+            this.labelStationTitle.Size = new System.Drawing.Size(54, 36);
             this.labelStationTitle.TabIndex = 0;
             this.labelStationTitle.Text = "站配置";
             // 
@@ -390,7 +392,7 @@
             this.flowStats.Margin = new System.Windows.Forms.Padding(0);
             this.flowStats.Name = "flowStats";
             this.flowStats.Padding = new System.Windows.Forms.Padding(4, 6, 4, 6);
-            this.flowStats.Size = new System.Drawing.Size(1164, 88);
+            this.flowStats.Size = new System.Drawing.Size(904, 88);
             this.flowStats.TabIndex = 1;
             // 
             // panelCurrentStationPointCard
@@ -420,7 +422,6 @@
             this.labelCurrentStationPointCount.Size = new System.Drawing.Size(72, 40);
             this.labelCurrentStationPointCount.TabIndex = 1;
             this.labelCurrentStationPointCount.Text = "0";
-            this.labelCurrentStationPointCount.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // labelCurrentStationPointTitle
             // 
@@ -460,7 +461,6 @@
             this.labelPointTotalCount.Size = new System.Drawing.Size(60, 40);
             this.labelPointTotalCount.TabIndex = 1;
             this.labelPointTotalCount.Text = "0";
-            this.labelPointTotalCount.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // labelPointTotalTitle
             // 
@@ -500,7 +500,6 @@
             this.labelOnlineStationCount.Size = new System.Drawing.Size(64, 40);
             this.labelOnlineStationCount.TabIndex = 1;
             this.labelOnlineStationCount.Text = "0";
-            this.labelOnlineStationCount.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // labelOnlineStationTitle
             // 
@@ -539,7 +538,6 @@
             this.labelStationTotalCount.Size = new System.Drawing.Size(60, 40);
             this.labelStationTotalCount.TabIndex = 1;
             this.labelStationTotalCount.Text = "0";
-            this.labelStationTotalCount.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // labelStationTotalTitle
             // 
@@ -553,95 +551,20 @@
             // 
             // panelToolbar
             // 
-            this.panelToolbar.Controls.Add(this.flowToolbarRight);
             this.panelToolbar.Controls.Add(this.flowToolbarLeft);
+            this.panelToolbar.Controls.Add(this.flowToolbarRight);
             this.panelToolbar.Dock = System.Windows.Forms.DockStyle.Top;
             this.panelToolbar.Location = new System.Drawing.Point(8, 8);
             this.panelToolbar.Margin = new System.Windows.Forms.Padding(0);
             this.panelToolbar.Name = "panelToolbar";
             this.panelToolbar.Padding = new System.Windows.Forms.Padding(4);
             this.panelToolbar.Radius = 0;
-            this.panelToolbar.Size = new System.Drawing.Size(1164, 44);
+            this.panelToolbar.Size = new System.Drawing.Size(904, 44);
             this.panelToolbar.TabIndex = 0;
-            // 
-            // flowToolbarRight
-            // 
-            this.flowToolbarRight.Controls.Add(this.buttonStopScan);
-            this.flowToolbarRight.Controls.Add(this.buttonStartScan);
-            this.flowToolbarRight.Controls.Add(this.buttonScanOnce);
-            this.flowToolbarRight.Controls.Add(this.buttonReloadConfig);
-            this.flowToolbarRight.Controls.Add(this.buttonRefresh);
-            this.flowToolbarRight.Dock = System.Windows.Forms.DockStyle.Right;
-            this.flowToolbarRight.Gap = 8;
-            this.flowToolbarRight.Location = new System.Drawing.Point(564, 4);
-            this.flowToolbarRight.Margin = new System.Windows.Forms.Padding(0);
-            this.flowToolbarRight.Name = "flowToolbarRight";
-            this.flowToolbarRight.Size = new System.Drawing.Size(596, 36);
-            this.flowToolbarRight.TabIndex = 1;
-            // 
-            // buttonStopScan
-            // 
-            this.buttonStopScan.IconSvg = "PauseCircleOutlined";
-            this.buttonStopScan.Location = new System.Drawing.Point(484, 0);
-            this.buttonStopScan.Margin = new System.Windows.Forms.Padding(0);
-            this.buttonStopScan.Name = "buttonStopScan";
-            this.buttonStopScan.Radius = 8;
-            this.buttonStopScan.Size = new System.Drawing.Size(112, 36);
-            this.buttonStopScan.TabIndex = 4;
-            this.buttonStopScan.Text = "停止扫描";
-            this.buttonStopScan.WaveSize = 0;
-            // 
-            // buttonStartScan
-            // 
-            this.buttonStartScan.IconSvg = "PlayCircleOutlined";
-            this.buttonStartScan.Location = new System.Drawing.Point(372, 0);
-            this.buttonStartScan.Margin = new System.Windows.Forms.Padding(0);
-            this.buttonStartScan.Name = "buttonStartScan";
-            this.buttonStartScan.Radius = 8;
-            this.buttonStartScan.Size = new System.Drawing.Size(104, 36);
-            this.buttonStartScan.TabIndex = 3;
-            this.buttonStartScan.Text = "启动扫描";
-            this.buttonStartScan.WaveSize = 0;
-            // 
-            // buttonScanOnce
-            // 
-            this.buttonScanOnce.IconSvg = "ThunderboltOutlined";
-            this.buttonScanOnce.Location = new System.Drawing.Point(252, 0);
-            this.buttonScanOnce.Margin = new System.Windows.Forms.Padding(0);
-            this.buttonScanOnce.Name = "buttonScanOnce";
-            this.buttonScanOnce.Radius = 8;
-            this.buttonScanOnce.Size = new System.Drawing.Size(112, 36);
-            this.buttonScanOnce.TabIndex = 2;
-            this.buttonScanOnce.Text = "单轮扫描";
-            this.buttonScanOnce.WaveSize = 0;
-            // 
-            // buttonReloadConfig
-            // 
-            this.buttonReloadConfig.IconSvg = "SyncOutlined";
-            this.buttonReloadConfig.Location = new System.Drawing.Point(124, 0);
-            this.buttonReloadConfig.Margin = new System.Windows.Forms.Padding(0);
-            this.buttonReloadConfig.Name = "buttonReloadConfig";
-            this.buttonReloadConfig.Radius = 8;
-            this.buttonReloadConfig.Size = new System.Drawing.Size(120, 36);
-            this.buttonReloadConfig.TabIndex = 1;
-            this.buttonReloadConfig.Text = "重载配置";
-            this.buttonReloadConfig.Type = AntdUI.TTypeMini.Primary;
-            this.buttonReloadConfig.WaveSize = 0;
-            // 
-            // buttonRefresh
-            // 
-            this.buttonRefresh.IconSvg = "ReloadOutlined";
-            this.buttonRefresh.Location = new System.Drawing.Point(0, 0);
-            this.buttonRefresh.Margin = new System.Windows.Forms.Padding(0);
-            this.buttonRefresh.Name = "buttonRefresh";
-            this.buttonRefresh.Radius = 8;
-            this.buttonRefresh.Size = new System.Drawing.Size(116, 36);
-            this.buttonRefresh.TabIndex = 0;
-            this.buttonRefresh.Text = "刷新列表";
-            this.buttonRefresh.WaveSize = 0;
             // 
             // flowToolbarLeft
             // 
+            this.flowToolbarLeft.Align = AntdUI.TAlignFlow.Left;
             this.flowToolbarLeft.Controls.Add(this.labelRuntimeSummary);
             this.flowToolbarLeft.Controls.Add(this.inputPointSearch);
             this.flowToolbarLeft.Controls.Add(this.inputStationSearch);
@@ -650,26 +573,26 @@
             this.flowToolbarLeft.Location = new System.Drawing.Point(4, 4);
             this.flowToolbarLeft.Margin = new System.Windows.Forms.Padding(0);
             this.flowToolbarLeft.Name = "flowToolbarLeft";
-            this.flowToolbarLeft.Size = new System.Drawing.Size(640, 36);
+            this.flowToolbarLeft.Size = new System.Drawing.Size(381, 36);
             this.flowToolbarLeft.TabIndex = 0;
             // 
             // labelRuntimeSummary
             // 
             this.labelRuntimeSummary.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
-            this.labelRuntimeSummary.Location = new System.Drawing.Point(456, 0);
+            this.labelRuntimeSummary.Location = new System.Drawing.Point(244, 0);
             this.labelRuntimeSummary.Margin = new System.Windows.Forms.Padding(0);
             this.labelRuntimeSummary.Name = "labelRuntimeSummary";
-            this.labelRuntimeSummary.Size = new System.Drawing.Size(180, 36);
+            this.labelRuntimeSummary.Size = new System.Drawing.Size(118, 36);
             this.labelRuntimeSummary.TabIndex = 2;
-            this.labelRuntimeSummary.Text = "PLC 运行态：未加载";
+            this.labelRuntimeSummary.Text = "未加载";
             // 
             // inputPointSearch
             // 
-            this.inputPointSearch.Location = new System.Drawing.Point(228, 0);
+            this.inputPointSearch.Location = new System.Drawing.Point(127, 0);
             this.inputPointSearch.Margin = new System.Windows.Forms.Padding(8, 0, 0, 0);
             this.inputPointSearch.Name = "inputPointSearch";
             this.inputPointSearch.PlaceholderText = "搜索点位名 / 分组 / 地址";
-            this.inputPointSearch.Size = new System.Drawing.Size(220, 36);
+            this.inputPointSearch.Size = new System.Drawing.Size(109, 36);
             this.inputPointSearch.TabIndex = 1;
             this.inputPointSearch.WaveSize = 0;
             // 
@@ -679,9 +602,86 @@
             this.inputStationSearch.Margin = new System.Windows.Forms.Padding(0);
             this.inputStationSearch.Name = "inputStationSearch";
             this.inputStationSearch.PlaceholderText = "搜索 PLC 名称 / 协议 / 端点";
-            this.inputStationSearch.Size = new System.Drawing.Size(220, 36);
+            this.inputStationSearch.Size = new System.Drawing.Size(111, 36);
             this.inputStationSearch.TabIndex = 0;
             this.inputStationSearch.WaveSize = 0;
+            // 
+            // flowToolbarRight
+            // 
+            this.flowToolbarRight.Align = AntdUI.TAlignFlow.RightCenter;
+            this.flowToolbarRight.Controls.Add(this.buttonStopScan);
+            this.flowToolbarRight.Controls.Add(this.buttonStartScan);
+            this.flowToolbarRight.Controls.Add(this.buttonScanOnce);
+            this.flowToolbarRight.Controls.Add(this.buttonReloadConfig);
+            this.flowToolbarRight.Controls.Add(this.buttonRefresh);
+            this.flowToolbarRight.Dock = System.Windows.Forms.DockStyle.Right;
+            this.flowToolbarRight.Gap = 8;
+            this.flowToolbarRight.Location = new System.Drawing.Point(360, 4);
+            this.flowToolbarRight.Margin = new System.Windows.Forms.Padding(0);
+            this.flowToolbarRight.Name = "flowToolbarRight";
+            this.flowToolbarRight.Size = new System.Drawing.Size(540, 36);
+            this.flowToolbarRight.TabIndex = 1;
+            // 
+            // buttonStopScan
+            // 
+            this.buttonStopScan.IconSvg = "PauseCircleOutlined";
+            this.buttonStopScan.Location = new System.Drawing.Point(443, 0);
+            this.buttonStopScan.Margin = new System.Windows.Forms.Padding(0);
+            this.buttonStopScan.Name = "buttonStopScan";
+            this.buttonStopScan.Radius = 8;
+            this.buttonStopScan.Size = new System.Drawing.Size(97, 36);
+            this.buttonStopScan.TabIndex = 4;
+            this.buttonStopScan.Text = "停止扫描";
+            this.buttonStopScan.WaveSize = 0;
+            // 
+            // buttonStartScan
+            // 
+            this.buttonStartScan.IconSvg = "PlayCircleOutlined";
+            this.buttonStartScan.Location = new System.Drawing.Point(339, 0);
+            this.buttonStartScan.Margin = new System.Windows.Forms.Padding(0);
+            this.buttonStartScan.Name = "buttonStartScan";
+            this.buttonStartScan.Radius = 8;
+            this.buttonStartScan.Size = new System.Drawing.Size(96, 36);
+            this.buttonStartScan.TabIndex = 3;
+            this.buttonStartScan.Text = "启动扫描";
+            this.buttonStartScan.WaveSize = 0;
+            // 
+            // buttonScanOnce
+            // 
+            this.buttonScanOnce.IconSvg = "ThunderboltOutlined";
+            this.buttonScanOnce.Location = new System.Drawing.Point(235, 0);
+            this.buttonScanOnce.Margin = new System.Windows.Forms.Padding(0);
+            this.buttonScanOnce.Name = "buttonScanOnce";
+            this.buttonScanOnce.Radius = 8;
+            this.buttonScanOnce.Size = new System.Drawing.Size(96, 36);
+            this.buttonScanOnce.TabIndex = 2;
+            this.buttonScanOnce.Text = "单轮扫描";
+            this.buttonScanOnce.WaveSize = 0;
+            // 
+            // buttonReloadConfig
+            // 
+            this.buttonReloadConfig.IconSvg = "SyncOutlined";
+            this.buttonReloadConfig.Location = new System.Drawing.Point(145, 0);
+            this.buttonReloadConfig.Margin = new System.Windows.Forms.Padding(0);
+            this.buttonReloadConfig.Name = "buttonReloadConfig";
+            this.buttonReloadConfig.Radius = 8;
+            this.buttonReloadConfig.Size = new System.Drawing.Size(82, 36);
+            this.buttonReloadConfig.TabIndex = 1;
+            this.buttonReloadConfig.Text = "重载";
+            this.buttonReloadConfig.Type = AntdUI.TTypeMini.Primary;
+            this.buttonReloadConfig.WaveSize = 0;
+            // 
+            // buttonRefresh
+            // 
+            this.buttonRefresh.IconSvg = "ReloadOutlined";
+            this.buttonRefresh.Location = new System.Drawing.Point(59, 0);
+            this.buttonRefresh.Margin = new System.Windows.Forms.Padding(0);
+            this.buttonRefresh.Name = "buttonRefresh";
+            this.buttonRefresh.Radius = 8;
+            this.buttonRefresh.Size = new System.Drawing.Size(78, 36);
+            this.buttonRefresh.TabIndex = 0;
+            this.buttonRefresh.Text = "刷新";
+            this.buttonRefresh.WaveSize = 0;
             // 
             // PlcConfigManagementPage
             // 
@@ -689,7 +689,7 @@
             this.Controls.Add(this.panelRoot);
             this.Margin = new System.Windows.Forms.Padding(0);
             this.Name = "PlcConfigManagementPage";
-            this.Size = new System.Drawing.Size(1180, 720);
+            this.Size = new System.Drawing.Size(1150, 680);
             this.panelRoot.ResumeLayout(false);
             this.panelContentCard.ResumeLayout(false);
             this.gridContent.ResumeLayout(false);
@@ -707,8 +707,8 @@
             this.panelOnlineStationCard.ResumeLayout(false);
             this.panelStationTotalCard.ResumeLayout(false);
             this.panelToolbar.ResumeLayout(false);
-            this.flowToolbarRight.ResumeLayout(false);
             this.flowToolbarLeft.ResumeLayout(false);
+            this.flowToolbarRight.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }

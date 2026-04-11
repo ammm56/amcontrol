@@ -79,8 +79,7 @@
             this.panelTableCard.Padding = new System.Windows.Forms.Padding(8);
             this.panelTableCard.Radius = 12;
             this.panelTableCard.Shadow = 4;
-            this.panelTableCard.ShadowOpacity = 0F;
-            this.panelTableCard.ShadowOpacityHover = 0F;
+            this.panelTableCard.ShadowOpacity = 0.15F;
             this.panelTableCard.Size = new System.Drawing.Size(834, 532);
             this.panelTableCard.TabIndex = 2;
             // 
