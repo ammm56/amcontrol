@@ -184,7 +184,7 @@ namespace AMControlWinF.Views.Plc
                 var dpi = g == null ? 1F : g.Dpi;
                 return new Size(
                     (int)Math.Round(172 * dpi),
-                    (int)Math.Round(120 * dpi));
+                    (int)Math.Round(140 * dpi));
             }
 
             public override bool MouseMove(VirtualPanel sender, VirtualPanelMouseArgs e)
@@ -249,45 +249,45 @@ namespace AMControlWinF.Views.Plc
                     textColor,
                     new Point(12, 42));
 
+                //g.String(
+                //    TrimText(Item.Name, 24),
+                //    FontBody,
+                //    subTextColor,
+                //    new Point(12, 64));
+
                 g.String(
-                    TrimText(Item.Name, 24),
+                    TrimText((string.IsNullOrWhiteSpace(Item.ProtocolType) ? "-" : Item.ProtocolType), 24),
                     FontBody,
                     subTextColor,
                     new Point(12, 64));
 
-                g.String(
-                    TrimText("协议：" + (string.IsNullOrWhiteSpace(Item.ProtocolType) ? "-" : Item.ProtocolType), 24),
-                    FontBody,
-                    subTextColor,
-                    new Point(12, 84));
+                //g.String(
+                //    TrimText("连接：" + (string.IsNullOrWhiteSpace(Item.ConnectionType) ? "-" : Item.ConnectionType), 24),
+                //    FontBody,
+                //    subTextColor,
+                //    new Point(126, 64));
 
                 g.String(
-                    TrimText("连接：" + (string.IsNullOrWhiteSpace(Item.ConnectionType) ? "-" : Item.ConnectionType), 24),
+                    TrimText(Item.AverageReadMsText, 22),
                     FontBody,
                     subTextColor,
-                    new Point(126, 84));
-
-                g.String(
-                    TrimText("平均读取：" + Item.AverageReadMsText, 22),
-                    FontBody,
-                    subTextColor,
-                    new Point(12, 102));
+                    new Point(106, 64));
 
                 if (Item.HasError)
                 {
                     g.String(
-                        TrimText("异常：" + Item.ErrorBriefText, 28),
+                        TrimText("异常：" + Item.ErrorBriefText, 22),
                         FontBody,
                         offlineColor,
-                        new Point(126, 102));
+                        new Point(12, 102));
                 }
                 else
                 {
                     g.String(
-                        TrimText("更新：" + Item.LastScanTimeText, 22),
+                        TrimText(Item.LastScanTimeText, 22),
                         FontBody,
                         subTextColor,
-                        new Point(126, 102));
+                        new Point(12, 84));
                 }
             }
 

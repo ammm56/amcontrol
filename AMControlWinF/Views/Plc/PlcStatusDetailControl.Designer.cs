@@ -131,9 +131,9 @@
             // 
             // labelErrorValue
             // 
-            this.labelErrorValue.Location = new System.Drawing.Point(14, 392);
+            this.labelErrorValue.Location = new System.Drawing.Point(14, 358);
             this.labelErrorValue.Name = "labelErrorValue";
-            this.labelErrorValue.Size = new System.Drawing.Size(244, 64);
+            this.labelErrorValue.Size = new System.Drawing.Size(244, 93);
             this.labelErrorValue.TabIndex = 13;
             this.labelErrorValue.Text = "—";
             this.labelErrorValue.TextAlign = System.Drawing.ContentAlignment.TopLeft;
@@ -141,7 +141,7 @@
             // labelErrorTitle
             // 
             this.labelErrorTitle.ForeColor = System.Drawing.Color.Gray;
-            this.labelErrorTitle.Location = new System.Drawing.Point(14, 366);
+            this.labelErrorTitle.Location = new System.Drawing.Point(14, 334);
             this.labelErrorTitle.Name = "labelErrorTitle";
             this.labelErrorTitle.Size = new System.Drawing.Size(244, 20);
             this.labelErrorTitle.TabIndex = 12;
@@ -151,7 +151,7 @@
             // 
             this.panelTagFailed.Controls.Add(this.labelTagFailedValue);
             this.panelTagFailed.Controls.Add(this.labelTagFailedKey);
-            this.panelTagFailed.Location = new System.Drawing.Point(8, 332);
+            this.panelTagFailed.Location = new System.Drawing.Point(8, 310);
             this.panelTagFailed.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagFailed.Name = "panelTagFailed";
             this.panelTagFailed.Radius = 0;
@@ -176,12 +176,13 @@
             this.labelTagFailedKey.Size = new System.Drawing.Size(72, 24);
             this.labelTagFailedKey.TabIndex = 0;
             this.labelTagFailedKey.Text = "失败次数";
+            this.labelTagFailedKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // panelTagSuccess
             // 
             this.panelTagSuccess.Controls.Add(this.labelTagSuccessValue);
             this.panelTagSuccess.Controls.Add(this.labelTagSuccessKey);
-            this.panelTagSuccess.Location = new System.Drawing.Point(8, 302);
+            this.panelTagSuccess.Location = new System.Drawing.Point(8, 282);
             this.panelTagSuccess.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagSuccess.Name = "panelTagSuccess";
             this.panelTagSuccess.Radius = 0;
@@ -206,12 +207,13 @@
             this.labelTagSuccessKey.Size = new System.Drawing.Size(72, 24);
             this.labelTagSuccessKey.TabIndex = 0;
             this.labelTagSuccessKey.Text = "成功次数";
+            this.labelTagSuccessKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // panelTagAverageWrite
             // 
             this.panelTagAverageWrite.Controls.Add(this.labelTagAverageWriteValue);
             this.panelTagAverageWrite.Controls.Add(this.labelTagAverageWriteKey);
-            this.panelTagAverageWrite.Location = new System.Drawing.Point(8, 272);
+            this.panelTagAverageWrite.Location = new System.Drawing.Point(8, 254);
             this.panelTagAverageWrite.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagAverageWrite.Name = "panelTagAverageWrite";
             this.panelTagAverageWrite.Radius = 0;
@@ -236,12 +238,13 @@
             this.labelTagAverageWriteKey.Size = new System.Drawing.Size(72, 24);
             this.labelTagAverageWriteKey.TabIndex = 0;
             this.labelTagAverageWriteKey.Text = "平均写入";
+            this.labelTagAverageWriteKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // panelTagAverageRead
             // 
             this.panelTagAverageRead.Controls.Add(this.labelTagAverageReadValue);
             this.panelTagAverageRead.Controls.Add(this.labelTagAverageReadKey);
-            this.panelTagAverageRead.Location = new System.Drawing.Point(8, 242);
+            this.panelTagAverageRead.Location = new System.Drawing.Point(8, 226);
             this.panelTagAverageRead.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagAverageRead.Name = "panelTagAverageRead";
             this.panelTagAverageRead.Radius = 0;
@@ -266,12 +269,13 @@
             this.labelTagAverageReadKey.Size = new System.Drawing.Size(72, 24);
             this.labelTagAverageReadKey.TabIndex = 0;
             this.labelTagAverageReadKey.Text = "平均读取";
+            this.labelTagAverageReadKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // panelTagLastConnect
             // 
             this.panelTagLastConnect.Controls.Add(this.labelTagLastConnectValue);
             this.panelTagLastConnect.Controls.Add(this.labelTagLastConnectKey);
-            this.panelTagLastConnect.Location = new System.Drawing.Point(8, 212);
+            this.panelTagLastConnect.Location = new System.Drawing.Point(8, 198);
             this.panelTagLastConnect.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagLastConnect.Name = "panelTagLastConnect";
             this.panelTagLastConnect.Radius = 0;
@@ -296,12 +300,13 @@
             this.labelTagLastConnectKey.Size = new System.Drawing.Size(72, 24);
             this.labelTagLastConnectKey.TabIndex = 0;
             this.labelTagLastConnectKey.Text = "连接时间";
+            this.labelTagLastConnectKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // panelTagLastScan
             // 
             this.panelTagLastScan.Controls.Add(this.labelTagLastScanValue);
             this.panelTagLastScan.Controls.Add(this.labelTagLastScanKey);
-            this.panelTagLastScan.Location = new System.Drawing.Point(8, 182);
+            this.panelTagLastScan.Location = new System.Drawing.Point(8, 170);
             this.panelTagLastScan.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagLastScan.Name = "panelTagLastScan";
             this.panelTagLastScan.Radius = 0;
@@ -326,12 +331,13 @@
             this.labelTagLastScanKey.Size = new System.Drawing.Size(72, 24);
             this.labelTagLastScanKey.TabIndex = 0;
             this.labelTagLastScanKey.Text = "更新时间";
+            this.labelTagLastScanKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // panelTagScan
             // 
             this.panelTagScan.Controls.Add(this.labelTagScanValue);
             this.panelTagScan.Controls.Add(this.labelTagScanKey);
-            this.panelTagScan.Location = new System.Drawing.Point(8, 152);
+            this.panelTagScan.Location = new System.Drawing.Point(8, 142);
             this.panelTagScan.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagScan.Name = "panelTagScan";
             this.panelTagScan.Radius = 0;
@@ -356,12 +362,13 @@
             this.labelTagScanKey.Size = new System.Drawing.Size(72, 24);
             this.labelTagScanKey.TabIndex = 0;
             this.labelTagScanKey.Text = "扫描";
+            this.labelTagScanKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // panelTagRuntime
             // 
             this.panelTagRuntime.Controls.Add(this.labelTagRuntimeValue);
             this.panelTagRuntime.Controls.Add(this.labelTagRuntimeKey);
-            this.panelTagRuntime.Location = new System.Drawing.Point(8, 122);
+            this.panelTagRuntime.Location = new System.Drawing.Point(8, 114);
             this.panelTagRuntime.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagRuntime.Name = "panelTagRuntime";
             this.panelTagRuntime.Radius = 0;
@@ -386,12 +393,13 @@
             this.labelTagRuntimeKey.Size = new System.Drawing.Size(72, 24);
             this.labelTagRuntimeKey.TabIndex = 0;
             this.labelTagRuntimeKey.Text = "通讯";
+            this.labelTagRuntimeKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // panelTagConfig
             // 
             this.panelTagConfig.Controls.Add(this.labelTagConfigValue);
             this.panelTagConfig.Controls.Add(this.labelTagConfigKey);
-            this.panelTagConfig.Location = new System.Drawing.Point(8, 92);
+            this.panelTagConfig.Location = new System.Drawing.Point(8, 86);
             this.panelTagConfig.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagConfig.Name = "panelTagConfig";
             this.panelTagConfig.Radius = 0;
@@ -416,12 +424,13 @@
             this.labelTagConfigKey.Size = new System.Drawing.Size(72, 24);
             this.labelTagConfigKey.TabIndex = 0;
             this.labelTagConfigKey.Text = "配置";
+            this.labelTagConfigKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // panelTagEndpoint
             // 
             this.panelTagEndpoint.Controls.Add(this.labelTagEndpointValue);
             this.panelTagEndpoint.Controls.Add(this.labelTagEndpointKey);
-            this.panelTagEndpoint.Location = new System.Drawing.Point(8, 62);
+            this.panelTagEndpoint.Location = new System.Drawing.Point(8, 58);
             this.panelTagEndpoint.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagEndpoint.Name = "panelTagEndpoint";
             this.panelTagEndpoint.Radius = 0;
@@ -446,12 +455,13 @@
             this.labelTagEndpointKey.Size = new System.Drawing.Size(72, 24);
             this.labelTagEndpointKey.TabIndex = 0;
             this.labelTagEndpointKey.Text = "端点";
+            this.labelTagEndpointKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // panelTagConnection
             // 
             this.panelTagConnection.Controls.Add(this.labelTagConnectionValue);
             this.panelTagConnection.Controls.Add(this.labelTagConnectionKey);
-            this.panelTagConnection.Location = new System.Drawing.Point(8, 32);
+            this.panelTagConnection.Location = new System.Drawing.Point(8, 30);
             this.panelTagConnection.Margin = new System.Windows.Forms.Padding(0);
             this.panelTagConnection.Name = "panelTagConnection";
             this.panelTagConnection.Radius = 0;
@@ -476,6 +486,7 @@
             this.labelTagConnectionKey.Size = new System.Drawing.Size(72, 24);
             this.labelTagConnectionKey.TabIndex = 0;
             this.labelTagConnectionKey.Text = "连接";
+            this.labelTagConnectionKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // panelTagProtocol
             // 
@@ -506,6 +517,7 @@
             this.labelTagProtocolKey.Size = new System.Drawing.Size(72, 24);
             this.labelTagProtocolKey.TabIndex = 0;
             this.labelTagProtocolKey.Text = "协议";
+            this.labelTagProtocolKey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // panelHeader
             // 
@@ -589,6 +601,7 @@
             this.panelHeader.ResumeLayout(false);
             this.panelEmpty.ResumeLayout(false);
             this.ResumeLayout(false);
+
         }
 
         private AntdUI.Panel panelRoot;

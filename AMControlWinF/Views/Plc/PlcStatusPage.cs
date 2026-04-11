@@ -28,7 +28,7 @@ namespace AMControlWinF.Views.Plc
 
             _model = new PlcStatusPageModel();
             _refreshTimer = new Timer();
-            _refreshTimer.Interval = 1000;
+            _refreshTimer.Interval = 200;
 
             BindEvents();
             ApplyPermissionState();
