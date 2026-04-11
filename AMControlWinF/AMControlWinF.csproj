@@ -397,6 +397,24 @@
     <Compile Include="Views\Motion\MotionMonitorVirtualListControl.Designer.cs">
       <DependentUpon>MotionMonitorVirtualListControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\Plc\PlcStatusDetailControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Plc\PlcStatusDetailControl.Designer.cs">
+      <DependentUpon>PlcStatusDetailControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Plc\PlcStatusPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Plc\PlcStatusPage.Designer.cs">
+      <DependentUpon>PlcStatusPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Plc\PlcStatusVirtualListControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Plc\PlcStatusVirtualListControl.Designer.cs">
+      <DependentUpon>PlcStatusVirtualListControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="Views\SysConfig\PlcConfigManagementPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -562,6 +580,9 @@
     <EmbeddedResource Include="Views\Motion\MotionMonitorPage.resx">
       <DependentUpon>MotionMonitorPage.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\Plc\PlcStatusPage.resx">
+      <DependentUpon>PlcStatusPage.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Views\SysConfig\PlcConfigManagementPage.resx">
       <DependentUpon>PlcConfigManagementPage.cs</DependentUpon>
     </EmbeddedResource>
@@ -616,8 +637,6 @@
   <ItemGroup>
     <Content Include="Resources\Img\logo.ico" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Views\Plc\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

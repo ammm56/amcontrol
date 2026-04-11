@@ -76,14 +76,13 @@
     <Compile Include="Navigation\NavigationCatalog.cs" />
     <Compile Include="Navigation\NavPageDef.cs" />
     <Compile Include="Navigation\NavPrimaryDef.cs" />
+    <Compile Include="Plc\PlcStatusPageModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SysConfig\PlcConfigManagementPageModel.cs" />
     <Compile Include="SysConfig\PlcPointEditorModel.cs" />
     <Compile Include="SysConfig\PlcStationEditorModel.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Plc\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\AM.Core\AM.Core.csproj">
       <Project>{7b305eb1-7403-4c0c-82d4-c871b4c2d877}</Project>

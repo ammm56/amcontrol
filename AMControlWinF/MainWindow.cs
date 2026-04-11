@@ -10,6 +10,7 @@ using AMControlWinF.Views.Auth;
 using AMControlWinF.Views.Main;
 using AMControlWinF.Views.Motion;
 using AMControlWinF.Views.MotionConfig;
+using AMControlWinF.Views.Plc;
 using AMControlWinF.Views.SysConfig;
 using AntdUI;
 using System;
@@ -477,6 +478,8 @@ namespace AMControlWinF
                 { "MotionConfig.IoMap",     () => new MotionIoMapManagementPage() },
                 { "MotionConfig.AxisParam", () => new MotionAxisParamManagementPage() },
                 { "MotionConfig.Actuator",  () => new ActuatorManagementPage() },
+
+                { "PLC.Status",             () => new PlcStatusPage() },
 
                 { "SysConfig.Plc",          () => new PlcConfigManagementPage() },
 
