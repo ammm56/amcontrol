@@ -199,19 +199,52 @@ namespace AMControlWinF.Views.SysConfig
 
         private void ApplyConnectionMode()
         {
-            var connectionType = GetSelectValue(dropdownConnectionType);
+            var connectionType = GetConnectionTypeText();
 
             bool isTcp = string.Equals(connectionType, "Tcp", StringComparison.OrdinalIgnoreCase);
             bool isSerial = string.Equals(connectionType, "Serial", StringComparison.OrdinalIgnoreCase);
 
-            panelRowIpAddress.Visible = isTcp;
-            panelRowPort.Visible = isTcp;
+            stackSectionAddress.SuspendLayout();
 
-            panelRowComPort.Visible = isSerial;
-            panelRowBaudRate.Visible = isSerial;
-            panelRowDataBits.Visible = isSerial;
-            panelRowParity.Visible = isSerial;
-            panelRowStopBits.Visible = isSerial;
+            try
+            {
+                panelRowIpAddress.Visible = isTcp;
+                panelRowPort.Visible = isTcp;
+
+                panelRowComPort.Visible = isSerial;
+                panelRowBaudRate.Visible = isSerial;
+                panelRowDataBits.Visible = isSerial;
+                panelRowParity.Visible = isSerial;
+                panelRowStopBits.Visible = isSerial;
+            }
+            finally
+            {
+                stackSectionAddress.ResumeLayout(true);
+                stackSectionAddress.PerformLayout();
+                panelContent.PerformLayout();
+                gridMainSections.PerformLayout();
+                Invalidate(true);
+            }
+        }
+
+        private string GetConnectionTypeText()
+        {
+            if (dropdownConnectionType == null)
+            {
+                return string.Empty;
+            }
+
+            if (dropdownConnectionType.SelectedValue != null)
+            {
+                var valueText = dropdownConnectionType.SelectedValue.ToString();
+                if (!string.IsNullOrWhiteSpace(valueText))
+                {
+                    return valueText.Trim();
+                }
+            }
+
+            var text = dropdownConnectionType.Text;
+            return string.IsNullOrWhiteSpace(text) ? string.Empty : text.Trim();
         }
 
         private void ButtonOk_Click(object sender, EventArgs e)
@@ -305,12 +338,22 @@ namespace AMControlWinF.Views.SysConfig
 
         private static string GetSelectValue(Select select)
         {
-            if (select == null || select.SelectedValue == null)
+            if (select == null)
             {
                 return string.Empty;
             }
 
-            return select.SelectedValue.ToString();
+            if (select.SelectedValue != null)
+            {
+                var valueText = select.SelectedValue.ToString();
+                if (!string.IsNullOrWhiteSpace(valueText))
+                {
+                    return valueText.Trim();
+                }
+            }
+
+            var text = select.Text;
+            return string.IsNullOrWhiteSpace(text) ? string.Empty : text.Trim();
         }
     }
 }
