@@ -13,9 +13,23 @@ namespace AM.DBService.Services.Runtime
     /// <summary>
     /// 统一后台任务宿主管理器。
     /// 负责后台工作单元的注册、启动、停止与状态查询。
+    /// 
+    /// 最小补充说明：
+    /// 1. 增加 `_syncRoot`，保证 `_workers` 的并发读写安全；
+    /// 2. 对外接口保持不变，不影响现有调用层；
+    /// 3. 仍只管理顶层 worker，不下沉管理 PLC 站 runner / 控制卡 runner。
     /// </summary>
     public class RuntimeTaskManager : ServiceBase, IRuntimeTaskManager
     {
+        /// <summary>
+        /// 工作单元集合访问同步锁。
+        /// </summary>
+        private readonly object _syncRoot;
+
+        /// <summary>
+        /// 已注册后台工作单元集合。
+        /// Key 为工作单元名称。
+        /// </summary>
         private readonly IDictionary<string, IRuntimeWorker> _workers;
 
         protected override string MessageSourceName
@@ -36,9 +50,13 @@ namespace AM.DBService.Services.Runtime
         public RuntimeTaskManager(IAppReporter reporter)
             : base(reporter)
         {
+            _syncRoot = new object();
             _workers = new Dictionary<string, IRuntimeWorker>(StringComparer.OrdinalIgnoreCase);
         }
 
+        /// <summary>
+        /// 注册后台工作单元。
+        /// </summary>
         public Result Register(IRuntimeWorker worker)
         {
             if (worker == null)
@@ -51,12 +69,16 @@ namespace AM.DBService.Services.Runtime
                 return Fail(-3002, "后台工作单元名称不能为空");
             }
 
-            if (_workers.ContainsKey(worker.Name))
+            lock (_syncRoot)
             {
-                return Fail(-3003, "后台工作单元名称重复: " + worker.Name);
+                if (_workers.ContainsKey(worker.Name))
+                {
+                    return Fail(-3003, "后台工作单元名称重复: " + worker.Name);
+                }
+
+                _workers[worker.Name] = worker;
             }
 
-            _workers[worker.Name] = worker;
             return OkLogOnly("后台工作单元注册成功: " + worker.Name);
         }
 
@@ -73,7 +95,6 @@ namespace AM.DBService.Services.Runtime
                 return regResult;
             }
 
-            // 自动启动：失败时仅 Warn，不阻断启动流程
             var startResult = worker.Start();
             if (!startResult.Success)
             {
@@ -83,18 +104,36 @@ namespace AM.DBService.Services.Runtime
                     startResult.Code);
             }
 
-            // 无论启动是否成功，注册本身已完成，返回注册结果
             return regResult;
         }
 
+        /// <summary>
+        /// 查询全部已注册后台工作单元。
+        /// 返回的是当前快照副本，避免外部枚举时与内部写操作冲突。
+        /// </summary>
         public Result<IRuntimeWorker> QueryAll()
         {
-            return OkList(_workers.Values.ToList(), "后台工作单元查询成功");
+            List<IRuntimeWorker> snapshot;
+            lock (_syncRoot)
+            {
+                snapshot = _workers.Values.ToList();
+            }
+
+            return OkList(snapshot, "后台工作单元查询成功");
         }
 
+        /// <summary>
+        /// 启动全部后台工作单元。
+        /// </summary>
         public Result StartAll()
         {
-            foreach (var worker in _workers.Values)
+            List<IRuntimeWorker> snapshot;
+            lock (_syncRoot)
+            {
+                snapshot = _workers.Values.ToList();
+            }
+
+            foreach (var worker in snapshot)
             {
                 var result = worker.Start();
                 if (!result.Success)
@@ -106,11 +145,21 @@ namespace AM.DBService.Services.Runtime
             return Ok("后台工作单元全部启动成功");
         }
 
+        /// <summary>
+        /// 停止全部后台工作单元。
+        /// 按注册顺序逆序停止，便于资源依赖释放。
+        /// </summary>
         public async Task<Result> StopAllAsync()
         {
-            foreach (var worker in _workers.Values.Reverse().ToList())
+            List<IRuntimeWorker> snapshot;
+            lock (_syncRoot)
             {
-                var result = await worker.StopAsync();
+                snapshot = _workers.Values.Reverse().ToList();
+            }
+
+            foreach (var worker in snapshot)
+            {
+                var result = await worker.StopAsync().ConfigureAwait(false);
                 if (!result.Success)
                 {
                     return Fail(result.Code, "停止后台工作单元失败: " + worker.Name + "，" + result.Message);
@@ -120,6 +169,9 @@ namespace AM.DBService.Services.Runtime
             return Ok("后台工作单元全部停止成功");
         }
 
+        /// <summary>
+        /// 按名称启动指定后台工作单元。
+        /// </summary>
         public Result Start(string name)
         {
             IRuntimeWorker worker;
@@ -137,6 +189,9 @@ namespace AM.DBService.Services.Runtime
             return Ok("后台工作单元启动成功: " + worker.Name);
         }
 
+        /// <summary>
+        /// 按名称停止指定后台工作单元。
+        /// </summary>
         public async Task<Result> StopAsync(string name)
         {
             IRuntimeWorker worker;
@@ -145,7 +200,7 @@ namespace AM.DBService.Services.Runtime
                 return Fail(-3004, "未找到后台工作单元: " + name);
             }
 
-            var result = await worker.StopAsync();
+            var result = await worker.StopAsync().ConfigureAwait(false);
             if (!result.Success)
             {
                 return Fail(result.Code, "停止后台工作单元失败: " + worker.Name + "，" + result.Message);
@@ -154,6 +209,9 @@ namespace AM.DBService.Services.Runtime
             return Ok("后台工作单元停止成功: " + worker.Name);
         }
 
+        /// <summary>
+        /// 按名称获取后台工作单元。
+        /// </summary>
         private bool TryGetWorker(string name, out IRuntimeWorker worker)
         {
             worker = null;
@@ -163,7 +221,10 @@ namespace AM.DBService.Services.Runtime
                 return false;
             }
 
-            return _workers.TryGetValue(name.Trim(), out worker);
+            lock (_syncRoot)
+            {
+                return _workers.TryGetValue(name.Trim(), out worker);
+            }
         }
     }
 }
