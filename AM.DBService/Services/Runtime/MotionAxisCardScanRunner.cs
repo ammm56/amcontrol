@@ -315,6 +315,8 @@ namespace AM.DBService.Services.Runtime
                 runtime.SetAxisSnapshot(snapshot);
             }
 
+            // 采样成功立即更新时间，防止Worker和Runner之间的缓存过期导致的UI监视异常
+            RuntimeContext.Instance.MotionAxis.MarkScanTime(now);
             LastRunTime = now;
             return OkSilent("轴采样成功: " + CardDisplayTitle);
         }

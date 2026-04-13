@@ -309,6 +309,11 @@ namespace AM.DBService.Services.Runtime
                 RuntimeContext.Instance.MotionIo.SetDO(bitMap.LogicalBit, logicalValue, now);
             }
 
+            // 最小修复：
+            // 运行时缓存的新鲜时间必须在“实际扫描成功”时立即更新，
+            // 不能等顶层 supervisor 再汇总，否则执行器层会误判缓存过期。
+            RuntimeContext.Instance.MotionIo.MarkScanTime(now);
+
             LastRunTime = now;
             return OkSilent("IO 控制卡扫描成功: " + CardDisplayTitle);
         }

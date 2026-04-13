@@ -375,7 +375,8 @@ namespace AM.DBService.Services.Runtime
 
             if (LastRunTime.HasValue)
             {
-                RuntimeContext.Instance.MotionAxis.MarkScanTime(LastRunTime.Value);
+                // Runner中已经记录了单轴的扫描时间。
+                //RuntimeContext.Instance.MotionAxis.MarkScanTime(LastRunTime.Value);
                 RuntimeContext.Instance.MotionAxis.NotifySnapshotChanged();
             }
         }

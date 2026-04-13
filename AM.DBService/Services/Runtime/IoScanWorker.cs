@@ -392,7 +392,8 @@ namespace AM.DBService.Services.Runtime
 
             if (LastRunTime.HasValue)
             {
-                RuntimeContext.Instance.MotionIo.MarkScanTime(LastRunTime.Value);
+                // 注意：MotionIo 内部不再维护单独的扫描时间戳，而是直接使用各 Runner 的扫描时间来判断数据新旧。
+                //RuntimeContext.Instance.MotionIo.MarkScanTime(LastRunTime.Value);
                 RuntimeContext.Instance.MotionIo.NotifySnapshotChanged();
             }
         }
