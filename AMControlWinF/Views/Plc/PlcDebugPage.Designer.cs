@@ -148,14 +148,14 @@
             this.panelResultCard.Controls.Add(this.panelResultBody);
             this.panelResultCard.Controls.Add(this.labelResultTitle);
             this.panelResultCard.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelResultCard.Location = new System.Drawing.Point(628, 0);
+            this.panelResultCard.Location = new System.Drawing.Point(629, 0);
             this.panelResultCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelResultCard.Name = "panelResultCard";
             this.panelResultCard.Padding = new System.Windows.Forms.Padding(12);
             this.panelResultCard.Radius = 12;
             this.panelResultCard.Shadow = 4;
             this.panelResultCard.ShadowOpacity = 0.15F;
-            this.panelResultCard.Size = new System.Drawing.Size(456, 620);
+            this.panelResultCard.Size = new System.Drawing.Size(455, 620);
             this.panelResultCard.TabIndex = 1;
             // 
             // panelResultBody
@@ -173,14 +173,15 @@
             this.panelResultBody.Margin = new System.Windows.Forms.Padding(0);
             this.panelResultBody.Name = "panelResultBody";
             this.panelResultBody.Padding = new System.Windows.Forms.Padding(0, 8, 0, 0);
-            this.panelResultBody.Size = new System.Drawing.Size(424, 552);
+            this.panelResultBody.Size = new System.Drawing.Size(423, 552);
             this.panelResultBody.TabIndex = 1;
             // 
             // labelResultMessageValue
             // 
-            this.labelResultMessageValue.Location = new System.Drawing.Point(8, 188);
+            this.labelResultMessageValue.Location = new System.Drawing.Point(8, 196);
+            this.labelResultMessageValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelResultMessageValue.Name = "labelResultMessageValue";
-            this.labelResultMessageValue.Size = new System.Drawing.Size(408, 180);
+            this.labelResultMessageValue.Size = new System.Drawing.Size(408, 320);
             this.labelResultMessageValue.TabIndex = 7;
             this.labelResultMessageValue.Text = "—";
             this.labelResultMessageValue.TextAlign = System.Drawing.ContentAlignment.TopLeft;
@@ -188,9 +189,10 @@
             // labelResultMessageTitle
             // 
             this.labelResultMessageTitle.ForeColor = System.Drawing.Color.Gray;
-            this.labelResultMessageTitle.Location = new System.Drawing.Point(8, 164);
+            this.labelResultMessageTitle.Location = new System.Drawing.Point(8, 168);
+            this.labelResultMessageTitle.Margin = new System.Windows.Forms.Padding(0);
             this.labelResultMessageTitle.Name = "labelResultMessageTitle";
-            this.labelResultMessageTitle.Size = new System.Drawing.Size(408, 20);
+            this.labelResultMessageTitle.Size = new System.Drawing.Size(408, 24);
             this.labelResultMessageTitle.TabIndex = 6;
             this.labelResultMessageTitle.Text = "结果消息";
             // 
@@ -202,7 +204,7 @@
             this.panelResultTime.Margin = new System.Windows.Forms.Padding(0);
             this.panelResultTime.Name = "panelResultTime";
             this.panelResultTime.Radius = 0;
-            this.panelResultTime.Size = new System.Drawing.Size(424, 24);
+            this.panelResultTime.Size = new System.Drawing.Size(424, 28);
             this.panelResultTime.TabIndex = 5;
             // 
             // labelResultTimeValue
@@ -210,7 +212,7 @@
             this.labelResultTimeValue.Location = new System.Drawing.Point(88, 0);
             this.labelResultTimeValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelResultTimeValue.Name = "labelResultTimeValue";
-            this.labelResultTimeValue.Size = new System.Drawing.Size(328, 24);
+            this.labelResultTimeValue.Size = new System.Drawing.Size(328, 28);
             this.labelResultTimeValue.TabIndex = 1;
             this.labelResultTimeValue.Text = "—";
             // 
@@ -220,7 +222,7 @@
             this.labelResultTimeKey.Location = new System.Drawing.Point(0, 0);
             this.labelResultTimeKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelResultTimeKey.Name = "labelResultTimeKey";
-            this.labelResultTimeKey.Size = new System.Drawing.Size(80, 24);
+            this.labelResultTimeKey.Size = new System.Drawing.Size(80, 28);
             this.labelResultTimeKey.TabIndex = 0;
             this.labelResultTimeKey.Text = "执行时间";
             // 
@@ -228,11 +230,11 @@
             // 
             this.panelResultQuality.Controls.Add(this.labelResultQualityValue);
             this.panelResultQuality.Controls.Add(this.labelResultQualityKey);
-            this.panelResultQuality.Location = new System.Drawing.Point(0, 104);
+            this.panelResultQuality.Location = new System.Drawing.Point(0, 100);
             this.panelResultQuality.Margin = new System.Windows.Forms.Padding(0);
             this.panelResultQuality.Name = "panelResultQuality";
             this.panelResultQuality.Radius = 0;
-            this.panelResultQuality.Size = new System.Drawing.Size(424, 24);
+            this.panelResultQuality.Size = new System.Drawing.Size(424, 28);
             this.panelResultQuality.TabIndex = 4;
             // 
             // labelResultQualityValue
@@ -240,7 +242,7 @@
             this.labelResultQualityValue.Location = new System.Drawing.Point(88, 0);
             this.labelResultQualityValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelResultQualityValue.Name = "labelResultQualityValue";
-            this.labelResultQualityValue.Size = new System.Drawing.Size(328, 24);
+            this.labelResultQualityValue.Size = new System.Drawing.Size(328, 28);
             this.labelResultQualityValue.TabIndex = 1;
             this.labelResultQualityValue.Text = "—";
             // 
@@ -250,7 +252,7 @@
             this.labelResultQualityKey.Location = new System.Drawing.Point(0, 0);
             this.labelResultQualityKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelResultQualityKey.Name = "labelResultQualityKey";
-            this.labelResultQualityKey.Size = new System.Drawing.Size(80, 24);
+            this.labelResultQualityKey.Size = new System.Drawing.Size(80, 28);
             this.labelResultQualityKey.TabIndex = 0;
             this.labelResultQualityKey.Text = "质量";
             // 
@@ -258,11 +260,11 @@
             // 
             this.panelResultValue.Controls.Add(this.labelResultValueValue);
             this.panelResultValue.Controls.Add(this.labelResultValueKey);
-            this.panelResultValue.Location = new System.Drawing.Point(0, 76);
+            this.panelResultValue.Location = new System.Drawing.Point(0, 68);
             this.panelResultValue.Margin = new System.Windows.Forms.Padding(0);
             this.panelResultValue.Name = "panelResultValue";
             this.panelResultValue.Radius = 0;
-            this.panelResultValue.Size = new System.Drawing.Size(424, 24);
+            this.panelResultValue.Size = new System.Drawing.Size(424, 28);
             this.panelResultValue.TabIndex = 3;
             // 
             // labelResultValueValue
@@ -270,7 +272,7 @@
             this.labelResultValueValue.Location = new System.Drawing.Point(88, 0);
             this.labelResultValueValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelResultValueValue.Name = "labelResultValueValue";
-            this.labelResultValueValue.Size = new System.Drawing.Size(328, 24);
+            this.labelResultValueValue.Size = new System.Drawing.Size(328, 28);
             this.labelResultValueValue.TabIndex = 1;
             this.labelResultValueValue.Text = "—";
             // 
@@ -280,7 +282,7 @@
             this.labelResultValueKey.Location = new System.Drawing.Point(0, 0);
             this.labelResultValueKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelResultValueKey.Name = "labelResultValueKey";
-            this.labelResultValueKey.Size = new System.Drawing.Size(80, 24);
+            this.labelResultValueKey.Size = new System.Drawing.Size(80, 28);
             this.labelResultValueKey.TabIndex = 0;
             this.labelResultValueKey.Text = "值";
             // 
@@ -288,11 +290,11 @@
             // 
             this.panelResultType.Controls.Add(this.labelResultTypeValue);
             this.panelResultType.Controls.Add(this.labelResultTypeKey);
-            this.panelResultType.Location = new System.Drawing.Point(0, 48);
+            this.panelResultType.Location = new System.Drawing.Point(0, 36);
             this.panelResultType.Margin = new System.Windows.Forms.Padding(0);
             this.panelResultType.Name = "panelResultType";
             this.panelResultType.Radius = 0;
-            this.panelResultType.Size = new System.Drawing.Size(424, 24);
+            this.panelResultType.Size = new System.Drawing.Size(424, 28);
             this.panelResultType.TabIndex = 2;
             // 
             // labelResultTypeValue
@@ -300,7 +302,7 @@
             this.labelResultTypeValue.Location = new System.Drawing.Point(88, 0);
             this.labelResultTypeValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelResultTypeValue.Name = "labelResultTypeValue";
-            this.labelResultTypeValue.Size = new System.Drawing.Size(328, 24);
+            this.labelResultTypeValue.Size = new System.Drawing.Size(328, 28);
             this.labelResultTypeValue.TabIndex = 1;
             this.labelResultTypeValue.Text = "—";
             // 
@@ -310,7 +312,7 @@
             this.labelResultTypeKey.Location = new System.Drawing.Point(0, 0);
             this.labelResultTypeKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelResultTypeKey.Name = "labelResultTypeKey";
-            this.labelResultTypeKey.Size = new System.Drawing.Size(80, 24);
+            this.labelResultTypeKey.Size = new System.Drawing.Size(80, 28);
             this.labelResultTypeKey.TabIndex = 0;
             this.labelResultTypeKey.Text = "数据类型";
             // 
@@ -318,11 +320,11 @@
             // 
             this.panelResultTarget.Controls.Add(this.labelResultTargetValue);
             this.panelResultTarget.Controls.Add(this.labelResultTargetKey);
-            this.panelResultTarget.Location = new System.Drawing.Point(0, 20);
+            this.panelResultTarget.Location = new System.Drawing.Point(0, 4);
             this.panelResultTarget.Margin = new System.Windows.Forms.Padding(0);
             this.panelResultTarget.Name = "panelResultTarget";
             this.panelResultTarget.Radius = 0;
-            this.panelResultTarget.Size = new System.Drawing.Size(424, 24);
+            this.panelResultTarget.Size = new System.Drawing.Size(424, 28);
             this.panelResultTarget.TabIndex = 1;
             // 
             // labelResultTargetValue
@@ -330,7 +332,7 @@
             this.labelResultTargetValue.Location = new System.Drawing.Point(88, 0);
             this.labelResultTargetValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelResultTargetValue.Name = "labelResultTargetValue";
-            this.labelResultTargetValue.Size = new System.Drawing.Size(328, 24);
+            this.labelResultTargetValue.Size = new System.Drawing.Size(328, 28);
             this.labelResultTargetValue.TabIndex = 1;
             this.labelResultTargetValue.Text = "—";
             // 
@@ -340,7 +342,7 @@
             this.labelResultTargetKey.Location = new System.Drawing.Point(0, 0);
             this.labelResultTargetKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelResultTargetKey.Name = "labelResultTargetKey";
-            this.labelResultTargetKey.Size = new System.Drawing.Size(80, 24);
+            this.labelResultTargetKey.Size = new System.Drawing.Size(80, 28);
             this.labelResultTargetKey.TabIndex = 0;
             this.labelResultTargetKey.Text = "目标";
             // 
@@ -348,11 +350,11 @@
             // 
             this.panelResultAction.Controls.Add(this.labelResultActionValue);
             this.panelResultAction.Controls.Add(this.labelResultActionKey);
-            this.panelResultAction.Location = new System.Drawing.Point(0, -8);
+            this.panelResultAction.Location = new System.Drawing.Point(0, -28);
             this.panelResultAction.Margin = new System.Windows.Forms.Padding(0);
             this.panelResultAction.Name = "panelResultAction";
             this.panelResultAction.Radius = 0;
-            this.panelResultAction.Size = new System.Drawing.Size(424, 24);
+            this.panelResultAction.Size = new System.Drawing.Size(424, 28);
             this.panelResultAction.TabIndex = 0;
             // 
             // labelResultActionValue
@@ -360,7 +362,7 @@
             this.labelResultActionValue.Location = new System.Drawing.Point(88, 0);
             this.labelResultActionValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelResultActionValue.Name = "labelResultActionValue";
-            this.labelResultActionValue.Size = new System.Drawing.Size(328, 24);
+            this.labelResultActionValue.Size = new System.Drawing.Size(328, 28);
             this.labelResultActionValue.TabIndex = 1;
             this.labelResultActionValue.Text = "—";
             // 
@@ -370,7 +372,7 @@
             this.labelResultActionKey.Location = new System.Drawing.Point(0, 0);
             this.labelResultActionKey.Margin = new System.Windows.Forms.Padding(0);
             this.labelResultActionKey.Name = "labelResultActionKey";
-            this.labelResultActionKey.Size = new System.Drawing.Size(80, 24);
+            this.labelResultActionKey.Size = new System.Drawing.Size(80, 28);
             this.labelResultActionKey.TabIndex = 0;
             this.labelResultActionKey.Text = "操作";
             // 
@@ -381,10 +383,9 @@
             this.labelResultTitle.Location = new System.Drawing.Point(16, 16);
             this.labelResultTitle.Margin = new System.Windows.Forms.Padding(0);
             this.labelResultTitle.Name = "labelResultTitle";
-            this.labelResultTitle.Size = new System.Drawing.Size(424, 36);
+            this.labelResultTitle.Size = new System.Drawing.Size(423, 36);
             this.labelResultTitle.TabIndex = 0;
             this.labelResultTitle.Text = "执行结果";
-            this.labelResultTitle.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // panelOpsCard
             // 
@@ -397,7 +398,7 @@
             this.panelOpsCard.Radius = 0;
             this.panelOpsCard.ShadowOpacity = 0F;
             this.panelOpsCard.ShadowOpacityHover = 0F;
-            this.panelOpsCard.Size = new System.Drawing.Size(628, 620);
+            this.panelOpsCard.Size = new System.Drawing.Size(629, 620);
             this.panelOpsCard.TabIndex = 0;
             // 
             // panelOpsScroll
@@ -411,7 +412,7 @@
             this.panelOpsScroll.Margin = new System.Windows.Forms.Padding(0);
             this.panelOpsScroll.Name = "panelOpsScroll";
             this.panelOpsScroll.Padding = new System.Windows.Forms.Padding(0, 0, 8, 0);
-            this.panelOpsScroll.Size = new System.Drawing.Size(628, 620);
+            this.panelOpsScroll.Size = new System.Drawing.Size(629, 620);
             this.panelOpsScroll.TabIndex = 0;
             // 
             // panelDirectWriteCard
@@ -427,7 +428,7 @@
             this.panelDirectWriteCard.Controls.Add(this.inputDirectAddress);
             this.panelDirectWriteCard.Controls.Add(this.labelDirectAddress);
             this.panelDirectWriteCard.Controls.Add(this.labelDirectWriteTitle);
-            this.panelDirectWriteCard.Location = new System.Drawing.Point(0, 376);
+            this.panelDirectWriteCard.Location = new System.Drawing.Point(0, 396);
             this.panelDirectWriteCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelDirectWriteCard.Name = "panelDirectWriteCard";
             this.panelDirectWriteCard.Padding = new System.Windows.Forms.Padding(12);
@@ -442,7 +443,7 @@
             this.checkDirectWriteConfirmed.Location = new System.Drawing.Point(16, 184);
             this.checkDirectWriteConfirmed.Margin = new System.Windows.Forms.Padding(0);
             this.checkDirectWriteConfirmed.Name = "checkDirectWriteConfirmed";
-            this.checkDirectWriteConfirmed.Size = new System.Drawing.Size(220, 24);
+            this.checkDirectWriteConfirmed.Size = new System.Drawing.Size(260, 24);
             this.checkDirectWriteConfirmed.TabIndex = 9;
             this.checkDirectWriteConfirmed.Text = "已确认这是高风险写入操作";
             // 
@@ -477,7 +478,6 @@
             this.labelDirectWriteValue.Size = new System.Drawing.Size(72, 32);
             this.labelDirectWriteValue.TabIndex = 7;
             this.labelDirectWriteValue.Text = "写入值";
-            this.labelDirectWriteValue.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // inputDirectLength
             // 
@@ -497,7 +497,6 @@
             this.labelDirectLength.Size = new System.Drawing.Size(56, 32);
             this.labelDirectLength.TabIndex = 5;
             this.labelDirectLength.Text = "长度";
-            this.labelDirectLength.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // selectDirectDataType
             // 
@@ -516,7 +515,6 @@
             this.labelDirectDataType.Size = new System.Drawing.Size(72, 32);
             this.labelDirectDataType.TabIndex = 3;
             this.labelDirectDataType.Text = "数据类型";
-            this.labelDirectDataType.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // inputDirectAddress
             // 
@@ -536,7 +534,6 @@
             this.labelDirectAddress.Size = new System.Drawing.Size(72, 32);
             this.labelDirectAddress.TabIndex = 1;
             this.labelDirectAddress.Text = "地址";
-            this.labelDirectAddress.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // labelDirectWriteTitle
             // 
@@ -544,7 +541,7 @@
             this.labelDirectWriteTitle.Location = new System.Drawing.Point(16, 8);
             this.labelDirectWriteTitle.Margin = new System.Windows.Forms.Padding(0);
             this.labelDirectWriteTitle.Name = "labelDirectWriteTitle";
-            this.labelDirectWriteTitle.Size = new System.Drawing.Size(200, 24);
+            this.labelDirectWriteTitle.Size = new System.Drawing.Size(300, 24);
             this.labelDirectWriteTitle.TabIndex = 0;
             this.labelDirectWriteTitle.Text = "按直接地址写入";
             // 
@@ -553,20 +550,20 @@
             this.panelDirectReadCard.Controls.Add(this.buttonTestReadAddress);
             this.panelDirectReadCard.Controls.Add(this.labelDirectReadTip);
             this.panelDirectReadCard.Controls.Add(this.labelDirectReadTitle);
-            this.panelDirectReadCard.Location = new System.Drawing.Point(0, 276);
+            this.panelDirectReadCard.Location = new System.Drawing.Point(0, 300);
             this.panelDirectReadCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelDirectReadCard.Name = "panelDirectReadCard";
             this.panelDirectReadCard.Padding = new System.Windows.Forms.Padding(12);
             this.panelDirectReadCard.Radius = 12;
             this.panelDirectReadCard.Shadow = 4;
             this.panelDirectReadCard.ShadowOpacity = 0.15F;
-            this.panelDirectReadCard.Size = new System.Drawing.Size(600, 84);
+            this.panelDirectReadCard.Size = new System.Drawing.Size(600, 80);
             this.panelDirectReadCard.TabIndex = 1;
             // 
             // buttonTestReadAddress
             // 
             this.buttonTestReadAddress.IconSvg = "SearchOutlined";
-            this.buttonTestReadAddress.Location = new System.Drawing.Point(488, 24);
+            this.buttonTestReadAddress.Location = new System.Drawing.Point(488, 22);
             this.buttonTestReadAddress.Margin = new System.Windows.Forms.Padding(0);
             this.buttonTestReadAddress.Name = "buttonTestReadAddress";
             this.buttonTestReadAddress.Radius = 8;
@@ -581,9 +578,9 @@
             this.labelDirectReadTip.Location = new System.Drawing.Point(16, 44);
             this.labelDirectReadTip.Margin = new System.Windows.Forms.Padding(0);
             this.labelDirectReadTip.Name = "labelDirectReadTip";
-            this.labelDirectReadTip.Size = new System.Drawing.Size(320, 20);
+            this.labelDirectReadTip.Size = new System.Drawing.Size(440, 20);
             this.labelDirectReadTip.TabIndex = 1;
-            this.labelDirectReadTip.Text = "复用下方地址、数据类型、长度输入项。";
+            this.labelDirectReadTip.Text = "请输入 PLC、地址、数据类型、长度后执行读取。";
             // 
             // labelDirectReadTitle
             // 
@@ -617,13 +614,13 @@
             this.panelPointOpCard.Radius = 12;
             this.panelPointOpCard.Shadow = 4;
             this.panelPointOpCard.ShadowOpacity = 0.15F;
-            this.panelPointOpCard.Size = new System.Drawing.Size(600, 260);
+            this.panelPointOpCard.Size = new System.Drawing.Size(600, 284);
             this.panelPointOpCard.TabIndex = 0;
             // 
             // buttonWritePoint
             // 
             this.buttonWritePoint.IconSvg = "EditOutlined";
-            this.buttonWritePoint.Location = new System.Drawing.Point(488, 208);
+            this.buttonWritePoint.Location = new System.Drawing.Point(488, 232);
             this.buttonWritePoint.Margin = new System.Windows.Forms.Padding(0);
             this.buttonWritePoint.Name = "buttonWritePoint";
             this.buttonWritePoint.Radius = 8;
@@ -636,7 +633,7 @@
             // buttonTestReadPoint
             // 
             this.buttonTestReadPoint.IconSvg = "SearchOutlined";
-            this.buttonTestReadPoint.Location = new System.Drawing.Point(384, 208);
+            this.buttonTestReadPoint.Location = new System.Drawing.Point(384, 232);
             this.buttonTestReadPoint.Margin = new System.Windows.Forms.Padding(0);
             this.buttonTestReadPoint.Name = "buttonTestReadPoint";
             this.buttonTestReadPoint.Radius = 8;
@@ -647,7 +644,7 @@
             // 
             // inputPointWriteValue
             // 
-            this.inputPointWriteValue.Location = new System.Drawing.Point(96, 160);
+            this.inputPointWriteValue.Location = new System.Drawing.Point(96, 184);
             this.inputPointWriteValue.Margin = new System.Windows.Forms.Padding(0);
             this.inputPointWriteValue.Name = "inputPointWriteValue";
             this.inputPointWriteValue.Size = new System.Drawing.Size(488, 32);
@@ -657,17 +654,16 @@
             // labelPointWriteValue
             // 
             this.labelPointWriteValue.ForeColor = System.Drawing.Color.Gray;
-            this.labelPointWriteValue.Location = new System.Drawing.Point(16, 160);
+            this.labelPointWriteValue.Location = new System.Drawing.Point(16, 184);
             this.labelPointWriteValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelPointWriteValue.Name = "labelPointWriteValue";
             this.labelPointWriteValue.Size = new System.Drawing.Size(72, 32);
             this.labelPointWriteValue.TabIndex = 9;
             this.labelPointWriteValue.Text = "写入值";
-            this.labelPointWriteValue.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // inputPointLength
             // 
-            this.inputPointLength.Location = new System.Drawing.Point(424, 112);
+            this.inputPointLength.Location = new System.Drawing.Point(424, 136);
             this.inputPointLength.Margin = new System.Windows.Forms.Padding(0);
             this.inputPointLength.Name = "inputPointLength";
             this.inputPointLength.Size = new System.Drawing.Size(160, 32);
@@ -677,17 +673,16 @@
             // labelPointLength
             // 
             this.labelPointLength.ForeColor = System.Drawing.Color.Gray;
-            this.labelPointLength.Location = new System.Drawing.Point(360, 112);
+            this.labelPointLength.Location = new System.Drawing.Point(360, 136);
             this.labelPointLength.Margin = new System.Windows.Forms.Padding(0);
             this.labelPointLength.Name = "labelPointLength";
             this.labelPointLength.Size = new System.Drawing.Size(56, 32);
             this.labelPointLength.TabIndex = 7;
             this.labelPointLength.Text = "长度";
-            this.labelPointLength.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // inputPointDataType
             // 
-            this.inputPointDataType.Location = new System.Drawing.Point(96, 112);
+            this.inputPointDataType.Location = new System.Drawing.Point(96, 136);
             this.inputPointDataType.Margin = new System.Windows.Forms.Padding(0);
             this.inputPointDataType.Name = "inputPointDataType";
             this.inputPointDataType.Size = new System.Drawing.Size(240, 32);
@@ -697,17 +692,16 @@
             // labelPointDataType
             // 
             this.labelPointDataType.ForeColor = System.Drawing.Color.Gray;
-            this.labelPointDataType.Location = new System.Drawing.Point(16, 112);
+            this.labelPointDataType.Location = new System.Drawing.Point(16, 136);
             this.labelPointDataType.Margin = new System.Windows.Forms.Padding(0);
             this.labelPointDataType.Name = "labelPointDataType";
             this.labelPointDataType.Size = new System.Drawing.Size(72, 32);
             this.labelPointDataType.TabIndex = 5;
             this.labelPointDataType.Text = "数据类型";
-            this.labelPointDataType.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // inputPointAddress
             // 
-            this.inputPointAddress.Location = new System.Drawing.Point(96, 64);
+            this.inputPointAddress.Location = new System.Drawing.Point(96, 88);
             this.inputPointAddress.Margin = new System.Windows.Forms.Padding(0);
             this.inputPointAddress.Name = "inputPointAddress";
             this.inputPointAddress.Size = new System.Drawing.Size(488, 32);
@@ -717,17 +711,16 @@
             // labelPointAddress
             // 
             this.labelPointAddress.ForeColor = System.Drawing.Color.Gray;
-            this.labelPointAddress.Location = new System.Drawing.Point(16, 64);
+            this.labelPointAddress.Location = new System.Drawing.Point(16, 88);
             this.labelPointAddress.Margin = new System.Windows.Forms.Padding(0);
             this.labelPointAddress.Name = "labelPointAddress";
             this.labelPointAddress.Size = new System.Drawing.Size(72, 32);
             this.labelPointAddress.TabIndex = 3;
             this.labelPointAddress.Text = "地址";
-            this.labelPointAddress.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // selectPoint
             // 
-            this.selectPoint.Location = new System.Drawing.Point(96, 24);
+            this.selectPoint.Location = new System.Drawing.Point(96, 40);
             this.selectPoint.Margin = new System.Windows.Forms.Padding(0);
             this.selectPoint.Name = "selectPoint";
             this.selectPoint.Size = new System.Drawing.Size(488, 32);
@@ -736,21 +729,20 @@
             // labelPointSelect
             // 
             this.labelPointSelect.ForeColor = System.Drawing.Color.Gray;
-            this.labelPointSelect.Location = new System.Drawing.Point(16, 24);
+            this.labelPointSelect.Location = new System.Drawing.Point(16, 40);
             this.labelPointSelect.Margin = new System.Windows.Forms.Padding(0);
             this.labelPointSelect.Name = "labelPointSelect";
             this.labelPointSelect.Size = new System.Drawing.Size(72, 32);
             this.labelPointSelect.TabIndex = 1;
             this.labelPointSelect.Text = "配置点位";
-            this.labelPointSelect.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // labelPointOpTitle
             // 
             this.labelPointOpTitle.Font = new System.Drawing.Font("Microsoft YaHei UI", 10F, System.Drawing.FontStyle.Bold);
-            this.labelPointOpTitle.Location = new System.Drawing.Point(16, -8);
+            this.labelPointOpTitle.Location = new System.Drawing.Point(16, 8);
             this.labelPointOpTitle.Margin = new System.Windows.Forms.Padding(0);
             this.labelPointOpTitle.Name = "labelPointOpTitle";
-            this.labelPointOpTitle.Size = new System.Drawing.Size(200, 24);
+            this.labelPointOpTitle.Size = new System.Drawing.Size(400, 24);
             this.labelPointOpTitle.TabIndex = 0;
             this.labelPointOpTitle.Text = "按配置点位调试";
             // 
@@ -771,32 +763,32 @@
             // 
             this.flowToolbarLeft.Controls.Add(this.labelRuntimeSummary);
             this.flowToolbarLeft.Controls.Add(this.selectPlcGlobal);
-            this.flowToolbarLeft.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.flowToolbarLeft.Dock = System.Windows.Forms.DockStyle.Left;
             this.flowToolbarLeft.Gap = 8;
             this.flowToolbarLeft.Location = new System.Drawing.Point(4, 4);
             this.flowToolbarLeft.Margin = new System.Windows.Forms.Padding(0);
             this.flowToolbarLeft.Name = "flowToolbarLeft";
-            this.flowToolbarLeft.Size = new System.Drawing.Size(924, 40);
+            this.flowToolbarLeft.Size = new System.Drawing.Size(625, 40);
             this.flowToolbarLeft.TabIndex = 0;
             this.flowToolbarLeft.Text = "flowToolbarLeft";
             // 
             // labelRuntimeSummary
             // 
-            this.labelRuntimeSummary.Location = new System.Drawing.Point(4, 0);
+            this.labelRuntimeSummary.Location = new System.Drawing.Point(228, 0);
             this.labelRuntimeSummary.Margin = new System.Windows.Forms.Padding(0);
             this.labelRuntimeSummary.Name = "labelRuntimeSummary";
             this.labelRuntimeSummary.Size = new System.Drawing.Size(200, 40);
             this.labelRuntimeSummary.TabIndex = 0;
             this.labelRuntimeSummary.Text = "状态未知";
-            this.labelRuntimeSummary.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // selectPlcGlobal
             // 
-            this.selectPlcGlobal.Location = new System.Drawing.Point(212, 4);
+            this.selectPlcGlobal.Location = new System.Drawing.Point(0, 4);
             this.selectPlcGlobal.Margin = new System.Windows.Forms.Padding(0, 4, 0, 0);
             this.selectPlcGlobal.Name = "selectPlcGlobal";
             this.selectPlcGlobal.Size = new System.Drawing.Size(220, 32);
             this.selectPlcGlobal.TabIndex = 1;
+            this.selectPlcGlobal.WaveSize = 0;
             // 
             // flowToolbarRight
             // 
@@ -821,12 +813,11 @@
             this.buttonRefresh.Size = new System.Drawing.Size(96, 36);
             this.buttonRefresh.TabIndex = 0;
             this.buttonRefresh.Text = "刷新";
-            this.buttonRefresh.Type = AntdUI.TTypeMini.Primary;
             this.buttonRefresh.WaveSize = 0;
             // 
             // PlcDebugPage
             // 
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.Controls.Add(this.panelRoot);
             this.Margin = new System.Windows.Forms.Padding(0);
             this.Name = "PlcDebugPage";
@@ -851,6 +842,7 @@
             this.flowToolbarLeft.ResumeLayout(false);
             this.flowToolbarRight.ResumeLayout(false);
             this.ResumeLayout(false);
+
         }
 
         #endregion
