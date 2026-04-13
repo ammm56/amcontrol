@@ -14,6 +14,7 @@ namespace AM.MotionCard.Googo
     public class GoogoMotionCardService : MotionCardBase
     {
         private readonly MotionCardConfig _config;
+        private volatile bool _isConnected;
 
         private MotionCardConfig CurrentConfig
         {
@@ -26,17 +27,21 @@ namespace AM.MotionCard.Googo
                 throw new ArgumentNullException(nameof(config));
 
             _config = config;
+            _cardId = config.CardId;
+            _isConnected = false;
         }
 
         public override Result Initialize(string configPath)
         {
-            // 启动阶段仅做连通性预检查，正式连接由 Connect 负责
             short res = mc.GTN_Open(CurrentConfig.CardId, CurrentConfig.ModeParam);
             if (res != 0)
             {
+                _isConnected = false;
                 return HandleError(res, "Initialize: GTN_Open 失败");
             }
+
             mc.GTN_Close();
+            _isConnected = false;
             return Ok("控制卡连通性预检查成功");
         }
 
@@ -57,6 +62,7 @@ namespace AM.MotionCard.Googo
             short rtn = mc.GTN_Open(_cardId, CurrentConfig.ModeParam);
             if (rtn != 0)
             {
+                _isConnected = false;
                 return HandleError(rtn, $"GTN_Open 通道 {_cardId} 失败。请检查驱动安装或插槽。");
             }
 
@@ -69,6 +75,7 @@ namespace AM.MotionCard.Googo
                 {
                     // 失败必须关闭已打开的通道，否则下次无法再次 Open
                     mc.GTN_Close();
+                    _isConnected = false;
                     return HandleError(resetRtn, $"GTN_Reset 第 {core} 核复位失败 (总配置 {CurrentConfig.CoreNumber} 核)");
                 }
             }
@@ -80,12 +87,35 @@ namespace AM.MotionCard.Googo
                 rtn = mc.GTN_ExtModuleInit(1, 1); // 默认地址1
                 if (rtn != 0)
                 {
+                    _isConnected = false;
                     return HandleError(rtn, "GTN_ExtModuleInit 扩展卡启动失败");
                 }
             }
 
+            _isConnected = true;
             return Ok("控制卡连接成功");
         }
+
+        public override Result Disconnect()
+        {
+            short rtn = mc.GTN_Close();
+            if (rtn != 0)
+            {
+                return HandleError(rtn, "GTN_Close 失败");
+            }
+
+            _isConnected = false;
+            return Ok("控制卡已断开");
+        }
+
+        /// <summary>
+        /// 查询当前固高控制卡连接状态。
+        /// </summary>
+        public override Result<bool> IsConnected()
+        {
+            return OkSilent(_isConnected, "控制卡连接状态查询成功");
+        }
+
         /// <summary>
         /// 清除指定核轴状态
         /// </summary>
@@ -222,13 +252,6 @@ namespace AM.MotionCard.Googo
             if (rtn != 0) return HandleError(rtn, $"限位模式配置失败，核{core} 轴{axis}");
 
             return Ok($"轴硬件参数配置成功，核{core} 轴{axis}");
-        }
-
-        public override Result Disconnect()
-        {
-            short rtn = mc.GTN_Close();
-            if (rtn != 0) return HandleError(rtn, "GTN_Close 失败");
-            return Ok("控制卡已断开");
         }
 
         public override Result Enable(short logicalAxis, bool onOff)

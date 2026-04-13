@@ -135,8 +135,7 @@ namespace AM.MotionService.Virtual
         {
             _isConnected = true;
 
-            // 为已加载的轴预创建状态对象（LoadAxisConfig → Connect 顺序调用，单线程初始化）
-            foreach (var kv in _axisMap)
+            foreach (KeyValuePair<short, AxisConfig> kv in _axisMap)
             {
                 _axisStates.TryAdd(kv.Key, new VirtualAxisState());
             }
@@ -149,6 +148,15 @@ namespace AM.MotionService.Virtual
             _isConnected = false;
             StopAllMotionInternal();
             return OkLogOnly("虚拟卡断开成功，CardId=" + _cardId);
+        }
+
+        /// <summary>
+        /// 返回虚拟卡当前连接标记。
+        /// 该标记在 Connect/Disconnect 中维护，用于上层统一显示连接状态。
+        /// </summary>
+        public override Result<bool> IsConnected()
+        {
+            return OkSilent(_isConnected, "虚拟卡连接状态查询成功");
         }
 
         // =====================================================================
@@ -165,7 +173,7 @@ namespace AM.MotionService.Virtual
 
         public override Result ClearAllAxisStatus()
         {
-            foreach (var kv in _axisStates)
+            foreach (KeyValuePair<short, VirtualAxisState> kv in _axisStates)
             {
                 kv.Value.IsAlarm = false;
                 FireAxisStatusChanged(kv.Key, kv.Value);
@@ -184,7 +192,7 @@ namespace AM.MotionService.Virtual
 
         public override Result SetAllZeroPos()
         {
-            foreach (var kv in _axisStates)
+            foreach (KeyValuePair<short, VirtualAxisState> kv in _axisStates)
             {
                 kv.Value.CommandPosition = 0;
                 kv.Value.EncoderPosition = 0;
@@ -218,8 +226,9 @@ namespace AM.MotionService.Virtual
         {
             var state = GetOrCreateAxisState(logicalAxis);
             state.CancelMotion();
+            state.IsMoving = false;
             FireAxisStatusChanged(logicalAxis, state);
-            return OkSilent((isEmergency ? "急停" : "平停") + " 虚拟轴: " + logicalAxis);
+            return OkSilent("虚拟轴停止成功: " + logicalAxis);
         }
 
         public override Result StopAll(bool isEmergency = false)

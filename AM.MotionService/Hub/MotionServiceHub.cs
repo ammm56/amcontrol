@@ -162,6 +162,50 @@ namespace AM.MotionService.Hub
                 "所有运动控制卡断开成功");
         }
 
+        public Result<bool> IsConnected()
+        {
+            var services = new List<IMotionCardService>();
+
+            foreach (var service in GetAllCardServices())
+            {
+                if (service == null)
+                {
+                    continue;
+                }
+
+                if (!services.Contains(service))
+                {
+                    services.Add(service);
+                }
+            }
+
+            if (services.Count <= 0)
+            {
+                return OkSilent(false, "当前未配置运动控制卡");
+            }
+
+            foreach (var service in services)
+            {
+                var result = service.IsConnected();
+                if (result == null)
+                {
+                    return Result<bool>.Fail((int)MotionErrorCode.CardConnectFailed, "控制卡连接状态查询失败", ResultSource.Motion);
+                }
+
+                if (!result.Success)
+                {
+                    return Result<bool>.Fail(result.Code, result.Message, ResultSource.Motion);
+                }
+
+                if (!result.Item)
+                {
+                    return OkSilent(false, "存在未连接的运动控制卡");
+                }
+            }
+
+            return OkSilent(true, "所有运动控制卡已连接");
+        }
+
         public Result ClearStatus(short logicalAxis)
         {
             return ExecuteOnAxis(logicalAxis, service => service.ClearStatus(logicalAxis));

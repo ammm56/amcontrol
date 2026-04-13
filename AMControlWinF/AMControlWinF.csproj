@@ -109,6 +109,12 @@
     <Compile Include="Views\Auth\LoginForm.Designer.cs">
       <DependentUpon>LoginForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\Main\ActiveAlarmDrawerControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Main\ActiveAlarmDrawerControl.Designer.cs">
+      <DependentUpon>ActiveAlarmDrawerControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="Views\Main\TextureBackgroundControl.cs">
       <SubType>Component</SubType>
     </Compile>

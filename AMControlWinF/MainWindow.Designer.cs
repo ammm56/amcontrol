@@ -1,4 +1,5 @@
-﻿namespace AMControlWinF
+﻿// AMControlWinF\MainWindow.Designer.cs
+namespace AMControlWinF
 {
     partial class MainWindow
     {
@@ -24,6 +25,10 @@
             this.gridMainHost = new AntdUI.GridPanel();
             this.panelStatusCard = new AntdUI.Panel();
             this.labelStatusValue = new AntdUI.Label();
+            this.flowStatusIndicators = new AntdUI.FlowPanel();
+            this.buttonAlarmIndicator = new AntdUI.Button();
+            this.labelPlcStatus = new AntdUI.Label();
+            this.labelMotionStatus = new AntdUI.Label();
             this.panelLeftCard = new AntdUI.Panel();
             this.menuPrimary = new AntdUI.Menu();
             this.panelAvatarHost = new AntdUI.Panel();
@@ -38,6 +43,7 @@
             this.textureBackgroundMain.SuspendLayout();
             this.gridMainHost.SuspendLayout();
             this.panelStatusCard.SuspendLayout();
+            this.flowStatusIndicators.SuspendLayout();
             this.panelLeftCard.SuspendLayout();
             this.panelAvatarHost.SuspendLayout();
             this.panelSecondaryNavCard.SuspendLayout();
@@ -119,11 +125,12 @@
             // 
             this.panelStatusCard.BackColor = System.Drawing.Color.Transparent;
             this.panelStatusCard.Controls.Add(this.labelStatusValue);
+            this.panelStatusCard.Controls.Add(this.flowStatusIndicators);
             this.panelStatusCard.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelStatusCard.Location = new System.Drawing.Point(6, 702);
             this.panelStatusCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelStatusCard.Name = "panelStatusCard";
-            this.panelStatusCard.Padding = new System.Windows.Forms.Padding(14, 0, 14, 0);
+            this.panelStatusCard.Padding = new System.Windows.Forms.Padding(14, 6, 14, 6);
             this.panelStatusCard.Radius = 12;
             this.panelStatusCard.Shadow = 4;
             this.panelStatusCard.Size = new System.Drawing.Size(1188, 44);
@@ -132,12 +139,64 @@
             // labelStatusValue
             // 
             this.labelStatusValue.BackColor = System.Drawing.Color.Transparent;
-            this.labelStatusValue.Location = new System.Drawing.Point(18, 4);
+            this.labelStatusValue.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.labelStatusValue.Location = new System.Drawing.Point(18, 10);
             this.labelStatusValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelStatusValue.Name = "labelStatusValue";
-            this.labelStatusValue.Size = new System.Drawing.Size(626, 32);
+            this.labelStatusValue.Size = new System.Drawing.Size(830, 24);
             this.labelStatusValue.TabIndex = 0;
             this.labelStatusValue.Text = "应用已启动，等待操作。";
+            this.labelStatusValue.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // flowStatusIndicators
+            // 
+            this.flowStatusIndicators.Controls.Add(this.buttonAlarmIndicator);
+            this.flowStatusIndicators.Controls.Add(this.labelPlcStatus);
+            this.flowStatusIndicators.Controls.Add(this.labelMotionStatus);
+            this.flowStatusIndicators.Dock = System.Windows.Forms.DockStyle.Right;
+            this.flowStatusIndicators.Gap = 8;
+            this.flowStatusIndicators.Location = new System.Drawing.Point(848, 10);
+            this.flowStatusIndicators.Margin = new System.Windows.Forms.Padding(0);
+            this.flowStatusIndicators.Name = "flowStatusIndicators";
+            this.flowStatusIndicators.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+            this.flowStatusIndicators.Size = new System.Drawing.Size(326, 24);
+            this.flowStatusIndicators.TabIndex = 1;
+            this.flowStatusIndicators.Text = "flowStatusIndicators";
+            // 
+            // buttonAlarmIndicator
+            // 
+            this.buttonAlarmIndicator.Location = new System.Drawing.Point(218, 0);
+            this.buttonAlarmIndicator.Margin = new System.Windows.Forms.Padding(0);
+            this.buttonAlarmIndicator.Name = "buttonAlarmIndicator";
+            this.buttonAlarmIndicator.Radius = 8;
+            this.buttonAlarmIndicator.Size = new System.Drawing.Size(108, 24);
+            this.buttonAlarmIndicator.TabIndex = 0;
+            this.buttonAlarmIndicator.Text = "报警: 0";
+            this.buttonAlarmIndicator.WaveSize = 0;
+            // 
+            // labelPlcStatus
+            // 
+            this.labelPlcStatus.BackColor = System.Drawing.Color.Transparent;
+            this.labelPlcStatus.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
+            this.labelPlcStatus.Location = new System.Drawing.Point(110, 0);
+            this.labelPlcStatus.Margin = new System.Windows.Forms.Padding(0);
+            this.labelPlcStatus.Name = "labelPlcStatus";
+            this.labelPlcStatus.Size = new System.Drawing.Size(100, 24);
+            this.labelPlcStatus.TabIndex = 1;
+            this.labelPlcStatus.Text = "PLC: 未知";
+            this.labelPlcStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // labelMotionStatus
+            // 
+            this.labelMotionStatus.BackColor = System.Drawing.Color.Transparent;
+            this.labelMotionStatus.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
+            this.labelMotionStatus.Location = new System.Drawing.Point(2, 0);
+            this.labelMotionStatus.Margin = new System.Windows.Forms.Padding(0);
+            this.labelMotionStatus.Name = "labelMotionStatus";
+            this.labelMotionStatus.Size = new System.Drawing.Size(100, 24);
+            this.labelMotionStatus.TabIndex = 2;
+            this.labelMotionStatus.Text = "Motion: 未知";
+            this.labelMotionStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // panelLeftCard
             // 
@@ -234,7 +293,7 @@
             // 
             // labelPrimaryTitleValue
             // 
-            this.labelPrimaryTitleValue.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.labelPrimaryTitleValue.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.labelPrimaryTitleValue.Font = new System.Drawing.Font("Microsoft YaHei UI", 16F, System.Drawing.FontStyle.Bold);
             this.labelPrimaryTitleValue.Location = new System.Drawing.Point(18, 0);
@@ -283,6 +342,7 @@
             this.textureBackgroundMain.ResumeLayout(false);
             this.gridMainHost.ResumeLayout(false);
             this.panelStatusCard.ResumeLayout(false);
+            this.flowStatusIndicators.ResumeLayout(false);
             this.panelLeftCard.ResumeLayout(false);
             this.panelAvatarHost.ResumeLayout(false);
             this.panelSecondaryNavCard.ResumeLayout(false);
@@ -301,6 +361,10 @@
         private AntdUI.GridPanel gridMainHost;
         private AntdUI.Panel panelStatusCard;
         private AntdUI.Label labelStatusValue;
+        private AntdUI.FlowPanel flowStatusIndicators;
+        private AntdUI.Button buttonAlarmIndicator;
+        private AntdUI.Label labelPlcStatus;
+        private AntdUI.Label labelMotionStatus;
         private AntdUI.Panel panelWorkCard;
         private AntdUI.Panel panelContent;
         private AntdUI.Panel panelSecondaryNavCard;

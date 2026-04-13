@@ -1,6 +1,13 @@
-﻿using AM.Core.Context;
+﻿// AMControlWinF\MainWindow.cs
+using AM.Core.Alarm;
+using AM.Core.Context;
 using AM.Core.Messaging;
 using AM.DBService.Services.Auth;
+using AM.DBService.Services.Plc.Runtime;
+using AM.Model.Alarm;
+using AM.Model.Common;
+using AM.Model.Interfaces.MotionCard;
+using AM.Model.Runtime;
 using AM.PageModel.Main;
 using AM.PageModel.Navigation;
 using AM.Tools;
@@ -30,12 +37,14 @@ namespace AMControlWinF
     /// 1. 构建一级/二级导航；
     /// 2. 承载右侧工作区与页面缓存；
     /// 3. 协调用户头像菜单（切换用户 / 退出登录）；
-    /// 4. 协调语言与主题切换。
-    ///
+    /// 4. 协调语言与主题切换；
+    /// 5. 订阅系统消息并更新底部状态栏；
+    /// 6. 汇总 Motion / PLC 连接状态；
+    /// 7. 打开活动报警抽屉面板。
+    /// 
     /// 主题切换策略（与 LoginForm 一致）：
-
-    ///   - AppThemeHelper.Apply() → AntdUI 全局自动跟随；
-    ///   - TextureBackground.SetTheme() → 自定义纹理背景同步。
+    /// - AppThemeHelper.Apply() → AntdUI 全局自动跟随；
+    /// - TextureBackground.SetTheme() → 自定义纹理背景同步。
     /// </summary>
     public partial class MainWindow : AntdUI.Window
     {
@@ -43,9 +52,13 @@ namespace AMControlWinF
         private readonly Dictionary<string, Control> _pageCache;
         private readonly Dictionary<string, Func<Control>> _pageFactories;
         private readonly Dictionary<string, string> _secondaryIcons;
+        private readonly PlcRuntimeQueryService _plcRuntimeQueryService;
+        private readonly Timer _statusIndicatorTimer;
 
+        private AlarmManager _alarmManager;
         private bool _isDarkMode;
         private bool _isUpdatingUiState;
+        private int _activeAlarmCount;
         private SystemMessageType _lastStatusMessageType = SystemMessageType.Status;
 
         /// <summary>
@@ -69,6 +82,9 @@ namespace AMControlWinF
             _pageCache = new Dictionary<string, Control>(StringComparer.OrdinalIgnoreCase);
             _pageFactories = CreatePageFactories();
             _secondaryIcons = CreateSecondaryIconMap();
+            _plcRuntimeQueryService = new PlcRuntimeQueryService();
+            _statusIndicatorTimer = new Timer();
+            _statusIndicatorTimer.Interval = 1000;
 
             BindEvents();
             InitializeShellState();
@@ -88,6 +104,8 @@ namespace AMControlWinF
 
             buttonColorMode.Click += ButtonColorMode_Click;
             dropdownTranslate.SelectedValueChanged += DropdownTranslate_SelectedValueChanged;
+            buttonAlarmIndicator.Click += ButtonAlarmIndicator_Click;
+            _statusIndicatorTimer.Tick += StatusIndicatorTimer_Tick;
             FormClosed += MainWindow_FormClosed;
         }
 
@@ -118,7 +136,10 @@ namespace AMControlWinF
             _model.LoadNavigation();
             RefreshShell();
             SubscribeSystemMessages();
+            BindAlarmManager();
             SetDefaultStatusMessage();
+            RefreshBottomIndicators();
+            StartStatusIndicatorTimer();
         }
 
         #endregion
@@ -357,9 +378,8 @@ namespace AMControlWinF
                 { "Vision.Calibrate",       "AimOutlined" },
 
                 { "PLC.Monitor",            "ApiOutlined" },
-                { "PLC.Register",           "DatabaseOutlined" },
                 { "PLC.Status",             "WifiOutlined" },
-                { "PLC.Write",              "EditOutlined" },
+                { "PLC.Debug",              "EditOutlined" },
 
                 { "Peripheral.Scanner",     "QrcodeOutlined" },
                 { "Peripheral.ScanTest",    "PlayCircleOutlined" },
@@ -659,6 +679,310 @@ namespace AMControlWinF
 
         #endregion
 
+        #region 底部状态栏与报警抽屉
+
+        private enum BottomIndicatorState
+        {
+            Unknown,
+            Normal,
+            Warning,
+            Error,
+            Inactive
+        }
+
+        private void BindAlarmManager()
+        {
+            UnbindAlarmManager();
+
+            _alarmManager = SystemContext.Instance.AlarmManager;
+            if (_alarmManager == null)
+            {
+                _activeAlarmCount = 0;
+                RefreshAlarmIndicator();
+                return;
+            }
+
+            _alarmManager.AlarmStateChanged += AlarmManager_AlarmStateChanged;
+            RefreshAlarmIndicator();
+        }
+
+        private void UnbindAlarmManager()
+        {
+            if (_alarmManager != null)
+            {
+                _alarmManager.AlarmStateChanged -= AlarmManager_AlarmStateChanged;
+                _alarmManager = null;
+            }
+        }
+
+        private void AlarmManager_AlarmStateChanged()
+        {
+            if (IsDisposed)
+                return;
+
+            if (InvokeRequired)
+            {
+                try
+                {
+                    BeginInvoke(new Action(RefreshAlarmIndicator));
+                }
+                catch
+                {
+                }
+
+                return;
+            }
+
+            RefreshAlarmIndicator();
+        }
+
+        private void StartStatusIndicatorTimer()
+        {
+            if (!_statusIndicatorTimer.Enabled)
+            {
+                _statusIndicatorTimer.Start();
+            }
+        }
+
+        private void StopStatusIndicatorTimer()
+        {
+            if (_statusIndicatorTimer.Enabled)
+            {
+                _statusIndicatorTimer.Stop();
+            }
+        }
+
+        private void StatusIndicatorTimer_Tick(object sender, EventArgs e)
+        {
+            if (IsDisposed || !Visible)
+                return;
+
+            RefreshConnectionIndicators();
+        }
+
+        private void RefreshBottomIndicators()
+        {
+            RefreshConnectionIndicators();
+            RefreshAlarmIndicator();
+        }
+
+        private void RefreshConnectionIndicators()
+        {
+            RefreshMotionIndicator();
+            RefreshPlcIndicator();
+        }
+
+        /// <summary>
+        /// 汇总所有运动控制卡真实连接状态。
+        /// 状态来源统一通过 IMotionCardConnection.IsConnected() 读取，
+        /// 不直接依赖具体驱动实现类的私有字段。
+        /// </summary>
+        private void RefreshMotionIndicator()
+        {
+            IList<IMotionCardService> cards = MachineContext.Instance.MotionCards == null
+                ? new List<IMotionCardService>()
+                : MachineContext.Instance.MotionCards.Values
+                    .Where(x => x != null)
+                    .Distinct()
+                    .ToList();
+
+            if (cards.Count <= 0)
+            {
+                labelMotionStatus.Text = IsEnglishLanguage(GetCurrentLanguage())
+                    ? "Motion: None"
+                    : "Motion: 未配置";
+                ApplyIndicatorStyle(labelMotionStatus, BottomIndicatorState.Inactive);
+                return;
+            }
+
+            int connectedCount = 0;
+
+            foreach (IMotionCardService card in cards)
+            {
+                try
+                {
+                    Result<bool> result = card.IsConnected();
+                    if (result != null && result.Success && result.Item)
+                    {
+                        connectedCount++;
+                    }
+                }
+                catch
+                {
+                }
+            }
+
+            int totalCount = cards.Count;
+
+            if (connectedCount <= 0)
+            {
+                labelMotionStatus.Text = IsEnglishLanguage(GetCurrentLanguage())
+                    ? "Motion: Offline"
+                    : "Motion: 未连接";
+                ApplyIndicatorStyle(labelMotionStatus, BottomIndicatorState.Error);
+                return;
+            }
+
+            if (connectedCount >= totalCount)
+            {
+                labelMotionStatus.Text = IsEnglishLanguage(GetCurrentLanguage())
+                    ? "Motion: Connected"
+                    : "Motion: 已连接";
+                ApplyIndicatorStyle(labelMotionStatus, BottomIndicatorState.Normal);
+                return;
+            }
+
+            labelMotionStatus.Text = IsEnglishLanguage(GetCurrentLanguage())
+                ? string.Format("Motion: {0}/{1}", connectedCount, totalCount)
+                : string.Format("Motion: {0}/{1}", connectedCount, totalCount);
+            ApplyIndicatorStyle(labelMotionStatus, BottomIndicatorState.Warning);
+        }
+
+        private void RefreshPlcIndicator()
+        {
+            try
+            {
+                Result<PlcStationRuntimeSnapshot> result = _plcRuntimeQueryService.QueryAllStations();
+                if (!result.Success)
+                {
+                    labelPlcStatus.Text = IsEnglishLanguage(GetCurrentLanguage())
+                        ? "PLC: Unknown"
+                        : "PLC: 状态未知";
+                    ApplyIndicatorStyle(labelPlcStatus, BottomIndicatorState.Unknown);
+                    return;
+                }
+
+                List<PlcStationRuntimeSnapshot> stations = result.Items == null
+                    ? new List<PlcStationRuntimeSnapshot>()
+                    : result.Items
+                        .Where(p => p != null && p.IsEnabled)
+                        .ToList();
+
+                if (stations.Count == 0 && result.Items != null)
+                {
+                    stations = result.Items.Where(p => p != null).ToList();
+                }
+
+                if (stations.Count == 0)
+                {
+                    labelPlcStatus.Text = IsEnglishLanguage(GetCurrentLanguage())
+                        ? "PLC: None"
+                        : "PLC: 未配置";
+                    ApplyIndicatorStyle(labelPlcStatus, BottomIndicatorState.Inactive);
+                    return;
+                }
+
+                int connectedCount = stations.Count(p => p.IsConnected);
+                int totalCount = stations.Count;
+
+                if (connectedCount <= 0)
+                {
+                    labelPlcStatus.Text = IsEnglishLanguage(GetCurrentLanguage())
+                        ? "PLC: Offline"
+                        : "PLC: 未连接";
+                    ApplyIndicatorStyle(labelPlcStatus, BottomIndicatorState.Error);
+                    return;
+                }
+
+                if (connectedCount >= totalCount)
+                {
+                    labelPlcStatus.Text = IsEnglishLanguage(GetCurrentLanguage())
+                        ? "PLC: Connected"
+                        : "PLC: 已连接";
+                    ApplyIndicatorStyle(labelPlcStatus, BottomIndicatorState.Normal);
+                    return;
+                }
+
+                labelPlcStatus.Text = IsEnglishLanguage(GetCurrentLanguage())
+                    ? string.Format("PLC: {0}/{1}", connectedCount, totalCount)
+                    : string.Format("PLC: {0}/{1}", connectedCount, totalCount);
+                ApplyIndicatorStyle(labelPlcStatus, BottomIndicatorState.Warning);
+            }
+            catch
+            {
+                labelPlcStatus.Text = IsEnglishLanguage(GetCurrentLanguage())
+                    ? "PLC: Unknown"
+                    : "PLC: 状态未知";
+                ApplyIndicatorStyle(labelPlcStatus, BottomIndicatorState.Unknown);
+            }
+        }
+
+        private void RefreshAlarmIndicator()
+        {
+            List<AlarmInfo> alarms = _alarmManager == null
+                ? new List<AlarmInfo>()
+                : _alarmManager.GetActiveAlarms();
+
+            _activeAlarmCount = alarms == null ? 0 : alarms.Count;
+
+            buttonAlarmIndicator.Text = IsEnglishLanguage(GetCurrentLanguage())
+                ? "Alarm: " + _activeAlarmCount
+                : "报警: " + _activeAlarmCount;
+
+            ApplyAlarmButtonStyle(_activeAlarmCount);
+        }
+
+        private void ApplyIndicatorStyle(Label label, BottomIndicatorState state)
+        {
+            if (label == null)
+                return;
+
+            switch (state)
+            {
+                case BottomIndicatorState.Normal:
+                    label.ForeColor = Color.FromArgb(82, 196, 26);
+                    break;
+                case BottomIndicatorState.Warning:
+                    label.ForeColor = Color.FromArgb(230, 145, 56);
+                    break;
+                case BottomIndicatorState.Error:
+                    label.ForeColor = Color.FromArgb(220, 84, 84);
+                    break;
+                case BottomIndicatorState.Inactive:
+                    label.ForeColor = _isDarkMode
+                        ? Color.FromArgb(160, 160, 160)
+                        : Color.FromArgb(120, 120, 120);
+                    break;
+                default:
+                    label.ForeColor = _isDarkMode
+                        ? Color.FromArgb(228, 228, 228)
+                        : Color.FromArgb(90, 90, 90);
+                    break;
+            }
+        }
+
+        private void ApplyAlarmButtonStyle(int count)
+        {
+            buttonAlarmIndicator.Type = count > 0
+                ? TTypeMini.Error
+                : TTypeMini.Default;
+        }
+
+        private void ButtonAlarmIndicator_Click(object sender, EventArgs e)
+        {
+            if (_activeAlarmCount <= 0)
+                return;
+
+            OpenAlarmDrawer();
+        }
+
+        private void OpenAlarmDrawer()
+        {
+            ActiveAlarmDrawerControl content = new ActiveAlarmDrawerControl();
+            content.BindAlarmManager(SystemContext.Instance.AlarmManager);
+            content.Size = new Size(760, 620);
+
+            AntdUI.Drawer.open(new AntdUI.Drawer.Config(this, content)
+            {
+                Align = TAlignMini.Left,
+                Mask = true,
+                MaskClosable = true,
+                DisplayDelay = 100
+            });
+        }
+
+        #endregion
+
         #region 用户菜单
 
         /// <summary>
@@ -746,6 +1070,8 @@ namespace AMControlWinF
             if (string.IsNullOrWhiteSpace(labelStatusValue.Text))
                 SetDefaultStatusMessage();
 
+            RefreshBottomIndicators();
+
             if (saveToConfig)
                 AM.Tools.Tools.SaveConfig("config.json", ConfigContext.Instance.Config);
         }
@@ -774,6 +1100,8 @@ namespace AMControlWinF
 
             buttonColorMode.Toggle = isDarkMode;
             ConfigContext.Instance.Config.Setting.Theme = isDarkMode ? "SkinDark" : "SkinDefault";
+
+            RefreshBottomIndicators();
 
             if (saveToConfig)
                 AM.Tools.Tools.SaveConfig("config.json", ConfigContext.Instance.Config);
@@ -824,8 +1152,18 @@ namespace AMControlWinF
 
         private void MainWindow_FormClosed(object sender, FormClosedEventArgs e)
         {
+            StopStatusIndicatorTimer();
+            UnbindAlarmManager();
             SystemContext.Instance.MessageBus?.Unsubscribe(this);
             DisposeAllCachedPages();
+
+            try
+            {
+                _statusIndicatorTimer.Dispose();
+            }
+            catch
+            {
+            }
         }
 
         #endregion

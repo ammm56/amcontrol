@@ -13,10 +13,13 @@ namespace AM.MotionService.Leisai
     public class LeisaiMotionCardService : MotionCardBase
     {
         private readonly MotionCardConfig _config;
+        private volatile bool _isConnected;
 
         public LeisaiMotionCardService(MotionCardConfig config)
         {
             _config = config;
+            _cardId = config == null ? (short)0 : config.CardId;
+            _isConnected = false;
         }
 
         public override Result ClearAllAxisStatus()
@@ -36,12 +39,24 @@ namespace AM.MotionService.Leisai
 
         public override Result Connect()
         {
+            _isConnected = false;
             throw new NotImplementedException();
         }
 
         public override Result Disconnect()
         {
+            _isConnected = false;
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// 雷赛驱动当前尚未完整实现。
+        /// 此处仅返回内部连接标记，避免主窗体状态栏统计时抛出异常。
+        /// 后续完成雷赛 Connect/Disconnect 时，同步维护该标记即可。
+        /// </summary>
+        public override Result<bool> IsConnected()
+        {
+            return OkSilent(_isConnected, "雷赛控制卡连接状态查询成功");
         }
 
         public override Result Enable(short logicalAxis, bool onOff)

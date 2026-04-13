@@ -35,7 +35,6 @@ namespace AM.Model.Interfaces.MotionCard
         /// 改为到IMessageBus中统一实现
         /// </summary>
         //event Action<short, string> OnError;
-
     }
 
     /// <summary>
@@ -47,13 +46,38 @@ namespace AM.Model.Interfaces.MotionCard
     }
 
     /// <summary>
-    /// 控制卡连接与生命周期
+    /// 控制卡连接与生命周期。
+    /// 主窗体状态栏、运行状态看板等上层模块通过该接口统一读取连接状态，
+    /// 避免直接依赖具体驱动实现类的私有字段。
     /// </summary>
     public interface IMotionCardConnection
     {
+        /// <summary>
+        /// 初始化控制卡。
+        /// </summary>
+        /// <param name="configPath">配置路径。</param>
+        /// <returns>初始化结果。</returns>
         Result Initialize(string configPath);
+
+        /// <summary>
+        /// 建立控制卡连接。
+        /// </summary>
+        /// <returns>连接结果。</returns>
         Result Connect();
+
+        /// <summary>
+        /// 断开控制卡连接。
+        /// </summary>
+        /// <returns>断开结果。</returns>
         Result Disconnect();
+
+        /// <summary>
+        /// 查询当前控制卡是否处于已连接状态。
+        /// 该接口仅返回当前驱动对象维护的运行态连接标记，
+        /// 不承担重新探测硬件或隐式重连职责。
+        /// </summary>
+        /// <returns>连接状态查询结果。</returns>
+        Result<bool> IsConnected();
     }
 
     /// <summary>

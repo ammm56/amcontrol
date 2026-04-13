@@ -24,6 +24,9 @@ namespace AM.Model.MotionCard
         // 单位换算
         InvalidK = -1101,
         PulseOverflow = -1102,
-        InvalidConvertInput = -1103
+        InvalidConvertInput = -1103,
+
+
+        CardConnectFailed = -1201
     }
 }

@@ -56,8 +56,8 @@ namespace AM.MotionService.Base
                 return Fail(MotionErrorCode.InvalidAxisConfig, "LoadAxisConfig 入参为空");
             }
 
-            var tempMap = new Dictionary<short, AxisConfig>();
-            foreach (var cfg in configs)
+            Dictionary<short, AxisConfig> tempMap = new Dictionary<short, AxisConfig>();
+            foreach (AxisConfig cfg in configs)
             {
                 tempMap[cfg.LogicalAxis] = cfg;
             }
@@ -93,37 +93,37 @@ namespace AM.MotionService.Base
 
         protected Result<int> MmToPulseResult(short logicalAxis, double mm)
         {
-            var cfgResult = GetLogicalAxisCfgResult(logicalAxis);
+            Result<AxisConfig> cfgResult = GetLogicalAxisCfgResult(logicalAxis);
             if (!cfgResult.Success)
             {
                 return Result<int>.Fail(cfgResult.Code, cfgResult.Message, ResultSource.Motion);
             }
 
-            var cfg = cfgResult.Item;
+            AxisConfig cfg = cfgResult.Item;
             if (cfg.K <= 0)
             {
                 return Fail<int>(MotionErrorCode.InvalidK, "轴 " + logicalAxis + " 的K值非法(" + cfg.K + ")，请检查导程或脉冲数设置");
             }
 
-            var pulseCalc = mm * cfg.K;
+            double pulseCalc = mm * cfg.K;
             if (pulseCalc > int.MaxValue || pulseCalc < int.MinValue)
             {
                 return Fail<int>(MotionErrorCode.PulseOverflow, "轴 " + logicalAxis + " 目标脉冲溢出(" + pulseCalc + ")，请检查行程或 K 值");
             }
 
-            var pulse = Convert.ToInt32(Math.Round(pulseCalc, MidpointRounding.AwayFromZero));
+            int pulse = Convert.ToInt32(Math.Round(pulseCalc, MidpointRounding.AwayFromZero));
             return Ok(pulse, "毫米转脉冲成功");
         }
 
         protected Result<double> PulseToMmResult(short logicalAxis, double pulse)
         {
-            var cfgResult = GetLogicalAxisCfgResult(logicalAxis);
+            Result<AxisConfig> cfgResult = GetLogicalAxisCfgResult(logicalAxis);
             if (!cfgResult.Success)
             {
                 return Result<double>.Fail(cfgResult.Code, cfgResult.Message, ResultSource.Motion);
             }
 
-            var cfg = cfgResult.Item;
+            AxisConfig cfg = cfgResult.Item;
             if (Math.Abs(cfg.K) < 0.000001)
             {
                 return Fail<double>(MotionErrorCode.InvalidK, "轴 " + logicalAxis + " 的脉冲当量(K)为0，无法换算坐标");
@@ -142,6 +142,14 @@ namespace AM.MotionService.Base
         public abstract Result Initialize(string configPath);
         public abstract Result Connect();
         public abstract Result Disconnect();
+
+        /// <summary>
+        /// 查询控制卡当前是否已连接。
+        /// 该方法供主窗体状态栏、设备状态页等统一读取连接状态。
+        /// </summary>
+        /// <returns>连接状态结果。</returns>
+        public abstract Result<bool> IsConnected();
+
         public abstract Result ClearStatus(short logicalAxis);
         public abstract Result ClearAllAxisStatus();
         public abstract Result SetAllZeroPos();
