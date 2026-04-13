@@ -613,7 +613,7 @@ namespace AM.DBService.Services.Plc.Runtime
             string plcName = point == null ? string.Empty : point.PlcName;
 
             return string.Format(
-                "PLC 点位写入成功 | PLC站名称={0} | PLC站显示名={1} | 点位={2} | 点位显示名={3} | 地址={4} | 类型={5} | 长度={6} | 访问={7} | 写入值={8} | 原始值={9} | 质量={10} | 登录名={11} | 用户名={12} | 角色组={13}",
+                "PLC 点位写入成功 | {0} | {1} | {2} | {3} | 地址={4} | 类型={5} | 长度={6} | {7} | 写入值={8} | 原始值={9} | {10} | {11} | {12} | {13}",
                 GetStationNameText(plcName),
                 GetStationDisplayText(plcName),
                 point == null ? "-" : (point.Name ?? "-"),
@@ -639,7 +639,7 @@ namespace AM.DBService.Services.Plc.Runtime
             M_PointData pointData)
         {
             return string.Format(
-                "PLC 地址写入成功 | PLC站名称={0} | PLC站显示名={1} | 地址={2} | 类型={3} | 长度={4} | 写入值={5} | 原始值={6} | 质量={7} | 登录名={8} | 用户名={9} | 角色组={10}",
+                "PLC 地址写入成功 | {0} | {1} | 地址={2} | 类型={3} | 长度={4} | 写入值={5} | 原始值={6} | {7} | {8} | {9} | {10}",
                 GetStationNameText(plcName),
                 GetStationDisplayText(plcName),
                 string.IsNullOrWhiteSpace(address) ? "-" : address.Trim(),
@@ -658,7 +658,7 @@ namespace AM.DBService.Services.Plc.Runtime
             string plcName = point == null ? string.Empty : point.PlcName;
 
             return string.Format(
-                "PLC 点位测试读取成功 | PLC站名称={0} | PLC站显示名={1} | 点位={2} | 点位显示名={3} | 地址={4} | 类型={5} | 长度={6} | 访问={7} | 值={8} | 原始值={9} | 质量={10} | 登录名={11} | 用户名={12} | 角色组={13}",
+                "PLC 点位测试读取成功 | {0} | {1} | {2} | {3} | 地址={4} | 类型={5} | 长度={6} | {7} | 值={8} | 原始值={9} | {10} | {11} | {12} | {13}",
                 GetStationNameText(plcName),
                 GetStationDisplayText(plcName),
                 point == null ? "-" : (point.Name ?? "-"),
@@ -683,7 +683,7 @@ namespace AM.DBService.Services.Plc.Runtime
             PlcPointRuntimeSnapshot snapshot)
         {
             return string.Format(
-                "PLC 地址测试读取成功 | PLC站名称={0} | PLC站显示名={1} | 地址={2} | 类型={3} | 长度={4} | 值={5} | 原始值={6} | 质量={7} | 登录名={8} | 用户名={9} | 角色组={10}",
+                "PLC 地址测试读取成功 | {0} | {1} | 地址={2} | 类型={3} | 长度={4} | 值={5} | 原始值={6} | {7} | {8} | {9} | {10}",
                 GetStationNameText(plcName),
                 GetStationDisplayText(plcName),
                 string.IsNullOrWhiteSpace(address) ? "-" : address.Trim(),
