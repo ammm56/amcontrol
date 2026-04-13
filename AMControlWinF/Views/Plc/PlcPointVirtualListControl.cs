@@ -3,7 +3,6 @@ using AntdUI;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Windows.Forms;
 
 namespace AMControlWinF.Views.Plc
@@ -190,6 +189,9 @@ namespace AMControlWinF.Views.Plc
 
         /// <summary>
         /// 单个 PLC 点位卡片。
+        /// 顶部标签语义：
+        /// - 左：扫描结果（正常 / 读取错误 / 通讯断开）
+        /// - 右：访问模式（只读 / 读写）
         /// </summary>
         private sealed class PlcPointVirtualCardItem : VirtualShadowItem
         {
@@ -265,12 +267,11 @@ namespace AMControlWinF.Views.Plc
                     ? Color.FromArgb(170, 176, 186)
                     : Color.FromArgb(120, 120, 120);
 
-                Color readableColor = Color.FromArgb(82, 196, 26);
-                Color unreadableColor = Color.FromArgb(250, 173, 20);
-                Color errorColor = Color.FromArgb(245, 108, 108);
+                Color normalColor = Color.FromArgb(82, 196, 26);
+                Color readErrorColor = Color.FromArgb(245, 108, 108);
+                Color disconnectedColor = Color.FromArgb(250, 173, 20);
                 Color readOnlyColor = Color.FromArgb(140, 140, 140);
                 Color readWriteColor = Color.FromArgb(22, 119, 255);
-                Color writeOnlyColor = Color.FromArgb(250, 173, 20);
 
                 using (var path = rect.RoundPath(e.Radius))
                 {
@@ -281,13 +282,13 @@ namespace AMControlWinF.Views.Plc
                 DrawBadge(
                     g,
                     new Rectangle(12, 12, 58, 22),
-                    ResolveStateColor(Item, readableColor, unreadableColor, errorColor),
-                    ResolveStateText(Item));
+                    ResolveMonitorStateColor(Item, normalColor, readErrorColor, disconnectedColor),
+                    TrimText(Item.MonitorStateText, 6));
 
                 DrawBadge(
                     g,
                     new Rectangle(76, 12, 58, 22),
-                    ResolveAccessModeColor(Item, readOnlyColor, readWriteColor, writeOnlyColor),
+                    ResolveAccessModeColor(Item, readOnlyColor, readWriteColor),
                     TrimText(Item.AccessModeText, 4));
 
                 g.String(
@@ -319,7 +320,7 @@ namespace AMControlWinF.Views.Plc
                     g.String(
                         "异常：" + Item.ErrorBriefText,
                         FontBody,
-                        errorColor,
+                        readErrorColor,
                         new Rectangle(12, 102, rect.Width - 24, 18),
                         FormatFlags.Left | FormatFlags.Top | FormatFlags.NoWrapEllipsis);
                 }
@@ -333,45 +334,34 @@ namespace AMControlWinF.Views.Plc
                 }
             }
 
-            private static string ResolveStateText(PlcMonitorPageModel.PointMonitorItem item)
-            {
-                if (item == null)
-                {
-                    return "不可读";
-                }
-
-                if (item.HasError)
-                {
-                    return "异常";
-                }
-
-                return item.IsConnected ? "可读" : "不可读";
-            }
-
-            private static Color ResolveStateColor(
+            private static Color ResolveMonitorStateColor(
                 PlcMonitorPageModel.PointMonitorItem item,
-                Color readableColor,
-                Color unreadableColor,
-                Color errorColor)
+                Color normalColor,
+                Color readErrorColor,
+                Color disconnectedColor)
             {
                 if (item == null)
                 {
-                    return unreadableColor;
+                    return disconnectedColor;
                 }
 
-                if (item.HasError)
+                if (item.IsDisconnected)
                 {
-                    return errorColor;
+                    return disconnectedColor;
                 }
 
-                return item.IsConnected ? readableColor : unreadableColor;
+                if (item.HasReadError)
+                {
+                    return readErrorColor;
+                }
+
+                return normalColor;
             }
 
             private static Color ResolveAccessModeColor(
                 PlcMonitorPageModel.PointMonitorItem item,
                 Color readOnlyColor,
-                Color readWriteColor,
-                Color writeOnlyColor)
+                Color readWriteColor)
             {
                 if (item == null)
                 {
@@ -381,11 +371,6 @@ namespace AMControlWinF.Views.Plc
                 if (string.Equals(item.AccessMode, "ReadWrite", StringComparison.OrdinalIgnoreCase))
                 {
                     return readWriteColor;
-                }
-
-                if (string.Equals(item.AccessMode, "WriteOnly", StringComparison.OrdinalIgnoreCase))
-                {
-                    return writeOnlyColor;
                 }
 
                 return readOnlyColor;

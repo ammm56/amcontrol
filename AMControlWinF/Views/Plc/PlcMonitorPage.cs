@@ -140,10 +140,10 @@ namespace AMControlWinF.Views.Plc
         private void RefreshView()
         {
             labelRuntimeSummary.Text = _model.RuntimeSummaryText;
-            labelTotalPointCount.Text = _model.TotalPointCount.ToString();
-            labelReadablePointCount.Text = _model.ReadablePointCount.ToString();
-            labelUnreadablePointCount.Text = _model.UnreadablePointCount.ToString();
-            labelErrorPointCount.Text = _model.ErrorPointCount.ToString();
+            labelMonitoredPointCount.Text = _model.MonitoredPointCount.ToString();
+            labelNormalPointCount.Text = _model.NormalPointCount.ToString();
+            labelReadErrorPointCount.Text = _model.ReadErrorPointCount.ToString();
+            labelDisconnectedPointCount.Text = _model.DisconnectedPointCount.ToString();
 
             BindFilters();
             RefreshPointList();

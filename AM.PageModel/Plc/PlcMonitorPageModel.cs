@@ -12,6 +12,10 @@ namespace AM.PageModel.Plc
 {
     /// <summary>
     /// PLC 点位监视页面模型。
+    /// 页面语义：
+    /// 1. 仅展示参与读取监视的点位；
+    /// 2. 默认排除 WriteOnly 点位；
+    /// 3. 统计项聚焦扫描结果：监视点位 / 正常 / 读取错误 / 通讯断开。
     /// </summary>
     public class PlcMonitorPageModel : BindableBase
     {
@@ -109,24 +113,37 @@ namespace AM.PageModel.Plc
             get { return LastRefreshTime.HasValue ? LastRefreshTime.Value.ToString("yyyy-MM-dd HH:mm:ss") : "-"; }
         }
 
-        public int TotalPointCount
+        /// <summary>
+        /// 当前纳入监视的点位数量。
+        /// 默认不包含 WriteOnly。
+        /// </summary>
+        public int MonitoredPointCount
         {
             get { return _allPoints.Count; }
         }
 
-        public int ReadablePointCount
+        /// <summary>
+        /// 本轮状态正常的点位数量。
+        /// </summary>
+        public int NormalPointCount
         {
-            get { return _allPoints.Count(x => x.IsConnected && !x.HasError); }
+            get { return _allPoints.Count(x => x.IsNormal); }
         }
 
-        public int UnreadablePointCount
+        /// <summary>
+        /// 本轮读取错误的点位数量。
+        /// </summary>
+        public int ReadErrorPointCount
         {
-            get { return _allPoints.Count(x => !x.IsConnected); }
+            get { return _allPoints.Count(x => x.HasReadError); }
         }
 
-        public int ErrorPointCount
+        /// <summary>
+        /// 当前处于通讯断开状态的点位数量。
+        /// </summary>
+        public int DisconnectedPointCount
         {
-            get { return _allPoints.Count(x => x.HasError); }
+            get { return _allPoints.Count(x => x.IsDisconnected); }
         }
 
         public string SelectedPointText
@@ -271,8 +288,11 @@ namespace AM.PageModel.Plc
                     ContainsText(x.DisplayName, keyword) ||
                     ContainsText(x.GroupName, keyword) ||
                     ContainsText(x.AddressText, keyword) ||
+                    ContainsText(x.DataType, keyword) ||
                     ContainsText(x.ValueText, keyword) ||
-                    ContainsText(x.ErrorMessage, keyword));
+                    ContainsText(x.ErrorMessage, keyword) ||
+                    ContainsText(x.AccessModeText, keyword) ||
+                    ContainsText(x.MonitorStateText, keyword));
             }
 
             _points = query
@@ -333,10 +353,10 @@ namespace AM.PageModel.Plc
 
         private void RaiseSummaryChanged()
         {
-            OnPropertyChanged(nameof(TotalPointCount));
-            OnPropertyChanged(nameof(ReadablePointCount));
-            OnPropertyChanged(nameof(UnreadablePointCount));
-            OnPropertyChanged(nameof(ErrorPointCount));
+            OnPropertyChanged(nameof(MonitoredPointCount));
+            OnPropertyChanged(nameof(NormalPointCount));
+            OnPropertyChanged(nameof(ReadErrorPointCount));
+            OnPropertyChanged(nameof(DisconnectedPointCount));
             OnPropertyChanged(nameof(SelectedPointText));
         }
 
@@ -412,6 +432,21 @@ namespace AM.PageModel.Plc
 
             public DateTime UpdateTime { get; set; }
 
+            public bool IsDisconnected
+            {
+                get { return !IsConnected; }
+            }
+
+            public bool HasReadError
+            {
+                get { return IsConnected && HasError; }
+            }
+
+            public bool IsNormal
+            {
+                get { return IsConnected && !HasError; }
+            }
+
             public string DisplayTitle
             {
                 get
@@ -440,6 +475,24 @@ namespace AM.PageModel.Plc
                 get
                 {
                     return string.IsNullOrWhiteSpace(Quality) ? "-" : Quality;
+                }
+            }
+
+            public string MonitorStateText
+            {
+                get
+                {
+                    if (IsDisconnected)
+                    {
+                        return "通讯断开";
+                    }
+
+                    if (HasReadError)
+                    {
+                        return "读取错误";
+                    }
+
+                    return "正常";
                 }
             }
 

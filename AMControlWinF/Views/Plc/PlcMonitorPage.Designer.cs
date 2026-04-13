@@ -21,34 +21,34 @@
             this.panelPointListCard = new AntdUI.Panel();
             this.plcPointVirtualListControl = new AMControlWinF.Views.Plc.PlcPointVirtualListControl();
             this.flowStats = new AntdUI.FlowPanel();
-            this.panelErrorPointCard = new AntdUI.Panel();
-            this.labelErrorPointCount = new AntdUI.Label();
-            this.labelErrorPointTitle = new AntdUI.Label();
-            this.panelUnreadablePointCard = new AntdUI.Panel();
-            this.labelUnreadablePointCount = new AntdUI.Label();
-            this.labelUnreadablePointTitle = new AntdUI.Label();
-            this.panelReadablePointCard = new AntdUI.Panel();
-            this.labelReadablePointCount = new AntdUI.Label();
-            this.labelReadablePointTitle = new AntdUI.Label();
-            this.panelTotalPointCard = new AntdUI.Panel();
-            this.labelTotalPointCount = new AntdUI.Label();
-            this.labelTotalPointTitle = new AntdUI.Label();
+            this.panelDisconnectedPointCard = new AntdUI.Panel();
+            this.labelDisconnectedPointCount = new AntdUI.Label();
+            this.labelDisconnectedPointTitle = new AntdUI.Label();
+            this.panelReadErrorPointCard = new AntdUI.Panel();
+            this.labelReadErrorPointCount = new AntdUI.Label();
+            this.labelReadErrorPointTitle = new AntdUI.Label();
+            this.panelNormalPointCard = new AntdUI.Panel();
+            this.labelNormalPointCount = new AntdUI.Label();
+            this.labelNormalPointTitle = new AntdUI.Label();
+            this.panelMonitoredPointCard = new AntdUI.Panel();
+            this.labelMonitoredPointCount = new AntdUI.Label();
+            this.labelMonitoredPointTitle = new AntdUI.Label();
             this.panelToolbar = new AntdUI.Panel();
             this.flowToolbarLeft = new AntdUI.FlowPanel();
             this.labelRuntimeSummary = new AntdUI.Label();
-            this.selectPlc = new AntdUI.Select();
-            this.selectGroup = new AntdUI.Select();
             this.inputSearch = new AntdUI.Input();
+            this.selectGroup = new AntdUI.Select();
+            this.selectPlc = new AntdUI.Select();
             this.flowToolbarRight = new AntdUI.FlowPanel();
             this.buttonRefresh = new AntdUI.Button();
             this.panelRoot.SuspendLayout();
             this.panelContentCard.SuspendLayout();
             this.panelPointListCard.SuspendLayout();
             this.flowStats.SuspendLayout();
-            this.panelErrorPointCard.SuspendLayout();
-            this.panelUnreadablePointCard.SuspendLayout();
-            this.panelReadablePointCard.SuspendLayout();
-            this.panelTotalPointCard.SuspendLayout();
+            this.panelDisconnectedPointCard.SuspendLayout();
+            this.panelReadErrorPointCard.SuspendLayout();
+            this.panelNormalPointCard.SuspendLayout();
+            this.panelMonitoredPointCard.SuspendLayout();
             this.panelToolbar.SuspendLayout();
             this.flowToolbarLeft.SuspendLayout();
             this.flowToolbarRight.SuspendLayout();
@@ -107,10 +107,10 @@
             // 
             // flowStats
             // 
-            this.flowStats.Controls.Add(this.panelErrorPointCard);
-            this.flowStats.Controls.Add(this.panelUnreadablePointCard);
-            this.flowStats.Controls.Add(this.panelReadablePointCard);
-            this.flowStats.Controls.Add(this.panelTotalPointCard);
+            this.flowStats.Controls.Add(this.panelDisconnectedPointCard);
+            this.flowStats.Controls.Add(this.panelReadErrorPointCard);
+            this.flowStats.Controls.Add(this.panelNormalPointCard);
+            this.flowStats.Controls.Add(this.panelMonitoredPointCard);
             this.flowStats.Dock = System.Windows.Forms.DockStyle.Top;
             this.flowStats.Gap = 8;
             this.flowStats.Location = new System.Drawing.Point(8, 52);
@@ -121,159 +121,159 @@
             this.flowStats.TabIndex = 1;
             this.flowStats.Text = "flowStats";
             // 
-            // panelErrorPointCard
+            // panelDisconnectedPointCard
             // 
-            this.panelErrorPointCard.Controls.Add(this.labelErrorPointCount);
-            this.panelErrorPointCard.Controls.Add(this.labelErrorPointTitle);
-            this.panelErrorPointCard.Location = new System.Drawing.Point(568, 6);
-            this.panelErrorPointCard.Margin = new System.Windows.Forms.Padding(0);
-            this.panelErrorPointCard.Name = "panelErrorPointCard";
-            this.panelErrorPointCard.Padding = new System.Windows.Forms.Padding(12);
-            this.panelErrorPointCard.Radius = 12;
-            this.panelErrorPointCard.Shadow = 4;
-            this.panelErrorPointCard.ShadowOpacityAnimation = true;
-            this.panelErrorPointCard.Size = new System.Drawing.Size(180, 72);
-            this.panelErrorPointCard.TabIndex = 3;
+            this.panelDisconnectedPointCard.Controls.Add(this.labelDisconnectedPointCount);
+            this.panelDisconnectedPointCard.Controls.Add(this.labelDisconnectedPointTitle);
+            this.panelDisconnectedPointCard.Location = new System.Drawing.Point(568, 6);
+            this.panelDisconnectedPointCard.Margin = new System.Windows.Forms.Padding(0);
+            this.panelDisconnectedPointCard.Name = "panelDisconnectedPointCard";
+            this.panelDisconnectedPointCard.Padding = new System.Windows.Forms.Padding(12);
+            this.panelDisconnectedPointCard.Radius = 12;
+            this.panelDisconnectedPointCard.Shadow = 4;
+            this.panelDisconnectedPointCard.ShadowOpacityAnimation = true;
+            this.panelDisconnectedPointCard.Size = new System.Drawing.Size(180, 72);
+            this.panelDisconnectedPointCard.TabIndex = 3;
             // 
-            // labelErrorPointCount
+            // labelDisconnectedPointCount
             // 
-            this.labelErrorPointCount.BackColor = System.Drawing.Color.Transparent;
-            this.labelErrorPointCount.Dock = System.Windows.Forms.DockStyle.Right;
-            this.labelErrorPointCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 18F, System.Drawing.FontStyle.Bold);
-            this.labelErrorPointCount.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(77)))), ((int)(((byte)(79)))));
-            this.labelErrorPointCount.Location = new System.Drawing.Point(104, 16);
-            this.labelErrorPointCount.Margin = new System.Windows.Forms.Padding(0);
-            this.labelErrorPointCount.Name = "labelErrorPointCount";
-            this.labelErrorPointCount.Size = new System.Drawing.Size(60, 40);
-            this.labelErrorPointCount.TabIndex = 1;
-            this.labelErrorPointCount.Text = "0";
+            this.labelDisconnectedPointCount.BackColor = System.Drawing.Color.Transparent;
+            this.labelDisconnectedPointCount.Dock = System.Windows.Forms.DockStyle.Right;
+            this.labelDisconnectedPointCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 18F, System.Drawing.FontStyle.Bold);
+            this.labelDisconnectedPointCount.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(193)))), ((int)(((byte)(7)))));
+            this.labelDisconnectedPointCount.Location = new System.Drawing.Point(104, 16);
+            this.labelDisconnectedPointCount.Margin = new System.Windows.Forms.Padding(0);
+            this.labelDisconnectedPointCount.Name = "labelDisconnectedPointCount";
+            this.labelDisconnectedPointCount.Size = new System.Drawing.Size(60, 40);
+            this.labelDisconnectedPointCount.TabIndex = 1;
+            this.labelDisconnectedPointCount.Text = "0";
             // 
-            // labelErrorPointTitle
+            // labelDisconnectedPointTitle
             // 
-            this.labelErrorPointTitle.BackColor = System.Drawing.Color.Transparent;
-            this.labelErrorPointTitle.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labelErrorPointTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(77)))), ((int)(((byte)(79)))));
-            this.labelErrorPointTitle.Location = new System.Drawing.Point(16, 16);
-            this.labelErrorPointTitle.Margin = new System.Windows.Forms.Padding(0);
-            this.labelErrorPointTitle.Name = "labelErrorPointTitle";
-            this.labelErrorPointTitle.Size = new System.Drawing.Size(72, 40);
-            this.labelErrorPointTitle.TabIndex = 0;
-            this.labelErrorPointTitle.Text = "异常";
+            this.labelDisconnectedPointTitle.BackColor = System.Drawing.Color.Transparent;
+            this.labelDisconnectedPointTitle.Dock = System.Windows.Forms.DockStyle.Left;
+            this.labelDisconnectedPointTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(193)))), ((int)(((byte)(7)))));
+            this.labelDisconnectedPointTitle.Location = new System.Drawing.Point(16, 16);
+            this.labelDisconnectedPointTitle.Margin = new System.Windows.Forms.Padding(0);
+            this.labelDisconnectedPointTitle.Name = "labelDisconnectedPointTitle";
+            this.labelDisconnectedPointTitle.Size = new System.Drawing.Size(72, 40);
+            this.labelDisconnectedPointTitle.TabIndex = 0;
+            this.labelDisconnectedPointTitle.Text = "通讯断开";
             // 
-            // panelUnreadablePointCard
+            // panelReadErrorPointCard
             // 
-            this.panelUnreadablePointCard.Controls.Add(this.labelUnreadablePointCount);
-            this.panelUnreadablePointCard.Controls.Add(this.labelUnreadablePointTitle);
-            this.panelUnreadablePointCard.Location = new System.Drawing.Point(380, 6);
-            this.panelUnreadablePointCard.Margin = new System.Windows.Forms.Padding(0);
-            this.panelUnreadablePointCard.Name = "panelUnreadablePointCard";
-            this.panelUnreadablePointCard.Padding = new System.Windows.Forms.Padding(12);
-            this.panelUnreadablePointCard.Radius = 12;
-            this.panelUnreadablePointCard.Shadow = 4;
-            this.panelUnreadablePointCard.ShadowOpacityAnimation = true;
-            this.panelUnreadablePointCard.Size = new System.Drawing.Size(180, 72);
-            this.panelUnreadablePointCard.TabIndex = 2;
+            this.panelReadErrorPointCard.Controls.Add(this.labelReadErrorPointCount);
+            this.panelReadErrorPointCard.Controls.Add(this.labelReadErrorPointTitle);
+            this.panelReadErrorPointCard.Location = new System.Drawing.Point(380, 6);
+            this.panelReadErrorPointCard.Margin = new System.Windows.Forms.Padding(0);
+            this.panelReadErrorPointCard.Name = "panelReadErrorPointCard";
+            this.panelReadErrorPointCard.Padding = new System.Windows.Forms.Padding(12);
+            this.panelReadErrorPointCard.Radius = 12;
+            this.panelReadErrorPointCard.Shadow = 4;
+            this.panelReadErrorPointCard.ShadowOpacityAnimation = true;
+            this.panelReadErrorPointCard.Size = new System.Drawing.Size(180, 72);
+            this.panelReadErrorPointCard.TabIndex = 2;
             // 
-            // labelUnreadablePointCount
+            // labelReadErrorPointCount
             // 
-            this.labelUnreadablePointCount.BackColor = System.Drawing.Color.Transparent;
-            this.labelUnreadablePointCount.Dock = System.Windows.Forms.DockStyle.Right;
-            this.labelUnreadablePointCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 18F, System.Drawing.FontStyle.Bold);
-            this.labelUnreadablePointCount.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(193)))), ((int)(((byte)(7)))));
-            this.labelUnreadablePointCount.Location = new System.Drawing.Point(104, 16);
-            this.labelUnreadablePointCount.Margin = new System.Windows.Forms.Padding(0);
-            this.labelUnreadablePointCount.Name = "labelUnreadablePointCount";
-            this.labelUnreadablePointCount.Size = new System.Drawing.Size(60, 40);
-            this.labelUnreadablePointCount.TabIndex = 1;
-            this.labelUnreadablePointCount.Text = "0";
+            this.labelReadErrorPointCount.BackColor = System.Drawing.Color.Transparent;
+            this.labelReadErrorPointCount.Dock = System.Windows.Forms.DockStyle.Right;
+            this.labelReadErrorPointCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 18F, System.Drawing.FontStyle.Bold);
+            this.labelReadErrorPointCount.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(77)))), ((int)(((byte)(79)))));
+            this.labelReadErrorPointCount.Location = new System.Drawing.Point(104, 16);
+            this.labelReadErrorPointCount.Margin = new System.Windows.Forms.Padding(0);
+            this.labelReadErrorPointCount.Name = "labelReadErrorPointCount";
+            this.labelReadErrorPointCount.Size = new System.Drawing.Size(60, 40);
+            this.labelReadErrorPointCount.TabIndex = 1;
+            this.labelReadErrorPointCount.Text = "0";
             // 
-            // labelUnreadablePointTitle
+            // labelReadErrorPointTitle
             // 
-            this.labelUnreadablePointTitle.BackColor = System.Drawing.Color.Transparent;
-            this.labelUnreadablePointTitle.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labelUnreadablePointTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(193)))), ((int)(((byte)(7)))));
-            this.labelUnreadablePointTitle.Location = new System.Drawing.Point(16, 16);
-            this.labelUnreadablePointTitle.Margin = new System.Windows.Forms.Padding(0);
-            this.labelUnreadablePointTitle.Name = "labelUnreadablePointTitle";
-            this.labelUnreadablePointTitle.Size = new System.Drawing.Size(72, 40);
-            this.labelUnreadablePointTitle.TabIndex = 0;
-            this.labelUnreadablePointTitle.Text = "不可读";
+            this.labelReadErrorPointTitle.BackColor = System.Drawing.Color.Transparent;
+            this.labelReadErrorPointTitle.Dock = System.Windows.Forms.DockStyle.Left;
+            this.labelReadErrorPointTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(77)))), ((int)(((byte)(79)))));
+            this.labelReadErrorPointTitle.Location = new System.Drawing.Point(16, 16);
+            this.labelReadErrorPointTitle.Margin = new System.Windows.Forms.Padding(0);
+            this.labelReadErrorPointTitle.Name = "labelReadErrorPointTitle";
+            this.labelReadErrorPointTitle.Size = new System.Drawing.Size(72, 40);
+            this.labelReadErrorPointTitle.TabIndex = 0;
+            this.labelReadErrorPointTitle.Text = "读取错误";
             // 
-            // panelReadablePointCard
+            // panelNormalPointCard
             // 
-            this.panelReadablePointCard.Controls.Add(this.labelReadablePointCount);
-            this.panelReadablePointCard.Controls.Add(this.labelReadablePointTitle);
-            this.panelReadablePointCard.Location = new System.Drawing.Point(192, 6);
-            this.panelReadablePointCard.Margin = new System.Windows.Forms.Padding(0);
-            this.panelReadablePointCard.Name = "panelReadablePointCard";
-            this.panelReadablePointCard.Padding = new System.Windows.Forms.Padding(12);
-            this.panelReadablePointCard.Radius = 12;
-            this.panelReadablePointCard.Shadow = 4;
-            this.panelReadablePointCard.ShadowOpacityAnimation = true;
-            this.panelReadablePointCard.Size = new System.Drawing.Size(180, 72);
-            this.panelReadablePointCard.TabIndex = 1;
+            this.panelNormalPointCard.Controls.Add(this.labelNormalPointCount);
+            this.panelNormalPointCard.Controls.Add(this.labelNormalPointTitle);
+            this.panelNormalPointCard.Location = new System.Drawing.Point(192, 6);
+            this.panelNormalPointCard.Margin = new System.Windows.Forms.Padding(0);
+            this.panelNormalPointCard.Name = "panelNormalPointCard";
+            this.panelNormalPointCard.Padding = new System.Windows.Forms.Padding(12);
+            this.panelNormalPointCard.Radius = 12;
+            this.panelNormalPointCard.Shadow = 4;
+            this.panelNormalPointCard.ShadowOpacityAnimation = true;
+            this.panelNormalPointCard.Size = new System.Drawing.Size(180, 72);
+            this.panelNormalPointCard.TabIndex = 1;
             // 
-            // labelReadablePointCount
+            // labelNormalPointCount
             // 
-            this.labelReadablePointCount.BackColor = System.Drawing.Color.Transparent;
-            this.labelReadablePointCount.Dock = System.Windows.Forms.DockStyle.Right;
-            this.labelReadablePointCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 18F, System.Drawing.FontStyle.Bold);
-            this.labelReadablePointCount.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(82)))), ((int)(((byte)(196)))), ((int)(((byte)(26)))));
-            this.labelReadablePointCount.Location = new System.Drawing.Point(104, 16);
-            this.labelReadablePointCount.Margin = new System.Windows.Forms.Padding(0);
-            this.labelReadablePointCount.Name = "labelReadablePointCount";
-            this.labelReadablePointCount.Size = new System.Drawing.Size(60, 40);
-            this.labelReadablePointCount.TabIndex = 1;
-            this.labelReadablePointCount.Text = "0";
+            this.labelNormalPointCount.BackColor = System.Drawing.Color.Transparent;
+            this.labelNormalPointCount.Dock = System.Windows.Forms.DockStyle.Right;
+            this.labelNormalPointCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 18F, System.Drawing.FontStyle.Bold);
+            this.labelNormalPointCount.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(82)))), ((int)(((byte)(196)))), ((int)(((byte)(26)))));
+            this.labelNormalPointCount.Location = new System.Drawing.Point(104, 16);
+            this.labelNormalPointCount.Margin = new System.Windows.Forms.Padding(0);
+            this.labelNormalPointCount.Name = "labelNormalPointCount";
+            this.labelNormalPointCount.Size = new System.Drawing.Size(60, 40);
+            this.labelNormalPointCount.TabIndex = 1;
+            this.labelNormalPointCount.Text = "0";
             // 
-            // labelReadablePointTitle
+            // labelNormalPointTitle
             // 
-            this.labelReadablePointTitle.BackColor = System.Drawing.Color.Transparent;
-            this.labelReadablePointTitle.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labelReadablePointTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(82)))), ((int)(((byte)(196)))), ((int)(((byte)(26)))));
-            this.labelReadablePointTitle.Location = new System.Drawing.Point(16, 16);
-            this.labelReadablePointTitle.Margin = new System.Windows.Forms.Padding(0);
-            this.labelReadablePointTitle.Name = "labelReadablePointTitle";
-            this.labelReadablePointTitle.Size = new System.Drawing.Size(72, 40);
-            this.labelReadablePointTitle.TabIndex = 0;
-            this.labelReadablePointTitle.Text = "可读";
+            this.labelNormalPointTitle.BackColor = System.Drawing.Color.Transparent;
+            this.labelNormalPointTitle.Dock = System.Windows.Forms.DockStyle.Left;
+            this.labelNormalPointTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(82)))), ((int)(((byte)(196)))), ((int)(((byte)(26)))));
+            this.labelNormalPointTitle.Location = new System.Drawing.Point(16, 16);
+            this.labelNormalPointTitle.Margin = new System.Windows.Forms.Padding(0);
+            this.labelNormalPointTitle.Name = "labelNormalPointTitle";
+            this.labelNormalPointTitle.Size = new System.Drawing.Size(72, 40);
+            this.labelNormalPointTitle.TabIndex = 0;
+            this.labelNormalPointTitle.Text = "正常";
             // 
-            // panelTotalPointCard
+            // panelMonitoredPointCard
             // 
-            this.panelTotalPointCard.Controls.Add(this.labelTotalPointCount);
-            this.panelTotalPointCard.Controls.Add(this.labelTotalPointTitle);
-            this.panelTotalPointCard.Location = new System.Drawing.Point(4, 6);
-            this.panelTotalPointCard.Margin = new System.Windows.Forms.Padding(0);
-            this.panelTotalPointCard.Name = "panelTotalPointCard";
-            this.panelTotalPointCard.Padding = new System.Windows.Forms.Padding(12);
-            this.panelTotalPointCard.Radius = 12;
-            this.panelTotalPointCard.Shadow = 4;
-            this.panelTotalPointCard.ShadowOpacityAnimation = true;
-            this.panelTotalPointCard.Size = new System.Drawing.Size(180, 72);
-            this.panelTotalPointCard.TabIndex = 0;
+            this.panelMonitoredPointCard.Controls.Add(this.labelMonitoredPointCount);
+            this.panelMonitoredPointCard.Controls.Add(this.labelMonitoredPointTitle);
+            this.panelMonitoredPointCard.Location = new System.Drawing.Point(4, 6);
+            this.panelMonitoredPointCard.Margin = new System.Windows.Forms.Padding(0);
+            this.panelMonitoredPointCard.Name = "panelMonitoredPointCard";
+            this.panelMonitoredPointCard.Padding = new System.Windows.Forms.Padding(12);
+            this.panelMonitoredPointCard.Radius = 12;
+            this.panelMonitoredPointCard.Shadow = 4;
+            this.panelMonitoredPointCard.ShadowOpacityAnimation = true;
+            this.panelMonitoredPointCard.Size = new System.Drawing.Size(180, 72);
+            this.panelMonitoredPointCard.TabIndex = 0;
             // 
-            // labelTotalPointCount
+            // labelMonitoredPointCount
             // 
-            this.labelTotalPointCount.BackColor = System.Drawing.Color.Transparent;
-            this.labelTotalPointCount.Dock = System.Windows.Forms.DockStyle.Right;
-            this.labelTotalPointCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 18F, System.Drawing.FontStyle.Bold);
-            this.labelTotalPointCount.Location = new System.Drawing.Point(104, 16);
-            this.labelTotalPointCount.Margin = new System.Windows.Forms.Padding(0);
-            this.labelTotalPointCount.Name = "labelTotalPointCount";
-            this.labelTotalPointCount.Size = new System.Drawing.Size(60, 40);
-            this.labelTotalPointCount.TabIndex = 1;
-            this.labelTotalPointCount.Text = "0";
+            this.labelMonitoredPointCount.BackColor = System.Drawing.Color.Transparent;
+            this.labelMonitoredPointCount.Dock = System.Windows.Forms.DockStyle.Right;
+            this.labelMonitoredPointCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 18F, System.Drawing.FontStyle.Bold);
+            this.labelMonitoredPointCount.Location = new System.Drawing.Point(104, 16);
+            this.labelMonitoredPointCount.Margin = new System.Windows.Forms.Padding(0);
+            this.labelMonitoredPointCount.Name = "labelMonitoredPointCount";
+            this.labelMonitoredPointCount.Size = new System.Drawing.Size(60, 40);
+            this.labelMonitoredPointCount.TabIndex = 1;
+            this.labelMonitoredPointCount.Text = "0";
             // 
-            // labelTotalPointTitle
+            // labelMonitoredPointTitle
             // 
-            this.labelTotalPointTitle.BackColor = System.Drawing.Color.Transparent;
-            this.labelTotalPointTitle.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labelTotalPointTitle.Location = new System.Drawing.Point(16, 16);
-            this.labelTotalPointTitle.Margin = new System.Windows.Forms.Padding(0);
-            this.labelTotalPointTitle.Name = "labelTotalPointTitle";
-            this.labelTotalPointTitle.Size = new System.Drawing.Size(72, 40);
-            this.labelTotalPointTitle.TabIndex = 0;
-            this.labelTotalPointTitle.Text = "总点位";
+            this.labelMonitoredPointTitle.BackColor = System.Drawing.Color.Transparent;
+            this.labelMonitoredPointTitle.Dock = System.Windows.Forms.DockStyle.Left;
+            this.labelMonitoredPointTitle.Location = new System.Drawing.Point(16, 16);
+            this.labelMonitoredPointTitle.Margin = new System.Windows.Forms.Padding(0);
+            this.labelMonitoredPointTitle.Name = "labelMonitoredPointTitle";
+            this.labelMonitoredPointTitle.Size = new System.Drawing.Size(72, 40);
+            this.labelMonitoredPointTitle.TabIndex = 0;
+            this.labelMonitoredPointTitle.Text = "监视点位";
             // 
             // panelToolbar
             // 
@@ -301,7 +301,7 @@
             this.flowToolbarLeft.Location = new System.Drawing.Point(4, 4);
             this.flowToolbarLeft.Margin = new System.Windows.Forms.Padding(0);
             this.flowToolbarLeft.Name = "flowToolbarLeft";
-            this.flowToolbarLeft.Size = new System.Drawing.Size(602, 36);
+            this.flowToolbarLeft.Size = new System.Drawing.Size(628, 36);
             this.flowToolbarLeft.TabIndex = 0;
             this.flowToolbarLeft.Text = "flowToolbarLeft";
             // 
@@ -314,19 +314,19 @@
             this.labelRuntimeSummary.TabIndex = 0;
             this.labelRuntimeSummary.Text = "状态未知";
             // 
-            // selectPlc
+            // inputSearch
             // 
-            this.selectPlc.Location = new System.Drawing.Point(286, 4);
-            this.selectPlc.Margin = new System.Windows.Forms.Padding(0, 4, 0, 0);
-            this.selectPlc.Name = "selectPlc";
-            this.selectPlc.Radius = 0;
-            this.selectPlc.Size = new System.Drawing.Size(120, 32);
-            this.selectPlc.TabIndex = 1;
-            this.selectPlc.WaveSize = 0;
+            this.inputSearch.Location = new System.Drawing.Point(256, 4);
+            this.inputSearch.Margin = new System.Windows.Forms.Padding(0, 4, 0, 0);
+            this.inputSearch.Name = "inputSearch";
+            this.inputSearch.PlaceholderText = "搜索点位名称 / 分组 / 地址 / 值";
+            this.inputSearch.Size = new System.Drawing.Size(150, 32);
+            this.inputSearch.TabIndex = 3;
+            this.inputSearch.WaveSize = 0;
             // 
             // selectGroup
             // 
-            this.selectGroup.Location = new System.Drawing.Point(158, 4);
+            this.selectGroup.Location = new System.Drawing.Point(128, 4);
             this.selectGroup.Margin = new System.Windows.Forms.Padding(0, 4, 0, 0);
             this.selectGroup.Name = "selectGroup";
             this.selectGroup.Radius = 0;
@@ -334,15 +334,15 @@
             this.selectGroup.TabIndex = 2;
             this.selectGroup.WaveSize = 0;
             // 
-            // inputSearch
+            // selectPlc
             // 
-            this.inputSearch.Location = new System.Drawing.Point(0, 4);
-            this.inputSearch.Margin = new System.Windows.Forms.Padding(0, 4, 0, 0);
-            this.inputSearch.Name = "inputSearch";
-            this.inputSearch.PlaceholderText = "搜索点位名称 / 分组 / 地址 / 值";
-            this.inputSearch.Size = new System.Drawing.Size(150, 32);
-            this.inputSearch.TabIndex = 3;
-            this.inputSearch.WaveSize = 0;
+            this.selectPlc.Location = new System.Drawing.Point(0, 4);
+            this.selectPlc.Margin = new System.Windows.Forms.Padding(0, 4, 0, 0);
+            this.selectPlc.Name = "selectPlc";
+            this.selectPlc.Radius = 0;
+            this.selectPlc.Size = new System.Drawing.Size(120, 32);
+            this.selectPlc.TabIndex = 1;
+            this.selectPlc.WaveSize = 0;
             // 
             // flowToolbarRight
             // 
@@ -380,10 +380,10 @@
             this.panelContentCard.ResumeLayout(false);
             this.panelPointListCard.ResumeLayout(false);
             this.flowStats.ResumeLayout(false);
-            this.panelErrorPointCard.ResumeLayout(false);
-            this.panelUnreadablePointCard.ResumeLayout(false);
-            this.panelReadablePointCard.ResumeLayout(false);
-            this.panelTotalPointCard.ResumeLayout(false);
+            this.panelDisconnectedPointCard.ResumeLayout(false);
+            this.panelReadErrorPointCard.ResumeLayout(false);
+            this.panelNormalPointCard.ResumeLayout(false);
+            this.panelMonitoredPointCard.ResumeLayout(false);
             this.panelToolbar.ResumeLayout(false);
             this.flowToolbarLeft.ResumeLayout(false);
             this.flowToolbarRight.ResumeLayout(false);
@@ -394,19 +394,20 @@
         private AntdUI.Panel panelRoot;
         private AntdUI.Panel panelContentCard;
         private AntdUI.Panel panelPointListCard;
+        private PlcPointVirtualListControl plcPointVirtualListControl;
         private AntdUI.FlowPanel flowStats;
-        private AntdUI.Panel panelErrorPointCard;
-        private AntdUI.Label labelErrorPointCount;
-        private AntdUI.Label labelErrorPointTitle;
-        private AntdUI.Panel panelUnreadablePointCard;
-        private AntdUI.Label labelUnreadablePointCount;
-        private AntdUI.Label labelUnreadablePointTitle;
-        private AntdUI.Panel panelReadablePointCard;
-        private AntdUI.Label labelReadablePointCount;
-        private AntdUI.Label labelReadablePointTitle;
-        private AntdUI.Panel panelTotalPointCard;
-        private AntdUI.Label labelTotalPointCount;
-        private AntdUI.Label labelTotalPointTitle;
+        private AntdUI.Panel panelDisconnectedPointCard;
+        private AntdUI.Label labelDisconnectedPointCount;
+        private AntdUI.Label labelDisconnectedPointTitle;
+        private AntdUI.Panel panelReadErrorPointCard;
+        private AntdUI.Label labelReadErrorPointCount;
+        private AntdUI.Label labelReadErrorPointTitle;
+        private AntdUI.Panel panelNormalPointCard;
+        private AntdUI.Label labelNormalPointCount;
+        private AntdUI.Label labelNormalPointTitle;
+        private AntdUI.Panel panelMonitoredPointCard;
+        private AntdUI.Label labelMonitoredPointCount;
+        private AntdUI.Label labelMonitoredPointTitle;
         private AntdUI.Panel panelToolbar;
         private AntdUI.FlowPanel flowToolbarLeft;
         private AntdUI.Label labelRuntimeSummary;
@@ -415,6 +416,5 @@
         private AntdUI.Input inputSearch;
         private AntdUI.FlowPanel flowToolbarRight;
         private AntdUI.Button buttonRefresh;
-        private PlcPointVirtualListControl plcPointVirtualListControl;
     }
 }
