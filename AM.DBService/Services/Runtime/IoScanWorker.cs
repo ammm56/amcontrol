@@ -1,11 +1,11 @@
 ﻿using AM.Core.Base;
 using AM.Core.Context;
 using AM.Core.Reporter;
-using AM.Model.Alarm;
 using AM.Model.Common;
 using AM.Model.Interfaces.Runtime;
 using AM.Model.MotionCard;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,23 +14,23 @@ namespace AM.DBService.Services.Runtime
 {
     /// <summary>
     /// Motion IO 后台扫描工作单元。
-    /// 周期性扫描已注册逻辑 DI/DO，并写入 RuntimeContext。
-    ///
-    /// 工业设备安全规范：
-    ///   - 任意一次扫描失败 → 立即停止扫描循环 → 触发 Critical 级别报警
-    ///   - 停止后 ScanState 置为 Error，需操作员确认后手动重启
-    ///   - 默认启动时处于 Idle 状态，不自动开始扫描
-    ///   - 是否自动启动由 config.json 中 IoScanConfig.AutoStart 控制
+    /// 重构后不再串行扫描全部控制卡，而是按控制卡维护多个独立 `IoCardScanRunner`。
     /// </summary>
     public class IoScanWorker : ServiceBase, IIoScanService
     {
+        private const int DefaultSupervisorIntervalMs = 500;
         private const int MinScanIntervalMs = 10;
         private const int DefaultScanIntervalMs = 50;
 
-        private readonly object _syncRoot;
-        private CancellationTokenSource _cancellationTokenSource;
-        private Task _scanLoopTask;
-        private IoScanState _scanState;
+        private readonly object _stateSyncRoot;
+        private readonly object _runnerSyncRoot;
+
+        private CancellationTokenSource _supervisorCancellationTokenSource;
+        private Task _supervisorTask;
+
+        private IList<MotionCardConfig> _cachedMotionCardsConfig;
+        private IDictionary<short, MotionCardConfig> _cachedCardLookup;
+        private readonly IDictionary<short, IoCardScanRunner> _cardRunners;
 
         protected override string MessageSourceName
         {
@@ -43,17 +43,19 @@ namespace AM.DBService.Services.Runtime
         }
 
         public IoScanWorker()
-            : this(SystemContext.Instance.Reporter,
-                   ConfigContext.Instance.Config.IoScanConfig.ScanIntervalMs)
+            : this(SystemContext.Instance.Reporter, ConfigContext.Instance.Config.IoScanConfig.ScanIntervalMs)
         {
         }
 
         public IoScanWorker(IAppReporter reporter, int scanIntervalMs = DefaultScanIntervalMs)
             : base(reporter)
         {
-            _syncRoot = new object();
-            _scanState = IoScanState.Idle;
+            _stateSyncRoot = new object();
+            _runnerSyncRoot = new object();
+            _cachedCardLookup = new Dictionary<short, MotionCardConfig>();
+            _cardRunners = new Dictionary<short, IoCardScanRunner>();
             ScanIntervalMs = scanIntervalMs < MinScanIntervalMs ? MinScanIntervalMs : scanIntervalMs;
+            ScanState = IoScanState.Idle;
             LastError = string.Empty;
         }
 
@@ -62,20 +64,17 @@ namespace AM.DBService.Services.Runtime
             get { return "MotionIoScanWorker"; }
         }
 
-        /// <summary>
-        /// 当前扫描状态（线程安全）。
-        /// </summary>
-        public IoScanState ScanState
-        {
-            get { lock (_syncRoot) { return _scanState; } }
-        }
+        public IoScanState ScanState { get; private set; }
 
-        /// <summary>
-        /// 是否扫描运行中，派生自 ScanState。
-        /// </summary>
         public bool IsRunning
         {
-            get { lock (_syncRoot) { return _scanState == IoScanState.Running; } }
+            get
+            {
+                lock (_stateSyncRoot)
+                {
+                    return _supervisorCancellationTokenSource != null && _supervisorTask != null;
+                }
+            }
         }
 
         public DateTime? LastRunTime { get; private set; }
@@ -84,58 +83,58 @@ namespace AM.DBService.Services.Runtime
 
         public int ScanIntervalMs { get; private set; }
 
-        /// <summary>
-        /// 启动 IO 扫描。
-        /// 允许从 Idle 或 Error 状态启动（Error 时为手动重启）。
-        /// </summary>
         public Result Start()
         {
-            lock (_syncRoot)
+            lock (_stateSyncRoot)
             {
-                if (_scanState == IoScanState.Running)
+                if (_supervisorCancellationTokenSource != null && _supervisorTask != null)
                 {
                     return Warn((int)MotionErrorCode.Unknown, "IO 扫描工作单元已在运行");
                 }
 
-                // Idle 或 Error 均允许启动/重启
-                _cancellationTokenSource?.Dispose();
-                _cancellationTokenSource = new CancellationTokenSource();
-                _scanState = IoScanState.Running;
-                RuntimeContext.Instance.MotionIo.SetScanServiceState(true, ScanIntervalMs);
-                _scanLoopTask = Task.Run(() => ScanLoopAsync(_cancellationTokenSource.Token));
+                RefreshScanCacheIfNeeded();
+                if (_cachedCardLookup.Count == 0)
+                {
+                    return Warn((int)MotionErrorCode.IoMapNotFound, "未找到可扫描的 IO 控制卡配置");
+                }
+
+                _supervisorCancellationTokenSource = new CancellationTokenSource();
+
+                ReconcileRunners();
+                StartAllRunners();
+                UpdateRuntimeServiceState();
+
+                _supervisorTask = Task.Run(() => SupervisorLoopAsync(_supervisorCancellationTokenSource.Token));
+                ScanState = IoScanState.Running;
             }
 
-            return Ok("IO 扫描工作单元启动成功");
+            return OkLogOnly("IO 扫描工作单元启动成功");
         }
 
-        /// <summary>
-        /// 手动停止 IO 扫描。
-        /// Error 状态下调用此方法可将状态重置为 Idle，便于后续重启。
-        /// </summary>
         public async Task<Result> StopAsync()
         {
             CancellationTokenSource cts;
-            Task loopTask;
+            Task supervisorTask;
 
-            lock (_syncRoot)
+            lock (_stateSyncRoot)
             {
-                cts = _cancellationTokenSource;
-                loopTask = _scanLoopTask;
-                _cancellationTokenSource = null;
-                _scanLoopTask = null;
+                cts = _supervisorCancellationTokenSource;
+                supervisorTask = _supervisorTask;
+                _supervisorCancellationTokenSource = null;
+                _supervisorTask = null;
             }
 
-            if (cts == null || loopTask == null)
+            if (cts == null || supervisorTask == null)
             {
-                SetScanState(IoScanState.Idle);
+                ScanState = IoScanState.Idle;
                 RuntimeContext.Instance.MotionIo.SetScanServiceState(false, 0);
-                return Ok("IO 扫描工作单元未启动");
+                return OkLogOnly("IO 扫描工作单元未启动");
             }
 
             try
             {
                 cts.Cancel();
-                await loopTask;
+                await supervisorTask.ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {
@@ -143,167 +142,274 @@ namespace AM.DBService.Services.Runtime
             catch (Exception ex)
             {
                 LastError = ex.Message;
+                ScanState = IoScanState.Error;
                 return HandleException(ex, (int)MotionErrorCode.Unknown, "停止 IO 扫描工作单元失败");
             }
             finally
             {
                 cts.Dispose();
-                // 手动停止后统一重置为 Idle（含 Error 状态重置）
-                SetScanState(IoScanState.Idle);
                 RuntimeContext.Instance.MotionIo.SetScanServiceState(false, 0);
             }
 
-            return Ok("IO 扫描工作单元已停止");
+            ScanState = IoScanState.Idle;
+            return OkLogOnly("IO 扫描工作单元已停止");
         }
 
-        /// <summary>
-        /// 立即执行一次完整 DI/DO 扫描。
-        /// 任意点位读取失败即返回 Fail，不跳过、不容错。
-        /// </summary>
         public Result ScanOnce()
         {
-            var machine = MachineContext.Instance;
-            var motionHub = machine.MotionHub;
-            if (motionHub == null)
+            try
             {
-                LastError = "MotionHub 未初始化，无法执行 IO 扫描";
-                return FailSilent((int)MotionErrorCode.IoMapNotFound, LastError);
-            }
+                RefreshScanCacheIfNeeded();
+                ReconcileRunners();
 
-            var now = DateTime.Now;
-            var diBits = machine.DICards.Keys.ToList();
-            var doBits = machine.DOCards.Keys.ToList();
-
-            foreach (var bit in diBits)
-            {
-                var diResult = motionHub.GetDI(bit);
-                if (!diResult.Success)
+                IoCardScanRunner[] runners;
+                lock (_runnerSyncRoot)
                 {
-                    LastError = string.Format("扫描 DI 失败: Bit={0}，{1}", bit, diResult.Message);
-                    return FailSilent(diResult.Code, LastError);
+                    runners = _cardRunners.Values.ToArray();
                 }
 
-                var logicalValue = ApplyLogicalTransform(bit, true, diResult.Item);
-                RuntimeContext.Instance.MotionIo.SetDI(bit, logicalValue, now);
-            }
-
-            foreach (var bit in doBits)
-            {
-                var doResult = motionHub.GetDO(bit);
-                if (!doResult.Success)
+                if (runners.Length == 0)
                 {
-                    LastError = string.Format("扫描 DO 失败: Bit={0}，{1}", bit, doResult.Message);
-                    return FailSilent(doResult.Code, LastError);
+                    return WarnSilent((int)MotionErrorCode.IoMapNotFound, "未找到可扫描的 IO 控制卡");
                 }
 
-                var logicalValue = ApplyLogicalTransform(bit, false, doResult.Item);
-                RuntimeContext.Instance.MotionIo.SetDO(bit, logicalValue, now);
-            }
+                Task<Result>[] tasks = runners
+                    .Where(x => x != null)
+                    .Select(x => x.ScanOnceAsync())
+                    .ToArray();
 
-            LastRunTime = now;
-            LastError = string.Empty;
-            RuntimeContext.Instance.MotionIo.MarkScanTime(now);
-            RuntimeContext.Instance.MotionIo.NotifySnapshotChanged();
-            return OkSilent("IO 扫描成功");
+                Task.WaitAll(tasks);
+
+                var failedResults = tasks
+                    .Where(x => x.Status == TaskStatus.RanToCompletion && x.Result != null && !x.Result.Success)
+                    .Select(x => x.Result)
+                    .ToList();
+
+                UpdateRuntimeServiceState();
+
+                if (failedResults.Count > 0)
+                {
+                    string message = string.Join(
+                        " | ",
+                        failedResults
+                            .Select(x => x.Message)
+                            .Where(x => !string.IsNullOrWhiteSpace(x))
+                            .Distinct()
+                            .Take(3));
+
+                    return Result.Fail(
+                        failedResults[0].Code,
+                        string.IsNullOrWhiteSpace(message) ? "IO 单轮扫描部分失败" : message,
+                        ResultSource.Motion);
+                }
+
+                return OkSilent("IO 单轮扫描成功");
+            }
+            catch (Exception ex)
+            {
+                LastError = ex.Message;
+                return HandleException(ex, (int)MotionErrorCode.Unknown, "执行 IO 单轮扫描失败");
+            }
         }
 
-        private async Task ScanLoopAsync(CancellationToken cancellationToken)
+        private async Task SupervisorLoopAsync(CancellationToken cancellationToken)
         {
             try
             {
                 while (!cancellationToken.IsCancellationRequested)
                 {
-                    var scanResult = ScanOnce();
-                    if (!scanResult.Success)
-                    {
-                        // 工业设备安全规范：扫描失败不容忍，立即停止并触发 Critical 报警
-                        // ScanOnce 内的 Fail() 已记录 Error 日志，此处只触发报警链路
-                        SetScanState(IoScanState.Error);
-                        RaiseAlarm(AlarmCode.IoScanFailed, AlarmLevel.Critical,
-                            string.Format("IO 扫描失败，服务已停止，需手动重启。原因：{0}", scanResult.Message));
-                        break;
-                    }
+                    RefreshScanCacheIfNeeded();
+                    ReconcileRunners();
+                    StartAllRunners();
+                    UpdateRuntimeServiceState();
 
-                    await Task.Delay(ScanIntervalMs, cancellationToken);
+                    await Task.Delay(DefaultSupervisorIntervalMs, cancellationToken).ConfigureAwait(false);
                 }
             }
             catch (OperationCanceledException)
             {
-                // 外部调用 StopAsync() 正常取消，不作为错误处理
             }
             catch (Exception ex)
             {
                 LastError = ex.Message;
-                SetScanState(IoScanState.Error);
-                RaiseAlarm(AlarmCode.IoScanFailed, AlarmLevel.Critical,
-                    string.Format("IO 扫描循环异常，服务已停止，需手动重启。原因：{0}", ex.Message));
+                ScanState = IoScanState.Error;
+                FailLogOnly((int)MotionErrorCode.Unknown, "IO 扫描协调循环异常", ex);
             }
             finally
             {
-                // 正常取消（外部 Stop）时状态为 Running → 置回 Idle
-                // 错误停止时状态已为 Error → 保持 Error，由手动 StopAsync 重置
-                lock (_syncRoot)
-                {
-                    if (_scanState == IoScanState.Running)
-                    {
-                        _scanState = IoScanState.Idle;
-                    }
-                }
-
+                await StopAllRunnersAsync().ConfigureAwait(false);
                 RuntimeContext.Instance.MotionIo.SetScanServiceState(false, 0);
             }
         }
 
-        private void SetScanState(IoScanState state)
+        private void RefreshScanCacheIfNeeded()
         {
-            lock (_syncRoot)
+            var motionCards = ConfigContext.Instance.Config.MotionCardsConfig ?? new List<MotionCardConfig>();
+            if (ReferenceEquals(_cachedMotionCardsConfig, motionCards))
             {
-                _scanState = state;
+                return;
+            }
+
+            _cachedMotionCardsConfig = motionCards;
+            _cachedCardLookup = BuildCardLookup(motionCards);
+        }
+
+        private void ReconcileRunners()
+        {
+            IDictionary<short, MotionCardConfig> cardLookup = _cachedCardLookup == null
+                ? new Dictionary<short, MotionCardConfig>()
+                : new Dictionary<short, MotionCardConfig>(_cachedCardLookup);
+
+            List<IoCardScanRunner> removedRunners = new List<IoCardScanRunner>();
+
+            lock (_runnerSyncRoot)
+            {
+                List<short> removedKeys = _cardRunners.Keys
+                    .Where(x => !cardLookup.ContainsKey(x))
+                    .ToList();
+
+                foreach (short key in removedKeys)
+                {
+                    removedRunners.Add(_cardRunners[key]);
+                    _cardRunners.Remove(key);
+                }
+
+                foreach (var pair in cardLookup)
+                {
+                    IoCardScanRunner runner;
+                    if (_cardRunners.TryGetValue(pair.Key, out runner))
+                    {
+                        runner.UpdateConfig(pair.Value, ScanIntervalMs);
+                        continue;
+                    }
+
+                    runner = new IoCardScanRunner(pair.Value, ScanIntervalMs, _reporter);
+                    _cardRunners[pair.Key] = runner;
+                }
+            }
+
+            foreach (var runner in removedRunners)
+            {
+                try
+                {
+                    runner.StopAsync().GetAwaiter().GetResult();
+                }
+                catch
+                {
+                }
             }
         }
 
-        private static bool ApplyLogicalTransform(short logicalBit, bool isDI, bool rawValue)
+        private void StartAllRunners()
         {
-            MotionIoBitMap bitMap;
-            if (!TryGetIoBitMap(logicalBit, isDI, out bitMap) || bitMap == null)
+            IoCardScanRunner[] runners;
+            lock (_runnerSyncRoot)
             {
-                return rawValue;
+                runners = _cardRunners.Values.ToArray();
             }
 
-            return bitMap.Invert ? !rawValue : rawValue;
-        }
-
-        private static bool TryGetIoBitMap(short logicalBit, bool isDI, out MotionIoBitMap bitMap)
-        {
-            bitMap = null;
-
-            var motionCards = ConfigContext.Instance.Config.MotionCardsConfig;
-            if (motionCards == null)
+            foreach (var runner in runners)
             {
-                return false;
-            }
-
-            foreach (var card in motionCards)
-            {
-                if (card == null)
+                if (runner == null || runner.IsRunning)
                 {
                     continue;
                 }
 
-                var list = isDI ? card.DIBitMaps : card.DOBitMaps;
-                if (list == null)
+                var startResult = runner.Start();
+                if (!startResult.Success)
+                {
+                    WarnLogOnly(startResult.Code, "IO 控制卡扫描运行器启动失败: CardId=" + runner.CardId + "，" + startResult.Message);
+                }
+            }
+        }
+
+        private async Task StopAllRunnersAsync()
+        {
+            IoCardScanRunner[] runners;
+            lock (_runnerSyncRoot)
+            {
+                runners = _cardRunners.Values.ToArray();
+                _cardRunners.Clear();
+            }
+
+            foreach (var runner in runners)
+            {
+                if (runner == null)
                 {
                     continue;
                 }
 
-                bitMap = list.FirstOrDefault(p => p != null && p.LogicalBit == logicalBit);
-                if (bitMap != null)
+                try
                 {
-                    return true;
+                    await runner.StopAsync().ConfigureAwait(false);
+                }
+                catch
+                {
                 }
             }
+        }
 
-            return false;
+        private void UpdateRuntimeServiceState()
+        {
+            IoCardScanRunner[] runners;
+            lock (_runnerSyncRoot)
+            {
+                runners = _cardRunners.Values.ToArray();
+            }
+
+            bool hasRunningRunner = runners.Any(x => x != null && x.IsRunning);
+            bool hasFaultRunner = runners.Any(x => x != null && x.HasFault);
+
+            RuntimeContext.Instance.MotionIo.SetScanServiceState(hasRunningRunner, hasRunningRunner ? ScanIntervalMs : 0);
+
+            DateTime latestRunTime = runners
+                .Where(x => x != null && x.LastRunTime.HasValue)
+                .Select(x => x.LastRunTime.Value)
+                .DefaultIfEmpty()
+                .Max();
+
+            LastRunTime = latestRunTime == default(DateTime) ? (DateTime?)null : latestRunTime;
+
+            string runnerError = runners
+                .Where(x => x != null && !string.IsNullOrWhiteSpace(x.LastError))
+                .Select(x => x.LastError)
+                .FirstOrDefault();
+
+            LastError = string.IsNullOrWhiteSpace(runnerError) ? string.Empty : runnerError;
+
+            if (!hasRunningRunner)
+            {
+                ScanState = IoScanState.Idle;
+            }
+            else if (hasFaultRunner)
+            {
+                ScanState = IoScanState.Error;
+            }
+            else
+            {
+                ScanState = IoScanState.Running;
+            }
+
+            if (LastRunTime.HasValue)
+            {
+                RuntimeContext.Instance.MotionIo.MarkScanTime(LastRunTime.Value);
+                RuntimeContext.Instance.MotionIo.NotifySnapshotChanged();
+            }
+        }
+
+        private static IDictionary<short, MotionCardConfig> BuildCardLookup(IList<MotionCardConfig> motionCards)
+        {
+            var machineCards = MachineContext.Instance.MotionCards;
+
+            return (motionCards ?? new List<MotionCardConfig>())
+                .Where(x =>
+                    x != null
+                    && machineCards.ContainsKey(x.CardId)
+                    && (((x.DIBitMaps == null ? 0 : x.DIBitMaps.Count) > 0)
+                        || ((x.DOBitMaps == null ? 0 : x.DOBitMaps.Count) > 0)))
+                .OrderBy(x => x.InitOrder)
+                .ThenBy(x => x.CardId)
+                .ToDictionary(x => x.CardId, x => x);
         }
     }
 }

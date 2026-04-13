@@ -127,7 +127,7 @@ namespace AM.App.Bootstrap
 
             // 8.1 注册后台工作单元（此时控制卡已连接，autoStart 扫描安全）
             // 第一版：轴运行态采样独立于 IO 扫描注册。仅供 UI / 监视使用，不参与控制安全逻辑。
-            var axisScanWorker = new MotionAxisScanWorker(reporter, 100);
+            var axisScanWorker = new MotionAxisScanWorker(reporter);
             var axisRegisterResult = runtimeTaskManager.Register(axisScanWorker, true);
             if (!axisRegisterResult.Success)
             {

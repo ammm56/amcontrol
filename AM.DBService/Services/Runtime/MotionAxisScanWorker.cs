@@ -3,6 +3,7 @@ using AM.Core.Context;
 using AM.Core.Reporter;
 using AM.Model.Common;
 using AM.Model.Interfaces.Runtime;
+using AM.Model.MotionCard;
 using AM.Model.Runtime;
 using System;
 using System.Collections.Generic;
@@ -15,21 +16,23 @@ namespace AM.DBService.Services.Runtime
     /// <summary>
     /// Motion 轴运行态后台采样服务。
     /// 该服务仅用于 UI / 监视 / 诊断缓存，不参与运动控制安全判断。
+    /// 重构后按控制卡维护多个独立 `MotionAxisCardScanRunner`。
     /// </summary>
     public class MotionAxisScanWorker : ServiceBase, IRuntimeWorker
     {
+        private const int DefaultSupervisorIntervalMs = 500;
         private const int MinScanIntervalMs = 10;
         private const int DefaultScanIntervalMs = 100;
 
-        /// <summary>
-        /// 重复错误日志节流周期。
-        /// </summary>
-        private const int ErrorLogThrottleIntervalMs = 30000;
+        private readonly object _stateSyncRoot;
+        private readonly object _runnerSyncRoot;
 
-        private readonly object _syncRoot;
-        private CancellationTokenSource _cancellationTokenSource;
-        private Task _scanLoopTask;
-        private bool _isRunning;
+        private CancellationTokenSource _supervisorCancellationTokenSource;
+        private Task _supervisorTask;
+
+        private IList<MotionCardConfig> _cachedMotionCardsConfig;
+        private IDictionary<short, MotionCardConfig> _cachedCardLookup;
+        private readonly IDictionary<short, MotionAxisCardScanRunner> _cardRunners;
 
         protected override string MessageSourceName
         {
@@ -49,7 +52,10 @@ namespace AM.DBService.Services.Runtime
         public MotionAxisScanWorker(IAppReporter reporter, int scanIntervalMs = DefaultScanIntervalMs)
             : base(reporter)
         {
-            _syncRoot = new object();
+            _stateSyncRoot = new object();
+            _runnerSyncRoot = new object();
+            _cachedCardLookup = new Dictionary<short, MotionCardConfig>();
+            _cardRunners = new Dictionary<short, MotionAxisCardScanRunner>();
             ScanIntervalMs = scanIntervalMs < MinScanIntervalMs ? MinScanIntervalMs : scanIntervalMs;
             LastError = string.Empty;
         }
@@ -63,9 +69,9 @@ namespace AM.DBService.Services.Runtime
         {
             get
             {
-                lock (_syncRoot)
+                lock (_stateSyncRoot)
                 {
-                    return _isRunning;
+                    return _supervisorCancellationTokenSource != null && _supervisorTask != null;
                 }
             }
         }
@@ -78,47 +84,54 @@ namespace AM.DBService.Services.Runtime
 
         public Result Start()
         {
-            lock (_syncRoot)
+            lock (_stateSyncRoot)
             {
-                if (_isRunning)
+                if (_supervisorCancellationTokenSource != null && _supervisorTask != null)
                 {
-                    return Warn(-1200, "轴运行态采样服务已在运行");
+                    return Warn((int)MotionErrorCode.Unknown, "轴运行态采样服务已在运行");
                 }
 
-                _cancellationTokenSource?.Dispose();
-                _cancellationTokenSource = new CancellationTokenSource();
-                _isRunning = true;
-                RuntimeContext.Instance.MotionAxis.SetScanServiceState(true, ScanIntervalMs);
-                _scanLoopTask = Task.Run(() => ScanLoopAsync(_cancellationTokenSource.Token));
+                RefreshScanCacheIfNeeded();
+                if (_cachedCardLookup.Count == 0)
+                {
+                    return Warn((int)MotionErrorCode.Unknown, "未找到可采样的控制卡配置");
+                }
+
+                _supervisorCancellationTokenSource = new CancellationTokenSource();
+
+                ReconcileRunners();
+                StartAllRunners();
+                UpdateRuntimeServiceState();
+
+                _supervisorTask = Task.Run(() => SupervisorLoopAsync(_supervisorCancellationTokenSource.Token));
             }
 
-            return Ok("轴运行态采样服务启动成功");
+            return OkLogOnly("轴运行态采样服务启动成功");
         }
 
         public async Task<Result> StopAsync()
         {
             CancellationTokenSource cts;
-            Task loopTask;
+            Task supervisorTask;
 
-            lock (_syncRoot)
+            lock (_stateSyncRoot)
             {
-                cts = _cancellationTokenSource;
-                loopTask = _scanLoopTask;
-                _cancellationTokenSource = null;
-                _scanLoopTask = null;
-                _isRunning = false;
+                cts = _supervisorCancellationTokenSource;
+                supervisorTask = _supervisorTask;
+                _supervisorCancellationTokenSource = null;
+                _supervisorTask = null;
             }
 
-            if (cts == null || loopTask == null)
+            if (cts == null || supervisorTask == null)
             {
                 RuntimeContext.Instance.MotionAxis.SetScanServiceState(false, 0);
-                return Ok("轴运行态采样服务未启动");
+                return OkLogOnly("轴运行态采样服务未启动");
             }
 
             try
             {
                 cts.Cancel();
-                await loopTask.ConfigureAwait(false);
+                await supervisorTask.ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {
@@ -126,7 +139,7 @@ namespace AM.DBService.Services.Runtime
             catch (Exception ex)
             {
                 LastError = ex.Message;
-                return HandleException(ex, -1201, "停止轴运行态采样服务失败");
+                return HandleException(ex, (int)MotionErrorCode.Unknown, "停止轴运行态采样服务失败");
             }
             finally
             {
@@ -134,119 +147,81 @@ namespace AM.DBService.Services.Runtime
                 RuntimeContext.Instance.MotionAxis.SetScanServiceState(false, 0);
             }
 
-            return Ok("轴运行态采样服务已停止");
+            return OkLogOnly("轴运行态采样服务已停止");
         }
 
         /// <summary>
-        /// 对所有已配置轴执行一次运行态采样。
-        /// 注意：该采样结果只供 UI 使用，不作为控制安全逻辑依据。
+        /// 手动执行全部控制卡单轮采样。
         /// </summary>
         public Result ScanOnce()
         {
-            var motionHub = MachineContext.Instance.MotionHub;
-            if (motionHub == null)
+            try
             {
-                LastError = "MotionHub 未初始化，无法执行轴运行态采样";
-                return FailSilent(-1202, LastError);
-            }
+                RefreshScanCacheIfNeeded();
+                ReconcileRunners();
 
-            var cards = ConfigContext.Instance.Config.MotionCardsConfig ?? new List<AM.Model.MotionCard.MotionCardConfig>();
-            var now = DateTime.Now;
-            var runtime = RuntimeContext.Instance.MotionAxis;
-
-            foreach (var card in cards.Where(x => x != null))
-            {
-                if (card.AxisConfigs == null)
+                MotionAxisCardScanRunner[] runners;
+                lock (_runnerSyncRoot)
                 {
-                    continue;
+                    runners = _cardRunners.Values.ToArray();
                 }
 
-                foreach (var axis in card.AxisConfigs.Where(x => x != null))
+                if (runners.Length == 0)
                 {
-                    MotionAxisRuntimeSnapshot snapshot;
-                    if (!runtime.TryGetAxisSnapshot(axis.LogicalAxis, out snapshot) || snapshot == null)
-                    {
-                        snapshot = new MotionAxisRuntimeSnapshot();
-                    }
-
-                    snapshot.LogicalAxis = axis.LogicalAxis;
-                    snapshot.CardId = card.CardId;
-                    snapshot.Name = axis.Name;
-                    snapshot.DisplayName = axis.DisplayName;
-                    snapshot.CardDisplayName = string.IsNullOrWhiteSpace(card.DisplayName) ? card.Name : card.DisplayName;
-                    snapshot.UpdateTime = now;
-
-                    var statusResult = motionHub.GetAxisStatus(axis.LogicalAxis);
-                    if (statusResult.Success)
-                    {
-                        snapshot.IsEnabled = statusResult.Item.IsEnabled;
-                        snapshot.IsAlarm = statusResult.Item.IsAlarm;
-                        snapshot.IsAtHome = statusResult.Item.IsAtHome;
-                        snapshot.PositiveLimit = statusResult.Item.PositiveLimit;
-                        snapshot.NegativeLimit = statusResult.Item.NegativeLimit;
-                        snapshot.IsDone = statusResult.Item.IsDone;
-                    }
-
-                    var movingResult = motionHub.IsMoving(axis.LogicalAxis);
-                    if (movingResult.Success)
-                    {
-                        snapshot.IsMoving = movingResult.Item;
-                    }
-
-                    var cmdPulseResult = motionHub.GetCommandPosition(axis.LogicalAxis);
-                    if (cmdPulseResult.Success)
-                    {
-                        snapshot.CommandPositionPulse = cmdPulseResult.Item;
-                    }
-
-                    var encPulseResult = motionHub.GetEncoderPosition(axis.LogicalAxis);
-                    if (encPulseResult.Success)
-                    {
-                        snapshot.EncoderPositionPulse = encPulseResult.Item;
-                    }
-
-                    var cmdMmResult = motionHub.GetCommandPositionMm(axis.LogicalAxis);
-                    if (cmdMmResult.Success)
-                    {
-                        snapshot.CommandPositionMm = cmdMmResult.Item;
-                    }
-
-                    var encMmResult = motionHub.GetEncoderPositionMm(axis.LogicalAxis);
-                    if (encMmResult.Success)
-                    {
-                        snapshot.EncoderPositionMm = encMmResult.Item;
-                    }
-
-                    runtime.SetAxisSnapshot(snapshot);
+                    return WarnSilent((int)MotionErrorCode.Unknown, "未找到可采样的控制卡");
                 }
-            }
 
-            LastRunTime = now;
-            LastError = string.Empty;
-            runtime.MarkScanTime(now);
-            runtime.NotifySnapshotChanged();
-            return OkSilent("轴运行态采样成功");
+                Task<Result>[] tasks = runners
+                    .Where(x => x != null)
+                    .Select(x => x.ScanOnceAsync())
+                    .ToArray();
+
+                Task.WaitAll(tasks);
+
+                var failedResults = tasks
+                    .Where(x => x.Status == TaskStatus.RanToCompletion && x.Result != null && !x.Result.Success)
+                    .Select(x => x.Result)
+                    .ToList();
+
+                UpdateRuntimeServiceState();
+
+                if (failedResults.Count > 0)
+                {
+                    string message = string.Join(
+                        " | ",
+                        failedResults
+                            .Select(x => x.Message)
+                            .Where(x => !string.IsNullOrWhiteSpace(x))
+                            .Distinct()
+                            .Take(3));
+
+                    return Result.Fail(
+                        failedResults[0].Code,
+                        string.IsNullOrWhiteSpace(message) ? "轴运行态单轮采样部分失败" : message,
+                        ResultSource.Motion);
+                }
+
+                return OkSilent("轴运行态单轮采样成功");
+            }
+            catch (Exception ex)
+            {
+                LastError = ex.Message;
+                return HandleException(ex, (int)MotionErrorCode.Unknown, "执行轴运行态单轮采样失败");
+            }
         }
 
-        private async Task ScanLoopAsync(CancellationToken cancellationToken)
+        private async Task SupervisorLoopAsync(CancellationToken cancellationToken)
         {
             try
             {
                 while (!cancellationToken.IsCancellationRequested)
                 {
-                    var scanResult = ScanOnce();
-                    if (!scanResult.Success)
-                    {
-                        LastError = scanResult.Message;
+                    RefreshScanCacheIfNeeded();
+                    ReconcileRunners();
+                    StartAllRunners();
+                    UpdateRuntimeServiceState();
 
-                        string reportKey = "MotionAxisScanWorker-" + scanResult.Code + "-" + (scanResult.Message ?? string.Empty);
-                        if (ShouldReportRepeated(reportKey, ErrorLogThrottleIntervalMs))
-                        {
-                            FailLogOnly(scanResult.Code, "轴运行态采样失败: " + scanResult.Message);
-                        }
-                    }
-
-                    await Task.Delay(ScanIntervalMs, cancellationToken).ConfigureAwait(false);
+                    await Task.Delay(DefaultSupervisorIntervalMs, cancellationToken).ConfigureAwait(false);
                 }
             }
             catch (OperationCanceledException)
@@ -255,22 +230,169 @@ namespace AM.DBService.Services.Runtime
             catch (Exception ex)
             {
                 LastError = ex.Message;
-
-                string reportKey = "MotionAxisScanWorker-LoopException-" + ex.Message;
-                if (ShouldReportRepeated(reportKey, ErrorLogThrottleIntervalMs))
-                {
-                    FailLogOnly(-1203, "轴运行态采样循环异常", ex);
-                }
+                FailLogOnly((int)MotionErrorCode.Unknown, "轴运行态采样协调循环异常", ex);
             }
             finally
             {
-                lock (_syncRoot)
-                {
-                    _isRunning = false;
-                }
-
+                await StopAllRunnersAsync().ConfigureAwait(false);
                 RuntimeContext.Instance.MotionAxis.SetScanServiceState(false, 0);
             }
+        }
+
+        private void RefreshScanCacheIfNeeded()
+        {
+            var motionCards = ConfigContext.Instance.Config.MotionCardsConfig ?? new List<MotionCardConfig>();
+            if (ReferenceEquals(_cachedMotionCardsConfig, motionCards))
+            {
+                return;
+            }
+
+            _cachedMotionCardsConfig = motionCards;
+            _cachedCardLookup = BuildCardLookup(motionCards);
+        }
+
+        private void ReconcileRunners()
+        {
+            IDictionary<short, MotionCardConfig> cardLookup = _cachedCardLookup == null
+                ? new Dictionary<short, MotionCardConfig>()
+                : new Dictionary<short, MotionCardConfig>(_cachedCardLookup);
+
+            List<MotionAxisCardScanRunner> removedRunners = new List<MotionAxisCardScanRunner>();
+
+            lock (_runnerSyncRoot)
+            {
+                List<short> removedKeys = _cardRunners.Keys
+                    .Where(x => !cardLookup.ContainsKey(x))
+                    .ToList();
+
+                foreach (short key in removedKeys)
+                {
+                    removedRunners.Add(_cardRunners[key]);
+                    _cardRunners.Remove(key);
+                }
+
+                foreach (var pair in cardLookup)
+                {
+                    MotionAxisCardScanRunner runner;
+                    if (_cardRunners.TryGetValue(pair.Key, out runner))
+                    {
+                        runner.UpdateConfig(pair.Value, ScanIntervalMs);
+                        continue;
+                    }
+
+                    runner = new MotionAxisCardScanRunner(pair.Value, ScanIntervalMs, _reporter);
+                    _cardRunners[pair.Key] = runner;
+                }
+            }
+
+            foreach (var runner in removedRunners)
+            {
+                try
+                {
+                    runner.StopAsync().GetAwaiter().GetResult();
+                }
+                catch
+                {
+                }
+            }
+        }
+
+        private void StartAllRunners()
+        {
+            MotionAxisCardScanRunner[] runners;
+            lock (_runnerSyncRoot)
+            {
+                runners = _cardRunners.Values.ToArray();
+            }
+
+            foreach (var runner in runners)
+            {
+                if (runner == null || runner.IsRunning)
+                {
+                    continue;
+                }
+
+                var startResult = runner.Start();
+                if (!startResult.Success)
+                {
+                    WarnLogOnly(startResult.Code, "轴采样运行器启动失败: CardId=" + runner.CardId + "，" + startResult.Message);
+                }
+            }
+        }
+
+        private async Task StopAllRunnersAsync()
+        {
+            MotionAxisCardScanRunner[] runners;
+            lock (_runnerSyncRoot)
+            {
+                runners = _cardRunners.Values.ToArray();
+                _cardRunners.Clear();
+            }
+
+            foreach (var runner in runners)
+            {
+                if (runner == null)
+                {
+                    continue;
+                }
+
+                try
+                {
+                    await runner.StopAsync().ConfigureAwait(false);
+                }
+                catch
+                {
+                }
+            }
+        }
+
+        private void UpdateRuntimeServiceState()
+        {
+            MotionAxisCardScanRunner[] runners;
+            lock (_runnerSyncRoot)
+            {
+                runners = _cardRunners.Values.ToArray();
+            }
+
+            bool hasRunningRunner = runners.Any(x => x != null && x.IsRunning);
+
+            RuntimeContext.Instance.MotionAxis.SetScanServiceState(hasRunningRunner, hasRunningRunner ? ScanIntervalMs : 0);
+
+            DateTime latestRunTime = runners
+                .Where(x => x != null && x.LastRunTime.HasValue)
+                .Select(x => x.LastRunTime.Value)
+                .DefaultIfEmpty()
+                .Max();
+
+            LastRunTime = latestRunTime == default(DateTime) ? (DateTime?)null : latestRunTime;
+
+            string runnerError = runners
+                .Where(x => x != null && !string.IsNullOrWhiteSpace(x.LastError))
+                .Select(x => x.LastError)
+                .FirstOrDefault();
+
+            LastError = string.IsNullOrWhiteSpace(runnerError) ? string.Empty : runnerError;
+
+            if (LastRunTime.HasValue)
+            {
+                RuntimeContext.Instance.MotionAxis.MarkScanTime(LastRunTime.Value);
+                RuntimeContext.Instance.MotionAxis.NotifySnapshotChanged();
+            }
+        }
+
+        private static IDictionary<short, MotionCardConfig> BuildCardLookup(IList<MotionCardConfig> motionCards)
+        {
+            var machineCards = MachineContext.Instance.MotionCards;
+
+            return (motionCards ?? new List<MotionCardConfig>())
+                .Where(x =>
+                    x != null
+                    && machineCards.ContainsKey(x.CardId)
+                    && x.AxisConfigs != null
+                    && x.AxisConfigs.Count > 0)
+                .OrderBy(x => x.InitOrder)
+                .ThenBy(x => x.CardId)
+                .ToDictionary(x => x.CardId, x => x);
         }
     }
 }
