@@ -106,10 +106,11 @@ namespace AMControlWinF.Views.Plc
 
         /// <summary>
         /// 定时刷新运行态。
+        /// 搜索输入过程中跳过本轮刷新，避免输入框失焦与顶部区域闪烁。
         /// </summary>
         private async void RefreshTimer_Tick(object sender, EventArgs e)
         {
-            if (!Visible || _isBusy)
+            if (!Visible || _isBusy || IsSearchEditing())
             {
                 return;
             }
@@ -142,6 +143,8 @@ namespace AMControlWinF.Views.Plc
 
         /// <summary>
         /// 首次加载或普通刷新入口。
+        /// 注意：
+        /// 运行态刷新不禁用顶部搜索栏和按钮，避免定时刷新导致输入框失焦与闪烁。
         /// </summary>
         private async Task ReloadAsync(bool useLoadMethod)
         {
@@ -150,7 +153,7 @@ namespace AMControlWinF.Views.Plc
                 return;
             }
 
-            SetBusyState(true);
+            _isBusy = true;
             try
             {
                 Result result = useLoadMethod
@@ -166,12 +169,13 @@ namespace AMControlWinF.Views.Plc
             }
             finally
             {
-                SetBusyState(false);
+                _isBusy = false;
             }
         }
 
         /// <summary>
         /// 执行扫描控制动作后刷新页面。
+        /// 仅此类显式操作才禁用页面按钮，避免重复提交。
         /// </summary>
         private async Task ExecuteAsync(Func<Result> action)
         {
@@ -225,6 +229,7 @@ namespace AMControlWinF.Views.Plc
 
         /// <summary>
         /// 设置忙碌状态。
+        /// 仅用于用户显式操作，不用于定时刷新。
         /// </summary>
         private void SetBusyState(bool isBusy)
         {
@@ -237,6 +242,18 @@ namespace AMControlWinF.Views.Plc
             buttonScanOnce.Enabled = !isBusy && canControl;
             buttonStartScan.Enabled = !isBusy && canControl;
             buttonStopScan.Enabled = !isBusy && canControl;
+        }
+
+        /// <summary>
+        /// 当前是否处于搜索输入编辑状态。
+        /// 输入过程中跳过定时刷新，避免搜索框失焦。
+        /// </summary>
+        private bool IsSearchEditing()
+        {
+            return inputSearch != null
+                && inputSearch.Focused
+                && inputSearch.Enabled
+                && Visible;
         }
 
         /// <summary>

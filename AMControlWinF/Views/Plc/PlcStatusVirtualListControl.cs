@@ -276,10 +276,11 @@ namespace AMControlWinF.Views.Plc
                 if (Item.HasError)
                 {
                     g.String(
-                        TrimText("异常：" + Item.ErrorBriefText, 22),
+                        "异常：" + Item.ErrorBriefText,
                         FontBody,
                         offlineColor,
-                        new Point(12, 102));
+                        new Rectangle(12, 102, rect.Width - 24, 18),
+                        FormatFlags.Left | FormatFlags.Top | FormatFlags.NoWrapEllipsis);
                 }
                 else
                 {
