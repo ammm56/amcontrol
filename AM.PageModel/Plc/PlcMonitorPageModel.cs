@@ -155,7 +155,9 @@ namespace AM.PageModel.Plc
                 _allPoints = runtimeResult.Items == null
                     ? new List<PointMonitorItem>()
                     : runtimeResult.Items
-                        .Where(x => x != null)
+                        .Where(x =>
+                            x != null &&
+                            !string.Equals(x.AccessMode, "WriteOnly", StringComparison.OrdinalIgnoreCase))
                         .OrderBy(x => x.PlcName)
                         .ThenBy(x => x.GroupName)
                         .ThenBy(x => x.PointName)
@@ -348,6 +350,7 @@ namespace AM.PageModel.Plc
                 GroupName = snapshot == null ? string.Empty : (snapshot.GroupName ?? string.Empty),
                 AddressText = snapshot == null ? string.Empty : (snapshot.AddressText ?? string.Empty),
                 DataType = snapshot == null ? string.Empty : (snapshot.DataType ?? string.Empty),
+                AccessMode = snapshot == null ? string.Empty : (snapshot.AccessMode ?? string.Empty),
                 ValueText = snapshot == null ? string.Empty : (snapshot.ValueText ?? string.Empty),
                 RawValue = snapshot == null ? string.Empty : (snapshot.RawValue ?? string.Empty),
                 Quality = snapshot == null ? string.Empty : (snapshot.Quality ?? string.Empty),
@@ -393,6 +396,8 @@ namespace AM.PageModel.Plc
 
             public string DataType { get; set; }
 
+            public string AccessMode { get; set; }
+
             public string ValueText { get; set; }
 
             public string RawValue { get; set; }
@@ -435,6 +440,29 @@ namespace AM.PageModel.Plc
                 get
                 {
                     return string.IsNullOrWhiteSpace(Quality) ? "-" : Quality;
+                }
+            }
+
+            public string AccessModeText
+            {
+                get
+                {
+                    if (string.Equals(AccessMode, "ReadOnly", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return "只读";
+                    }
+
+                    if (string.Equals(AccessMode, "WriteOnly", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return "只写";
+                    }
+
+                    if (string.Equals(AccessMode, "ReadWrite", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return "读写";
+                    }
+
+                    return "-";
                 }
             }
 

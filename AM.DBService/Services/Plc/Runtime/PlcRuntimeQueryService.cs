@@ -304,6 +304,7 @@ namespace AM.DBService.Services.Plc.Runtime
                 GroupName = point == null ? null : point.GroupName,
                 AddressText = point == null ? null : point.AddressText,
                 DataType = point == null ? null : point.DataType,
+                AccessMode = point == null ? null : point.AccessMode,
                 ValueText = "--",
                 RawValue = null,
                 Quality = runtime.IsScanServiceRunning ? "Stale" : "Unknown",
@@ -328,6 +329,7 @@ namespace AM.DBService.Services.Plc.Runtime
             snapshot.GroupName = string.IsNullOrWhiteSpace(snapshot.GroupName) ? point.GroupName : snapshot.GroupName;
             snapshot.AddressText = string.IsNullOrWhiteSpace(snapshot.AddressText) ? point.AddressText : snapshot.AddressText;
             snapshot.DataType = string.IsNullOrWhiteSpace(snapshot.DataType) ? point.DataType : snapshot.DataType;
+            snapshot.AccessMode = string.IsNullOrWhiteSpace(snapshot.AccessMode) ? point.AccessMode : snapshot.AccessMode;
             return snapshot;
         }
     }

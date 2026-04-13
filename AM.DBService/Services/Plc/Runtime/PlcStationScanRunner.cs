@@ -318,6 +318,11 @@ namespace AM.DBService.Services.Plc.Runtime
 
             foreach (PlcPointConfig point in points)
             {
+                if (!IsReadablePoint(point))
+                {
+                    continue;
+                }
+
                 UpdatePointSnapshot(
                     client,
                     station,
@@ -442,6 +447,7 @@ namespace AM.DBService.Services.Plc.Runtime
                     GroupName = point.GroupName,
                     AddressText = point.AddressText,
                     DataType = point.DataType,
+                    AccessMode = point.AccessMode,
                     ValueText = "ERR",
                     RawValue = null,
                     Quality = QualityError,
@@ -466,6 +472,7 @@ namespace AM.DBService.Services.Plc.Runtime
                 GroupName = point.GroupName,
                 AddressText = point.AddressText,
                 DataType = point.DataType,
+                AccessMode = point.AccessMode,
                 ValueText = displayValueText,
                 RawValue = rawValueText,
                 Quality = string.IsNullOrWhiteSpace(readResult.Item.quality) ? QualityGood : readResult.Item.quality,
@@ -489,6 +496,11 @@ namespace AM.DBService.Services.Plc.Runtime
         {
             foreach (PlcPointConfig point in points)
             {
+                if (!IsReadablePoint(point))
+                {
+                    continue;
+                }
+
                 RuntimeContext.Instance.Plc.SetPointSnapshot(new PlcPointRuntimeSnapshot
                 {
                     PlcName = station.Name,
@@ -497,6 +509,7 @@ namespace AM.DBService.Services.Plc.Runtime
                     GroupName = point.GroupName,
                     AddressText = point.AddressText,
                     DataType = point.DataType,
+                    AccessMode = point.AccessMode,
                     ValueText = "--",
                     RawValue = null,
                     Quality = QualityDisconnected,
@@ -753,6 +766,16 @@ namespace AM.DBService.Services.Plc.Runtime
         {
             _wasDisconnected = false;
             _lastDisconnectMessage = string.Empty;
+        }
+
+        private static bool IsReadablePoint(PlcPointConfig point)
+        {
+            if (point == null || !point.IsEnabled)
+            {
+                return false;
+            }
+
+            return !string.Equals(point.AccessMode, "WriteOnly", StringComparison.OrdinalIgnoreCase);
         }
     }
 }

@@ -40,6 +40,12 @@ namespace AM.Model.Runtime
         public string DataType { get; set; }
 
         /// <summary>
+        /// 点位访问模式。
+        /// 例如：ReadOnly / ReadWrite / WriteOnly。
+        /// </summary>
+        public string AccessMode { get; set; }
+
+        /// <summary>
         /// 点位显示值。
         /// </summary>
         public string ValueText { get; set; }
@@ -104,6 +110,7 @@ namespace AM.Model.Runtime
                 GroupName = GroupName,
                 AddressText = AddressText,
                 DataType = DataType,
+                AccessMode = AccessMode,
                 ValueText = ValueText,
                 RawValue = RawValue,
                 Quality = Quality,

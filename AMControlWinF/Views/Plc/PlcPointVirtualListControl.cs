@@ -265,9 +265,12 @@ namespace AMControlWinF.Views.Plc
                     ? Color.FromArgb(170, 176, 186)
                     : Color.FromArgb(120, 120, 120);
 
-                Color goodColor = Color.FromArgb(82, 196, 26);
-                Color disconnectedColor = Color.FromArgb(250, 173, 20);
+                Color readableColor = Color.FromArgb(82, 196, 26);
+                Color unreadableColor = Color.FromArgb(250, 173, 20);
                 Color errorColor = Color.FromArgb(245, 108, 108);
+                Color readOnlyColor = Color.FromArgb(140, 140, 140);
+                Color readWriteColor = Color.FromArgb(22, 119, 255);
+                Color writeOnlyColor = Color.FromArgb(250, 173, 20);
 
                 using (var path = rect.RoundPath(e.Radius))
                 {
@@ -278,14 +281,14 @@ namespace AMControlWinF.Views.Plc
                 DrawBadge(
                     g,
                     new Rectangle(12, 12, 58, 22),
-                    ResolveQualityColor(Item, goodColor, disconnectedColor, errorColor),
-                    TrimText(Item.QualityText, 8));
+                    ResolveStateColor(Item, readableColor, unreadableColor, errorColor),
+                    ResolveStateText(Item));
 
                 DrawBadge(
                     g,
                     new Rectangle(76, 12, 58, 22),
-                    Item.IsConnected ? goodColor : disconnectedColor,
-                    Item.IsConnected ? "可读" : "不可读");
+                    ResolveAccessModeColor(Item, readOnlyColor, readWriteColor, writeOnlyColor),
+                    TrimText(Item.AccessModeText, 4));
 
                 g.String(
                     TrimText(Item.DisplayTitle, 16),
@@ -306,7 +309,7 @@ namespace AMControlWinF.Views.Plc
                     new Point(106, 64));
 
                 g.String(
-                    TrimText(BuildValueText(Item.ValueText), 12),
+                    TrimText(Item.ValueBriefText, 12),
                     FontBody,
                     subTextColor,
                     new Point(12, 84));
@@ -330,25 +333,30 @@ namespace AMControlWinF.Views.Plc
                 }
             }
 
-            private static string BuildValueText(string valueText)
+            private static string ResolveStateText(PlcMonitorPageModel.PointMonitorItem item)
             {
-                if (string.IsNullOrWhiteSpace(valueText))
+                if (item == null)
                 {
-                    return "值：-";
+                    return "不可读";
                 }
 
-                return "值：" + valueText;
+                if (item.HasError)
+                {
+                    return "异常";
+                }
+
+                return item.IsConnected ? "可读" : "不可读";
             }
 
-            private static Color ResolveQualityColor(
+            private static Color ResolveStateColor(
                 PlcMonitorPageModel.PointMonitorItem item,
-                Color goodColor,
-                Color disconnectedColor,
+                Color readableColor,
+                Color unreadableColor,
                 Color errorColor)
             {
                 if (item == null)
                 {
-                    return disconnectedColor;
+                    return unreadableColor;
                 }
 
                 if (item.HasError)
@@ -356,17 +364,31 @@ namespace AMControlWinF.Views.Plc
                     return errorColor;
                 }
 
-                if (string.Equals(item.Quality, "Disconnected", StringComparison.OrdinalIgnoreCase))
+                return item.IsConnected ? readableColor : unreadableColor;
+            }
+
+            private static Color ResolveAccessModeColor(
+                PlcMonitorPageModel.PointMonitorItem item,
+                Color readOnlyColor,
+                Color readWriteColor,
+                Color writeOnlyColor)
+            {
+                if (item == null)
                 {
-                    return disconnectedColor;
+                    return readOnlyColor;
                 }
 
-                if (string.Equals(item.Quality, "Error", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(item.AccessMode, "ReadWrite", StringComparison.OrdinalIgnoreCase))
                 {
-                    return errorColor;
+                    return readWriteColor;
                 }
 
-                return goodColor;
+                if (string.Equals(item.AccessMode, "WriteOnly", StringComparison.OrdinalIgnoreCase))
+                {
+                    return writeOnlyColor;
+                }
+
+                return readOnlyColor;
             }
 
             private static void DrawBadge(Canvas g, Rectangle rect, Color backColor, string text)

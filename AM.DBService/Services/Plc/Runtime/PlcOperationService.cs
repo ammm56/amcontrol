@@ -176,6 +176,11 @@ namespace AM.DBService.Services.Plc.Runtime
                     return Warn<PlcPointRuntimeSnapshot>((int)DbErrorCode.NotFound, "未找到对应 PLC 点位配置");
                 }
 
+                if (string.Equals(point.AccessMode, "WriteOnly", StringComparison.OrdinalIgnoreCase))
+                {
+                    return Fail<PlcPointRuntimeSnapshot>((int)DbErrorCode.InvalidArgument, "只写点位禁止读取: " + point.DisplayTitle);
+                }
+
                 Result<PlcPointRuntimeSnapshot> readResult = ReadPointInternal(point);
                 if (!readResult.Success)
                 {
