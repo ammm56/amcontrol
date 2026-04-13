@@ -230,7 +230,8 @@ namespace AM.DBService.Services.Plc.Runtime
                 {
                     PlcName = plcName.Trim(),
                     Name = string.Format("{0}_{1}", plcName.Trim(), address.Trim()),
-                    DisplayName = "地址测试读取",
+                    //DisplayName = "地址测试读取",
+                    DisplayName = address.Trim(),
                     GroupName = "Debug",
                     Address = address.Trim(),
                     DataType = NormalizeDataType(dataType),

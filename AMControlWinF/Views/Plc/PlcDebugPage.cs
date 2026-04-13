@@ -14,7 +14,7 @@ namespace AMControlWinF.Views.Plc
     /// 三行布局：
     /// 1. 顶部工具栏；
     /// 2. 中间空占位；
-    /// 3. 左侧调试操作卡片，右侧执行结果与历史记录表。
+    /// 3. 左侧调试操作区，右侧执行结果历史表。
     /// </summary>
     public partial class PlcDebugPage : UserControl
     {
@@ -45,12 +45,24 @@ namespace AMControlWinF.Views.Plc
             {
                 new Column("TimeText", "时间", ColumnAlign.Center)
                 {
-                    Width = "140",
+                    Width = "135",
                     Fixed = true
                 },
                 new Column("ResultTag", "结果", ColumnAlign.Center)
                 {
-                    Width = "70"
+                    Width = "60"
+                },
+                new Column("TargetText", "目标", ColumnAlign.Left)
+                {
+                    Width = "90"
+                },
+                new Column("DataTypeText", "类型", ColumnAlign.Left)
+                {
+                    Width = "100"
+                },
+                new Column("ValueText", "值", ColumnAlign.Left)
+                {
+                    Width = "100"
                 },
                 new Column("ActionName", "操作", ColumnAlign.Left)
                 {
@@ -60,25 +72,13 @@ namespace AMControlWinF.Views.Plc
                 {
                     Width = "90"
                 },
-                new Column("PlcName", "PLC", ColumnAlign.Left)
-                {
-                    Width = "110"
-                },
-                new Column("TargetText", "目标", ColumnAlign.Left)
-                {
-                    Width = "140"
-                },
-                new Column("DataTypeText", "类型", ColumnAlign.Center)
-                {
-                    Width = "120"
-                },
-                new Column("ValueText", "值", ColumnAlign.Left)
-                {
-                    Width = "120"
-                },
                 new Column("Quality", "质量", ColumnAlign.Center)
                 {
                     Width = "80"
+                },
+                new Column("PlcName", "PLC", ColumnAlign.Left)
+                {
+                    Width = "150"
                 },
                 new Column("MessageText", "消息", ColumnAlign.Left)
                 {
@@ -87,6 +87,9 @@ namespace AMControlWinF.Views.Plc
             };
         }
 
+        /// <summary>
+        /// 配置点位元信息只读展示，不允许在调试页直接修改配置。
+        /// </summary>
         private void ApplyStaticViewState()
         {
             inputPointAddress.Enabled = false;
@@ -288,7 +291,7 @@ namespace AMControlWinF.Views.Plc
                     _model.DirectDataTypeOptions,
                     _model.DirectDataType);
 
-                BindConfigPointMeta();
+                BindConfigPointArea();
                 BindDirectAddressArea();
                 BindResultTable();
                 RefreshOperationState();
@@ -299,7 +302,7 @@ namespace AMControlWinF.Views.Plc
             }
         }
 
-        private void BindConfigPointMeta()
+        private void BindConfigPointArea()
         {
             inputPointAddress.Text = _model.ConfigPointAddress;
             inputPointDataType.Text = BuildConfigPointDataTypeText();
@@ -314,7 +317,6 @@ namespace AMControlWinF.Views.Plc
             inputDirectLength.Text = _model.DirectLength.ToString();
             inputDirectWriteValue.Text = _model.DirectWriteValueText;
             checkDirectWriteConfirmed.Checked = _model.DirectWriteConfirmed;
-            labelDirectWriteTitle.Text = "按地址读写";
         }
 
         private void BindResultTable()
@@ -322,7 +324,7 @@ namespace AMControlWinF.Views.Plc
             _resultTableRows = new AntList<ResultTableRow>(
                 _model.ResultHistory.Select(x => new ResultTableRow(x)).ToList());
 
-            tableResults.DataSource = _resultTableRows;
+            tableResults.Binding(_resultTableRows);
         }
 
         private void RefreshOperationState()
@@ -510,28 +512,15 @@ namespace AMControlWinF.Views.Plc
                 get
                 {
                     string type = string.IsNullOrWhiteSpace(Item.DataType) ? "-" : Item.DataType;
-                    string access = string.IsNullOrWhiteSpace(Item.AccessModeText) ? "-" : Item.AccessModeText;
                     string length = Item.Length > 0 ? Item.Length.ToString() : "-";
+                    string access = string.IsNullOrWhiteSpace(Item.AccessModeText) ? "-" : Item.AccessModeText;
                     return string.Format("{0}/{1}/{2}", type, length, access);
                 }
             }
 
             public string ValueText
             {
-                get
-                {
-                    if (!string.IsNullOrWhiteSpace(Item.ValueText))
-                    {
-                        return Item.ValueText;
-                    }
-
-                    if (!string.IsNullOrWhiteSpace(Item.InputValueText))
-                    {
-                        return Item.InputValueText;
-                    }
-
-                    return "-";
-                }
+                get { return string.IsNullOrWhiteSpace(Item.ValueText) ? "-" : Item.ValueText; }
             }
 
             public string Quality
