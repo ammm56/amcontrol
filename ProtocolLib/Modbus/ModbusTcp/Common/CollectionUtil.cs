@@ -223,44 +223,45 @@ namespace ProtocolLib.ModbusTcp.Common
             {
                 case "bool":
                     {
-                        M_OperateResult<bool[]> result = modbusTCP.ReadBool(address, len);
-                        if (!result.IsSuccess)
+                        string registerBitAddress;
+                        if (TryParseRegisterBitAddress(address, out registerBitAddress))
                         {
-                            errorMessage = result.Message;
+                            M_OperateResult<bool[]> result = modbusTCP.ReadBool(registerBitAddress, len);
+                            if (!result.IsSuccess)
+                            {
+                                errorMessage = result.Message;
+                                return false;
+                            }
+
+                            valueText = ToolBasic.ArrayFormatValue(result.Content).Replace("False", "0").Replace("True", "1");
+                            return true;
+                        }
+
+                        if (IsRegisterAreaAddress(address))
+                        {
+                            errorMessage = "寄存器布尔位访问必须使用 40010.0 ~ 40010.15 或 30010.0 ~ 30010.15 语法";
                             return false;
                         }
 
-                        valueText = ToolBasic.ArrayFormatValue(result.Content).Replace("False", "0").Replace("True", "1");
+                        M_OperateResult<bool[]> coilResult = modbusTCP.ReadBool(address, len);
+                        if (!coilResult.IsSuccess)
+                        {
+                            errorMessage = coilResult.Message;
+                            return false;
+                        }
+
+                        valueText = ToolBasic.ArrayFormatValue(coilResult.Content).Replace("False", "0").Replace("True", "1");
                         return true;
                     }
 
                 case "uint8":
                     {
-                        M_OperateResult<byte[]> result = modbusTCP.Read(address, 1);
-                        if (!result.IsSuccess)
-                        {
-                            errorMessage = result.Message;
-                            return false;
-                        }
-
-                        byte[] content = result.Content ?? new byte[0];
-                        valueText = content.Length <= 0 ? "0" : content[0].ToString(CultureInfo.InvariantCulture);
-                        return true;
+                        return TryReadRegisterByte(modbusTCP, address, false, out valueText, out errorMessage);
                     }
 
                 case "int8":
                     {
-                        M_OperateResult<byte[]> result = modbusTCP.Read(address, 1);
-                        if (!result.IsSuccess)
-                        {
-                            errorMessage = result.Message;
-                            return false;
-                        }
-
-                        byte[] content = result.Content ?? new byte[0];
-                        sbyte value = content.Length <= 0 ? (sbyte)0 : unchecked((sbyte)content[0]);
-                        valueText = value.ToString(CultureInfo.InvariantCulture);
-                        return true;
+                        return TryReadRegisterByte(modbusTCP, address, true, out valueText, out errorMessage);
                     }
 
                 case "int16":
@@ -420,13 +421,26 @@ namespace ProtocolLib.ModbusTcp.Common
             switch (type)
             {
                 case "bool":
-                    return modbusTCP.Write(address, Convert.ToBoolean(value, CultureInfo.InvariantCulture));
+                    {
+                        string registerBitAddress;
+                        if (TryParseRegisterBitAddress(address, out registerBitAddress))
+                        {
+                            return modbusTCP.Write(registerBitAddress, Convert.ToBoolean(value, CultureInfo.InvariantCulture));
+                        }
+
+                        if (IsRegisterAreaAddress(address))
+                        {
+                            return new M_OperateResult("寄存器布尔位写入必须使用 40010.0 ~ 40010.15 或 30010.0 ~ 30010.15 语法");
+                        }
+
+                        return modbusTCP.Write(address, Convert.ToBoolean(value, CultureInfo.InvariantCulture));
+                    }
 
                 case "uint8":
-                    return modbusTCP.Write(address, new byte[] { Convert.ToByte(value, CultureInfo.InvariantCulture) });
+                    return WriteRegisterByte(modbusTCP, address, Convert.ToByte(value, CultureInfo.InvariantCulture));
 
                 case "int8":
-                    return modbusTCP.Write(address, new byte[] { unchecked((byte)Convert.ToSByte(value, CultureInfo.InvariantCulture)) });
+                    return WriteRegisterByte(modbusTCP, address, unchecked((byte)Convert.ToSByte(value, CultureInfo.InvariantCulture)));
 
                 case "int16":
                     return modbusTCP.Write(address, Convert.ToInt16(value, CultureInfo.InvariantCulture));
@@ -537,6 +551,212 @@ namespace ProtocolLib.ModbusTcp.Common
         {
             int length = ToolBasic.ExtractStartIndex(ref address);
             return length > 0 ? length : (defaultLength <= 0 ? 1 : defaultLength);
+        }
+
+        private static bool TryReadRegisterByte(
+            ModbusTCP modbusTCP,
+            string address,
+            bool signed,
+            out string valueText,
+            out string errorMessage)
+        {
+            valueText = string.Empty;
+            errorMessage = string.Empty;
+
+            string registerAddress;
+            bool isHighByte;
+            if (!TryParseRegisterByteAddress(address, out registerAddress, out isHighByte))
+            {
+                errorMessage = "寄存器字节访问必须使用 40010.H / 40010.L 或 30010.H / 30010.L 语法";
+                return false;
+            }
+
+            M_OperateResult<byte[]> result = modbusTCP.Read(registerAddress, 1);
+            if (!result.IsSuccess)
+            {
+                errorMessage = result.Message;
+                return false;
+            }
+
+            byte[] content = result.Content ?? new byte[0];
+            byte byteValue = 0;
+
+            if (content.Length >= 2)
+            {
+                byteValue = isHighByte ? content[0] : content[1];
+            }
+            else if (content.Length == 1)
+            {
+                byteValue = content[0];
+            }
+
+            if (signed)
+            {
+                valueText = unchecked((sbyte)byteValue).ToString(CultureInfo.InvariantCulture);
+            }
+            else
+            {
+                valueText = byteValue.ToString(CultureInfo.InvariantCulture);
+            }
+
+            return true;
+        }
+
+        private static M_OperateResult WriteRegisterByte(ModbusTCP modbusTCP, string address, byte byteValue)
+        {
+            string registerAddress;
+            bool isHighByte;
+            if (!TryParseRegisterByteAddress(address, out registerAddress, out isHighByte))
+            {
+                return new M_OperateResult("寄存器字节写入必须使用 40010.H / 40010.L 或 30010.H / 30010.L 语法");
+            }
+
+            M_OperateResult<byte[]> readResult = modbusTCP.Read(registerAddress, 1);
+            if (!readResult.IsSuccess)
+            {
+                return new M_OperateResult(readResult.Message);
+            }
+
+            byte[] content = readResult.Content ?? new byte[0];
+            byte highByte = 0;
+            byte lowByte = 0;
+
+            if (content.Length >= 2)
+            {
+                highByte = content[0];
+                lowByte = content[1];
+            }
+            else if (content.Length == 1)
+            {
+                highByte = content[0];
+            }
+
+            if (isHighByte)
+            {
+                highByte = byteValue;
+            }
+            else
+            {
+                lowByte = byteValue;
+            }
+
+            return modbusTCP.Write(registerAddress, new byte[] { highByte, lowByte });
+        }
+
+        private static bool TryParseRegisterByteAddress(string address, out string registerAddress, out bool isHighByte)
+        {
+            registerAddress = string.Empty;
+            isHighByte = false;
+
+            if (string.IsNullOrWhiteSpace(address))
+            {
+                return false;
+            }
+
+            string workingAddress = address.Trim();
+            int dotIndex = workingAddress.LastIndexOf('.');
+            if (dotIndex <= 0 || dotIndex >= workingAddress.Length - 1)
+            {
+                return false;
+            }
+
+            string suffix = workingAddress.Substring(dotIndex + 1);
+            string baseAddress = workingAddress.Substring(0, dotIndex);
+
+            if (!IsRegisterAreaAddress(baseAddress))
+            {
+                return false;
+            }
+
+            if (string.Equals(suffix, "H", StringComparison.OrdinalIgnoreCase))
+            {
+                registerAddress = baseAddress;
+                isHighByte = true;
+                return true;
+            }
+
+            if (string.Equals(suffix, "L", StringComparison.OrdinalIgnoreCase))
+            {
+                registerAddress = baseAddress;
+                isHighByte = false;
+                return true;
+            }
+
+            return false;
+        }
+
+        private static bool TryParseRegisterBitAddress(string address, out string registerBitAddress)
+        {
+            registerBitAddress = string.Empty;
+
+            if (string.IsNullOrWhiteSpace(address))
+            {
+                return false;
+            }
+
+            string workingAddress = address.Trim();
+            int dotIndex = workingAddress.LastIndexOf('.');
+            if (dotIndex <= 0 || dotIndex >= workingAddress.Length - 1)
+            {
+                return false;
+            }
+
+            string suffix = workingAddress.Substring(dotIndex + 1);
+            string baseAddress = workingAddress.Substring(0, dotIndex);
+
+            if (!IsRegisterAreaAddress(baseAddress))
+            {
+                return false;
+            }
+
+            int bitIndex;
+            if (!int.TryParse(suffix, out bitIndex))
+            {
+                return false;
+            }
+
+            if (bitIndex < 0 || bitIndex > 15)
+            {
+                return false;
+            }
+
+            registerBitAddress = workingAddress;
+            return true;
+        }
+
+        private static bool IsRegisterAreaAddress(string address)
+        {
+            string pureAddress = ExtractPureAddress(address);
+            if (string.IsNullOrWhiteSpace(pureAddress))
+            {
+                return false;
+            }
+
+            int dotIndex = pureAddress.IndexOf('.');
+            if (dotIndex > 0)
+            {
+                pureAddress = pureAddress.Substring(0, dotIndex);
+            }
+
+            return pureAddress.StartsWith("3", StringComparison.Ordinal)
+                || pureAddress.StartsWith("4", StringComparison.Ordinal);
+        }
+
+        private static string ExtractPureAddress(string address)
+        {
+            if (string.IsNullOrWhiteSpace(address))
+            {
+                return string.Empty;
+            }
+
+            string workingAddress = address.Trim();
+            int index = workingAddress.LastIndexOf(';');
+            if (index >= 0 && index < workingAddress.Length - 1)
+            {
+                return workingAddress.Substring(index + 1);
+            }
+
+            return workingAddress;
         }
     }
 }

@@ -178,6 +178,26 @@ namespace ProtocolLib.ModbusTcp.Core
                 M_ModbusAddress mAddress = new M_ModbusAddress(address, station, defaultFunction);
                 CheckModbusAddressStart(mAddress, isStartWithZero);
 
+                if (mAddress.Function == ReadDiscrete)
+                {
+                    return new M_OperateResult<byte[]>("1xxxx 离散输入为只读区域，禁止写入");
+                }
+
+                if (mAddress.Function == ReadInputRegister)
+                {
+                    return new M_OperateResult<byte[]>("3xxxx 输入寄存器为只读区域，禁止写入");
+                }
+
+                if (mAddress.Function == ReadRegister)
+                {
+                    return new M_OperateResult<byte[]>("4xxxx 寄存器布尔写入必须使用 40010.0 ~ 40010.15 语法");
+                }
+
+                if (mAddress.Function == ReadCoil)
+                {
+                    mAddress.Function = defaultFunction;
+                }
+
                 return BuildWriteBoolModbusCommand(mAddress, values);
             }
             catch (Exception ex)
@@ -203,18 +223,55 @@ namespace ProtocolLib.ModbusTcp.Core
                     M_ModbusAddress mAddress = new M_ModbusAddress(address, station, defaultFunction);
                     CheckModbusAddressStart(mAddress, isStartWithZero);
 
+                    if (mAddress.Function == ReadDiscrete)
+                    {
+                        return new M_OperateResult<byte[]>("1xxxx 离散输入为只读区域，禁止写入");
+                    }
+
+                    if (mAddress.Function == ReadInputRegister)
+                    {
+                        return new M_OperateResult<byte[]>("3xxxx 输入寄存器为只读区域，禁止写入");
+                    }
+
+                    if (mAddress.Function == ReadRegister)
+                    {
+                        return new M_OperateResult<byte[]>("4xxxx 寄存器布尔写入必须使用 40010.0 ~ 40010.15 语法");
+                    }
+
+                    if (mAddress.Function == ReadCoil)
+                    {
+                        mAddress.Function = defaultFunction;
+                    }
+
                     return BuildWriteBoolModbusCommand(mAddress, value);
                 }
                 else
                 {
+                    string baseAddress = address.Substring(0, address.IndexOf('.'));
+                    M_ModbusAddress mAddress = new M_ModbusAddress(baseAddress, station, defaultFunction);
+                    CheckModbusAddressStart(mAddress, isStartWithZero);
+
+                    if (mAddress.Function == ReadInputRegister)
+                    {
+                        return new M_OperateResult<byte[]>("3xxxx 输入寄存器为只读区域，禁止位写入");
+                    }
+
+                    if (mAddress.Function != ReadRegister)
+                    {
+                        return new M_OperateResult<byte[]>("位偏移语法仅支持 3xxxx/4xxxx 寄存器区域");
+                    }
+
                     int bitIndex = Convert.ToInt32(address.Substring(address.IndexOf('.') + 1));
-                    if (bitIndex < 0 || bitIndex > 15) return new M_OperateResult<byte[]>("位访问的索引越界，应该在0-15之间");
+                    if (bitIndex < 0 || bitIndex > 15)
+                    {
+                        return new M_OperateResult<byte[]>("位访问的索引越界，应该在0-15之间");
+                    }
 
                     int orMask = 1 << bitIndex;
                     int andMask = ~orMask;
                     if (!value) orMask = 0;
 
-                    return BuildWriteMaskModbusCommand(address.Substring(0, address.IndexOf('.')), (ushort)andMask, (ushort)orMask, station, isStartWithZero, ModbusInfo.WriteMaskRegister);
+                    return BuildWriteMaskModbusCommand(baseAddress, (ushort)andMask, (ushort)orMask, station, isStartWithZero, ModbusInfo.WriteMaskRegister);
                 }
             }
             catch (Exception ex)
@@ -293,8 +350,27 @@ namespace ProtocolLib.ModbusTcp.Core
             try
             {
                 M_ModbusAddress mAddress = new M_ModbusAddress(address, station, defaultFunction);
-                if (mAddress.Function == ModbusInfo.ReadRegister) mAddress.Function = defaultFunction;
                 CheckModbusAddressStart(mAddress, isStartWithZero);
+
+                if (mAddress.Function == ReadInputRegister)
+                {
+                    return new M_OperateResult<byte[]>("3xxxx 输入寄存器为只读区域，禁止写入");
+                }
+
+                if (mAddress.Function == ReadDiscrete)
+                {
+                    return new M_OperateResult<byte[]>("1xxxx 离散输入不支持寄存器字写入");
+                }
+
+                if (mAddress.Function == ReadCoil)
+                {
+                    return new M_OperateResult<byte[]>("0xxxx 线圈区域不支持寄存器字写入");
+                }
+
+                if (mAddress.Function == ReadRegister)
+                {
+                    mAddress.Function = defaultFunction;
+                }
 
                 return BuildWriteWordModbusCommand(mAddress, values);
             }
@@ -340,8 +416,27 @@ namespace ProtocolLib.ModbusTcp.Core
             try
             {
                 M_ModbusAddress mAddress = new M_ModbusAddress(address, station, defaultFunction);
-                if (mAddress.Function == ModbusInfo.ReadRegister) mAddress.Function = defaultFunction;
                 CheckModbusAddressStart(mAddress, isStartWithZero);
+
+                if (mAddress.Function == ReadInputRegister)
+                {
+                    return new M_OperateResult<byte[]>("3xxxx 输入寄存器为只读区域，禁止写入");
+                }
+
+                if (mAddress.Function == ReadDiscrete)
+                {
+                    return new M_OperateResult<byte[]>("1xxxx 离散输入不支持寄存器字写入");
+                }
+
+                if (mAddress.Function == ReadCoil)
+                {
+                    return new M_OperateResult<byte[]>("0xxxx 线圈区域不支持寄存器字写入");
+                }
+
+                if (mAddress.Function == ReadRegister)
+                {
+                    mAddress.Function = defaultFunction;
+                }
 
                 return BuildWriteOneRegisterModbusCommand(mAddress, value);
             }
@@ -386,8 +481,27 @@ namespace ProtocolLib.ModbusTcp.Core
             try
             {
                 M_ModbusAddress mAddress = new M_ModbusAddress(address, station, defaultFunction);
-                if (mAddress.Function == ModbusInfo.ReadRegister) mAddress.Function = defaultFunction;
                 CheckModbusAddressStart(mAddress, isStartWithZero);
+
+                if (mAddress.Function == ReadInputRegister)
+                {
+                    return new M_OperateResult<byte[]>("3xxxx 输入寄存器为只读区域，禁止写入");
+                }
+
+                if (mAddress.Function == ReadDiscrete)
+                {
+                    return new M_OperateResult<byte[]>("1xxxx 离散输入不支持寄存器字写入");
+                }
+
+                if (mAddress.Function == ReadCoil)
+                {
+                    return new M_OperateResult<byte[]>("0xxxx 线圈区域不支持寄存器字写入");
+                }
+
+                if (mAddress.Function == ReadRegister)
+                {
+                    mAddress.Function = defaultFunction;
+                }
 
                 return BuildWriteOneRegisterModbusCommand(mAddress, value);
             }
@@ -434,9 +548,19 @@ namespace ProtocolLib.ModbusTcp.Core
             try
             {
                 M_ModbusAddress mAddress = new M_ModbusAddress(address, station, defaultFunction);
-                if (mAddress.Function == ModbusInfo.ReadRegister) mAddress.Function = defaultFunction;
                 CheckModbusAddressStart(mAddress, isStartWithZero);
 
+                if (mAddress.Function == ReadInputRegister)
+                {
+                    return new M_OperateResult<byte[]>("3xxxx 输入寄存器为只读区域，禁止掩码写入");
+                }
+
+                if (mAddress.Function != ReadRegister)
+                {
+                    return new M_OperateResult<byte[]>("掩码写入仅支持 4xxxx Holding Register");
+                }
+
+                mAddress.Function = defaultFunction;
                 return BuildWriteMaskModbusCommand(mAddress, andMask, orMask);
             }
             catch (Exception ex)
