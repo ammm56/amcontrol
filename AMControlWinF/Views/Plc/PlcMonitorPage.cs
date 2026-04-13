@@ -11,10 +11,10 @@ namespace AMControlWinF.Views.Plc
 {
     /// <summary>
     /// PLC 点位监视页面。
-    /// 布局与 `PlcStatusPage` 保持一致：
+    /// 布局采用三行结构：
     /// 1. 顶部工具栏；
     /// 2. 中部统计卡片；
-    /// 3. 底部左右两列内容区。
+    /// 3. 底部整行点位虚拟卡片列表。
     /// </summary>
     public partial class PlcMonitorPage : UserControl
     {
@@ -79,6 +79,7 @@ namespace AMControlWinF.Views.Plc
 
             buttonRefresh.Click += async (s, e) => await ReloadAsync(false);
 
+            // 保留选中事件，仅用于卡片选中高亮，不再驱动右侧详情区。
             plcPointVirtualListControl.ItemSelected += PlcPointVirtualListControl_ItemSelected;
         }
 
@@ -140,17 +141,17 @@ namespace AMControlWinF.Views.Plc
         {
             labelRuntimeSummary.Text = _model.RuntimeSummaryText;
             labelTotalPointCount.Text = _model.TotalPointCount.ToString();
-            labelOnlinePointCount.Text = _model.OnlinePointCount.ToString();
-            labelOfflinePointCount.Text = _model.OfflinePointCount.ToString();
+            labelReadablePointCount.Text = _model.ReadablePointCount.ToString();
+            labelUnreadablePointCount.Text = _model.UnreadablePointCount.ToString();
             labelErrorPointCount.Text = _model.ErrorPointCount.ToString();
 
             BindFilters();
-            RefreshPointSelection();
+            RefreshPointList();
         }
 
         /// <summary>
         /// 绑定顶部筛选控件。
-        /// 绑定时临时屏蔽事件，避免刷新过程中再次触发筛选逻辑。
+        /// 绑定期间屏蔽控件事件，避免刷新时再次进入筛选逻辑。
         /// </summary>
         private void BindFilters()
         {
@@ -223,10 +224,9 @@ namespace AMControlWinF.Views.Plc
             }
         }
 
-        private void RefreshPointSelection()
+        private void RefreshPointList()
         {
             plcPointVirtualListControl.BindItems(_model.Points, _model.SelectedPoint);
-            plcPointDetailControl.Bind(_model.SelectedPoint);
         }
 
         private void PlcPointVirtualListControl_ItemSelected(object sender, PlcPointVirtualListControl.PlcPointSelectedEventArgs e)
@@ -237,7 +237,7 @@ namespace AMControlWinF.Views.Plc
             }
 
             _model.SelectPointByName(e.PointName);
-            RefreshPointSelection();
+            RefreshPointList();
         }
 
         private void UpdateRefreshTimerState()

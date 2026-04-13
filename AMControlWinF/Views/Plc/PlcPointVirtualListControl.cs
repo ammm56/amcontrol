@@ -285,7 +285,7 @@ namespace AMControlWinF.Views.Plc
                     g,
                     new Rectangle(76, 12, 58, 22),
                     Item.IsConnected ? goodColor : disconnectedColor,
-                    Item.IsConnected ? "在线" : "离线");
+                    Item.IsConnected ? "可读" : "不可读");
 
                 g.String(
                     TrimText(Item.DisplayTitle, 16),
@@ -303,13 +303,13 @@ namespace AMControlWinF.Views.Plc
                     TrimText(string.IsNullOrWhiteSpace(Item.DataType) ? "-" : Item.DataType, 12),
                     FontBody,
                     subTextColor,
-                    new Point(12, 84));
+                    new Point(106, 64));
 
                 g.String(
                     TrimText(BuildValueText(Item.ValueText), 12),
                     FontBody,
                     subTextColor,
-                    new Point(106, 84));
+                    new Point(12, 84));
 
                 if (Item.HasError)
                 {

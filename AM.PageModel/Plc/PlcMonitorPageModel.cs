@@ -1,7 +1,6 @@
 ﻿using AM.Core.Context;
 using AM.DBService.Services.Plc.Runtime;
 using AM.Model.Common;
-using AM.Model.Plc;
 using AM.Model.Runtime;
 using AM.PageModel.Common;
 using System;
@@ -115,12 +114,12 @@ namespace AM.PageModel.Plc
             get { return _allPoints.Count; }
         }
 
-        public int OnlinePointCount
+        public int ReadablePointCount
         {
-            get { return _allPoints.Count(x => x.IsConnected); }
+            get { return _allPoints.Count(x => x.IsConnected && !x.HasError); }
         }
 
-        public int OfflinePointCount
+        public int UnreadablePointCount
         {
             get { return _allPoints.Count(x => !x.IsConnected); }
         }
@@ -144,7 +143,7 @@ namespace AM.PageModel.Plc
         {
             return await Task.Run(() =>
             {
-                var runtimeResult = _runtimeQueryService.QueryAllPoints();
+                Result<PlcPointRuntimeSnapshot> runtimeResult = _runtimeQueryService.QueryAllPoints();
                 if (!runtimeResult.Success)
                 {
                     ClearAll();
@@ -333,8 +332,8 @@ namespace AM.PageModel.Plc
         private void RaiseSummaryChanged()
         {
             OnPropertyChanged(nameof(TotalPointCount));
-            OnPropertyChanged(nameof(OnlinePointCount));
-            OnPropertyChanged(nameof(OfflinePointCount));
+            OnPropertyChanged(nameof(ReadablePointCount));
+            OnPropertyChanged(nameof(UnreadablePointCount));
             OnPropertyChanged(nameof(ErrorPointCount));
             OnPropertyChanged(nameof(SelectedPointText));
         }

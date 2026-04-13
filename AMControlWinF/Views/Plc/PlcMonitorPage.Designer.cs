@@ -18,21 +18,18 @@
         {
             this.panelRoot = new AntdUI.Panel();
             this.panelContentCard = new AntdUI.Panel();
-            this.gridContent = new AntdUI.GridPanel();
-            this.panelPointDetailCard = new AntdUI.Panel();
-            this.plcPointDetailControl = new AMControlWinF.Views.Plc.PlcPointDetailControl();
             this.panelPointListCard = new AntdUI.Panel();
             this.plcPointVirtualListControl = new AMControlWinF.Views.Plc.PlcPointVirtualListControl();
             this.flowStats = new AntdUI.FlowPanel();
             this.panelErrorPointCard = new AntdUI.Panel();
             this.labelErrorPointCount = new AntdUI.Label();
             this.labelErrorPointTitle = new AntdUI.Label();
-            this.panelOfflinePointCard = new AntdUI.Panel();
-            this.labelOfflinePointCount = new AntdUI.Label();
-            this.labelOfflinePointTitle = new AntdUI.Label();
-            this.panelOnlinePointCard = new AntdUI.Panel();
-            this.labelOnlinePointCount = new AntdUI.Label();
-            this.labelOnlinePointTitle = new AntdUI.Label();
+            this.panelUnreadablePointCard = new AntdUI.Panel();
+            this.labelUnreadablePointCount = new AntdUI.Label();
+            this.labelUnreadablePointTitle = new AntdUI.Label();
+            this.panelReadablePointCard = new AntdUI.Panel();
+            this.labelReadablePointCount = new AntdUI.Label();
+            this.labelReadablePointTitle = new AntdUI.Label();
             this.panelTotalPointCard = new AntdUI.Panel();
             this.labelTotalPointCount = new AntdUI.Label();
             this.labelTotalPointTitle = new AntdUI.Label();
@@ -46,13 +43,11 @@
             this.buttonRefresh = new AntdUI.Button();
             this.panelRoot.SuspendLayout();
             this.panelContentCard.SuspendLayout();
-            this.gridContent.SuspendLayout();
-            this.panelPointDetailCard.SuspendLayout();
             this.panelPointListCard.SuspendLayout();
             this.flowStats.SuspendLayout();
             this.panelErrorPointCard.SuspendLayout();
-            this.panelOfflinePointCard.SuspendLayout();
-            this.panelOnlinePointCard.SuspendLayout();
+            this.panelUnreadablePointCard.SuspendLayout();
+            this.panelReadablePointCard.SuspendLayout();
             this.panelTotalPointCard.SuspendLayout();
             this.panelToolbar.SuspendLayout();
             this.flowToolbarLeft.SuspendLayout();
@@ -76,7 +71,7 @@
             // panelContentCard
             // 
             this.panelContentCard.BackColor = System.Drawing.Color.Transparent;
-            this.panelContentCard.Controls.Add(this.gridContent);
+            this.panelContentCard.Controls.Add(this.panelPointListCard);
             this.panelContentCard.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelContentCard.Location = new System.Drawing.Point(8, 140);
             this.panelContentCard.Margin = new System.Windows.Forms.Padding(0);
@@ -86,42 +81,6 @@
             this.panelContentCard.ShadowOpacityHover = 0F;
             this.panelContentCard.Size = new System.Drawing.Size(834, 532);
             this.panelContentCard.TabIndex = 2;
-            // 
-            // gridContent
-            // 
-            this.gridContent.Controls.Add(this.panelPointDetailCard);
-            this.gridContent.Controls.Add(this.panelPointListCard);
-            this.gridContent.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gridContent.Location = new System.Drawing.Point(0, 0);
-            this.gridContent.Margin = new System.Windows.Forms.Padding(0);
-            this.gridContent.Name = "gridContent";
-            this.gridContent.Size = new System.Drawing.Size(834, 532);
-            this.gridContent.Span = "100% 250";
-            this.gridContent.TabIndex = 0;
-            // 
-            // panelPointDetailCard
-            // 
-            this.panelPointDetailCard.BackColor = System.Drawing.Color.Transparent;
-            this.panelPointDetailCard.Controls.Add(this.plcPointDetailControl);
-            this.panelPointDetailCard.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelPointDetailCard.Location = new System.Drawing.Point(584, 0);
-            this.panelPointDetailCard.Margin = new System.Windows.Forms.Padding(0);
-            this.panelPointDetailCard.Name = "panelPointDetailCard";
-            this.panelPointDetailCard.Padding = new System.Windows.Forms.Padding(8);
-            this.panelPointDetailCard.Radius = 12;
-            this.panelPointDetailCard.Shadow = 4;
-            this.panelPointDetailCard.ShadowOpacity = 0.15F;
-            this.panelPointDetailCard.Size = new System.Drawing.Size(250, 532);
-            this.panelPointDetailCard.TabIndex = 1;
-            // 
-            // plcPointDetailControl
-            // 
-            this.plcPointDetailControl.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.plcPointDetailControl.Location = new System.Drawing.Point(12, 12);
-            this.plcPointDetailControl.Margin = new System.Windows.Forms.Padding(0);
-            this.plcPointDetailControl.Name = "plcPointDetailControl";
-            this.plcPointDetailControl.Size = new System.Drawing.Size(226, 508);
-            this.plcPointDetailControl.TabIndex = 0;
             // 
             // panelPointListCard
             // 
@@ -134,7 +93,7 @@
             this.panelPointListCard.Radius = 0;
             this.panelPointListCard.ShadowOpacity = 0F;
             this.panelPointListCard.ShadowOpacityHover = 0F;
-            this.panelPointListCard.Size = new System.Drawing.Size(584, 532);
+            this.panelPointListCard.Size = new System.Drawing.Size(834, 532);
             this.panelPointListCard.TabIndex = 0;
             // 
             // plcPointVirtualListControl
@@ -143,14 +102,14 @@
             this.plcPointVirtualListControl.Location = new System.Drawing.Point(0, 0);
             this.plcPointVirtualListControl.Margin = new System.Windows.Forms.Padding(0);
             this.plcPointVirtualListControl.Name = "plcPointVirtualListControl";
-            this.plcPointVirtualListControl.Size = new System.Drawing.Size(584, 532);
+            this.plcPointVirtualListControl.Size = new System.Drawing.Size(834, 532);
             this.plcPointVirtualListControl.TabIndex = 0;
             // 
             // flowStats
             // 
             this.flowStats.Controls.Add(this.panelErrorPointCard);
-            this.flowStats.Controls.Add(this.panelOfflinePointCard);
-            this.flowStats.Controls.Add(this.panelOnlinePointCard);
+            this.flowStats.Controls.Add(this.panelUnreadablePointCard);
+            this.flowStats.Controls.Add(this.panelReadablePointCard);
             this.flowStats.Controls.Add(this.panelTotalPointCard);
             this.flowStats.Dock = System.Windows.Forms.DockStyle.Top;
             this.flowStats.Gap = 8;
@@ -201,83 +160,83 @@
             this.labelErrorPointTitle.TabIndex = 0;
             this.labelErrorPointTitle.Text = "异常";
             // 
-            // panelOfflinePointCard
+            // panelUnreadablePointCard
             // 
-            this.panelOfflinePointCard.Controls.Add(this.labelOfflinePointCount);
-            this.panelOfflinePointCard.Controls.Add(this.labelOfflinePointTitle);
-            this.panelOfflinePointCard.Location = new System.Drawing.Point(380, 6);
-            this.panelOfflinePointCard.Margin = new System.Windows.Forms.Padding(0);
-            this.panelOfflinePointCard.Name = "panelOfflinePointCard";
-            this.panelOfflinePointCard.Padding = new System.Windows.Forms.Padding(12);
-            this.panelOfflinePointCard.Radius = 12;
-            this.panelOfflinePointCard.Shadow = 4;
-            this.panelOfflinePointCard.ShadowOpacityAnimation = true;
-            this.panelOfflinePointCard.Size = new System.Drawing.Size(180, 72);
-            this.panelOfflinePointCard.TabIndex = 2;
+            this.panelUnreadablePointCard.Controls.Add(this.labelUnreadablePointCount);
+            this.panelUnreadablePointCard.Controls.Add(this.labelUnreadablePointTitle);
+            this.panelUnreadablePointCard.Location = new System.Drawing.Point(380, 6);
+            this.panelUnreadablePointCard.Margin = new System.Windows.Forms.Padding(0);
+            this.panelUnreadablePointCard.Name = "panelUnreadablePointCard";
+            this.panelUnreadablePointCard.Padding = new System.Windows.Forms.Padding(12);
+            this.panelUnreadablePointCard.Radius = 12;
+            this.panelUnreadablePointCard.Shadow = 4;
+            this.panelUnreadablePointCard.ShadowOpacityAnimation = true;
+            this.panelUnreadablePointCard.Size = new System.Drawing.Size(180, 72);
+            this.panelUnreadablePointCard.TabIndex = 2;
             // 
-            // labelOfflinePointCount
+            // labelUnreadablePointCount
             // 
-            this.labelOfflinePointCount.BackColor = System.Drawing.Color.Transparent;
-            this.labelOfflinePointCount.Dock = System.Windows.Forms.DockStyle.Right;
-            this.labelOfflinePointCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 18F, System.Drawing.FontStyle.Bold);
-            this.labelOfflinePointCount.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(193)))), ((int)(((byte)(7)))));
-            this.labelOfflinePointCount.Location = new System.Drawing.Point(104, 16);
-            this.labelOfflinePointCount.Margin = new System.Windows.Forms.Padding(0);
-            this.labelOfflinePointCount.Name = "labelOfflinePointCount";
-            this.labelOfflinePointCount.Size = new System.Drawing.Size(60, 40);
-            this.labelOfflinePointCount.TabIndex = 1;
-            this.labelOfflinePointCount.Text = "0";
+            this.labelUnreadablePointCount.BackColor = System.Drawing.Color.Transparent;
+            this.labelUnreadablePointCount.Dock = System.Windows.Forms.DockStyle.Right;
+            this.labelUnreadablePointCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 18F, System.Drawing.FontStyle.Bold);
+            this.labelUnreadablePointCount.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(193)))), ((int)(((byte)(7)))));
+            this.labelUnreadablePointCount.Location = new System.Drawing.Point(104, 16);
+            this.labelUnreadablePointCount.Margin = new System.Windows.Forms.Padding(0);
+            this.labelUnreadablePointCount.Name = "labelUnreadablePointCount";
+            this.labelUnreadablePointCount.Size = new System.Drawing.Size(60, 40);
+            this.labelUnreadablePointCount.TabIndex = 1;
+            this.labelUnreadablePointCount.Text = "0";
             // 
-            // labelOfflinePointTitle
+            // labelUnreadablePointTitle
             // 
-            this.labelOfflinePointTitle.BackColor = System.Drawing.Color.Transparent;
-            this.labelOfflinePointTitle.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labelOfflinePointTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(193)))), ((int)(((byte)(7)))));
-            this.labelOfflinePointTitle.Location = new System.Drawing.Point(16, 16);
-            this.labelOfflinePointTitle.Margin = new System.Windows.Forms.Padding(0);
-            this.labelOfflinePointTitle.Name = "labelOfflinePointTitle";
-            this.labelOfflinePointTitle.Size = new System.Drawing.Size(72, 40);
-            this.labelOfflinePointTitle.TabIndex = 0;
-            this.labelOfflinePointTitle.Text = "离线";
+            this.labelUnreadablePointTitle.BackColor = System.Drawing.Color.Transparent;
+            this.labelUnreadablePointTitle.Dock = System.Windows.Forms.DockStyle.Left;
+            this.labelUnreadablePointTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(193)))), ((int)(((byte)(7)))));
+            this.labelUnreadablePointTitle.Location = new System.Drawing.Point(16, 16);
+            this.labelUnreadablePointTitle.Margin = new System.Windows.Forms.Padding(0);
+            this.labelUnreadablePointTitle.Name = "labelUnreadablePointTitle";
+            this.labelUnreadablePointTitle.Size = new System.Drawing.Size(72, 40);
+            this.labelUnreadablePointTitle.TabIndex = 0;
+            this.labelUnreadablePointTitle.Text = "不可读";
             // 
-            // panelOnlinePointCard
+            // panelReadablePointCard
             // 
-            this.panelOnlinePointCard.Controls.Add(this.labelOnlinePointCount);
-            this.panelOnlinePointCard.Controls.Add(this.labelOnlinePointTitle);
-            this.panelOnlinePointCard.Location = new System.Drawing.Point(192, 6);
-            this.panelOnlinePointCard.Margin = new System.Windows.Forms.Padding(0);
-            this.panelOnlinePointCard.Name = "panelOnlinePointCard";
-            this.panelOnlinePointCard.Padding = new System.Windows.Forms.Padding(12);
-            this.panelOnlinePointCard.Radius = 12;
-            this.panelOnlinePointCard.Shadow = 4;
-            this.panelOnlinePointCard.ShadowOpacityAnimation = true;
-            this.panelOnlinePointCard.Size = new System.Drawing.Size(180, 72);
-            this.panelOnlinePointCard.TabIndex = 1;
+            this.panelReadablePointCard.Controls.Add(this.labelReadablePointCount);
+            this.panelReadablePointCard.Controls.Add(this.labelReadablePointTitle);
+            this.panelReadablePointCard.Location = new System.Drawing.Point(192, 6);
+            this.panelReadablePointCard.Margin = new System.Windows.Forms.Padding(0);
+            this.panelReadablePointCard.Name = "panelReadablePointCard";
+            this.panelReadablePointCard.Padding = new System.Windows.Forms.Padding(12);
+            this.panelReadablePointCard.Radius = 12;
+            this.panelReadablePointCard.Shadow = 4;
+            this.panelReadablePointCard.ShadowOpacityAnimation = true;
+            this.panelReadablePointCard.Size = new System.Drawing.Size(180, 72);
+            this.panelReadablePointCard.TabIndex = 1;
             // 
-            // labelOnlinePointCount
+            // labelReadablePointCount
             // 
-            this.labelOnlinePointCount.BackColor = System.Drawing.Color.Transparent;
-            this.labelOnlinePointCount.Dock = System.Windows.Forms.DockStyle.Right;
-            this.labelOnlinePointCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 18F, System.Drawing.FontStyle.Bold);
-            this.labelOnlinePointCount.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(82)))), ((int)(((byte)(196)))), ((int)(((byte)(26)))));
-            this.labelOnlinePointCount.Location = new System.Drawing.Point(104, 16);
-            this.labelOnlinePointCount.Margin = new System.Windows.Forms.Padding(0);
-            this.labelOnlinePointCount.Name = "labelOnlinePointCount";
-            this.labelOnlinePointCount.Size = new System.Drawing.Size(60, 40);
-            this.labelOnlinePointCount.TabIndex = 1;
-            this.labelOnlinePointCount.Text = "0";
+            this.labelReadablePointCount.BackColor = System.Drawing.Color.Transparent;
+            this.labelReadablePointCount.Dock = System.Windows.Forms.DockStyle.Right;
+            this.labelReadablePointCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 18F, System.Drawing.FontStyle.Bold);
+            this.labelReadablePointCount.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(82)))), ((int)(((byte)(196)))), ((int)(((byte)(26)))));
+            this.labelReadablePointCount.Location = new System.Drawing.Point(104, 16);
+            this.labelReadablePointCount.Margin = new System.Windows.Forms.Padding(0);
+            this.labelReadablePointCount.Name = "labelReadablePointCount";
+            this.labelReadablePointCount.Size = new System.Drawing.Size(60, 40);
+            this.labelReadablePointCount.TabIndex = 1;
+            this.labelReadablePointCount.Text = "0";
             // 
-            // labelOnlinePointTitle
+            // labelReadablePointTitle
             // 
-            this.labelOnlinePointTitle.BackColor = System.Drawing.Color.Transparent;
-            this.labelOnlinePointTitle.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labelOnlinePointTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(82)))), ((int)(((byte)(196)))), ((int)(((byte)(26)))));
-            this.labelOnlinePointTitle.Location = new System.Drawing.Point(16, 16);
-            this.labelOnlinePointTitle.Margin = new System.Windows.Forms.Padding(0);
-            this.labelOnlinePointTitle.Name = "labelOnlinePointTitle";
-            this.labelOnlinePointTitle.Size = new System.Drawing.Size(72, 40);
-            this.labelOnlinePointTitle.TabIndex = 0;
-            this.labelOnlinePointTitle.Text = "在线";
+            this.labelReadablePointTitle.BackColor = System.Drawing.Color.Transparent;
+            this.labelReadablePointTitle.Dock = System.Windows.Forms.DockStyle.Left;
+            this.labelReadablePointTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(82)))), ((int)(((byte)(196)))), ((int)(((byte)(26)))));
+            this.labelReadablePointTitle.Location = new System.Drawing.Point(16, 16);
+            this.labelReadablePointTitle.Margin = new System.Windows.Forms.Padding(0);
+            this.labelReadablePointTitle.Name = "labelReadablePointTitle";
+            this.labelReadablePointTitle.Size = new System.Drawing.Size(72, 40);
+            this.labelReadablePointTitle.TabIndex = 0;
+            this.labelReadablePointTitle.Text = "可读";
             // 
             // panelTotalPointCard
             // 
@@ -342,7 +301,7 @@
             this.flowToolbarLeft.Location = new System.Drawing.Point(4, 4);
             this.flowToolbarLeft.Margin = new System.Windows.Forms.Padding(0);
             this.flowToolbarLeft.Name = "flowToolbarLeft";
-            this.flowToolbarLeft.Size = new System.Drawing.Size(604, 36);
+            this.flowToolbarLeft.Size = new System.Drawing.Size(602, 36);
             this.flowToolbarLeft.TabIndex = 0;
             this.flowToolbarLeft.Text = "flowToolbarLeft";
             // 
@@ -419,13 +378,11 @@
             this.Size = new System.Drawing.Size(850, 680);
             this.panelRoot.ResumeLayout(false);
             this.panelContentCard.ResumeLayout(false);
-            this.gridContent.ResumeLayout(false);
-            this.panelPointDetailCard.ResumeLayout(false);
             this.panelPointListCard.ResumeLayout(false);
             this.flowStats.ResumeLayout(false);
             this.panelErrorPointCard.ResumeLayout(false);
-            this.panelOfflinePointCard.ResumeLayout(false);
-            this.panelOnlinePointCard.ResumeLayout(false);
+            this.panelUnreadablePointCard.ResumeLayout(false);
+            this.panelReadablePointCard.ResumeLayout(false);
             this.panelTotalPointCard.ResumeLayout(false);
             this.panelToolbar.ResumeLayout(false);
             this.flowToolbarLeft.ResumeLayout(false);
@@ -436,19 +393,17 @@
 
         private AntdUI.Panel panelRoot;
         private AntdUI.Panel panelContentCard;
-        private AntdUI.GridPanel gridContent;
-        private AntdUI.Panel panelPointDetailCard;
         private AntdUI.Panel panelPointListCard;
         private AntdUI.FlowPanel flowStats;
         private AntdUI.Panel panelErrorPointCard;
         private AntdUI.Label labelErrorPointCount;
         private AntdUI.Label labelErrorPointTitle;
-        private AntdUI.Panel panelOfflinePointCard;
-        private AntdUI.Label labelOfflinePointCount;
-        private AntdUI.Label labelOfflinePointTitle;
-        private AntdUI.Panel panelOnlinePointCard;
-        private AntdUI.Label labelOnlinePointCount;
-        private AntdUI.Label labelOnlinePointTitle;
+        private AntdUI.Panel panelUnreadablePointCard;
+        private AntdUI.Label labelUnreadablePointCount;
+        private AntdUI.Label labelUnreadablePointTitle;
+        private AntdUI.Panel panelReadablePointCard;
+        private AntdUI.Label labelReadablePointCount;
+        private AntdUI.Label labelReadablePointTitle;
         private AntdUI.Panel panelTotalPointCard;
         private AntdUI.Label labelTotalPointCount;
         private AntdUI.Label labelTotalPointTitle;
@@ -461,6 +416,5 @@
         private AntdUI.FlowPanel flowToolbarRight;
         private AntdUI.Button buttonRefresh;
         private PlcPointVirtualListControl plcPointVirtualListControl;
-        private PlcPointDetailControl plcPointDetailControl;
     }
 }
