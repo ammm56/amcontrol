@@ -604,6 +604,9 @@
     <EmbeddedResource Include="Views\Motion\MotionMonitorPage.resx">
       <DependentUpon>MotionMonitorPage.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\Plc\PlcMonitorPage.resx">
+      <DependentUpon>PlcMonitorPage.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Views\Plc\PlcStatusDetailControl.resx">
       <DependentUpon>PlcStatusDetailControl.cs</DependentUpon>
     </EmbeddedResource>

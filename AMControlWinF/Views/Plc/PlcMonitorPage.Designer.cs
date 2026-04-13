@@ -20,7 +20,9 @@
             this.panelContentCard = new AntdUI.Panel();
             this.gridContent = new AntdUI.GridPanel();
             this.panelPointDetailCard = new AntdUI.Panel();
+            this.plcPointDetailControl = new AMControlWinF.Views.Plc.PlcPointDetailControl();
             this.panelPointListCard = new AntdUI.Panel();
+            this.plcPointVirtualListControl = new AMControlWinF.Views.Plc.PlcPointVirtualListControl();
             this.flowStats = new AntdUI.FlowPanel();
             this.panelErrorPointCard = new AntdUI.Panel();
             this.labelErrorPointCount = new AntdUI.Label();
@@ -39,8 +41,6 @@
             this.inputSearch = new AntdUI.Input();
             this.flowToolbarRight = new AntdUI.FlowPanel();
             this.buttonRefresh = new AntdUI.Button();
-            this.plcPointDetailControl = new AMControlWinF.Views.Plc.PlcPointDetailControl();
-            this.plcPointVirtualListControl = new AMControlWinF.Views.Plc.PlcPointVirtualListControl();
             this.panelRoot.SuspendLayout();
             this.panelContentCard.SuspendLayout();
             this.gridContent.SuspendLayout();
@@ -92,7 +92,7 @@
             this.gridContent.Margin = new System.Windows.Forms.Padding(0);
             this.gridContent.Name = "gridContent";
             this.gridContent.Size = new System.Drawing.Size(964, 532);
-            this.gridContent.Span = "100% 300";
+            this.gridContent.Span = "100% 250";
             this.gridContent.TabIndex = 0;
             // 
             // panelPointDetailCard
@@ -100,15 +100,24 @@
             this.panelPointDetailCard.BackColor = System.Drawing.Color.Transparent;
             this.panelPointDetailCard.Controls.Add(this.plcPointDetailControl);
             this.panelPointDetailCard.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelPointDetailCard.Location = new System.Drawing.Point(664, 0);
+            this.panelPointDetailCard.Location = new System.Drawing.Point(714, 0);
             this.panelPointDetailCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelPointDetailCard.Name = "panelPointDetailCard";
             this.panelPointDetailCard.Padding = new System.Windows.Forms.Padding(8);
             this.panelPointDetailCard.Radius = 12;
             this.panelPointDetailCard.Shadow = 4;
             this.panelPointDetailCard.ShadowOpacity = 0.15F;
-            this.panelPointDetailCard.Size = new System.Drawing.Size(300, 532);
+            this.panelPointDetailCard.Size = new System.Drawing.Size(250, 532);
             this.panelPointDetailCard.TabIndex = 1;
+            // 
+            // plcPointDetailControl
+            // 
+            this.plcPointDetailControl.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.plcPointDetailControl.Location = new System.Drawing.Point(12, 12);
+            this.plcPointDetailControl.Margin = new System.Windows.Forms.Padding(0);
+            this.plcPointDetailControl.Name = "plcPointDetailControl";
+            this.plcPointDetailControl.Size = new System.Drawing.Size(226, 508);
+            this.plcPointDetailControl.TabIndex = 0;
             // 
             // panelPointListCard
             // 
@@ -121,8 +130,17 @@
             this.panelPointListCard.Radius = 0;
             this.panelPointListCard.ShadowOpacity = 0F;
             this.panelPointListCard.ShadowOpacityHover = 0F;
-            this.panelPointListCard.Size = new System.Drawing.Size(664, 532);
+            this.panelPointListCard.Size = new System.Drawing.Size(714, 532);
             this.panelPointListCard.TabIndex = 0;
+            // 
+            // plcPointVirtualListControl
+            // 
+            this.plcPointVirtualListControl.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.plcPointVirtualListControl.Location = new System.Drawing.Point(0, 0);
+            this.plcPointVirtualListControl.Margin = new System.Windows.Forms.Padding(0);
+            this.plcPointVirtualListControl.Name = "plcPointVirtualListControl";
+            this.plcPointVirtualListControl.Size = new System.Drawing.Size(714, 532);
+            this.plcPointVirtualListControl.TabIndex = 0;
             // 
             // flowStats
             // 
@@ -158,7 +176,7 @@
             this.labelErrorPointCount.BackColor = System.Drawing.Color.Transparent;
             this.labelErrorPointCount.Dock = System.Windows.Forms.DockStyle.Right;
             this.labelErrorPointCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 18F, System.Drawing.FontStyle.Bold);
-            this.labelErrorPointCount.ForeColor = System.Drawing.Color.FromArgb(255, 77, 79);
+            this.labelErrorPointCount.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(77)))), ((int)(((byte)(79)))));
             this.labelErrorPointCount.Location = new System.Drawing.Point(104, 16);
             this.labelErrorPointCount.Margin = new System.Windows.Forms.Padding(0);
             this.labelErrorPointCount.Name = "labelErrorPointCount";
@@ -170,7 +188,7 @@
             // 
             this.labelErrorPointTitle.BackColor = System.Drawing.Color.Transparent;
             this.labelErrorPointTitle.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labelErrorPointTitle.ForeColor = System.Drawing.Color.FromArgb(255, 77, 79);
+            this.labelErrorPointTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(77)))), ((int)(((byte)(79)))));
             this.labelErrorPointTitle.Location = new System.Drawing.Point(16, 16);
             this.labelErrorPointTitle.Margin = new System.Windows.Forms.Padding(0);
             this.labelErrorPointTitle.Name = "labelErrorPointTitle";
@@ -197,7 +215,7 @@
             this.labelOnlinePointCount.BackColor = System.Drawing.Color.Transparent;
             this.labelOnlinePointCount.Dock = System.Windows.Forms.DockStyle.Right;
             this.labelOnlinePointCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 18F, System.Drawing.FontStyle.Bold);
-            this.labelOnlinePointCount.ForeColor = System.Drawing.Color.FromArgb(82, 196, 26);
+            this.labelOnlinePointCount.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(82)))), ((int)(((byte)(196)))), ((int)(((byte)(26)))));
             this.labelOnlinePointCount.Location = new System.Drawing.Point(104, 16);
             this.labelOnlinePointCount.Margin = new System.Windows.Forms.Padding(0);
             this.labelOnlinePointCount.Name = "labelOnlinePointCount";
@@ -209,7 +227,7 @@
             // 
             this.labelOnlinePointTitle.BackColor = System.Drawing.Color.Transparent;
             this.labelOnlinePointTitle.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labelOnlinePointTitle.ForeColor = System.Drawing.Color.FromArgb(82, 196, 26);
+            this.labelOnlinePointTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(82)))), ((int)(((byte)(196)))), ((int)(((byte)(26)))));
             this.labelOnlinePointTitle.Location = new System.Drawing.Point(16, 16);
             this.labelOnlinePointTitle.Margin = new System.Windows.Forms.Padding(0);
             this.labelOnlinePointTitle.Name = "labelOnlinePointTitle";
@@ -263,8 +281,10 @@
             this.panelToolbar.Location = new System.Drawing.Point(8, 8);
             this.panelToolbar.Margin = new System.Windows.Forms.Padding(0);
             this.panelToolbar.Name = "panelToolbar";
-            this.panelToolbar.Padding = new System.Windows.Forms.Padding(4, 4, 4, 0);
+            this.panelToolbar.Padding = new System.Windows.Forms.Padding(4);
             this.panelToolbar.Radius = 0;
+            this.panelToolbar.ShadowOpacity = 0F;
+            this.panelToolbar.ShadowOpacityHover = 0F;
             this.panelToolbar.Size = new System.Drawing.Size(964, 44);
             this.panelToolbar.TabIndex = 0;
             // 
@@ -274,47 +294,50 @@
             this.flowToolbarLeft.Controls.Add(this.selectPlc);
             this.flowToolbarLeft.Controls.Add(this.selectGroup);
             this.flowToolbarLeft.Controls.Add(this.inputSearch);
-            this.flowToolbarLeft.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.flowToolbarLeft.Dock = System.Windows.Forms.DockStyle.Left;
             this.flowToolbarLeft.Gap = 8;
             this.flowToolbarLeft.Location = new System.Drawing.Point(4, 4);
             this.flowToolbarLeft.Margin = new System.Windows.Forms.Padding(0);
             this.flowToolbarLeft.Name = "flowToolbarLeft";
-            this.flowToolbarLeft.Size = new System.Drawing.Size(804, 40);
+            this.flowToolbarLeft.Size = new System.Drawing.Size(569, 36);
             this.flowToolbarLeft.TabIndex = 0;
             this.flowToolbarLeft.Text = "flowToolbarLeft";
             // 
             // labelRuntimeSummary
             // 
-            this.labelRuntimeSummary.Location = new System.Drawing.Point(4, 0);
+            this.labelRuntimeSummary.Location = new System.Drawing.Point(421, 0);
             this.labelRuntimeSummary.Margin = new System.Windows.Forms.Padding(0);
             this.labelRuntimeSummary.Name = "labelRuntimeSummary";
-            this.labelRuntimeSummary.Size = new System.Drawing.Size(180, 40);
+            this.labelRuntimeSummary.Size = new System.Drawing.Size(135, 40);
             this.labelRuntimeSummary.TabIndex = 0;
             this.labelRuntimeSummary.Text = "状态未知";
-            this.labelRuntimeSummary.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // selectPlc
             // 
-            this.selectPlc.Location = new System.Drawing.Point(192, 4);
+            this.selectPlc.Location = new System.Drawing.Point(284, 4);
             this.selectPlc.Margin = new System.Windows.Forms.Padding(0, 4, 0, 0);
             this.selectPlc.Name = "selectPlc";
-            this.selectPlc.Size = new System.Drawing.Size(160, 32);
+            this.selectPlc.Radius = 0;
+            this.selectPlc.Size = new System.Drawing.Size(129, 32);
             this.selectPlc.TabIndex = 1;
+            this.selectPlc.WaveSize = 0;
             // 
             // selectGroup
             // 
-            this.selectGroup.Location = new System.Drawing.Point(360, 4);
+            this.selectGroup.Location = new System.Drawing.Point(147, 4);
             this.selectGroup.Margin = new System.Windows.Forms.Padding(0, 4, 0, 0);
             this.selectGroup.Name = "selectGroup";
-            this.selectGroup.Size = new System.Drawing.Size(160, 32);
+            this.selectGroup.Radius = 0;
+            this.selectGroup.Size = new System.Drawing.Size(129, 32);
             this.selectGroup.TabIndex = 2;
+            this.selectGroup.WaveSize = 0;
             // 
             // inputSearch
             // 
-            this.inputSearch.Location = new System.Drawing.Point(528, 4);
+            this.inputSearch.Location = new System.Drawing.Point(0, 4);
             this.inputSearch.Margin = new System.Windows.Forms.Padding(0, 4, 0, 0);
             this.inputSearch.Name = "inputSearch";
-            this.inputSearch.Size = new System.Drawing.Size(260, 32);
+            this.inputSearch.Size = new System.Drawing.Size(139, 32);
             this.inputSearch.TabIndex = 3;
             this.inputSearch.WaveSize = 0;
             // 
@@ -327,7 +350,7 @@
             this.flowToolbarRight.Location = new System.Drawing.Point(808, 4);
             this.flowToolbarRight.Margin = new System.Windows.Forms.Padding(0);
             this.flowToolbarRight.Name = "flowToolbarRight";
-            this.flowToolbarRight.Size = new System.Drawing.Size(152, 40);
+            this.flowToolbarRight.Size = new System.Drawing.Size(152, 36);
             this.flowToolbarRight.TabIndex = 1;
             this.flowToolbarRight.Text = "flowToolbarRight";
             // 
@@ -344,26 +367,9 @@
             this.buttonRefresh.Type = AntdUI.TTypeMini.Primary;
             this.buttonRefresh.WaveSize = 0;
             // 
-            // plcPointDetailControl
-            // 
-            this.plcPointDetailControl.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.plcPointDetailControl.Location = new System.Drawing.Point(12, 12);
-            this.plcPointDetailControl.Margin = new System.Windows.Forms.Padding(0);
-            this.plcPointDetailControl.Name = "plcPointDetailControl";
-            this.plcPointDetailControl.Size = new System.Drawing.Size(276, 508);
-            this.plcPointDetailControl.TabIndex = 0;
-            // 
-            // plcPointVirtualListControl
-            // 
-            this.plcPointVirtualListControl.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.plcPointVirtualListControl.Location = new System.Drawing.Point(0, 0);
-            this.plcPointVirtualListControl.Margin = new System.Windows.Forms.Padding(0);
-            this.plcPointVirtualListControl.Name = "plcPointVirtualListControl";
-            this.plcPointVirtualListControl.Size = new System.Drawing.Size(664, 532);
-            this.plcPointVirtualListControl.TabIndex = 0;
-            // 
             // PlcMonitorPage
             // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.panelRoot);
             this.Margin = new System.Windows.Forms.Padding(0);
@@ -382,6 +388,7 @@
             this.flowToolbarLeft.ResumeLayout(false);
             this.flowToolbarRight.ResumeLayout(false);
             this.ResumeLayout(false);
+
         }
 
         private AntdUI.Panel panelRoot;
