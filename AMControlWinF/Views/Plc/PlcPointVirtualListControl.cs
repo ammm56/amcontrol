@@ -64,7 +64,6 @@ namespace AMControlWinF.Views.Plc
 
         /// <summary>
         /// 绑定内部事件。
-        /// 这里只包装 `VirtualPanel.ItemClick`。
         /// </summary>
         private void BindEvents()
         {
@@ -91,14 +90,7 @@ namespace AMControlWinF.Views.Plc
 
         /// <summary>
         /// 判断是否可以原位更新。
-        ///
-        /// 只比较：
-        /// 1. 项数量；
-        /// 2. 每个位置上的 PointName。
-        ///
-        /// 原因：
-        /// - 普通刷新时对象实例会变化，但 PointName 是稳定标识；
-        /// - 只要顺序未变，就没必要重建 VirtualPanel。
+        /// 只比较数量和当前顺序上的 PointName。
         /// </summary>
         private bool CanUpdateInPlace(IList<PlcMonitorPageModel.PointMonitorItem> items)
         {
@@ -134,7 +126,6 @@ namespace AMControlWinF.Views.Plc
 
         /// <summary>
         /// 原位更新卡片数据。
-        /// 不清空 `VirtualPanel.Items`，仅替换每张卡片绑定的数据。
         /// </summary>
         private void UpdateItemsInPlace(IList<PlcMonitorPageModel.PointMonitorItem> items, string selectedPointName)
         {
@@ -156,7 +147,6 @@ namespace AMControlWinF.Views.Plc
 
         /// <summary>
         /// 重建虚拟卡片列表。
-        /// 用于首次加载、筛选变化或顺序变化场景。
         /// </summary>
         private void RebuildItems(IList<PlcMonitorPageModel.PointMonitorItem> items, string selectedPointName)
         {
@@ -176,7 +166,7 @@ namespace AMControlWinF.Views.Plc
                             string.Equals(item.PointName, selectedPointName, StringComparison.OrdinalIgnoreCase)));
                     }
 
-                    virtualPanelPoints.Items.AddRange(virtualItems);
+                    virtualPanelPoints.Items.AddRange(virtualItems.ToArray());
                 }
             }
             finally
@@ -200,9 +190,6 @@ namespace AMControlWinF.Views.Plc
 
         /// <summary>
         /// 单个 PLC 点位卡片。
-        ///
-        /// 这里不是普通 Control，而是 `VirtualShadowItem`。
-        /// 真实卡片内容由 `Size()` 和 `Paint()` 决定。
         /// </summary>
         private sealed class PlcPointVirtualCardItem : VirtualShadowItem
         {
@@ -218,14 +205,8 @@ namespace AMControlWinF.Views.Plc
                 CanClick = true;
             }
 
-            /// <summary>
-            /// 当前卡片绑定的数据项。
-            /// </summary>
             public PlcMonitorPageModel.PointMonitorItem Item { get; private set; }
 
-            /// <summary>
-            /// 绑定或更新卡片数据。
-            /// </summary>
             public void Bind(PlcMonitorPageModel.PointMonitorItem item, bool selected)
             {
                 Item = item;
@@ -234,15 +215,14 @@ namespace AMControlWinF.Views.Plc
             }
 
             /// <summary>
-            /// 返回卡片尺寸。
-            /// 这里统一固定尺寸，确保虚拟布局稳定。
+            /// 卡片尺寸与 `PlcStatusVirtualListControl` 对齐。
             /// </summary>
             public override Size Size(Canvas g, VirtualPanelArgs e)
             {
                 float dpi = g == null ? 1F : g.Dpi;
                 return new Size(
-                    (int)Math.Round(188 * dpi),
-                    (int)Math.Round(150 * dpi));
+                    (int)Math.Round(172 * dpi),
+                    (int)Math.Round(140 * dpi));
             }
 
             public override bool MouseMove(VirtualPanel sender, VirtualPanelMouseArgs e)
@@ -253,11 +233,11 @@ namespace AMControlWinF.Views.Plc
             /// <summary>
             /// 绘制点位卡片。
             ///
-            /// 当前布局说明：
-            /// 1. 左上显示质量标签；
-            /// 2. 右侧显示在线/离线标签；
-            /// 3. 中间显示点位名、地址、类型和值；
-            /// 4. 底部优先显示异常，否则显示更新时间。
+            /// 布局节奏对齐 `PlcStatusVirtualListControl`：
+            /// 1. 顶部两枚状态标签；
+            /// 2. 中间三行紧凑信息；
+            /// 3. 底部一行显示错误或更新时间；
+            /// 4. 卡片高度、留白、文字密度尽量保持一致。
             /// </summary>
             public override void Paint(Canvas g, VirtualPanelArgs e)
             {
@@ -288,7 +268,6 @@ namespace AMControlWinF.Views.Plc
                 Color goodColor = Color.FromArgb(82, 196, 26);
                 Color disconnectedColor = Color.FromArgb(250, 173, 20);
                 Color errorColor = Color.FromArgb(245, 108, 108);
-                Color statusColor = Item.IsConnected ? goodColor : disconnectedColor;
 
                 using (var path = rect.RoundPath(e.Radius))
                 {
@@ -298,14 +277,14 @@ namespace AMControlWinF.Views.Plc
 
                 DrawBadge(
                     g,
-                    new Rectangle(12, 12, 72, 22),
+                    new Rectangle(12, 12, 58, 22),
                     ResolveQualityColor(Item, goodColor, disconnectedColor, errorColor),
-                    TrimText(Item.QualityText, 10));
+                    TrimText(Item.QualityText, 8));
 
                 DrawBadge(
                     g,
-                    new Rectangle(90, 12, 52, 22),
-                    statusColor,
+                    new Rectangle(76, 12, 58, 22),
+                    Item.IsConnected ? goodColor : disconnectedColor,
                     Item.IsConnected ? "在线" : "离线");
 
                 g.String(
@@ -315,22 +294,22 @@ namespace AMControlWinF.Views.Plc
                     new Point(12, 42));
 
                 g.String(
-                    TrimText((string.IsNullOrWhiteSpace(Item.AddressText) ? "-" : Item.AddressText), 26),
+                    TrimText(string.IsNullOrWhiteSpace(Item.AddressText) ? "-" : Item.AddressText, 22),
                     FontBody,
                     subTextColor,
-                    new Point(12, 66));
+                    new Point(12, 64));
 
                 g.String(
-                    TrimText((string.IsNullOrWhiteSpace(Item.DataType) ? "-" : Item.DataType), 16),
+                    TrimText(string.IsNullOrWhiteSpace(Item.DataType) ? "-" : Item.DataType, 12),
                     FontBody,
                     subTextColor,
-                    new Point(12, 88));
+                    new Point(12, 84));
 
                 g.String(
-                    TrimText("值：" + (string.IsNullOrWhiteSpace(Item.ValueText) ? "-" : Item.ValueText), 22),
+                    TrimText(BuildValueText(Item.ValueText), 12),
                     FontBody,
-                    textColor,
-                    new Point(12, 110));
+                    subTextColor,
+                    new Point(106, 84));
 
                 if (Item.HasError)
                 {
@@ -338,7 +317,7 @@ namespace AMControlWinF.Views.Plc
                         "异常：" + Item.ErrorBriefText,
                         FontBody,
                         errorColor,
-                        new Rectangle(12, 130, rect.Width - 24, 18),
+                        new Rectangle(12, 102, rect.Width - 24, 18),
                         FormatFlags.Left | FormatFlags.Top | FormatFlags.NoWrapEllipsis);
                 }
                 else
@@ -347,13 +326,20 @@ namespace AMControlWinF.Views.Plc
                         TrimText(Item.UpdateTimeText, 22),
                         FontBody,
                         subTextColor,
-                        new Point(12, 130));
+                        new Point(12, 102));
                 }
             }
 
-            /// <summary>
-            /// 根据质量文字解析卡片标签颜色。
-            /// </summary>
+            private static string BuildValueText(string valueText)
+            {
+                if (string.IsNullOrWhiteSpace(valueText))
+                {
+                    return "值：-";
+                }
+
+                return "值：" + valueText;
+            }
+
             private static Color ResolveQualityColor(
                 PlcMonitorPageModel.PointMonitorItem item,
                 Color goodColor,
@@ -383,9 +369,6 @@ namespace AMControlWinF.Views.Plc
                 return goodColor;
             }
 
-            /// <summary>
-            /// 绘制顶部标签。
-            /// </summary>
             private static void DrawBadge(Canvas g, Rectangle rect, Color backColor, string text)
             {
                 using (var path = rect.RoundPath(6))
@@ -400,9 +383,6 @@ namespace AMControlWinF.Views.Plc
                     rect);
             }
 
-            /// <summary>
-            /// 超长文本裁剪，避免卡片文字溢出。
-            /// </summary>
             private static string TrimText(string text, int maxLength)
             {
                 if (string.IsNullOrWhiteSpace(text))

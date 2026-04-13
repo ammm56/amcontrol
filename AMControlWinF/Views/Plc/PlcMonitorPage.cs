@@ -11,6 +11,10 @@ namespace AMControlWinF.Views.Plc
 {
     /// <summary>
     /// PLC 点位监视页面。
+    /// 布局与 `PlcStatusPage` 保持一致：
+    /// 1. 顶部工具栏；
+    /// 2. 中部统计卡片；
+    /// 3. 底部左右两列内容区。
     /// </summary>
     public partial class PlcMonitorPage : UserControl
     {
@@ -137,12 +141,17 @@ namespace AMControlWinF.Views.Plc
             labelRuntimeSummary.Text = _model.RuntimeSummaryText;
             labelTotalPointCount.Text = _model.TotalPointCount.ToString();
             labelOnlinePointCount.Text = _model.OnlinePointCount.ToString();
+            labelOfflinePointCount.Text = _model.OfflinePointCount.ToString();
             labelErrorPointCount.Text = _model.ErrorPointCount.ToString();
 
             BindFilters();
             RefreshPointSelection();
         }
 
+        /// <summary>
+        /// 绑定顶部筛选控件。
+        /// 绑定时临时屏蔽事件，避免刷新过程中再次触发筛选逻辑。
+        /// </summary>
         private void BindFilters()
         {
             _isBindingFilters = true;
@@ -160,7 +169,10 @@ namespace AMControlWinF.Views.Plc
                     _model.GroupOptions,
                     _model.SelectedGroupName);
 
-                if (!string.Equals(inputSearch.Text ?? string.Empty, _model.SearchText ?? string.Empty, StringComparison.Ordinal))
+                if (!string.Equals(
+                    inputSearch.Text ?? string.Empty,
+                    _model.SearchText ?? string.Empty,
+                    StringComparison.Ordinal))
                 {
                     inputSearch.Text = _model.SearchText ?? string.Empty;
                 }

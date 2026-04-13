@@ -120,6 +120,11 @@ namespace AM.PageModel.Plc
             get { return _allPoints.Count(x => x.IsConnected); }
         }
 
+        public int OfflinePointCount
+        {
+            get { return _allPoints.Count(x => !x.IsConnected); }
+        }
+
         public int ErrorPointCount
         {
             get { return _allPoints.Count(x => x.HasError); }
@@ -329,6 +334,7 @@ namespace AM.PageModel.Plc
         {
             OnPropertyChanged(nameof(TotalPointCount));
             OnPropertyChanged(nameof(OnlinePointCount));
+            OnPropertyChanged(nameof(OfflinePointCount));
             OnPropertyChanged(nameof(ErrorPointCount));
             OnPropertyChanged(nameof(SelectedPointText));
         }
@@ -377,17 +383,29 @@ namespace AM.PageModel.Plc
         public sealed class PointMonitorItem
         {
             public string PlcName { get; set; }
+
             public string PointName { get; set; }
+
             public string DisplayName { get; set; }
+
             public string GroupName { get; set; }
+
             public string AddressText { get; set; }
+
             public string DataType { get; set; }
+
             public string ValueText { get; set; }
+
             public string RawValue { get; set; }
+
             public string Quality { get; set; }
+
             public bool IsConnected { get; set; }
+
             public bool HasError { get; set; }
+
             public string ErrorMessage { get; set; }
+
             public DateTime UpdateTime { get; set; }
 
             public string DisplayTitle
@@ -418,6 +436,19 @@ namespace AM.PageModel.Plc
                 get
                 {
                     return string.IsNullOrWhiteSpace(Quality) ? "-" : Quality;
+                }
+            }
+
+            public string ValueBriefText
+            {
+                get
+                {
+                    if (string.IsNullOrWhiteSpace(ValueText))
+                    {
+                        return "值：-";
+                    }
+
+                    return "值：" + ValueText;
                 }
             }
 
