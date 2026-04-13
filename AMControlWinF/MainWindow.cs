@@ -480,6 +480,8 @@ namespace AMControlWinF
                 { "MotionConfig.Actuator",  () => new ActuatorManagementPage() },
 
                 { "PLC.Status",             () => new PlcStatusPage() },
+                { "PLC.Monitor",            () => new PlcMonitorPage() },
+                { "PLC.Debug",              () => new PlcDebugPage() },
 
                 { "SysConfig.Plc",          () => new PlcConfigManagementPage() },
 

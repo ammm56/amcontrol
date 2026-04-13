@@ -397,6 +397,30 @@
     <Compile Include="Views\Motion\MotionMonitorVirtualListControl.Designer.cs">
       <DependentUpon>MotionMonitorVirtualListControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\Plc\PlcDebugPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Plc\PlcDebugPage.Designer.cs">
+      <DependentUpon>PlcDebugPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Plc\PlcMonitorPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Plc\PlcMonitorPage.Designer.cs">
+      <DependentUpon>PlcMonitorPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Plc\PlcPointDetailControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Plc\PlcPointDetailControl.Designer.cs">
+      <DependentUpon>PlcPointDetailControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Plc\PlcPointVirtualListControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Plc\PlcPointVirtualListControl.Designer.cs">
+      <DependentUpon>PlcPointVirtualListControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="Views\Plc\PlcStatusDetailControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
