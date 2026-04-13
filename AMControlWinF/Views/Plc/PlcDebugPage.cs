@@ -11,10 +11,10 @@ namespace AMControlWinF.Views.Plc
 {
     /// <summary>
     /// PLC 调试页面。
-    /// 当前版本采用“左操作 + 右结果”的工程调试布局：
-    /// 1. 左侧：配置点位调试 + 直接地址调试；
-    /// 2. 右侧：最近一次执行结果；
-    /// 3. 调试历史已由 Model 承载，后续可继续扩展到界面。
+    /// 三行布局：
+    /// 1. 顶部工具栏；
+    /// 2. 中间空占位；
+    /// 3. 左侧调试操作卡片，右侧执行结果与历史记录表。
     /// </summary>
     public partial class PlcDebugPage : UserControl
     {
@@ -24,12 +24,74 @@ namespace AMControlWinF.Views.Plc
         private bool _isBusy;
         private bool _isBindingView;
 
+        private AntList<ResultTableRow> _resultTableRows;
+
         public PlcDebugPage()
         {
             InitializeComponent();
+
             _model = new PlcDebugPageModel();
-            BindEvents();
+            _resultTableRows = new AntList<ResultTableRow>();
+
+            InitializeTables();
             ApplyStaticViewState();
+            BindEvents();
+            RefreshOperationState();
+        }
+
+        private void InitializeTables()
+        {
+            tableResults.Columns = new ColumnCollection()
+            {
+                new Column("TimeText", "时间", ColumnAlign.Center)
+                {
+                    Width = "140",
+                    Fixed = true
+                },
+                new Column("ResultTag", "结果", ColumnAlign.Center)
+                {
+                    Width = "70"
+                },
+                new Column("ActionName", "操作", ColumnAlign.Left)
+                {
+                    Width = "120"
+                },
+                new Column("TargetModeText", "模式", ColumnAlign.Center)
+                {
+                    Width = "90"
+                },
+                new Column("PlcName", "PLC", ColumnAlign.Left)
+                {
+                    Width = "110"
+                },
+                new Column("TargetText", "目标", ColumnAlign.Left)
+                {
+                    Width = "140"
+                },
+                new Column("DataTypeText", "类型", ColumnAlign.Center)
+                {
+                    Width = "120"
+                },
+                new Column("ValueText", "值", ColumnAlign.Left)
+                {
+                    Width = "120"
+                },
+                new Column("Quality", "质量", ColumnAlign.Center)
+                {
+                    Width = "80"
+                },
+                new Column("MessageText", "消息", ColumnAlign.Left)
+                {
+                    Width = "220"
+                }
+            };
+        }
+
+        private void ApplyStaticViewState()
+        {
+            inputPointAddress.Enabled = false;
+            inputPointDataType.Enabled = false;
+            inputPointLength.Enabled = false;
         }
 
         private void BindEvents()
@@ -140,17 +202,6 @@ namespace AMControlWinF.Views.Plc
             buttonWriteAddress.Click += async (s, e) => await ExecuteAsync(() => _model.WriteAddress());
         }
 
-        /// <summary>
-        /// 固定视图状态。
-        /// 配置点位元信息仅作展示，不允许在调试页修改。
-        /// </summary>
-        private void ApplyStaticViewState()
-        {
-            inputPointAddress.Enabled = false;
-            inputPointDataType.Enabled = false;
-            inputPointLength.Enabled = false;
-        }
-
         private async void PlcDebugPage_Load(object sender, EventArgs e)
         {
             if (_isFirstLoad)
@@ -216,6 +267,7 @@ namespace AMControlWinF.Views.Plc
             try
             {
                 labelRuntimeSummary.Text = _model.RuntimeSummaryText;
+                labelHistorySummary.Text = string.Format("最近 {0} 条执行结果", _model.ResultHistoryCount);
 
                 BindSelectItems(
                     selectPlcGlobal,
@@ -238,7 +290,7 @@ namespace AMControlWinF.Views.Plc
 
                 BindConfigPointMeta();
                 BindDirectAddressArea();
-                BindResult();
+                BindResultTable();
                 RefreshOperationState();
             }
             finally
@@ -253,9 +305,6 @@ namespace AMControlWinF.Views.Plc
             inputPointDataType.Text = BuildConfigPointDataTypeText();
             inputPointLength.Text = _model.ConfigPointLength.ToString();
             inputPointWriteValue.Text = _model.ConfigWriteValueText;
-
-            // 当前 Designer 还没有单独的配置点提示标签，
-            // 先把权限/启用状态压缩到标题中，避免页面信息缺失。
             labelPointOpTitle.Text = BuildPointOperationTitle();
         }
 
@@ -265,90 +314,40 @@ namespace AMControlWinF.Views.Plc
             inputDirectLength.Text = _model.DirectLength.ToString();
             inputDirectWriteValue.Text = _model.DirectWriteValueText;
             checkDirectWriteConfirmed.Checked = _model.DirectWriteConfirmed;
+            labelDirectWriteTitle.Text = "按地址读写";
+        }
 
-            // 直接地址读取区当前已有提示标签，可复用展示操作条件。
-            labelDirectReadTip.Text = _model.DirectOperationHintText;
+        private void BindResultTable()
+        {
+            _resultTableRows = new AntList<ResultTableRow>(
+                _model.ResultHistory.Select(x => new ResultTableRow(x)).ToList());
+
+            tableResults.DataSource = _resultTableRows;
         }
 
         private void RefreshOperationState()
         {
-            buttonTestReadPoint.Enabled = !_isBusy && _model.CanReadSelectedPoint;
-            buttonWritePoint.Enabled = !_isBusy && _model.CanWriteSelectedPoint;
-
-            buttonTestReadAddress.Enabled = !_isBusy && _model.CanReadDirectAddress;
-            buttonWriteAddress.Enabled = !_isBusy && _model.CanWriteDirectAddress;
-
-            // 仅禁止配置元信息编辑；写入值允许编辑。
-            inputPointWriteValue.Enabled = !_isBusy && _model.CanWriteSelectedPoint;
-
-            inputDirectAddress.Enabled = !_isBusy;
-            inputDirectLength.Enabled = !_isBusy;
-            selectDirectDataType.Enabled = !_isBusy;
-            inputDirectWriteValue.Enabled = !_isBusy;
-            checkDirectWriteConfirmed.Enabled = !_isBusy;
+            buttonRefresh.Enabled = !_isBusy;
 
             selectPlcGlobal.Enabled = !_isBusy;
             selectPoint.Enabled = !_isBusy;
-            buttonRefresh.Enabled = !_isBusy;
 
-            labelDirectWriteTitle.Text = BuildDirectWriteTitle();
-        }
+            buttonTestReadPoint.Enabled = !_isBusy && _model.CanReadSelectedPoint;
+            buttonWritePoint.Enabled = !_isBusy && _model.CanWriteSelectedPoint;
+            inputPointWriteValue.Enabled = !_isBusy && _model.CanWriteSelectedPoint;
 
-        private void BindResult()
-        {
-            PlcDebugPageModel.DebugResultItem result = _model.LastResult;
+            inputDirectAddress.Enabled = !_isBusy;
+            selectDirectDataType.Enabled = !_isBusy;
+            inputDirectLength.Enabled = !_isBusy;
+            inputDirectWriteValue.Enabled = !_isBusy;
+            checkDirectWriteConfirmed.Enabled = !_isBusy;
 
-            labelResultActionValue.Text = result == null || string.IsNullOrWhiteSpace(result.ActionName)
-                ? "—"
-                : result.ActionName;
-
-            labelResultTargetValue.Text = result == null
-                ? "—"
-                : BuildResultTargetText(result);
-
-            labelResultTypeValue.Text = result == null || string.IsNullOrWhiteSpace(result.DataType)
-                ? "—"
-                : BuildResultTypeText(result);
-
-            labelResultValueValue.Text = result == null || string.IsNullOrWhiteSpace(result.ValueText)
-                ? "—"
-                : result.ValueText;
-
-            labelResultQualityValue.Text = result == null || string.IsNullOrWhiteSpace(result.Quality)
-                ? "—"
-                : result.Quality;
-
-            labelResultTimeValue.Text = result == null
-                ? "—"
-                : result.TimeText;
-
-            labelResultMessageValue.Text = result == null
-                ? "—"
-                : BuildResultMessageText(result);
-
-            ApplyResultVisualState(result);
-        }
-
-        private void ApplyResultVisualState(PlcDebugPageModel.DebugResultItem result)
-        {
-            if (result == null)
-            {
-                labelResultTitle.Text = "执行结果";
-                labelResultTitle.ForeColor = System.Drawing.Color.Empty;
-                return;
-            }
-
-            labelResultTitle.Text = result.Success ? "执行结果 · 成功" : "执行结果 · 失败";
-            labelResultTitle.ForeColor = result.Success
-                ? System.Drawing.Color.FromArgb(82, 196, 26)
-                : System.Drawing.Color.FromArgb(255, 77, 79);
+            buttonTestReadAddress.Enabled = !_isBusy && _model.CanReadDirectAddress;
+            buttonWriteAddress.Enabled = !_isBusy && _model.CanWriteDirectAddress;
         }
 
         private string BuildPointOperationTitle()
         {
-            string accessText = _model.ConfigPointAccessModeText;
-            string enabledText = _model.ConfigPointEnabled ? "已启用" : "未启用";
-
             if (!_model.IsPointSelected)
             {
                 return "按配置点位调试";
@@ -356,8 +355,8 @@ namespace AMControlWinF.Views.Plc
 
             return string.Format(
                 "按配置点位调试（{0} / {1}）",
-                string.IsNullOrWhiteSpace(accessText) ? "-" : accessText,
-                enabledText);
+                string.IsNullOrWhiteSpace(_model.ConfigPointAccessModeText) ? "-" : _model.ConfigPointAccessModeText,
+                _model.ConfigPointEnabled ? "已启用" : "未启用");
         }
 
         private string BuildConfigPointDataTypeText()
@@ -367,95 +366,7 @@ namespace AMControlWinF.Views.Plc
                 return "—";
             }
 
-            string accessText = _model.ConfigPointAccessModeText;
-            if (string.IsNullOrWhiteSpace(accessText) || accessText == "-")
-            {
-                return _model.ConfigPointDataType;
-            }
-
-            return string.Format("{0} / {1}", _model.ConfigPointDataType, accessText);
-        }
-
-        private string BuildDirectWriteTitle()
-        {
-            if (_model.CanWriteDirectAddress)
-            {
-                return "按直接地址写入（已确认）";
-            }
-
-            return "按直接地址写入";
-        }
-
-        private static string BuildResultTargetText(PlcDebugPageModel.DebugResultItem result)
-        {
-            if (result == null)
-            {
-                return "—";
-            }
-
-            string target = !string.IsNullOrWhiteSpace(result.PointDisplayName)
-                ? result.PointDisplayName
-                : (!string.IsNullOrWhiteSpace(result.PointName) ? result.PointName : result.Address);
-
-            if (string.IsNullOrWhiteSpace(target))
-            {
-                target = "—";
-            }
-
-            if (!string.IsNullOrWhiteSpace(result.PlcName))
-            {
-                return string.Format("{0} / {1}", result.PlcName, target);
-            }
-
-            return target;
-        }
-
-        private static string BuildResultTypeText(PlcDebugPageModel.DebugResultItem result)
-        {
-            if (result == null)
-            {
-                return "—";
-            }
-
-            string dataType = string.IsNullOrWhiteSpace(result.DataType) ? "-" : result.DataType;
-            string lengthText = result.Length > 0 ? result.Length.ToString() : "-";
-            string accessText = string.IsNullOrWhiteSpace(result.AccessModeText) ? "-" : result.AccessModeText;
-
-            return string.Format("{0} / Len={1} / {2}", dataType, lengthText, accessText);
-        }
-
-        private static string BuildResultMessageText(PlcDebugPageModel.DebugResultItem result)
-        {
-            if (result == null)
-            {
-                return "—";
-            }
-
-            List<string> lines = new List<string>();
-
-            lines.Add(string.IsNullOrWhiteSpace(result.Message) ? "—" : result.Message);
-
-            if (!string.IsNullOrWhiteSpace(result.RawValue))
-            {
-                lines.Add("原始值: " + result.RawValue);
-            }
-
-            if (!string.IsNullOrWhiteSpace(result.InputValueText))
-            {
-                lines.Add("输入值: " + result.InputValueText);
-            }
-
-            if (!string.IsNullOrWhiteSpace(result.TargetMode))
-            {
-                lines.Add("模式: " + result.TargetMode);
-            }
-
-            if (result.Confirmed)
-            {
-                lines.Add("已确认高风险写入");
-            }
-
-            return string.Join(Environment.NewLine, lines);
+            return _model.ConfigPointDataType;
         }
 
         private static void BindSelectItems(
@@ -527,6 +438,111 @@ namespace AMControlWinF.Views.Plc
         {
             _isBusy = isBusy;
             RefreshOperationState();
+        }
+
+        private sealed class ResultTableRow
+        {
+            public ResultTableRow(PlcDebugPageModel.DebugResultItem item)
+            {
+                Item = item ?? new PlcDebugPageModel.DebugResultItem();
+            }
+
+            public PlcDebugPageModel.DebugResultItem Item { get; private set; }
+
+            public string TimeText
+            {
+                get { return Item.TimeText; }
+            }
+
+            public string ResultTag
+            {
+                get { return Item.Success ? "成功" : "失败"; }
+            }
+
+            public string ActionName
+            {
+                get { return string.IsNullOrWhiteSpace(Item.ActionName) ? "-" : Item.ActionName; }
+            }
+
+            public string TargetModeText
+            {
+                get
+                {
+                    if (string.Equals(Item.TargetMode, "ConfigPoint", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return "配置点位";
+                    }
+
+                    if (string.Equals(Item.TargetMode, "DirectAddress", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return "直接地址";
+                    }
+
+                    return "-";
+                }
+            }
+
+            public string PlcName
+            {
+                get { return string.IsNullOrWhiteSpace(Item.PlcName) ? "-" : Item.PlcName; }
+            }
+
+            public string TargetText
+            {
+                get
+                {
+                    if (!string.IsNullOrWhiteSpace(Item.PointDisplayName))
+                    {
+                        return Item.PointDisplayName;
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(Item.PointName))
+                    {
+                        return Item.PointName;
+                    }
+
+                    return string.IsNullOrWhiteSpace(Item.Address) ? "-" : Item.Address;
+                }
+            }
+
+            public string DataTypeText
+            {
+                get
+                {
+                    string type = string.IsNullOrWhiteSpace(Item.DataType) ? "-" : Item.DataType;
+                    string access = string.IsNullOrWhiteSpace(Item.AccessModeText) ? "-" : Item.AccessModeText;
+                    string length = Item.Length > 0 ? Item.Length.ToString() : "-";
+                    return string.Format("{0}/{1}/{2}", type, length, access);
+                }
+            }
+
+            public string ValueText
+            {
+                get
+                {
+                    if (!string.IsNullOrWhiteSpace(Item.ValueText))
+                    {
+                        return Item.ValueText;
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(Item.InputValueText))
+                    {
+                        return Item.InputValueText;
+                    }
+
+                    return "-";
+                }
+            }
+
+            public string Quality
+            {
+                get { return string.IsNullOrWhiteSpace(Item.Quality) ? "-" : Item.Quality; }
+            }
+
+            public string MessageText
+            {
+                get { return string.IsNullOrWhiteSpace(Item.Message) ? "-" : Item.Message; }
+            }
         }
     }
 }

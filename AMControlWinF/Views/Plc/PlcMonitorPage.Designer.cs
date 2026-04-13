@@ -19,7 +19,6 @@
             this.panelRoot = new AntdUI.Panel();
             this.panelContentCard = new AntdUI.Panel();
             this.panelPointListCard = new AntdUI.Panel();
-            this.plcPointVirtualListControl = new AMControlWinF.Views.Plc.PlcPointVirtualListControl();
             this.flowStats = new AntdUI.FlowPanel();
             this.panelDisconnectedPointCard = new AntdUI.Panel();
             this.labelDisconnectedPointCount = new AntdUI.Label();
@@ -41,6 +40,7 @@
             this.selectPlc = new AntdUI.Select();
             this.flowToolbarRight = new AntdUI.FlowPanel();
             this.buttonRefresh = new AntdUI.Button();
+            this.plcPointVirtualListControl = new AMControlWinF.Views.Plc.PlcPointVirtualListControl();
             this.panelRoot.SuspendLayout();
             this.panelContentCard.SuspendLayout();
             this.panelPointListCard.SuspendLayout();
@@ -95,15 +95,6 @@
             this.panelPointListCard.ShadowOpacityHover = 0F;
             this.panelPointListCard.Size = new System.Drawing.Size(834, 532);
             this.panelPointListCard.TabIndex = 0;
-            // 
-            // plcPointVirtualListControl
-            // 
-            this.plcPointVirtualListControl.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.plcPointVirtualListControl.Location = new System.Drawing.Point(0, 0);
-            this.plcPointVirtualListControl.Margin = new System.Windows.Forms.Padding(0);
-            this.plcPointVirtualListControl.Name = "plcPointVirtualListControl";
-            this.plcPointVirtualListControl.Size = new System.Drawing.Size(834, 532);
-            this.plcPointVirtualListControl.TabIndex = 0;
             // 
             // flowStats
             // 
@@ -368,6 +359,15 @@
             this.buttonRefresh.TabIndex = 0;
             this.buttonRefresh.Text = "刷新";
             this.buttonRefresh.WaveSize = 0;
+            // 
+            // plcPointVirtualListControl
+            // 
+            this.plcPointVirtualListControl.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.plcPointVirtualListControl.Location = new System.Drawing.Point(0, 0);
+            this.plcPointVirtualListControl.Margin = new System.Windows.Forms.Padding(0);
+            this.plcPointVirtualListControl.Name = "plcPointVirtualListControl";
+            this.plcPointVirtualListControl.Size = new System.Drawing.Size(834, 532);
+            this.plcPointVirtualListControl.TabIndex = 0;
             // 
             // PlcMonitorPage
             // 
