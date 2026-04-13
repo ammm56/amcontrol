@@ -91,7 +91,8 @@ namespace AM.DBService.Services.Plc.Runtime
                 }
 
                 UpdatePointRuntimeAfterWrite(point, writeResult.Item);
-                return OkLogOnly("PLC 点位写入成功");
+
+                return OkLogOnly(BuildPointWriteAuditMessage(point, value, writeResult.Item));
             }
             catch (Exception ex)
             {
@@ -150,7 +151,13 @@ namespace AM.DBService.Services.Plc.Runtime
                     return Fail(writeResult.Code, writeResult.Message);
                 }
 
-                return OkLogOnly("PLC 地址写入成功");
+                return OkLogOnly(BuildAddressWriteAuditMessage(
+                    plcName,
+                    address,
+                    dataType,
+                    length,
+                    value,
+                    writeResult.Item));
             }
             catch (Exception ex)
             {
@@ -189,7 +196,10 @@ namespace AM.DBService.Services.Plc.Runtime
 
                 RuntimeContext.Instance.Plc.SetPointSnapshot(readResult.Item);
                 RuntimeContext.Instance.Plc.NotifyPointSnapshotChanged(point.Name);
-                return OkLogOnly(readResult.Item, "PLC 点位测试读取成功");
+
+                return OkLogOnly(
+                    readResult.Item,
+                    BuildPointReadAuditMessage(point, readResult.Item));
             }
             catch (Exception ex)
             {
@@ -230,7 +240,6 @@ namespace AM.DBService.Services.Plc.Runtime
                 {
                     PlcName = plcName.Trim(),
                     Name = string.Format("{0}_{1}", plcName.Trim(), address.Trim()),
-                    //DisplayName = "地址测试读取",
                     DisplayName = address.Trim(),
                     GroupName = "Debug",
                     Address = address.Trim(),
@@ -240,7 +249,20 @@ namespace AM.DBService.Services.Plc.Runtime
                     IsEnabled = true
                 };
 
-                return ReadPointWithClient(clientResult.Item, tempPoint);
+                Result<PlcPointRuntimeSnapshot> readResult = ReadPointWithClient(clientResult.Item, tempPoint);
+                if (!readResult.Success)
+                {
+                    return readResult;
+                }
+
+                return OkLogOnly(
+                    readResult.Item,
+                    BuildAddressReadAuditMessage(
+                        plcName,
+                        address,
+                        dataType,
+                        length,
+                        readResult.Item));
             }
             catch (Exception ex)
             {
@@ -384,8 +406,26 @@ namespace AM.DBService.Services.Plc.Runtime
         private PlcPointConfig FindPointConfig(string pointName)
         {
             PlcConfig config = ConfigContext.Instance.Config.PlcConfig ?? new PlcConfig();
-            var points = config.Points ?? new List<PlcPointConfig>();
-            return points.FirstOrDefault(p => p != null && string.Equals(p.Name, pointName, StringComparison.OrdinalIgnoreCase));
+            List<PlcPointConfig> points = config.Points ?? new List<PlcPointConfig>();
+
+            return points.FirstOrDefault(p =>
+                p != null &&
+                string.Equals(p.Name, pointName, StringComparison.OrdinalIgnoreCase));
+        }
+
+        private static PlcStationConfig FindStationConfig(string plcName)
+        {
+            if (string.IsNullOrWhiteSpace(plcName))
+            {
+                return null;
+            }
+
+            PlcConfig config = ConfigContext.Instance.Config.PlcConfig ?? new PlcConfig();
+            List<PlcStationConfig> stations = config.Stations ?? new List<PlcStationConfig>();
+
+            return stations.FirstOrDefault(x =>
+                x != null &&
+                string.Equals(x.Name, plcName.Trim(), StringComparison.OrdinalIgnoreCase));
         }
 
         private Result<PlcPointRuntimeSnapshot> ReadPointInternal(PlcPointConfig point)
@@ -424,6 +464,7 @@ namespace AM.DBService.Services.Plc.Runtime
                 GroupName = point.GroupName,
                 AddressText = point.AddressText,
                 DataType = point.DataType,
+                AccessMode = point.AccessMode,
                 ValueText = displayValueText,
                 RawValue = rawValueText,
                 Quality = string.IsNullOrWhiteSpace(readResult.Item.quality) ? "Good" : readResult.Item.quality,
@@ -454,6 +495,7 @@ namespace AM.DBService.Services.Plc.Runtime
                 GroupName = point.GroupName,
                 AddressText = point.AddressText,
                 DataType = point.DataType,
+                AccessMode = point.AccessMode,
                 ValueText = displayValueText,
                 RawValue = rawValueText,
                 Quality = pointData == null || string.IsNullOrWhiteSpace(pointData.quality) ? "Good" : pointData.quality,
@@ -563,5 +605,150 @@ namespace AM.DBService.Services.Plc.Runtime
 
             return bool.TryParse(valueText, out result);
         }
+
+        #region 更详细的 PLC 操作日志构建
+
+        private static string BuildPointWriteAuditMessage(PlcPointConfig point, object value, M_PointData pointData)
+        {
+            string plcName = point == null ? string.Empty : point.PlcName;
+
+            return string.Format(
+                "PLC 点位写入成功 | PLC站名称={0} | PLC站显示名={1} | 点位={2} | 点位显示名={3} | 地址={4} | 类型={5} | 长度={6} | 访问={7} | 写入值={8} | 原始值={9} | 质量={10} | 登录名={11} | 用户名={12} | 角色组={13}",
+                GetStationNameText(plcName),
+                GetStationDisplayText(plcName),
+                point == null ? "-" : (point.Name ?? "-"),
+                point == null ? "-" : (point.DisplayTitle ?? "-"),
+                point == null ? "-" : (point.Address ?? "-"),
+                point == null ? "-" : (point.DataType ?? "-"),
+                ResolvePointLength(point),
+                point == null ? "-" : (point.AccessMode ?? "-"),
+                value == null ? "-" : value.ToString(),
+                pointData == null ? "-" : (pointData.value ?? "-"),
+                pointData == null || string.IsNullOrWhiteSpace(pointData.quality) ? "Good" : pointData.quality,
+                GetCurrentLoginName(),
+                GetCurrentUserName(),
+                GetCurrentRoleGroupText());
+        }
+
+        private static string BuildAddressWriteAuditMessage(
+            string plcName,
+            string address,
+            string dataType,
+            int length,
+            object value,
+            M_PointData pointData)
+        {
+            return string.Format(
+                "PLC 地址写入成功 | PLC站名称={0} | PLC站显示名={1} | 地址={2} | 类型={3} | 长度={4} | 写入值={5} | 原始值={6} | 质量={7} | 登录名={8} | 用户名={9} | 角色组={10}",
+                GetStationNameText(plcName),
+                GetStationDisplayText(plcName),
+                string.IsNullOrWhiteSpace(address) ? "-" : address.Trim(),
+                string.IsNullOrWhiteSpace(dataType) ? "-" : dataType.Trim(),
+                length <= 0 ? 1 : length,
+                value == null ? "-" : value.ToString(),
+                pointData == null ? "-" : (pointData.value ?? "-"),
+                pointData == null || string.IsNullOrWhiteSpace(pointData.quality) ? "Good" : pointData.quality,
+                GetCurrentLoginName(),
+                GetCurrentUserName(),
+                GetCurrentRoleGroupText());
+        }
+
+        private static string BuildPointReadAuditMessage(PlcPointConfig point, PlcPointRuntimeSnapshot snapshot)
+        {
+            string plcName = point == null ? string.Empty : point.PlcName;
+
+            return string.Format(
+                "PLC 点位测试读取成功 | PLC站名称={0} | PLC站显示名={1} | 点位={2} | 点位显示名={3} | 地址={4} | 类型={5} | 长度={6} | 访问={7} | 值={8} | 原始值={9} | 质量={10} | 登录名={11} | 用户名={12} | 角色组={13}",
+                GetStationNameText(plcName),
+                GetStationDisplayText(plcName),
+                point == null ? "-" : (point.Name ?? "-"),
+                point == null ? "-" : (point.DisplayTitle ?? "-"),
+                point == null ? "-" : (point.Address ?? "-"),
+                point == null ? "-" : (point.DataType ?? "-"),
+                ResolvePointLength(point),
+                point == null ? "-" : (point.AccessMode ?? "-"),
+                snapshot == null ? "-" : (snapshot.ValueText ?? "-"),
+                snapshot == null ? "-" : (snapshot.RawValue ?? "-"),
+                snapshot == null || string.IsNullOrWhiteSpace(snapshot.Quality) ? "Good" : snapshot.Quality,
+                GetCurrentLoginName(),
+                GetCurrentUserName(),
+                GetCurrentRoleGroupText());
+        }
+
+        private static string BuildAddressReadAuditMessage(
+            string plcName,
+            string address,
+            string dataType,
+            int length,
+            PlcPointRuntimeSnapshot snapshot)
+        {
+            return string.Format(
+                "PLC 地址测试读取成功 | PLC站名称={0} | PLC站显示名={1} | 地址={2} | 类型={3} | 长度={4} | 值={5} | 原始值={6} | 质量={7} | 登录名={8} | 用户名={9} | 角色组={10}",
+                GetStationNameText(plcName),
+                GetStationDisplayText(plcName),
+                string.IsNullOrWhiteSpace(address) ? "-" : address.Trim(),
+                string.IsNullOrWhiteSpace(dataType) ? "-" : dataType.Trim(),
+                length <= 0 ? 1 : length,
+                snapshot == null ? "-" : (snapshot.ValueText ?? "-"),
+                snapshot == null ? "-" : (snapshot.RawValue ?? "-"),
+                snapshot == null || string.IsNullOrWhiteSpace(snapshot.Quality) ? "Good" : snapshot.Quality,
+                GetCurrentLoginName(),
+                GetCurrentUserName(),
+                GetCurrentRoleGroupText());
+        }
+
+        private static string GetStationNameText(string plcName)
+        {
+            PlcStationConfig station = FindStationConfig(plcName);
+            if (station == null)
+            {
+                return string.IsNullOrWhiteSpace(plcName) ? "-" : plcName.Trim();
+            }
+
+            return string.IsNullOrWhiteSpace(station.Name) ? "-" : station.Name;
+        }
+
+        private static string GetStationDisplayText(string plcName)
+        {
+            PlcStationConfig station = FindStationConfig(plcName);
+            if (station == null)
+            {
+                return "-";
+            }
+
+            return string.IsNullOrWhiteSpace(station.DisplayTitle) ? "-" : station.DisplayTitle;
+        }
+
+        private static string GetCurrentLoginName()
+        {
+            return string.IsNullOrWhiteSpace(UserContext.Instance.LoginName)
+                ? "-"
+                : UserContext.Instance.LoginName;
+        }
+
+        private static string GetCurrentUserName()
+        {
+            return string.IsNullOrWhiteSpace(UserContext.Instance.UserName)
+                ? "-"
+                : UserContext.Instance.UserName;
+        }
+
+        private static string GetCurrentRoleGroupText()
+        {
+            if (UserContext.Instance.CurrentRoles == null || UserContext.Instance.CurrentRoles.Count == 0)
+            {
+                return "-";
+            }
+
+            return string.Join(
+                ",",
+                UserContext.Instance.CurrentRoles
+                    .Where(x => x != null && !string.IsNullOrWhiteSpace(x.RoleCode))
+                    .Select(x => x.RoleCode)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToArray());
+        }
+
+        #endregion
     }
 }

@@ -50,15 +50,15 @@ namespace AMControlWinF.Views.Plc
                 },
                 new Column("ResultTag", "结果", ColumnAlign.Center)
                 {
-                    Width = "60"
+                    Width = "65"
                 },
                 new Column("TargetText", "目标", ColumnAlign.Left)
                 {
-                    Width = "90"
+                    Width = "85"
                 },
                 new Column("DataTypeText", "类型", ColumnAlign.Left)
                 {
-                    Width = "100"
+                    Width = "95"
                 },
                 new Column("ValueText", "值", ColumnAlign.Left)
                 {
@@ -68,21 +68,21 @@ namespace AMControlWinF.Views.Plc
                 {
                     Width = "120"
                 },
-                new Column("TargetModeText", "模式", ColumnAlign.Center)
+                new Column("TargetModeTag", "模式", ColumnAlign.Center)
                 {
-                    Width = "90"
+                    Width = "95"
                 },
-                new Column("Quality", "质量", ColumnAlign.Center)
+                new Column("QualityTag", "质量", ColumnAlign.Center)
                 {
                     Width = "80"
                 },
-                new Column("PlcName", "PLC", ColumnAlign.Left)
+                new Column("PlcNameTag", "PLC站", ColumnAlign.Center)
                 {
-                    Width = "150"
+                    Width = "130"
                 },
                 new Column("MessageText", "消息", ColumnAlign.Left)
                 {
-                    Width = "220"
+                    Width = "260"
                 }
             };
         }
@@ -321,8 +321,25 @@ namespace AMControlWinF.Views.Plc
 
         private void BindResultTable()
         {
-            _resultTableRows = new AntList<ResultTableRow>(
-                _model.ResultHistory.Select(x => new ResultTableRow(x)).ToList());
+            _resultTableRows = new AntList<ResultTableRow>();
+
+            foreach (PlcDebugPageModel.DebugResultItem item in _model.ResultHistory)
+            {
+                _resultTableRows.Add(new ResultTableRow
+                {
+                    Item = item,
+                    TimeText = new CellText(item == null ? "-" : item.TimeText),
+                    ResultTag = BuildResultTag(item),
+                    TargetText = new CellText(BuildTargetText(item)),
+                    DataTypeText = new CellText(BuildDataTypeText(item)),
+                    ValueText = new CellText(string.IsNullOrWhiteSpace(item == null ? null : item.ValueText) ? "-" : item.ValueText),
+                    ActionName = new CellText(string.IsNullOrWhiteSpace(item == null ? null : item.ActionName) ? "-" : item.ActionName),
+                    TargetModeTag = BuildTargetModeTag(item),
+                    QualityTag = BuildQualityTag(item),
+                    PlcNameTag = BuildPlcNameTag(item),
+                    MessageText = new CellText(string.IsNullOrWhiteSpace(item == null ? null : item.Message) ? "-" : item.Message)
+                });
+            }
 
             tableResults.Binding(_resultTableRows);
         }
@@ -442,96 +459,131 @@ namespace AMControlWinF.Views.Plc
             RefreshOperationState();
         }
 
+        #region Table行构建和样式
+
+        private static CellTag BuildResultTag(PlcDebugPageModel.DebugResultItem item)
+        {
+            bool success = item != null && item.Success;
+            return new CellTag(
+                success ? "成功" : "失败",
+                success ? TTypeMini.Success : TTypeMini.Error);
+        }
+
+        private static string BuildTargetText(PlcDebugPageModel.DebugResultItem item)
+        {
+            if (item == null)
+            {
+                return "-";
+            }
+
+            if (!string.IsNullOrWhiteSpace(item.PointDisplayName))
+            {
+                return item.PointDisplayName;
+            }
+
+            if (!string.IsNullOrWhiteSpace(item.PointName))
+            {
+                return item.PointName;
+            }
+
+            if (!string.IsNullOrWhiteSpace(item.Address))
+            {
+                return item.Address;
+            }
+
+            return "-";
+        }
+
+        private static CellTag BuildTargetModeTag(PlcDebugPageModel.DebugResultItem item)
+        {
+            if (item == null || string.IsNullOrWhiteSpace(item.TargetMode))
+            {
+                return new CellTag("-", TTypeMini.Default);
+            }
+
+            if (string.Equals(item.TargetMode, "ConfigPoint", StringComparison.OrdinalIgnoreCase))
+            {
+                return new CellTag("配置点位", TTypeMini.Primary);
+            }
+
+            if (string.Equals(item.TargetMode, "DirectAddress", StringComparison.OrdinalIgnoreCase))
+            {
+                return new CellTag("直接地址", TTypeMini.Warn);
+            }
+
+            return new CellTag(item.TargetMode, TTypeMini.Default);
+        }
+
+        private static string BuildDataTypeText(PlcDebugPageModel.DebugResultItem item)
+        {
+            if (item == null)
+            {
+                return "-";
+            }
+
+            string type = string.IsNullOrWhiteSpace(item.DataType) ? "-" : item.DataType;
+            string length = item.Length > 0 ? item.Length.ToString() : "-";
+            string access = string.IsNullOrWhiteSpace(item.AccessModeText) ? "-" : item.AccessModeText;
+
+            return string.Format("{0}/{1}/{2}", type, length, access);
+        }
+
+        private static CellTag BuildPlcNameTag(PlcDebugPageModel.DebugResultItem item)
+        {
+            string plcName = item == null || string.IsNullOrWhiteSpace(item.PlcName)
+                ? "-"
+                : item.PlcName;
+
+            return new CellTag(
+                plcName,
+                plcName == "-" ? TTypeMini.Default : TTypeMini.Primary);
+        }
+
+        private static CellTag BuildQualityTag(PlcDebugPageModel.DebugResultItem item)
+        {
+            string quality = item == null || string.IsNullOrWhiteSpace(item.Quality)
+                ? "-"
+                : item.Quality;
+
+            if (string.Equals(quality, "Good", StringComparison.OrdinalIgnoreCase))
+            {
+                return new CellTag("Good", TTypeMini.Success);
+            }
+
+            if (string.Equals(quality, "Error", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(quality, "Bad", StringComparison.OrdinalIgnoreCase))
+            {
+                return new CellTag(quality, TTypeMini.Error);
+            }
+
+            return new CellTag(quality, TTypeMini.Default);
+        }
+
         private sealed class ResultTableRow
         {
-            public ResultTableRow(PlcDebugPageModel.DebugResultItem item)
-            {
-                Item = item ?? new PlcDebugPageModel.DebugResultItem();
-            }
+            public PlcDebugPageModel.DebugResultItem Item { get; set; }
 
-            public PlcDebugPageModel.DebugResultItem Item { get; private set; }
+            public CellText TimeText { get; set; }
 
-            public string TimeText
-            {
-                get { return Item.TimeText; }
-            }
+            public CellTag ResultTag { get; set; }
 
-            public string ResultTag
-            {
-                get { return Item.Success ? "成功" : "失败"; }
-            }
+            public CellText TargetText { get; set; }
 
-            public string ActionName
-            {
-                get { return string.IsNullOrWhiteSpace(Item.ActionName) ? "-" : Item.ActionName; }
-            }
+            public CellText DataTypeText { get; set; }
 
-            public string TargetModeText
-            {
-                get
-                {
-                    if (string.Equals(Item.TargetMode, "ConfigPoint", StringComparison.OrdinalIgnoreCase))
-                    {
-                        return "配置点位";
-                    }
+            public CellText ValueText { get; set; }
 
-                    if (string.Equals(Item.TargetMode, "DirectAddress", StringComparison.OrdinalIgnoreCase))
-                    {
-                        return "直接地址";
-                    }
+            public CellText ActionName { get; set; }
 
-                    return "-";
-                }
-            }
+            public CellTag TargetModeTag { get; set; }
 
-            public string PlcName
-            {
-                get { return string.IsNullOrWhiteSpace(Item.PlcName) ? "-" : Item.PlcName; }
-            }
+            public CellTag QualityTag { get; set; }
 
-            public string TargetText
-            {
-                get
-                {
-                    if (!string.IsNullOrWhiteSpace(Item.PointDisplayName))
-                    {
-                        return Item.PointDisplayName;
-                    }
+            public CellTag PlcNameTag { get; set; }
 
-                    if (!string.IsNullOrWhiteSpace(Item.PointName))
-                    {
-                        return Item.PointName;
-                    }
-
-                    return string.IsNullOrWhiteSpace(Item.Address) ? "-" : Item.Address;
-                }
-            }
-
-            public string DataTypeText
-            {
-                get
-                {
-                    string type = string.IsNullOrWhiteSpace(Item.DataType) ? "-" : Item.DataType;
-                    string length = Item.Length > 0 ? Item.Length.ToString() : "-";
-                    string access = string.IsNullOrWhiteSpace(Item.AccessModeText) ? "-" : Item.AccessModeText;
-                    return string.Format("{0}/{1}/{2}", type, length, access);
-                }
-            }
-
-            public string ValueText
-            {
-                get { return string.IsNullOrWhiteSpace(Item.ValueText) ? "-" : Item.ValueText; }
-            }
-
-            public string Quality
-            {
-                get { return string.IsNullOrWhiteSpace(Item.Quality) ? "-" : Item.Quality; }
-            }
-
-            public string MessageText
-            {
-                get { return string.IsNullOrWhiteSpace(Item.Message) ? "-" : Item.Message; }
-            }
+            public CellText MessageText { get; set; }
         }
+
+        #endregion
     }
 }
