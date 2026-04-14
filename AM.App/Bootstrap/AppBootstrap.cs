@@ -70,6 +70,7 @@ namespace AM.App.Bootstrap
             if (!seedResult.Success)
             {
                 reporter.Error("AppBootstrap", "默认运动配置种子初始化失败，应用启动终止", seedResult.Code);
+                reporter.Alarm("AppBootstrap", AlarmCode.DatabaseError, AlarmLevel.Alarm, "默认运动配置种子初始化失败，应用启动终止");
                 return;
             }
 
@@ -79,20 +80,20 @@ namespace AM.App.Bootstrap
             if (!plcSeedResult.Success)
             {
                 reporter.Error("AppBootstrap", "默认 PLC 配置种子初始化失败，应用启动终止", plcSeedResult.Code);
+                reporter.Alarm("AppBootstrap", AlarmCode.DatabaseError, AlarmLevel.Alarm, "默认 PLC 配置种子初始化失败，应用启动终止");
                 return;
             }
 
             // 5.2 加载协议实现程序集
             ProtocolAssemblyRegistry.Reload();
 
-            // 6. 从数据库加载完整设备配置并重建 MachineContext
-            //    完成后 MachineContext 中已有所有控制卡服务实例、轴/DI/DO 映射、执行器配置
-            //    但控制卡尚未物理连接
+            // 6. 从数据库加载完整设备配置并重建 MachineContext 完成后 MachineContext 中已有所有控制卡服务实例、轴/DI/DO 映射、执行器配置 但控制卡尚未物理连接
             var reloadService = new MachineConfigReloadService();
             var reloadResult = reloadService.ReloadAndRebuild();
             if (!reloadResult.Success)
             {
                 reporter.Error("AppBootstrap", "数据库运动控制配置加载或设备上下文重建失败，应用启动终止", reloadResult.Code);
+                reporter.Alarm("AppBootstrap", AlarmCode.DatabaseError, AlarmLevel.Alarm, "数据库运动控制配置加载或设备上下文重建失败，应用启动终止");
                 return;
             }
             reporter.Info("AppBootstrap", "数据库运动控制配置加载并完成设备上下文重建");
@@ -103,46 +104,43 @@ namespace AM.App.Bootstrap
             if (!plcReloadResult.Success)
             {
                 reporter.Error("AppBootstrap", "数据库 PLC 配置加载或 PLC 上下文重建失败，应用启动终止", plcReloadResult.Code);
+                reporter.Alarm("AppBootstrap", AlarmCode.DatabaseError, AlarmLevel.Alarm, "数据库 PLC 配置加载或 PLC 上下文重建失败，应用启动终止");
                 return;
             }
             reporter.Info("AppBootstrap", "数据库 PLC 配置加载并完成 PLC 上下文重建");
 
-            // 7. 建立硬件连接（必须在 IoScanWorker 注册前完成，确保 autoStart 时卡已就绪）
+            // 7. 建立硬件连接（容错：单卡失败不阻断后续后台服务注册）
             var machineResult = InitializeMachine();
             if (!machineResult.Success)
             {
-                reporter.Error("AppBootstrap", "硬件初始化失败，应用启动终止", machineResult.Code);
-                return;
+                reporter.Warn("AppBootstrap", "部分运动控制卡初始化失败，后台服务将继续注册，请在报警面板中处理", machineResult.Code);
             }
 
-            // 8. 注册后台工作单元（此时控制卡已连接，autoStart 扫描安全）
+            // 8. 注册后台工作单元（容错：单个 worker 失败不阻断其他 worker）
             var ioScanConfig = config.IoScanConfig;
-            var ioScanWorker = new IoScanWorker(reporter, ioScanConfig.ScanIntervalMs);
-            var registerResult = runtimeTaskManager.Register(ioScanWorker, ioScanConfig.AutoStart);
-            if (!registerResult.Success)
-            {
-                reporter.Error("AppBootstrap", "IO 扫描工作单元注册失败，应用启动终止", registerResult.Code);
-                return;
-            }
+            RegisterRuntimeWorkerWithTolerance(
+                runtimeTaskManager,
+                new IoScanWorker(reporter, ioScanConfig.ScanIntervalMs),
+                ioScanConfig.AutoStart,
+                "Motion IO 扫描工作单元",
+                AlarmCode.MotionIoScanWorkerStartFailed);
 
             // 8.1 注册后台工作单元（此时控制卡已连接，autoStart 扫描安全）
             // 第一版：轴运行态采样独立于 IO 扫描注册。仅供 UI / 监视使用，不参与控制安全逻辑。
-            var axisScanWorker = new MotionAxisScanWorker(reporter);
-            var axisRegisterResult = runtimeTaskManager.Register(axisScanWorker, true);
-            if (!axisRegisterResult.Success)
-            {
-                reporter.Error("AppBootstrap", "轴运行态采样服务注册失败，应用启动终止", axisRegisterResult.Code);
-                return;
-            }
+            RegisterRuntimeWorkerWithTolerance(
+                runtimeTaskManager,
+                new MotionAxisScanWorker(reporter),
+                true,
+                "轴运行态采样服务",
+                AlarmCode.MotionAxisScanWorkerStartFailed);
 
             // 8.2 注册后台工作单元（此时 PLC 上下文已重建，autoStart 扫描安全）
-            var plcScanWorker = new PlcScanWorker(reporter);
-            var plcRegisterResult = runtimeTaskManager.Register(plcScanWorker, true);
-            if (!plcRegisterResult.Success)
-            {
-                reporter.Error("AppBootstrap", "PLC 扫描工作单元注册失败，应用启动终止", plcRegisterResult.Code);
-                return;
-            }
+            RegisterRuntimeWorkerWithTolerance(
+                runtimeTaskManager,
+                new PlcScanWorker(reporter),
+                true,
+                "PLC 扫描工作单元",
+                AlarmCode.PlcScanWorkerStartFailed);
 
             reporter.Info("AppBootstrap", "应用启动完成");
         }
@@ -152,8 +150,7 @@ namespace AM.App.Bootstrap
         /// 按 InitOrder 顺序依次 Initialize + Connect 所有已注册控制卡。
         ///
         /// 前置条件：MachineConfigReloadService.ReloadAndRebuild() 已调用，
-        ///   MachineContext.MotionCards 已按配置创建好控制卡服务实例。
-        /// 任意一张卡失败则立即终止，不尝试其余卡。
+        /// MachineContext.MotionCards 已按配置创建好控制卡服务实例。
         /// </summary>
         private static Result InitializeMachine()
         {
@@ -173,32 +170,119 @@ namespace AM.App.Bootstrap
                 .OrderBy(c => c.InitOrder)
                 .ToList();
 
+            int successCount = 0;
+            int failedCount = 0;
+            int firstErrorCode = 0;
             foreach (var cfg in ordered)
             {
                 var card = machine.MotionCards[cfg.CardId];
                 string label = string.Format("CardId={0} ({1})", cfg.CardId, cfg.DisplayName ?? cfg.Name);
 
-                // 驱动层初始化（厂商卡加载底层驱动；虚拟卡为空操作）
-                var initResult = card.Initialize(null);
-                if (!initResult.Success)
+                try
                 {
-                    reporter.Error("AppBootstrap", string.Format("控制卡 {0} 驱动初始化失败: {1}", label, initResult.Message), initResult.Code);
-                    return initResult;
-                }
+                    // 驱动层初始化（厂商卡加载底层驱动；虚拟卡为空操作）
+                    var initResult = card.Initialize(null);
+                    if (!initResult.Success)
+                    {
+                        failedCount++;
+                        if (firstErrorCode == 0)
+                        {
+                            firstErrorCode = initResult.Code;
+                        }
 
-                // 建立物理连接（虚拟卡：内存中创建轴状态并标记已连接）
-                var connectResult = card.Connect();
-                if (!connectResult.Success)
+                        string message = string.Format("控制卡 {0} 驱动初始化失败: {1}", label, initResult.Message);
+                        reporter.Error("AppBootstrap", message, initResult.Code, cfg.CardId);
+                        reporter.Alarm("AppBootstrap", AlarmCode.MotionCardInitializeFailed, AlarmLevel.Alarm, message, cfg.CardId);
+                        continue;
+                    }
+
+                    // 建立物理连接（虚拟卡：内存中创建轴状态并标记已连接）
+                    var connectResult = card.Connect();
+                    if (!connectResult.Success)
+                    {
+                        failedCount++;
+                        if (firstErrorCode == 0)
+                        {
+                            firstErrorCode = connectResult.Code;
+                        }
+
+                        string message = string.Format("控制卡 {0} 连接失败: {1}", label, connectResult.Message);
+                        reporter.Error("AppBootstrap", message, connectResult.Code, cfg.CardId);
+                        reporter.Alarm("AppBootstrap", AlarmCode.MotionCardInitializeFailed, AlarmLevel.Alarm, message, cfg.CardId);
+                        continue;
+                    }
+
+                    successCount++;
+                    reporter.Info("AppBootstrap", string.Format("控制卡 {0} 连接成功", label));
+                }
+                catch (Exception ex)
                 {
-                    reporter.Error("AppBootstrap", string.Format("控制卡 {0} 连接失败: {1}", label, connectResult.Message), connectResult.Code);
-                    return connectResult;
-                }
+                    failedCount++;
+                    if (firstErrorCode == 0)
+                    {
+                        firstErrorCode = (int)MotionErrorCode.Unknown;
+                    }
 
-                reporter.Info("AppBootstrap", string.Format("控制卡 {0} 连接成功", label));
+                    string message = string.Format("控制卡 {0} 初始化过程中发生异常", label);
+                    reporter.Error("AppBootstrap", ex, message, (int)MotionErrorCode.Unknown, cfg.CardId);
+                    reporter.Alarm("AppBootstrap", AlarmCode.MotionCardInitializeFailed, AlarmLevel.Alarm, message, cfg.CardId);
+                }
             }
 
-            reporter.Info("AppBootstrap", string.Format("全部 {0} 张控制卡初始化完成", ordered.Count));
+            if (failedCount > 0)
+            {
+                string summary = string.Format(
+                    "运动控制卡初始化完成，但存在失败项。成功 {0} 张，失败 {1} 张。",
+                    successCount,
+                    failedCount);
+
+                reporter.Warn("AppBootstrap", summary, firstErrorCode == 0 ? (int)MotionErrorCode.Unknown : firstErrorCode);
+                return Result.Fail(
+                    firstErrorCode == 0 ? (int)MotionErrorCode.Unknown : firstErrorCode,
+                    summary,
+                    ResultSource.Motion);
+            }
+
+            reporter.Info("AppBootstrap", string.Format("全部 {0} 张控制卡初始化完成", successCount));
             return Result.Ok("所有控制卡初始化成功");
+        }
+
+        private static void RegisterRuntimeWorkerWithTolerance(
+            IRuntimeTaskManager runtimeTaskManager,
+            IRuntimeWorker worker,
+            bool autoStart,
+            string displayName,
+            AlarmCode alarmCode)
+        {
+            var reporter = SystemContext.Instance.Reporter;
+            var registerResult = runtimeTaskManager.Register(worker, autoStart);
+
+            if (!registerResult.Success)
+            {
+                string message = string.Format("{0}注册失败: {1}", displayName, registerResult.Message);
+                reporter.Error("AppBootstrap", message, registerResult.Code);
+                reporter.Alarm("AppBootstrap", alarmCode, AlarmLevel.Alarm, message);
+                return;
+            }
+
+            if (autoStart && !worker.IsRunning)
+            {
+                string detail = string.IsNullOrWhiteSpace(worker.LastError)
+                    ? "自动启动后未进入运行状态"
+                    : worker.LastError;
+
+                string message = string.Format("{0}自动启动失败: {1}", displayName, detail);
+                reporter.Error("AppBootstrap", message, AlarmCodeToInt(alarmCode));
+                reporter.Alarm("AppBootstrap", alarmCode, AlarmLevel.Alarm, message);
+                return;
+            }
+
+            reporter.Info("AppBootstrap", string.Format("{0}已注册{1}", displayName, autoStart ? "并尝试自动启动" : ""));
+        }
+
+        private static int AlarmCodeToInt(AlarmCode code)
+        {
+            return (int)code;
         }
 
         /// <summary>

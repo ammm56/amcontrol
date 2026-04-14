@@ -1,4 +1,5 @@
-﻿namespace AMControlWinF.Views.Main
+﻿// AMControlWinF\Views\Main\ActiveAlarmDrawerControl.Designer.cs
+namespace AMControlWinF.Views.Main
 {
     partial class ActiveAlarmDrawerControl
     {
@@ -43,14 +44,9 @@
             this.labelDetailMeta = new AntdUI.Label();
             this.labelDetailMetaTitle = new AntdUI.Label();
             this.labelDetailMessage = new AntdUI.Label();
-            this.labelDetailMessageTitle = new AntdUI.Label();
             this.labelDetailHeader = new AntdUI.Label();
             this.panelFooter = new AntdUI.Panel();
-            this.labelPageInfo = new AntdUI.Label();
-            this.flowFooterRight = new AntdUI.FlowPanel();
-            this.buttonNextPage = new AntdUI.Button();
-            this.buttonPrevPage = new AntdUI.Button();
-            this.labelPageRange = new AntdUI.Label();
+            this.paginationAlarms = new AntdUI.Pagination();
             this.panelToolbar = new AntdUI.Panel();
             this.flowToolbarRight = new AntdUI.FlowPanel();
             this.buttonClearAll = new AntdUI.Button();
@@ -69,7 +65,6 @@
             this.panelDetailCard.SuspendLayout();
             this.panelDetailBody.SuspendLayout();
             this.panelFooter.SuspendLayout();
-            this.flowFooterRight.SuspendLayout();
             this.panelToolbar.SuspendLayout();
             this.flowToolbarRight.SuspendLayout();
             this.flowToolbarLeft.SuspendLayout();
@@ -82,7 +77,6 @@
             this.panelRoot.Controls.Add(this.panelToolbar);
             this.panelRoot.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelRoot.Location = new System.Drawing.Point(0, 0);
-            this.panelRoot.Margin = new System.Windows.Forms.Padding(0);
             this.panelRoot.Name = "panelRoot";
             this.panelRoot.Padding = new System.Windows.Forms.Padding(8);
             this.panelRoot.Radius = 0;
@@ -213,6 +207,7 @@
             // 
             // panelDetailBody
             // 
+            this.panelDetailBody.AutoScroll = true;
             this.panelDetailBody.Controls.Add(this.labelDetailSuggestion);
             this.panelDetailBody.Controls.Add(this.labelDetailSuggestionTitle);
             this.panelDetailBody.Controls.Add(this.labelDetailDescription);
@@ -220,7 +215,6 @@
             this.panelDetailBody.Controls.Add(this.labelDetailMeta);
             this.panelDetailBody.Controls.Add(this.labelDetailMetaTitle);
             this.panelDetailBody.Controls.Add(this.labelDetailMessage);
-            this.panelDetailBody.Controls.Add(this.labelDetailMessageTitle);
             this.panelDetailBody.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelDetailBody.Location = new System.Drawing.Point(12, 48);
             this.panelDetailBody.Margin = new System.Windows.Forms.Padding(0);
@@ -238,7 +232,7 @@
             this.labelDetailSuggestion.Margin = new System.Windows.Forms.Padding(0);
             this.labelDetailSuggestion.Name = "labelDetailSuggestion";
             this.labelDetailSuggestion.Size = new System.Drawing.Size(206, 92);
-            this.labelDetailSuggestion.TabIndex = 7;
+            this.labelDetailSuggestion.TabIndex = 6;
             this.labelDetailSuggestion.Text = "-";
             // 
             // labelDetailSuggestionTitle
@@ -248,7 +242,7 @@
             this.labelDetailSuggestionTitle.Margin = new System.Windows.Forms.Padding(0);
             this.labelDetailSuggestionTitle.Name = "labelDetailSuggestionTitle";
             this.labelDetailSuggestionTitle.Size = new System.Drawing.Size(206, 22);
-            this.labelDetailSuggestionTitle.TabIndex = 6;
+            this.labelDetailSuggestionTitle.TabIndex = 5;
             this.labelDetailSuggestionTitle.Text = "处理建议";
             // 
             // labelDetailDescription
@@ -257,7 +251,7 @@
             this.labelDetailDescription.Margin = new System.Windows.Forms.Padding(0);
             this.labelDetailDescription.Name = "labelDetailDescription";
             this.labelDetailDescription.Size = new System.Drawing.Size(206, 84);
-            this.labelDetailDescription.TabIndex = 5;
+            this.labelDetailDescription.TabIndex = 4;
             this.labelDetailDescription.Text = "-";
             // 
             // labelDetailDescriptionTitle
@@ -267,7 +261,7 @@
             this.labelDetailDescriptionTitle.Margin = new System.Windows.Forms.Padding(0);
             this.labelDetailDescriptionTitle.Name = "labelDetailDescriptionTitle";
             this.labelDetailDescriptionTitle.Size = new System.Drawing.Size(206, 22);
-            this.labelDetailDescriptionTitle.TabIndex = 4;
+            this.labelDetailDescriptionTitle.TabIndex = 3;
             this.labelDetailDescriptionTitle.Text = "详细说明";
             // 
             // labelDetailMeta
@@ -276,7 +270,7 @@
             this.labelDetailMeta.Margin = new System.Windows.Forms.Padding(0);
             this.labelDetailMeta.Name = "labelDetailMeta";
             this.labelDetailMeta.Size = new System.Drawing.Size(206, 88);
-            this.labelDetailMeta.TabIndex = 3;
+            this.labelDetailMeta.TabIndex = 2;
             this.labelDetailMeta.Text = "报警代码：-\r\n报警等级：-\r\n报警来源：-\r\n控制卡号：-\r\n报警时间：-";
             // 
             // labelDetailMetaTitle
@@ -286,7 +280,7 @@
             this.labelDetailMetaTitle.Margin = new System.Windows.Forms.Padding(0);
             this.labelDetailMetaTitle.Name = "labelDetailMetaTitle";
             this.labelDetailMetaTitle.Size = new System.Drawing.Size(206, 22);
-            this.labelDetailMetaTitle.TabIndex = 2;
+            this.labelDetailMetaTitle.TabIndex = 1;
             this.labelDetailMetaTitle.Text = "报警详情";
             // 
             // labelDetailMessage
@@ -295,19 +289,8 @@
             this.labelDetailMessage.Margin = new System.Windows.Forms.Padding(0);
             this.labelDetailMessage.Name = "labelDetailMessage";
             this.labelDetailMessage.Size = new System.Drawing.Size(206, 34);
-            this.labelDetailMessage.TabIndex = 1;
+            this.labelDetailMessage.TabIndex = 0;
             this.labelDetailMessage.Text = "-";
-            // 
-            // labelDetailMessageTitle
-            // 
-            this.labelDetailMessageTitle.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Bold);
-            this.labelDetailMessageTitle.Location = new System.Drawing.Point(8, -18);
-            this.labelDetailMessageTitle.Margin = new System.Windows.Forms.Padding(0);
-            this.labelDetailMessageTitle.Name = "labelDetailMessageTitle";
-            this.labelDetailMessageTitle.Size = new System.Drawing.Size(206, 22);
-            this.labelDetailMessageTitle.TabIndex = 0;
-            this.labelDetailMessageTitle.Text = "消息";
-            this.labelDetailMessageTitle.Visible = false;
             // 
             // labelDetailHeader
             // 
@@ -322,75 +305,28 @@
             // 
             // panelFooter
             // 
-            this.panelFooter.Controls.Add(this.labelPageInfo);
-            this.panelFooter.Controls.Add(this.flowFooterRight);
-            this.panelFooter.Controls.Add(this.labelPageRange);
+            this.panelFooter.Controls.Add(this.paginationAlarms);
             this.panelFooter.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.panelFooter.Location = new System.Drawing.Point(8, 568);
             this.panelFooter.Margin = new System.Windows.Forms.Padding(0);
             this.panelFooter.Name = "panelFooter";
-            this.panelFooter.Padding = new System.Windows.Forms.Padding(4);
+            this.panelFooter.Padding = new System.Windows.Forms.Padding(0, 8, 0, 0);
             this.panelFooter.Radius = 0;
             this.panelFooter.Size = new System.Drawing.Size(744, 44);
             this.panelFooter.TabIndex = 2;
             // 
-            // labelPageInfo
+            // paginationAlarms
             // 
-            this.labelPageInfo.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.labelPageInfo.Location = new System.Drawing.Point(86, 4);
-            this.labelPageInfo.Margin = new System.Windows.Forms.Padding(0);
-            this.labelPageInfo.Name = "labelPageInfo";
-            this.labelPageInfo.Size = new System.Drawing.Size(428, 36);
-            this.labelPageInfo.TabIndex = 1;
-            this.labelPageInfo.Text = "第 0 / 0 页";
-            this.labelPageInfo.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // flowFooterRight
-            // 
-            this.flowFooterRight.Align = AntdUI.TAlignFlow.Right;
-            this.flowFooterRight.Controls.Add(this.buttonNextPage);
-            this.flowFooterRight.Controls.Add(this.buttonPrevPage);
-            this.flowFooterRight.Dock = System.Windows.Forms.DockStyle.Right;
-            this.flowFooterRight.Gap = 8;
-            this.flowFooterRight.Location = new System.Drawing.Point(514, 4);
-            this.flowFooterRight.Margin = new System.Windows.Forms.Padding(0);
-            this.flowFooterRight.Name = "flowFooterRight";
-            this.flowFooterRight.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
-            this.flowFooterRight.Size = new System.Drawing.Size(226, 36);
-            this.flowFooterRight.TabIndex = 2;
-            this.flowFooterRight.Text = "flowFooterRight";
-            // 
-            // buttonNextPage
-            // 
-            this.buttonNextPage.Location = new System.Drawing.Point(138, 0);
-            this.buttonNextPage.Margin = new System.Windows.Forms.Padding(0);
-            this.buttonNextPage.Name = "buttonNextPage";
-            this.buttonNextPage.Radius = 8;
-            this.buttonNextPage.Size = new System.Drawing.Size(88, 36);
-            this.buttonNextPage.TabIndex = 0;
-            this.buttonNextPage.Text = "下一页";
-            this.buttonNextPage.WaveSize = 0;
-            // 
-            // buttonPrevPage
-            // 
-            this.buttonPrevPage.Location = new System.Drawing.Point(50, 0);
-            this.buttonPrevPage.Margin = new System.Windows.Forms.Padding(0);
-            this.buttonPrevPage.Name = "buttonPrevPage";
-            this.buttonPrevPage.Radius = 8;
-            this.buttonPrevPage.Size = new System.Drawing.Size(80, 36);
-            this.buttonPrevPage.TabIndex = 1;
-            this.buttonPrevPage.Text = "上一页";
-            this.buttonPrevPage.WaveSize = 0;
-            // 
-            // labelPageRange
-            // 
-            this.labelPageRange.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labelPageRange.Location = new System.Drawing.Point(4, 4);
-            this.labelPageRange.Margin = new System.Windows.Forms.Padding(0);
-            this.labelPageRange.Name = "labelPageRange";
-            this.labelPageRange.Size = new System.Drawing.Size(82, 36);
-            this.labelPageRange.TabIndex = 0;
-            this.labelPageRange.Text = "0 / 0";
+            this.paginationAlarms.BackColor = System.Drawing.Color.Transparent;
+            this.paginationAlarms.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.paginationAlarms.Location = new System.Drawing.Point(0, 2);
+            this.paginationAlarms.Margin = new System.Windows.Forms.Padding(0);
+            this.paginationAlarms.Name = "paginationAlarms";
+            this.paginationAlarms.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+            this.paginationAlarms.Size = new System.Drawing.Size(744, 42);
+            this.paginationAlarms.SizeChangerWidth = 72;
+            this.paginationAlarms.TabIndex = 0;
+            this.paginationAlarms.Text = "paginationAlarms";
             // 
             // panelToolbar
             // 
@@ -515,7 +451,6 @@
             this.panelDetailCard.ResumeLayout(false);
             this.panelDetailBody.ResumeLayout(false);
             this.panelFooter.ResumeLayout(false);
-            this.flowFooterRight.ResumeLayout(false);
             this.panelToolbar.ResumeLayout(false);
             this.flowToolbarRight.ResumeLayout(false);
             this.flowToolbarLeft.ResumeLayout(false);
@@ -546,7 +481,6 @@
         private AntdUI.Panel panelDetailCard;
         private AntdUI.Label labelDetailHeader;
         private AntdUI.Panel panelDetailBody;
-        private AntdUI.Label labelDetailMessageTitle;
         private AntdUI.Label labelDetailMessage;
         private AntdUI.Label labelDetailMetaTitle;
         private AntdUI.Label labelDetailMeta;
@@ -555,10 +489,6 @@
         private AntdUI.Label labelDetailSuggestionTitle;
         private AntdUI.Label labelDetailSuggestion;
         private AntdUI.Panel panelFooter;
-        private AntdUI.Label labelPageRange;
-        private AntdUI.Label labelPageInfo;
-        private AntdUI.FlowPanel flowFooterRight;
-        private AntdUI.Button buttonPrevPage;
-        private AntdUI.Button buttonNextPage;
+        private AntdUI.Pagination paginationAlarms;
     }
 }

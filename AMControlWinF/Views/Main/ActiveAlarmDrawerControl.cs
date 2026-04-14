@@ -1,4 +1,5 @@
-﻿using AM.Core.Alarm;
+﻿// AMControlWinF\Views\Main\ActiveAlarmDrawerControl.cs
+using AM.Core.Alarm;
 using AM.Model.Alarm;
 using AntdUI;
 using System;
@@ -19,14 +20,16 @@ namespace AMControlWinF.Views.Main
     /// </summary>
     public partial class ActiveAlarmDrawerControl : UserControl
     {
-        private const int PageSize = 20;
+        private const int DefaultPageSize = 20;
 
         private readonly List<AlarmDisplayItem> _allAlarmItems;
 
         private AlarmManager _alarmManager;
         private AlarmDisplayItem _selectedItem;
         private int _currentPageIndex;
+        private int _pageSize;
         private bool _isRefreshing;
+        private bool _isUpdatingPagination;
 
         public ActiveAlarmDrawerControl()
         {
@@ -34,9 +37,11 @@ namespace AMControlWinF.Views.Main
 
             _allAlarmItems = new List<AlarmDisplayItem>();
             _currentPageIndex = 1;
+            _pageSize = DefaultPageSize;
 
             InitializeTableColumns();
             BindEvents();
+            InitializePagination();
             ShowAlarmDetail(null);
 
             Disposed += (s, e) => UnsubscribeAlarmManager();
@@ -96,7 +101,7 @@ namespace AMControlWinF.Views.Main
                 EnsureValidPageIndex();
                 RebindTable(preferredKey);
                 RefreshSummary();
-                RefreshPagingState();
+                SyncPagination();
                 RefreshActionButtons();
             }
             finally
@@ -137,6 +142,23 @@ namespace AMControlWinF.Views.Main
         }
 
         /// <summary>
+        /// 初始化分页栏。
+        /// 风格与 LoginLogPage 保持一致。
+        /// </summary>
+        private void InitializePagination()
+        {
+            paginationAlarms.Current = 1;
+            paginationAlarms.Total = 0;
+            paginationAlarms.PageSize = _pageSize;
+            paginationAlarms.PageSizeOptions = new int[] { 10, 20, 50, 100 };
+            paginationAlarms.ShowSizeChanger = true;
+            paginationAlarms.SizeChangerWidth = 72;
+            paginationAlarms.RightToLeft = RightToLeft.Yes;
+            paginationAlarms.Gap = 8;
+            paginationAlarms.Radius = 8;
+        }
+
+        /// <summary>
         /// 绑定页面事件。
         /// </summary>
         private void BindEvents()
@@ -144,9 +166,8 @@ namespace AMControlWinF.Views.Main
             buttonRefresh.Click += (s, e) => RefreshAlarms();
             buttonClearCurrent.Click += ButtonClearCurrent_Click;
             buttonClearAll.Click += ButtonClearAll_Click;
-            buttonPrevPage.Click += ButtonPrevPage_Click;
-            buttonNextPage.Click += ButtonNextPage_Click;
             tableAlarms.CellClick += TableAlarms_CellClick;
+            paginationAlarms.ValueChanged += PaginationAlarms_ValueChanged;
         }
 
         private void SubscribeAlarmManager()
@@ -200,12 +221,29 @@ namespace AMControlWinF.Views.Main
             RefreshAlarms();
         }
 
+        private void PaginationAlarms_ValueChanged(object sender, PagePageEventArgs e)
+        {
+            if (_isUpdatingPagination || e == null)
+            {
+                return;
+            }
+
+            _currentPageIndex = e.Current <= 0 ? 1 : e.Current;
+            _pageSize = e.PageSize <= 0 ? DefaultPageSize : e.PageSize;
+
+            EnsureValidPageIndex();
+            RebindTable(string.Empty);
+            SyncPagination();
+            RefreshActionButtons();
+        }
+
         /// <summary>
         /// 刷新顶部摘要区。
         /// </summary>
         private void RefreshSummary()
         {
             labelAlarmCount.Text = _allAlarmItems.Count.ToString();
+            labelListSummary.Text = "当前活动报警列表";
 
             int criticalCount = _allAlarmItems.Count(x => x.Level == AlarmLevel.Critical);
             if (criticalCount > 0)
@@ -230,7 +268,7 @@ namespace AMControlWinF.Views.Main
         {
             List<AlarmDisplayItem> pageItems = GetCurrentPageItems();
 
-            var rows = new AntList<AlarmTableRow>();
+            AntList<AlarmTableRow> rows = new AntList<AlarmTableRow>();
             foreach (AlarmDisplayItem item in pageItems)
             {
                 rows.Add(new AlarmTableRow
@@ -263,10 +301,10 @@ namespace AMControlWinF.Views.Main
                 return new List<AlarmDisplayItem>();
             }
 
-            int skip = (_currentPageIndex - 1) * PageSize;
+            int skip = (_currentPageIndex - 1) * _pageSize;
             return _allAlarmItems
                 .Skip(skip)
-                .Take(PageSize)
+                .Take(_pageSize)
                 .ToList();
         }
 
@@ -301,33 +339,27 @@ namespace AMControlWinF.Views.Main
                 return 0;
             }
 
-            return (int)Math.Ceiling((double)_allAlarmItems.Count / PageSize);
+            return _pageSize <= 0
+                ? 0
+                : (int)Math.Ceiling((double)_allAlarmItems.Count / _pageSize);
         }
 
         /// <summary>
-        /// 刷新底部分页状态。
+        /// 同步分页栏状态。
         /// </summary>
-        private void RefreshPagingState()
+        private void SyncPagination()
         {
-            int totalCount = _allAlarmItems.Count;
-            int totalPages = GetTotalPages();
-
-            if (totalCount <= 0)
+            _isUpdatingPagination = true;
+            try
             {
-                labelPageRange.Text = "0 / 0";
-                labelPageInfo.Text = "第 0 / 0 页";
-                buttonPrevPage.Enabled = false;
-                buttonNextPage.Enabled = false;
-                return;
+                paginationAlarms.Current = _currentPageIndex;
+                paginationAlarms.Total = _allAlarmItems.Count;
+                paginationAlarms.PageSize = _pageSize;
             }
-
-            int startIndex = ((_currentPageIndex - 1) * PageSize) + 1;
-            int endIndex = Math.Min(_currentPageIndex * PageSize, totalCount);
-
-            labelPageRange.Text = startIndex + "-" + endIndex + " / " + totalCount;
-            labelPageInfo.Text = "第 " + _currentPageIndex + " / " + totalPages + " 页";
-            buttonPrevPage.Enabled = _currentPageIndex > 1;
-            buttonNextPage.Enabled = _currentPageIndex < totalPages;
+            finally
+            {
+                _isUpdatingPagination = false;
+            }
         }
 
         /// <summary>
@@ -353,33 +385,6 @@ namespace AMControlWinF.Views.Main
 
             _selectedItem = row.Item;
             ShowAlarmDetail(_selectedItem);
-            RefreshActionButtons();
-        }
-
-        private void ButtonPrevPage_Click(object sender, EventArgs e)
-        {
-            if (_currentPageIndex <= 1)
-            {
-                return;
-            }
-
-            _currentPageIndex--;
-            RebindTable(string.Empty);
-            RefreshPagingState();
-            RefreshActionButtons();
-        }
-
-        private void ButtonNextPage_Click(object sender, EventArgs e)
-        {
-            int totalPages = GetTotalPages();
-            if (_currentPageIndex >= totalPages)
-            {
-                return;
-            }
-
-            _currentPageIndex++;
-            RebindTable(string.Empty);
-            RefreshPagingState();
             RefreshActionButtons();
         }
 
