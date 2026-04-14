@@ -507,7 +507,7 @@ namespace AMControlWinF
                 { "SysConfig.Plc",          () => new PlcConfigManagementPage() },
 
                 { "AlarmLog.Current",       () => new CurrentAlarmPage() },
-                { "AlarmLog.History",       () => CreatePlaceholderPage("报警与日志 / 报警历史") },
+                { "AlarmLog.History",       () => new AlarmHistoryPage() },
                 { "AlarmLog.RunLog",        () => CreatePlaceholderPage("报警与日志 / 运行日志") },
 
                 { "System.User",            () => new UserManagementPage() },

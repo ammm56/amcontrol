@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AlarmLog\AlarmHistoryPageModel.cs" />
     <Compile Include="AlarmLog\CurrentAlarmPageModel.cs" />
     <Compile Include="Am\LoginLogPageModel.cs" />
     <Compile Include="Am\UserManagementPageModel.cs" />
