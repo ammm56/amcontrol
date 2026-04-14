@@ -22,6 +22,8 @@ namespace AM.PageModel.Navigation
             D("Motion",      "设备",       "Motion.Axis",            "轴控制",          "单轴点动、回零与使能操作。",                             "Engineer,Am",          "高", 40),
             D("Motion",      "设备",       "Motion.Actuator",        "执行器控制",      "手动操作气缸、真空、夹爪等执行器。",                     "Engineer,Am",          "高", 50),
 
+            D("Assembly",    "装配接线",   "Assembly.Wiring",       "接线与调试",      "集中展示软件 IO 定义、硬件接线关系、实时状态与单点调试入口。", "Engineer,Am",          "高", 10),
+
             D("Production",  "生产",       "Production.Order",       "工单管理",        "管理生产工单，新建、下发与完结。",                       "Operator,Engineer,Am", "中", 10),
             D("Production",  "生产",       "Production.Recipe",      "配方管理",        "管理多型号产品配方，配置轴位、视觉与工艺参数。",         "Engineer,Am",          "高", 20),
             D("Production",  "生产",       "Production.Data",        "生产数据",        "查看产量、节拍、良率与工单统计信息。",                   "Operator,Engineer,Am", "低", 30),

@@ -127,6 +127,12 @@
     <Compile Include="Views\Am\UserPermissionUserSelectDialog.Designer.cs">
       <DependentUpon>UserPermissionUserSelectDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\Assembly\AssemblyWiringPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Assembly\AssemblyWiringPage.Designer.cs">
+      <DependentUpon>AssemblyWiringPage.cs</DependentUpon>
+    </Compile>
     <Compile Include="Views\Auth\LoginForm.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -60,8 +60,12 @@
     <Compile Include="Common\ErrorDescriptor.cs" />
     <Compile Include="Common\IoScanState.cs" />
     <Compile Include="Common\ResultSource.cs" />
+    <Compile Include="Entity\Motion\Topology\MotionIoWiringEntity.cs" />
     <Compile Include="Entity\Plc\PlcPointConfigEntity.cs" />
     <Compile Include="Entity\Plc\PlcStationConfigEntity.cs" />
+    <Compile Include="Interfaces\DB\Motion\Topology\IMotionIoWiringCrudService.cs" />
+    <Compile Include="Interfaces\Motion\Assembly\IAssemblyWiringDebugService.cs" />
+    <Compile Include="Interfaces\Motion\Assembly\IAssemblyWiringQueryService.cs" />
     <Compile Include="Interfaces\Plc\App\IPlcConfigAppService.cs" />
     <Compile Include="Interfaces\Plc\Config\IPlcPointCrudService.cs" />
     <Compile Include="Interfaces\Plc\Config\IPlcStationCrudService.cs" />

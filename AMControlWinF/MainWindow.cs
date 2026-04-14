@@ -14,6 +14,7 @@ using AM.Tools;
 using AMControlWinF.Tools;
 using AMControlWinF.Views.AlarmLog;
 using AMControlWinF.Views.Am;
+using AMControlWinF.Views.Assembly;
 using AMControlWinF.Views.Auth;
 using AMControlWinF.Views.Main;
 using AMControlWinF.Views.Motion;
@@ -352,6 +353,8 @@ namespace AMControlWinF
                 { "Motion.Axis",            "ControlOutlined" },
                 { "Motion.Actuator",        "ThunderboltOutlined" },
 
+                { "Assembly.Wiring",       "DeploymentUnitOutlined" },
+
                 { "MotionConfig.Card",      "CreditCardOutlined" },
                 { "MotionConfig.Axis",      "PartitionOutlined" },
                 { "MotionConfig.IoMap",     "DeploymentUnitOutlined" },
@@ -493,6 +496,8 @@ namespace AMControlWinF
                 { "Motion.Monitor",         () => new MotionMonitorPage() },
                 { "Motion.Axis",            () => new MotionAxisPage() },
                 { "Motion.Actuator",        () => new MotionActuatorPage() },
+
+                { "Assembly.Wiring",        () => new AssemblyWiringPage() },
 
                 { "MotionConfig.Card",      () => new MotionCardManagementPage() },
                 { "MotionConfig.Axis",      () => new MotionAxisManagementPage() },
