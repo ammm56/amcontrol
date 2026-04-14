@@ -242,10 +242,6 @@ namespace AM.DBService.Services.Runtime
                     await Task.Delay(DefaultSupervisorIntervalMs, cancellationToken).ConfigureAwait(false);
                 }
             }
-
-        #endregion
-
-        #region 状态汇总与诊断
             catch (OperationCanceledException)
             {
             }
@@ -256,7 +252,7 @@ namespace AM.DBService.Services.Runtime
                     "MOTION-AXIS-WORKER-LOOP-" + ex.Message,
                     (int)MotionErrorCode.Unknown,
                     "轴运行态采样协调循环异常",
-                    30000,
+                    BackgroundLogThrottleIntervalMs,
                     ex);
             }
             finally
@@ -318,8 +314,13 @@ namespace AM.DBService.Services.Runtime
                 {
                     runner.StopAsync().GetAwaiter().GetResult();
                 }
-                catch
+                catch (Exception ex)
                 {
+                    WarnLogOnlyIfRepeated(
+                        "AXIS-RUNNER-REMOVE-STOP-" + runner.CardId + "-" + ex.Message,
+                        (int)MotionErrorCode.Unknown,
+                        "停止已移除的轴采样运行器失败: CardId=" + runner.CardId,
+                        BackgroundLogThrottleIntervalMs);
                 }
             }
         }
@@ -371,11 +372,20 @@ namespace AM.DBService.Services.Runtime
                 {
                     await runner.StopAsync().ConfigureAwait(false);
                 }
-                catch
+                catch (Exception ex)
                 {
+                    WarnLogOnlyIfRepeated(
+                        "AXIS-RUNNER-STOP-" + runner.CardId + "-" + ex.Message,
+                        (int)MotionErrorCode.Unknown,
+                        "停止轴采样运行器失败: CardId=" + runner.CardId,
+                        BackgroundLogThrottleIntervalMs);
                 }
             }
         }
+
+        #endregion
+
+        #region 状态汇总与诊断
 
         private void UpdateRuntimeServiceState()
         {

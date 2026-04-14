@@ -244,10 +244,6 @@ namespace AM.DBService.Services.Runtime
                     await Task.Delay(DefaultSupervisorIntervalMs, cancellationToken).ConfigureAwait(false);
                 }
             }
-
-        #endregion
-
-        #region 状态汇总与诊断
             catch (OperationCanceledException)
             {
             }
@@ -322,8 +318,13 @@ namespace AM.DBService.Services.Runtime
                 {
                     runner.StopAsync().GetAwaiter().GetResult();
                 }
-                catch
+                catch (Exception ex)
                 {
+                    WarnLogOnlyIfRepeated(
+                        "IO-RUNNER-REMOVE-STOP-" + runner.CardId + "-" + ex.Message,
+                        (int)MotionErrorCode.Unknown,
+                        "停止已移除的 IO 控制卡扫描运行器失败: CardId=" + runner.CardId,
+                        BackgroundLogThrottleIntervalMs);
                 }
             }
         }
@@ -375,11 +376,20 @@ namespace AM.DBService.Services.Runtime
                 {
                     await runner.StopAsync().ConfigureAwait(false);
                 }
-                catch
+                catch (Exception ex)
                 {
+                    WarnLogOnlyIfRepeated(
+                        "IO-RUNNER-STOP-" + runner.CardId + "-" + ex.Message,
+                        (int)MotionErrorCode.Unknown,
+                        "停止 IO 控制卡扫描运行器失败: CardId=" + runner.CardId,
+                        BackgroundLogThrottleIntervalMs);
                 }
             }
         }
+
+        #endregion
+
+        #region 状态汇总与诊断
 
         private void UpdateRuntimeServiceState()
         {

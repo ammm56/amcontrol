@@ -24,6 +24,8 @@ namespace AM.DBService.Services.Motion.Actuator
     /// </summary>
     public class StackLightService : ServiceBase, IStackLightService
     {
+        #region 元数据与构造
+
         protected override string MessageSourceName
         {
             get { return "StackLightService"; }
@@ -43,6 +45,10 @@ namespace AM.DBService.Services.Motion.Actuator
             : base(reporter)
         {
         }
+
+        #endregion
+
+        #region 查询与动作
 
         /// <summary>
         /// 查询全部已注册灯塔对象。
@@ -296,5 +302,7 @@ namespace AM.DBService.Services.Motion.Actuator
 
             return OkSilent(partName + "输出设置成功");
         }
+
+        #endregion
     }
 }

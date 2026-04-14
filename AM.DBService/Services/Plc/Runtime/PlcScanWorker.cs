@@ -364,10 +364,6 @@ namespace AM.DBService.Services.Plc.Runtime
                     await Task.Delay(DefaultSupervisorIntervalMs, cancellationToken).ConfigureAwait(false);
                 }
             }
-
-        #endregion
-
-        #region 状态汇总与诊断
             catch (OperationCanceledException)
             {
             }
@@ -378,7 +374,7 @@ namespace AM.DBService.Services.Plc.Runtime
                     "PLC-WORKER-LOOP-" + ex.Message,
                     (int)DbErrorCode.Unknown,
                     "PLC 扫描协调循环异常",
-                    30000,
+                    BackgroundLogThrottleIntervalMs,
                     ex);
             }
             finally
@@ -468,8 +464,13 @@ namespace AM.DBService.Services.Plc.Runtime
                 {
                     runner.StopAsync().GetAwaiter().GetResult();
                 }
-                catch
+                catch (Exception ex)
                 {
+                    WarnLogOnlyIfRepeated(
+                        "PLC-RUNNER-REMOVE-STOP-" + runner.PlcName + "-" + ex.Message,
+                        (int)DbErrorCode.Unknown,
+                        "停止已移除的 PLC 站扫描运行器失败: " + runner.PlcName,
+                        BackgroundLogThrottleIntervalMs);
                 }
             }
         }
@@ -528,11 +529,20 @@ namespace AM.DBService.Services.Plc.Runtime
                 {
                     await runner.StopAsync().ConfigureAwait(false);
                 }
-                catch
+                catch (Exception ex)
                 {
+                    WarnLogOnlyIfRepeated(
+                        "PLC-RUNNER-STOP-" + runner.PlcName + "-" + ex.Message,
+                        (int)DbErrorCode.Unknown,
+                        "停止 PLC 站扫描运行器失败: " + runner.PlcName,
+                        BackgroundLogThrottleIntervalMs);
                 }
             }
         }
+
+        #endregion
+
+        #region 状态汇总与诊断
 
         /// <summary>
         /// 汇总整体扫描服务状态，并写回 RuntimeContext。
