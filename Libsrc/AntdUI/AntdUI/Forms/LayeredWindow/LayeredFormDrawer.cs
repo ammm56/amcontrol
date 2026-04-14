@@ -154,7 +154,13 @@ namespace AntdUI
         Bitmap? tempContent;
         private void Form_SizeChanged(object? sender, EventArgs e)
         {
+            if (IsDisposed || !IsHandleCreated || config.Form == null || config.Form.IsDisposed)
+            {
+                return;
+            }
+
             if (config.Form.WindowState == FormWindowState.Minimized) return;
+
             switch (config.Align)
             {
                 case TAlignMini.Top:
@@ -217,11 +223,13 @@ namespace AntdUI
                     end_X = start_X - end_W;
                     break;
             }
+
             if (task_start == null)
             {
                 SetLocation(end_X, end_Y);
                 SetSize(end_W, end_H);
-                if (form != null)
+
+                if (form != null && !form.IsDisposed)
                 {
                     isok = false;
                     var rect = Ang();
@@ -229,22 +237,39 @@ namespace AntdUI
                     form.Size = rect.Size;
                     isok = true;
                 }
-                Print();
+
+                if (!IsDisposed && IsHandleCreated)
+                {
+                    Print();
+                }
             }
         }
 
         private void Form_LocationChanged(object? sender, EventArgs e)
         {
+            if (IsDisposed || !IsHandleCreated || config.Form == null || config.Form.IsDisposed)
+            {
+                return;
+            }
+
             if (config.Form.WindowState == FormWindowState.Minimized)
             {
                 SetLocation(-end_W * 2, -end_H * 2);
                 if (task_start == null)
                 {
-                    if (form != null) form.Location = Helper.OffScreenLocation(form.Width, form.Height);
-                    Print();
+                    if (form != null && !form.IsDisposed)
+                    {
+                        form.Location = Helper.OffScreenLocation(form.Width, form.Height);
+                    }
+
+                    if (!IsDisposed && IsHandleCreated)
+                    {
+                        Print();
+                    }
                 }
                 return;
             }
+
             switch (config.Align)
             {
                 case TAlignMini.Top:
@@ -307,11 +332,20 @@ namespace AntdUI
                     end_X = start_X - end_W;
                     break;
             }
+
             if (task_start == null)
             {
                 SetLocation(end_X, end_Y);
-                if (form != null) form.Location = Ang().Location;
-                Print();
+
+                if (form != null && !form.IsDisposed)
+                {
+                    form.Location = Ang().Location;
+                }
+
+                if (!IsDisposed && IsHandleCreated)
+                {
+                    Print();
+                }
             }
         }
 
@@ -411,7 +445,11 @@ namespace AntdUI
         bool isok = true;
         private void Content_SizeChanged(object? sender, EventArgs e)
         {
-            if (form == null) return;
+            if (form == null || form.IsDisposed || IsDisposed || !IsHandleCreated)
+            {
+                return;
+            }
+
             if (isok)
             {
                 isok = false;
@@ -482,12 +520,21 @@ namespace AntdUI
                         end_X = start_X - end_W;
                         break;
                 }
+
                 SetLocation(end_X, end_Y);
                 SetSize(end_W, end_H);
+
+                if (form == null || form.IsDisposed || IsDisposed || !IsHandleCreated)
+                {
+                    isok = true;
+                    return;
+                }
+
                 var rect = Ang();
                 form.Location = rect.Location;
                 form.Size = rect.Size;
                 Print();
+
                 ITask.Run(() =>
                 {
                     System.Threading.Thread.Sleep(500);
@@ -607,21 +654,50 @@ namespace AntdUI
 
         protected override void Dispose(bool disposing)
         {
-            config.Form.LocationChanged -= Form_LocationChanged;
-            config.Form.SizeChanged -= Form_SizeChanged;
-            if (config.Dispose) config.Content.Dispose();
+            try
+            {
+                config.Form.LocationChanged -= Form_LocationChanged;
+                config.Form.SizeChanged -= Form_SizeChanged;
+                config.Content.SizeChanged -= Content_SizeChanged;
+            }
+            catch
+            {
+            }
+
+            if (config.Dispose)
+            {
+                config.Content.Dispose();
+            }
+
             tempContent?.Dispose();
-            form?.Dispose();
+            tempContent = null;
+
+            if (form != null)
+            {
+                try
+                {
+                    form.Dispose();
+                }
+                catch
+                {
+                }
+
+                form = null;
+            }
+
             task_start?.Dispose();
+            task_start = null;
+
             config.OnClose?.Invoke();
             config.OnClose = null;
+
             shadow_temp?.Dispose();
             shadow_temp = null;
+
             base.Dispose(disposing);
 
             if (config.ManualActivateParent)
             {
-                // 在抽屉关闭后恢复主窗体的激活/置前
                 try
                 {
                     var owner = config.Form;
@@ -631,7 +707,9 @@ namespace AntdUI
                         else owner.Activate();
                     }
                 }
-                catch { }
+                catch
+                {
+                }
             }
         }
 

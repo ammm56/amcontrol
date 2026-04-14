@@ -60,6 +60,7 @@ namespace AMControlWinF
         private bool _isUpdatingUiState;
         private int _activeAlarmCount;
         private SystemMessageType _lastStatusMessageType = SystemMessageType.Status;
+        private ActiveAlarmDrawerControl _activeAlarmDrawerControl;
 
         /// <summary>
         /// 关闭原因，供 Program.cs 主循环读取。
@@ -968,16 +969,22 @@ namespace AMControlWinF
 
         private void OpenAlarmDrawer()
         {
-            ActiveAlarmDrawerControl content = new ActiveAlarmDrawerControl();
-            content.BindAlarmManager(SystemContext.Instance.AlarmManager);
-            content.Size = new Size(760, 620);
+            if (_activeAlarmDrawerControl == null || _activeAlarmDrawerControl.IsDisposed)
+            {
+                _activeAlarmDrawerControl = new ActiveAlarmDrawerControl();
+                _activeAlarmDrawerControl.BindAlarmManager(SystemContext.Instance.AlarmManager);
+                _activeAlarmDrawerControl.Size = new Size(760, 620);
+            }
 
-            AntdUI.Drawer.open(new AntdUI.Drawer.Config(this, content)
+            _activeAlarmDrawerControl.RefreshAlarms();
+
+            AntdUI.Drawer.open(new AntdUI.Drawer.Config(this, _activeAlarmDrawerControl)
             {
                 Align = TAlignMini.Left,
                 Mask = true,
                 MaskClosable = true,
-                DisplayDelay = 100
+                DisplayDelay = 0,
+                Dispose = false
             });
         }
 
@@ -1163,6 +1170,10 @@ namespace AMControlWinF
             }
             catch
             {
+            }
+            if (_activeAlarmDrawerControl != null && !_activeAlarmDrawerControl.IsDisposed)
+            {
+                _activeAlarmDrawerControl.Dispose();
             }
         }
 

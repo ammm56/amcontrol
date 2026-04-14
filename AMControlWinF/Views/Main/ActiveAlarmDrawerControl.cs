@@ -22,7 +22,6 @@ namespace AMControlWinF.Views.Main
         private const int PageSize = 20;
 
         private readonly List<AlarmDisplayItem> _allAlarmItems;
-        private AntList<AlarmTableRow> _tableRows;
 
         private AlarmManager _alarmManager;
         private AlarmDisplayItem _selectedItem;
@@ -34,7 +33,6 @@ namespace AMControlWinF.Views.Main
             InitializeComponent();
 
             _allAlarmItems = new List<AlarmDisplayItem>();
-            _tableRows = new AntList<AlarmTableRow>();
             _currentPageIndex = 1;
 
             InitializeTableColumns();
@@ -58,11 +56,15 @@ namespace AMControlWinF.Views.Main
         /// <param name="alarmManager">报警管理器。</param>
         public void BindAlarmManager(AlarmManager alarmManager)
         {
+            if (ReferenceEquals(_alarmManager, alarmManager))
+            {
+                return;
+            }
+
             UnsubscribeAlarmManager();
 
             _alarmManager = alarmManager;
             SubscribeAlarmManager();
-            RefreshAlarms();
         }
 
         /// <summary>
@@ -80,27 +82,20 @@ namespace AMControlWinF.Views.Main
             {
                 string preferredKey = _selectedItem == null ? string.Empty : _selectedItem.UniqueKey;
 
-                _allAlarmItems.Clear();
-
-                List<AlarmInfo> alarms = _alarmManager == null
-                    ? new List<AlarmInfo>()
+                List<AlarmDisplayItem> items = _alarmManager == null
+                    ? new List<AlarmDisplayItem>()
                     : _alarmManager.GetActiveAlarms()
+                        .Where(x => x != null)
                         .OrderByDescending(x => x.Time)
+                        .Select(x => new AlarmDisplayItem(x))
                         .ToList();
 
-                foreach (AlarmInfo alarm in alarms)
-                {
-                    if (alarm == null)
-                    {
-                        continue;
-                    }
-
-                    _allAlarmItems.Add(new AlarmDisplayItem(alarm));
-                }
+                _allAlarmItems.Clear();
+                _allAlarmItems.AddRange(items);
 
                 EnsureValidPageIndex();
-                RefreshSummary();
                 RebindTable(preferredKey);
+                RefreshSummary();
                 RefreshPagingState();
                 RefreshActionButtons();
             }
@@ -178,7 +173,7 @@ namespace AMControlWinF.Views.Main
 
         private void AlarmManager_AlarmStateChanged()
         {
-            if (IsDisposed)
+            if (IsDisposed || !IsHandleCreated || !Visible)
             {
                 return;
             }
@@ -187,7 +182,13 @@ namespace AMControlWinF.Views.Main
             {
                 try
                 {
-                    BeginInvoke(new Action(RefreshAlarms));
+                    BeginInvoke(new Action(() =>
+                    {
+                        if (!IsDisposed && IsHandleCreated && Visible)
+                        {
+                            RefreshAlarms();
+                        }
+                    }));
                 }
                 catch
                 {
@@ -227,13 +228,12 @@ namespace AMControlWinF.Views.Main
         /// <param name="preferredKey">优先保持选中的报警唯一键。</param>
         private void RebindTable(string preferredKey)
         {
-            _tableRows = new AntList<AlarmTableRow>();
-
             List<AlarmDisplayItem> pageItems = GetCurrentPageItems();
 
+            var rows = new AntList<AlarmTableRow>();
             foreach (AlarmDisplayItem item in pageItems)
             {
-                _tableRows.Add(new AlarmTableRow
+                rows.Add(new AlarmTableRow
                 {
                     Item = item,
                     TimeText = item.TimeText,
@@ -244,14 +244,13 @@ namespace AMControlWinF.Views.Main
                 });
             }
 
-            tableAlarms.Binding(_tableRows);
+            tableAlarms.Binding(rows);
 
-            AlarmDisplayItem selected = pageItems.FirstOrDefault(x =>
+            _selectedItem = pageItems.FirstOrDefault(x =>
                 string.Equals(x.UniqueKey, preferredKey, StringComparison.Ordinal))
                 ?? pageItems.FirstOrDefault();
 
-            _selectedItem = selected;
-            ShowAlarmDetail(selected);
+            ShowAlarmDetail(_selectedItem);
         }
 
         /// <summary>

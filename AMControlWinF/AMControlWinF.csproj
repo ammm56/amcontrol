@@ -499,6 +499,9 @@
     <EmbeddedResource Include="Views\Auth\LoginForm.resx">
       <DependentUpon>LoginForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\Main\ActiveAlarmDrawerControl.resx">
+      <DependentUpon>ActiveAlarmDrawerControl.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Views\Main\UserAvatarMenuControl.resx">
       <DependentUpon>UserAvatarMenuControl.cs</DependentUpon>
     </EmbeddedResource>
