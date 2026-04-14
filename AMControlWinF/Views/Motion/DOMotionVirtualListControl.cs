@@ -209,8 +209,8 @@ namespace AMControlWinF.Views.Motion
                     g.Draw(borderColor, _selected ? 1.6F : 1F, path);
                 }
 
-                DrawBadge(g, new Rectangle(12, 12, 34, 22), primaryColor, "DO");
-                DrawBadge(g, new Rectangle(50, 12, 48, 22), Item.CurrentValue ? onColor : offColor, Item.ValueText);
+                //DrawBadge(g, new Rectangle(12, 12, 34, 22), primaryColor, "DO");
+                DrawBadge(g, new Rectangle(12, 12, 48, 22), Item.CurrentValue ? onColor : offColor, Item.ValueText);
 
                 g.String(
                     "L#" + Item.LogicalBit,

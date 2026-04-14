@@ -445,16 +445,16 @@ namespace AMControlWinF.Views.Motion
                 }
 
                 // 左上角 "DI" 类型标签。
-                DrawBadge(
-                    g,
-                    new Rectangle(12, 12, 34, 22),
-                    primaryColor,
-                    "DI");
+                //DrawBadge(
+                //    g,
+                //    new Rectangle(12, 12, 34, 22),
+                //    primaryColor,
+                //    "DI");
 
                 // 左上角 ON/OFF 值标签。
                 DrawBadge(
                     g,
-                    new Rectangle(50, 12, 48, 22),
+                    new Rectangle(12, 12, 48, 22),
                     Item.CurrentValue ? onColor : offColor,
                     Item.ValueText);
 
