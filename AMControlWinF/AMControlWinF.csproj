@@ -61,6 +61,18 @@
     <Compile Include="Tools\AppThemeHelper.cs" />
     <Compile Include="Tools\ControlDisposeHelper.cs" />
     <Compile Include="Tools\PageDialogHelper.cs" />
+    <Compile Include="Views\AlarmLog\ActiveAlarmContentControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\AlarmLog\ActiveAlarmContentControl.Designer.cs">
+      <DependentUpon>ActiveAlarmContentControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\AlarmLog\CurrentAlarmPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\AlarmLog\CurrentAlarmPage.Designer.cs">
+      <DependentUpon>CurrentAlarmPage.cs</DependentUpon>
+    </Compile>
     <Compile Include="Views\Am\LoginLogPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -475,6 +487,9 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="Views\AlarmLog\ActiveAlarmContentControl.resx">
+      <DependentUpon>ActiveAlarmContentControl.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Views\Am\LoginLogPage.resx">
       <DependentUpon>LoginLogPage.cs</DependentUpon>
     </EmbeddedResource>

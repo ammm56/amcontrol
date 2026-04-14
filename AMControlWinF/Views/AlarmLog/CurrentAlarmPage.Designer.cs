@@ -1,13 +1,16 @@
-﻿namespace AMControlWinF.Views.Main
+﻿namespace AMControlWinF.Views.AlarmLog
 {
-    partial class ActiveAlarmDrawerControl
+    partial class CurrentAlarmPage
     {
+        /// <summary> 
+        /// 必需的设计器变量。
+        /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        /// 释放资源。
+        /// <summary> 
+        /// 清理所有正在使用的资源。
         /// </summary>
-        /// <param name="disposing">是否释放托管资源。</param>
+        /// <param name="disposing">如果应释放托管资源，为 true；否则为 false。</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -20,8 +23,9 @@
 
         #region 组件设计器生成的代码
 
-        /// <summary>
-        /// 设计器生成代码。
+        /// <summary> 
+        /// 设计器支持所需的方法 - 不要修改
+        /// 使用代码编辑器修改此方法的内容。
         /// </summary>
         private void InitializeComponent()
         {
@@ -37,27 +41,27 @@
             this.panelRoot.Location = new System.Drawing.Point(0, 0);
             this.panelRoot.Margin = new System.Windows.Forms.Padding(0);
             this.panelRoot.Name = "panelRoot";
-            this.panelRoot.Padding = new System.Windows.Forms.Padding(0);
+            this.panelRoot.Padding = new System.Windows.Forms.Padding(8);
             this.panelRoot.Radius = 0;
-            this.panelRoot.Size = new System.Drawing.Size(760, 620);
+            this.panelRoot.Size = new System.Drawing.Size(1100, 680);
             this.panelRoot.TabIndex = 0;
             // 
             // activeAlarmContentControl
             // 
             this.activeAlarmContentControl.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.activeAlarmContentControl.Location = new System.Drawing.Point(0, 0);
+            this.activeAlarmContentControl.Location = new System.Drawing.Point(8, 8);
             this.activeAlarmContentControl.Margin = new System.Windows.Forms.Padding(0);
             this.activeAlarmContentControl.Name = "activeAlarmContentControl";
-            this.activeAlarmContentControl.Size = new System.Drawing.Size(760, 620);
+            this.activeAlarmContentControl.Size = new System.Drawing.Size(1084, 664);
             this.activeAlarmContentControl.TabIndex = 0;
             // 
-            // ActiveAlarmDrawerControl
+            // CurrentAlarmPage
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.Controls.Add(this.panelRoot);
             this.Margin = new System.Windows.Forms.Padding(0);
-            this.Name = "ActiveAlarmDrawerControl";
-            this.Size = new System.Drawing.Size(760, 620);
+            this.Name = "CurrentAlarmPage";
+            this.Size = new System.Drawing.Size(1100, 680);
             this.panelRoot.ResumeLayout(false);
             this.ResumeLayout(false);
         }
@@ -65,6 +69,6 @@
         #endregion
 
         private AntdUI.Panel panelRoot;
-        private AMControlWinF.Views.AlarmLog.ActiveAlarmContentControl activeAlarmContentControl;
+        private ActiveAlarmContentControl activeAlarmContentControl;
     }
 }

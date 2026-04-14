@@ -12,6 +12,7 @@ using AM.PageModel.Main;
 using AM.PageModel.Navigation;
 using AM.Tools;
 using AMControlWinF.Tools;
+using AMControlWinF.Views.AlarmLog;
 using AMControlWinF.Views.Am;
 using AMControlWinF.Views.Auth;
 using AMControlWinF.Views.Main;
@@ -505,7 +506,7 @@ namespace AMControlWinF
 
                 { "SysConfig.Plc",          () => new PlcConfigManagementPage() },
 
-                { "AlarmLog.Current",       () => CreatePlaceholderPage("报警与日志 / 当前报警") },
+                { "AlarmLog.Current",       () => new CurrentAlarmPage() },
                 { "AlarmLog.History",       () => CreatePlaceholderPage("报警与日志 / 报警历史") },
                 { "AlarmLog.RunLog",        () => CreatePlaceholderPage("报警与日志 / 运行日志") },
 
