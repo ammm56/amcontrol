@@ -21,6 +21,8 @@ namespace AM.DBService.Services.Plc.Runtime
     /// </summary>
     internal sealed class PlcStationScanRunner : ServiceBase
     {
+        #region 常量与字段
+
         private const string QualityGood = "Good";
         private const string QualityDisconnected = "Disconnected";
         private const string QualityError = "Error";
@@ -89,6 +91,10 @@ namespace AM.DBService.Services.Plc.Runtime
         /// </summary>
         private string _lastDisconnectMessage = string.Empty;
 
+        #endregion
+
+        #region 元数据与构造
+
         protected override string MessageSourceName
         {
             get { return "PlcStationScanRunner"; }
@@ -113,6 +119,10 @@ namespace AM.DBService.Services.Plc.Runtime
             _clientResolver = clientResolver;
             LastError = string.Empty;
         }
+
+        #endregion
+
+        #region 属性与生命周期
 
         /// <summary>
         /// 站名称。
@@ -235,6 +245,10 @@ namespace AM.DBService.Services.Plc.Runtime
             return Task.Run(() => ScanOnceInternal(DateTime.Now));
         }
 
+        #endregion
+
+        #region 扫描循环
+
         /// <summary>
         /// 本站扫描循环。
         /// </summary>
@@ -264,9 +278,16 @@ namespace AM.DBService.Services.Plc.Runtime
             catch (Exception ex)
             {
                 LastError = ex.Message;
-                Fail((int)DbErrorCode.Unknown, "PLC 站扫描循环异常: " + PlcName, ex);
+                FailLogOnlyIfRepeated(
+                    "PLC-STATION-LOOP-" + PlcName + "-" + ex.Message,
+                    (int)DbErrorCode.Unknown,
+                    "PLC 站扫描循环异常: " + PlcName,
+                    DisconnectSteadyLogIntervalMs,
+                    ex);
             }
         }
+
+        #endregion
 
         /// <summary>
         /// 执行本站单轮扫描核心逻辑。
@@ -724,20 +745,13 @@ namespace AM.DBService.Services.Plc.Runtime
             string finalMessage = string.IsNullOrWhiteSpace(message) ? "PLC 未连接" : message;
             string displayName = station == null ? PlcName : station.DisplayTitle;
 
-            bool isEdgeDisconnect = !_wasDisconnected;
-            bool errorChanged = !string.Equals(_lastDisconnectMessage, finalMessage, StringComparison.Ordinal);
-
-            if (isEdgeDisconnect || errorChanged)
-            {
-                Warn(code, "PLC 站离线: " + displayName + "，" + finalMessage, ReportChannels.Log | ReportChannels.Message);
-            }
-            else if (ShouldReportRepeated("PLC-DISCONNECT-" + PlcName + "-" + finalMessage, DisconnectSteadyLogIntervalMs))
-            {
-                WarnLogOnly(code, "PLC 站持续离线: " + displayName + "，" + finalMessage);
-            }
-
-            _wasDisconnected = true;
-            _lastDisconnectMessage = finalMessage;
+            ReportBackgroundFaultIfNeeded(
+                ref _wasDisconnected,
+                ref _lastDisconnectMessage,
+                "PLC-DISCONNECT-" + PlcName,
+                code,
+                "PLC 站离线: " + displayName + "，" + finalMessage,
+                DisconnectSteadyLogIntervalMs);
         }
 
         /// <summary>
@@ -746,16 +760,12 @@ namespace AM.DBService.Services.Plc.Runtime
         /// </summary>
         private void ReportReconnectIfNeeded(PlcStationConfig station)
         {
-            if (!_wasDisconnected)
-            {
-                return;
-            }
-
             string displayName = station == null ? PlcName : station.DisplayTitle;
-            OkLogOnly("PLC 站恢复在线: " + displayName);
 
-            _wasDisconnected = false;
-            _lastDisconnectMessage = string.Empty;
+            ReportBackgroundRecoveredIfNeeded(
+                ref _wasDisconnected,
+                ref _lastDisconnectMessage,
+                "PLC 站恢复在线: " + displayName);
         }
 
         /// <summary>
@@ -764,8 +774,7 @@ namespace AM.DBService.Services.Plc.Runtime
         /// </summary>
         private void ResetDisconnectReportState()
         {
-            _wasDisconnected = false;
-            _lastDisconnectMessage = string.Empty;
+            ResetBackgroundFaultState(ref _wasDisconnected, ref _lastDisconnectMessage);
         }
 
         private static bool IsReadablePoint(PlcPointConfig point)

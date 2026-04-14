@@ -18,6 +18,8 @@ namespace AM.DBService.Services.Runtime
     /// </summary>
     public class IoScanWorker : ServiceBase, IIoScanService
     {
+        #region 常量与字段
+
         private const int DefaultSupervisorIntervalMs = 500;
         private const int MinScanIntervalMs = 10;
         private const int DefaultScanIntervalMs = 50;
@@ -31,6 +33,14 @@ namespace AM.DBService.Services.Runtime
         private IList<MotionCardConfig> _cachedMotionCardsConfig;
         private IDictionary<short, MotionCardConfig> _cachedCardLookup;
         private readonly IDictionary<short, IoCardScanRunner> _cardRunners;
+
+        private const int BackgroundLogThrottleIntervalMs = 30000;
+        private const int ScanStallWarnMinMs = 2000;
+        private const int ScanStallWarnFactor = 8;
+
+        #endregion
+
+        #region 元数据与构造
 
         protected override string MessageSourceName
         {
@@ -58,6 +68,10 @@ namespace AM.DBService.Services.Runtime
             ScanState = IoScanState.Idle;
             LastError = string.Empty;
         }
+
+        #endregion
+
+        #region 属性与启停
 
         public string Name
         {
@@ -212,6 +226,10 @@ namespace AM.DBService.Services.Runtime
             }
         }
 
+        #endregion
+
+        #region 协调循环与运行器管理
+
         private async Task SupervisorLoopAsync(CancellationToken cancellationToken)
         {
             try
@@ -226,6 +244,10 @@ namespace AM.DBService.Services.Runtime
                     await Task.Delay(DefaultSupervisorIntervalMs, cancellationToken).ConfigureAwait(false);
                 }
             }
+
+        #endregion
+
+        #region 状态汇总与诊断
             catch (OperationCanceledException)
             {
             }
@@ -233,7 +255,13 @@ namespace AM.DBService.Services.Runtime
             {
                 LastError = ex.Message;
                 ScanState = IoScanState.Error;
-                FailLogOnly((int)MotionErrorCode.Unknown, "IO 扫描协调循环异常", ex);
+
+                FailLogOnlyIfRepeated(
+                    "IO-WORKER-LOOP-" + ex.Message,
+                    (int)MotionErrorCode.Unknown,
+                    "IO 扫描协调循环异常",
+                    BackgroundLogThrottleIntervalMs,
+                    ex);
             }
             finally
             {
@@ -318,7 +346,11 @@ namespace AM.DBService.Services.Runtime
                 var startResult = runner.Start();
                 if (!startResult.Success)
                 {
-                    WarnLogOnly(startResult.Code, "IO 控制卡扫描运行器启动失败: CardId=" + runner.CardId + "，" + startResult.Message);
+                    WarnLogOnlyIfRepeated(
+                        "IO-RUNNER-START-" + runner.CardId + "-" + startResult.Message,
+                        startResult.Code,
+                        "IO 控制卡扫描运行器启动失败: CardId=" + runner.CardId + "，" + startResult.Message,
+                        BackgroundLogThrottleIntervalMs);
                 }
             }
         }
@@ -390,6 +422,8 @@ namespace AM.DBService.Services.Runtime
                 ScanState = IoScanState.Running;
             }
 
+            ReportScanStallIfNeeded(hasRunningRunner, hasFaultRunner, runners.Length);
+
             if (LastRunTime.HasValue)
             {
                 // 注意：MotionIo 内部不再维护单独的扫描时间戳，而是直接使用各 Runner 的扫描时间来判断数据新旧。
@@ -397,6 +431,55 @@ namespace AM.DBService.Services.Runtime
                 RuntimeContext.Instance.MotionIo.NotifySnapshotChanged();
             }
         }
+
+        private void ReportScanStallIfNeeded(bool hasRunningRunner, bool hasFaultRunner, int runnerCount)
+        {
+            if (!hasRunningRunner)
+            {
+                return;
+            }
+
+            if (!LastRunTime.HasValue)
+            {
+                WarnLogOnlyIfRepeated(
+                    "IO-WORKER-NO-SNAPSHOT",
+                    (int)MotionErrorCode.IoRuntimeCacheStale,
+                    string.Format(
+                        "Motion IO 扫描已启动但尚未产生有效快照: RunnerCount={0}, ScanInterval={1}ms, FaultRunner={2}",
+                        runnerCount,
+                        ScanIntervalMs,
+                        hasFaultRunner ? "Y" : "N"),
+                    BackgroundLogThrottleIntervalMs);
+                return;
+            }
+
+            double ageMs = (DateTime.Now - LastRunTime.Value).TotalMilliseconds;
+            int thresholdMs = GetScanStallWarnThresholdMs();
+            if (ageMs <= thresholdMs)
+            {
+                return;
+            }
+
+            WarnLogOnlyIfRepeated(
+                "IO-WORKER-STALL",
+                (int)MotionErrorCode.IoRuntimeCacheStale,
+                string.Format(
+                    "Motion IO 扫描疑似停滞: Age={0:0}ms, Threshold={1}ms, RunnerCount={2}, FaultRunner={3}, LastError={4}",
+                    ageMs,
+                    thresholdMs,
+                    runnerCount,
+                    hasFaultRunner ? "Y" : "N",
+                    string.IsNullOrWhiteSpace(LastError) ? "-" : LastError),
+                BackgroundLogThrottleIntervalMs);
+        }
+
+        private int GetScanStallWarnThresholdMs()
+        {
+            int threshold = ScanIntervalMs * ScanStallWarnFactor;
+            return threshold > ScanStallWarnMinMs ? threshold : ScanStallWarnMinMs;
+        }
+
+        #endregion
 
         private static IDictionary<short, MotionCardConfig> BuildCardLookup(IList<MotionCardConfig> motionCards)
         {

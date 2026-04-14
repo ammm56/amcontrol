@@ -34,6 +34,8 @@ namespace AM.DBService.Services.Plc.Runtime
     /// </summary>
     public class PlcScanWorker : ServiceBase, IPlcScanWorker
     {
+        #region 常量与字段
+
         /// <summary>
         /// 顶层协调循环默认刷新间隔。
         /// 用于检查配置变化、增删 runner，不表示 PLC 点位扫描周期。
@@ -92,6 +94,14 @@ namespace AM.DBService.Services.Plc.Runtime
         /// </summary>
         private readonly IDictionary<string, PlcStationScanRunner> _stationRunners;
 
+        private const int BackgroundLogThrottleIntervalMs = 30000;
+        private const int ScanStallWarnMinMs = 3000;
+        private const int ScanStallWarnFactor = 8;
+
+        #endregion
+
+        #region 元数据与构造
+
         protected override string MessageSourceName
         {
             get { return "PlcScanWorker"; }
@@ -117,6 +127,10 @@ namespace AM.DBService.Services.Plc.Runtime
             _stationRunners = new Dictionary<string, PlcStationScanRunner>(StringComparer.OrdinalIgnoreCase);
             LastError = string.Empty;
         }
+
+        #endregion
+
+        #region 属性与启停
 
         /// <summary>
         /// 顶层工作单元名称。
@@ -324,6 +338,10 @@ namespace AM.DBService.Services.Plc.Runtime
             }
         }
 
+        #endregion
+
+        #region 协调循环与运行器管理
+
         /// <summary>
         /// 顶层协调循环。
         /// 当前循环不直接读 PLC 点位，只负责：
@@ -346,13 +364,22 @@ namespace AM.DBService.Services.Plc.Runtime
                     await Task.Delay(DefaultSupervisorIntervalMs, cancellationToken).ConfigureAwait(false);
                 }
             }
+
+        #endregion
+
+        #region 状态汇总与诊断
             catch (OperationCanceledException)
             {
             }
             catch (Exception ex)
             {
                 LastError = ex.Message;
-                Fail((int)DbErrorCode.Unknown, "PLC 扫描协调循环异常", ex);
+                FailLogOnlyIfRepeated(
+                    "PLC-WORKER-LOOP-" + ex.Message,
+                    (int)DbErrorCode.Unknown,
+                    "PLC 扫描协调循环异常",
+                    30000,
+                    ex);
             }
             finally
             {
@@ -469,10 +496,11 @@ namespace AM.DBService.Services.Plc.Runtime
                 Result startResult = runner.Start();
                 if (!startResult.Success)
                 {
-                    _reporter.Warn(
-                        MessageSourceName,
+                    WarnLogOnlyIfRepeated(
+                        "PLC-RUNNER-START-" + runner.PlcName + "-" + startResult.Message,
+                        startResult.Code,
                         "PLC 站扫描运行器启动失败: " + runner.PlcName + "，" + startResult.Message,
-                        startResult.Code);
+                        BackgroundLogThrottleIntervalMs);
                 }
             }
         }
@@ -523,6 +551,8 @@ namespace AM.DBService.Services.Plc.Runtime
             }
 
             bool hasRunningRunner = runners.Any(x => x != null && x.IsRunning);
+            bool hasFaultRunner = runners.Any(x => x != null && !string.IsNullOrWhiteSpace(x.LastError));
+
             int scanIntervalMs = GetMinScanIntervalMs(
                 _cachedEnabledStationLookup == null
                     ? new List<PlcStationConfig>()
@@ -546,6 +576,8 @@ namespace AM.DBService.Services.Plc.Runtime
                 .FirstOrDefault();
 
             LastError = string.IsNullOrWhiteSpace(runnerError) ? string.Empty : runnerError;
+
+            ReportScanStallIfNeeded(hasRunningRunner, hasFaultRunner, scanIntervalMs, runners.Length);
         }
 
         /// <summary>
@@ -623,5 +655,55 @@ namespace AM.DBService.Services.Plc.Runtime
 
             return min < MinScanIntervalMs ? MinScanIntervalMs : min;
         }
+
+        private void ReportScanStallIfNeeded(bool hasRunningRunner, bool hasFaultRunner, int scanIntervalMs, int runnerCount)
+        {
+            if (!hasRunningRunner)
+            {
+                return;
+            }
+
+            if (!LastRunTime.HasValue)
+            {
+                WarnLogOnlyIfRepeated(
+                    "PLC-WORKER-NO-SNAPSHOT",
+                    (int)DbErrorCode.Unknown,
+                    string.Format(
+                        "PLC 扫描已启动但尚未产生有效快照: RunnerCount={0}, ScanInterval={1}ms, FaultRunner={2}",
+                        runnerCount,
+                        scanIntervalMs,
+                        hasFaultRunner ? "Y" : "N"),
+                    BackgroundLogThrottleIntervalMs);
+                return;
+            }
+
+            double ageMs = (DateTime.Now - LastRunTime.Value).TotalMilliseconds;
+            int thresholdMs = GetScanStallWarnThresholdMs(scanIntervalMs);
+            if (ageMs <= thresholdMs)
+            {
+                return;
+            }
+
+            WarnLogOnlyIfRepeated(
+                "PLC-WORKER-STALL",
+                (int)DbErrorCode.Unknown,
+                string.Format(
+                    "PLC 扫描疑似停滞: Age={0:0}ms, Threshold={1}ms, RunnerCount={2}, FaultRunner={3}, LastError={4}",
+                    ageMs,
+                    thresholdMs,
+                    runnerCount,
+                    hasFaultRunner ? "Y" : "N",
+                    string.IsNullOrWhiteSpace(LastError) ? "-" : LastError),
+                BackgroundLogThrottleIntervalMs);
+        }
+
+        private int GetScanStallWarnThresholdMs(int scanIntervalMs)
+        {
+            int safeIntervalMs = scanIntervalMs <= 0 ? MinScanIntervalMs : scanIntervalMs;
+            int threshold = safeIntervalMs * ScanStallWarnFactor;
+            return threshold > ScanStallWarnMinMs ? threshold : ScanStallWarnMinMs;
+        }
+
+        #endregion
     }
 }

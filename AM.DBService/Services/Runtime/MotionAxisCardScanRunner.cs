@@ -18,6 +18,8 @@ namespace AM.DBService.Services.Runtime
     /// </summary>
     internal sealed class MotionAxisCardScanRunner : ServiceBase
     {
+        #region 常量与字段
+
         private const int MinScanIntervalMs = 10;
         private const int ErrorLogThrottleIntervalMs = 30000;
 
@@ -32,6 +34,10 @@ namespace AM.DBService.Services.Runtime
 
         private bool _wasFaulted;
         private string _lastFaultMessage = string.Empty;
+
+        #endregion
+
+        #region 元数据与构造
 
         protected override string MessageSourceName
         {
@@ -63,6 +69,10 @@ namespace AM.DBService.Services.Runtime
             _scanIntervalMs = scanIntervalMs < MinScanIntervalMs ? MinScanIntervalMs : scanIntervalMs;
             LastError = string.Empty;
         }
+
+        #endregion
+
+        #region 属性与生命周期
 
         public short CardId
         {
@@ -192,6 +202,10 @@ namespace AM.DBService.Services.Runtime
             return Task.Run(() => ScanOnceInternal(DateTime.Now));
         }
 
+        #endregion
+
+        #region 扫描循环与故障处理
+
         private async Task ScanLoopAsync(CancellationToken cancellationToken)
         {
             try
@@ -221,10 +235,12 @@ namespace AM.DBService.Services.Runtime
             {
                 LastError = ex.Message;
 
-                if (ShouldReportRepeated("AXIS-CARD-LOOP-" + CardId + "-" + ex.Message, ErrorLogThrottleIntervalMs))
-                {
-                    FailLogOnly((int)MotionErrorCode.Unknown, "轴采样循环异常: " + CardDisplayTitle, ex);
-                }
+                FailLogOnlyIfRepeated(
+                    "AXIS-CARD-LOOP-" + CardId + "-" + ex.Message,
+                    (int)MotionErrorCode.Unknown,
+                    "轴采样循环异常: " + CardDisplayTitle,
+                    ErrorLogThrottleIntervalMs,
+                    ex);
             }
         }
 
@@ -323,32 +339,25 @@ namespace AM.DBService.Services.Runtime
 
         private void ReportFaultIfNeeded(int code, string message)
         {
-            string finalMessage = string.IsNullOrWhiteSpace(message) ? "轴采样失败" : message;
-            bool isEdgeFault = !_wasFaulted;
-            bool faultChanged = !string.Equals(_lastFaultMessage, finalMessage, StringComparison.Ordinal);
+            string finalMessage = string.IsNullOrWhiteSpace(message)
+                ? "控制卡轴采样异常: " + CardDisplayTitle
+                : "控制卡轴采样异常: " + CardDisplayTitle + "，" + message;
 
-            if (isEdgeFault || faultChanged)
-            {
-                Warn(code, "控制卡轴采样异常: " + CardDisplayTitle + "，" + finalMessage, ReportChannels.Log | ReportChannels.Message);
-            }
-            else if (ShouldReportRepeated("AXIS-CARD-FAULT-" + CardId + "-" + finalMessage, ErrorLogThrottleIntervalMs))
-            {
-                WarnLogOnly(code, "控制卡轴采样持续异常: " + CardDisplayTitle + "，" + finalMessage);
-            }
-
-            _wasFaulted = true;
-            _lastFaultMessage = finalMessage;
+            ReportBackgroundFaultIfNeeded(
+                ref _wasFaulted,
+                ref _lastFaultMessage,
+                "AXIS-CARD-FAULT-" + CardId,
+                code,
+                finalMessage,
+                ErrorLogThrottleIntervalMs);
         }
 
         private void ReportRecoveredIfNeeded()
         {
-            if (!_wasFaulted)
-            {
-                return;
-            }
-
-            OkLogOnly("控制卡轴采样恢复正常: " + CardDisplayTitle);
-            ResetFaultState();
+            ReportBackgroundRecoveredIfNeeded(
+                ref _wasFaulted,
+                ref _lastFaultMessage,
+                "控制卡轴采样恢复正常: " + CardDisplayTitle);
         }
 
         private int GetScanIntervalMs()
@@ -361,8 +370,9 @@ namespace AM.DBService.Services.Runtime
 
         private void ResetFaultState()
         {
-            _wasFaulted = false;
-            _lastFaultMessage = string.Empty;
+            ResetBackgroundFaultState(ref _wasFaulted, ref _lastFaultMessage);
         }
+
+        #endregion
     }
 }

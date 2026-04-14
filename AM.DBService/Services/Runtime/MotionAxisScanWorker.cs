@@ -20,6 +20,8 @@ namespace AM.DBService.Services.Runtime
     /// </summary>
     public class MotionAxisScanWorker : ServiceBase, IRuntimeWorker
     {
+        #region 常量与字段
+
         private const int DefaultSupervisorIntervalMs = 500;
         private const int MinScanIntervalMs = 10;
         private const int DefaultScanIntervalMs = 100;
@@ -33,6 +35,14 @@ namespace AM.DBService.Services.Runtime
         private IList<MotionCardConfig> _cachedMotionCardsConfig;
         private IDictionary<short, MotionCardConfig> _cachedCardLookup;
         private readonly IDictionary<short, MotionAxisCardScanRunner> _cardRunners;
+
+        private const int BackgroundLogThrottleIntervalMs = 30000;
+        private const int ScanStallWarnMinMs = 3000;
+        private const int ScanStallWarnFactor = 8;
+
+        #endregion
+
+        #region 元数据与构造
 
         protected override string MessageSourceName
         {
@@ -59,6 +69,10 @@ namespace AM.DBService.Services.Runtime
             ScanIntervalMs = scanIntervalMs < MinScanIntervalMs ? MinScanIntervalMs : scanIntervalMs;
             LastError = string.Empty;
         }
+
+        #endregion
+
+        #region 属性与启停
 
         public string Name
         {
@@ -210,6 +224,10 @@ namespace AM.DBService.Services.Runtime
             }
         }
 
+        #endregion
+
+        #region 协调循环与运行器管理
+
         private async Task SupervisorLoopAsync(CancellationToken cancellationToken)
         {
             try
@@ -224,13 +242,22 @@ namespace AM.DBService.Services.Runtime
                     await Task.Delay(DefaultSupervisorIntervalMs, cancellationToken).ConfigureAwait(false);
                 }
             }
+
+        #endregion
+
+        #region 状态汇总与诊断
             catch (OperationCanceledException)
             {
             }
             catch (Exception ex)
             {
                 LastError = ex.Message;
-                FailLogOnly((int)MotionErrorCode.Unknown, "轴运行态采样协调循环异常", ex);
+                FailLogOnlyIfRepeated(
+                    "MOTION-AXIS-WORKER-LOOP-" + ex.Message,
+                    (int)MotionErrorCode.Unknown,
+                    "轴运行态采样协调循环异常",
+                    30000,
+                    ex);
             }
             finally
             {
@@ -315,7 +342,11 @@ namespace AM.DBService.Services.Runtime
                 var startResult = runner.Start();
                 if (!startResult.Success)
                 {
-                    WarnLogOnly(startResult.Code, "轴采样运行器启动失败: CardId=" + runner.CardId + "，" + startResult.Message);
+                    WarnLogOnlyIfRepeated(
+                        "AXIS-RUNNER-START-" + runner.CardId + "-" + startResult.Message,
+                        startResult.Code,
+                        "轴采样运行器启动失败: CardId=" + runner.CardId + "，" + startResult.Message,
+                        BackgroundLogThrottleIntervalMs);
                 }
             }
         }
@@ -355,6 +386,7 @@ namespace AM.DBService.Services.Runtime
             }
 
             bool hasRunningRunner = runners.Any(x => x != null && x.IsRunning);
+            bool hasFaultRunner = runners.Any(x => x != null && x.HasFault);
 
             RuntimeContext.Instance.MotionAxis.SetScanServiceState(hasRunningRunner, hasRunningRunner ? ScanIntervalMs : 0);
 
@@ -373,6 +405,8 @@ namespace AM.DBService.Services.Runtime
 
             LastError = string.IsNullOrWhiteSpace(runnerError) ? string.Empty : runnerError;
 
+            ReportScanStallIfNeeded(hasRunningRunner, hasFaultRunner, runners.Length);
+
             if (LastRunTime.HasValue)
             {
                 // Runner中已经记录了单轴的扫描时间。
@@ -380,6 +414,55 @@ namespace AM.DBService.Services.Runtime
                 RuntimeContext.Instance.MotionAxis.NotifySnapshotChanged();
             }
         }
+
+        private void ReportScanStallIfNeeded(bool hasRunningRunner, bool hasFaultRunner, int runnerCount)
+        {
+            if (!hasRunningRunner)
+            {
+                return;
+            }
+
+            if (!LastRunTime.HasValue)
+            {
+                WarnLogOnlyIfRepeated(
+                    "AXIS-WORKER-NO-SNAPSHOT",
+                    (int)MotionErrorCode.IoRuntimeCacheStale,
+                    string.Format(
+                        "轴运行态采样已启动但尚未产生有效快照: RunnerCount={0}, ScanInterval={1}ms, FaultRunner={2}",
+                        runnerCount,
+                        ScanIntervalMs,
+                        hasFaultRunner ? "Y" : "N"),
+                    BackgroundLogThrottleIntervalMs);
+                return;
+            }
+
+            double ageMs = (DateTime.Now - LastRunTime.Value).TotalMilliseconds;
+            int thresholdMs = GetScanStallWarnThresholdMs();
+            if (ageMs <= thresholdMs)
+            {
+                return;
+            }
+
+            WarnLogOnlyIfRepeated(
+                "AXIS-WORKER-STALL",
+                (int)MotionErrorCode.IoRuntimeCacheStale,
+                string.Format(
+                    "轴运行态采样疑似停滞: Age={0:0}ms, Threshold={1}ms, RunnerCount={2}, FaultRunner={3}, LastError={4}",
+                    ageMs,
+                    thresholdMs,
+                    runnerCount,
+                    hasFaultRunner ? "Y" : "N",
+                    string.IsNullOrWhiteSpace(LastError) ? "-" : LastError),
+                BackgroundLogThrottleIntervalMs);
+        }
+
+        private int GetScanStallWarnThresholdMs()
+        {
+            int threshold = ScanIntervalMs * ScanStallWarnFactor;
+            return threshold > ScanStallWarnMinMs ? threshold : ScanStallWarnMinMs;
+        }
+
+        #endregion
 
         private static IDictionary<short, MotionCardConfig> BuildCardLookup(IList<MotionCardConfig> motionCards)
         {

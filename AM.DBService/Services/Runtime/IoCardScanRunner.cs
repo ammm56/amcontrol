@@ -18,6 +18,8 @@ namespace AM.DBService.Services.Runtime
     /// </summary>
     internal sealed class IoCardScanRunner : ServiceBase
     {
+        #region 常量与字段
+
         private const int MinScanIntervalMs = 10;
         private const int ErrorLogThrottleIntervalMs = 30000;
 
@@ -32,6 +34,10 @@ namespace AM.DBService.Services.Runtime
 
         private bool _wasFaulted;
         private string _lastFaultMessage = string.Empty;
+
+        #endregion
+
+        #region 元数据与构造
 
         protected override string MessageSourceName
         {
@@ -63,6 +69,10 @@ namespace AM.DBService.Services.Runtime
             _scanIntervalMs = scanIntervalMs < MinScanIntervalMs ? MinScanIntervalMs : scanIntervalMs;
             LastError = string.Empty;
         }
+
+        #endregion
+
+        #region 属性与生命周期
 
         /// <summary>
         /// 控制卡编号。
@@ -222,6 +232,10 @@ namespace AM.DBService.Services.Runtime
             return Task.Run(() => ScanOnceInternal(DateTime.Now));
         }
 
+        #endregion
+
+        #region 扫描循环与故障处理
+
         private async Task ScanLoopAsync(CancellationToken cancellationToken)
         {
             try
@@ -252,10 +266,12 @@ namespace AM.DBService.Services.Runtime
                 LastError = ex.Message;
                 ReportFaultIfNeeded((int)MotionErrorCode.Unknown, ex.Message);
 
-                if (ShouldReportRepeated("IO-CARD-LOOP-" + CardId + "-" + ex.Message, ErrorLogThrottleIntervalMs))
-                {
-                    FailLogOnly((int)MotionErrorCode.Unknown, "IO 控制卡扫描循环异常: " + CardDisplayTitle, ex);
-                }
+                FailLogOnlyIfRepeated(
+                    "IO-CARD-LOOP-" + CardId + "-" + ex.Message,
+                    (int)MotionErrorCode.Unknown,
+                    "IO 控制卡扫描循环异常: " + CardDisplayTitle,
+                    ErrorLogThrottleIntervalMs,
+                    ex);
             }
         }
 
@@ -323,22 +339,19 @@ namespace AM.DBService.Services.Runtime
         /// </summary>
         private void ReportFaultIfNeeded(int code, string message)
         {
-            string finalMessage = string.IsNullOrWhiteSpace(message) ? "IO 控制卡扫描失败" : message;
-            bool isEdgeFault = !_wasFaulted;
-            bool faultChanged = !string.Equals(_lastFaultMessage, finalMessage, StringComparison.Ordinal);
+            string finalMessage = string.IsNullOrWhiteSpace(message)
+                ? "IO 控制卡扫描失败"
+                : message;
 
-            if (isEdgeFault || faultChanged)
-            {
-                Warn(code, finalMessage, ReportChannels.Log | ReportChannels.Message);
-                RaiseAlarm(AlarmCode.IoScanFailed, AlarmLevel.Critical, finalMessage);
-            }
-            else if (ShouldReportRepeated("IO-CARD-FAULT-" + CardId + "-" + finalMessage, ErrorLogThrottleIntervalMs))
-            {
-                WarnLogOnly(code, "IO 控制卡持续异常: " + finalMessage);
-            }
-
-            _wasFaulted = true;
-            _lastFaultMessage = finalMessage;
+            ReportBackgroundFaultIfNeeded(
+                ref _wasFaulted,
+                ref _lastFaultMessage,
+                "IO-CARD-FAULT-" + CardId,
+                code,
+                finalMessage,
+                ErrorLogThrottleIntervalMs,
+                AlarmCode.IoScanFailed,
+                AlarmLevel.Critical);
         }
 
         /// <summary>
@@ -346,13 +359,10 @@ namespace AM.DBService.Services.Runtime
         /// </summary>
         private void ReportRecoveredIfNeeded()
         {
-            if (!_wasFaulted)
-            {
-                return;
-            }
-
-            OkLogOnly("IO 控制卡恢复正常: " + CardDisplayTitle);
-            ResetFaultState();
+            ReportBackgroundRecoveredIfNeeded(
+                ref _wasFaulted,
+                ref _lastFaultMessage,
+                "IO 控制卡恢复正常: " + CardDisplayTitle);
         }
 
         private int GetScanIntervalMs()
@@ -365,8 +375,9 @@ namespace AM.DBService.Services.Runtime
 
         private void ResetFaultState()
         {
-            _wasFaulted = false;
-            _lastFaultMessage = string.Empty;
+            ResetBackgroundFaultState(ref _wasFaulted, ref _lastFaultMessage);
         }
+
+        #endregion
     }
 }

@@ -7,7 +7,6 @@ using AM.Model.Interfaces.Motion.Actuator;
 using AM.Model.Interfaces.MotionCard;
 using AM.Model.MotionCard;
 using AM.Model.MotionCard.Actuator;
-using AM.Model.Runtime;
 using System;
 using System.Linq;
 using System.Threading;
@@ -23,10 +22,17 @@ namespace AM.DBService.Services.Motion.Actuator
     /// </summary>
     public class VacuumService : ServiceBase, IVacuumService
     {
+        #region 常量
+
         private const int DefaultPollIntervalMs = 50;
         private const int DefaultActionTimeoutMs = 3000;
         private const int DefaultCacheStaleToleranceMs = 500;
         private const int DefaultBlowOffPulseMs = 100;
+        private const int RuntimeCacheStaleLogThrottleIntervalMs = 30000;
+
+        #endregion
+
+        #region 元数据与构造
 
         protected override string MessageSourceName
         {
@@ -47,6 +53,10 @@ namespace AM.DBService.Services.Motion.Actuator
             : base(reporter)
         {
         }
+
+        #endregion
+
+        #region 查询与动作
 
         /// <summary>
         /// 查询全部已注册真空对象。
@@ -289,7 +299,7 @@ namespace AM.DBService.Services.Motion.Actuator
             var readResult = TryReadCachedDI(vacuum.VacuumFeedbackBit.Value, out value);
             if (!readResult.Success)
             {
-                return Fail<bool>(readResult.Code, readResult.Message);
+                return ForwardSilentFailure<bool>(readResult);
             }
 
             return OkSilent(value, "真空建立状态读取成功");
@@ -315,7 +325,7 @@ namespace AM.DBService.Services.Motion.Actuator
                 readResult = TryReadCachedDI(vacuum.ReleaseFeedbackBit.Value, out value);
                 if (!readResult.Success)
                 {
-                    return Fail<bool>(readResult.Code, readResult.Message);
+                    return ForwardSilentFailure<bool>(readResult);
                 }
 
                 return OkSilent(value, "真空释放状态读取成功");
@@ -326,7 +336,7 @@ namespace AM.DBService.Services.Motion.Actuator
                 readResult = TryReadCachedDI(vacuum.VacuumFeedbackBit.Value, out value);
                 if (!readResult.Success)
                 {
-                    return Fail<bool>(readResult.Code, readResult.Message);
+                    return ForwardSilentFailure<bool>(readResult);
                 }
 
                 return OkSilent(!value, "真空释放状态读取成功");
@@ -356,7 +366,7 @@ namespace AM.DBService.Services.Motion.Actuator
             var readResult = TryReadCachedDI(vacuum.WorkpiecePresentBit.Value, out value);
             if (!readResult.Success)
             {
-                return Fail<bool>(readResult.Code, readResult.Message);
+                return ForwardSilentFailure<bool>(readResult);
             }
 
             return OkSilent(value, "工件检测状态读取成功");
@@ -415,71 +425,14 @@ namespace AM.DBService.Services.Motion.Actuator
             return timeoutMs > 0 ? timeoutMs : DefaultActionTimeoutMs;
         }
 
-        private int GetCacheStaleToleranceMs(MotionIoRuntimeState runtimeState)
-        {
-            var scanInterval = runtimeState.ScanIntervalMs > 0
-                ? runtimeState.ScanIntervalMs
-                : DefaultPollIntervalMs;
-
-            var calculated = scanInterval * 4;
-            return calculated > DefaultCacheStaleToleranceMs
-                ? calculated
-                : DefaultCacheStaleToleranceMs;
-        }
-
-        private Result ValidateRuntimeCache(MotionIoRuntimeState runtimeState)
-        {
-            if (runtimeState == null)
-            {
-                return Fail((int)MotionErrorCode.IoMapNotFound, "Motion IO 运行时缓存未初始化");
-            }
-
-            if (!runtimeState.IsScanServiceRunning)
-            {
-                return Fail((int)MotionErrorCode.IoMapNotFound, "Motion IO 扫描工作单元未运行");
-            }
-
-            if (!runtimeState.LastScanTime.HasValue)
-            {
-                return Fail((int)MotionErrorCode.IoMapNotFound, "Motion IO 运行时缓存尚无扫描数据");
-            }
-
-            var ageMs = (DateTime.Now - runtimeState.LastScanTime.Value).TotalMilliseconds;
-            if (ageMs > GetCacheStaleToleranceMs(runtimeState))
-            {
-                return Fail((int)MotionErrorCode.IoMapNotFound, "Motion IO 运行时缓存已过期");
-            }
-
-            return OkSilent("Motion IO 运行时缓存可用");
-        }
-
         private Result TryReadCachedDI(short logicalBit, out bool value)
         {
-            value = false;
-
-            var runtimeState = RuntimeContext.Instance.MotionIo;
-            var validateResult = ValidateRuntimeCache(runtimeState);
-            if (!validateResult.Success)
-            {
-                return validateResult;
-            }
-
-            if (!runtimeState.TryGetDI(logicalBit, out value))
-            {
-                return Fail((int)MotionErrorCode.IoMapNotFound, "逻辑DI缓存不存在: " + logicalBit);
-            }
-
-            DateTime updateTime;
-            if (runtimeState.TryGetDIUpdateTime(logicalBit, out updateTime))
-            {
-                var ageMs = (DateTime.Now - updateTime).TotalMilliseconds;
-                if (ageMs > GetCacheStaleToleranceMs(runtimeState))
-                {
-                    return Fail((int)MotionErrorCode.IoMapNotFound, "逻辑DI缓存值已过期: " + logicalBit);
-                }
-            }
-
-            return OkSilent("逻辑DI缓存读取成功");
+            return TryReadMotionIoCachedDI(
+                logicalBit,
+                DefaultPollIntervalMs,
+                DefaultCacheStaleToleranceMs,
+                RuntimeCacheStaleLogThrottleIntervalMs,
+                out value);
         }
 
         private Result SetOutputsForVacuumOn(VacuumConfig vacuum)
@@ -628,5 +581,7 @@ namespace AM.DBService.Services.Motion.Actuator
                 await Task.Delay(DefaultPollIntervalMs, cancellationToken);
             }
         }
+
+        #endregion
     }
 }
