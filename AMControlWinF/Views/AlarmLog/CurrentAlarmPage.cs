@@ -27,6 +27,7 @@ namespace AMControlWinF.Views.AlarmLog
         private void BindEvents()
         {
             Load += CurrentAlarmPage_Load;
+            VisibleChanged += CurrentAlarmPage_VisibleChanged;
         }
 
         private void BindModel()
@@ -45,6 +46,16 @@ namespace AMControlWinF.Views.AlarmLog
 
             _model.BindAlarmManager(SystemContext.Instance.AlarmManager);
             activeAlarmContentControl.BindAlarmManager(SystemContext.Instance.AlarmManager);
+            activeAlarmContentControl.RefreshAlarms();
+        }
+
+        private void CurrentAlarmPage_VisibleChanged(object sender, EventArgs e)
+        {
+            if (!Visible || !_isFirstLoad)
+            {
+                return;
+            }
+
             activeAlarmContentControl.RefreshAlarms();
         }
     }

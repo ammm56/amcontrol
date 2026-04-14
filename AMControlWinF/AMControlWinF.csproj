@@ -79,6 +79,12 @@
     <Compile Include="Views\AlarmLog\CurrentAlarmPage.Designer.cs">
       <DependentUpon>CurrentAlarmPage.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\AlarmLog\RunLogPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\AlarmLog\RunLogPage.Designer.cs">
+      <DependentUpon>RunLogPage.cs</DependentUpon>
+    </Compile>
     <Compile Include="Views\Am\LoginLogPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -498,6 +504,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Views\AlarmLog\AlarmHistoryPage.resx">
       <DependentUpon>AlarmHistoryPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\AlarmLog\RunLogPage.resx">
+      <DependentUpon>RunLogPage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\Am\LoginLogPage.resx">
       <DependentUpon>LoginLogPage.cs</DependentUpon>

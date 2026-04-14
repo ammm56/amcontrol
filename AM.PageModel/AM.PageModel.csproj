@@ -44,6 +44,7 @@
   <ItemGroup>
     <Compile Include="AlarmLog\AlarmHistoryPageModel.cs" />
     <Compile Include="AlarmLog\CurrentAlarmPageModel.cs" />
+    <Compile Include="AlarmLog\RunLogPageModel.cs" />
     <Compile Include="Am\LoginLogPageModel.cs" />
     <Compile Include="Am\UserManagementPageModel.cs" />
     <Compile Include="Am\UserPermissionPageModel.cs" />

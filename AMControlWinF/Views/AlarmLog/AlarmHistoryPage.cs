@@ -40,6 +40,7 @@ namespace AMControlWinF.Views.AlarmLog
         private void BindEvents()
         {
             Load += AlarmHistoryPage_Load;
+            VisibleChanged += AlarmHistoryPage_VisibleChanged;
 
             inputSearch.TextChanged += InputSearch_TextChanged;
             inputSearch.KeyDown += InputSearch_KeyDown;
@@ -219,6 +220,16 @@ namespace AMControlWinF.Views.AlarmLog
             }
 
             UpdateFilterButtons();
+            await ReloadAsync();
+        }
+
+        private async void AlarmHistoryPage_VisibleChanged(object sender, EventArgs e)
+        {
+            if (!Visible || !_isFirstLoad || _isBusy)
+            {
+                return;
+            }
+
             await ReloadAsync();
         }
 

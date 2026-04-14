@@ -508,7 +508,7 @@ namespace AMControlWinF
 
                 { "AlarmLog.Current",       () => new CurrentAlarmPage() },
                 { "AlarmLog.History",       () => new AlarmHistoryPage() },
-                { "AlarmLog.RunLog",        () => CreatePlaceholderPage("报警与日志 / 运行日志") },
+                { "AlarmLog.RunLog",        () => new RunLogPage() },
 
                 { "System.User",            () => new UserManagementPage() },
                 { "System.Permission",      () => new UserPermissionPage() },
