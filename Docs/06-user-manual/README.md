@@ -25,6 +25,12 @@
 - 工程师（Engineer）：可进行参数配置和手动控制，不可进行用户管理。
 - 管理员（Am）：拥有全部权限，包括用户管理和权限配置。
 
+## AMControlWinF 手册
+
+| 文件 | 说明 |
+|------|------|
+| [winf-page-operation-manual.md](winf-page-operation-manual.md) | 已实现页面操作手册（登录、导航、用户管理、权限分配、日志、Motion、PLC、报警） |
+
 ---
 
 ## 相关文档

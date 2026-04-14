@@ -37,12 +37,16 @@
 ### AMControlWinF 分支
 
 - **WinForms 项目总览** → [02-development/winf-project-overview.md](02-development/winf-project-overview.md)
+- **WinForms 解决方案架构** → [01-architecture/winf-solution-architecture.md](01-architecture/winf-solution-architecture.md)
 - **应用生命周期与登录流程** → [01-architecture/winf-application-lifecycle.md](01-architecture/winf-application-lifecycle.md)
 - **主题系统设计** → [01-architecture/winf-theme-system.md](01-architecture/winf-theme-system.md)
 - **导航系统与页面缓存** → [01-architecture/winf-navigation-system.md](01-architecture/winf-navigation-system.md)
+- **统一 UI 规范与开发模板** → [01-architecture/winf-ui-standards.md](01-architecture/winf-ui-standards.md)
+- **页面开发模板与实施基线** → [02-development/winf-page-development-template.md](02-development/winf-page-development-template.md)
 - **用户认证与登录** → [03-features/winf-auth-login.md](03-features/winf-auth-login.md)
 - **主窗体壳层** → [03-features/winf-mainwindow-shell.md](03-features/winf-mainwindow-shell.md)
 - **开发进展记录** → [07-release-notes/winf-development-progress.md](07-release-notes/winf-development-progress.md)
+- **WinForms 页面操作手册** → [06-user-manual/winf-page-operation-manual.md](06-user-manual/winf-page-operation-manual.md)
 
 ### PLC 通信模块
 

@@ -1,150 +1,279 @@
 # AMControlWinF 导航系统与页面缓存
 
 **文档编号**：ARCH-W003  
-**版本**：1.0.0  
+**版本**：2.0.0  
 **状态**：有效  
-**最后更新**：2026-03-28  
+**最后更新**：2026-04-14  
 **维护人**：Am
 
 ---
 
 ## 1. 设计目标
 
-- 左侧两级固定可见导航：一级导航与二级导航同时显示，不使用垂直折叠展开；
-- 右侧工作区显示当前二级页面的完整内容；
-- 页面实例缓存复用，避免频繁创建销毁；
-- 导航目录与权限目录共用同一数据源（`NavigationCatalog`）。
+当前 WinForms 分支的导航系统已固定为以下目标：
+
+- 左侧两级导航固定可见；
+- 导航目录与页面权限共用同一数据源；
+- 页面按 `PageKey` 工厂创建并缓存复用；
+- 页面切换时不销毁 PageModel / ViewModel；
+- 语言切换后统一释放缓存并重建页面；
+- 壳层只负责导航与承载，不在 `MainWindow` 中写业务逻辑。
 
 ---
 
-## 2. 导航架构
+## 2. 导航数据源
 
-### 2.1 数据源
+### 2.1 唯一来源
 
-`NavigationCatalog`（位于 `AM.PageModel.Navigation`）是全局页面目录的唯一来源，同时服务于：
+`AM.PageModel.Navigation.NavigationCatalog` 是导航菜单与权限目录的唯一来源，提供：
 
-- **导航菜单构建**：`GetPrimaryItems()` / `GetSecondaryItems(moduleKey)`
-- **权限同步**：`ToPermissionEntities()` → 同步到数据库 `SysPagePermission` 表
+- `All`：全部页面定义；
+- `GetPrimaryItems()`：一级导航；
+- `GetSecondaryItems(moduleKey)`：二级页面；
+- `ToPermissionEntities()`：页面权限同步实体集合。
 
-每条记录包含：
+### 2.2 页面定义字段
+
+每个 `NavPageDef` 包含以下信息：
 
 | 字段 | 说明 |
 |------|------|
-| `ModuleKey` | 一级模块键名（如 `Motion`、`System`） |
-| `ModuleName` | 一级模块显示名（如 `设备`、`系统`） |
-| `PageKey` | 二级页面唯一键（如 `Motion.DI`、`System.User`） |
-| `DisplayName` | 二级页面显示名 |
-| `Description` | 页面功能描述 |
-| `AllowedRoles` | 允许访问的角色列表 |
-| `RiskLevel` | 风险等级（低/中/高） |
-| `SortOrder` | 排序序号 |
-
-### 2.2 模块与页面分布
-
-| 一级模块 | 二级页面数 | 说明 |
-|----------|-----------|------|
-| Home | 2 | 总览看板、系统状态 |
-| Motion | 5 | DI/DO 监视、多轴总览、轴控制、执行器控制 |
-| Production | 7 | 工单、配方、数据、报表、追溯、MES、上传 |
-| Vision | 3 | 相机监视、检测结果、标定管理 |
-| PLC | 4 | 点位监视、寄存器监视、通讯状态、写入调试 |
-| Peripheral | 4 | 扫码监视/测试、传感器监视/趋势 |
-| MotionConfig | 5 | 控制卡、轴拓扑、IO映射、轴参数、执行器 |
-| SysConfig | 6 | 相机、PLC、传感器、扫码器、MES、运行配置 |
-| Engineer | 4 | 设备诊断、原始轴/PLC/相机参数 |
-| AlarmLog | 3 | 当前报警、报警历史、运行日志 |
-| System | 3 | 用户管理、权限分配、登录日志 |
+| `ModuleKey` | 一级模块键，如 `Motion`、`PLC` |
+| `ModuleName` | 一级模块显示名 |
+| `PageKey` | 二级页面唯一键，如 `Motion.DI` |
+| `DisplayName` | 页面显示名 |
+| `Description` | 页面功能说明 |
+| `DefaultRoleCodes` | 默认允许访问角色 |
+| `RiskLevel` | 页面风险等级 |
+| `SortOrder` | 排序号 |
 
 ---
 
-## 3. 主窗体布局
+## 3. 导航过滤链路
 
-```
-┌─────────────────────────────────────────────────────────┐
-│  Titlebar (AM运动控制 | Version)   [语言] [主题] [头像] │
-├──────┬──────────┬───────────────────────────────────────┤
-│      │ 二级导航  │                                       │
-│ 一级 │ (Menu)   │         工作区 (panelContent)          │
-│ 导航 │          │                                       │
-│(Menu)│          │                                       │
-│      │          │                                       │
-├──────┴──────────┴───────────────────────────────────────┤
-│  状态栏 (panelStatusCard)                                │
-└─────────────────────────────────────────────────────────┘
+### 3.1 权限同步
+
+启动时 `Program.SyncPagePermissions()` 调用：
+
+```text
+NavigationCatalog.ToPermissionEntities()
+  → AuthSeedService.SyncPagePermissions(...)
+  → 写入 SysPagePermission 表
 ```
 
-使用 AntdUI `GridPanel` 布局，`Span = "100% 230 86 ;100%-100% 40"`：
+### 3.2 运行时过滤
 
-- 第一行高度 `100%-100%`（占满剩余空间，减去第二行高度）
-- 第二行高度 `40`（状态栏固定高度）
-- 第一列宽度 `100%`（占满）
-- 但一级导航宽 `230px`，二级导航宽 `86px`，工作区自动填充
+`MainWindowModel.LoadNavigation()` 的过滤规则：
+
+```text
+NavigationCatalog.GetPrimaryItems()
+  → CanAccessPrimary(primary)
+      → NavigationCatalog.GetSecondaryItems(primary.Key)
+      → Any(CanAccessPage)
+  → UserContext.Instance.HasPagePermission(page.PageKey)
+```
+
+即：
+
+- 用户只会看到自己至少有一个可访问子页面的一级模块；
+- 一级模块切换后，二级页面再次按页面权限过滤；
+- `SelectedSecondary` 默认取当前模块下第一个可访问页面。
 
 ---
 
-## 4. 页面缓存机制
+## 4. 当前导航模块分布
 
-### 4.1 缓存策略
+按 `NavigationCatalog`，当前定义的一级模块如下：
+
+| 一级模块 | 页面数 | 说明 |
+|----------|--------|------|
+| `Home` | 2 | 总览与系统状态 |
+| `Motion` | 5 | DI / DO / 多轴总览 / 轴控制 / 执行器控制 |
+| `Production` | 7 | 工单、配方、统计、追溯、MES |
+| `Vision` | 3 | 相机监视、检测结果、标定 |
+| `PLC` | 3 | 通讯状态、点位监视、调试工具 |
+| `Peripheral` | 4 | 扫码、传感器监视与趋势 |
+| `MotionConfig` | 5 | 控制卡、轴、IO、参数、执行器配置 |
+| `SysConfig` | 6 | 相机、PLC、传感器、扫码器、MES、运行配置 |
+| `Engineer` | 4 | 诊断与原始参数调试 |
+| `AlarmLog` | 3 | 当前报警、报警历史、运行日志 |
+| `System` | 3 | 用户、权限、登录日志 |
+
+### 4.1 当前已实现并接入工厂的页面
+
+`MainWindow.CreatePageFactories()` 当前已注册以下真实页面：
+
+```text
+Motion
+├── Motion.DI
+├── Motion.DO
+├── Motion.Monitor
+├── Motion.Axis
+└── Motion.Actuator
+
+MotionConfig
+├── MotionConfig.Card
+├── MotionConfig.Axis
+├── MotionConfig.IoMap
+├── MotionConfig.AxisParam
+└── MotionConfig.Actuator
+
+PLC
+├── PLC.Status
+├── PLC.Monitor
+└── PLC.Debug
+
+SysConfig
+└── SysConfig.Plc
+
+AlarmLog
+├── AlarmLog.Current
+├── AlarmLog.History
+└── AlarmLog.RunLog
+
+System
+├── System.User
+├── System.Permission
+└── System.LoginLog
+```
+
+### 4.2 当前仍使用占位页的模块
+
+- `Home.*`
+- `Production.*`
+- `Vision.*`
+- `Peripheral.*`
+- `SysConfig.Camera / Sensor / Scanner / Mes / Runtime`
+- `Engineer.*`
+
+占位页统一由 `CreatePlaceholderPage(...)` 生成。
+
+---
+
+## 5. 主窗体布局关系
+
+当前壳层固定为：
+
+```text
+┌─────────────────────────────────────────────────────────────┐
+│ Titlebar：应用标题 / 语言 / 主题 / 用户头像                │
+├────────────┬────────────┬──────────────────────────────────┤
+│ 一级导航    │ 二级导航    │ 工作区 panelContent              │
+│ menuPrimary │ menuSecondary│ 页面缓存实例显示区              │
+├────────────┴────────────┴──────────────────────────────────┤
+│ 状态栏：Motion / PLC / 状态消息 / 报警按钮                 │
+└─────────────────────────────────────────────────────────────┘
+```
+
+布局实现要点：
+
+- 一级导航与二级导航分列固定显示；
+- 工作区只承载当前二级页面；
+- 状态栏始终驻留底部；
+- 报警抽屉从主界面右侧打开，不改变导航层级。
+
+---
+
+## 6. 页面工厂与缓存机制
+
+### 6.1 核心字段
+
+`MainWindow` 使用两个字典维护页面：
 
 ```csharp
 private readonly Dictionary<string, Control> _pageCache;
 private readonly Dictionary<string, Func<Control>> _pageFactories;
 ```
 
-- `_pageFactories`：`PageKey → Func<Control>` 工厂映射，在构造时一次性注册
-- `_pageCache`：`PageKey → Control` 实例缓存，首次访问时创建并缓存
+- `_pageFactories`：`PageKey -> 页面构造函数`
+- `_pageCache`：`PageKey -> 已创建实例`
 
-### 4.2 页面创建与显示
+### 6.2 页面创建流程
 
-```
+```text
 NavigateToSelectedPage()
-  └─ GetOrCreatePage(pageKey)
-      ├─ 缓存命中 → 返回已有实例
-      └─ 缓存未命中 → _pageFactories[pageKey]() → 缓存 → 返回
-  └─ ShowPage(page)
-      ├─ panelContent.Controls 移除旧页面（不释放）
-      └─ 添加新页面 → Dock.Fill → BringToFront
+  → GetOrCreatePage(page.PageKey)
+      → 命中缓存：直接返回
+      → 未命中：CreatePage(pageKey) → 工厂创建 → 加入缓存
+  → ShowPage(page)
+      → 从 panelContent 移除旧控件
+      → 添加新页面 → Dock.Fill → BringToFront
 ```
 
-### 4.3 页面生命周期注意事项
-
-由于被 MainWindow 页面缓存复用，页面有以下特殊要求：
-
-| 规则 | 说明 |
-|------|------|
-| 不要在 `Unloaded` 中断开实时订阅 | 页面被切走时仅从 Controls 集合移除，未释放，后续还会回来 |
-| 首次加载使用布尔标记控制 | 不要在 `Loaded` 后解绑事件来控制"只初始化一次" |
-| 代码中需注释说明原因 | 避免后续页面重复出现相同问题 |
-
-### 4.4 缓存清理时机
+### 6.3 页面销毁时机
 
 | 时机 | 方法 | 说明 |
 |------|------|------|
-| 语言切换 | `DisposeAllCachedPages()` | 所有页面文本需刷新，释放后重建 |
-| 窗体关闭 | `MainWindow_FormClosed` | 释放全部缓存页面 |
+| 切换页面 | `ShowPage(page, false)` | 旧页面仅移出容器，不销毁 |
+| 语言切换 | `DisposeAllCachedPages()` | 清空缓存，重新创建页面以刷新文本 |
+| 窗体关闭 | `DisposeAllCachedPages()` | 释放全部缓存页面 |
+| 显示占位页 | `ShowPage(page, true)` | 占位页是临时页面，可立即销毁旧临时控件 |
 
 ---
 
-## 5. 权限过滤
+## 7. 页面生命周期约束
 
-`MainWindowModel.LoadNavigation()` 从 `NavigationCatalog` 加载全部页面定义后，根据当前登录用户的角色与数据库权限记录进行过滤，只展示用户有权限访问的一级模块和二级页面。
+由于页面被缓存复用，所有业务页必须遵守以下规则：
+
+### 7.1 首次加载规则
+
+- 页面通过 `_isFirstLoad` 控制一次性初始化；
+- 不依赖 `Load` 事件每次都执行重载；
+- 页面初始化逻辑集中到 `InitializePageAsync()` 或 `ReloadAsync(true)`。
+
+### 7.2 定时刷新规则
+
+- 页面可见时启动刷新；
+- 页面不可见时停止刷新；
+- 页面离开时不释放模型；
+- 页面关闭时释放 `Timer`；
+- 输入搜索 / 筛选时，必要时跳过本轮刷新，避免失焦和闪烁。
+
+### 7.3 页面职责边界
+
+| 层级 | 允许职责 | 禁止职责 |
+|------|----------|----------|
+| `MainWindow` | 导航、缓存、状态栏、消息提示 | 业务查询、业务规则、设备操作 |
+| 页面 `UserControl` | 事件接线、首次加载、视图绑定、低频刷新 | 直接计算筛选/分页、直接访问底层协议 |
+| `PageModel` | 查询、筛选、分页、选中项、权限态、动作调用 | 直接访问控件 |
+| `Service` | 配置、运行态、读写、重载 | 直接依赖 WinForms 控件 |
 
 ---
 
-## 6. 国际化支持
+## 8. 国际化与导航文本
 
-导航文本支持中/英双语：
+当前导航支持中英双语：
 
-- 一级导航：`GetPrimaryText(item)` — 按 `ModuleKey` 映射中/英文本
-- 二级导航：`GetSecondaryText(item)` — 中文用 `DisplayName`，英文从 `PageKey` 提取最后一段
-- 二级导航图标：`CreateSecondaryIconMap()` — `PageKey → AntdUI SVG Icon 名称`
+- 一级导航中文取 `DisplayName`，部分模块做多行显示；
+- 英文直接使用 `ModuleKey` 或 `PageKey` 最后一段；
+- 二级页面图标由 `CreateSecondaryIconMap()` 按 `PageKey` 映射。
 
-语言切换时清空页面缓存并完整刷新壳层（`DisposeAllCachedPages()` + `RefreshShell()`）。
+语言切换流程：
+
+```text
+ApplyLanguage(language)
+  → 更新 ConfigContext.Setting.Language
+  → AntdUI 本地化切换
+  → DisposeAllCachedPages()
+  → RefreshShell()
+```
+
+---
+
+## 9. 当前实现结论
+
+导航与缓存架构已经稳定，后续页面开发不应再改动整体导航机制，只需：
+
+1. 在 `NavigationCatalog` 补页面定义；
+2. 在 `MainWindow.CreatePageFactories()` 注册新页面；
+3. 实现 `UserControl + PageModel`；
+4. 遵守缓存页生命周期规则。
 
 ---
 
 ## 相关文档
 
-- [AMControlWinF 项目总览](../02-development/winf-project-overview.md)
-- [应用生命周期](winf-application-lifecycle.md)
-- [主窗体壳层功能](../03-features/winf-mainwindow-shell.md)
+- [WinForms 解决方案架构](winf-solution-architecture.md)
+- [WinForms 项目总览](../02-development/winf-project-overview.md)
+- [统一 UI 规范与开发模板](winf-ui-standards.md)
+- [主窗体壳层](../03-features/winf-mainwindow-shell.md)
