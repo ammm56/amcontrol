@@ -419,6 +419,25 @@ namespace AMControlWinF.Views.Main
             RefreshAlarms();
         }
 
+        protected override bool ProcessCmdKey(ref System.Windows.Forms.Message msg, Keys keyData)
+        {
+            if (keyData == Keys.Escape)
+            {
+                CloseDrawer();
+                return true;
+            }
+
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+        private void CloseDrawer()
+        {
+            var hostForm = FindForm();
+            if (hostForm != null && !hostForm.IsDisposed)
+            {
+                hostForm.Close();
+            }
+        }
+
         /// <summary>
         /// 绑定右侧报警详情区。
         /// </summary>

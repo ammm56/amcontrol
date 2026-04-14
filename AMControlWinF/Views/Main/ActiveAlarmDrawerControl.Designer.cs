@@ -207,7 +207,6 @@ namespace AMControlWinF.Views.Main
             // 
             // panelDetailBody
             // 
-            this.panelDetailBody.AutoScroll = true;
             this.panelDetailBody.Controls.Add(this.labelDetailSuggestion);
             this.panelDetailBody.Controls.Add(this.labelDetailSuggestionTitle);
             this.panelDetailBody.Controls.Add(this.labelDetailDescription);
