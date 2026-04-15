@@ -227,9 +227,9 @@ namespace AMControlWinF.Views.Assembly
 
         private void RefreshStatCards()
         {
-            labelTotalCount.Text = _model.TotalCount.ToString();
-            labelVerifiedCount.Text = _model.VerifiedCount.ToString();
-            labelUnverifiedCount.Text = _model.UnverifiedCount.ToString();
+            //labelTotalCount.Text = _model.TotalCount.ToString();
+            //labelVerifiedCount.Text = _model.VerifiedCount.ToString();
+            //labelUnverifiedCount.Text = _model.UnverifiedCount.ToString();
             labelTableSummary.Text = _model.SummaryText;
         }
 

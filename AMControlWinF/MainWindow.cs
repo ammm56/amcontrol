@@ -302,6 +302,7 @@ namespace AMControlWinF
 
             switch (item.Key)
             {
+                case "Assembly": return "装配\n接线";
                 case "MotionConfig": return "运控\n配置";
                 case "SysConfig": return "系统\n配置";
                 case "AlarmLog": return "报警\n日志";

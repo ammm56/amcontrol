@@ -102,7 +102,7 @@ namespace AMControlWinF.Views.Assembly
             this.panelRoot.Location = new System.Drawing.Point(0, 0);
             this.panelRoot.Margin = new System.Windows.Forms.Padding(0);
             this.panelRoot.Name = "panelRoot";
-            this.panelRoot.Padding = new System.Windows.Forms.Padding(8);
+            this.panelRoot.Padding = new System.Windows.Forms.Padding(8, 8, 8, 0);
             this.panelRoot.Radius = 0;
             this.panelRoot.Size = new System.Drawing.Size(1100, 720);
             this.panelRoot.TabIndex = 0;
@@ -120,7 +120,7 @@ namespace AMControlWinF.Views.Assembly
             this.panelTableCard.Radius = 12;
             this.panelTableCard.Shadow = 4;
             this.panelTableCard.ShadowOpacity = 0.15F;
-            this.panelTableCard.Size = new System.Drawing.Size(1084, 384);
+            this.panelTableCard.Size = new System.Drawing.Size(1084, 392);
             this.panelTableCard.TabIndex = 2;
             // 
             // tableWiring
@@ -135,7 +135,7 @@ namespace AMControlWinF.Views.Assembly
             this.tableWiring.Margin = new System.Windows.Forms.Padding(0);
             this.tableWiring.Name = "tableWiring";
             this.tableWiring.ShowTip = false;
-            this.tableWiring.Size = new System.Drawing.Size(1060, 316);
+            this.tableWiring.Size = new System.Drawing.Size(1060, 324);
             this.tableWiring.TabIndex = 1;
             this.tableWiring.Text = "tableWiring";
             // 
@@ -179,7 +179,7 @@ namespace AMControlWinF.Views.Assembly
             this.panelDebugCard.BackColor = System.Drawing.Color.Transparent;
             this.panelDebugCard.Controls.Add(this.gridDebugLayout);
             this.panelDebugCard.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panelDebugCard.Location = new System.Drawing.Point(8, 524);
+            this.panelDebugCard.Location = new System.Drawing.Point(8, 532);
             this.panelDebugCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelDebugCard.Name = "panelDebugCard";
             this.panelDebugCard.Radius = 12;
@@ -496,6 +496,7 @@ namespace AMControlWinF.Views.Assembly
             this.flowStats.Size = new System.Drawing.Size(1084, 88);
             this.flowStats.TabIndex = 1;
             this.flowStats.Text = "flowStats";
+            this.flowStats.Visible = false;
             // 
             // panelUnverifiedCard
             // 

@@ -16,13 +16,13 @@ namespace AM.PageModel.Navigation
             D("Home",        "首页",       "Home.Overview",          "总览看板",        "设备总览、生产摘要与快捷入口。",                         "Operator,Engineer,Am", "低", 10),
             D("Home",        "首页",       "Home.SysStatus",         "系统状态",        "显示整机运动、PLC、相机、IO 总体在线状态。",             "Operator,Engineer,Am", "低", 20),
 
+            D("Assembly",    "装配接线",   "Assembly.Wiring",       "接线与调试",      "集中展示软件 IO 定义、硬件接线关系、实时状态与单点调试入口。", "Engineer,Am",          "高", 10),
+
             D("Motion",      "设备",       "Motion.DI",              "DI 监视",         "查看全部数字输入点位状态与逻辑描述。",                   "Operator,Engineer,Am", "低", 10),
             D("Motion",      "设备",       "Motion.DO",              "DO 监视",         "查看全部数字输出点位状态与联动对象。",                   "Operator,Engineer,Am", "低", 20),
             D("Motion",      "设备",       "Motion.Monitor",         "多轴总览",        "查看所有轴的位置、速度与运动状态总览。",                 "Operator,Engineer,Am", "低", 30),
             D("Motion",      "设备",       "Motion.Axis",            "轴控制",          "单轴点动、回零与使能操作。",                             "Engineer,Am",          "高", 40),
             D("Motion",      "设备",       "Motion.Actuator",        "执行器控制",      "手动操作气缸、真空、夹爪等执行器。",                     "Engineer,Am",          "高", 50),
-
-            D("Assembly",    "装配接线",   "Assembly.Wiring",       "接线与调试",      "集中展示软件 IO 定义、硬件接线关系、实时状态与单点调试入口。", "Engineer,Am",          "高", 10),
 
             D("Production",  "生产",       "Production.Order",       "工单管理",        "管理生产工单，新建、下发与完结。",                       "Operator,Engineer,Am", "中", 10),
             D("Production",  "生产",       "Production.Recipe",      "配方管理",        "管理多型号产品配方，配置轴位、视觉与工艺参数。",         "Engineer,Am",          "高", 20),
