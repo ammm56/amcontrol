@@ -20,6 +20,7 @@ using AMControlWinF.Views.Home;
 using AMControlWinF.Views.Main;
 using AMControlWinF.Views.Motion;
 using AMControlWinF.Views.MotionConfig;
+using AMControlWinF.Views.Other;
 using AMControlWinF.Views.Plc;
 using AMControlWinF.Views.SysConfig;
 using AntdUI;
@@ -29,6 +30,7 @@ using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Label = AntdUI.Label;
 using MenuItem = AntdUI.MenuItem;
 using Panel = AntdUI.Panel;
@@ -115,6 +117,8 @@ namespace AMControlWinF
             buttonAlarmIndicator.Click += ButtonAlarmIndicator_Click;
             _statusIndicatorTimer.Tick += StatusIndicatorTimer_Tick;
             FormClosed += MainWindow_FormClosed;
+
+            buttonAbout.Click += ButtonAbout_Click;
         }
 
         private void InitializeShellState()
@@ -1174,6 +1178,26 @@ namespace AMControlWinF
 
             if (saveToConfig)
                 AM.Tools.Tools.SaveConfig("config.json", ConfigContext.Instance.Config);
+        }
+
+        #endregion
+
+        #region 关于
+
+        private void ButtonAbout_Click(object sender, EventArgs e)
+        {
+            OpenAboutDialog();
+        }
+
+        private void OpenAboutDialog()
+        {
+            var content = new AboutInfoControl();
+            content.Size = new Size(760, 500);
+
+            AntdUI.Modal.open(new AntdUI.Modal.Config(this, content)
+            {
+                BtnHeight = 0,
+            });
         }
 
         #endregion

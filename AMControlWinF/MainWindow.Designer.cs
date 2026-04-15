@@ -39,6 +39,7 @@ namespace AMControlWinF
             this.labelPrimaryTitleValue = new AntdUI.Label();
             this.panelWorkCard = new AntdUI.Panel();
             this.panelContent = new AntdUI.Panel();
+            this.buttonAbout = new AntdUI.Button();
             this.titlebar.SuspendLayout();
             this.textureBackgroundMain.SuspendLayout();
             this.gridMainHost.SuspendLayout();
@@ -55,6 +56,7 @@ namespace AMControlWinF
             // 
             this.titlebar.Controls.Add(this.dropdownTranslate);
             this.titlebar.Controls.Add(this.buttonColorMode);
+            this.titlebar.Controls.Add(this.buttonAbout);
             this.titlebar.DividerShow = true;
             this.titlebar.Dock = System.Windows.Forms.DockStyle.Top;
             this.titlebar.Location = new System.Drawing.Point(0, 0);
@@ -324,6 +326,19 @@ namespace AMControlWinF
             this.panelContent.Size = new System.Drawing.Size(826, 664);
             this.panelContent.TabIndex = 0;
             // 
+            // buttonAbout
+            // 
+            this.buttonAbout.Dock = System.Windows.Forms.DockStyle.Right;
+            this.buttonAbout.Ghost = true;
+            this.buttonAbout.IconSvg = "InfoCircleOutlined";
+            this.buttonAbout.Location = new System.Drawing.Point(906, 0);
+            this.buttonAbout.Name = "buttonAbout";
+            this.buttonAbout.Radius = 0;
+            this.buttonAbout.Size = new System.Drawing.Size(50, 48);
+            this.buttonAbout.TabIndex = 2;
+            this.buttonAbout.ToggleIconSvg = "MoonOutlined";
+            this.buttonAbout.WaveSize = 0;
+            // 
             // MainWindow
             // 
             this.ClientSize = new System.Drawing.Size(1200, 800);
@@ -373,5 +388,6 @@ namespace AMControlWinF
         private AntdUI.Menu menuPrimary;
         private AntdUI.Panel panelAvatarHost;
         private AMControlWinF.Views.Main.UserAvatarMenuControl userAvatarMenuControl;
+        private AntdUI.Button buttonAbout;
     }
 }
