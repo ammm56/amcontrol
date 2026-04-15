@@ -16,6 +16,7 @@ using AMControlWinF.Views.AlarmLog;
 using AMControlWinF.Views.Am;
 using AMControlWinF.Views.Assembly;
 using AMControlWinF.Views.Auth;
+using AMControlWinF.Views.Home;
 using AMControlWinF.Views.Main;
 using AMControlWinF.Views.Motion;
 using AMControlWinF.Views.MotionConfig;
@@ -530,7 +531,7 @@ namespace AMControlWinF
         {
             return new Dictionary<string, Func<Control>>(StringComparer.OrdinalIgnoreCase)
             {
-                { "Home.Overview",          () => CreatePlaceholderPage("首页 / 总览看板") },
+                { "Home.Overview",          () => new HomeOverviewPage() },
                 { "Home.SysStatus",         () => CreatePlaceholderPage("首页 / 系统状态") },
 
                 { "Assembly.Wiring",        () => new AssemblyWiringPage() },

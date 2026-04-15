@@ -31,6 +31,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>logo.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -88,7 +91,9 @@
     <Compile Include="SysConfig\PlcPointEditorModel.cs" />
     <Compile Include="SysConfig\PlcStationEditorModel.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="logo.ico" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AM.Core\AM.Core.csproj">
       <Project>{7b305eb1-7403-4c0c-82d4-c871b4c2d877}</Project>

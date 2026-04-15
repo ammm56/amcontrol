@@ -32,6 +32,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>logo.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="SqlSugar">
       <HintPath>..\Libs\SqlSugar.dll</HintPath>
@@ -131,6 +134,7 @@
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="logo.ico" />
     <Content Include="SQLite.Interop.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

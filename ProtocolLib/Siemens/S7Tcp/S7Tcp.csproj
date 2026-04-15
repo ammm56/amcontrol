@@ -4,8 +4,9 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>ProtocolLib.$(MSBuildProjectName)</AssemblyName>
     <RootNamespace>ProtocolLib.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
-    <Version>0.0.1</Version>
+    <Version>0.0.2</Version>
     <Authors>Am</Authors>
+    <ApplicationIcon>logo.ico</ApplicationIcon>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
@@ -17,6 +18,10 @@
     <OutputPath>..\..\..\AMControlWinF\bin\Release\Protocols\</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="logo.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Interface\" />
