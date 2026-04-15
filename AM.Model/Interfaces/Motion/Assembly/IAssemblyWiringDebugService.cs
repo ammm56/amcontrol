@@ -4,7 +4,7 @@ namespace AM.Model.Interfaces.Motion.Assembly
 {
     /// <summary>
     /// 装配接线工作台调试服务接口。
-    /// 负责单点 IO 调试与关联执行器测试入口。
+    /// 负责单点 IO 调试。
     /// </summary>
     public interface IAssemblyWiringDebugService
     {
@@ -28,12 +28,5 @@ namespace AM.Model.Interfaces.Motion.Assembly
         /// <param name="pulseMs">脉冲宽度，单位 ms。</param>
         Result PulseDo(short logicalBit, int pulseMs);
 
-        /// <summary>
-        /// 测试关联执行器动作。
-        /// 当前阶段仅提供统一入口，具体联调动作后续补充。
-        /// </summary>
-        /// <param name="actuatorName">执行器名称。</param>
-        /// <param name="actionName">动作名称。</param>
-        Result TestActuator(string actuatorName, string actionName);
     }
 }

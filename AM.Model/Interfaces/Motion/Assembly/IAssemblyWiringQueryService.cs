@@ -4,7 +4,7 @@ namespace AM.Model.Interfaces.Motion.Assembly
 {
     /// <summary>
     /// 装配接线工作台查询服务接口。
-    /// 负责聚合软件 IO 定义、接线信息、运行时状态与关联对象摘要。
+    /// 负责聚合软件 IO 定义、接线信息与运行时状态。
     /// </summary>
     public interface IAssemblyWiringQueryService
     {
@@ -71,11 +71,19 @@ namespace AM.Model.Interfaces.Motion.Assembly
 
         public string DeviceName { get; set; }
 
+        public string DeviceModel { get; set; }
+
         public string DeviceTerminal { get; set; }
 
         public string CabinetArea { get; set; }
 
         public string SignalType { get; set; }
+
+        public string ExpectedNormalState { get; set; }
+
+        public string CheckMethod { get; set; }
+
+        public string WiringRemark { get; set; }
 
         public bool IsVerified { get; set; }
 
@@ -88,10 +96,6 @@ namespace AM.Model.Interfaces.Motion.Assembly
         public string RuntimeStatusText { get; set; }
 
         public string WiringStatusText { get; set; }
-
-        public string RelatedActuatorName { get; set; }
-
-        public string RelatedActuatorType { get; set; }
 
         public bool CanManualOperate { get; set; }
     }

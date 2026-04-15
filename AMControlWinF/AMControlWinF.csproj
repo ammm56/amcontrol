@@ -535,6 +535,9 @@
     <EmbeddedResource Include="Views\Am\UserPermissionUserSelectDialog.resx">
       <DependentUpon>UserPermissionUserSelectDialog.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\Assembly\AssemblyWiringPage.resx">
+      <DependentUpon>AssemblyWiringPage.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Views\Auth\LoginForm.resx">
       <DependentUpon>LoginForm.cs</DependentUpon>
     </EmbeddedResource>

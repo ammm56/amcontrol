@@ -171,6 +171,9 @@ namespace AM.DBService.Services.Motion.Assembly
             DateTime updateTime;
             var hasValue = TryGetRuntimeValue(ioMap.IoType, ioMap.LogicalBit, out currentValue, out updateTime);
 
+            var isDo = string.Equals(ioMap.IoType, "DO", StringComparison.OrdinalIgnoreCase);
+            var canManualOperate = isDo && ioMap.IsEnabled && (pointConfig == null || pointConfig.CanManualOperate);
+
             return new AssemblyWiringRowModel
             {
                 IoMapId = ioMap.Id,
@@ -192,18 +195,20 @@ namespace AM.DBService.Services.Motion.Assembly
                 PinNo = wiring == null ? string.Empty : wiring.PinNo ?? string.Empty,
                 WireNo = wiring == null ? string.Empty : wiring.WireNo ?? string.Empty,
                 DeviceName = wiring == null ? string.Empty : wiring.DeviceName ?? string.Empty,
+                DeviceModel = wiring == null ? string.Empty : wiring.DeviceModel ?? string.Empty,
                 DeviceTerminal = wiring == null ? string.Empty : wiring.DeviceTerminal ?? string.Empty,
                 CabinetArea = wiring == null ? string.Empty : wiring.CabinetArea ?? string.Empty,
                 SignalType = wiring == null ? string.Empty : wiring.SignalType ?? string.Empty,
+                ExpectedNormalState = wiring == null ? string.Empty : wiring.ExpectedNormalState ?? string.Empty,
+                CheckMethod = wiring == null ? string.Empty : wiring.CheckMethod ?? string.Empty,
+                WiringRemark = wiring == null ? string.Empty : wiring.Remark ?? string.Empty,
                 IsVerified = wiring != null && wiring.IsVerified,
                 VerifiedBy = wiring == null ? string.Empty : wiring.VerifiedBy ?? string.Empty,
                 CurrentValueText = hasValue ? (currentValue ? "ON" : "OFF") : "-",
                 LastUpdateTimeText = hasValue ? updateTime.ToString("yyyy-MM-dd HH:mm:ss") : "-",
                 RuntimeStatusText = hasValue ? "已刷新" : "未刷新",
                 WiringStatusText = GetWiringStatusText(wiring),
-                RelatedActuatorName = string.Empty,
-                RelatedActuatorType = string.Empty,
-                CanManualOperate = pointConfig != null && pointConfig.CanManualOperate
+                CanManualOperate = canManualOperate
             };
         }
 

@@ -10,7 +10,7 @@ namespace AM.DBService.Services.Motion.Assembly
 {
     /// <summary>
     /// 装配接线工作台调试服务。
-    /// 当前阶段负责单点 DI/DO 调试与执行器测试入口占位。
+    /// 当前阶段负责单点 DI/DO 调试。
     /// </summary>
     public class AssemblyWiringDebugService : ServiceBase, IAssemblyWiringDebugService
     {
@@ -91,20 +91,6 @@ namespace AM.DBService.Services.Motion.Assembly
 
             Thread.Sleep(pulseMs);
             return hub.SetDO(logicalBit, false);
-        }
-
-        /// <summary>
-        /// 测试关联执行器动作。
-        /// 当前阶段先保留统一入口，后续接入执行器服务。
-        /// </summary>
-        public Result TestActuator(string actuatorName, string actionName)
-        {
-            if (string.IsNullOrWhiteSpace(actuatorName) || string.IsNullOrWhiteSpace(actionName))
-            {
-                return Fail((int)MotionErrorCode.InvalidIoBit, "执行器名称或动作名称不能为空");
-            }
-
-            return Warn((int)MotionErrorCode.NotImplemented, "执行器联调骨架已预留，具体动作后续补充");
         }
 
         private static IMotionCardService GetMotionHub()

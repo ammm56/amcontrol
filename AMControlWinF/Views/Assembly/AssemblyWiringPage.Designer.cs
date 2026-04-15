@@ -27,7 +27,8 @@ namespace AMControlWinF.Views.Assembly
             this.panelDebugCard = new AntdUI.Panel();
             this.panelDebugActions = new AntdUI.Panel();
             this.flowDebugActions = new AntdUI.FlowPanel();
-            this.buttonTestActuator = new AntdUI.Button();
+            this.buttonCancelVerified = new AntdUI.Button();
+            this.buttonMarkVerified = new AntdUI.Button();
             this.buttonPulseDo = new AntdUI.Button();
             this.buttonDoOff = new AntdUI.Button();
             this.buttonDoOn = new AntdUI.Button();
@@ -71,8 +72,8 @@ namespace AMControlWinF.Views.Assembly
             this.labelSelectedCard = new AntdUI.Label();
             this.buttonSelectCard = new AntdUI.Button();
             this.flowToolbarRight = new AntdUI.FlowPanel();
+            this.buttonExportCsv = new AntdUI.Button();
             this.buttonRefresh = new AntdUI.Button();
-            this.checkboxDebugMode = new AntdUI.Checkbox();
             this.checkboxOnlyIssues = new AntdUI.Checkbox();
             this.checkboxOnlyUnverified = new AntdUI.Checkbox();
             this.panelRoot.SuspendLayout();
@@ -199,47 +200,61 @@ namespace AMControlWinF.Views.Assembly
             this.panelDebugActions.Controls.Add(this.inputPulseWidth);
             this.panelDebugActions.Controls.Add(this.labelPulseWidth);
             this.panelDebugActions.Dock = System.Windows.Forms.DockStyle.Right;
-            this.panelDebugActions.Location = new System.Drawing.Point(740, 48);
+            this.panelDebugActions.Location = new System.Drawing.Point(728, 48);
             this.panelDebugActions.Margin = new System.Windows.Forms.Padding(0);
             this.panelDebugActions.Name = "panelDebugActions";
             this.panelDebugActions.Padding = new System.Windows.Forms.Padding(0, 8, 0, 0);
             this.panelDebugActions.Radius = 0;
-            this.panelDebugActions.Size = new System.Drawing.Size(332, 128);
+            this.panelDebugActions.Size = new System.Drawing.Size(344, 128);
             this.panelDebugActions.TabIndex = 2;
             // 
             // flowDebugActions
             // 
             this.flowDebugActions.Align = AntdUI.TAlignFlow.RightCenter;
-            this.flowDebugActions.Controls.Add(this.buttonTestActuator);
+            this.flowDebugActions.Controls.Add(this.buttonCancelVerified);
+            this.flowDebugActions.Controls.Add(this.buttonMarkVerified);
             this.flowDebugActions.Controls.Add(this.buttonPulseDo);
             this.flowDebugActions.Controls.Add(this.buttonDoOff);
             this.flowDebugActions.Controls.Add(this.buttonDoOn);
             this.flowDebugActions.Controls.Add(this.buttonReadDi);
             this.flowDebugActions.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flowDebugActions.Gap = 8;
-            this.flowDebugActions.Location = new System.Drawing.Point(0, 44);
+            this.flowDebugActions.Location = new System.Drawing.Point(0, 64);
             this.flowDebugActions.Margin = new System.Windows.Forms.Padding(0);
             this.flowDebugActions.Name = "flowDebugActions";
-            this.flowDebugActions.Size = new System.Drawing.Size(332, 84);
+            this.flowDebugActions.Size = new System.Drawing.Size(344, 64);
             this.flowDebugActions.TabIndex = 2;
             this.flowDebugActions.Text = "flowDebugActions";
             // 
-            // buttonTestActuator
+            // buttonCancelVerified
             // 
-            this.buttonTestActuator.IconSvg = "ToolOutlined";
-            this.buttonTestActuator.Location = new System.Drawing.Point(228, 44);
-            this.buttonTestActuator.Margin = new System.Windows.Forms.Padding(0);
-            this.buttonTestActuator.Name = "buttonTestActuator";
-            this.buttonTestActuator.Radius = 8;
-            this.buttonTestActuator.Size = new System.Drawing.Size(104, 36);
-            this.buttonTestActuator.TabIndex = 4;
-            this.buttonTestActuator.Text = "执行器测试";
-            this.buttonTestActuator.WaveSize = 0;
+            this.buttonCancelVerified.IconSvg = "CloseCircleOutlined";
+            this.buttonCancelVerified.Location = new System.Drawing.Point(232, 44);
+            this.buttonCancelVerified.Margin = new System.Windows.Forms.Padding(0);
+            this.buttonCancelVerified.Name = "buttonCancelVerified";
+            this.buttonCancelVerified.Radius = 8;
+            this.buttonCancelVerified.Size = new System.Drawing.Size(104, 36);
+            this.buttonCancelVerified.TabIndex = 5;
+            this.buttonCancelVerified.Text = "取消核对";
+            this.buttonCancelVerified.WaveSize = 0;
+            // 
+            // buttonMarkVerified
+            // 
+            this.buttonMarkVerified.IconSvg = "CheckCircleOutlined";
+            this.buttonMarkVerified.Location = new System.Drawing.Point(120, 44);
+            this.buttonMarkVerified.Margin = new System.Windows.Forms.Padding(0);
+            this.buttonMarkVerified.Name = "buttonMarkVerified";
+            this.buttonMarkVerified.Radius = 8;
+            this.buttonMarkVerified.Size = new System.Drawing.Size(104, 36);
+            this.buttonMarkVerified.TabIndex = 4;
+            this.buttonMarkVerified.Text = "标记已核对";
+            this.buttonMarkVerified.Type = AntdUI.TTypeMini.Primary;
+            this.buttonMarkVerified.WaveSize = 0;
             // 
             // buttonPulseDo
             // 
             this.buttonPulseDo.IconSvg = "ThunderboltOutlined";
-            this.buttonPulseDo.Location = new System.Drawing.Point(116, 44);
+            this.buttonPulseDo.Location = new System.Drawing.Point(8, 44);
             this.buttonPulseDo.Margin = new System.Windows.Forms.Padding(0);
             this.buttonPulseDo.Name = "buttonPulseDo";
             this.buttonPulseDo.Radius = 8;
@@ -251,24 +266,24 @@ namespace AMControlWinF.Views.Assembly
             // buttonDoOff
             // 
             this.buttonDoOff.IconSvg = "PoweroffOutlined";
-            this.buttonDoOff.Location = new System.Drawing.Point(4, 44);
+            this.buttonDoOff.Location = new System.Drawing.Point(232, 0);
             this.buttonDoOff.Margin = new System.Windows.Forms.Padding(0);
             this.buttonDoOff.Name = "buttonDoOff";
             this.buttonDoOff.Radius = 8;
             this.buttonDoOff.Size = new System.Drawing.Size(104, 36);
-            this.buttonDoOff.TabIndex = 2;
+            this.buttonDoOff.TabIndex = 1;
             this.buttonDoOff.Text = "DO 关闭";
             this.buttonDoOff.WaveSize = 0;
             // 
             // buttonDoOn
             // 
             this.buttonDoOn.IconSvg = "PlayCircleOutlined";
-            this.buttonDoOn.Location = new System.Drawing.Point(116, 0);
+            this.buttonDoOn.Location = new System.Drawing.Point(120, 0);
             this.buttonDoOn.Margin = new System.Windows.Forms.Padding(0);
             this.buttonDoOn.Name = "buttonDoOn";
             this.buttonDoOn.Radius = 8;
             this.buttonDoOn.Size = new System.Drawing.Size(104, 36);
-            this.buttonDoOn.TabIndex = 1;
+            this.buttonDoOn.TabIndex = 0;
             this.buttonDoOn.Text = "DO 打开";
             this.buttonDoOn.Type = AntdUI.TTypeMini.Primary;
             this.buttonDoOn.WaveSize = 0;
@@ -276,7 +291,7 @@ namespace AMControlWinF.Views.Assembly
             // buttonReadDi
             // 
             this.buttonReadDi.IconSvg = "SearchOutlined";
-            this.buttonReadDi.Location = new System.Drawing.Point(4, 0);
+            this.buttonReadDi.Location = new System.Drawing.Point(8, 0);
             this.buttonReadDi.Margin = new System.Windows.Forms.Padding(0);
             this.buttonReadDi.Name = "buttonReadDi";
             this.buttonReadDi.Radius = 8;
@@ -288,10 +303,10 @@ namespace AMControlWinF.Views.Assembly
             // inputPulseWidth
             // 
             this.inputPulseWidth.Dock = System.Windows.Forms.DockStyle.Top;
-            this.inputPulseWidth.Location = new System.Drawing.Point(0, 12);
+            this.inputPulseWidth.Location = new System.Drawing.Point(0, 32);
             this.inputPulseWidth.Margin = new System.Windows.Forms.Padding(0);
             this.inputPulseWidth.Name = "inputPulseWidth";
-            this.inputPulseWidth.Size = new System.Drawing.Size(332, 32);
+            this.inputPulseWidth.Size = new System.Drawing.Size(344, 32);
             this.inputPulseWidth.TabIndex = 1;
             this.inputPulseWidth.Text = "300";
             this.inputPulseWidth.WaveSize = 0;
@@ -303,7 +318,7 @@ namespace AMControlWinF.Views.Assembly
             this.labelPulseWidth.Location = new System.Drawing.Point(0, 8);
             this.labelPulseWidth.Margin = new System.Windows.Forms.Padding(0);
             this.labelPulseWidth.Name = "labelPulseWidth";
-            this.labelPulseWidth.Size = new System.Drawing.Size(332, 24);
+            this.labelPulseWidth.Size = new System.Drawing.Size(344, 24);
             this.labelPulseWidth.TabIndex = 0;
             this.labelPulseWidth.Text = "脉冲宽度（ms）";
             // 
@@ -323,7 +338,7 @@ namespace AMControlWinF.Views.Assembly
             this.panelDebugInfo.Name = "panelDebugInfo";
             this.panelDebugInfo.Padding = new System.Windows.Forms.Padding(0, 8, 12, 0);
             this.panelDebugInfo.Radius = 0;
-            this.panelDebugInfo.Size = new System.Drawing.Size(728, 128);
+            this.panelDebugInfo.Size = new System.Drawing.Size(1060, 128);
             this.panelDebugInfo.TabIndex = 1;
             // 
             // labelSelectedRuntimeValue
@@ -426,7 +441,7 @@ namespace AMControlWinF.Views.Assembly
             this.labelDebugHint.Name = "labelDebugHint";
             this.labelDebugHint.Size = new System.Drawing.Size(964, 28);
             this.labelDebugHint.TabIndex = 1;
-            this.labelDebugHint.Text = "请选择表格中的点位后再执行调试；高风险动作需要先开启调试模式。";
+            this.labelDebugHint.Text = "请选择表格中的点位后执行检查；本页仅用于接线对照和单点 IO 检查。";
             // 
             // labelDebugTitle
             // 
@@ -526,7 +541,7 @@ namespace AMControlWinF.Views.Assembly
             this.labelRuntimeTitle.Name = "labelRuntimeTitle";
             this.labelRuntimeTitle.Size = new System.Drawing.Size(72, 40);
             this.labelRuntimeTitle.TabIndex = 0;
-            this.labelRuntimeTitle.Text = "运行正常";
+            this.labelRuntimeTitle.Text = "已刷新";
             // 
             // panelUnverifiedCard
             // 
@@ -656,53 +671,53 @@ namespace AMControlWinF.Views.Assembly
             this.flowToolbarLeft.Controls.Add(this.labelSelectedCard);
             this.flowToolbarLeft.Controls.Add(this.buttonSelectCard);
             this.flowToolbarLeft.Dock = System.Windows.Forms.DockStyle.Left;
-            this.flowToolbarLeft.Gap = 8;
+            this.flowToolbarLeft.Gap = 4;
             this.flowToolbarLeft.Location = new System.Drawing.Point(4, 4);
             this.flowToolbarLeft.Margin = new System.Windows.Forms.Padding(0);
             this.flowToolbarLeft.Name = "flowToolbarLeft";
-            this.flowToolbarLeft.Size = new System.Drawing.Size(560, 36);
+            this.flowToolbarLeft.Size = new System.Drawing.Size(456, 36);
             this.flowToolbarLeft.TabIndex = 0;
             this.flowToolbarLeft.Text = "flowToolbarLeft";
             // 
             // inputSearch
             // 
-            this.inputSearch.Location = new System.Drawing.Point(0, 0);
+            this.inputSearch.Location = new System.Drawing.Point(334, 0);
             this.inputSearch.Margin = new System.Windows.Forms.Padding(0);
             this.inputSearch.Name = "inputSearch";
             this.inputSearch.PlaceholderText = "搜索点位 / 设备 / 线号";
-            this.inputSearch.Size = new System.Drawing.Size(148, 36);
+            this.inputSearch.Size = new System.Drawing.Size(110, 36);
             this.inputSearch.TabIndex = 5;
             this.inputSearch.WaveSize = 0;
             // 
             // buttonFilterDO
             // 
-            this.buttonFilterDO.Location = new System.Drawing.Point(332, 0);
+            this.buttonFilterDO.Location = new System.Drawing.Point(280, 0);
             this.buttonFilterDO.Margin = new System.Windows.Forms.Padding(0);
             this.buttonFilterDO.Name = "buttonFilterDO";
             this.buttonFilterDO.Radius = 8;
-            this.buttonFilterDO.Size = new System.Drawing.Size(56, 36);
+            this.buttonFilterDO.Size = new System.Drawing.Size(50, 36);
             this.buttonFilterDO.TabIndex = 4;
             this.buttonFilterDO.Text = "DO";
             this.buttonFilterDO.WaveSize = 0;
             // 
             // buttonFilterDI
             // 
-            this.buttonFilterDI.Location = new System.Drawing.Point(268, 0);
+            this.buttonFilterDI.Location = new System.Drawing.Point(226, 0);
             this.buttonFilterDI.Margin = new System.Windows.Forms.Padding(0);
             this.buttonFilterDI.Name = "buttonFilterDI";
             this.buttonFilterDI.Radius = 8;
-            this.buttonFilterDI.Size = new System.Drawing.Size(56, 36);
+            this.buttonFilterDI.Size = new System.Drawing.Size(50, 36);
             this.buttonFilterDI.TabIndex = 3;
             this.buttonFilterDI.Text = "DI";
             this.buttonFilterDI.WaveSize = 0;
             // 
             // buttonFilterAll
             // 
-            this.buttonFilterAll.Location = new System.Drawing.Point(204, 0);
+            this.buttonFilterAll.Location = new System.Drawing.Point(172, 0);
             this.buttonFilterAll.Margin = new System.Windows.Forms.Padding(0);
             this.buttonFilterAll.Name = "buttonFilterAll";
             this.buttonFilterAll.Radius = 8;
-            this.buttonFilterAll.Size = new System.Drawing.Size(56, 36);
+            this.buttonFilterAll.Size = new System.Drawing.Size(50, 36);
             this.buttonFilterAll.TabIndex = 2;
             this.buttonFilterAll.Text = "全部";
             this.buttonFilterAll.Type = AntdUI.TTypeMini.Primary;
@@ -710,12 +725,12 @@ namespace AMControlWinF.Views.Assembly
             // 
             // labelSelectedCard
             // 
-            this.labelSelectedCard.Location = new System.Drawing.Point(100, 0);
+            this.labelSelectedCard.Location = new System.Drawing.Point(79, 0);
             this.labelSelectedCard.Margin = new System.Windows.Forms.Padding(0);
             this.labelSelectedCard.Name = "labelSelectedCard";
-            this.labelSelectedCard.Size = new System.Drawing.Size(96, 36);
+            this.labelSelectedCard.Size = new System.Drawing.Size(89, 36);
             this.labelSelectedCard.TabIndex = 1;
-            this.labelSelectedCard.Text = "当前：全部控制卡";
+            this.labelSelectedCard.Text = "全部控制卡";
             // 
             // buttonSelectCard
             // 
@@ -724,7 +739,7 @@ namespace AMControlWinF.Views.Assembly
             this.buttonSelectCard.Margin = new System.Windows.Forms.Padding(0);
             this.buttonSelectCard.Name = "buttonSelectCard";
             this.buttonSelectCard.Radius = 8;
-            this.buttonSelectCard.Size = new System.Drawing.Size(92, 36);
+            this.buttonSelectCard.Size = new System.Drawing.Size(75, 36);
             this.buttonSelectCard.TabIndex = 0;
             this.buttonSelectCard.Text = "控制卡";
             this.buttonSelectCard.Type = AntdUI.TTypeMini.Primary;
@@ -733,57 +748,60 @@ namespace AMControlWinF.Views.Assembly
             // flowToolbarRight
             // 
             this.flowToolbarRight.Align = AntdUI.TAlignFlow.RightCenter;
+            this.flowToolbarRight.Controls.Add(this.buttonExportCsv);
             this.flowToolbarRight.Controls.Add(this.buttonRefresh);
-            this.flowToolbarRight.Controls.Add(this.checkboxDebugMode);
             this.flowToolbarRight.Controls.Add(this.checkboxOnlyIssues);
             this.flowToolbarRight.Controls.Add(this.checkboxOnlyUnverified);
             this.flowToolbarRight.Dock = System.Windows.Forms.DockStyle.Right;
             this.flowToolbarRight.Gap = 8;
-            this.flowToolbarRight.Location = new System.Drawing.Point(732, 4);
+            this.flowToolbarRight.Location = new System.Drawing.Point(728, 4);
             this.flowToolbarRight.Margin = new System.Windows.Forms.Padding(0);
             this.flowToolbarRight.Name = "flowToolbarRight";
-            this.flowToolbarRight.Size = new System.Drawing.Size(348, 36);
+            this.flowToolbarRight.Size = new System.Drawing.Size(352, 36);
             this.flowToolbarRight.TabIndex = 1;
             this.flowToolbarRight.Text = "flowToolbarRight";
+            // 
+            // buttonExportCsv
+            // 
+            this.buttonExportCsv.IconSvg = "DownloadOutlined";
+            this.buttonExportCsv.Location = new System.Drawing.Point(262, 0);
+            this.buttonExportCsv.Margin = new System.Windows.Forms.Padding(0);
+            this.buttonExportCsv.Name = "buttonExportCsv";
+            this.buttonExportCsv.Radius = 8;
+            this.buttonExportCsv.Size = new System.Drawing.Size(90, 36);
+            this.buttonExportCsv.TabIndex = 3;
+            this.buttonExportCsv.Text = "导出 CSV";
+            this.buttonExportCsv.WaveSize = 0;
             // 
             // buttonRefresh
             // 
             this.buttonRefresh.IconSvg = "ReloadOutlined";
-            this.buttonRefresh.Location = new System.Drawing.Point(252, 0);
+            this.buttonRefresh.Location = new System.Drawing.Point(189, 0);
             this.buttonRefresh.Margin = new System.Windows.Forms.Padding(0);
             this.buttonRefresh.Name = "buttonRefresh";
             this.buttonRefresh.Radius = 8;
-            this.buttonRefresh.Size = new System.Drawing.Size(96, 36);
-            this.buttonRefresh.TabIndex = 3;
+            this.buttonRefresh.Size = new System.Drawing.Size(65, 36);
+            this.buttonRefresh.TabIndex = 2;
             this.buttonRefresh.Text = "刷新";
             this.buttonRefresh.WaveSize = 0;
             // 
-            // checkboxDebugMode
-            // 
-            this.checkboxDebugMode.Location = new System.Drawing.Point(172, 6);
-            this.checkboxDebugMode.Margin = new System.Windows.Forms.Padding(0);
-            this.checkboxDebugMode.Name = "checkboxDebugMode";
-            this.checkboxDebugMode.Size = new System.Drawing.Size(72, 24);
-            this.checkboxDebugMode.TabIndex = 2;
-            this.checkboxDebugMode.Text = "调试模式";
-            // 
             // checkboxOnlyIssues
             // 
-            this.checkboxOnlyIssues.Location = new System.Drawing.Point(92, 6);
+            this.checkboxOnlyIssues.Location = new System.Drawing.Point(109, 0);
             this.checkboxOnlyIssues.Margin = new System.Windows.Forms.Padding(0);
             this.checkboxOnlyIssues.Name = "checkboxOnlyIssues";
-            this.checkboxOnlyIssues.Size = new System.Drawing.Size(72, 24);
+            this.checkboxOnlyIssues.Size = new System.Drawing.Size(72, 36);
             this.checkboxOnlyIssues.TabIndex = 1;
-            this.checkboxOnlyIssues.Text = "仅异常";
+            this.checkboxOnlyIssues.Text = "未定义";
             // 
             // checkboxOnlyUnverified
             // 
-            this.checkboxOnlyUnverified.Location = new System.Drawing.Point(0, 6);
+            this.checkboxOnlyUnverified.Location = new System.Drawing.Point(29, 0);
             this.checkboxOnlyUnverified.Margin = new System.Windows.Forms.Padding(0);
             this.checkboxOnlyUnverified.Name = "checkboxOnlyUnverified";
-            this.checkboxOnlyUnverified.Size = new System.Drawing.Size(84, 24);
+            this.checkboxOnlyUnverified.Size = new System.Drawing.Size(72, 36);
             this.checkboxOnlyUnverified.TabIndex = 0;
-            this.checkboxOnlyUnverified.Text = "仅未核对";
+            this.checkboxOnlyUnverified.Text = "未核对";
             // 
             // AssemblyWiringPage
             // 
@@ -827,7 +845,7 @@ namespace AMControlWinF.Views.Assembly
         private AntdUI.FlowPanel flowToolbarRight;
         private AntdUI.Checkbox checkboxOnlyUnverified;
         private AntdUI.Checkbox checkboxOnlyIssues;
-        private AntdUI.Checkbox checkboxDebugMode;
+        private AntdUI.Button buttonExportCsv;
         private AntdUI.Button buttonRefresh;
         private AntdUI.FlowPanel flowStats;
         private AntdUI.Panel panelTotalCard;
@@ -867,10 +885,11 @@ namespace AMControlWinF.Views.Assembly
         private AntdUI.Label labelPulseWidth;
         private AntdUI.Input inputPulseWidth;
         private AntdUI.FlowPanel flowDebugActions;
+        private AntdUI.Button buttonCancelVerified;
+        private AntdUI.Button buttonMarkVerified;
         private AntdUI.Button buttonReadDi;
         private AntdUI.Button buttonDoOn;
         private AntdUI.Button buttonDoOff;
         private AntdUI.Button buttonPulseDo;
-        private AntdUI.Button buttonTestActuator;
     }
 }

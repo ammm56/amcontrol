@@ -1,10 +1,14 @@
+using AM.Core.Context;
 using AM.DBService.Services.Motion.Assembly;
+using AM.DBService.Services.Motion.Topology;
 using AM.Model.Common;
+using AM.Model.Entity.Motion.Topology;
 using AM.Model.Interfaces.Motion.Assembly;
 using AM.PageModel.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace AM.PageModel.Assembly
@@ -17,6 +21,7 @@ namespace AM.PageModel.Assembly
     {
         private readonly AssemblyWiringQueryService _queryService;
         private readonly AssemblyWiringDebugService _debugService;
+        private readonly MotionIoWiringCrudService _ioWiringCrudService;
 
         private List<AssemblyWiringRowViewItem> _allItems;
         private List<AssemblyWiringRowViewItem> _items;
@@ -26,7 +31,6 @@ namespace AM.PageModel.Assembly
         private string _selectedIoType;
         private bool _onlyUnverified;
         private bool _onlyIssues;
-        private bool _debugModeEnabled;
         private int _totalCount;
         private int _verifiedCount;
         private int _unverifiedCount;
@@ -38,6 +42,7 @@ namespace AM.PageModel.Assembly
         {
             _queryService = new AssemblyWiringQueryService();
             _debugService = new AssemblyWiringDebugService();
+            _ioWiringCrudService = new MotionIoWiringCrudService();
             _allItems = new List<AssemblyWiringRowViewItem>();
             _items = new List<AssemblyWiringRowViewItem>();
             _searchText = string.Empty;
@@ -89,16 +94,16 @@ namespace AM.PageModel.Assembly
             {
                 if (!SelectedCardId.HasValue)
                 {
-                    return "当前：全部控制卡";
+                    return "全部控制卡";
                 }
 
                 var selected = _allItems.FirstOrDefault(p => p.CardId == SelectedCardId.Value);
                 if (selected == null)
                 {
-                    return "当前：控制卡 #" + SelectedCardId.Value;
+                    return "控制卡 #" + SelectedCardId.Value;
                 }
 
-                return "当前：" + selected.CardDisplayName + " (#" + SelectedCardId.Value + ")";
+                return selected.CardDisplayName + " (#" + SelectedCardId.Value + ")";
             }
         }
 
@@ -130,12 +135,101 @@ namespace AM.PageModel.Assembly
         }
 
         /// <summary>
-        /// 是否开启调试模式。
+        /// 当前是否已选择点位。
         /// </summary>
-        public bool DebugModeEnabled
+        public bool HasSelection
         {
-            get { return _debugModeEnabled; }
-            private set { SetProperty(ref _debugModeEnabled, value); }
+            get { return SelectedItem != null; }
+        }
+
+        /// <summary>
+        /// 当前选中项是否为 DI 点。
+        /// </summary>
+        public bool IsSelectedDi
+        {
+            get
+            {
+                return HasSelection
+                    && string.Equals(SelectedItem.IoType, "DI", StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
+        /// <summary>
+        /// 当前选中项是否为 DO 点。
+        /// </summary>
+        public bool IsSelectedDo
+        {
+            get
+            {
+                return HasSelection
+                    && string.Equals(SelectedItem.IoType, "DO", StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
+        /// <summary>
+        /// 当前是否允许读取 DI。
+        /// </summary>
+        public bool CanReadSelectedDi
+        {
+            get
+            {
+                return IsSelectedDi;
+            }
+        }
+
+        /// <summary>
+        /// 当前是否允许手动控制 DO。
+        /// </summary>
+        public bool CanSetSelectedDo
+        {
+            get { return IsSelectedDo && SelectedItem.CanManualOperate; }
+        }
+
+        /// <summary>
+        /// 当前是否允许标记已核对。
+        /// </summary>
+        public bool CanMarkSelectedVerified
+        {
+            get
+            {
+                return HasSelection
+                    && SelectedItem.HasWiringDefinition
+                    && !SelectedItem.IsVerified;
+            }
+        }
+
+        /// <summary>
+        /// 当前是否允许取消核对。
+        /// </summary>
+        public bool CanCancelSelectedVerified
+        {
+            get
+            {
+                return HasSelection
+                    && SelectedItem.HasWiringDefinition
+                    && SelectedItem.IsVerified;
+            }
+        }
+
+        /// <summary>
+        /// 当前检查模式文本。
+        /// </summary>
+        public string SelectedCheckModeText
+        {
+            get
+            {
+                if (!HasSelection)
+                {
+                    return "未选择点位";
+                }
+
+                if (IsSelectedDi)
+                {
+                    return "DI 状态读取";
+                }
+
+                return "DO 手动调试";
+            }
         }
 
         /// <summary>
@@ -255,19 +349,12 @@ namespace AM.PageModel.Assembly
         }
 
         /// <summary>
-        /// 设置调试模式。
-        /// </summary>
-        public void SetDebugModeEnabled(bool value)
-        {
-            DebugModeEnabled = value;
-        }
-
-        /// <summary>
         /// 选中指定行。
         /// </summary>
         public void SelectRow(int ioMapId)
         {
             SelectedItem = _items.FirstOrDefault(p => p.IoMapId == ioMapId);
+            RaiseSelectionStateChanged();
         }
 
         /// <summary>
@@ -310,16 +397,59 @@ namespace AM.PageModel.Assembly
         }
 
         /// <summary>
-        /// 测试当前选中行关联的执行器。
+        /// 标记当前选中点位已核对。
         /// </summary>
-        public Result TestSelectedActuator(string actionName)
+        public Result MarkSelectedVerified()
         {
             if (SelectedItem == null)
             {
                 return Result.Fail(-1, "当前未选择任何行", ResultSource.UI);
             }
 
-            return _debugService.TestActuator(SelectedItem.RelatedActuatorName, actionName);
+            if (!SelectedItem.HasWiringDefinition)
+            {
+                return Result.Fail(-1, "当前点位尚未维护接线信息，不能标记已核对", ResultSource.UI);
+            }
+
+            var entityResult = BuildWiringEntityFromSelection();
+            if (!entityResult.Success)
+            {
+                return entityResult;
+            }
+
+            entityResult.Item.IsVerified = true;
+            entityResult.Item.VerifiedBy = GetCurrentVerifier();
+            entityResult.Item.VerifiedTime = DateTime.Now;
+
+            return _ioWiringCrudService.Save(entityResult.Item);
+        }
+
+        /// <summary>
+        /// 取消当前选中点位核对状态。
+        /// </summary>
+        public Result CancelSelectedVerified()
+        {
+            if (SelectedItem == null)
+            {
+                return Result.Fail(-1, "当前未选择任何行", ResultSource.UI);
+            }
+
+            if (!SelectedItem.HasWiringDefinition)
+            {
+                return Result.Fail(-1, "当前点位尚未维护接线信息", ResultSource.UI);
+            }
+
+            var entityResult = BuildWiringEntityFromSelection();
+            if (!entityResult.Success)
+            {
+                return entityResult;
+            }
+
+            entityResult.Item.IsVerified = false;
+            entityResult.Item.VerifiedBy = null;
+            entityResult.Item.VerifiedTime = null;
+
+            return _ioWiringCrudService.Save(entityResult.Item);
         }
 
         private async Task<Result> ReloadAsync()
@@ -333,6 +463,7 @@ namespace AM.PageModel.Assembly
                     _items = new List<AssemblyWiringRowViewItem>();
                     SelectedItem = null;
                     RefreshStats();
+                    RaiseSelectionStateChanged();
                     OnPropertyChanged(nameof(Items));
                     return Result.Fail(result.Code, result.Message, result.Source);
                 }
@@ -389,7 +520,115 @@ namespace AM.PageModel.Assembly
 
             SelectedItem = ResolveSelectedItem();
             RefreshStats();
+            RaiseSelectionStateChanged();
             OnPropertyChanged(nameof(Items));
+        }
+
+        private void RaiseSelectionStateChanged()
+        {
+            OnPropertyChanged(nameof(HasSelection));
+            OnPropertyChanged(nameof(IsSelectedDi));
+            OnPropertyChanged(nameof(IsSelectedDo));
+            OnPropertyChanged(nameof(CanReadSelectedDi));
+            OnPropertyChanged(nameof(CanSetSelectedDo));
+            OnPropertyChanged(nameof(CanMarkSelectedVerified));
+            OnPropertyChanged(nameof(CanCancelSelectedVerified));
+            OnPropertyChanged(nameof(SelectedCheckModeText));
+        }
+
+        private Result<MotionIoWiringEntity> BuildWiringEntityFromSelection()
+        {
+            var existing = _ioWiringCrudService.QueryByIoMapId(SelectedItem.IoMapId);
+            if (existing.Success && existing.Item != null)
+            {
+                return Result<MotionIoWiringEntity>.OkItem(existing.Item, "IO接线信息查询成功", ResultSource.UI);
+            }
+
+            if (existing.Code != (int)DbErrorCode.NotFound)
+            {
+                return Result<MotionIoWiringEntity>.Fail(existing.Code, existing.Message, existing.Source);
+            }
+
+            return Result<MotionIoWiringEntity>.OkItem(new MotionIoWiringEntity
+            {
+                IoMapId = SelectedItem.IoMapId,
+                CardId = SelectedItem.CardId,
+                IoType = SelectedItem.IoType,
+                LogicalBit = SelectedItem.LogicalBit,
+                TerminalBlock = NullIfWhiteSpace(SelectedItem.TerminalBlock),
+                TerminalNo = NullIfWhiteSpace(SelectedItem.TerminalNo),
+                ConnectorNo = NullIfWhiteSpace(SelectedItem.ConnectorNo),
+                PinNo = NullIfWhiteSpace(SelectedItem.PinNo),
+                WireNo = NullIfWhiteSpace(SelectedItem.WireNo),
+                DeviceName = NullIfWhiteSpace(SelectedItem.DeviceName),
+                DeviceModel = NullIfWhiteSpace(SelectedItem.DeviceModel),
+                DeviceTerminal = NullIfWhiteSpace(SelectedItem.DeviceTerminal),
+                CabinetArea = NullIfWhiteSpace(SelectedItem.CabinetArea),
+                SignalType = NullIfWhiteSpace(SelectedItem.SignalType),
+                ExpectedNormalState = NullIfWhiteSpace(SelectedItem.ExpectedNormalState),
+                CheckMethod = NullIfWhiteSpace(SelectedItem.CheckMethod),
+                Remark = NullIfWhiteSpace(SelectedItem.WiringRemark)
+            }, "IO接线信息初始化成功", ResultSource.UI);
+        }
+
+        private static string GetCurrentVerifier()
+        {
+            if (!string.IsNullOrWhiteSpace(UserContext.Instance.UserName))
+            {
+                return UserContext.Instance.UserName;
+            }
+
+            return string.IsNullOrWhiteSpace(UserContext.Instance.LoginName)
+                ? "System"
+                : UserContext.Instance.LoginName;
+        }
+
+        private static string NullIfWhiteSpace(string value)
+        {
+            return string.IsNullOrWhiteSpace(value) ? null : value;
+        }
+
+        /// <summary>
+        /// 导出当前筛选结果为 CSV 文本。
+        /// </summary>
+        public string ExportCurrentItemsToCsv()
+        {
+            var builder = new StringBuilder();
+            builder.AppendLine("类型,逻辑位,软件点名,显示名,控制卡,硬件位置,端子排,端子号,插头号,针脚号,线号,对端设备,设备型号,对端端子,区域,信号类型,常态,点检方法,接线备注,是否核对,核对人,当前值,更新时间,运行状态,接线状态");
+
+            foreach (var item in _items)
+            {
+                builder.AppendLine(string.Join(",", new[]
+                {
+                    EscapeCsv(item.IoType),
+                    EscapeCsv(item.LogicalBit.ToString()),
+                    EscapeCsv(item.SoftwareName),
+                    EscapeCsv(item.DisplayName),
+                    EscapeCsv(item.CardDisplayName),
+                    EscapeCsv(GetHardwareText(item)),
+                    EscapeCsv(item.TerminalBlock),
+                    EscapeCsv(item.TerminalNo),
+                    EscapeCsv(item.ConnectorNo),
+                    EscapeCsv(item.PinNo),
+                    EscapeCsv(item.WireNo),
+                    EscapeCsv(item.DeviceName),
+                    EscapeCsv(item.DeviceModel),
+                    EscapeCsv(item.DeviceTerminal),
+                    EscapeCsv(item.CabinetArea),
+                    EscapeCsv(item.SignalType),
+                    EscapeCsv(item.ExpectedNormalState),
+                    EscapeCsv(item.CheckMethod),
+                    EscapeCsv(item.WiringRemark),
+                    EscapeCsv(item.IsVerified ? "是" : "否"),
+                    EscapeCsv(item.VerifiedBy),
+                    EscapeCsv(item.CurrentValueText),
+                    EscapeCsv(item.LastUpdateTimeText),
+                    EscapeCsv(item.RuntimeStatusText),
+                    EscapeCsv(item.WiringStatusText)
+                }));
+            }
+
+            return builder.ToString();
         }
 
         private AssemblyWiringRowViewItem ResolveSelectedItem()
@@ -409,8 +648,8 @@ namespace AM.PageModel.Assembly
             VerifiedCount = _items.Count(p => p.IsVerified);
             UnverifiedCount = _items.Count(p => !p.IsVerified);
             RuntimeOkCount = _items.Count(p => string.Equals(p.RuntimeStatusText, "已刷新", StringComparison.OrdinalIgnoreCase));
-            IssueCount = _items.Count(p => p.IsIssue);
-            SummaryText = "共 " + TotalCount + " 项，异常 " + IssueCount + " 项";
+            IssueCount = _items.Count(p => !p.HasWiringDefinition);
+            SummaryText = "共 " + TotalCount + " 项，已核对 " + VerifiedCount + " 项，未定义 " + IssueCount + " 项";
         }
 
         private static bool ContainsText(string source, string searchText)
@@ -462,19 +701,42 @@ namespace AM.PageModel.Assembly
                 PinNo = model.PinNo ?? string.Empty,
                 WireNo = model.WireNo ?? string.Empty,
                 DeviceName = model.DeviceName ?? string.Empty,
+                DeviceModel = model.DeviceModel ?? string.Empty,
                 DeviceTerminal = model.DeviceTerminal ?? string.Empty,
                 CabinetArea = model.CabinetArea ?? string.Empty,
                 SignalType = model.SignalType ?? string.Empty,
+                ExpectedNormalState = model.ExpectedNormalState ?? string.Empty,
+                CheckMethod = model.CheckMethod ?? string.Empty,
+                WiringRemark = model.WiringRemark ?? string.Empty,
                 IsVerified = model.IsVerified,
                 VerifiedBy = model.VerifiedBy ?? string.Empty,
                 CurrentValueText = model.CurrentValueText ?? string.Empty,
                 LastUpdateTimeText = model.LastUpdateTimeText ?? string.Empty,
                 RuntimeStatusText = model.RuntimeStatusText ?? string.Empty,
                 WiringStatusText = model.WiringStatusText ?? string.Empty,
-                RelatedActuatorName = model.RelatedActuatorName ?? string.Empty,
-                RelatedActuatorType = model.RelatedActuatorType ?? string.Empty,
                 CanManualOperate = model.CanManualOperate
             };
+        }
+
+        private static string EscapeCsv(string value)
+        {
+            value = value ?? string.Empty;
+            value = value.Replace("\r", " ").Replace("\n", " ");
+
+            if (value.Contains("\"") || value.Contains(","))
+            {
+                return "\"" + value.Replace("\"", "\"\"") + "\"";
+            }
+
+            return value;
+        }
+
+        private static string GetHardwareText(AssemblyWiringRowViewItem item)
+        {
+            return item.CardDisplayName
+                + " / Core " + item.Core
+                + " / " + (item.IsExtModule ? "扩展" : "板载")
+                + " / Bit " + item.HardwareBit;
         }
 
         /// <summary>
@@ -520,11 +782,19 @@ namespace AM.PageModel.Assembly
 
             public string DeviceName { get; set; }
 
+            public string DeviceModel { get; set; }
+
             public string DeviceTerminal { get; set; }
 
             public string CabinetArea { get; set; }
 
             public string SignalType { get; set; }
+
+            public string ExpectedNormalState { get; set; }
+
+            public string CheckMethod { get; set; }
+
+            public string WiringRemark { get; set; }
 
             public bool IsVerified { get; set; }
 
@@ -538,19 +808,21 @@ namespace AM.PageModel.Assembly
 
             public string WiringStatusText { get; set; }
 
-            public string RelatedActuatorName { get; set; }
-
-            public string RelatedActuatorType { get; set; }
-
             public bool CanManualOperate { get; set; }
+
+            public bool HasWiringDefinition
+            {
+                get
+                {
+                    return !string.Equals(WiringStatusText, "未定义", StringComparison.OrdinalIgnoreCase);
+                }
+            }
 
             public bool IsIssue
             {
                 get
                 {
-                    return string.Equals(WiringStatusText, "未定义", StringComparison.OrdinalIgnoreCase)
-                        || string.Equals(WiringStatusText, "未核对", StringComparison.OrdinalIgnoreCase)
-                        || !string.Equals(RuntimeStatusText, "已刷新", StringComparison.OrdinalIgnoreCase);
+                    return !HasWiringDefinition;
                 }
             }
         }

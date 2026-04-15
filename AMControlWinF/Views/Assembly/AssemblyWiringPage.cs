@@ -3,17 +3,16 @@ using AM.PageModel.Assembly;
 using AMControlWinF.Views.MotionConfig;
 using AntdUI;
 using System;
+using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace AMControlWinF.Views.Assembly
 {
     /// <summary>
-    /// 装配接线与调试工作台页面。
-    /// 被 MainWindow 页面缓存复用：
-    /// - 不在离开页面时释放页面模型；
-    /// - 首次加载使用布尔标记控制，避免重复初始化；
-    /// - 通过顶部筛选与底部调试区在同页完成接线查看和单点调试。
+    /// 装配接线与手动检查页面。
+    /// 面向装配电工，只保留接线对照、单点 IO 检查和导出功能。
     /// </summary>
     public partial class AssemblyWiringPage : UserControl
     {
@@ -49,22 +48,38 @@ namespace AMControlWinF.Views.Assembly
                     Width = "72",
                     Fixed = true
                 },
-                new Column("SoftwareNameText", "软件点名", ColumnAlign.Left)
+                new Column("LogicalBitText", "逻辑IO号", ColumnAlign.Center)
                 {
-                    Width = "150",
+                    Width = "65",
                     Fixed = true
+                },
+                new Column("HardwareBitText", "硬件位号", ColumnAlign.Center)
+                {
+                    Width = "65"
                 },
                 new Column("DisplayNameText", "显示名", ColumnAlign.Left)
                 {
-                    Width = "160"
+                    Width = "135"
+                },
+                new Column("ModuleTypeText", "板载/扩展", ColumnAlign.Center)
+                {
+                    Width = "65"
+                },
+                new Column("CurrentValueTag", "当前值", ColumnAlign.Center)
+                {
+                    Width = "65"
+                },
+                new Column("RuntimeStatusTag", "运行状态", ColumnAlign.Center)
+                {
+                    Width = "65"
+                },
+                new Column("WiringStatusTag", "接线", ColumnAlign.Center)
+                {
+                    Width = "65"
                 },
                 new Column("CardText", "控制卡", ColumnAlign.Left)
                 {
-                    Width = "145"
-                },
-                new Column("HardwareText", "硬件位置", ColumnAlign.Left)
-                {
-                    Width = "150"
+                    Width = "100"
                 },
                 new Column("WiringText", "接线信息", ColumnAlign.Left)
                 {
@@ -73,20 +88,13 @@ namespace AMControlWinF.Views.Assembly
                 },
                 new Column("DeviceText", "对端设备", ColumnAlign.Left)
                 {
-                    Width = "180",
+                    Width = "160",
                     LineBreak = true
                 },
-                new Column("CurrentValueTag", "当前值", ColumnAlign.Center)
+                new Column("FieldInfoText", "现场信息", ColumnAlign.Left)
                 {
-                    Width = "88"
-                },
-                new Column("RuntimeStatusTag", "运行", ColumnAlign.Center)
-                {
-                    Width = "92"
-                },
-                new Column("WiringStatusTag", "接线", ColumnAlign.Center)
-                {
-                    Width = "92"
+                    Width = "200",
+                    LineBreak = true
                 }
             };
         }
@@ -96,6 +104,7 @@ namespace AMControlWinF.Views.Assembly
             Load += AssemblyWiringPage_Load;
 
             buttonRefresh.Click += async (s, e) => await ReloadAsync();
+            buttonExportCsv.Click += ButtonExportCsv_Click;
             buttonSelectCard.Click += ButtonSelectCard_Click;
             buttonFilterAll.Click += ButtonFilterAll_Click;
             buttonFilterDI.Click += ButtonFilterDI_Click;
@@ -104,7 +113,6 @@ namespace AMControlWinF.Views.Assembly
             inputSearch.TextChanged += InputSearch_TextChanged;
             checkboxOnlyUnverified.CheckedChanged += CheckboxOnlyUnverified_CheckedChanged;
             checkboxOnlyIssues.CheckedChanged += CheckboxOnlyIssues_CheckedChanged;
-            checkboxDebugMode.CheckedChanged += CheckboxDebugMode_CheckedChanged;
 
             tableWiring.CellClick += TableWiring_CellClick;
 
@@ -112,7 +120,8 @@ namespace AMControlWinF.Views.Assembly
             buttonDoOn.Click += async (s, e) => await ExecuteAsync(() => _model.SetSelectedDo(true));
             buttonDoOff.Click += async (s, e) => await ExecuteAsync(() => _model.SetSelectedDo(false));
             buttonPulseDo.Click += async (s, e) => await ExecuteAsync(() => _model.PulseSelectedDo(GetPulseWidthMs()));
-            buttonTestActuator.Click += async (s, e) => await ExecuteAsync(() => _model.TestSelectedActuator("Test"));
+            buttonMarkVerified.Click += async (s, e) => await ExecuteAsync(() => _model.MarkSelectedVerified());
+            buttonCancelVerified.Click += async (s, e) => await ExecuteAsync(() => _model.CancelSelectedVerified());
         }
 
         private async void AssemblyWiringPage_Load(object sender, EventArgs e)
@@ -139,11 +148,6 @@ namespace AMControlWinF.Views.Assembly
                 var result = await _model.LoadAsync();
                 _lastActionMessage = result.Message;
                 RefreshView();
-
-                if (!result.Success)
-                {
-                    return;
-                }
             }
             finally
             {
@@ -165,11 +169,6 @@ namespace AMControlWinF.Views.Assembly
                 _lastActionMessage = result.Message;
                 await _model.RefreshAsync();
                 RefreshView();
-
-                if (!result.Success)
-                {
-                    return;
-                }
             }
             finally
             {
@@ -194,11 +193,6 @@ namespace AMControlWinF.Views.Assembly
 
                 await _model.RefreshAsync();
                 RefreshView();
-
-                if (!result.Success)
-                {
-                    return;
-                }
             }
             finally
             {
@@ -211,10 +205,13 @@ namespace AMControlWinF.Views.Assembly
             _isBindingView = true;
             try
             {
-                inputSearch.Text = _model.SearchText;
+                if (!inputSearch.Focused && !string.Equals(inputSearch.Text, _model.SearchText, StringComparison.Ordinal))
+                {
+                    inputSearch.Text = _model.SearchText;
+                }
+
                 checkboxOnlyUnverified.Checked = _model.OnlyUnverified;
                 checkboxOnlyIssues.Checked = _model.OnlyIssues;
-                checkboxDebugMode.Checked = _model.DebugModeEnabled;
                 labelSelectedCard.Text = _model.SelectedCardText;
             }
             finally
@@ -226,6 +223,7 @@ namespace AMControlWinF.Views.Assembly
             RefreshStatCards();
             RebindTable();
             RefreshDebugPanel();
+            RefreshDebugModeState();
             RefreshActionButtons();
         }
 
@@ -249,12 +247,14 @@ namespace AMControlWinF.Views.Assembly
                 {
                     Item = item,
                     IoTypeTag = BuildIoTypeTag(item),
-                    SoftwareNameText = new CellText(item.SoftwareName),
+                    LogicalBitText = new CellText(item.LogicalBit.ToString()),
+                    HardwareBitText = new CellText(item.HardwareBit.ToString()),
                     DisplayNameText = new CellText(string.IsNullOrWhiteSpace(item.DisplayName) ? "-" : item.DisplayName),
                     CardText = new CellText(item.CardDisplayName),
-                    HardwareText = new CellText(BuildHardwareText(item)),
+                    ModuleTypeText = new CellText(item.IsExtModule ? "扩展" : "板载"),
                     WiringText = new CellText(BuildWiringText(item)),
                     DeviceText = new CellText(BuildDeviceText(item)),
+                    FieldInfoText = new CellText(BuildFieldInfoText(item)),
                     CurrentValueTag = BuildCurrentValueTag(item),
                     RuntimeStatusTag = BuildRuntimeStatusTag(item),
                     WiringStatusTag = BuildWiringStatusTag(item)
@@ -269,64 +269,73 @@ namespace AMControlWinF.Views.Assembly
             var item = _model.SelectedItem;
             if (item == null)
             {
+                labelDebugTitle.Text = "点位检查";
                 labelSelectedNameValue.Text = "未选择点位";
                 labelSelectedHardwareValue.Text = "-";
                 labelSelectedWiringValue.Text = "-";
                 labelSelectedRuntimeValue.Text = "-";
                 labelDebugHint.Text = string.IsNullOrWhiteSpace(_lastActionMessage)
-                    ? "请选择表格中的点位后再执行调试；高风险动作需要先开启调试模式。"
+                    ? "请选择表格中的点位后执行检查；本页仅用于接线对照和单点 IO 检查。"
                     : _lastActionMessage;
                 return;
             }
 
+            labelDebugTitle.Text = _model.SelectedCheckModeText;
             labelSelectedNameValue.Text = BuildSelectedNameText(item);
-            labelSelectedHardwareValue.Text = BuildHardwareText(item);
-            labelSelectedWiringValue.Text = BuildWiringText(item);
+            labelSelectedHardwareValue.Text = "逻辑IO " + item.LogicalBit + " / 硬件位 " + item.HardwareBit + " / " + (item.IsExtModule ? "扩展" : "板载");
+            labelSelectedWiringValue.Text = BuildWiringText(item) + " / " + BuildFieldInfoText(item) + " / " + BuildVerifyStatusText(item);
             labelSelectedRuntimeValue.Text = item.CurrentValueText + " / " + item.RuntimeStatusText + " / " + item.LastUpdateTimeText;
 
             if (!string.IsNullOrWhiteSpace(_lastActionMessage))
             {
                 labelDebugHint.Text = _lastActionMessage;
             }
-            else if (!_model.DebugModeEnabled)
+            else if (_model.IsSelectedDi)
             {
-                labelDebugHint.Text = "已选中点位，开启调试模式后可执行 DO 和执行器动作。";
+                labelDebugHint.Text = item.HasWiringDefinition
+                    ? "先对照软件点名、端子、线号与设备端子，再读取 DI 状态确认物理接线是否正确。"
+                    : "当前点位尚未定义接线信息，请先补齐端子和线号，再做 DI 检查。";
+            }
+            else if (_model.CanSetSelectedDo)
+            {
+                labelDebugHint.Text = item.HasWiringDefinition
+                    ? "先对照软件点名与接线信息，再执行 DO 打开、关闭或脉冲输出确认物理接线。"
+                    : "当前点位尚未定义接线信息，请先补齐端子和线号，再做 DO 检查。";
             }
             else
             {
-                labelDebugHint.Text = "已开启调试模式，可在右侧执行单点调试。";
+                labelDebugHint.Text = "当前 DO 点未开放手动操作，仅可查看接线和状态。";
             }
+        }
+
+        private void RefreshDebugModeState()
+        {
+            var isDi = _model.IsSelectedDi;
+            var isDo = _model.IsSelectedDo;
+            var hasWiringDefinition = _model.HasSelection && _model.SelectedItem.HasWiringDefinition;
+
+            labelPulseWidth.Visible = isDo;
+            inputPulseWidth.Visible = isDo;
+
+            buttonReadDi.Visible = isDi;
+            buttonDoOn.Visible = isDo;
+            buttonDoOff.Visible = isDo;
+            buttonPulseDo.Visible = isDo;
+            buttonMarkVerified.Visible = hasWiringDefinition;
+            buttonCancelVerified.Visible = hasWiringDefinition;
         }
 
         private void RefreshActionButtons()
         {
-            var item = _model.SelectedItem;
-            var hasSelection = item != null;
-            var isDi = hasSelection && string.Equals(item.IoType, "DI", StringComparison.OrdinalIgnoreCase);
-            var isDo = hasSelection && string.Equals(item.IoType, "DO", StringComparison.OrdinalIgnoreCase);
-            var debugEnabled = _model.DebugModeEnabled;
-            var canManualDo = isDo && item.CanManualOperate;
-            var canTestActuator = hasSelection
-                && debugEnabled
-                && !string.IsNullOrWhiteSpace(item.RelatedActuatorName);
+            buttonExportCsv.Enabled = _model.Items.Count > 0;
+            inputPulseWidth.Enabled = _model.IsSelectedDo;
 
-            buttonSelectCard.Enabled = !_isBusy;
-            buttonRefresh.Enabled = !_isBusy;
-            buttonFilterAll.Enabled = !_isBusy;
-            buttonFilterDI.Enabled = !_isBusy;
-            buttonFilterDO.Enabled = !_isBusy;
-            inputSearch.Enabled = !_isBusy;
-            checkboxOnlyUnverified.Enabled = !_isBusy;
-            checkboxOnlyIssues.Enabled = !_isBusy;
-            checkboxDebugMode.Enabled = !_isBusy;
-            tableWiring.Enabled = !_isBusy;
-            inputPulseWidth.Enabled = !_isBusy && debugEnabled;
-
-            buttonReadDi.Enabled = !_isBusy && isDi;
-            buttonDoOn.Enabled = !_isBusy && debugEnabled && canManualDo;
-            buttonDoOff.Enabled = !_isBusy && debugEnabled && canManualDo;
-            buttonPulseDo.Enabled = !_isBusy && debugEnabled && canManualDo;
-            buttonTestActuator.Enabled = !_isBusy && canTestActuator;
+            buttonReadDi.Enabled = _model.CanReadSelectedDi;
+            buttonDoOn.Enabled = _model.CanSetSelectedDo;
+            buttonDoOff.Enabled = _model.CanSetSelectedDo;
+            buttonPulseDo.Enabled = _model.CanSetSelectedDo;
+            buttonMarkVerified.Enabled = _model.CanMarkSelectedVerified;
+            buttonCancelVerified.Enabled = _model.CanCancelSelectedVerified;
         }
 
         private void UpdateFilterButtons()
@@ -347,7 +356,7 @@ namespace AMControlWinF.Views.Assembly
         private void SetBusyState(bool isBusy)
         {
             _isBusy = isBusy;
-            RefreshActionButtons();
+            UseWaitCursor = isBusy;
         }
 
         private void InputSearch_TextChanged(object sender, EventArgs e)
@@ -383,18 +392,6 @@ namespace AMControlWinF.Views.Assembly
             RefreshView();
         }
 
-        private void CheckboxDebugMode_CheckedChanged(object sender, BoolEventArgs e)
-        {
-            if (_isBindingView)
-            {
-                return;
-            }
-
-            _model.SetDebugModeEnabled(checkboxDebugMode.Checked);
-            _lastActionMessage = string.Empty;
-            RefreshView();
-        }
-
         private void ButtonSelectCard_Click(object sender, EventArgs e)
         {
             if (_isBusy)
@@ -411,6 +408,44 @@ namespace AMControlWinF.Views.Assembly
 
                 _model.SetCardFilter(dialog.SelectedCardId);
                 RefreshView();
+            }
+        }
+
+        private void ButtonExportCsv_Click(object sender, EventArgs e)
+        {
+            if (_isBusy || _model.Items.Count <= 0)
+            {
+                return;
+            }
+
+            using (var dialog = new SaveFileDialog())
+            {
+                dialog.Title = "导出接线表";
+                dialog.Filter = "CSV 文件 (*.csv)|*.csv";
+                dialog.FileName = "assembly_wiring_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".csv";
+                dialog.RestoreDirectory = true;
+
+                if (dialog.ShowDialog(FindForm()) != DialogResult.OK)
+                {
+                    return;
+                }
+
+                try
+                {
+                    var csv = _model.ExportCurrentItemsToCsv();
+                    File.WriteAllText(dialog.FileName, csv, new UTF8Encoding(true));
+                    _lastActionMessage = "接线表导出成功：" + dialog.FileName;
+                }
+                catch (IOException ex)
+                {
+                    _lastActionMessage = "接线表导出失败：" + ex.Message;
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    _lastActionMessage = "接线表导出失败：" + ex.Message;
+                }
+
+                RefreshDebugPanel();
             }
         }
 
@@ -507,40 +542,97 @@ namespace AMControlWinF.Views.Assembly
             return item.IoType + " " + item.LogicalBit + " / " + displayName;
         }
 
-        private static string BuildHardwareText(AssemblyWiringPageModel.AssemblyWiringRowViewItem item)
-        {
-            return item.CardDisplayName
-                + " / Core " + item.Core
-                + " / " + (item.IsExtModule ? "扩展" : "板载")
-                + " / Bit " + item.HardwareBit;
-        }
-
         private static string BuildWiringText(AssemblyWiringPageModel.AssemblyWiringRowViewItem item)
         {
             var terminalText = string.IsNullOrWhiteSpace(item.TerminalBlock) && string.IsNullOrWhiteSpace(item.TerminalNo)
                 ? "端子未定义"
                 : (item.TerminalBlock + " " + item.TerminalNo).Trim();
 
+            var connectorText = string.IsNullOrWhiteSpace(item.ConnectorNo) && string.IsNullOrWhiteSpace(item.PinNo)
+                ? string.Empty
+                : " / 插头 " + (item.ConnectorNo + " " + item.PinNo).Trim();
+
             var wireText = string.IsNullOrWhiteSpace(item.WireNo)
                 ? string.Empty
                 : " / 线号 " + item.WireNo;
 
-            return terminalText + wireText;
+            return terminalText + connectorText + wireText;
         }
 
         private static string BuildDeviceText(AssemblyWiringPageModel.AssemblyWiringRowViewItem item)
         {
-            if (string.IsNullOrWhiteSpace(item.DeviceName) && string.IsNullOrWhiteSpace(item.DeviceTerminal))
+            if (string.IsNullOrWhiteSpace(item.DeviceName)
+                && string.IsNullOrWhiteSpace(item.DeviceModel)
+                && string.IsNullOrWhiteSpace(item.DeviceTerminal))
             {
                 return "-";
             }
 
-            if (string.IsNullOrWhiteSpace(item.DeviceTerminal))
+            var deviceText = string.IsNullOrWhiteSpace(item.DeviceName) ? string.Empty : item.DeviceName;
+            if (!string.IsNullOrWhiteSpace(item.DeviceModel))
             {
-                return item.DeviceName;
+                deviceText = string.IsNullOrWhiteSpace(deviceText)
+                    ? item.DeviceModel
+                    : deviceText + " / " + item.DeviceModel;
             }
 
-            return item.DeviceName + " / " + item.DeviceTerminal;
+            if (!string.IsNullOrWhiteSpace(item.DeviceTerminal))
+            {
+                deviceText = string.IsNullOrWhiteSpace(deviceText)
+                    ? item.DeviceTerminal
+                    : deviceText + " / " + item.DeviceTerminal;
+            }
+
+            return string.IsNullOrWhiteSpace(deviceText) ? "-" : deviceText;
+        }
+
+        private static string BuildFieldInfoText(AssemblyWiringPageModel.AssemblyWiringRowViewItem item)
+        {
+            var parts = new System.Collections.Generic.List<string>();
+
+            if (!string.IsNullOrWhiteSpace(item.CabinetArea))
+            {
+                parts.Add("区域 " + item.CabinetArea);
+            }
+
+            if (!string.IsNullOrWhiteSpace(item.SignalType))
+            {
+                parts.Add("信号 " + item.SignalType);
+            }
+
+            if (!string.IsNullOrWhiteSpace(item.ExpectedNormalState))
+            {
+                parts.Add("常态 " + item.ExpectedNormalState);
+            }
+
+            if (!string.IsNullOrWhiteSpace(item.CheckMethod))
+            {
+                parts.Add("点检 " + item.CheckMethod);
+            }
+
+            if (!string.IsNullOrWhiteSpace(item.WiringRemark))
+            {
+                parts.Add("备注 " + item.WiringRemark);
+            }
+
+            return parts.Count == 0 ? "-" : string.Join(" / ", parts);
+        }
+
+        private static string BuildVerifyStatusText(AssemblyWiringPageModel.AssemblyWiringRowViewItem item)
+        {
+            if (!item.HasWiringDefinition)
+            {
+                return "未定义接线";
+            }
+
+            if (!item.IsVerified)
+            {
+                return "未核对";
+            }
+
+            return string.IsNullOrWhiteSpace(item.VerifiedBy)
+                ? "已核对"
+                : "已核对 / " + item.VerifiedBy;
         }
 
         private sealed class WiringTableRow
@@ -549,17 +641,21 @@ namespace AMControlWinF.Views.Assembly
 
             public CellTag IoTypeTag { get; set; }
 
-            public CellText SoftwareNameText { get; set; }
+            public CellText LogicalBitText { get; set; }
+
+            public CellText HardwareBitText { get; set; }
 
             public CellText DisplayNameText { get; set; }
 
             public CellText CardText { get; set; }
 
-            public CellText HardwareText { get; set; }
+            public CellText ModuleTypeText { get; set; }
 
             public CellText WiringText { get; set; }
 
             public CellText DeviceText { get; set; }
+
+            public CellText FieldInfoText { get; set; }
 
             public CellTag CurrentValueTag { get; set; }
 
