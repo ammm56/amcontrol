@@ -293,14 +293,14 @@ namespace AMControlWinF.Views.Assembly
             else if (_model.IsSelectedDi)
             {
                 labelDebugHint.Text = item.HasWiringDefinition
-                    ? "先对照软件点名、端子、线号与设备端子，再读取 DI 状态确认物理接线是否正确。"
-                    : "当前点位尚未定义接线信息，请先补齐端子和线号，再做 DI 检查。";
+                    ? "先对照逻辑IO号、硬件位号和显示名，再读取 DI 状态确认物理接线是否正确。"
+                    : "先确认逻辑IO号与硬件位号对应关系，再读取 DI 状态做现场核对。";
             }
             else if (_model.CanSetSelectedDo)
             {
                 labelDebugHint.Text = item.HasWiringDefinition
-                    ? "先对照软件点名与接线信息，再执行 DO 打开、关闭或脉冲输出确认物理接线。"
-                    : "当前点位尚未定义接线信息，请先补齐端子和线号，再做 DO 检查。";
+                    ? "先对照逻辑IO号、硬件位号和显示名，再执行 DO 打开、关闭或脉冲输出确认物理接线。"
+                    : "先确认逻辑IO号与硬件位号对应关系，再执行 DO 打开、关闭或脉冲输出做现场核对。";
             }
             else
             {
@@ -312,7 +312,7 @@ namespace AMControlWinF.Views.Assembly
         {
             var isDi = _model.IsSelectedDi;
             var isDo = _model.IsSelectedDo;
-            var hasWiringDefinition = _model.HasSelection && _model.SelectedItem.HasWiringDefinition;
+            var hasSelection = _model.HasSelection;
 
             labelPulseWidth.Visible = isDo;
             inputPulseWidth.Visible = isDo;
@@ -321,8 +321,8 @@ namespace AMControlWinF.Views.Assembly
             buttonDoOn.Visible = isDo;
             buttonDoOff.Visible = isDo;
             buttonPulseDo.Visible = isDo;
-            buttonMarkVerified.Visible = hasWiringDefinition;
-            buttonCancelVerified.Visible = hasWiringDefinition;
+            buttonMarkVerified.Visible = hasSelection;
+            buttonCancelVerified.Visible = hasSelection;
         }
 
         private void RefreshActionButtons()
@@ -536,8 +536,8 @@ namespace AMControlWinF.Views.Assembly
         private static string BuildSelectedNameText(AssemblyWiringPageModel.AssemblyWiringRowViewItem item)
         {
             var displayName = string.IsNullOrWhiteSpace(item.DisplayName)
-                ? item.SoftwareName
-                : item.SoftwareName + " / " + item.DisplayName;
+                ? "未命名点位"
+                : item.DisplayName;
 
             return item.IoType + " " + item.LogicalBit + " / " + displayName;
         }

@@ -25,16 +25,19 @@ namespace AMControlWinF.Views.Assembly
             this.labelTableSummary = new AntdUI.Label();
             this.labelTableTitle = new AntdUI.Label();
             this.panelDebugCard = new AntdUI.Panel();
+            this.gridDebugLayout = new AntdUI.GridPanel();
             this.panelDebugActions = new AntdUI.Panel();
-            this.flowDebugActions = new AntdUI.FlowPanel();
+            this.panelDebugButtons = new AntdUI.Panel();
             this.buttonCancelVerified = new AntdUI.Button();
             this.buttonMarkVerified = new AntdUI.Button();
             this.buttonPulseDo = new AntdUI.Button();
             this.buttonDoOff = new AntdUI.Button();
             this.buttonDoOn = new AntdUI.Button();
             this.buttonReadDi = new AntdUI.Button();
+            this.panelPulseRow = new AntdUI.Panel();
             this.inputPulseWidth = new AntdUI.Input();
             this.labelPulseWidth = new AntdUI.Label();
+            this.panelDebugLeft = new AntdUI.Panel();
             this.panelDebugInfo = new AntdUI.Panel();
             this.labelSelectedRuntimeValue = new AntdUI.Label();
             this.labelSelectedRuntimeTitle = new AntdUI.Label();
@@ -80,8 +83,11 @@ namespace AMControlWinF.Views.Assembly
             this.panelTableCard.SuspendLayout();
             this.panelTableHeader.SuspendLayout();
             this.panelDebugCard.SuspendLayout();
+            this.gridDebugLayout.SuspendLayout();
             this.panelDebugActions.SuspendLayout();
-            this.flowDebugActions.SuspendLayout();
+            this.panelDebugButtons.SuspendLayout();
+            this.panelPulseRow.SuspendLayout();
+            this.panelDebugLeft.SuspendLayout();
             this.panelDebugInfo.SuspendLayout();
             this.panelDebugHeader.SuspendLayout();
             this.flowStats.SuspendLayout();
@@ -180,60 +186,67 @@ namespace AMControlWinF.Views.Assembly
             // panelDebugCard
             // 
             this.panelDebugCard.BackColor = System.Drawing.Color.Transparent;
-            this.panelDebugCard.Controls.Add(this.panelDebugActions);
-            this.panelDebugCard.Controls.Add(this.panelDebugInfo);
-            this.panelDebugCard.Controls.Add(this.panelDebugHeader);
+            this.panelDebugCard.Controls.Add(this.gridDebugLayout);
             this.panelDebugCard.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.panelDebugCard.Location = new System.Drawing.Point(8, 524);
             this.panelDebugCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelDebugCard.Name = "panelDebugCard";
-            this.panelDebugCard.Padding = new System.Windows.Forms.Padding(8);
             this.panelDebugCard.Radius = 12;
             this.panelDebugCard.Shadow = 4;
             this.panelDebugCard.ShadowOpacity = 0.15F;
             this.panelDebugCard.Size = new System.Drawing.Size(1084, 188);
             this.panelDebugCard.TabIndex = 3;
             // 
+            // gridDebugLayout
+            // 
+            this.gridDebugLayout.Controls.Add(this.panelDebugActions);
+            this.gridDebugLayout.Controls.Add(this.panelDebugLeft);
+            this.gridDebugLayout.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.gridDebugLayout.Gap = 12;
+            this.gridDebugLayout.Location = new System.Drawing.Point(4, 4);
+            this.gridDebugLayout.Margin = new System.Windows.Forms.Padding(0);
+            this.gridDebugLayout.Name = "gridDebugLayout";
+            this.gridDebugLayout.Size = new System.Drawing.Size(1076, 180);
+            this.gridDebugLayout.Span = "100% 300";
+            this.gridDebugLayout.TabIndex = 0;
+            this.gridDebugLayout.Text = "gridDebugLayout";
+            // 
             // panelDebugActions
             // 
-            this.panelDebugActions.Controls.Add(this.flowDebugActions);
-            this.panelDebugActions.Controls.Add(this.inputPulseWidth);
-            this.panelDebugActions.Controls.Add(this.labelPulseWidth);
-            this.panelDebugActions.Dock = System.Windows.Forms.DockStyle.Right;
-            this.panelDebugActions.Location = new System.Drawing.Point(728, 48);
+            this.panelDebugActions.Controls.Add(this.panelDebugButtons);
+            this.panelDebugActions.Controls.Add(this.panelPulseRow);
+            this.panelDebugActions.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelDebugActions.Location = new System.Drawing.Point(788, 12);
             this.panelDebugActions.Margin = new System.Windows.Forms.Padding(0);
             this.panelDebugActions.Name = "panelDebugActions";
-            this.panelDebugActions.Padding = new System.Windows.Forms.Padding(0, 8, 0, 0);
             this.panelDebugActions.Radius = 0;
-            this.panelDebugActions.Size = new System.Drawing.Size(344, 128);
-            this.panelDebugActions.TabIndex = 2;
+            this.panelDebugActions.Size = new System.Drawing.Size(276, 156);
+            this.panelDebugActions.TabIndex = 1;
             // 
-            // flowDebugActions
+            // panelDebugButtons
             // 
-            this.flowDebugActions.Align = AntdUI.TAlignFlow.RightCenter;
-            this.flowDebugActions.Controls.Add(this.buttonCancelVerified);
-            this.flowDebugActions.Controls.Add(this.buttonMarkVerified);
-            this.flowDebugActions.Controls.Add(this.buttonPulseDo);
-            this.flowDebugActions.Controls.Add(this.buttonDoOff);
-            this.flowDebugActions.Controls.Add(this.buttonDoOn);
-            this.flowDebugActions.Controls.Add(this.buttonReadDi);
-            this.flowDebugActions.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flowDebugActions.Gap = 8;
-            this.flowDebugActions.Location = new System.Drawing.Point(0, 64);
-            this.flowDebugActions.Margin = new System.Windows.Forms.Padding(0);
-            this.flowDebugActions.Name = "flowDebugActions";
-            this.flowDebugActions.Size = new System.Drawing.Size(344, 64);
-            this.flowDebugActions.TabIndex = 2;
-            this.flowDebugActions.Text = "flowDebugActions";
+            this.panelDebugButtons.Controls.Add(this.buttonCancelVerified);
+            this.panelDebugButtons.Controls.Add(this.buttonMarkVerified);
+            this.panelDebugButtons.Controls.Add(this.buttonPulseDo);
+            this.panelDebugButtons.Controls.Add(this.buttonDoOff);
+            this.panelDebugButtons.Controls.Add(this.buttonDoOn);
+            this.panelDebugButtons.Controls.Add(this.buttonReadDi);
+            this.panelDebugButtons.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelDebugButtons.Location = new System.Drawing.Point(0, 36);
+            this.panelDebugButtons.Margin = new System.Windows.Forms.Padding(0);
+            this.panelDebugButtons.Name = "panelDebugButtons";
+            this.panelDebugButtons.Radius = 0;
+            this.panelDebugButtons.Size = new System.Drawing.Size(276, 120);
+            this.panelDebugButtons.TabIndex = 1;
             // 
             // buttonCancelVerified
             // 
             this.buttonCancelVerified.IconSvg = "CloseCircleOutlined";
-            this.buttonCancelVerified.Location = new System.Drawing.Point(232, 44);
+            this.buttonCancelVerified.Location = new System.Drawing.Point(145, 84);
             this.buttonCancelVerified.Margin = new System.Windows.Forms.Padding(0);
             this.buttonCancelVerified.Name = "buttonCancelVerified";
             this.buttonCancelVerified.Radius = 8;
-            this.buttonCancelVerified.Size = new System.Drawing.Size(104, 36);
+            this.buttonCancelVerified.Size = new System.Drawing.Size(120, 36);
             this.buttonCancelVerified.TabIndex = 5;
             this.buttonCancelVerified.Text = "取消核对";
             this.buttonCancelVerified.WaveSize = 0;
@@ -241,11 +254,11 @@ namespace AMControlWinF.Views.Assembly
             // buttonMarkVerified
             // 
             this.buttonMarkVerified.IconSvg = "CheckCircleOutlined";
-            this.buttonMarkVerified.Location = new System.Drawing.Point(120, 44);
+            this.buttonMarkVerified.Location = new System.Drawing.Point(15, 84);
             this.buttonMarkVerified.Margin = new System.Windows.Forms.Padding(0);
             this.buttonMarkVerified.Name = "buttonMarkVerified";
             this.buttonMarkVerified.Radius = 8;
-            this.buttonMarkVerified.Size = new System.Drawing.Size(104, 36);
+            this.buttonMarkVerified.Size = new System.Drawing.Size(120, 36);
             this.buttonMarkVerified.TabIndex = 4;
             this.buttonMarkVerified.Text = "标记已核对";
             this.buttonMarkVerified.Type = AntdUI.TTypeMini.Primary;
@@ -254,11 +267,11 @@ namespace AMControlWinF.Views.Assembly
             // buttonPulseDo
             // 
             this.buttonPulseDo.IconSvg = "ThunderboltOutlined";
-            this.buttonPulseDo.Location = new System.Drawing.Point(8, 44);
+            this.buttonPulseDo.Location = new System.Drawing.Point(145, 4);
             this.buttonPulseDo.Margin = new System.Windows.Forms.Padding(0);
             this.buttonPulseDo.Name = "buttonPulseDo";
             this.buttonPulseDo.Radius = 8;
-            this.buttonPulseDo.Size = new System.Drawing.Size(104, 36);
+            this.buttonPulseDo.Size = new System.Drawing.Size(120, 36);
             this.buttonPulseDo.TabIndex = 3;
             this.buttonPulseDo.Text = "脉冲输出";
             this.buttonPulseDo.WaveSize = 0;
@@ -266,11 +279,11 @@ namespace AMControlWinF.Views.Assembly
             // buttonDoOff
             // 
             this.buttonDoOff.IconSvg = "PoweroffOutlined";
-            this.buttonDoOff.Location = new System.Drawing.Point(232, 0);
+            this.buttonDoOff.Location = new System.Drawing.Point(145, 44);
             this.buttonDoOff.Margin = new System.Windows.Forms.Padding(0);
             this.buttonDoOff.Name = "buttonDoOff";
             this.buttonDoOff.Radius = 8;
-            this.buttonDoOff.Size = new System.Drawing.Size(104, 36);
+            this.buttonDoOff.Size = new System.Drawing.Size(120, 36);
             this.buttonDoOff.TabIndex = 1;
             this.buttonDoOff.Text = "DO 关闭";
             this.buttonDoOff.WaveSize = 0;
@@ -278,11 +291,11 @@ namespace AMControlWinF.Views.Assembly
             // buttonDoOn
             // 
             this.buttonDoOn.IconSvg = "PlayCircleOutlined";
-            this.buttonDoOn.Location = new System.Drawing.Point(120, 0);
+            this.buttonDoOn.Location = new System.Drawing.Point(15, 44);
             this.buttonDoOn.Margin = new System.Windows.Forms.Padding(0);
             this.buttonDoOn.Name = "buttonDoOn";
             this.buttonDoOn.Radius = 8;
-            this.buttonDoOn.Size = new System.Drawing.Size(104, 36);
+            this.buttonDoOn.Size = new System.Drawing.Size(120, 36);
             this.buttonDoOn.TabIndex = 0;
             this.buttonDoOn.Text = "DO 打开";
             this.buttonDoOn.Type = AntdUI.TTypeMini.Primary;
@@ -291,36 +304,60 @@ namespace AMControlWinF.Views.Assembly
             // buttonReadDi
             // 
             this.buttonReadDi.IconSvg = "SearchOutlined";
-            this.buttonReadDi.Location = new System.Drawing.Point(8, 0);
+            this.buttonReadDi.Location = new System.Drawing.Point(15, 4);
             this.buttonReadDi.Margin = new System.Windows.Forms.Padding(0);
             this.buttonReadDi.Name = "buttonReadDi";
             this.buttonReadDi.Radius = 8;
-            this.buttonReadDi.Size = new System.Drawing.Size(104, 36);
+            this.buttonReadDi.Size = new System.Drawing.Size(120, 36);
             this.buttonReadDi.TabIndex = 0;
             this.buttonReadDi.Text = "读取 DI";
             this.buttonReadDi.WaveSize = 0;
             // 
+            // panelPulseRow
+            // 
+            this.panelPulseRow.Controls.Add(this.inputPulseWidth);
+            this.panelPulseRow.Controls.Add(this.labelPulseWidth);
+            this.panelPulseRow.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panelPulseRow.Location = new System.Drawing.Point(0, 0);
+            this.panelPulseRow.Margin = new System.Windows.Forms.Padding(0);
+            this.panelPulseRow.Name = "panelPulseRow";
+            this.panelPulseRow.Radius = 0;
+            this.panelPulseRow.Size = new System.Drawing.Size(276, 36);
+            this.panelPulseRow.TabIndex = 0;
+            // 
             // inputPulseWidth
             // 
-            this.inputPulseWidth.Dock = System.Windows.Forms.DockStyle.Top;
-            this.inputPulseWidth.Location = new System.Drawing.Point(0, 32);
+            this.inputPulseWidth.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.inputPulseWidth.Location = new System.Drawing.Point(92, 0);
             this.inputPulseWidth.Margin = new System.Windows.Forms.Padding(0);
             this.inputPulseWidth.Name = "inputPulseWidth";
-            this.inputPulseWidth.Size = new System.Drawing.Size(344, 32);
+            this.inputPulseWidth.Size = new System.Drawing.Size(184, 36);
             this.inputPulseWidth.TabIndex = 1;
             this.inputPulseWidth.Text = "300";
             this.inputPulseWidth.WaveSize = 0;
             // 
             // labelPulseWidth
             // 
-            this.labelPulseWidth.Dock = System.Windows.Forms.DockStyle.Top;
+            this.labelPulseWidth.Dock = System.Windows.Forms.DockStyle.Left;
             this.labelPulseWidth.ForeColor = System.Drawing.Color.Gray;
-            this.labelPulseWidth.Location = new System.Drawing.Point(0, 8);
+            this.labelPulseWidth.Location = new System.Drawing.Point(0, 0);
             this.labelPulseWidth.Margin = new System.Windows.Forms.Padding(0);
             this.labelPulseWidth.Name = "labelPulseWidth";
-            this.labelPulseWidth.Size = new System.Drawing.Size(344, 24);
+            this.labelPulseWidth.Size = new System.Drawing.Size(92, 36);
             this.labelPulseWidth.TabIndex = 0;
             this.labelPulseWidth.Text = "脉冲宽度（ms）";
+            // 
+            // panelDebugLeft
+            // 
+            this.panelDebugLeft.Controls.Add(this.panelDebugInfo);
+            this.panelDebugLeft.Controls.Add(this.panelDebugHeader);
+            this.panelDebugLeft.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelDebugLeft.Location = new System.Drawing.Point(12, 12);
+            this.panelDebugLeft.Margin = new System.Windows.Forms.Padding(0);
+            this.panelDebugLeft.Name = "panelDebugLeft";
+            this.panelDebugLeft.Radius = 0;
+            this.panelDebugLeft.Size = new System.Drawing.Size(752, 156);
+            this.panelDebugLeft.TabIndex = 0;
             // 
             // panelDebugInfo
             // 
@@ -333,12 +370,12 @@ namespace AMControlWinF.Views.Assembly
             this.panelDebugInfo.Controls.Add(this.labelSelectedNameValue);
             this.panelDebugInfo.Controls.Add(this.labelSelectedNameTitle);
             this.panelDebugInfo.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelDebugInfo.Location = new System.Drawing.Point(12, 48);
+            this.panelDebugInfo.Location = new System.Drawing.Point(0, 36);
             this.panelDebugInfo.Margin = new System.Windows.Forms.Padding(0);
             this.panelDebugInfo.Name = "panelDebugInfo";
             this.panelDebugInfo.Padding = new System.Windows.Forms.Padding(0, 8, 12, 0);
             this.panelDebugInfo.Radius = 0;
-            this.panelDebugInfo.Size = new System.Drawing.Size(1060, 128);
+            this.panelDebugInfo.Size = new System.Drawing.Size(752, 120);
             this.panelDebugInfo.TabIndex = 1;
             // 
             // labelSelectedRuntimeValue
@@ -423,12 +460,12 @@ namespace AMControlWinF.Views.Assembly
             this.panelDebugHeader.Controls.Add(this.labelDebugHint);
             this.panelDebugHeader.Controls.Add(this.labelDebugTitle);
             this.panelDebugHeader.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panelDebugHeader.Location = new System.Drawing.Point(12, 12);
+            this.panelDebugHeader.Location = new System.Drawing.Point(0, 0);
             this.panelDebugHeader.Margin = new System.Windows.Forms.Padding(0);
             this.panelDebugHeader.Name = "panelDebugHeader";
             this.panelDebugHeader.Padding = new System.Windows.Forms.Padding(0, 0, 0, 8);
             this.panelDebugHeader.Radius = 0;
-            this.panelDebugHeader.Size = new System.Drawing.Size(1060, 36);
+            this.panelDebugHeader.Size = new System.Drawing.Size(752, 36);
             this.panelDebugHeader.TabIndex = 0;
             // 
             // labelDebugHint
@@ -439,7 +476,7 @@ namespace AMControlWinF.Views.Assembly
             this.labelDebugHint.Location = new System.Drawing.Point(96, 0);
             this.labelDebugHint.Margin = new System.Windows.Forms.Padding(0);
             this.labelDebugHint.Name = "labelDebugHint";
-            this.labelDebugHint.Size = new System.Drawing.Size(964, 28);
+            this.labelDebugHint.Size = new System.Drawing.Size(656, 28);
             this.labelDebugHint.TabIndex = 1;
             this.labelDebugHint.Text = "请选择表格中的点位后执行检查；本页仅用于接线对照和单点 IO 检查。";
             // 
@@ -814,8 +851,11 @@ namespace AMControlWinF.Views.Assembly
             this.panelTableCard.ResumeLayout(false);
             this.panelTableHeader.ResumeLayout(false);
             this.panelDebugCard.ResumeLayout(false);
+            this.gridDebugLayout.ResumeLayout(false);
             this.panelDebugActions.ResumeLayout(false);
-            this.flowDebugActions.ResumeLayout(false);
+            this.panelDebugButtons.ResumeLayout(false);
+            this.panelPulseRow.ResumeLayout(false);
+            this.panelDebugLeft.ResumeLayout(false);
             this.panelDebugInfo.ResumeLayout(false);
             this.panelDebugHeader.ResumeLayout(false);
             this.flowStats.ResumeLayout(false);
@@ -869,6 +909,8 @@ namespace AMControlWinF.Views.Assembly
         private AntdUI.Label labelTableSummary;
         private AntdUI.Table tableWiring;
         private AntdUI.Panel panelDebugCard;
+        private AntdUI.GridPanel gridDebugLayout;
+        private AntdUI.Panel panelDebugLeft;
         private AntdUI.Panel panelDebugHeader;
         private AntdUI.Label labelDebugTitle;
         private AntdUI.Label labelDebugHint;
@@ -884,7 +926,8 @@ namespace AMControlWinF.Views.Assembly
         private AntdUI.Panel panelDebugActions;
         private AntdUI.Label labelPulseWidth;
         private AntdUI.Input inputPulseWidth;
-        private AntdUI.FlowPanel flowDebugActions;
+        private AntdUI.Panel panelDebugButtons;
+        private AntdUI.Panel panelPulseRow;
         private AntdUI.Button buttonCancelVerified;
         private AntdUI.Button buttonMarkVerified;
         private AntdUI.Button buttonReadDi;

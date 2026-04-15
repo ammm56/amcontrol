@@ -193,7 +193,6 @@ namespace AM.PageModel.Assembly
             get
             {
                 return HasSelection
-                    && SelectedItem.HasWiringDefinition
                     && !SelectedItem.IsVerified;
             }
         }
@@ -206,7 +205,6 @@ namespace AM.PageModel.Assembly
             get
             {
                 return HasSelection
-                    && SelectedItem.HasWiringDefinition
                     && SelectedItem.IsVerified;
             }
         }
@@ -406,11 +404,6 @@ namespace AM.PageModel.Assembly
                 return Result.Fail(-1, "当前未选择任何行", ResultSource.UI);
             }
 
-            if (!SelectedItem.HasWiringDefinition)
-            {
-                return Result.Fail(-1, "当前点位尚未维护接线信息，不能标记已核对", ResultSource.UI);
-            }
-
             var entityResult = BuildWiringEntityFromSelection();
             if (!entityResult.Success)
             {
@@ -432,11 +425,6 @@ namespace AM.PageModel.Assembly
             if (SelectedItem == null)
             {
                 return Result.Fail(-1, "当前未选择任何行", ResultSource.UI);
-            }
-
-            if (!SelectedItem.HasWiringDefinition)
-            {
-                return Result.Fail(-1, "当前点位尚未维护接线信息", ResultSource.UI);
             }
 
             var entityResult = BuildWiringEntityFromSelection();
@@ -594,7 +582,7 @@ namespace AM.PageModel.Assembly
         public string ExportCurrentItemsToCsv()
         {
             var builder = new StringBuilder();
-            builder.AppendLine("类型,逻辑位,软件点名,显示名,控制卡,硬件位置,端子排,端子号,插头号,针脚号,线号,对端设备,设备型号,对端端子,区域,信号类型,常态,点检方法,接线备注,是否核对,核对人,当前值,更新时间,运行状态,接线状态");
+            builder.AppendLine("类型,逻辑IO号,硬件位号,显示名,控制卡,板载扩展,端子排,端子号,插头号,针脚号,线号,对端设备,设备型号,对端端子,区域,信号类型,常态,点检方法,接线备注,是否核对,核对人,当前值,更新时间,运行状态,接线状态");
 
             foreach (var item in _items)
             {
@@ -602,10 +590,10 @@ namespace AM.PageModel.Assembly
                 {
                     EscapeCsv(item.IoType),
                     EscapeCsv(item.LogicalBit.ToString()),
-                    EscapeCsv(item.SoftwareName),
+                    EscapeCsv(item.HardwareBit.ToString()),
                     EscapeCsv(item.DisplayName),
                     EscapeCsv(item.CardDisplayName),
-                    EscapeCsv(GetHardwareText(item)),
+                    EscapeCsv(item.IsExtModule ? "扩展" : "板载"),
                     EscapeCsv(item.TerminalBlock),
                     EscapeCsv(item.TerminalNo),
                     EscapeCsv(item.ConnectorNo),
@@ -729,14 +717,6 @@ namespace AM.PageModel.Assembly
             }
 
             return value;
-        }
-
-        private static string GetHardwareText(AssemblyWiringRowViewItem item)
-        {
-            return item.CardDisplayName
-                + " / Core " + item.Core
-                + " / " + (item.IsExtModule ? "扩展" : "板载")
-                + " / Bit " + item.HardwareBit;
         }
 
         /// <summary>
