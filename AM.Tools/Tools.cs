@@ -131,5 +131,17 @@ namespace AM.Tools
 
             return string.Format("{0}.{1}.{2}", version.Major, version.Minor, version.Build);
         }
+
+        public static string GetCurrentLanguage()
+        {
+            var language = ConfigContext.Instance.Config.Setting.Language;
+            return string.IsNullOrWhiteSpace(language) ? "zh-CN" : language;
+        }
+
+        public static bool IsEnglishLanguage(string language)
+        {
+            return !string.IsNullOrWhiteSpace(language) &&
+                   language.StartsWith("en", StringComparison.OrdinalIgnoreCase);
+        }
     }
 }

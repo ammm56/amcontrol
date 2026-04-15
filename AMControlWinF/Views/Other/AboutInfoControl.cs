@@ -19,13 +19,25 @@ namespace AMControlWinF.Views.Other
 
         private void InitializeLibraryTable()
         {
-            labelVersionValue.Text = $"版本：{AM.Tools.Tools.GetAppVersionText()}";
+            var appVersionText = AM.Tools.Tools.GetAppVersionText();
+            string language = AM.Tools.Tools.GetCurrentLanguage();
+            labelProgramName.Text = AM.Tools.Tools.IsEnglishLanguage(language) ? "AM Motion Control System" : "AM运动控制系统";
+
+            labelAuthorValue.Text = AM.Tools.Tools.IsEnglishLanguage(language) ? "Developers: amm" : "开发者：amm";
+
+            labelemail.Text = AM.Tools.Tools.IsEnglishLanguage(language) ? "Email: tang.am@foxmail.com" : "邮箱：tang.am@foxmail.com";
+
+            labelVersionValue.Text = AM.Tools.Tools.IsEnglishLanguage(language)
+                ? "Version: " + appVersionText
+                : "版本：" + appVersionText;
+
+            labelLibrariesTitle.Text = AM.Tools.Tools.IsEnglishLanguage(language) ? "Third-party libraries and protocols" : "第三方库与协议";
 
             tableLibraries.Columns = new ColumnCollection
             {
-                new Column("Name", "名称"),
-                new Column("License", "协议名称"),
-                new Column("Description", "描述")
+                new Column("Name", AM.Tools.Tools.IsEnglishLanguage(language) ? "Name" : "名称"),
+                new Column("License", AM.Tools.Tools.IsEnglishLanguage(language) ? "License" : "协议名称"),
+                new Column("Description", AM.Tools.Tools.IsEnglishLanguage(language) ? "Description" : "描述")
             };
 
             tableLibraries.Binding(new BindingList<ThirdPartyLibraryItem>(
