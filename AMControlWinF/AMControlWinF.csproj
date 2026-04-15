@@ -145,6 +145,12 @@
     <Compile Include="Views\Main\ActiveAlarmDrawerControl.Designer.cs">
       <DependentUpon>ActiveAlarmDrawerControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\Main\PageLoadingMaskControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Main\PageLoadingMaskControl.Designer.cs">
+      <DependentUpon>PageLoadingMaskControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="Views\Main\TextureBackgroundControl.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -543,6 +549,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Views\Main\ActiveAlarmDrawerControl.resx">
       <DependentUpon>ActiveAlarmDrawerControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\Main\PageLoadingMaskControl.resx">
+      <DependentUpon>PageLoadingMaskControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\Main\UserAvatarMenuControl.resx">
       <DependentUpon>UserAvatarMenuControl.cs</DependentUpon>

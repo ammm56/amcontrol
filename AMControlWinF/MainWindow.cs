@@ -24,7 +24,6 @@ using AMControlWinF.Views.SysConfig;
 using AntdUI;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
@@ -65,13 +64,9 @@ namespace AMControlWinF
         private int _activeAlarmCount;
         private SystemMessageType _lastStatusMessageType = SystemMessageType.Status;
 
-        private Panel _pageLoadingMask;
-        private Label _pageLoadingMaskLabel;
+        private PageLoadingMaskControl _pageLoadingMaskControl;
         private int _navigateVersion;
         private bool _isClosing;
-
-        private const int FirstOpenMaskRenderDelayMs = 60;
-        private const int FirstOpenMaskMinDurationMs = 500;
 
         /// <summary>
         /// 关闭原因，供 Program.cs 主循环读取。
@@ -415,9 +410,11 @@ namespace AMControlWinF
             var page = _model.SelectedSecondary;
             var navigateVersion = ++_navigateVersion;
 
+            EnsurePageLoadingMaskControl();
+
             if (page == null)
             {
-                HidePageLoadingMask();
+                _pageLoadingMaskControl.HideImmediately();
                 ShowPage(CreatePlaceholderPage(
                     IsEnglishLanguage(GetCurrentLanguage())
                         ? "No accessible page"
@@ -430,25 +427,22 @@ namespace AMControlWinF
                 cachedPage != null &&
                 !cachedPage.IsDisposed)
             {
-                HidePageLoadingMask();
+                _pageLoadingMaskControl.HideImmediately();
                 ShowPage(cachedPage, false);
                 return;
             }
 
-            var loadingText = IsEnglishLanguage(GetCurrentLanguage())
-                ? "Loading page..."
-                : "页面加载中...";
-
-            ShowPageLoadingMask(loadingText);
-
-            var stopwatch = Stopwatch.StartNew();
+            _pageLoadingMaskControl.Begin(navigateVersion);
 
             try
             {
-                await Task.Delay(FirstOpenMaskRenderDelayMs);
+                await Task.Delay(_pageLoadingMaskControl.RenderDelayMs);
 
                 if (_isClosing || IsDisposed || navigateVersion != _navigateVersion)
+                {
+                    _pageLoadingMaskControl.HideImmediately();
                     return;
+                }
 
                 var createdPage = CreatePage(page.PageKey);
                 createdPage.Dock = DockStyle.Fill;
@@ -456,20 +450,18 @@ namespace AMControlWinF
                 if (_isClosing || IsDisposed || navigateVersion != _navigateVersion)
                 {
                     createdPage.Dispose();
+                    _pageLoadingMaskControl.HideImmediately();
                     return;
                 }
 
                 _pageCache[page.PageKey] = createdPage;
                 ShowPage(createdPage, false);
 
-                var remain = FirstOpenMaskMinDurationMs - (int)stopwatch.ElapsedMilliseconds;
-                if (remain > 0)
-                    await Task.Delay(remain);
+                await _pageLoadingMaskControl.CompleteAndHideAsync(navigateVersion);
             }
-            finally
+            catch
             {
-                if (!_isClosing && !IsDisposed && navigateVersion == _navigateVersion)
-                    HidePageLoadingMask();
+                _pageLoadingMaskControl.HideImmediately();
             }
         }
 
@@ -488,9 +480,9 @@ namespace AMControlWinF
                     if (ReferenceEquals(control, page))
                         continue;
 
-                    if (_pageLoadingMask != null &&
-                        !ReferenceEquals(_pageLoadingMask, page) &&
-                        ReferenceEquals(control, _pageLoadingMask))
+                    if (_pageLoadingMaskControl != null &&
+                        !ReferenceEquals(_pageLoadingMaskControl, page) &&
+                        ReferenceEquals(control, _pageLoadingMaskControl))
                         continue;
 
                     panelContent.Controls.Remove(control);
@@ -505,12 +497,12 @@ namespace AMControlWinF
                 page.Dock = DockStyle.Fill;
                 page.BringToFront();
 
-                if (_pageLoadingMask != null &&
-                    !_pageLoadingMask.IsDisposed &&
-                    panelContent.Controls.Contains(_pageLoadingMask) &&
-                    _pageLoadingMask.Visible)
+                if (_pageLoadingMaskControl != null &&
+                    !_pageLoadingMaskControl.IsDisposed &&
+                    panelContent.Controls.Contains(_pageLoadingMaskControl) &&
+                    _pageLoadingMaskControl.Visible)
                 {
-                    _pageLoadingMask.BringToFront();
+                    _pageLoadingMaskControl.BringToFront();
                 }
 
                 if (disposeRemovedControls && removedControls.Count > 0)
@@ -608,6 +600,24 @@ namespace AMControlWinF
 
             if (controls.Count > 0)
                 ControlDisposeHelper.DisposeControlsDeferred(this, controls);
+        }
+
+        private void EnsurePageLoadingMaskControl()
+        {
+            if (_pageLoadingMaskControl != null && !_pageLoadingMaskControl.IsDisposed)
+            {
+                if (_pageLoadingMaskControl.Parent == null)
+                    panelContent.Controls.Add(_pageLoadingMaskControl);
+
+                return;
+            }
+
+            _pageLoadingMaskControl = new PageLoadingMaskControl();
+            _pageLoadingMaskControl.Dock = DockStyle.Fill;
+            _pageLoadingMaskControl.Visible = false;
+
+            panelContent.Controls.Add(_pageLoadingMaskControl);
+            _pageLoadingMaskControl.BringToFront();
         }
 
         #endregion
@@ -1204,61 +1214,6 @@ namespace AMControlWinF
                 string.Equals(theme, "Dark", StringComparison.OrdinalIgnoreCase));
         }
 
-        private void EnsurePageLoadingMask()
-        {
-            if (_pageLoadingMask != null && !_pageLoadingMask.IsDisposed)
-            {
-                if (_pageLoadingMask.Parent == null)
-                    panelContent.Controls.Add(_pageLoadingMask);
-
-                return;
-            }
-
-            _pageLoadingMaskLabel = new Label
-            {
-                Dock = DockStyle.Fill,
-                TextAlign = ContentAlignment.MiddleCenter,
-                Font = new Font("Microsoft YaHei UI", 14F, FontStyle.Bold),
-                Text = IsEnglishLanguage(GetCurrentLanguage()) ? "Loading page..." : "页面加载中..."
-            };
-
-            _pageLoadingMask = new Panel
-            {
-                Dock = DockStyle.Fill,
-                Radius = 0,
-                Visible = false
-            };
-
-            _pageLoadingMask.Controls.Add(_pageLoadingMaskLabel);
-            panelContent.Controls.Add(_pageLoadingMask);
-            _pageLoadingMask.BringToFront();
-        }
-
-        private void ShowPageLoadingMask(string text)
-        {
-            EnsurePageLoadingMask();
-
-            if (_pageLoadingMaskLabel != null && !_pageLoadingMaskLabel.IsDisposed)
-                _pageLoadingMaskLabel.Text = text;
-
-            if (_pageLoadingMask != null && !_pageLoadingMask.IsDisposed)
-            {
-                if (_pageLoadingMask.Parent == null)
-                    panelContent.Controls.Add(_pageLoadingMask);
-
-                _pageLoadingMask.Visible = true;
-                _pageLoadingMask.BringToFront();
-            }
-        }
-
-        private void HidePageLoadingMask()
-        {
-            if (_pageLoadingMask == null || _pageLoadingMask.IsDisposed)
-                return;
-
-            _pageLoadingMask.Visible = false;
-        }
-
         #endregion
 
         #region 生命周期
@@ -1275,16 +1230,15 @@ namespace AMControlWinF
 
             try
             {
-                if (_pageLoadingMask != null && !_pageLoadingMask.IsDisposed)
-                    _pageLoadingMask.Dispose();
+                if (_pageLoadingMaskControl != null && !_pageLoadingMaskControl.IsDisposed)
+                    _pageLoadingMaskControl.Dispose();
             }
             catch
             {
             }
             finally
             {
-                _pageLoadingMask = null;
-                _pageLoadingMaskLabel = null;
+                _pageLoadingMaskControl = null;
             }
 
             try
