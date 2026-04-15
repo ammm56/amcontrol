@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace AMControlWinF.Views.Home
@@ -13,63 +14,154 @@ namespace AMControlWinF.Views.Home
     /// </summary>
     public partial class HomeOverviewPage : UserControl
     {
-        private readonly List<Image> _loadedImages;
+        private readonly List<Image> _previewImages;
+        private readonly Dictionary<string, Image> _imageMap;
+        private readonly Dictionary<string, int> _previewIndexMap;
 
         public HomeOverviewPage()
         {
             InitializeComponent();
 
-            _loadedImages = new List<Image>();
+            _previewImages = new List<Image>();
+            _imageMap = new Dictionary<string, Image>(StringComparer.OrdinalIgnoreCase);
+            _previewIndexMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
+            BindEvents();
+            LoadOverviewImages();
             BindCarousels();
 
             Disposed += HomeOverviewPage_Disposed;
         }
 
-        private void BindCarousels()
+        private void BindEvents()
         {
-            BindCarouselImages(carouselAreaA, "a_1.png", "a_2.png");
-            BindCarouselImages(carouselAreaB, "b_1.png", "b_2.png");
-            BindCarouselImages(carouselAreaC, "c_1.png", "c_2.png");
-            BindCarouselImages(carouselAreaD, "d_1.png", "d_2.png");
+            carouselAreaA.Click += CarouselArea_Click;
+            carouselAreaB.Click += CarouselArea_Click;
+            carouselAreaC.Click += CarouselArea_Click;
+            carouselAreaD.Click += CarouselArea_Click;
         }
 
-        private void BindCarouselImages(AntdUI.Carousel carousel, params string[] fileNames)
+        private void LoadOverviewImages()
         {
-            if (carousel == null || fileNames == null || fileNames.Length == 0)
+            var imageDirectory = GetOverviewImageDirectory();
+            if (!Directory.Exists(imageDirectory))
+                return;
+
+            var imageFiles = Directory.GetFiles(imageDirectory)
+                .Where(IsSupportedImageFile)
+                .OrderBy(Path.GetFileName, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            for (var i = 0; i < imageFiles.Count; i++)
+            {
+                var filePath = imageFiles[i];
+                var fileName = Path.GetFileName(filePath);
+                if (string.IsNullOrWhiteSpace(fileName))
+                    continue;
+
+                var image = LoadImageFromPath(filePath);
+                if (image == null)
+                    continue;
+
+                _previewImages.Add(image);
+                _imageMap[fileName] = image;
+                _previewIndexMap[fileName] = _previewImages.Count - 1;
+            }
+        }
+
+        private void BindCarousels()
+        {
+            BindCarouselImages(carouselAreaA, "a");
+            BindCarouselImages(carouselAreaB, "b");
+            BindCarouselImages(carouselAreaC, "c");
+            BindCarouselImages(carouselAreaD, "d");
+        }
+
+        private void BindCarouselImages(AntdUI.Carousel carousel, string prefix)
+        {
+            if (carousel == null || string.IsNullOrWhiteSpace(prefix))
                 return;
 
             carousel.Image.Clear();
 
+            var fileNames = _imageMap.Keys
+                .Where(p => p.StartsWith(prefix + "_", StringComparison.OrdinalIgnoreCase))
+                .OrderBy(p => p, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
             foreach (var fileName in fileNames)
             {
-                var image = LoadOverviewImage(fileName);
-                if (image == null)
+                Image image;
+                if (!_imageMap.TryGetValue(fileName, out image) || image == null)
                     continue;
 
-                _loadedImages.Add(image);
-                carousel.Image.Add(new CarouselItem().SetImage(image).SetID(fileName));
+                carousel.Image.Add(new CarouselItem()
+                    .SetID(fileName)
+                    .SetImage(image)
+                    .SetTag(fileName));
             }
         }
 
-        private Image LoadOverviewImage(string fileName)
+        private void CarouselArea_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(fileName))
-                return null;
+            var carousel = sender as AntdUI.Carousel;
+            if (carousel == null)
+                return;
 
-            var imagePath = Path.Combine(
+            if (carousel.Image == null || carousel.Image.Count <= 0)
+                return;
+
+            var selectedIndex = carousel.SelectIndex;
+            if (selectedIndex < 0 || selectedIndex >= carousel.Image.Count)
+                selectedIndex = 0;
+
+            var selectedItem = carousel.Image[selectedIndex];
+            if (selectedItem == null || string.IsNullOrWhiteSpace(selectedItem.ID))
+                return;
+
+            int previewIndex;
+            if (!_previewIndexMap.TryGetValue(selectedItem.ID, out previewIndex))
+                previewIndex = 0;
+
+            var form = FindForm();
+            if (form == null || _previewImages.Count == 0)
+                return;
+
+            new AntdUI.Preview.Config(form, _previewImages)
+                .SetSelectIndex(previewIndex)
+                .SetFit(TFit.Cover)
+                .open();
+        }
+
+        private static bool IsSupportedImageFile(string filePath)
+        {
+            if (string.IsNullOrWhiteSpace(filePath))
+                return false;
+
+            var extension = Path.GetExtension(filePath);
+            return string.Equals(extension, ".jpg", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(extension, ".jpeg", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(extension, ".png", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(extension, ".bmp", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static string GetOverviewImageDirectory()
+        {
+            return Path.Combine(
                 AppDomain.CurrentDomain.BaseDirectory,
                 "Static",
                 "Img",
-                "Overview",
-                fileName);
+                "Overview");
+        }
 
-            if (!File.Exists(imagePath))
+        private static Image LoadImageFromPath(string filePath)
+        {
+            if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
                 return null;
 
             try
             {
-                using (var source = Image.FromFile(imagePath))
+                using (var source = Image.FromFile(filePath))
                 {
                     return new Bitmap(source);
                 }
@@ -82,7 +174,7 @@ namespace AMControlWinF.Views.Home
 
         private void HomeOverviewPage_Disposed(object sender, EventArgs e)
         {
-            foreach (var image in _loadedImages)
+            foreach (var image in _previewImages)
             {
                 try
                 {
@@ -94,7 +186,9 @@ namespace AMControlWinF.Views.Home
                 }
             }
 
-            _loadedImages.Clear();
+            _previewImages.Clear();
+            _imageMap.Clear();
+            _previewIndexMap.Clear();
         }
     }
 }

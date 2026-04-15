@@ -1,6 +1,7 @@
 ﻿using AM.Core.Base;
 using AM.Core.Context;
 using AM.Core.Reporter;
+using AM.Model.Alarm;
 using AM.Model.Common;
 using AM.Model.Interfaces.Plc;
 using AM.Model.Plc;
@@ -736,9 +737,9 @@ namespace AM.DBService.Services.Plc.Runtime
         /// <summary>
         /// 按“边沿通知 + 稳态节流”上报离线信息。
         /// 规则：
-        /// 1. 首次离线：日志 + 消息；
-        /// 2. 错误文本变化：日志 + 消息；
-        /// 3. 持续离线：仅按固定周期记录一条日志，不再弹消息。
+        /// 1. 首次离线：日志 + 消息 + 报警；
+        /// 2. 错误文本变化：日志 + 消息 + 报警；
+        /// 3. 持续离线：仅按固定周期记录一条日志，不再弹消息，不重复报报警。
         /// </summary>
         private void ReportDisconnectIfNeeded(PlcStationConfig station, int code, string message)
         {
@@ -751,7 +752,9 @@ namespace AM.DBService.Services.Plc.Runtime
                 "PLC-DISCONNECT-" + PlcName,
                 code,
                 "PLC 站离线: " + displayName + "，" + finalMessage,
-                DisconnectSteadyLogIntervalMs);
+                DisconnectSteadyLogIntervalMs,
+                AlarmCode.PLCDisconnect,
+                AlarmLevel.Alarm);
         }
 
         /// <summary>
