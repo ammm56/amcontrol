@@ -25,6 +25,7 @@
 
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LoginForm));
             this.textureBackgroundLogin = new AMControlWinF.Views.Main.TextureBackgroundControl();
             this.panelShell = new AntdUI.Panel();
             this.panelLogin = new AntdUI.Panel();
@@ -343,6 +344,7 @@
             this.ControlBox = false;
             this.Controls.Add(this.textureBackgroundLogin);
             this.Font = new System.Drawing.Font("Microsoft YaHei UI", 10F);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(0);
             this.MaximumSize = new System.Drawing.Size(880, 520);
             this.MinimumSize = new System.Drawing.Size(880, 520);

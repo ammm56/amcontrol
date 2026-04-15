@@ -28,6 +28,7 @@
 		<EnableNETAnalyzers>false</EnableNETAnalyzers>
 		<TreatWarningsAsErrors>false</TreatWarningsAsErrors>
 		<AssemblyName>$(MSBuildProjectName)</AssemblyName>
+		<Platforms>AnyCPU;x64</Platforms>
 	</PropertyGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net40' OR '$(TargetFramework)' == 'net46' OR '$(TargetFramework)' == 'net48'">
@@ -61,7 +62,17 @@
 	  <NoWarn>$(NoWarn);1701;1702</NoWarn>
 	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net48|x64'">
+	  <WarningLevel>1</WarningLevel>
+	  <NoWarn>$(NoWarn);1701;1702</NoWarn>
+	</PropertyGroup>
+
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net48|AnyCPU'">
+	  <WarningLevel>1</WarningLevel>
+	  <NoWarn>$(NoWarn);1701;1702</NoWarn>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net48|x64'">
 	  <WarningLevel>1</WarningLevel>
 	  <NoWarn>$(NoWarn);1701;1702</NoWarn>
 	</PropertyGroup>
@@ -71,7 +82,17 @@
 	  <NoWarn>$(NoWarn);1701;1702</NoWarn>
 	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net46|x64'">
+	  <WarningLevel>1</WarningLevel>
+	  <NoWarn>$(NoWarn);1701;1702</NoWarn>
+	</PropertyGroup>
+
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net46|AnyCPU'">
+	  <WarningLevel>1</WarningLevel>
+	  <NoWarn>$(NoWarn);1701;1702</NoWarn>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net46|x64'">
 	  <WarningLevel>1</WarningLevel>
 	  <NoWarn>$(NoWarn);1701;1702</NoWarn>
 	</PropertyGroup>
@@ -81,7 +102,17 @@
 	  <NoWarn>$(NoWarn);1701;1702</NoWarn>
 	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net40|x64'">
+	  <WarningLevel>1</WarningLevel>
+	  <NoWarn>$(NoWarn);1701;1702</NoWarn>
+	</PropertyGroup>
+
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net40|AnyCPU'">
+	  <WarningLevel>1</WarningLevel>
+	  <NoWarn>$(NoWarn);1701;1702</NoWarn>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net40|x64'">
 	  <WarningLevel>1</WarningLevel>
 	  <NoWarn>$(NoWarn);1701;1702</NoWarn>
 	</PropertyGroup>
@@ -90,7 +121,15 @@
 	  <NoWarn>$(NoWarn);1701;1702</NoWarn>
 	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-windows|x64'">
+	  <NoWarn>$(NoWarn);1701;1702</NoWarn>
+	</PropertyGroup>
+
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net10.0-windows|AnyCPU'">
+	  <NoWarn>$(NoWarn);1701;1702</NoWarn>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net10.0-windows|x64'">
 	  <NoWarn>$(NoWarn);1701;1702</NoWarn>
 	</PropertyGroup>
 

@@ -7,15 +7,16 @@
     <Version>0.0.2</Version>
     <Authors>Am</Authors>
     <ApplicationIcon>logo.ico</ApplicationIcon>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
-    <OutputPath>..\..\..\AMControlWinF\bin\Debug\Protocols\</OutputPath>
+    <OutputPath>..\..\..\AMControlWinF\bin\x64\Debug\Protocols\</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
-    <OutputPath>..\..\..\AMControlWinF\bin\Release\Protocols\</OutputPath>
+    <OutputPath>..\..\..\AMControlWinF\bin\x64\Release\Protocols\</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 

@@ -6,6 +6,7 @@
     <RootNamespace>ProtocolLib.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
     <Version>0.0.2</Version>
     <Authors>Am</Authors>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
 </Project>

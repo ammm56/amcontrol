@@ -8,6 +8,8 @@
     <Version>0.0.1</Version>
 
     <Authors>Am</Authors>
+
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
