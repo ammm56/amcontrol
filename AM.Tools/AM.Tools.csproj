@@ -84,6 +84,12 @@
     <None Include="DB\Sqlite\amctl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Static\Python\MovePdbFiles.bat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Static\Python\MovePdbFiles.py">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AM.Core\AM.Core.csproj">
