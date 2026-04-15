@@ -23,18 +23,16 @@
             this.panelRoot.Name = "panelRoot";
             this.panelRoot.Padding = new System.Windows.Forms.Padding(96, 0, 96, 0);
             this.panelRoot.Radius = 0;
-            this.panelRoot.Size = new System.Drawing.Size(826, 664);
+            this.panelRoot.Size = new System.Drawing.Size(850, 680);
             this.panelRoot.TabIndex = 0;
             // 
             // progressLoading
             // 
-            this.progressLoading.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressLoading.Location = new System.Drawing.Point(0, 307);
+            this.progressLoading.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.progressLoading.Location = new System.Drawing.Point(0, 300);
             this.progressLoading.Margin = new System.Windows.Forms.Padding(0);
             this.progressLoading.Name = "progressLoading";
-            this.progressLoading.Size = new System.Drawing.Size(826, 20);
+            this.progressLoading.Size = new System.Drawing.Size(850, 20);
             this.progressLoading.TabIndex = 0;
             this.progressLoading.Text = "";
             this.progressLoading.TextUnit = "";
@@ -43,7 +41,7 @@
             // 
             this.Controls.Add(this.panelRoot);
             this.Name = "PageLoadingMaskControl";
-            this.Size = new System.Drawing.Size(826, 664);
+            this.Size = new System.Drawing.Size(850, 680);
             this.panelRoot.ResumeLayout(false);
             this.ResumeLayout(false);
 
