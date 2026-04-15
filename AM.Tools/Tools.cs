@@ -4,6 +4,7 @@ using AM.Model.Common;
 using Newtonsoft.Json;
 using System;
 using System.IO;
+using System.Reflection;
 using System.Text;
 
 namespace AM.Tools
@@ -120,6 +121,15 @@ namespace AM.Tools
         public static Result SaveSettingArgsConfig(SettingArgsConfig settingArgsConfig)
         {
             return SaveConfig("settingargsconfig.json", settingArgsConfig);
+        }
+
+        public static string GetAppVersionText()
+        {
+            var version = Assembly.GetExecutingAssembly().GetName().Version;
+            if (version == null)
+                return "0.0.1";
+
+            return string.Format("{0}.{1}.{2}", version.Major, version.Minor, version.Build);
         }
     }
 }

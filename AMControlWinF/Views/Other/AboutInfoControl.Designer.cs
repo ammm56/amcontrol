@@ -129,7 +129,7 @@
             this.labelVersionValue.Name = "labelVersionValue";
             this.labelVersionValue.Size = new System.Drawing.Size(266, 28);
             this.labelVersionValue.TabIndex = 10;
-            this.labelVersionValue.Text = "版本：0.0.2";
+            this.labelVersionValue.Text = "版本：0.0.1";
             // 
             // labelcopyright
             // 

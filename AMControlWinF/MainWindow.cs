@@ -1134,8 +1134,11 @@ namespace AMControlWinF
             try { Localization.SetLanguage(language); }
             catch { }
 
+            var appVersionText = AM.Tools.Tools.GetAppVersionText();
             titlebar.Text = IsEnglishLanguage(language) ? "AM Motion Control" : "AM运动控制";
-            titlebar.SubText = IsEnglishLanguage(language) ? "Version 0.0.1" : "版本 0.0.1";
+            titlebar.SubText = IsEnglishLanguage(language)
+                ? "Version " + appVersionText
+                : "版本 " + appVersionText;
 
             DisposeAllCachedPages();
             RefreshShell();

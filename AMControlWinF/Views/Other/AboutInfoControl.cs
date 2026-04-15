@@ -19,6 +19,8 @@ namespace AMControlWinF.Views.Other
 
         private void InitializeLibraryTable()
         {
+            labelVersionValue.Text = $"版本：{AM.Tools.Tools.GetAppVersionText()}";
+
             tableLibraries.Columns = new ColumnCollection
             {
                 new Column("Name", "名称"),
