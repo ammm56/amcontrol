@@ -255,12 +255,7 @@ namespace AM.DBService.Services.Motion.Assembly
 
         private static string GetWiringStatusText(MotionIoWiringEntity wiring)
         {
-            if (wiring == null)
-            {
-                return "未定义";
-            }
-
-            if (!wiring.IsVerified)
+            if (wiring == null || !wiring.IsVerified)
             {
                 return "未核对";
             }

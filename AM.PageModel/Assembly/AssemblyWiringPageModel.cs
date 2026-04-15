@@ -30,12 +30,9 @@ namespace AM.PageModel.Assembly
         private short? _selectedCardId;
         private string _selectedIoType;
         private bool _onlyUnverified;
-        private bool _onlyIssues;
         private int _totalCount;
         private int _verifiedCount;
         private int _unverifiedCount;
-        private int _runtimeOkCount;
-        private int _issueCount;
         private string _summaryText;
 
         public AssemblyWiringPageModel()
@@ -123,15 +120,6 @@ namespace AM.PageModel.Assembly
         {
             get { return _onlyUnverified; }
             private set { SetProperty(ref _onlyUnverified, value); }
-        }
-
-        /// <summary>
-        /// 是否仅显示异常项。
-        /// </summary>
-        public bool OnlyIssues
-        {
-            get { return _onlyIssues; }
-            private set { SetProperty(ref _onlyIssues, value); }
         }
 
         /// <summary>
@@ -258,24 +246,6 @@ namespace AM.PageModel.Assembly
         }
 
         /// <summary>
-        /// 运行正常数量。
-        /// </summary>
-        public int RuntimeOkCount
-        {
-            get { return _runtimeOkCount; }
-            private set { SetProperty(ref _runtimeOkCount, value); }
-        }
-
-        /// <summary>
-        /// 异常数量。
-        /// </summary>
-        public int IssueCount
-        {
-            get { return _issueCount; }
-            private set { SetProperty(ref _issueCount, value); }
-        }
-
-        /// <summary>
         /// 摘要文本。
         /// </summary>
         public string SummaryText
@@ -334,15 +304,6 @@ namespace AM.PageModel.Assembly
         public void SetOnlyUnverified(bool value)
         {
             OnlyUnverified = value;
-            ApplyFilter();
-        }
-
-        /// <summary>
-        /// 设置仅显示异常项。
-        /// </summary>
-        public void SetOnlyIssues(bool value)
-        {
-            OnlyIssues = value;
             ApplyFilter();
         }
 
@@ -495,11 +456,6 @@ namespace AM.PageModel.Assembly
                 query = query.Where(p => !p.IsVerified);
             }
 
-            if (OnlyIssues)
-            {
-                query = query.Where(p => p.IsIssue);
-            }
-
             _items = query
                 .OrderBy(p => p.CardId)
                 .ThenBy(p => p.IoType)
@@ -635,9 +591,7 @@ namespace AM.PageModel.Assembly
             TotalCount = _items.Count;
             VerifiedCount = _items.Count(p => p.IsVerified);
             UnverifiedCount = _items.Count(p => !p.IsVerified);
-            RuntimeOkCount = _items.Count(p => string.Equals(p.RuntimeStatusText, "已刷新", StringComparison.OrdinalIgnoreCase));
-            IssueCount = _items.Count(p => !p.HasWiringDefinition);
-            SummaryText = "共 " + TotalCount + " 项，已核对 " + VerifiedCount + " 项，未定义 " + IssueCount + " 项";
+            SummaryText = "共 " + TotalCount + " 项，已核对 " + VerifiedCount + " 项，未核对 " + UnverifiedCount + " 项";
         }
 
         private static bool ContainsText(string source, string searchText)
@@ -789,22 +743,6 @@ namespace AM.PageModel.Assembly
             public string WiringStatusText { get; set; }
 
             public bool CanManualOperate { get; set; }
-
-            public bool HasWiringDefinition
-            {
-                get
-                {
-                    return !string.Equals(WiringStatusText, "未定义", StringComparison.OrdinalIgnoreCase);
-                }
-            }
-
-            public bool IsIssue
-            {
-                get
-                {
-                    return !HasWiringDefinition;
-                }
-            }
         }
     }
 }

@@ -112,7 +112,6 @@ namespace AMControlWinF.Views.Assembly
 
             inputSearch.TextChanged += InputSearch_TextChanged;
             checkboxOnlyUnverified.CheckedChanged += CheckboxOnlyUnverified_CheckedChanged;
-            checkboxOnlyIssues.CheckedChanged += CheckboxOnlyIssues_CheckedChanged;
 
             tableWiring.CellClick += TableWiring_CellClick;
 
@@ -211,7 +210,6 @@ namespace AMControlWinF.Views.Assembly
                 }
 
                 checkboxOnlyUnverified.Checked = _model.OnlyUnverified;
-                checkboxOnlyIssues.Checked = _model.OnlyIssues;
                 labelSelectedCard.Text = _model.SelectedCardText;
             }
             finally
@@ -232,8 +230,6 @@ namespace AMControlWinF.Views.Assembly
             labelTotalCount.Text = _model.TotalCount.ToString();
             labelVerifiedCount.Text = _model.VerifiedCount.ToString();
             labelUnverifiedCount.Text = _model.UnverifiedCount.ToString();
-            labelRuntimeCount.Text = _model.RuntimeOkCount.ToString();
-            labelIssueCount.Text = _model.IssueCount.ToString();
             labelTableSummary.Text = _model.SummaryText;
         }
 
@@ -292,15 +288,11 @@ namespace AMControlWinF.Views.Assembly
             }
             else if (_model.IsSelectedDi)
             {
-                labelDebugHint.Text = item.HasWiringDefinition
-                    ? "先对照逻辑IO号、硬件位号和显示名，再读取 DI 状态确认物理接线是否正确。"
-                    : "先确认逻辑IO号与硬件位号对应关系，再读取 DI 状态做现场核对。";
+                labelDebugHint.Text = "先对照逻辑IO号、硬件位号和显示名，再读取 DI 状态确认物理接线是否正确。";
             }
             else if (_model.CanSetSelectedDo)
             {
-                labelDebugHint.Text = item.HasWiringDefinition
-                    ? "先对照逻辑IO号、硬件位号和显示名，再执行 DO 打开、关闭或脉冲输出确认物理接线。"
-                    : "先确认逻辑IO号与硬件位号对应关系，再执行 DO 打开、关闭或脉冲输出做现场核对。";
+                labelDebugHint.Text = "先对照逻辑IO号、硬件位号和显示名，再执行 DO 打开、关闭或脉冲输出确认物理接线。";
             }
             else
             {
@@ -378,17 +370,6 @@ namespace AMControlWinF.Views.Assembly
             }
 
             _model.SetOnlyUnverified(checkboxOnlyUnverified.Checked);
-            RefreshView();
-        }
-
-        private void CheckboxOnlyIssues_CheckedChanged(object sender, BoolEventArgs e)
-        {
-            if (_isBindingView)
-            {
-                return;
-            }
-
-            _model.SetOnlyIssues(checkboxOnlyIssues.Checked);
             RefreshView();
         }
 
@@ -620,11 +601,6 @@ namespace AMControlWinF.Views.Assembly
 
         private static string BuildVerifyStatusText(AssemblyWiringPageModel.AssemblyWiringRowViewItem item)
         {
-            if (!item.HasWiringDefinition)
-            {
-                return "未定义接线";
-            }
-
             if (!item.IsVerified)
             {
                 return "未核对";

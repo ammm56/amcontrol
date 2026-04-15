@@ -51,12 +51,6 @@ namespace AMControlWinF.Views.Assembly
             this.labelDebugHint = new AntdUI.Label();
             this.labelDebugTitle = new AntdUI.Label();
             this.flowStats = new AntdUI.FlowPanel();
-            this.panelIssueCard = new AntdUI.Panel();
-            this.labelIssueCount = new AntdUI.Label();
-            this.labelIssueTitle = new AntdUI.Label();
-            this.panelRuntimeCard = new AntdUI.Panel();
-            this.labelRuntimeCount = new AntdUI.Label();
-            this.labelRuntimeTitle = new AntdUI.Label();
             this.panelUnverifiedCard = new AntdUI.Panel();
             this.labelUnverifiedCount = new AntdUI.Label();
             this.labelUnverifiedTitle = new AntdUI.Label();
@@ -77,7 +71,6 @@ namespace AMControlWinF.Views.Assembly
             this.flowToolbarRight = new AntdUI.FlowPanel();
             this.buttonExportCsv = new AntdUI.Button();
             this.buttonRefresh = new AntdUI.Button();
-            this.checkboxOnlyIssues = new AntdUI.Checkbox();
             this.checkboxOnlyUnverified = new AntdUI.Checkbox();
             this.panelRoot.SuspendLayout();
             this.panelTableCard.SuspendLayout();
@@ -91,8 +84,6 @@ namespace AMControlWinF.Views.Assembly
             this.panelDebugInfo.SuspendLayout();
             this.panelDebugHeader.SuspendLayout();
             this.flowStats.SuspendLayout();
-            this.panelIssueCard.SuspendLayout();
-            this.panelRuntimeCard.SuspendLayout();
             this.panelUnverifiedCard.SuspendLayout();
             this.panelVerifiedCard.SuspendLayout();
             this.panelTotalCard.SuspendLayout();
@@ -170,7 +161,7 @@ namespace AMControlWinF.Views.Assembly
             this.labelTableSummary.Name = "labelTableSummary";
             this.labelTableSummary.Size = new System.Drawing.Size(956, 36);
             this.labelTableSummary.TabIndex = 1;
-            this.labelTableSummary.Text = "共 0 项，异常 0 项";
+            this.labelTableSummary.Text = "共 0 项，已核对 0 项，未核对 0 项";
             // 
             // labelTableTitle
             // 
@@ -493,8 +484,6 @@ namespace AMControlWinF.Views.Assembly
             // 
             // flowStats
             // 
-            this.flowStats.Controls.Add(this.panelIssueCard);
-            this.flowStats.Controls.Add(this.panelRuntimeCard);
             this.flowStats.Controls.Add(this.panelUnverifiedCard);
             this.flowStats.Controls.Add(this.panelVerifiedCard);
             this.flowStats.Controls.Add(this.panelTotalCard);
@@ -507,78 +496,6 @@ namespace AMControlWinF.Views.Assembly
             this.flowStats.Size = new System.Drawing.Size(1084, 88);
             this.flowStats.TabIndex = 1;
             this.flowStats.Text = "flowStats";
-            // 
-            // panelIssueCard
-            // 
-            this.panelIssueCard.BackColor = System.Drawing.Color.Transparent;
-            this.panelIssueCard.Controls.Add(this.labelIssueCount);
-            this.panelIssueCard.Controls.Add(this.labelIssueTitle);
-            this.panelIssueCard.Location = new System.Drawing.Point(644, 6);
-            this.panelIssueCard.Margin = new System.Windows.Forms.Padding(0);
-            this.panelIssueCard.Name = "panelIssueCard";
-            this.panelIssueCard.Padding = new System.Windows.Forms.Padding(12);
-            this.panelIssueCard.Radius = 12;
-            this.panelIssueCard.Shadow = 4;
-            this.panelIssueCard.ShadowOpacity = 0.2F;
-            this.panelIssueCard.Size = new System.Drawing.Size(156, 72);
-            this.panelIssueCard.TabIndex = 4;
-            // 
-            // labelIssueCount
-            // 
-            this.labelIssueCount.Dock = System.Windows.Forms.DockStyle.Right;
-            this.labelIssueCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 18F, System.Drawing.FontStyle.Bold);
-            this.labelIssueCount.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(108)))), ((int)(((byte)(108)))));
-            this.labelIssueCount.Location = new System.Drawing.Point(84, 16);
-            this.labelIssueCount.Name = "labelIssueCount";
-            this.labelIssueCount.Size = new System.Drawing.Size(56, 40);
-            this.labelIssueCount.TabIndex = 1;
-            this.labelIssueCount.Text = "0";
-            // 
-            // labelIssueTitle
-            // 
-            this.labelIssueTitle.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labelIssueTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(108)))), ((int)(((byte)(108)))));
-            this.labelIssueTitle.Location = new System.Drawing.Point(16, 16);
-            this.labelIssueTitle.Name = "labelIssueTitle";
-            this.labelIssueTitle.Size = new System.Drawing.Size(72, 40);
-            this.labelIssueTitle.TabIndex = 0;
-            this.labelIssueTitle.Text = "异常项";
-            // 
-            // panelRuntimeCard
-            // 
-            this.panelRuntimeCard.BackColor = System.Drawing.Color.Transparent;
-            this.panelRuntimeCard.Controls.Add(this.labelRuntimeCount);
-            this.panelRuntimeCard.Controls.Add(this.labelRuntimeTitle);
-            this.panelRuntimeCard.Location = new System.Drawing.Point(484, 6);
-            this.panelRuntimeCard.Margin = new System.Windows.Forms.Padding(0);
-            this.panelRuntimeCard.Name = "panelRuntimeCard";
-            this.panelRuntimeCard.Padding = new System.Windows.Forms.Padding(12);
-            this.panelRuntimeCard.Radius = 12;
-            this.panelRuntimeCard.Shadow = 4;
-            this.panelRuntimeCard.ShadowOpacity = 0.2F;
-            this.panelRuntimeCard.Size = new System.Drawing.Size(152, 72);
-            this.panelRuntimeCard.TabIndex = 3;
-            // 
-            // labelRuntimeCount
-            // 
-            this.labelRuntimeCount.Dock = System.Windows.Forms.DockStyle.Right;
-            this.labelRuntimeCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 18F, System.Drawing.FontStyle.Bold);
-            this.labelRuntimeCount.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(82)))), ((int)(((byte)(196)))), ((int)(((byte)(26)))));
-            this.labelRuntimeCount.Location = new System.Drawing.Point(80, 16);
-            this.labelRuntimeCount.Name = "labelRuntimeCount";
-            this.labelRuntimeCount.Size = new System.Drawing.Size(56, 40);
-            this.labelRuntimeCount.TabIndex = 1;
-            this.labelRuntimeCount.Text = "0";
-            // 
-            // labelRuntimeTitle
-            // 
-            this.labelRuntimeTitle.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labelRuntimeTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(82)))), ((int)(((byte)(196)))), ((int)(((byte)(26)))));
-            this.labelRuntimeTitle.Location = new System.Drawing.Point(16, 16);
-            this.labelRuntimeTitle.Name = "labelRuntimeTitle";
-            this.labelRuntimeTitle.Size = new System.Drawing.Size(72, 40);
-            this.labelRuntimeTitle.TabIndex = 0;
-            this.labelRuntimeTitle.Text = "已刷新";
             // 
             // panelUnverifiedCard
             // 
@@ -708,17 +625,17 @@ namespace AMControlWinF.Views.Assembly
             this.flowToolbarLeft.Controls.Add(this.labelSelectedCard);
             this.flowToolbarLeft.Controls.Add(this.buttonSelectCard);
             this.flowToolbarLeft.Dock = System.Windows.Forms.DockStyle.Left;
-            this.flowToolbarLeft.Gap = 4;
+            this.flowToolbarLeft.Gap = 8;
             this.flowToolbarLeft.Location = new System.Drawing.Point(4, 4);
             this.flowToolbarLeft.Margin = new System.Windows.Forms.Padding(0);
             this.flowToolbarLeft.Name = "flowToolbarLeft";
-            this.flowToolbarLeft.Size = new System.Drawing.Size(456, 36);
+            this.flowToolbarLeft.Size = new System.Drawing.Size(532, 36);
             this.flowToolbarLeft.TabIndex = 0;
             this.flowToolbarLeft.Text = "flowToolbarLeft";
             // 
             // inputSearch
             // 
-            this.inputSearch.Location = new System.Drawing.Point(334, 0);
+            this.inputSearch.Location = new System.Drawing.Point(398, 0);
             this.inputSearch.Margin = new System.Windows.Forms.Padding(0);
             this.inputSearch.Name = "inputSearch";
             this.inputSearch.PlaceholderText = "搜索点位 / 设备 / 线号";
@@ -728,33 +645,33 @@ namespace AMControlWinF.Views.Assembly
             // 
             // buttonFilterDO
             // 
-            this.buttonFilterDO.Location = new System.Drawing.Point(280, 0);
+            this.buttonFilterDO.Location = new System.Drawing.Point(334, 0);
             this.buttonFilterDO.Margin = new System.Windows.Forms.Padding(0);
             this.buttonFilterDO.Name = "buttonFilterDO";
             this.buttonFilterDO.Radius = 8;
-            this.buttonFilterDO.Size = new System.Drawing.Size(50, 36);
+            this.buttonFilterDO.Size = new System.Drawing.Size(56, 36);
             this.buttonFilterDO.TabIndex = 4;
             this.buttonFilterDO.Text = "DO";
             this.buttonFilterDO.WaveSize = 0;
             // 
             // buttonFilterDI
             // 
-            this.buttonFilterDI.Location = new System.Drawing.Point(226, 0);
+            this.buttonFilterDI.Location = new System.Drawing.Point(270, 0);
             this.buttonFilterDI.Margin = new System.Windows.Forms.Padding(0);
             this.buttonFilterDI.Name = "buttonFilterDI";
             this.buttonFilterDI.Radius = 8;
-            this.buttonFilterDI.Size = new System.Drawing.Size(50, 36);
+            this.buttonFilterDI.Size = new System.Drawing.Size(56, 36);
             this.buttonFilterDI.TabIndex = 3;
             this.buttonFilterDI.Text = "DI";
             this.buttonFilterDI.WaveSize = 0;
             // 
             // buttonFilterAll
             // 
-            this.buttonFilterAll.Location = new System.Drawing.Point(172, 0);
+            this.buttonFilterAll.Location = new System.Drawing.Point(206, 0);
             this.buttonFilterAll.Margin = new System.Windows.Forms.Padding(0);
             this.buttonFilterAll.Name = "buttonFilterAll";
             this.buttonFilterAll.Radius = 8;
-            this.buttonFilterAll.Size = new System.Drawing.Size(50, 36);
+            this.buttonFilterAll.Size = new System.Drawing.Size(56, 36);
             this.buttonFilterAll.TabIndex = 2;
             this.buttonFilterAll.Text = "全部";
             this.buttonFilterAll.Type = AntdUI.TTypeMini.Primary;
@@ -762,10 +679,10 @@ namespace AMControlWinF.Views.Assembly
             // 
             // labelSelectedCard
             // 
-            this.labelSelectedCard.Location = new System.Drawing.Point(79, 0);
+            this.labelSelectedCard.Location = new System.Drawing.Point(83, 0);
             this.labelSelectedCard.Margin = new System.Windows.Forms.Padding(0);
             this.labelSelectedCard.Name = "labelSelectedCard";
-            this.labelSelectedCard.Size = new System.Drawing.Size(89, 36);
+            this.labelSelectedCard.Size = new System.Drawing.Size(115, 36);
             this.labelSelectedCard.TabIndex = 1;
             this.labelSelectedCard.Text = "全部控制卡";
             // 
@@ -787,21 +704,20 @@ namespace AMControlWinF.Views.Assembly
             this.flowToolbarRight.Align = AntdUI.TAlignFlow.RightCenter;
             this.flowToolbarRight.Controls.Add(this.buttonExportCsv);
             this.flowToolbarRight.Controls.Add(this.buttonRefresh);
-            this.flowToolbarRight.Controls.Add(this.checkboxOnlyIssues);
             this.flowToolbarRight.Controls.Add(this.checkboxOnlyUnverified);
             this.flowToolbarRight.Dock = System.Windows.Forms.DockStyle.Right;
             this.flowToolbarRight.Gap = 8;
-            this.flowToolbarRight.Location = new System.Drawing.Point(728, 4);
+            this.flowToolbarRight.Location = new System.Drawing.Point(808, 4);
             this.flowToolbarRight.Margin = new System.Windows.Forms.Padding(0);
             this.flowToolbarRight.Name = "flowToolbarRight";
-            this.flowToolbarRight.Size = new System.Drawing.Size(352, 36);
+            this.flowToolbarRight.Size = new System.Drawing.Size(272, 36);
             this.flowToolbarRight.TabIndex = 1;
             this.flowToolbarRight.Text = "flowToolbarRight";
             // 
             // buttonExportCsv
             // 
             this.buttonExportCsv.IconSvg = "DownloadOutlined";
-            this.buttonExportCsv.Location = new System.Drawing.Point(262, 0);
+            this.buttonExportCsv.Location = new System.Drawing.Point(182, 0);
             this.buttonExportCsv.Margin = new System.Windows.Forms.Padding(0);
             this.buttonExportCsv.Name = "buttonExportCsv";
             this.buttonExportCsv.Radius = 8;
@@ -813,7 +729,7 @@ namespace AMControlWinF.Views.Assembly
             // buttonRefresh
             // 
             this.buttonRefresh.IconSvg = "ReloadOutlined";
-            this.buttonRefresh.Location = new System.Drawing.Point(189, 0);
+            this.buttonRefresh.Location = new System.Drawing.Point(109, 0);
             this.buttonRefresh.Margin = new System.Windows.Forms.Padding(0);
             this.buttonRefresh.Name = "buttonRefresh";
             this.buttonRefresh.Radius = 8;
@@ -821,15 +737,6 @@ namespace AMControlWinF.Views.Assembly
             this.buttonRefresh.TabIndex = 2;
             this.buttonRefresh.Text = "刷新";
             this.buttonRefresh.WaveSize = 0;
-            // 
-            // checkboxOnlyIssues
-            // 
-            this.checkboxOnlyIssues.Location = new System.Drawing.Point(109, 0);
-            this.checkboxOnlyIssues.Margin = new System.Windows.Forms.Padding(0);
-            this.checkboxOnlyIssues.Name = "checkboxOnlyIssues";
-            this.checkboxOnlyIssues.Size = new System.Drawing.Size(72, 36);
-            this.checkboxOnlyIssues.TabIndex = 1;
-            this.checkboxOnlyIssues.Text = "未定义";
             // 
             // checkboxOnlyUnverified
             // 
@@ -859,8 +766,6 @@ namespace AMControlWinF.Views.Assembly
             this.panelDebugInfo.ResumeLayout(false);
             this.panelDebugHeader.ResumeLayout(false);
             this.flowStats.ResumeLayout(false);
-            this.panelIssueCard.ResumeLayout(false);
-            this.panelRuntimeCard.ResumeLayout(false);
             this.panelUnverifiedCard.ResumeLayout(false);
             this.panelVerifiedCard.ResumeLayout(false);
             this.panelTotalCard.ResumeLayout(false);
@@ -884,7 +789,6 @@ namespace AMControlWinF.Views.Assembly
         private AntdUI.Input inputSearch;
         private AntdUI.FlowPanel flowToolbarRight;
         private AntdUI.Checkbox checkboxOnlyUnverified;
-        private AntdUI.Checkbox checkboxOnlyIssues;
         private AntdUI.Button buttonExportCsv;
         private AntdUI.Button buttonRefresh;
         private AntdUI.FlowPanel flowStats;
@@ -897,12 +801,6 @@ namespace AMControlWinF.Views.Assembly
         private AntdUI.Panel panelUnverifiedCard;
         private AntdUI.Label labelUnverifiedCount;
         private AntdUI.Label labelUnverifiedTitle;
-        private AntdUI.Panel panelRuntimeCard;
-        private AntdUI.Label labelRuntimeCount;
-        private AntdUI.Label labelRuntimeTitle;
-        private AntdUI.Panel panelIssueCard;
-        private AntdUI.Label labelIssueCount;
-        private AntdUI.Label labelIssueTitle;
         private AntdUI.Panel panelTableCard;
         private AntdUI.Panel panelTableHeader;
         private AntdUI.Label labelTableTitle;
