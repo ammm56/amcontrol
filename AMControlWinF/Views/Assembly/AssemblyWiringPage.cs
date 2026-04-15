@@ -526,7 +526,7 @@ namespace AMControlWinF.Views.Assembly
         private static string BuildWiringText(AssemblyWiringPageModel.AssemblyWiringRowViewItem item)
         {
             var terminalText = string.IsNullOrWhiteSpace(item.TerminalBlock) && string.IsNullOrWhiteSpace(item.TerminalNo)
-                ? "端子未定义"
+                ? "-"
                 : (item.TerminalBlock + " " + item.TerminalNo).Trim();
 
             var connectorText = string.IsNullOrWhiteSpace(item.ConnectorNo) && string.IsNullOrWhiteSpace(item.PinNo)

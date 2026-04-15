@@ -443,8 +443,7 @@ namespace AM.PageModel.Assembly
 
             if (!string.IsNullOrWhiteSpace(SearchText))
             {
-                query = query.Where(p => ContainsText(p.SoftwareName, SearchText)
-                    || ContainsText(p.DisplayName, SearchText)
+                query = query.Where(p => ContainsText(p.DisplayName, SearchText)
                     || ContainsText(p.DeviceName, SearchText)
                     || ContainsText(p.WireNo, SearchText)
                     || ContainsText(p.TerminalBlock, SearchText)

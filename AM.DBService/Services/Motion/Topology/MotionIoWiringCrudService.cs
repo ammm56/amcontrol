@@ -115,7 +115,7 @@ namespace AM.DBService.Services.Motion.Topology
 
                 if (item == null)
                 {
-                    return Warn<MotionIoWiringEntity>((int)DbErrorCode.NotFound, "未找到对应 IO 接线信息");
+                    return WarnSilent<MotionIoWiringEntity>((int)DbErrorCode.NotFound, "未找到对应 IO 接线信息");
                 }
 
                 return OkLogOnly(item, "IO接线信息查询成功");
@@ -152,7 +152,7 @@ namespace AM.DBService.Services.Motion.Topology
 
                 if (item == null)
                 {
-                    return Warn<MotionIoWiringEntity>((int)DbErrorCode.NotFound, "未找到对应 IO 接线信息");
+                    return WarnSilent<MotionIoWiringEntity>((int)DbErrorCode.NotFound, "未找到对应 IO 接线信息");
                 }
 
                 return OkLogOnly(item, "IO接线信息查询成功");
