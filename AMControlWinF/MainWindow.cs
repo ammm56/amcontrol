@@ -24,8 +24,10 @@ using AMControlWinF.Views.SysConfig;
 using AntdUI;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Label = AntdUI.Label;
 using MenuItem = AntdUI.MenuItem;
@@ -62,6 +64,14 @@ namespace AMControlWinF
         private bool _isUpdatingUiState;
         private int _activeAlarmCount;
         private SystemMessageType _lastStatusMessageType = SystemMessageType.Status;
+
+        private Panel _pageLoadingMask;
+        private Label _pageLoadingMaskLabel;
+        private int _navigateVersion;
+        private bool _isClosing;
+
+        private const int FirstOpenMaskRenderDelayMs = 60;
+        private const int FirstOpenMaskMinDurationMs = 500;
 
         /// <summary>
         /// 关闭原因，供 Program.cs 主循环读取。
@@ -348,35 +358,17 @@ namespace AMControlWinF
                 { "Home.Overview",          "HomeOutlined" },
                 { "Home.SysStatus",         "MonitorOutlined" },
 
+                { "Assembly.Wiring",        "DeploymentUnitOutlined" },
+
                 { "Motion.DI",              "ApiOutlined" },
                 { "Motion.DO",              "SendOutlined" },
                 { "Motion.Monitor",         "DashboardOutlined" },
                 { "Motion.Axis",            "ControlOutlined" },
                 { "Motion.Actuator",        "ThunderboltOutlined" },
 
-                { "Assembly.Wiring",       "DeploymentUnitOutlined" },
-
-                { "MotionConfig.Card",      "CreditCardOutlined" },
-                { "MotionConfig.Axis",      "PartitionOutlined" },
-                { "MotionConfig.IoMap",     "DeploymentUnitOutlined" },
-                { "MotionConfig.AxisParam", "SlidersOutlined" },
-                { "MotionConfig.Actuator",  "ToolOutlined" },
-
-                { "AlarmLog.Current",       "AlertOutlined" },
-                { "AlarmLog.History",       "ProfileOutlined" },
-                { "AlarmLog.RunLog",        "FileTextOutlined" },
-
-                { "System.User",            "UserOutlined" },
-                { "System.Permission",      "SafetyCertificateOutlined" },
-                { "System.LoginLog",        "AuditOutlined" },
-
-                { "Production.Order",       "ProfileOutlined" },
                 { "Production.Recipe",      "BookOutlined" },
                 { "Production.Data",        "BarChartOutlined" },
                 { "Production.Report",      "LineChartOutlined" },
-                { "Production.Trace",       "SearchOutlined" },
-                { "Production.MesStatus",   "CloudServerOutlined" },
-                { "Production.UploadLog",   "UploadOutlined" },
 
                 { "Vision.Monitor",         "EyeOutlined" },
                 { "Vision.Result",          "CheckCircleOutlined" },
@@ -391,6 +383,12 @@ namespace AMControlWinF
                 { "Peripheral.Sensor",      "RadarChartOutlined" },
                 { "Peripheral.SensorTrend", "AreaChartOutlined" },
 
+                { "MotionConfig.Card",      "CreditCardOutlined" },
+                { "MotionConfig.Axis",      "PartitionOutlined" },
+                { "MotionConfig.IoMap",     "DeploymentUnitOutlined" },
+                { "MotionConfig.AxisParam", "SlidersOutlined" },
+                { "MotionConfig.Actuator",  "ToolOutlined" },
+
                 { "SysConfig.Camera",       "CameraOutlined" },
                 { "SysConfig.Plc",          "ApiOutlined" },
                 { "SysConfig.Sensor",       "RadarChartOutlined" },
@@ -398,10 +396,13 @@ namespace AMControlWinF
                 { "SysConfig.Mes",          "CloudOutlined" },
                 { "SysConfig.Runtime",      "SettingOutlined" },
 
-                { "Engineer.Diagnostic",    "ToolOutlined" },
-                { "Engineer.RawAxis",       "ControlOutlined" },
-                { "Engineer.RawPlc",        "ApiOutlined" },
-                { "Engineer.RawCamera",     "CameraOutlined" }
+                { "AlarmLog.Current",       "AlertOutlined" },
+                { "AlarmLog.History",       "ProfileOutlined" },
+                { "AlarmLog.RunLog",        "FileTextOutlined" },
+
+                { "System.User",            "UserOutlined" },
+                { "System.Permission",      "SafetyCertificateOutlined" },
+                { "System.LoginLog",        "AuditOutlined" }
             };
         }
 
@@ -409,11 +410,14 @@ namespace AMControlWinF
 
         #region 页面缓存
 
-        private void NavigateToSelectedPage()
+        private async void NavigateToSelectedPage()
         {
             var page = _model.SelectedSecondary;
+            var navigateVersion = ++_navigateVersion;
+
             if (page == null)
             {
+                HidePageLoadingMask();
                 ShowPage(CreatePlaceholderPage(
                     IsEnglishLanguage(GetCurrentLanguage())
                         ? "No accessible page"
@@ -421,20 +425,52 @@ namespace AMControlWinF
                 return;
             }
 
-            ShowPage(GetOrCreatePage(page.PageKey), false);
-        }
+            Control cachedPage;
+            if (_pageCache.TryGetValue(page.PageKey, out cachedPage) &&
+                cachedPage != null &&
+                !cachedPage.IsDisposed)
+            {
+                HidePageLoadingMask();
+                ShowPage(cachedPage, false);
+                return;
+            }
 
-        private Control GetOrCreatePage(string pageKey)
-        {
-            Control page;
-            if (_pageCache.TryGetValue(pageKey, out page) && page != null && !page.IsDisposed)
-                return page;
+            var loadingText = IsEnglishLanguage(GetCurrentLanguage())
+                ? "Loading page..."
+                : "页面加载中...";
 
-            page = CreatePage(pageKey);
-            page.Dock = DockStyle.Fill;
-            _pageCache[pageKey] = page;
+            ShowPageLoadingMask(loadingText);
 
-            return page;
+            var stopwatch = Stopwatch.StartNew();
+
+            try
+            {
+                await Task.Delay(FirstOpenMaskRenderDelayMs);
+
+                if (_isClosing || IsDisposed || navigateVersion != _navigateVersion)
+                    return;
+
+                var createdPage = CreatePage(page.PageKey);
+                createdPage.Dock = DockStyle.Fill;
+
+                if (_isClosing || IsDisposed || navigateVersion != _navigateVersion)
+                {
+                    createdPage.Dispose();
+                    return;
+                }
+
+                _pageCache[page.PageKey] = createdPage;
+                ShowPage(createdPage, false);
+
+                var remain = FirstOpenMaskMinDurationMs - (int)stopwatch.ElapsedMilliseconds;
+                if (remain > 0)
+                    await Task.Delay(remain);
+            }
+            finally
+            {
+                if (!_isClosing && !IsDisposed && navigateVersion == _navigateVersion)
+                    HidePageLoadingMask();
+            }
         }
 
         private void ShowPage(Control page, bool disposeRemovedControls)
@@ -452,6 +488,11 @@ namespace AMControlWinF
                     if (ReferenceEquals(control, page))
                         continue;
 
+                    if (_pageLoadingMask != null &&
+                        !ReferenceEquals(_pageLoadingMask, page) &&
+                        ReferenceEquals(control, _pageLoadingMask))
+                        continue;
+
                     panelContent.Controls.Remove(control);
 
                     if (disposeRemovedControls)
@@ -463,6 +504,14 @@ namespace AMControlWinF
 
                 page.Dock = DockStyle.Fill;
                 page.BringToFront();
+
+                if (_pageLoadingMask != null &&
+                    !_pageLoadingMask.IsDisposed &&
+                    panelContent.Controls.Contains(_pageLoadingMask) &&
+                    _pageLoadingMask.Visible)
+                {
+                    _pageLoadingMask.BringToFront();
+                }
 
                 if (disposeRemovedControls && removedControls.Count > 0)
                     ControlDisposeHelper.DisposeControlsDeferred(this, removedControls);
@@ -492,13 +541,13 @@ namespace AMControlWinF
                 { "Home.Overview",          () => CreatePlaceholderPage("首页 / 总览看板") },
                 { "Home.SysStatus",         () => CreatePlaceholderPage("首页 / 系统状态") },
 
+                { "Assembly.Wiring",        () => new AssemblyWiringPage() },
+
                 { "Motion.DI",              () => new DIMotionPage() },
                 { "Motion.DO",              () => new DOMotionPage() },
                 { "Motion.Monitor",         () => new MotionMonitorPage() },
                 { "Motion.Axis",            () => new MotionAxisPage() },
                 { "Motion.Actuator",        () => new MotionActuatorPage() },
-
-                { "Assembly.Wiring",        () => new AssemblyWiringPage() },
 
                 { "MotionConfig.Card",      () => new MotionCardManagementPage() },
                 { "MotionConfig.Axis",      () => new MotionAxisManagementPage() },
@@ -1155,16 +1204,88 @@ namespace AMControlWinF
                 string.Equals(theme, "Dark", StringComparison.OrdinalIgnoreCase));
         }
 
+        private void EnsurePageLoadingMask()
+        {
+            if (_pageLoadingMask != null && !_pageLoadingMask.IsDisposed)
+            {
+                if (_pageLoadingMask.Parent == null)
+                    panelContent.Controls.Add(_pageLoadingMask);
+
+                return;
+            }
+
+            _pageLoadingMaskLabel = new Label
+            {
+                Dock = DockStyle.Fill,
+                TextAlign = ContentAlignment.MiddleCenter,
+                Font = new Font("Microsoft YaHei UI", 14F, FontStyle.Bold),
+                Text = IsEnglishLanguage(GetCurrentLanguage()) ? "Loading page..." : "页面加载中..."
+            };
+
+            _pageLoadingMask = new Panel
+            {
+                Dock = DockStyle.Fill,
+                Radius = 0,
+                Visible = false
+            };
+
+            _pageLoadingMask.Controls.Add(_pageLoadingMaskLabel);
+            panelContent.Controls.Add(_pageLoadingMask);
+            _pageLoadingMask.BringToFront();
+        }
+
+        private void ShowPageLoadingMask(string text)
+        {
+            EnsurePageLoadingMask();
+
+            if (_pageLoadingMaskLabel != null && !_pageLoadingMaskLabel.IsDisposed)
+                _pageLoadingMaskLabel.Text = text;
+
+            if (_pageLoadingMask != null && !_pageLoadingMask.IsDisposed)
+            {
+                if (_pageLoadingMask.Parent == null)
+                    panelContent.Controls.Add(_pageLoadingMask);
+
+                _pageLoadingMask.Visible = true;
+                _pageLoadingMask.BringToFront();
+            }
+        }
+
+        private void HidePageLoadingMask()
+        {
+            if (_pageLoadingMask == null || _pageLoadingMask.IsDisposed)
+                return;
+
+            _pageLoadingMask.Visible = false;
+        }
+
         #endregion
 
         #region 生命周期
 
         private void MainWindow_FormClosed(object sender, FormClosedEventArgs e)
         {
+            _isClosing = true;
+            _navigateVersion++;
+
             StopStatusIndicatorTimer();
             UnbindAlarmManager();
             SystemContext.Instance.MessageBus?.Unsubscribe(this);
             DisposeAllCachedPages();
+
+            try
+            {
+                if (_pageLoadingMask != null && !_pageLoadingMask.IsDisposed)
+                    _pageLoadingMask.Dispose();
+            }
+            catch
+            {
+            }
+            finally
+            {
+                _pageLoadingMask = null;
+                _pageLoadingMaskLabel = null;
+            }
 
             try
             {
