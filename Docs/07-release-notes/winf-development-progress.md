@@ -167,15 +167,19 @@ MainWindow
 
 12. `Peripheral.*`
 13. `Vision.*`
-14. `Production.*`
-15. `Engineer.*`
-16. 其余 `SysConfig.*`
+14. `Production.Recipe`
+15. `Production.Data`
+16. `Production.Report`
+17. 其余 `SysConfig.*`
 
 ---
 
 ## 6. 已实现页面清单（可直接开发与测试）
 
 ```text
+Assembly
+└── Wiring
+
 System
 ├── User
 ├── Permission

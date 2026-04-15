@@ -169,6 +169,7 @@ AMControlWinF/
 
 | 模块 | 页面 |
 |------|------|
+| `Assembly` | `Assembly.Wiring` |
 | `Motion` | `Motion.DI`、`Motion.DO`、`Motion.Monitor`、`Motion.Axis`、`Motion.Actuator` |
 | `MotionConfig` | `MotionConfig.Card`、`MotionConfig.Axis`、`MotionConfig.IoMap`、`MotionConfig.AxisParam`、`MotionConfig.Actuator` |
 | `PLC` | `PLC.Status`、`PLC.Monitor`、`PLC.Debug` |
@@ -183,7 +184,6 @@ AMControlWinF/
 - `Vision.*`
 - `Peripheral.*`
 - `SysConfig.Camera / Sensor / Scanner / Mes / Runtime`
-- `Engineer.*`
 
 ---
 

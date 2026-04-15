@@ -88,14 +88,14 @@ NavigationCatalog.GetPrimaryItems()
 | 一级模块 | 页面数 | 说明 |
 |----------|--------|------|
 | `Home` | 2 | 总览与系统状态 |
+| `Assembly` | 1 | 装配接线与现场调试 |
 | `Motion` | 5 | DI / DO / 多轴总览 / 轴控制 / 执行器控制 |
-| `Production` | 7 | 工单、配方、统计、追溯、MES |
+| `Production` | 3 | 设备本地配方、生产统计、班次报表 |
 | `Vision` | 3 | 相机监视、检测结果、标定 |
 | `PLC` | 3 | 通讯状态、点位监视、调试工具 |
 | `Peripheral` | 4 | 扫码、传感器监视与趋势 |
 | `MotionConfig` | 5 | 控制卡、轴、IO、参数、执行器配置 |
 | `SysConfig` | 6 | 相机、PLC、传感器、扫码器、MES、运行配置 |
-| `Engineer` | 4 | 诊断与原始参数调试 |
 | `AlarmLog` | 3 | 当前报警、报警历史、运行日志 |
 | `System` | 3 | 用户、权限、登录日志 |
 
@@ -104,6 +104,9 @@ NavigationCatalog.GetPrimaryItems()
 `MainWindow.CreatePageFactories()` 当前已注册以下真实页面：
 
 ```text
+Assembly
+└── Assembly.Wiring
+
 Motion
 ├── Motion.DI
 ├── Motion.DO
@@ -144,7 +147,6 @@ System
 - `Vision.*`
 - `Peripheral.*`
 - `SysConfig.Camera / Sensor / Scanner / Mes / Runtime`
-- `Engineer.*`
 
 占位页统一由 `CreatePlaceholderPage(...)` 生成。
 

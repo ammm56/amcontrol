@@ -203,7 +203,7 @@ namespace AMControlWinF.Views.Am
                 ControlDisposeHelper.ClearControlsSafely(flowModules);
 
                 var btnLength = 56;
-                var btnMaxLength = 85;
+                var btnMaxLength = 80;
 
                 foreach (var module in _model.Modules)
                 {

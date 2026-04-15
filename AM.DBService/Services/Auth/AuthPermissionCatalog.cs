@@ -10,47 +10,80 @@ namespace AM.DBService.Services.Auth
         {
             return new List<SysPagePermissionEntity>
             {
-                new SysPagePermissionEntity { ModuleKey = "Home", ModuleName = "首页", PageKey = "Home.Overview", DisplayName = "总览看板", Description = "设备总览、生产摘要与快捷入口。", DefaultRoleCodes = "Operator,Engineer,Am", RecommendedRoles = "Operator / Engineer / Am", RiskLevel = "低", SortOrder = 10, IsEnabled = true, CreateTime = DateTime.Now },
-                new SysPagePermissionEntity { ModuleKey = "Home", ModuleName = "首页", PageKey = "Home.Status", DisplayName = "设备状态", Description = "显示整机运动、PLC、相机、IO 总体状态。", DefaultRoleCodes = "Operator,Engineer,Am", RecommendedRoles = "Operator / Engineer / Am", RiskLevel = "低", SortOrder = 20, IsEnabled = true, CreateTime = DateTime.Now },
+                D("Home", "首页", "Home.Overview", "总览看板", "设备总览、生产摘要与快捷入口。", "Operator,Engineer,Am", "低", 10),
+                D("Home", "首页", "Home.SysStatus", "系统状态", "显示整机运动、PLC、相机、IO 总体在线状态。", "Operator,Engineer,Am", "低", 20),
 
-                new SysPagePermissionEntity { ModuleKey = "Production", ModuleName = "生产", PageKey = "Production.Data", DisplayName = "生产数据", Description = "查看产量、节拍、良率与工单信息。", DefaultRoleCodes = "Operator,Engineer,Am", RecommendedRoles = "Operator / Engineer / Am", RiskLevel = "低", SortOrder = 10, IsEnabled = true, CreateTime = DateTime.Now },
-                new SysPagePermissionEntity { ModuleKey = "Production", ModuleName = "生产", PageKey = "Production.Report", DisplayName = "班次统计", Description = "查看班次与日报汇总统计。", DefaultRoleCodes = "Engineer,Am", RecommendedRoles = "Engineer / Am", RiskLevel = "低", SortOrder = 20, IsEnabled = true, CreateTime = DateTime.Now },
+                D("Assembly", "装配接线", "Assembly.Wiring", "接线与调试", "集中展示软件 IO 定义、硬件接线关系、实时状态与单点调试入口。", "Engineer,Am", "高", 10),
 
-                new SysPagePermissionEntity { ModuleKey = "Motion", ModuleName = "运动", PageKey = "Motion.Axis", DisplayName = "轴控制", Description = "查看当前轴状态并进入轴控制页面。", DefaultRoleCodes = "Operator,Engineer,Am", RecommendedRoles = "Operator / Engineer / Am", RiskLevel = "中", SortOrder = 10, IsEnabled = true, CreateTime = DateTime.Now },
-                new SysPagePermissionEntity { ModuleKey = "Motion", ModuleName = "运动", PageKey = "Motion.Status", DisplayName = "位置监视", Description = "查看多轴位置、速度、状态总览。", DefaultRoleCodes = "Operator,Engineer,Am", RecommendedRoles = "Operator / Engineer / Am", RiskLevel = "低", SortOrder = 20, IsEnabled = true, CreateTime = DateTime.Now },
-                new SysPagePermissionEntity { ModuleKey = "Motion", ModuleName = "运动", PageKey = "Motion.Alarm", DisplayName = "运动报警", Description = "查看运动域报警记录与处理信息。", DefaultRoleCodes = "Operator,Engineer,Am", RecommendedRoles = "Operator / Engineer / Am", RiskLevel = "低", SortOrder = 30, IsEnabled = true, CreateTime = DateTime.Now },
+                D("Motion", "设备", "Motion.DI", "DI 监视", "查看全部数字输入点位状态与逻辑描述。", "Operator,Engineer,Am", "低", 10),
+                D("Motion", "设备", "Motion.DO", "DO 监视", "查看全部数字输出点位状态与联动对象。", "Operator,Engineer,Am", "低", 20),
+                D("Motion", "设备", "Motion.Monitor", "多轴总览", "查看所有轴的位置、速度与运动状态总览。", "Operator,Engineer,Am", "低", 30),
+                D("Motion", "设备", "Motion.Axis", "轴控制", "单轴点动、回零与使能操作。", "Engineer,Am", "高", 40),
+                D("Motion", "设备", "Motion.Actuator", "执行器控制", "手动操作气缸、真空、夹爪等执行器。", "Engineer,Am", "高", 50),
 
-                new SysPagePermissionEntity { ModuleKey = "IO", ModuleName = "IO", PageKey = "IO.DI", DisplayName = "DI 监视", Description = "查看输入点位状态与条件判断结果。", DefaultRoleCodes = "Operator,Engineer,Am", RecommendedRoles = "Operator / Engineer / Am", RiskLevel = "低", SortOrder = 10, IsEnabled = true, CreateTime = DateTime.Now },
-                new SysPagePermissionEntity { ModuleKey = "IO", ModuleName = "IO", PageKey = "IO.DO", DisplayName = "DO 监视", Description = "查看输出点位状态与联动对象。", DefaultRoleCodes = "Operator,Engineer,Am", RecommendedRoles = "Operator / Engineer / Am", RiskLevel = "中", SortOrder = 20, IsEnabled = true, CreateTime = DateTime.Now },
-                new SysPagePermissionEntity { ModuleKey = "IO", ModuleName = "IO", PageKey = "IO.Debug", DisplayName = "IO 调试", Description = "进行 IO 调试与联动测试。", DefaultRoleCodes = "Engineer,Am", RecommendedRoles = "Engineer / Am", RiskLevel = "高", SortOrder = 30, IsEnabled = true, CreateTime = DateTime.Now },
+                D("Production", "生产", "Production.Recipe", "配方管理", "维护设备本地配方，决定设备运行逻辑、动作参数与工艺参数。", "Engineer,Am", "高", 10),
+                D("Production", "生产", "Production.Data", "生产统计", "查看设备本地产量、节拍、良率与运行记录统计。", "Operator,Engineer,Am", "低", 20),
+                D("Production", "生产", "Production.Report", "班次报表", "查看设备本地班次与日报汇总统计报表。", "Operator,Engineer,Am", "低", 30),
 
-                new SysPagePermissionEntity { ModuleKey = "Vision", ModuleName = "视觉", PageKey = "Vision.Monitor", DisplayName = "相机监视", Description = "查看相机实时画面与触发结果。", DefaultRoleCodes = "Operator,Engineer,Am", RecommendedRoles = "Operator / Engineer / Am", RiskLevel = "低", SortOrder = 10, IsEnabled = true, CreateTime = DateTime.Now },
+                D("Vision", "视觉", "Vision.Monitor", "相机监视", "查看相机实时画面与触发状态。", "Operator,Engineer,Am", "低", 10),
+                D("Vision", "视觉", "Vision.Result", "检测结果", "查看视觉检测结果、OK/NG 记录与图像回放。", "Operator,Engineer,Am", "低", 20),
+                D("Vision", "视觉", "Vision.Calibrate", "标定管理", "执行相机标定与精度验证操作。", "Engineer,Am", "高", 30),
 
-                new SysPagePermissionEntity { ModuleKey = "PLC", ModuleName = "PLC", PageKey = "PLC.Monitor", DisplayName = "点位监视", Description = "查看 PLC 点位与寄存器状态。", DefaultRoleCodes = "Operator,Engineer,Am", RecommendedRoles = "Operator / Engineer / Am", RiskLevel = "低", SortOrder = 10, IsEnabled = true, CreateTime = DateTime.Now },
-                new SysPagePermissionEntity { ModuleKey = "PLC", ModuleName = "PLC", PageKey = "PLC.Debug", DisplayName = "通讯状态", Description = "查看 PLC 通讯诊断信息。", DefaultRoleCodes = "Operator,Engineer,Am", RecommendedRoles = "Operator / Engineer / Am", RiskLevel = "中", SortOrder = 20, IsEnabled = true, CreateTime = DateTime.Now },
+                D("PLC", "PLC", "PLC.Status", "通讯状态", "查看 PLC 通讯链路状态、扫描状态与诊断信息。", "Operator,Engineer,Am", "低", 20),
+                D("PLC", "PLC", "PLC.Monitor", "点位监视", "查看已配置 PLC 点位实时状态、质量和更新时间。", "Operator,Engineer,Am", "低", 10),
+                D("PLC", "PLC", "PLC.Debug", "调试工具", "按配置点位或直接地址执行 PLC 读写调试。", "Engineer,Am", "高", 30),
 
-                new SysPagePermissionEntity { ModuleKey = "Config", ModuleName = "配置", PageKey = "Config.Card", DisplayName = "控制卡配置", Description = "维护控制卡基础信息与驱动配置。", DefaultRoleCodes = "Engineer,Am", RecommendedRoles = "Engineer / Am", RiskLevel = "高", SortOrder = 10, IsEnabled = true, CreateTime = DateTime.Now },
-                new SysPagePermissionEntity { ModuleKey = "Config", ModuleName = "配置", PageKey = "Config.Axis", DisplayName = "轴拓扑配置", Description = "维护逻辑轴、物理轴与归属关系。", DefaultRoleCodes = "Engineer,Am", RecommendedRoles = "Engineer / Am", RiskLevel = "高", SortOrder = 20, IsEnabled = true, CreateTime = DateTime.Now },
-                new SysPagePermissionEntity { ModuleKey = "Config", ModuleName = "配置", PageKey = "Config.IoMap", DisplayName = "IO 映射配置", Description = "维护 DI/DO 逻辑点与硬件点映射。", DefaultRoleCodes = "Engineer,Am", RecommendedRoles = "Engineer / Am", RiskLevel = "高", SortOrder = 30, IsEnabled = true, CreateTime = DateTime.Now },
-                new SysPagePermissionEntity { ModuleKey = "Config", ModuleName = "配置", PageKey = "Config.AxisParam", DisplayName = "轴运行参数", Description = "维护轴运行参数、回零与限位配置。", DefaultRoleCodes = "Engineer,Am", RecommendedRoles = "Engineer / Am", RiskLevel = "高", SortOrder = 40, IsEnabled = true, CreateTime = DateTime.Now },
-                new SysPagePermissionEntity { ModuleKey = "Config", ModuleName = "配置", PageKey = "Config.Actuator", DisplayName = "执行器配置", Description = "维护气缸、真空、灯塔、夹爪对象配置。", DefaultRoleCodes = "Engineer,Am", RecommendedRoles = "Engineer / Am", RiskLevel = "高", SortOrder = 50, IsEnabled = true, CreateTime = DateTime.Now },
-                new SysPagePermissionEntity { ModuleKey = "Config", ModuleName = "配置", PageKey = "Config.Runtime", DisplayName = "运行配置编辑", Description = "维护系统运行配置。", DefaultRoleCodes = "Engineer,Am", RecommendedRoles = "Engineer / Am", RiskLevel = "高", SortOrder = 60, IsEnabled = true, CreateTime = DateTime.Now },
-                new SysPagePermissionEntity { ModuleKey = "Config", ModuleName = "配置", PageKey = "Config.Camera", DisplayName = "相机配置编辑", Description = "维护相机与任务配置。", DefaultRoleCodes = "Engineer,Am", RecommendedRoles = "Engineer / Am", RiskLevel = "高", SortOrder = 70, IsEnabled = true, CreateTime = DateTime.Now },
-                new SysPagePermissionEntity { ModuleKey = "Config", ModuleName = "配置", PageKey = "Config.Plc", DisplayName = "PLC 配置编辑", Description = "维护 PLC 业务配置。", DefaultRoleCodes = "Engineer,Am", RecommendedRoles = "Engineer / Am", RiskLevel = "高", SortOrder = 80, IsEnabled = true, CreateTime = DateTime.Now },
+                D("Peripheral", "外设", "Peripheral.Scanner", "扫码监视", "查看扫码器在线状态与最近扫码记录。", "Operator,Engineer,Am", "低", 10),
+                D("Peripheral", "外设", "Peripheral.ScanTest", "扫码测试", "手动触发扫码器扫描，验证通讯与码格式。", "Engineer,Am", "中", 20),
+                D("Peripheral", "外设", "Peripheral.Sensor", "传感器监视", "查看 Modbus/RS232/USB 传感器实时采样数据。", "Operator,Engineer,Am", "低", 30),
+                D("Peripheral", "外设", "Peripheral.SensorTrend", "数据趋势", "查看传感器历史数据曲线与统计分析。", "Operator,Engineer,Am", "低", 40),
 
-                new SysPagePermissionEntity { ModuleKey = "Engineer", ModuleName = "工程", PageKey = "Engineer.RawAxis", DisplayName = "原始轴参数", Description = "查看或调试原始轴参数。", DefaultRoleCodes = "Engineer,Am", RecommendedRoles = "Engineer / Am", RiskLevel = "高", SortOrder = 10, IsEnabled = true, CreateTime = DateTime.Now },
-                new SysPagePermissionEntity { ModuleKey = "Engineer", ModuleName = "工程", PageKey = "Engineer.RawPlc", DisplayName = "原始 PLC 参数", Description = "查看或调试原始 PLC 参数。", DefaultRoleCodes = "Engineer,Am", RecommendedRoles = "Engineer / Am", RiskLevel = "高", SortOrder = 20, IsEnabled = true, CreateTime = DateTime.Now },
-                new SysPagePermissionEntity { ModuleKey = "Engineer", ModuleName = "工程", PageKey = "Engineer.RawCamera", DisplayName = "原始相机参数", Description = "查看或调试原始相机参数。", DefaultRoleCodes = "Engineer,Am", RecommendedRoles = "Engineer / Am", RiskLevel = "高", SortOrder = 30, IsEnabled = true, CreateTime = DateTime.Now },
-                new SysPagePermissionEntity { ModuleKey = "Engineer", ModuleName = "工程", PageKey = "Engineer.Diagnostic", DisplayName = "设备诊断", Description = "查看设备诊断结果与检查信息。", DefaultRoleCodes = "Engineer,Am", RecommendedRoles = "Engineer / Am", RiskLevel = "中", SortOrder = 40, IsEnabled = true, CreateTime = DateTime.Now },
-                new SysPagePermissionEntity { ModuleKey = "Engineer", ModuleName = "工程", PageKey = "Engineer.Debug", DisplayName = "Motion/IO 调试", Description = "执行工程调试与测试。", DefaultRoleCodes = "Engineer,Am", RecommendedRoles = "Engineer / Am", RiskLevel = "高", SortOrder = 50, IsEnabled = true, CreateTime = DateTime.Now },
+                D("MotionConfig", "运控配置", "MotionConfig.Card", "控制卡配置", "维护控制卡基础信息与驱动参数配置。", "Engineer,Am", "高", 10),
+                D("MotionConfig", "运控配置", "MotionConfig.Axis", "轴拓扑配置", "维护逻辑轴、物理轴与控制卡归属关系。", "Engineer,Am", "高", 20),
+                D("MotionConfig", "运控配置", "MotionConfig.IoMap", "IO 映射配置", "维护 DI/DO 逻辑点位与硬件点位映射关系。", "Engineer,Am", "高", 30),
+                D("MotionConfig", "运控配置", "MotionConfig.AxisParam", "轴运行参数", "维护轴运动参数、回零流程与软件限位配置。", "Engineer,Am", "高", 40),
+                D("MotionConfig", "运控配置", "MotionConfig.Actuator", "执行器配置", "维护气缸、真空、灯塔、夹爪等执行器对象配置。", "Engineer,Am", "高", 50),
 
-                new SysPagePermissionEntity { ModuleKey = "AlarmLog", ModuleName = "报警与日志", PageKey = "AlarmLog.Current", DisplayName = "当前报警", Description = "查看当前活动报警。", DefaultRoleCodes = "Operator,Engineer,Am", RecommendedRoles = "Operator / Engineer / Am", RiskLevel = "低", SortOrder = 10, IsEnabled = true, CreateTime = DateTime.Now },
-                new SysPagePermissionEntity { ModuleKey = "AlarmLog", ModuleName = "报警与日志", PageKey = "AlarmLog.History", DisplayName = "报警历史", Description = "查看历史报警记录。", DefaultRoleCodes = "Engineer,Am", RecommendedRoles = "Engineer / Am", RiskLevel = "低", SortOrder = 20, IsEnabled = true, CreateTime = DateTime.Now },
-                new SysPagePermissionEntity { ModuleKey = "AlarmLog", ModuleName = "报警与日志", PageKey = "AlarmLog.RunLog", DisplayName = "运行日志", Description = "查看系统运行日志。", DefaultRoleCodes = "Engineer,Am", RecommendedRoles = "Engineer / Am", RiskLevel = "低", SortOrder = 30, IsEnabled = true, CreateTime = DateTime.Now },
+                D("SysConfig", "系统配置", "SysConfig.Plc", "PLC 配置", "维护 PLC 通讯协议与业务地址映射。", "Engineer,Am", "高", 20),
+                D("SysConfig", "系统配置", "SysConfig.Camera", "相机配置", "维护视觉相机型号、连接与任务参数。", "Engineer,Am", "高", 10),
+                D("SysConfig", "系统配置", "SysConfig.Sensor", "传感器配置", "维护 Modbus/RS232/USB 传感器连接参数。", "Engineer,Am", "高", 30),
+                D("SysConfig", "系统配置", "SysConfig.Scanner", "扫码器配置", "维护扫码器型号、接口与触发参数。", "Engineer,Am", "高", 40),
+                D("SysConfig", "系统配置", "SysConfig.Mes", "MES 配置", "维护 MES 服务地址、认证与上传策略。", "Engineer,Am", "高", 50),
+                D("SysConfig", "系统配置", "SysConfig.Runtime", "运行配置", "维护系统运行模式与全局运行参数。", "Engineer,Am", "高", 60),
 
-                new SysPagePermissionEntity { ModuleKey = "System", ModuleName = "系统", PageKey = "System.User", DisplayName = "用户管理", Description = "维护用户、角色、启停与密码。", DefaultRoleCodes = "Am", RecommendedRoles = "Am", RiskLevel = "高", SortOrder = 10, IsEnabled = true, CreateTime = DateTime.Now },
-                new SysPagePermissionEntity { ModuleKey = "System", ModuleName = "系统", PageKey = "System.Permission", DisplayName = "权限分配", Description = "维护用户页面权限。", DefaultRoleCodes = "Am", RecommendedRoles = "Am", RiskLevel = "高", SortOrder = 20, IsEnabled = true, CreateTime = DateTime.Now },
-                new SysPagePermissionEntity { ModuleKey = "System", ModuleName = "系统", PageKey = "System.LoginLog", DisplayName = "登录日志", Description = "查看登录审计日志。", DefaultRoleCodes = "Am", RecommendedRoles = "Am", RiskLevel = "中", SortOrder = 30, IsEnabled = true, CreateTime = DateTime.Now }
+                D("AlarmLog", "报警与日志", "AlarmLog.Current", "当前报警", "查看当前所有活动报警与处理入口。", "Operator,Engineer,Am", "低", 10),
+                D("AlarmLog", "报警与日志", "AlarmLog.History", "报警历史", "查看所有历史报警记录与详情。", "Operator,Engineer,Am", "低", 20),
+                D("AlarmLog", "报警与日志", "AlarmLog.RunLog", "运行日志", "查看系统运行日志，支持筛选与关键字搜索。", "Engineer,Am", "低", 30),
+
+                D("System", "系统", "System.User", "用户管理", "维护用户账户、角色与账号状态。", "Am", "高", 10),
+                D("System", "系统", "System.Permission", "权限分配", "按用户分配页面级访问权限。", "Am", "高", 20),
+                D("System", "系统", "System.LoginLog", "登录日志", "查看用户登录操作审计日志。", "Am", "中", 30)
+            };
+        }
+
+        private static SysPagePermissionEntity D(
+            string moduleKey,
+            string moduleName,
+            string pageKey,
+            string displayName,
+            string description,
+            string defaultRoleCodes,
+            string riskLevel,
+            int sortOrder)
+        {
+            return new SysPagePermissionEntity
+            {
+                ModuleKey = moduleKey,
+                ModuleName = moduleName,
+                PageKey = pageKey,
+                DisplayName = displayName,
+                Description = description,
+                DefaultRoleCodes = defaultRoleCodes,
+                RecommendedRoles = (defaultRoleCodes ?? string.Empty).Replace(",", " / "),
+                RiskLevel = riskLevel,
+                SortOrder = sortOrder,
+                IsEnabled = true,
+                CreateTime = DateTime.Now
             };
         }
     }

@@ -24,9 +24,9 @@ namespace AM.PageModel.Navigation
             D("Motion",      "设备",       "Motion.Axis",            "轴控制",          "单轴点动、回零与使能操作。",                             "Engineer,Am",          "高", 40),
             D("Motion",      "设备",       "Motion.Actuator",        "执行器控制",      "手动操作气缸、真空、夹爪等执行器。",                     "Engineer,Am",          "高", 50),
 
-            D("Production",   "生产",       "Production.Recipe",      "配方管理",        "维护设备本地配方，决定设备运行逻辑、动作参数与工艺参数。",     "Engineer,Am",          "高", 10),
-            D("Production",   "生产",       "Production.Data",        "生产统计",        "查看设备本地产量、节拍、良率与运行记录统计。",               "Operator,Engineer,Am", "低", 20),
-            D("Production",   "生产",       "Production.Report",      "班次报表",        "查看设备本地班次与日报汇总统计报表。",                       "Operator,Engineer,Am", "低", 30),
+            D("Production",  "生产",       "Production.Recipe",      "配方管理",        "维护设备本地配方，决定设备运行逻辑、动作参数与工艺参数。",     "Engineer,Am",          "高", 10),
+            D("Production",  "生产",       "Production.Data",        "生产统计",        "查看设备本地产量、节拍、良率与运行记录统计。",               "Operator,Engineer,Am", "低", 20),
+            D("Production",  "生产",       "Production.Report",      "班次报表",        "查看设备本地班次与日报汇总统计报表。",                       "Operator,Engineer,Am", "低", 30),
 
             D("Vision",      "视觉",       "Vision.Monitor",         "相机监视",        "查看相机实时画面与触发状态。",                           "Operator,Engineer,Am", "低", 10),
             D("Vision",      "视觉",       "Vision.Result",          "检测结果",        "查看视觉检测结果、OK/NG 记录与图像回放。",               "Operator,Engineer,Am", "低", 20),
@@ -54,9 +54,9 @@ namespace AM.PageModel.Navigation
             D("SysConfig",   "系统配置",   "SysConfig.Mes",          "MES 配置",        "维护 MES 服务地址、认证与上传策略。",                    "Engineer,Am",          "高", 50),
             D("SysConfig",   "系统配置",   "SysConfig.Runtime",      "运行配置",        "维护系统运行模式与全局运行参数。",                       "Engineer,Am",          "高", 60),
 
-            D("AlarmLog",    "报警与日志", "AlarmLog.Current",       "当前报警",        "查看当前所有活动报警与处理入口。",                       "Operator,Engineer,Am", "低", 10),
-            D("AlarmLog",    "报警与日志", "AlarmLog.History",       "报警历史",        "查看所有历史报警记录与详情。",                           "Operator,Engineer,Am", "低", 20),
-            D("AlarmLog",    "报警与日志", "AlarmLog.RunLog",        "运行日志",        "查看系统运行日志，支持筛选与关键字搜索。",               "Engineer,Am",          "低", 30),
+            D("AlarmLog",    "报警日志",  "AlarmLog.Current",       "当前报警",        "查看当前所有活动报警与处理入口。",                       "Operator,Engineer,Am", "低", 10),
+            D("AlarmLog",    "报警日志",  "AlarmLog.History",       "报警历史",        "查看所有历史报警记录与详情。",                           "Operator,Engineer,Am", "低", 20),
+            D("AlarmLog",    "报警日志",  "AlarmLog.RunLog",        "运行日志",        "查看系统运行日志，支持筛选与关键字搜索。",               "Engineer,Am",          "低", 30),
 
             D("System",      "系统",       "System.User",            "用户管理",        "维护用户账户、角色与账号状态。",                         "Am",                   "高", 10),
             D("System",      "系统",       "System.Permission",      "权限分配",        "按用户分配页面级访问权限。",                             "Am",                   "高", 20),
