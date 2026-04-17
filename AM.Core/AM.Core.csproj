@@ -69,6 +69,7 @@
     <Compile Include="Alarm\NullAlarmRecordService.cs" />
     <Compile Include="Base\ServiceBase.cs" />
     <Compile Include="Context\ConfigContext.cs" />
+    <Compile Include="Context\LicenseRuntimeContext.cs" />
     <Compile Include="Context\MachineContext.cs" />
     <Compile Include="Context\RuntimeContext.cs" />
     <Compile Include="Context\SystemContext.cs" />

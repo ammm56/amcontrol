@@ -97,6 +97,13 @@
     <Compile Include="Interfaces\Plc\IPlcClientFactory.cs" />
     <Compile Include="Interfaces\Plc\Runtime\IPlcRuntimeService.cs" />
     <Compile Include="Interfaces\Plc\Runtime\IPlcScanWorker.cs" />
+    <Compile Include="License\DeviceHardwareInfo.cs" />
+    <Compile Include="License\DeviceLicense.cs" />
+    <Compile Include="License\DeviceLicenseState.cs" />
+    <Compile Include="License\LicenseApplyRequest.cs" />
+    <Compile Include="License\LicenseApplyResponse.cs" />
+    <Compile Include="License\LicenseConstants.cs" />
+    <Compile Include="License\LicenseValidationResult.cs" />
     <Compile Include="Model\LogModel.cs" />
     <Compile Include="Entity\Auth\SysLoginLogEntity.cs" />
     <Compile Include="Entity\Auth\SysPagePermissionEntity.cs" />

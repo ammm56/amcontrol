@@ -1,0 +1,132 @@
+using System;
+using System.Collections.Generic;
+
+namespace AM.Model.License
+{
+    /// <summary>
+    /// license.lic 解密后的授权明文模型。
+    /// </summary>
+    public class DeviceLicense
+    {
+        /// <summary>
+        /// 授权 ID。
+        /// </summary>
+        public string LicenseId { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 授权协议版本。
+        /// </summary>
+        public string LicenseProtocolVersion { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 签发时间。
+        /// </summary>
+        public DateTime? IssueTime { get; set; }
+
+        /// <summary>
+        /// 签发方。
+        /// </summary>
+        public string Issuer { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 软件信息。
+        /// </summary>
+        public DeviceLicenseSoftware Software { get; set; } = new DeviceLicenseSoftware();
+
+        /// <summary>
+        /// 设备绑定信息。
+        /// </summary>
+        public DeviceLicenseBinding DeviceBinding { get; set; } = new DeviceLicenseBinding();
+
+        /// <summary>
+        /// 有效期信息。
+        /// </summary>
+        public DeviceLicenseValidity Validity { get; set; } = new DeviceLicenseValidity();
+
+        /// <summary>
+        /// 功能授权信息。
+        /// </summary>
+        public DeviceLicenseAuthorization Authorization { get; set; } = new DeviceLicenseAuthorization();
+
+        /// <summary>
+        /// 授权签名信息。
+        /// </summary>
+        public DeviceLicenseSignature Signature { get; set; } = new DeviceLicenseSignature();
+    }
+
+    /// <summary>
+    /// License 中的软件信息。
+    /// </summary>
+    public class DeviceLicenseSoftware
+    {
+        public string AppCategory { get; set; } = string.Empty;
+
+        public string AppCode { get; set; } = string.Empty;
+
+        public string AppName { get; set; } = string.Empty;
+
+        public string AppEdition { get; set; } = string.Empty;
+
+        public string AppVersion { get; set; } = string.Empty;
+    }
+
+    /// <summary>
+    /// License 中的设备绑定信息。
+    /// </summary>
+    public class DeviceLicenseBinding
+    {
+        public string ClientId { get; set; } = string.Empty;
+
+        public string MachineCode { get; set; } = string.Empty;
+
+        public string MachineName { get; set; } = string.Empty;
+
+        public string CpuId { get; set; } = string.Empty;
+
+        public string BiosSerialNumber { get; set; } = string.Empty;
+
+        public string MainboardSerialNumber { get; set; } = string.Empty;
+
+        public string DiskSerialNumber { get; set; } = string.Empty;
+
+        public string MacAddress { get; set; } = string.Empty;
+    }
+
+    /// <summary>
+    /// License 有效期信息。
+    /// </summary>
+    public class DeviceLicenseValidity
+    {
+        public string LicenseType { get; set; } = string.Empty;
+
+        public DateTime? NotBefore { get; set; }
+
+        public DateTime? ExpiresAt { get; set; }
+
+        public int GraceDays { get; set; }
+    }
+
+    /// <summary>
+    /// License 中的授权范围。
+    /// </summary>
+    public class DeviceLicenseAuthorization
+    {
+        public List<string> ModuleKeys { get; set; } = new List<string>();
+
+        public List<string> PageKeys { get; set; } = new List<string>();
+    }
+
+    /// <summary>
+    /// License 签名信息。
+    /// </summary>
+    public class DeviceLicenseSignature
+    {
+        public string Algorithm { get; set; } = string.Empty;
+
+        public string ContentSha256 { get; set; } = string.Empty;
+
+        public string SignText { get; set; } = string.Empty;
+
+        public string KeyId { get; set; } = string.Empty;
+    }
+}

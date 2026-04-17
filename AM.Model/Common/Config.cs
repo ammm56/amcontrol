@@ -138,7 +138,37 @@ namespace AM.Model.Common
         /// 设备名称。
         /// 默认可为空，运行时可回退到 Environment.MachineName。
         /// </summary>
-        public string MachineName { get; set; } = string.Empty; 
+        public string MachineName { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 是否启用设备侧 License 运行时校验。
+        /// 默认 true。
+        /// </summary>
+        public bool EnableDeviceLicense { get; set; } = true;
+
+        /// <summary>
+        /// 授权服务根地址。
+        /// 用于设备调用 /api/license/apply。
+        /// </summary>
+        public string LicenseServiceUrl { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 设备服务根地址。
+        /// 用于设备注册、心跳、刷新 token 和结构化上报。
+        /// </summary>
+        public string DeviceServiceUrl { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 设备心跳周期，单位 ms。
+        /// 默认 60000。
+        /// </summary>
+        public int DeviceHeartbeatIntervalMs { get; set; } = 60000;
+
+        /// <summary>
+        /// 最近一次注册或刷新后保存的设备 token。
+        /// 当前阶段先持久化到 config.json，后续如有需要再调整存储位置。
+        /// </summary>
+        public string DeviceToken { get; set; } = string.Empty;
     }
 
     /// <summary>
