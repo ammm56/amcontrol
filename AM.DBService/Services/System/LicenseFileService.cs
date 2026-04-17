@@ -47,7 +47,7 @@ namespace AM.DBService.Services.System
         /// <summary>
         /// 获取授权文件完整路径。
         /// </summary>
-        public string GetLicenseFilePath()
+        public virtual string GetLicenseFilePath()
         {
             string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
             if (string.IsNullOrWhiteSpace(baseDirectory))
@@ -61,7 +61,7 @@ namespace AM.DBService.Services.System
         /// <summary>
         /// 获取授权备份文件完整路径。
         /// </summary>
-        public string GetLicenseBackupFilePath()
+        public virtual string GetLicenseBackupFilePath()
         {
             return GetLicenseFilePath() + BackupSuffix;
         }
@@ -69,7 +69,7 @@ namespace AM.DBService.Services.System
         /// <summary>
         /// 检查授权文件是否存在。
         /// </summary>
-        public bool Exists()
+        public virtual bool Exists()
         {
             return File.Exists(GetLicenseFilePath());
         }
@@ -77,7 +77,7 @@ namespace AM.DBService.Services.System
         /// <summary>
         /// 读取授权文件内容。
         /// </summary>
-        public Result<string> ReadLicenseText()
+        public virtual Result<string> ReadLicenseText()
         {
             try
             {
@@ -105,7 +105,7 @@ namespace AM.DBService.Services.System
         /// 将授权文本写入本地文件。
         /// 采用临时文件 + 备份替换的方式避免中途覆盖损坏。
         /// </summary>
-        public Result WriteLicenseText(string licenseText)
+        public virtual Result WriteLicenseText(string licenseText)
         {
             try
             {

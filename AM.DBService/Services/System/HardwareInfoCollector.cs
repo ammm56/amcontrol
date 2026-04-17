@@ -48,7 +48,7 @@ namespace AM.DBService.Services.System
         /// <summary>
         /// 采集当前设备硬件信息并执行统一归一化。
         /// </summary>
-        public Result<DeviceHardwareInfo> CollectCurrent()
+        public virtual Result<DeviceHardwareInfo> CollectCurrent()
         {
             try
             {

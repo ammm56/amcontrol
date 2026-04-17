@@ -36,6 +36,20 @@ namespace AM.DBService.Services.System
         {
         }
 
+        /// <summary>
+        /// 供本地验证替身使用的无依赖构造。
+        /// 仅允许派生类覆写 Validate 时使用，避免触发真实硬件与数据库依赖初始化。
+        /// </summary>
+        protected LicenseValidator(bool skipDependencyInitialization)
+            : base(null)
+        {
+            if (!skipDependencyInitialization)
+            {
+                _hardwareInfoCollector = new HardwareInfoCollector();
+                _licenseCryptoService = new LicenseCryptoService();
+            }
+        }
+
         public LicenseValidator(HardwareInfoCollector hardwareInfoCollector, LicenseCryptoService licenseCryptoService, IAppReporter reporter)
             : base(reporter)
         {
@@ -46,7 +60,7 @@ namespace AM.DBService.Services.System
         /// <summary>
         /// 校验授权明文与当前设备环境。
         /// </summary>
-        public Result<LicenseValidationResult> Validate(DeviceLicense license, string licenseJson)
+        public virtual Result<LicenseValidationResult> Validate(DeviceLicense license, string licenseJson)
         {
             try
             {

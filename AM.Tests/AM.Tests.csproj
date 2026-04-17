@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <OutputType>Exe</OutputType>
     <TargetFramework>net461</TargetFramework>
 
     <IsPackable>false</IsPackable>
@@ -13,6 +14,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AM.Core\AM.Core.csproj" />
+    <ProjectReference Include="..\AM.Model\AM.Model.csproj" />
+    <ProjectReference Include="..\AM.DBService\AM.DBService.csproj" />
     <ProjectReference Include="..\ProtocolLib\Modbus\ModbusTcp\ModbusTcp.csproj" />
     <ProjectReference Include="..\ProtocolLib\Siemens\S7Tcp\S7Tcp.csproj" />
   </ItemGroup>

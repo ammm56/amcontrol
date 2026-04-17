@@ -48,7 +48,7 @@ namespace AM.DBService.Services.System
         /// 1. 已经是 JSON 明文；
         /// 2. Base64 编码后的 UTF8 JSON 文本。
         /// </summary>
-        public Result<string> DecodeLicenseText(string licenseText)
+        public virtual Result<string> DecodeLicenseText(string licenseText)
         {
             try
             {
@@ -92,7 +92,7 @@ namespace AM.DBService.Services.System
         /// 3. 校验 contentSha256；
         /// 4. 对去除 signature.signText 后的最小化 JSON 执行 RSA-SHA256 验签。
         /// </summary>
-        public Result VerifyLicenseSignature(string licenseJson, DeviceLicense license)
+        public virtual Result VerifyLicenseSignature(string licenseJson, DeviceLicense license)
         {
             try
             {
@@ -164,7 +164,7 @@ namespace AM.DBService.Services.System
         /// <summary>
         /// 从嵌入式资源读取 PEM 公钥文本。
         /// </summary>
-        public Result<string> LoadEmbeddedPublicKeyPem()
+        public virtual Result<string> LoadEmbeddedPublicKeyPem()
         {
             try
             {
