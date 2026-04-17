@@ -63,6 +63,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Management" />
     <Reference Include="System.Data.SQLite, Version=2.0.2.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Libs\System.Data.SQLite.dll</HintPath>
@@ -129,6 +130,11 @@
     <Compile Include="Services\Runtime\MotionAxisScanWorker.cs" />
     <Compile Include="Services\Runtime\RuntimeTaskManager.cs" />
     <Compile Include="Services\System\ClientIdentityService.cs" />
+    <Compile Include="Services\System\HardwareInfoCollector.cs" />
+    <Compile Include="Services\System\LicenseCryptoService.cs" />
+    <Compile Include="Services\System\LicenseFileService.cs" />
+    <Compile Include="Services\System\LicenseRuntimeLoader.cs" />
+    <Compile Include="Services\System\LicenseValidator.cs" />
     <Compile Include="Services\System\ClientUpdateRecordService.cs" />
     <Compile Include="Services\System\UsageEventBufferService.cs" />
     <Compile Include="Services\System\UsageReportService.cs" />
@@ -161,6 +167,7 @@
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Resources\License\LicensePublicKey.pem" />
     <Content Include="logo.ico" />
     <Content Include="SQLite.Interop.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
