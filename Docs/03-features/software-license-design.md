@@ -2,7 +2,7 @@
 
 **文档编号**：FEAT-LICENSE-001  
 **版本**：1.0.0  
-**状态**：规划中  
+**状态**：实现前最终版  
 **最后更新**：2026-04-17  
 **维护人**：Am
 
@@ -14,7 +14,7 @@
 
 1. 设备软件提交授权申请；
 2. 后端授权服务匹配默认授权配置并生成授权数据；
-3. 设备软件将成功授权返回的数据保存到根目录 `license.lic`；
+3. 设备软件将成功授权响应中的 `data.licenseText` 保存到根目录 `license.lic`；
 4. 程序启动时读取 `license.lic`，解密得到 JSON 明文；
 5. 程序校验 RSA 签名和硬件绑定信息；
 6. 校验成功后将授权信息载入运行时上下文；
@@ -273,10 +273,49 @@
 ```json
 {
   "success": false,
-  "code": "LicensePending",
+  "errorCode": "LicensePending",
   "message": "未找到默认授权配置，请联系管理员添加授权模板。"
 }
 ```
+
+### 5.4 当前真实成功响应包装
+
+当前设备侧实现应以真实后端成功响应为准，而不是自行推断返回结构。
+
+```json
+{
+  "success": true,
+  "data": {
+    "licenseId": "LIC-20260417111557-636f844c28",
+    "status": "Issued",
+    "licenseText": "{\"licenseId\":\"LIC-20260417111557-636f844c28\",...}",
+    "issuedAt": "2026-04-17T11:15:57.7315933Z",
+    "expiresAt": "2027-04-17T11:15:57.7315933Z"
+  },
+  "message": null,
+  "errorCode": null,
+  "traceId": "0HNKSD62133I5:00000001",
+  "errors": null
+}
+```
+
+设备侧固定处理约束：
+
+1. 顶层 `success`、`message`、`errorCode`、`traceId`、`errors` 是统一 API 包装；
+2. 真正的授权业务载荷位于 `data`；
+3. `data.licenseText` 是一个 JSON 字符串，不是嵌套对象；
+4. 设备侧落地到 `license.lic` 的内容固定为 `data.licenseText`，而不是整个响应包装；
+5. `data.issuedAt`、`data.expiresAt` 仅作为当前申请结果展示或日志辅助字段，不替代 `licenseText.validity` 中的正式校验字段。
+
+### 5.5 requestId 固定规则
+
+设备侧首版必须把 `requestId` 视为幂等键，而不是普通流水号。
+
+1. 同一次授权申请重试时，`requestId` 必须保持不变；
+2. 新的一次授权申请才生成新的 `requestId`；
+3. 推荐格式：`apply-{yyyyMMddHHmmss}-{随机短码}`；
+4. 设备侧不得把 `requestId` 与 `traceId` 混用；
+5. 当后端返回 `LicensePending` 时，设备侧应保留本次 `requestId` 以便后续排查。
 
 ---
 
@@ -313,13 +352,28 @@
 
 说明：
 
-1. 授权成功后，将后端返回的授权数据原文保存到应用根目录；
+1. 授权成功后，将 `data.licenseText` 原文保存到应用根目录；
 2. 文件名固定为 `license.lic`；
 3. 启动时优先读取 `license.lic`；
-4. 设备侧先解密，再得到 JSON 明文；
+4. 若 `licenseText` 为密文，则设备侧先解密，再得到 JSON 明文；若当前联调阶段返回的已是明文 JSON 字符串，则直接解析；
 5. 不单独落本地授权数据库表。
 
-### 6.3 运行时状态模型建议
+### 6.3 设备侧首版模型清单
+
+为避免实现时临时拼装匿名对象，建议设备侧首版固定以下模型：
+
+- `LicenseApplyRequest`
+- `LicenseApplyResponse`
+- `DeviceLicense`
+- `DeviceLicenseSoftware`
+- `DeviceLicenseBinding`
+- `DeviceLicenseValidity`
+- `DeviceLicenseAuthorization`
+- `DeviceLicenseSignature`
+- `DeviceHardwareInfo`
+- `LicenseValidationResult`
+
+### 6.4 运行时状态模型建议
 
 建议增加运行时状态模型：
 
@@ -538,14 +592,20 @@
 
 后续建议按以下顺序推进：
 
-1. 设备侧新增 `LicenseFileService`，负责读写 `license.lic`；
-2. 设备侧新增 `LicenseCryptoService`，负责解密与 RSA 验签；
-3. 设备侧新增 `LicenseValidator`，负责硬件信息与有效期校验；
-4. 设备侧新增运行时授权上下文；
-5. 登录成功后接入 `pageKeys` 与当前用户页面权限的交集逻辑；
-6. MainWindow 与 MainWindowModel 保持现有过滤逻辑不变；
-7. 后端侧补齐程序表、页面表、默认授权模板表与授权记录表；
-8. 完成授权申请 API 与许可签发 API。
+1. Phase A：新增模型、运行时上下文、常量与配置项；
+2. Phase B：实现 `LicenseFileService`、`LicenseCryptoService`、`LicenseValidator`、`HardwareInfoCollector`、`LicenseRuntimeLoader`；
+3. Phase C：实现 `DeviceRegisterClient`、`DeviceHeartbeatClient`、`DeviceReportClient`、`DeviceLicenseApplyClient`；
+4. Phase D：在 `AppBootstrap.cs` 接入启动期授权运行时装载，并在 `AuthService.cs` 登录成功后做页面权限收口；
+5. Phase E：在 `MainWindow.cs` 增加授权状态提示与到期提示，但不承载授权核心逻辑。
+
+### 10.1 按项目分层的新增类清单
+
+建议按当前 WinForms 解决方案分层固定新增类的放置位置：
+
+1. `AM.Model`：`LicenseApplyRequest`、`LicenseApplyResponse`、`DeviceLicense*`、`DeviceHardwareInfo`、`LicenseValidationResult`；
+2. `AM.Core.Context`：`LicenseRuntimeContext`；
+3. `AM.DBService.Services.System`：`LicenseFileService`、`LicenseCryptoService`、`LicenseValidator`、`LicenseRuntimeLoader`、`HardwareInfoCollector`、`DeviceRegisterClient`、`DeviceHeartbeatClient`、`DeviceReportClient`、`DeviceLicenseApplyClient`、`LicensePagePermissionHelper`；
+4. `AMControlWinF`：后续只承载授权状态展示，不承载授权核心逻辑。
 
 ---
 

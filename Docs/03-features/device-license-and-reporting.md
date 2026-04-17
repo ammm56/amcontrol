@@ -2,7 +2,7 @@
 
 **文档编号**：FEAT-DEVICE-001  
 **版本**：1.0.0  
-**状态**：规划中  
+**状态**：实现前最终版  
 **最后更新**：2026-04-17  
 **维护人**：Am
 
@@ -19,7 +19,7 @@
 
 - 当前已经落地的真实接口；
 - 设备软件请求与响应格式；
-- 设备侧收到授权数据后的本地保存方式；
+- 设备侧收到授权响应后，仅保存 `data.licenseText` 的本地落盘方式；
 - 设备管理链路与授权链路之间的关系；
 - 当前最小闭环范围与非目标。
 
@@ -80,8 +80,8 @@
 当前阶段设备侧的处理约定为：
 
 1. 设备调用 `/api/license/apply`；
-2. 后端返回授权数据；
-3. 设备将成功授权返回结果保存到根目录 `license.lic`；
+2. 后端返回统一授权响应包装；
+3. 设备将成功授权响应中的 `data.licenseText` 保存到根目录 `license.lic`；
 4. 下次启动时读取 `license.lic`；
 5. 解密后得到 JSON 明文；
 6. 验签并校验硬件信息；
@@ -148,6 +148,45 @@
 7. `environment.customerCode` / `siteCode`：建议传，用于模板匹配；
 8. `signature.contentSha256`：当前阶段可先按最小闭环透传摘要值。
 
+### requestId 规则
+
+设备侧实现前应固定以下 `requestId` 规则：
+
+1. 同一次申请的重试必须复用同一个 `requestId`；
+2. 新的一次申请才生成新的 `requestId`；
+3. 推荐格式：`apply-{yyyyMMddHHmmss}-{随机短码}`；
+4. `requestId` 是授权申请幂等键，不等同于 `traceId`；
+5. 当后端返回 `LicensePending` 时，设备侧应保留 `requestId` 便于联调和审计。
+
+### 当前真实成功响应
+
+当前设备端必须按真实返回结构处理成功响应：
+
+```json
+{
+  "success": true,
+  "data": {
+    "licenseId": "LIC-20260417111557-636f844c28",
+    "status": "Issued",
+    "licenseText": "{\"licenseId\":\"LIC-20260417111557-636f844c28\",...}",
+    "issuedAt": "2026-04-17T11:15:57.7315933Z",
+    "expiresAt": "2027-04-17T11:15:57.7315933Z"
+  },
+  "message": null,
+  "errorCode": null,
+  "traceId": "0HNKSD62133I5:00000001",
+  "errors": null
+}
+```
+
+设备侧固定处理约束：
+
+1. 顶层是统一 API 包装；
+2. 真正授权结果位于 `data`；
+3. `data.licenseText` 是字符串；
+4. `license.lic` 固定保存 `data.licenseText`；
+5. `issuedAt`、`expiresAt` 可用于提示，但正式校验仍以 `licenseText.validity` 为准。
+
 ---
 
 ## 3.3 授权申请结果语义
@@ -170,13 +209,20 @@
 
 设备端应把 `LicensePending` 当作业务待处理结果，而不是系统崩溃错误。
 
+当前推荐错误处理方式：
+
+1. 保留本次 `requestId`、`clientId`、`machineCode`、`traceId` 到日志；
+2. 不写入新的 `license.lic`；
+3. 程序继续使用本地旧授权或退回最小功能模式；
+4. 前端或日志消息统一提示“待管理员配置默认模板”。
+
 ---
 
 ## 3.4 设备侧收到授权后的处理
 
 当前阶段设备侧必须遵守以下规则：
 
-1. 成功收到授权数据后，保存到根目录 `license.lic`；
+1. 成功收到授权数据后，将 `data.licenseText` 保存到根目录 `license.lic`；
 2. 当前阶段不把授权信息写入本地数据库；
 3. 程序启动时优先读取 `license.lic`；
 4. 先解密，再得到 JSON 明文；
@@ -292,6 +338,16 @@
 1. 刷新接口不是匿名接口；
 2. 必须携带当前有效 `deviceToken`；
 3. 收到新 token 后设备端应立即覆盖旧 token。
+
+### Token 头固定规则
+
+设备侧实现前应固定以下规则：
+
+1. `refresh-token`、`heartbeat`、`report` 三类接口统一使用 `X-Device-Token`；
+2. 不额外引入第二套自定义 Token 头；
+3. 刷新成功后必须立即用新 token 覆盖旧 token；
+4. 路径中的 `{id}` 必须与 token 主体一致；
+5. 设备端不得把管理员 `Bearer Token` 混用于设备写接口。
 
 ---
 
@@ -428,14 +484,33 @@
 5. `LicenseFileService`
 6. `LicenseCryptoService`
 7. `LicenseValidator`
-8. `LicenseRuntimeContext`
-9. `LicensePagePermissionHelper`
+8. `LicenseRuntimeLoader`
+9. `HardwareInfoCollector`
+10. `LicenseRuntimeContext`
+11. `LicensePagePermissionHelper`
 
 说明：
 
 - 设备管理客户端负责与 `/api/devices/*` 交互；
 - 授权客户端负责与 `/api/license/apply` 交互；
 - 授权文件与运行时逻辑保持独立，避免和设备上报逻辑混在一个类里。
+
+### 6.1 按项目分层的新增类清单
+
+建议按当前 WinForms 解决方案分层固定新增类：
+
+1. `AM.Model`：授权申请请求/响应模型、`licenseText` 明文模型、硬件信息模型、校验结果模型；
+2. `AM.Core.Context`：`LicenseRuntimeContext`；
+3. `AM.DBService.Services.System`：`LicenseFileService`、`LicenseCryptoService`、`LicenseValidator`、`LicenseRuntimeLoader`、`HardwareInfoCollector`、`DeviceRegisterClient`、`DeviceHeartbeatClient`、`DeviceReportClient`、`DeviceLicenseApplyClient`、`LicensePagePermissionHelper`；
+4. `AMControlWinF`：只负责授权状态提示，不承载授权核心逻辑。
+
+### 6.2 实现阶段顺序
+
+1. Phase A：模型、Context、常量、配置项；
+2. Phase B：`license.lic` 文件服务、硬件采集、校验器、运行时装载器；
+3. Phase C：设备注册、心跳、上报、授权申请客户端；
+4. Phase D：启动期接入 `AppBootstrap.cs`，登录期接入 `AuthService.cs`；
+5. Phase E：主界面授权状态提示，`MainWindow.cs` 只做展示。
 
 ---
 

@@ -2,7 +2,7 @@
 
 **文档编号**：FEAT-LICENSE-002  
 **版本**：1.0.0  
-**状态**：规划中  
+**状态**：实现前最终版  
 **最后更新**：2026-04-17  
 **维护人**：Am
 
@@ -25,10 +25,36 @@
 
 当前阶段：
 
-1. 后端授权成功后返回授权数据；
-2. 设备侧将返回结果原样保存到 `license.lic`；
-3. 文件内容本质上是加密授权数据；
-4. 设备侧读取后先解密，再得到 JSON 明文。
+1. 后端授权成功后返回统一 API 包装；
+2. 设备侧只将 `response.data.licenseText` 保存到 `license.lic`；
+3. `license.lic` 不保存顶层 `success/message/errorCode/traceId` 包装；
+4. `license.lic` 的内容可以是密文，也可以是当前联调阶段的明文 JSON 字符串；
+5. 设备侧读取后先判断是否需要解密，再得到 JSON 明文。
+
+当前真实成功响应包装示例：
+
+```json
+{
+  "success": true,
+  "data": {
+    "licenseId": "LIC-20260417111557-636f844c28",
+    "status": "Issued",
+    "licenseText": "{\"licenseId\":\"LIC-20260417111557-636f844c28\",...}",
+    "issuedAt": "2026-04-17T11:15:57.7315933Z",
+    "expiresAt": "2027-04-17T11:15:57.7315933Z"
+  },
+  "message": null,
+  "errorCode": null,
+  "traceId": "0HNKSD62133I5:00000001",
+  "errors": null
+}
+```
+
+设备侧固定写文件规则：
+
+```text
+license.lic = response.data.licenseText
+```
 
 ---
 
@@ -61,7 +87,8 @@
 1. 检查 `license.lic` 是否存在；
 2. 读取 `license.lic` 内容；
 3. 写入新授权数据到 `license.lic`；
-4. 提供统一的文件路径与异常处理。
+4. 提供统一的文件路径与异常处理；
+5. 必要时保留旧文件备份或临时写入文件，避免直接覆盖导致文件损坏。
 
 ### 4.2 LicenseCryptoService
 
@@ -81,6 +108,15 @@
 4. 判断是否进入宽限期；
 5. 输出最终许可状态。
 
+### 4.4 HardwareInfoCollector
+
+职责：
+
+1. 统一采集 `clientId`、`machineCode`、`machineName`、`cpuId`、`biosSerialNumber`、`mainboardSerialNumber`、`diskSerialNumber`、`macAddress`；
+2. 对大小写、空格、分隔符做统一归一化；
+3. 为 `LicenseValidator` 提供标准化的当前设备硬件快照；
+4. 与 `ClientIdentityService` 分工明确，不把授权校验逻辑写进身份服务。
+
 ---
 
 ## 5. RSA 验签规则
@@ -97,6 +133,12 @@
 
 - 验签成功：继续校验硬件信息与有效期；
 - 验签失败：直接视为无效授权，退回最小功能模式。
+
+实现前还应固定以下规则：
+
+1. 是否首版即启用正式 RSA 验签；
+2. 验签公钥的来源是内置资源、配置文件还是外部 Key 文件；
+3. 若启用 `KeyId`，设备侧如何根据 `licenseText.signature` 选择公钥。
 
 ---
 
@@ -119,6 +161,14 @@
 - 关键硬件标识不一致：授权无效；
 - 非关键字段为空：允许忽略；
 - 字段比较建议统一去空格、大小写不敏感处理。
+
+建议首版强校验字段固定为：
+
+1. `ClientId`
+2. `MachineCode`
+3. `CpuId`
+
+其余字段默认作为增强校验字段，在授权中声明且本地可采集时再参与比较。
 
 ---
 
@@ -201,6 +251,9 @@
 - `LicenseFileService`
 - `LicenseCryptoService`
 - `LicenseValidator`
+- `HardwareInfoCollector`
+- `LicenseRuntimeLoader`
+- `LicensePagePermissionHelper`
 - `DeviceLicenseState`
 - `LicenseRuntimeContext`
 

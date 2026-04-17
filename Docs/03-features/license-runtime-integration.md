@@ -2,7 +2,7 @@
 
 **文档编号**：FEAT-LICENSE-003  
 **版本**：1.0.0  
-**状态**：规划中  
+**状态**：实现前最终版  
 **最后更新**：2026-04-17  
 **维护人**：Am
 
@@ -88,6 +88,13 @@
 4. 将交集结果写回 `UserContext.CurrentPageKeys`；
 5. 由 `MainWindowModel.LoadNavigation()` 自动过滤可见页面。
 
+推荐固定到当前 WinForms 代码链路中的具体接入点：
+
+1. 启动期装载入口：`AppBootstrap.cs`；
+2. 登录后页面权限收口入口：`AuthService.cs` 的登录成功分支；
+3. 最终页面权限落点：`UserContext.RefreshPagePermissions(...)` 或 `UserContext.SignIn(...)` 写入的页面集合；
+4. `MainWindowModel.CanAccessPage(...)` 保持不变。
+
 ---
 
 ## 5. 最终页面权限规则
@@ -152,6 +159,13 @@
 2. `UserContext.SignIn(...)` 之前或之后立即处理；
 3. 在 `MainWindowModel.LoadNavigation()` 调用之前完成。
 
+建议当前首版固定为：
+
+1. `AuthService.Login(...)` 查询到角色和页面权限后；
+2. 使用 `LicensePagePermissionHelper` 计算最终页面集合；
+3. 将最终页面集合写入 `UserContext.SignIn(...)`；
+4. 如需刷新已登录用户权限，统一走 `UserContext.RefreshPagePermissions(...)`。
+
 ---
 
 ## 8. 建议的辅助类
@@ -174,9 +188,37 @@
 2. 将授权状态装载到 `LicenseRuntimeContext`；
 3. 提供统一初始化入口。
 
+### 8.3 DeviceLicenseApplyClient
+
+职责：
+
+1. 按固定请求体调用 `POST /api/license/apply`；
+2. 解析统一 API 包装；
+3. 成功时返回 `LicenseApplyResponse`；
+4. `LicensePending` 时返回明确业务结果，而不是抛未知异常。
+
+### 8.4 DeviceRegisterClient / DeviceHeartbeatClient / DeviceReportClient
+
+职责：
+
+1. 负责设备注册、令牌刷新、心跳与结构化上报；
+2. 固定使用 `X-Device-Token` 请求头；
+3. 对 `DEVICE_TOKEN_MISSING`、`DEVICE_TOKEN_INVALID`、`DEVICE_TOKEN_EXPIRED`、`DEVICE_ID_MISMATCH`、`DEVICE_REPORT_EVENT_ID_CONFLICT` 等错误码做明确映射。
+
 ---
 
-## 9. 对现有代码的影响原则
+## 9. 按项目分层的实现清单
+
+建议实现前先固定以下项目分层：
+
+1. `AM.Model`：`LicenseApplyRequest`、`LicenseApplyResponse`、`DeviceLicense`、`DeviceLicenseSoftware`、`DeviceLicenseBinding`、`DeviceLicenseValidity`、`DeviceLicenseAuthorization`、`DeviceLicenseSignature`、`DeviceHardwareInfo`、`LicenseValidationResult`；
+2. `AM.Core.Context`：`LicenseRuntimeContext`；
+3. `AM.DBService.Services.System`：`LicenseFileService`、`LicenseCryptoService`、`LicenseValidator`、`LicenseRuntimeLoader`、`HardwareInfoCollector`、`DeviceRegisterClient`、`DeviceHeartbeatClient`、`DeviceReportClient`、`DeviceLicenseApplyClient`、`LicensePagePermissionHelper`；
+4. `AMControlWinF`：只负责授权状态提示和导航刷新后的展示。
+
+---
+
+## 10. 对现有代码的影响原则
 
 本授权接入方案应遵守以下原则：
 
@@ -188,21 +230,19 @@
 
 ---
 
-## 10. 后续开发建议顺序
+## 11. 后续开发建议顺序
 
 建议后续按以下顺序实现：
 
-1. `LicenseRuntimeContext`
-2. `LicenseFileService`
-3. `LicenseCryptoService`
-4. `LicenseValidator`
-5. `LicensePagePermissionHelper`
-6. 登录成功后的页面权限收口接入
-7. 主界面授权状态提示与到期提示
+1. Phase A：`LicenseApplyRequest/Response`、`DeviceLicense*` 模型、`DeviceHardwareInfo`、`LicenseValidationResult`、`LicenseRuntimeContext`、授权常量与配置项；
+2. Phase B：`LicenseFileService`、`LicenseCryptoService`、`LicenseValidator`、`HardwareInfoCollector`、`LicenseRuntimeLoader`；
+3. Phase C：`DeviceRegisterClient`、`DeviceHeartbeatClient`、`DeviceReportClient`、`DeviceLicenseApplyClient`；
+4. Phase D：启动期接入 `AppBootstrap.cs`，登录期接入 `AuthService.cs`；
+5. Phase E：主界面授权状态提示与到期提示，`MainWindow.cs` 只做展示。
 
 ---
 
-## 11. 结论
+## 12. 结论
 
 设备侧授权运行时接入的核心原则是：
 
