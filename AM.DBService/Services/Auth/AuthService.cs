@@ -2,6 +2,7 @@ using AM.Core.Base;
 using AM.Core.Context;
 using AM.Core.Reporter;
 using AM.DBService.DBase;
+using AM.DBService.Services.System;
 using AM.Model.Auth;
 using AM.Model.Common;
 using AM.Model.Entity.Auth;
@@ -28,6 +29,7 @@ namespace AM.DBService.Services.Auth
         private readonly DBCommon<SysLoginLogEntity> _loginLogDb;
         private readonly DBCommon<SysPagePermissionEntity> _pagePermissionDb;
         private readonly DBCommon<SysUserPagePermissionEntity> _userPagePermissionDb;
+        private readonly LicensePagePermissionHelper _licensePagePermissionHelper;
 
         protected override string MessageSourceName
         {
@@ -47,6 +49,7 @@ namespace AM.DBService.Services.Auth
             _loginLogDb = new DBCommon<SysLoginLogEntity>();
             _pagePermissionDb = new DBCommon<SysPagePermissionEntity>();
             _userPagePermissionDb = new DBCommon<SysUserPagePermissionEntity>();
+            _licensePagePermissionHelper = new LicensePagePermissionHelper();
         }
 
         public AuthService(IAppReporter reporter) : base(reporter)
@@ -57,6 +60,7 @@ namespace AM.DBService.Services.Auth
             _loginLogDb = new DBCommon<SysLoginLogEntity>();
             _pagePermissionDb = new DBCommon<SysPagePermissionEntity>();
             _userPagePermissionDb = new DBCommon<SysUserPagePermissionEntity>();
+            _licensePagePermissionHelper = new LicensePagePermissionHelper(reporter);
         }
 
         public Result<SysUserEntity> Login(string loginName, string password, string clientInfo = null)
@@ -110,6 +114,13 @@ namespace AM.DBService.Services.Auth
                 return Fail<SysUserEntity>(permissionResult.Code, "查询页面权限失败");
             }
 
+            var effectivePermissionResult = _licensePagePermissionHelper.GetEffectivePageKeys(permissionResult.Items);
+            if (!effectivePermissionResult.Success)
+            {
+                SaveLoginLog(user.Id, loginName, false, "收口授权页面权限失败", clientInfo);
+                return Fail<SysUserEntity>(effectivePermissionResult.Code, "收口授权页面权限失败");
+            }
+
             user.LastLoginTime = DateTime.Now;
             var editResult = _userDb.Edit(user);
             if (!editResult.Success)
@@ -118,7 +129,7 @@ namespace AM.DBService.Services.Auth
                 _reporter?.Warn(MessageSourceName, "更新最后登录时间失败", editResult.Code);
             }
 
-            UserContext.Instance.SignIn(user, rolesResult.Items, permissionResult.Items);
+            UserContext.Instance.SignIn(user, rolesResult.Items, effectivePermissionResult.Items);
 
             SaveLoginLog(user.Id, loginName, true, "登录成功", clientInfo);
 
@@ -814,7 +825,13 @@ namespace AM.DBService.Services.Auth
                 return;
             }
 
-            UserContext.Instance.SignIn(currentUser, roleResult.Items, permissionResult.Items);
+            var effectivePermissionResult = _licensePagePermissionHelper.GetEffectivePageKeys(permissionResult.Items);
+            if (!effectivePermissionResult.Success)
+            {
+                return;
+            }
+
+            UserContext.Instance.SignIn(currentUser, roleResult.Items, effectivePermissionResult.Items);
         }
 
         public Result RestoreDefaultPagePermissions(int userId)

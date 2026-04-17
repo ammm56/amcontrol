@@ -133,6 +133,7 @@
     <Compile Include="Services\System\HardwareInfoCollector.cs" />
     <Compile Include="Services\System\LicenseCryptoService.cs" />
     <Compile Include="Services\System\LicenseFileService.cs" />
+    <Compile Include="Services\System\LicensePagePermissionHelper.cs" />
     <Compile Include="Services\System\LicenseRuntimeLoader.cs" />
     <Compile Include="Services\System\LicenseValidator.cs" />
     <Compile Include="Services\System\ClientUpdateRecordService.cs" />

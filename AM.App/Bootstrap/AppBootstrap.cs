@@ -113,6 +113,14 @@ namespace AM.App.Bootstrap
             }
             reporter.Info("AppBootstrap", "数据库 PLC 配置加载并完成 PLC 上下文重建");
 
+            // 6.2 启动期读取并校验本地授权文件，将最终状态写入 LicenseRuntimeContext
+            var licenseRuntimeLoader = new LicenseRuntimeLoader(reporter);
+            var licenseLoadResult = licenseRuntimeLoader.Load();
+            if (!licenseLoadResult.Success)
+            {
+                reporter.Warn("AppBootstrap", "启动期授权装载执行失败，系统将按最小功能模式继续启动", licenseLoadResult.Code);
+            }
+
             // 7. 建立硬件连接（容错：单卡失败不阻断后续后台服务注册）
             var machineResult = InitializeMachine();
             if (!machineResult.Success)
