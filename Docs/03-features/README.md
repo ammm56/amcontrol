@@ -43,6 +43,7 @@
 | [software-license-design.md](software-license-design.md) | 设备软件授权设计（license.lic 文件方案、设备侧请求 JSON、授权数据、页面授权清单、运行时接入规则） |
 | [license-file-validation-flow.md](license-file-validation-flow.md) | 设备侧 license.lic 读取、解密、RSA 验签、硬件绑定校验与最小功能回退流程 |
 | [license-runtime-integration.md](license-runtime-integration.md) | 设备侧运行时授权上下文、pageKeys 与当前用户页面权限交集、导航过滤接入说明 |
+| [device-license-and-reporting.md](device-license-and-reporting.md) | 设备软件授权申请与设备信息上报说明（apply、register、heartbeat、report、返回语义、联调顺序） |
 | [plc-communication.md](plc-communication.md) | PLC 通信模块实现说明（配置模型、服务接口、协议库、扫描链路、UI 页面映射、调用示例） |
 | [plc-communication-planning.md](plc-communication-planning.md) | PLC 通信模块功能文档（配置模型、数据库实体、服务职责边界、页面规划与实现状态） |
 
