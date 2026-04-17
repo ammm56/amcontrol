@@ -45,6 +45,9 @@
 - **页面开发模板与实施基线** → [02-development/winf-page-development-template.md](02-development/winf-page-development-template.md)
 - **用户认证与登录** → [03-features/winf-auth-login.md](03-features/winf-auth-login.md)
 - **主窗体壳层** → [03-features/winf-mainwindow-shell.md](03-features/winf-mainwindow-shell.md)
+- **设备软件授权设计** → [03-features/software-license-design.md](03-features/software-license-design.md)
+- **license.lic 读取与校验流程** → [03-features/license-file-validation-flow.md](03-features/license-file-validation-flow.md)
+- **运行时上下文与页面过滤接入** → [03-features/license-runtime-integration.md](03-features/license-runtime-integration.md)
 - **开发进展记录** → [07-release-notes/winf-development-progress.md](07-release-notes/winf-development-progress.md)
 - **WinForms 页面操作手册** → [06-user-manual/winf-page-operation-manual.md](06-user-manual/winf-page-operation-manual.md)
 
