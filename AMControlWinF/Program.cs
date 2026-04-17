@@ -1,6 +1,7 @@
 ﻿using AM.App.Bootstrap;
 using AM.Core.Context;
 using AM.DBService.Services.Auth;
+using AM.DBService.Services.System;
 using AM.PageModel.Main;
 using AM.PageModel.Navigation;
 using AMControlWinF.Views.Auth;
@@ -28,42 +29,75 @@ namespace AMControlWinF
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            // 全局唯一初始化：设备上下文、系统上下文、后台扫描。
-            AppBootstrap.Initialize();
-            SyncPagePermissions();
+            UsageEventBufferService usageEventBufferService = null;
+            UsageUploadWorker usageUploadWorker = null;
 
-            // 首次登录，取消则直接退出。
-            if (!ShowLogin(null))
-                return;
-
-            // 主循环：MainWindow 关闭后根据退出原因决定后续流程。
-            while (true)
+            try
             {
-                MainWindowExitReason exitReason;
+                // 全局唯一初始化：设备上下文、系统上下文、后台扫描。
+                AppBootstrap.Initialize();
+                SyncPagePermissions();
 
-                using (var window = new MainWindow())
+                // 启动后记录程序启动事件。
+                usageEventBufferService = new UsageEventBufferService();
+                usageEventBufferService.SaveAppStart();
+
+                // 首次登录，取消则直接退出。
+                if (!ShowLogin(null))
+                    return;
+
+                usageUploadWorker = TryStartUsageUploadWorker();
+
+                // 主循环：MainWindow 关闭后根据退出原因决定后续流程。
+                while (true)
                 {
-                    Application.Run(window);
-                    exitReason = window.ExitReason;
+                    MainWindowExitReason exitReason;
+
+                    using (var window = new MainWindow())
+                    {
+                        Application.Run(window);
+                        exitReason = window.ExitReason;
+                    }
+
+                    switch (exitReason)
+                    {
+                        case MainWindowExitReason.SwitchUser:
+                            // 切换用户：LoginForm 已在 MainWindow 内以模态完成认证，
+                            // 直接进入下一轮创建新 MainWindow。
+                            continue;
+
+                        case MainWindowExitReason.Logout:
+                            // 退出登录：清除登录态，重新弹出登录窗。
+                            UserContext.Instance.SignOut();
+                            if (ShowLogin(null))
+                                continue;
+                            return;
+
+                        default:
+                            // 正常关闭（关闭按钮）→ 退出程序。
+                            return;
+                    }
+                }
+            }
+            finally
+            {
+                try
+                {
+                    if (usageUploadWorker != null)
+                    {
+                        usageUploadWorker.StopAsync().GetAwaiter().GetResult();
+                    }
+                }
+                catch
+                {
                 }
 
-                switch (exitReason)
+                try
                 {
-                    case MainWindowExitReason.SwitchUser:
-                        // 切换用户：LoginForm 已在 MainWindow 内以模态完成认证，
-                        // 直接进入下一轮创建新 MainWindow。
-                        continue;
-
-                    case MainWindowExitReason.Logout:
-                        // 退出登录：清除登录态，重新弹出登录窗。
-                        UserContext.Instance.SignOut();
-                        if (ShowLogin(null))
-                            continue;
-                        return;
-
-                    default:
-                        // 正常关闭（关闭按钮）→ 退出程序。
-                        return;
+                    usageEventBufferService?.SaveAppExit();
+                }
+                catch
+                {
                 }
             }
         }
@@ -97,6 +131,30 @@ namespace AMControlWinF
             }
             catch
             {
+            }
+        }
+
+        /// <summary>
+        /// 启动使用信息上传工作单元。
+        /// 该工作单元不加入 AppBootstrap 与 PLC 后台任务编排，避免影响已有稳定启动链路。
+        /// </summary>
+        private static UsageUploadWorker TryStartUsageUploadWorker()
+        {
+            try
+            {
+                if (!ConfigContext.Instance.Config.Setting.EnableUsageReport)
+                    return null;
+
+                var worker = new UsageUploadWorker(SystemContext.Instance.Reporter);
+                var result = worker.Start();
+                if (!result.Success)
+                    return null;
+
+                return worker;
+            }
+            catch
+            {
+                return null;
             }
         }
     }

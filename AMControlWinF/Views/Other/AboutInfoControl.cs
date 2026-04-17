@@ -1,4 +1,5 @@
-﻿using AntdUI;
+﻿using AM.Tools;
+using AntdUI;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows.Forms;
@@ -21,7 +22,7 @@ namespace AMControlWinF.Views.Other
         {
             var appVersionText = AM.Tools.Tools.GetAppVersionText();
             string language = AM.Tools.Tools.GetCurrentLanguage();
-            labelProgramName.Text = AM.Tools.Tools.IsEnglishLanguage(language) ? "AM Motion Control System" : "AM运动控制系统";
+            labelProgramName.Text = AM.Tools.Tools.IsEnglishLanguage(language) ? "AM Motion Control Program" : "AM运动控制程序";
 
             labelAuthorValue.Text = AM.Tools.Tools.IsEnglishLanguage(language) ? "Developers: amm" : "开发者：amm";
 
@@ -68,6 +69,8 @@ namespace AMControlWinF.Views.Other
                         Description = "数据库 ORM"
                     }
                 }));
+
+            OSInfo.GetOSInfo();
         }
 
         private class ThirdPartyLibraryItem

@@ -1,4 +1,5 @@
 ﻿using AM.DBService.Services.Auth;
+using AM.DBService.Services.System;
 using AM.PageModel.Common;
 using System;
 using System.Threading.Tasks;
@@ -11,6 +12,7 @@ namespace AM.PageModel.Auth
     public class LoginPageModel : BindableBase
     {
         private readonly AuthService _authService;
+        private readonly UsageEventBufferService _usageEventBufferService;
 
         private string _loginName;
         private string _password;
@@ -21,6 +23,8 @@ namespace AM.PageModel.Auth
         public LoginPageModel()
         {
             _authService = new AuthService();
+            _usageEventBufferService = new UsageEventBufferService();
+
             _loginName = "am";
             _password = "am123";
             _statusText = "请输入登录信息";
@@ -68,6 +72,8 @@ namespace AM.PageModel.Auth
             {
                 ErrorMessage = "登录名不能为空";
                 StatusText = "登录失败";
+
+                TrySaveLoginFailed(string.Empty, "LoginNameEmpty");
                 return false;
             }
 
@@ -75,6 +81,8 @@ namespace AM.PageModel.Auth
             {
                 ErrorMessage = "密码不能为空";
                 StatusText = "登录失败";
+
+                TrySaveLoginFailed(LoginName.Trim(), "PasswordEmpty");
                 return false;
             }
 
@@ -91,21 +99,56 @@ namespace AM.PageModel.Auth
                 {
                     ErrorMessage = result.Message;
                     StatusText = "登录失败";
+
+                    TrySaveLoginFailed(LoginName.Trim(), result.Code.ToString());
                     return false;
                 }
 
                 StatusText = "登录成功";
+                TrySaveLoginSuccess(result.Item == null ? (int?)null : result.Item.Id, LoginName.Trim());
                 return true;
             }
             catch (Exception ex)
             {
                 ErrorMessage = ex.Message;
                 StatusText = "登录异常";
+
+                TrySaveLoginFailed(LoginName.Trim(), "LoginException");
                 return false;
             }
             finally
             {
                 IsBusy = false;
+            }
+        }
+
+        /// <summary>
+        /// 尝试记录登录成功事件。
+        /// 统计失败不影响登录主流程。
+        /// </summary>
+        private void TrySaveLoginSuccess(int? userId, string loginName)
+        {
+            try
+            {
+                _usageEventBufferService.SaveLoginSuccess(userId, loginName);
+            }
+            catch
+            {
+            }
+        }
+
+        /// <summary>
+        /// 尝试记录登录失败事件。
+        /// 统计失败不影响登录主流程。
+        /// </summary>
+        private void TrySaveLoginFailed(string loginName, string failReasonCode)
+        {
+            try
+            {
+                _usageEventBufferService.SaveLoginFailed(loginName, failReasonCode);
+            }
+            catch
+            {
             }
         }
     }

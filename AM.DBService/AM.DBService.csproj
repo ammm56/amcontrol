@@ -54,6 +54,10 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Libs\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="SqlSugar">
       <HintPath>..\Libs\SqlSugar.dll</HintPath>
     </Reference>
@@ -124,6 +128,11 @@
     <Compile Include="Services\Runtime\MotionAxisCardScanRunner.cs" />
     <Compile Include="Services\Runtime\MotionAxisScanWorker.cs" />
     <Compile Include="Services\Runtime\RuntimeTaskManager.cs" />
+    <Compile Include="Services\System\ClientIdentityService.cs" />
+    <Compile Include="Services\System\ClientUpdateRecordService.cs" />
+    <Compile Include="Services\System\UsageEventBufferService.cs" />
+    <Compile Include="Services\System\UsageReportService.cs" />
+    <Compile Include="Services\System\UsageUploadWorker.cs" />
     <Compile Include="Tables\DBTableT.cs" />
   </ItemGroup>
   <ItemGroup>

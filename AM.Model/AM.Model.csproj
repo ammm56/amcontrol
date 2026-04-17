@@ -84,6 +84,9 @@
     <Compile Include="Entity\Motion\Topology\MotionIoWiringEntity.cs" />
     <Compile Include="Entity\Plc\PlcPointConfigEntity.cs" />
     <Compile Include="Entity\Plc\PlcStationConfigEntity.cs" />
+    <Compile Include="Entity\System\SysClientIdentityEntity.cs" />
+    <Compile Include="Entity\System\SysClientUpdateRecordEntity.cs" />
+    <Compile Include="Entity\System\SysUsageEventBufferEntity.cs" />
     <Compile Include="Interfaces\DB\Motion\Topology\IMotionIoWiringCrudService.cs" />
     <Compile Include="Interfaces\Motion\Assembly\IAssemblyWiringDebugService.cs" />
     <Compile Include="Interfaces\Motion\Assembly\IAssemblyWiringQueryService.cs" />
@@ -170,6 +173,12 @@
     <Compile Include="Runtime\PlcStationRuntimeSnapshot.cs" />
     <Compile Include="Structs\AxisParam.cs" />
     <Compile Include="Structs\AxisStatus.cs" />
+    <Compile Include="Update\UpdateCheckRequest.cs" />
+    <Compile Include="Update\UpdateManifest.cs" />
+    <Compile Include="Update\UpdateReport.cs" />
+    <Compile Include="Usage\ClientIdentity.cs" />
+    <Compile Include="Usage\UsageEvent.cs" />
+    <Compile Include="Usage\UsageEventBatchUpload.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Entity\Vision\" />

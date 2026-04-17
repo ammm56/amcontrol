@@ -4,6 +4,7 @@ using AM.Core.Context;
 using AM.Core.Messaging;
 using AM.DBService.Services.Auth;
 using AM.DBService.Services.Plc.Runtime;
+using AM.DBService.Services.System;
 using AM.Model.Alarm;
 using AM.Model.Common;
 using AM.Model.Interfaces.MotionCard;
@@ -71,6 +72,9 @@ namespace AMControlWinF
         private int _navigateVersion;
         private bool _isClosing;
 
+        private readonly UsageEventBufferService _usageEventBufferService;
+        private string _lastTrackedPageKey;
+
         /// <summary>
         /// 关闭原因，供 Program.cs 主循环读取。
         /// 默认为 Exit（正常关闭 → 退出程序）。
@@ -95,6 +99,9 @@ namespace AMControlWinF
             _plcRuntimeQueryService = new PlcRuntimeQueryService();
             _statusIndicatorTimer = new Timer();
             _statusIndicatorTimer.Interval = 1000;
+
+            _usageEventBufferService = new UsageEventBufferService();
+            _lastTrackedPageKey = string.Empty;
 
             BindEvents();
             InitializeShellState();
@@ -434,6 +441,7 @@ namespace AMControlWinF
             {
                 _pageLoadingMaskControl.HideImmediately();
                 ShowPage(cachedPage, false);
+                TrackPageVisit(page.PageKey);
                 return;
             }
 
@@ -461,6 +469,7 @@ namespace AMControlWinF
 
                 _pageCache[page.PageKey] = createdPage;
                 ShowPage(createdPage, false);
+                TrackPageVisit(page.PageKey);
 
                 await _pageLoadingMaskControl.CompleteAndHideAsync(navigateVersion);
             }
@@ -1240,6 +1249,33 @@ namespace AMControlWinF
             return !string.IsNullOrWhiteSpace(theme) && (
                 string.Equals(theme, "SkinDark", StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(theme, "Dark", StringComparison.OrdinalIgnoreCase));
+        }
+
+        /// <summary>
+        /// 记录页面访问事件。
+        /// 
+        /// 约束：
+        /// 1. 只记录成功显示到工作区的页面；
+        /// 2. 连续同一页面不重复记录；
+        /// 3. 统计值直接使用 NavigationCatalog 的 PageKey。
+        /// </summary>
+        private void TrackPageVisit(string pageKey)
+        {
+            if (string.IsNullOrWhiteSpace(pageKey))
+                return;
+
+            if (string.Equals(_lastTrackedPageKey, pageKey, StringComparison.OrdinalIgnoreCase))
+                return;
+
+            _lastTrackedPageKey = pageKey;
+
+            try
+            {
+                _usageEventBufferService.SavePageVisit(pageKey);
+            }
+            catch
+            {
+            }
         }
 
         #endregion

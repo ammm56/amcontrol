@@ -97,6 +97,48 @@ namespace AM.Model.Common
         /// 是否启用数据库执行命令记录显示
         /// </summary>
         public bool DBLogExec { get; set; } = false;
+
+        /// <summary>
+        /// 是否启用使用信息上报。
+        /// 默认 false。
+        /// </summary>
+        public bool EnableUsageReport { get; set; } = true;
+
+        /// <summary>
+        /// 使用信息上报服务地址。
+        /// 建议填网关根地址或服务根地址。
+        /// </summary>
+        public string UsageReportServiceUrl { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 使用信息上传周期，单位 ms。
+        /// 默认 60000。
+        /// </summary>
+        public int UsageUploadIntervalMs { get; set; } = 60000;
+
+        /// <summary>
+        /// 使用信息单批上传数量。
+        /// 默认 100。
+        /// </summary>
+        public int UsageUploadBatchSize { get; set; } = 100;
+
+        /// <summary>
+        /// 客户端唯一标识。
+        /// 首次运行后由客户端身份服务生成并回写。
+        /// </summary>
+        public string ClientId { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 设备编码。
+        /// 仅用于软件实例识别，不包含生产数据。
+        /// </summary>
+        public string MachineCode { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 设备名称。
+        /// 默认可为空，运行时可回退到 Environment.MachineName。
+        /// </summary>
+        public string MachineName { get; set; } = string.Empty; 
     }
 
     /// <summary>

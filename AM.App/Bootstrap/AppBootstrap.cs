@@ -11,6 +11,7 @@ using AM.DBService.Services.Plc.App;
 using AM.DBService.Services.Plc.Driver;
 using AM.DBService.Services.Plc.Runtime;
 using AM.DBService.Services.Runtime;
+using AM.DBService.Services.System;
 using AM.Model.Alarm;
 using AM.Model.Common;
 using AM.Model.Interfaces.DB;
@@ -52,8 +53,10 @@ namespace AM.App.Bootstrap
             // 报警持久化：保留强类型引用用于启动时恢复未清除报警，DevAlarmRecordService，不走 reporter 避免循环调用
             var devAlarmRecord = new DevAlarmRecordService();
             AlarmManager alarmManager = new AlarmManager(messageBus, logger, devAlarmRecord);
+
             // 恢复上次未清除的历史报警（跨重启持续有效，直到被明确清除）
             RestoreUnclearedAlarms(devAlarmRecord, alarmManager, logger);
+
             IAppReporter reporter = new AppReporter(messageBus, logger, alarmManager, errorCatalog);
 
             // 3. 初始化系统上下文
@@ -87,7 +90,8 @@ namespace AM.App.Bootstrap
             // 5.2 加载协议实现程序集
             ProtocolAssemblyRegistry.Reload();
 
-            // 6. 从数据库加载完整设备配置并重建 MachineContext 完成后 MachineContext 中已有所有控制卡服务实例、轴/DI/DO 映射、执行器配置 但控制卡尚未物理连接
+            // 6. 从数据库加载完整设备配置并重建 MachineContext
+            // 完成后 MachineContext 中已有所有控制卡服务实例、轴/DI/DO 映射、执行器配置，但控制卡尚未物理连接
             var reloadService = new MachineConfigReloadService();
             var reloadResult = reloadService.ReloadAndRebuild();
             if (!reloadResult.Success)
@@ -145,7 +149,6 @@ namespace AM.App.Bootstrap
             reporter.Info("AppBootstrap", "应用启动完成");
         }
 
-
         /// <summary>
         /// 按 InitOrder 顺序依次 Initialize + Connect 所有已注册控制卡。
         ///
@@ -173,6 +176,7 @@ namespace AM.App.Bootstrap
             int successCount = 0;
             int failedCount = 0;
             int firstErrorCode = 0;
+
             foreach (var cfg in ordered)
             {
                 var card = machine.MotionCards[cfg.CardId];

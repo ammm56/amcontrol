@@ -191,7 +191,7 @@
             this.labelProgramName.Name = "labelProgramName";
             this.labelProgramName.Size = new System.Drawing.Size(266, 40);
             this.labelProgramName.TabIndex = 1;
-            this.labelProgramName.Text = "AM运动控制系统";
+            this.labelProgramName.Text = "AM运动控制程序";
             // 
             // AboutInfoControl
             // 
