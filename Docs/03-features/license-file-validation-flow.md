@@ -134,11 +134,14 @@ license.lic = response.data.licenseText
 - 验签成功：继续校验硬件信息与有效期；
 - 验签失败：直接视为无效授权，退回最小功能模式。
 
-实现前还应固定以下规则：
+首版定稿规则如下：
 
-1. 是否首版即启用正式 RSA 验签；
-2. 验签公钥的来源是内置资源、配置文件还是外部 Key 文件；
-3. 若启用 `KeyId`，设备侧如何根据 `licenseText.signature` 选择公钥。
+1. 首版即启用正式 `RSA-SHA256` 验签，不采用“仅明文解析不验签”的过渡方案；
+2. 验签公钥固定为随程序编译发布的内置 PEM 文本资源，由 `LicenseCryptoService` 读取使用；
+3. 首版不从 `config.json`、数据库或外部 Key 文件加载公钥，避免现场配置漂移导致授权失效；
+4. 首版不实现多公钥轮换路由；
+5. 若 `licenseText.signature.keyId` 存在，则其值必须等于固定内置 KeyId；不一致直接判定验签失败；
+6. 固定内置 KeyId 建议使用 `AMCONTROL_RSA_V1`，后续如需轮换，再以新版本扩展多 KeyId 支持。
 
 ---
 
@@ -146,7 +149,7 @@ license.lic = response.data.licenseText
 
 设备侧启动时应重新采集当前设备硬件信息，并与 License 中记录的绑定信息比较。
 
-建议参与校验的字段：
+首版统一采集字段：
 
 1. `ClientId`
 2. `MachineCode`
@@ -168,7 +171,13 @@ license.lic = response.data.licenseText
 2. `MachineCode`
 3. `CpuId`
 
-其余字段默认作为增强校验字段，在授权中声明且本地可采集时再参与比较。
+首版按以下规则执行：
+
+1. `ClientId`、`MachineCode`、`CpuId` 属于拦截性强校验字段，任一缺失、采集失败或比较不一致，均判定授权无效；
+2. `MachineName` 不纳入强校验，避免现场改机名导致授权误失效；
+3. `BiosSerialNumber`、`MainboardSerialNumber`、`DiskSerialNumber`、`MacAddress` 首版只采集并写入诊断日志，不作为拦截条件；
+4. 所有比较统一执行 `Trim()`、去分隔符、转大写后再比较；
+5. 后端签发时也应保证首版授权一定写入 `ClientId`、`MachineCode`、`CpuId` 三个绑定字段。
 
 ---
 

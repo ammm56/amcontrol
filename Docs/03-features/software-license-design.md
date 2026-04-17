@@ -428,6 +428,17 @@
 - 不阻断软件启动；
 - 自动退回默认最小功能模式。
 
+### 7.3 首版验签与硬件绑定定稿
+
+首版授权校验固定采用以下口径：
+
+1. 启动时正式执行 `RSA-SHA256` 验签；
+2. 验签公钥固定为随程序编译发布的内置 PEM 文本资源，不从配置文件、数据库或外部 Key 文件读取；
+3. 首版固定单一 KeyId，建议值为 `AMCONTROL_RSA_V1`；若授权中携带 `signature.keyId`，则必须与该值一致；
+4. 硬件强校验字段固定为 `ClientId`、`MachineCode`、`CpuId`；
+5. `MachineName`、`BiosSerialNumber`、`MainboardSerialNumber`、`DiskSerialNumber`、`MacAddress` 只做诊断采集，不作为首版拦截条件；
+6. 强校验字段任一缺失、采集失败或比较不一致，均判定授权无效并退回最小功能模式。
+
 ---
 
 ## 8. 设备侧如何将 pageKeys 应用到现有导航与页面权限体系

@@ -232,6 +232,15 @@
 8. 成功则载入运行时授权上下文；
 9. 失败则退回默认最小功能页面集。
 
+首版校验定稿如下：
+
+1. 启动期正式启用 `RSA-SHA256` 验签；
+2. 验签公钥固定为随程序编译发布的内置 PEM 文本资源；
+3. 首版不从配置文件或外部 Key 文件读取公钥；
+4. 首版固定单一 KeyId，建议值为 `AMCONTROL_RSA_V1`；
+5. 拦截性硬件强校验字段固定为 `clientId`、`machineCode`、`cpuId`；
+6. `machineName`、`biosSerialNumber`、`mainboardSerialNumber`、`diskSerialNumber`、`macAddress` 只用于诊断日志，不作为首版拦截条件。
+
 ---
 
 ## 4. 设备管理链路
