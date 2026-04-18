@@ -27,6 +27,7 @@ using AMControlWinF.Views.SysConfig;
 using AntdUI;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
@@ -121,11 +122,10 @@ namespace AMControlWinF
 
             buttonColorMode.Click += ButtonColorMode_Click;
             dropdownTranslate.SelectedValueChanged += DropdownTranslate_SelectedValueChanged;
+            dropdownWindowActions.ItemClick += DropdownWindowActions_ItemClick;
             buttonAlarmIndicator.Click += ButtonAlarmIndicator_Click;
             _statusIndicatorTimer.Tick += StatusIndicatorTimer_Tick;
             FormClosed += MainWindow_FormClosed;
-
-            buttonAbout.Click += ButtonAbout_Click;
         }
 
         private void InitializeShellState()
@@ -1149,6 +1149,10 @@ namespace AMControlWinF
                 ? "Version " + appVersionText
                 : "版本 " + appVersionText;
 
+            dropdownWindowActions.Items.Clear(); 
+            dropdownWindowActions.Items.Add(IsEnglishLanguage(language) ? "License" : "许可证");
+            dropdownWindowActions.Items.Add(IsEnglishLanguage(language) ? "About" : "关于");
+
             DisposeAllCachedPages();
             RefreshShell();
 
@@ -1194,11 +1198,45 @@ namespace AMControlWinF
 
         #endregion
 
-        #region 关于
+        #region 标题栏动作
 
-        private void ButtonAbout_Click(object sender, EventArgs e)
+        private void DropdownWindowActions_ItemClick(object sender, ObjectNEventArgs e)
         {
-            OpenAboutDialog();
+            if (_isUpdatingUiState)
+                return;
+
+            var value = e == null || e.Value == null ? string.Empty : e.Value.ToString();
+            if (value == null)
+                return;
+
+            switch (value)
+            {
+                case "License":
+                    OpenLicenseDialog();
+                    break;
+                case "许可证":
+                    OpenLicenseDialog();
+                    break;
+                case "About":
+                    OpenAboutDialog();
+                    break;
+                case "关于":
+                    OpenAboutDialog();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void OpenLicenseDialog()
+        {
+            var content = new LicenseInfoControl();
+            content.Size = new Size(1060, 620);
+
+            AntdUI.Modal.open(new AntdUI.Modal.Config(this, content)
+            {
+                BtnHeight = 0,
+            });
         }
 
         private void OpenAboutDialog()
@@ -1277,6 +1315,7 @@ namespace AMControlWinF
             {
             }
         }
+
 
         #endregion
 

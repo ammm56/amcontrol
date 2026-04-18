@@ -493,6 +493,12 @@
     <Compile Include="Views\Other\AboutInfoControl.Designer.cs">
       <DependentUpon>AboutInfoControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\Other\LicenseInfoControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Other\LicenseInfoControl.Designer.cs">
+      <DependentUpon>LicenseInfoControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="Views\Plc\PlcDebugPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -723,6 +729,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Views\Other\AboutInfoControl.resx">
       <DependentUpon>AboutInfoControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\Other\LicenseInfoControl.resx">
+      <DependentUpon>LicenseInfoControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\Plc\PlcDebugPage.resx">
       <DependentUpon>PlcDebugPage.cs</DependentUpon>

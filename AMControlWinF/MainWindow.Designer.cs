@@ -19,6 +19,7 @@ namespace AMControlWinF
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
             this.titlebar = new AntdUI.PageHeader();
+            this.dropdownWindowActions = new AntdUI.Dropdown();
             this.dropdownTranslate = new AntdUI.Dropdown();
             this.buttonColorMode = new AntdUI.Button();
             this.textureBackgroundMain = new AMControlWinF.Views.Main.TextureBackgroundControl();
@@ -39,7 +40,6 @@ namespace AMControlWinF
             this.labelPrimaryTitleValue = new AntdUI.Label();
             this.panelWorkCard = new AntdUI.Panel();
             this.panelContent = new AntdUI.Panel();
-            this.buttonAbout = new AntdUI.Button();
             this.titlebar.SuspendLayout();
             this.textureBackgroundMain.SuspendLayout();
             this.gridMainHost.SuspendLayout();
@@ -56,7 +56,7 @@ namespace AMControlWinF
             // 
             this.titlebar.Controls.Add(this.dropdownTranslate);
             this.titlebar.Controls.Add(this.buttonColorMode);
-            this.titlebar.Controls.Add(this.buttonAbout);
+            this.titlebar.Controls.Add(this.dropdownWindowActions);
             this.titlebar.DividerShow = true;
             this.titlebar.Dock = System.Windows.Forms.DockStyle.Top;
             this.titlebar.Location = new System.Drawing.Point(0, 0);
@@ -67,6 +67,21 @@ namespace AMControlWinF
             this.titlebar.SubText = "v0.0.1";
             this.titlebar.TabIndex = 0;
             this.titlebar.Text = "AM运动控制";
+            // 
+            // dropdownWindowActions
+            // 
+            this.dropdownWindowActions.Dock = System.Windows.Forms.DockStyle.Right;
+            this.dropdownWindowActions.Ghost = true;
+            this.dropdownWindowActions.IconSvg = "MoreOutlined";
+            this.dropdownWindowActions.Items.AddRange(new object[] {
+            "License",
+            "About"});
+            this.dropdownWindowActions.Location = new System.Drawing.Point(906, 0);
+            this.dropdownWindowActions.Name = "dropdownWindowActions";
+            this.dropdownWindowActions.Size = new System.Drawing.Size(50, 48);
+            this.dropdownWindowActions.TabIndex = 3;
+            this.dropdownWindowActions.Trigger = AntdUI.Trigger.Hover;
+            this.dropdownWindowActions.WaveSize = 0;
             // 
             // dropdownTranslate
             // 
@@ -326,19 +341,6 @@ namespace AMControlWinF
             this.panelContent.Size = new System.Drawing.Size(826, 664);
             this.panelContent.TabIndex = 0;
             // 
-            // buttonAbout
-            // 
-            this.buttonAbout.Dock = System.Windows.Forms.DockStyle.Right;
-            this.buttonAbout.Ghost = true;
-            this.buttonAbout.IconSvg = "InfoCircleOutlined";
-            this.buttonAbout.Location = new System.Drawing.Point(906, 0);
-            this.buttonAbout.Name = "buttonAbout";
-            this.buttonAbout.Radius = 0;
-            this.buttonAbout.Size = new System.Drawing.Size(50, 48);
-            this.buttonAbout.TabIndex = 2;
-            this.buttonAbout.ToggleIconSvg = "MoonOutlined";
-            this.buttonAbout.WaveSize = 0;
-            // 
             // MainWindow
             // 
             this.ClientSize = new System.Drawing.Size(1200, 800);
@@ -368,6 +370,7 @@ namespace AMControlWinF
         #endregion
 
         private AntdUI.PageHeader titlebar;
+        private AntdUI.Dropdown dropdownWindowActions;
         private AntdUI.Dropdown dropdownTranslate;
         private AntdUI.Button buttonColorMode;
         private AMControlWinF.Views.Main.TextureBackgroundControl textureBackgroundMain;
@@ -388,6 +391,5 @@ namespace AMControlWinF
         private AntdUI.Menu menuPrimary;
         private AntdUI.Panel panelAvatarHost;
         private AMControlWinF.Views.Main.UserAvatarMenuControl userAvatarMenuControl;
-        private AntdUI.Button buttonAbout;
     }
 }
