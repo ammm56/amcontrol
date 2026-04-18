@@ -8,7 +8,14 @@
 		"ControllerInfoPrint": false,
 		"DBPrint": false,
 		"EXPrint": false,
-		"DBLogExec": false
+		"DBLogExec": false,
+		"DesktopAppCode": "AMControlWinF",
+		"DesktopAppName": "AMControlWinF",
+		"DesktopAppCategory": "MotionControl",
+		"DesktopAppEdition": "",
+		"DesktopAppVendor": "AM",
+		"DesktopAppTargetFramework": ".NET Framework 4.6.1",
+		"DesktopAppUiPlatform": "WinForms"
 	},
 	"Sqlite": {
 		"Connection": "DataSource=./DB/Sqlite/amctl",

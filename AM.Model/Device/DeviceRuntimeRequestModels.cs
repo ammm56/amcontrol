@@ -50,6 +50,9 @@ namespace AM.Model.Device
         [JsonProperty("isSuccess")]
         public bool? IsSuccess { get; set; }
 
+        [JsonProperty("failReasonCode")]
+        public string FailReasonCode { get; set; } = string.Empty;
+
         [JsonProperty("traceId")]
         public string TraceId { get; set; } = string.Empty;
 

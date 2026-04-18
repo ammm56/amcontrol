@@ -304,6 +304,18 @@ namespace AM.DBService.Services.System
                 return;
             }
 
+            Result ensureResult = await EnsureDeviceSessionAsync().ConfigureAwait(false);
+            if (!ensureResult.Success)
+            {
+                LastError = ensureResult.Message;
+                WarnLogOnlyIfRepeated(
+                    "UsageUploadWorker.EnsureDeviceSessionBeforeUsageAsync",
+                    ensureResult.Code,
+                    "使用事件上报前设备注册或 token 刷新失败: " + ensureResult.Message,
+                    BackendFailureLogThrottleIntervalMs);
+                return;
+            }
+
             Result<SysUsageEventBufferEntity> queryResult = _usageEventBufferService.QueryPending(BatchSize);
             if (!queryResult.Success)
             {
@@ -542,7 +554,7 @@ namespace AM.DBService.Services.System
 
             var status = new
             {
-                appCode = LicenseConstants.DesktopAppCode,
+                appCode = BackendServiceConfigHelper.GetDesktopAppCode(),
                 appVersion = AM.Tools.Tools.GetAppVersionText(),
                 clientId = setting.ClientId ?? string.Empty,
                 deviceId = setting.DeviceId ?? string.Empty,

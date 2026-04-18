@@ -2,13 +2,11 @@
 using AM.Core.Context;
 using AM.Core.Reporter;
 using AM.Model.Common;
+using AM.Model.Device;
 using AM.Model.Entity.System;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace AM.DBService.Services.System
@@ -24,7 +22,7 @@ namespace AM.DBService.Services.System
     public class UsageReportService : ServiceBase
     {
         private readonly string _serviceUrl;
-        private readonly HttpClient _httpClient;
+        private readonly DeviceReportClient _deviceReportClient;
 
         protected override string MessageSourceName
         {
@@ -45,16 +43,14 @@ namespace AM.DBService.Services.System
             : base(reporter)
         {
             _serviceUrl = GetServiceUrlFromConfig();
-            _httpClient = new HttpClient();
-            _httpClient.Timeout = TimeSpan.FromSeconds(15);
+            _deviceReportClient = new DeviceReportClient(reporter);
         }
 
         public UsageReportService(string serviceUrl, IAppReporter reporter)
             : base(reporter)
         {
             _serviceUrl = serviceUrl == null ? string.Empty : serviceUrl.Trim();
-            _httpClient = new HttpClient();
-            _httpClient.Timeout = TimeSpan.FromSeconds(15);
+            _deviceReportClient = new DeviceReportClient(reporter);
         }
 
         /// <summary>
@@ -67,6 +63,7 @@ namespace AM.DBService.Services.System
 
         /// <summary>
         /// 批量上报使用事件。
+        /// 当前后端真实写入口为设备 report，因此这里将每条使用事件映射为一条设备 Info report。
         /// </summary>
         public async Task<Result> UploadBatchAsync(IList<SysUsageEventBufferEntity> events)
         {
@@ -86,53 +83,18 @@ namespace AM.DBService.Services.System
                     return OkSilent("没有可上报的使用事件");
                 }
 
-                SysUsageEventBufferEntity first = list[0];
-
-                var payload = new
+                foreach (SysUsageEventBufferEntity item in list)
                 {
-                    AppCode = first.AppCode ?? string.Empty,
-                    ClientId = first.ClientId ?? string.Empty,
-                    MachineCode = first.MachineCode ?? string.Empty,
-                    MachineName = first.MachineName ?? string.Empty,
-                    Events = list.Select(x => new
+                    Result<DeviceReportRequest> requestResult = BuildDeviceReportRequest(item);
+                    if (!requestResult.Success || requestResult.Item == null)
                     {
-                        x.EventId,
-                        x.EventType,
-                        x.AppCode,
-                        x.AppVersion,
-                        x.ClientId,
-                        x.MachineCode,
-                        x.MachineName,
-                        x.UserId,
-                        x.LoginName,
-                        x.PageKey,
-                        x.IsSuccess,
-                        x.FailReasonCode,
-                        x.TraceId,
-                        x.OccurredTime
-                    }).ToList()
-                };
+                        return FailSilent(requestResult.Code == 0 ? -1 : requestResult.Code, requestResult.Message);
+                    }
 
-                string json = JsonConvert.SerializeObject(payload);
-                string requestUrl = BuildBatchUploadUrl();
-
-                using (var request = new HttpRequestMessage(HttpMethod.Post, requestUrl))
-                {
-                    request.Content = new StringContent(json, Encoding.UTF8, "application/json");
-
-                    using (HttpResponseMessage response = await _httpClient.SendAsync(request).ConfigureAwait(false))
+                    Result reportResult = await _deviceReportClient.ReportAsync(requestResult.Item).ConfigureAwait(false);
+                    if (!reportResult.Success)
                     {
-                        if (!response.IsSuccessStatusCode)
-                        {
-                            return FailSilent(
-                                -1,
-                                BackendRequestFailureHelper.BuildHttpFailureMessage(
-                                    "使用事件上报",
-                                    response.StatusCode,
-                                    response.ReasonPhrase,
-                                    null,
-                                    null));
-                        }
+                        return FailSilent(reportResult.Code, reportResult.Message);
                     }
                 }
 
@@ -145,11 +107,69 @@ namespace AM.DBService.Services.System
         }
 
         /// <summary>
-        /// 构建批量上报地址。
+        /// 将本地使用事件映射为设备 report 请求。
         /// </summary>
-        private string BuildBatchUploadUrl()
+        private Result<DeviceReportRequest> BuildDeviceReportRequest(SysUsageEventBufferEntity entity)
         {
-            return _serviceUrl.TrimEnd('/') + "/api/usage/events/batch";
+            if (entity == null)
+            {
+                return Fail<DeviceReportRequest>(-2, "使用事件不能为空");
+            }
+
+            string eventType = entity.EventType ?? string.Empty;
+            var payload = new
+            {
+                source = "UsageEventBuffer",
+                eventType = eventType,
+                uploadCategory = "DesktopUsage",
+                localOccurredTime = entity.OccurredTime,
+                localBufferId = entity.Id
+            };
+
+            var request = new DeviceReportRequest
+            {
+                EventId = entity.EventId ?? string.Empty,
+                ReportType = ResolveReportType(eventType),
+                AppCode = entity.AppCode ?? string.Empty,
+                AppVersion = entity.AppVersion ?? string.Empty,
+                ClientId = entity.ClientId ?? string.Empty,
+                MachineCode = entity.MachineCode ?? string.Empty,
+                MachineName = entity.MachineName ?? string.Empty,
+                UserId = entity.UserId,
+                LoginName = entity.LoginName ?? string.Empty,
+                PageKey = entity.PageKey ?? string.Empty,
+                IsSuccess = entity.IsSuccess,
+                FailReasonCode = entity.FailReasonCode ?? string.Empty,
+                TraceId = entity.TraceId ?? string.Empty,
+                OccurredAt = entity.OccurredTime == default(DateTime) ? DateTime.UtcNow : entity.OccurredTime,
+                Payload = payload
+            };
+
+            return OkSilent(request, "生成使用事件设备上报请求成功");
+        }
+
+        /// <summary>
+        /// 根据本地使用事件类型映射后端设备 reportType。
+        /// </summary>
+        private static string ResolveReportType(string eventType)
+        {
+            if (string.IsNullOrWhiteSpace(eventType))
+            {
+                return "Info";
+            }
+
+            switch (eventType.Trim())
+            {
+                case "LoginSuccess":
+                case "LoginFailed":
+                    return "Status";
+
+                case "AppStart":
+                case "AppExit":
+                case "PageVisit":
+                default:
+                    return "Info";
+            }
         }
 
         /// <summary>

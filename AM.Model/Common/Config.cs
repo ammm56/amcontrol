@@ -111,6 +111,48 @@ namespace AM.Model.Common
         public string BackendServiceUrl { get; set; } = "http://localhost:5095";
 
         /// <summary>
+        /// 桌面应用编码。
+        /// 设备授权申请、设备心跳与结构化上报统一使用该标识。
+        /// </summary>
+        public string DesktopAppCode { get; set; } = "AMControlWinF";
+
+        /// <summary>
+        /// 桌面应用名称。
+        /// 设备授权申请统一使用该名称。
+        /// </summary>
+        public string DesktopAppName { get; set; } = "AMControlWinF";
+
+        /// <summary>
+        /// 桌面应用分类。
+        /// 当前用于授权申请中的 software.appCategory。
+        /// </summary>
+        public string DesktopAppCategory { get; set; } = "MotionControl";
+
+        /// <summary>
+        /// 桌面应用版本版型。
+        /// 当前为空时表示不额外指定 Edition。
+        /// </summary>
+        public string DesktopAppEdition { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 桌面应用供应商标识。
+        /// 当前用于授权申请中的 software.vendor。
+        /// </summary>
+        public string DesktopAppVendor { get; set; } = "AM";
+
+        /// <summary>
+        /// 桌面应用目标框架。
+        /// 当前用于授权申请中的 software.targetFramework。
+        /// </summary>
+        public string DesktopAppTargetFramework { get; set; } = ".NET Framework 4.6.1";
+
+        /// <summary>
+        /// 桌面应用 UI 平台。
+        /// 当前用于授权申请中的 software.uiPlatform。
+        /// </summary>
+        public string DesktopAppUiPlatform { get; set; } = "WinForms";
+
+        /// <summary>
         /// 使用信息上传周期，单位 ms。
         /// 默认 60000。
         /// </summary>

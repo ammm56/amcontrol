@@ -1,4 +1,5 @@
 using AM.Core.Context;
+using AM.Model.Common;
 
 namespace AM.DBService.Services.System
 {
@@ -8,11 +9,23 @@ namespace AM.DBService.Services.System
     /// </summary>
     internal static class BackendServiceConfigHelper
     {
+        private static Setting GetSetting()
+        {
+            try
+            {
+                return ConfigContext.Instance.Config.Setting ?? new Setting();
+            }
+            catch
+            {
+                return new Setting();
+            }
+        }
+
         public static string GetBackendServiceUrl()
         {
             try
             {
-                return ConfigContext.Instance.Config.Setting.BackendServiceUrl ?? string.Empty;
+                return GetSetting().BackendServiceUrl ?? string.Empty;
             }
             catch
             {
@@ -23,6 +36,47 @@ namespace AM.DBService.Services.System
         public static bool IsConfigured()
         {
             return !string.IsNullOrWhiteSpace(GetBackendServiceUrl());
+        }
+
+        public static string GetDesktopAppCode()
+        {
+            string value = GetSetting().DesktopAppCode;
+            return string.IsNullOrWhiteSpace(value) ? "AMControlWinF" : value.Trim();
+        }
+
+        public static string GetDesktopAppName()
+        {
+            string value = GetSetting().DesktopAppName;
+            return string.IsNullOrWhiteSpace(value) ? GetDesktopAppCode() : value.Trim();
+        }
+
+        public static string GetDesktopAppCategory()
+        {
+            string value = GetSetting().DesktopAppCategory;
+            return string.IsNullOrWhiteSpace(value) ? "MotionControl" : value.Trim();
+        }
+
+        public static string GetDesktopAppEdition()
+        {
+            return (GetSetting().DesktopAppEdition ?? string.Empty).Trim();
+        }
+
+        public static string GetDesktopAppVendor()
+        {
+            string value = GetSetting().DesktopAppVendor;
+            return string.IsNullOrWhiteSpace(value) ? "AM" : value.Trim();
+        }
+
+        public static string GetDesktopAppTargetFramework()
+        {
+            string value = GetSetting().DesktopAppTargetFramework;
+            return string.IsNullOrWhiteSpace(value) ? ".NET Framework 4.6.1" : value.Trim();
+        }
+
+        public static string GetDesktopAppUiPlatform()
+        {
+            string value = GetSetting().DesktopAppUiPlatform;
+            return string.IsNullOrWhiteSpace(value) ? "WinForms" : value.Trim();
         }
     }
 }

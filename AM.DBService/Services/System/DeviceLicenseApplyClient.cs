@@ -180,14 +180,14 @@ namespace AM.DBService.Services.System
                     LicenseProtocolVersion = LicenseConstants.LicenseProtocolVersion,
                     Software = new LicenseApplySoftware
                     {
-                        AppCategory = "MotionControl",
-                        AppCode = identityResult.Item.AppCode ?? LicenseConstants.DesktopAppCode,
-                        AppName = LicenseConstants.DesktopAppName,
-                        AppEdition = string.Empty,
+                        AppCategory = BackendServiceConfigHelper.GetDesktopAppCategory(),
+                        AppCode = string.IsNullOrWhiteSpace(identityResult.Item.AppCode) ? BackendServiceConfigHelper.GetDesktopAppCode() : identityResult.Item.AppCode,
+                        AppName = BackendServiceConfigHelper.GetDesktopAppName(),
+                        AppEdition = BackendServiceConfigHelper.GetDesktopAppEdition(),
                         AppVersion = AM.Tools.Tools.GetAppVersionText(),
-                        TargetFramework = ".NET Framework 4.6.1",
-                        UiPlatform = "WinForms",
-                        Vendor = "AM"
+                        TargetFramework = BackendServiceConfigHelper.GetDesktopAppTargetFramework(),
+                        UiPlatform = BackendServiceConfigHelper.GetDesktopAppUiPlatform(),
+                        Vendor = BackendServiceConfigHelper.GetDesktopAppVendor()
                     },
                     Device = hardwareResult.Item,
                     Environment = new LicenseApplyEnvironment

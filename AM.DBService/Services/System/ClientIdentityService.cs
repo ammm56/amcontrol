@@ -21,8 +21,6 @@ namespace AM.DBService.Services.System
     /// </summary>
     public class ClientIdentityService : ServiceBase
     {
-        private const string DefaultAppCode = "AMControlWinF";
-
         private readonly DBCommon<SysClientIdentityEntity> _identityDb;
 
         private SysClientIdentityEntity _cachedIdentity;
@@ -158,7 +156,7 @@ namespace AM.DBService.Services.System
             return new SysClientIdentityEntity
             {
                 ClientId = setting.ClientId ?? string.Empty,
-                AppCode = DefaultAppCode,
+                AppCode = BackendServiceConfigHelper.GetDesktopAppCode(),
                 MachineCode = setting.MachineCode ?? string.Empty,
                 MachineName = string.IsNullOrWhiteSpace(setting.MachineName)
                     ? Environment.MachineName
@@ -208,7 +206,7 @@ namespace AM.DBService.Services.System
                 SysClientIdentityEntity entity = new SysClientIdentityEntity
                 {
                     ClientId = AM.Tools.Tools.Guid(24),
-                    AppCode = DefaultAppCode,
+                    AppCode = BackendServiceConfigHelper.GetDesktopAppCode(),
                     MachineCode = string.Empty,
                     MachineName = Environment.MachineName,
                     CreateTime = DateTime.Now,
@@ -254,7 +252,7 @@ namespace AM.DBService.Services.System
 
                 SysClientIdentityEntity dbEntity = dbResult.Item;
                 dbEntity.ClientId = configIdentity.ClientId ?? string.Empty;
-                dbEntity.AppCode = DefaultAppCode;
+                dbEntity.AppCode = BackendServiceConfigHelper.GetDesktopAppCode();
                 dbEntity.MachineCode = configIdentity.MachineCode ?? string.Empty;
                 dbEntity.MachineName = configIdentity.MachineName ?? string.Empty;
                 dbEntity.UpdateTime = DateTime.Now;
@@ -279,7 +277,7 @@ namespace AM.DBService.Services.System
                 {
                     SysClientIdentityEntity dbEntity = dbResult.Item;
                     dbEntity.ClientId = entity.ClientId ?? string.Empty;
-                    dbEntity.AppCode = DefaultAppCode;
+                    dbEntity.AppCode = BackendServiceConfigHelper.GetDesktopAppCode();
                     dbEntity.MachineCode = entity.MachineCode ?? string.Empty;
                     dbEntity.MachineName = entity.MachineName ?? string.Empty;
                     dbEntity.UpdateTime = DateTime.Now;
@@ -294,7 +292,7 @@ namespace AM.DBService.Services.System
                     return OkSilent("更新客户端身份成功");
                 }
 
-                entity.AppCode = DefaultAppCode;
+                entity.AppCode = BackendServiceConfigHelper.GetDesktopAppCode();
                 entity.CreateTime = entity.CreateTime == default(DateTime) ? DateTime.Now : entity.CreateTime;
                 entity.UpdateTime = DateTime.Now;
 
