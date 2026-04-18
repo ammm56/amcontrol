@@ -100,15 +100,15 @@ namespace AM.Model.Common
 
         /// <summary>
         /// 是否启用使用信息上报。
-        /// 默认 false。
+        /// 默认 true。
         /// </summary>
         public bool EnableUsageReport { get; set; } = true;
 
         /// <summary>
-        /// 使用信息上报服务地址。
-        /// 建议填网关根地址或服务根地址。
+        /// 统一后端服务根地址。
+        /// 授权申请、设备注册、心跳、结构化上报和使用信息上报统一走此地址。
         /// </summary>
-        public string UsageReportServiceUrl { get; set; } = string.Empty;
+        public string BackendServiceUrl { get; set; } = "http://localhost:5095";
 
         /// <summary>
         /// 使用信息上传周期，单位 ms。
@@ -145,18 +145,6 @@ namespace AM.Model.Common
         /// 默认 true。
         /// </summary>
         public bool EnableDeviceLicense { get; set; } = true;
-
-        /// <summary>
-        /// 授权服务根地址。
-        /// 用于设备调用 /api/license/apply。
-        /// </summary>
-        public string LicenseServiceUrl { get; set; } = string.Empty;
-
-        /// <summary>
-        /// 设备服务根地址。
-        /// 用于设备注册、心跳、刷新 token 和结构化上报。
-        /// </summary>
-        public string DeviceServiceUrl { get; set; } = string.Empty;
 
         /// <summary>
         /// 设备心跳周期，单位 ms。

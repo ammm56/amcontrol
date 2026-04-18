@@ -307,14 +307,7 @@ namespace AM.DBService.Services.System
 
         private static string GetDeviceServiceUrlFromConfig()
         {
-            try
-            {
-                return ConfigContext.Instance.Config.Setting.DeviceServiceUrl ?? string.Empty;
-            }
-            catch
-            {
-                return string.Empty;
-            }
+            return BackendServiceConfigHelper.GetBackendServiceUrl();
         }
 
         private static string GetLocalIpv4Address()

@@ -129,9 +129,11 @@
     <Compile Include="Services\Runtime\MotionAxisCardScanRunner.cs" />
     <Compile Include="Services\Runtime\MotionAxisScanWorker.cs" />
     <Compile Include="Services\Runtime\RuntimeTaskManager.cs" />
+    <Compile Include="Services\System\BackendServiceConfigHelper.cs" />
     <Compile Include="Services\System\ClientIdentityService.cs" />
     <Compile Include="Services\System\DeviceHeartbeatClient.cs" />
     <Compile Include="Services\System\DeviceLicenseApplyClient.cs" />
+    <Compile Include="Services\System\DeviceReportBufferService.cs" />
     <Compile Include="Services\System\DeviceRegisterClient.cs" />
     <Compile Include="Services\System\DeviceReportClient.cs" />
     <Compile Include="Services\System\HardwareInfoCollector.cs" />

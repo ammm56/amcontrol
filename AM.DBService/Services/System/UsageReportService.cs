@@ -177,14 +177,7 @@ namespace AM.DBService.Services.System
         /// </summary>
         private static string GetServiceUrlFromConfig()
         {
-            try
-            {
-                return ConfigContext.Instance.Config.Setting.UsageReportServiceUrl ?? string.Empty;
-            }
-            catch
-            {
-                return string.Empty;
-            }
+            return BackendServiceConfigHelper.GetBackendServiceUrl();
         }
 
         /// <summary>

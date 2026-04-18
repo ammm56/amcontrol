@@ -30,7 +30,6 @@ namespace AMControlWinF
             Application.SetCompatibleTextRenderingDefault(false);
 
             UsageEventBufferService usageEventBufferService = null;
-            UsageUploadWorker usageUploadWorker = null;
 
             try
             {
@@ -45,8 +44,6 @@ namespace AMControlWinF
                 // 首次登录，取消则直接退出。
                 if (!ShowLogin(null))
                     return;
-
-                usageUploadWorker = TryStartUsageUploadWorker();
 
                 // 主循环：MainWindow 关闭后根据退出原因决定后续流程。
                 while (true)
@@ -83,9 +80,9 @@ namespace AMControlWinF
             {
                 try
                 {
-                    if (usageUploadWorker != null)
+                    if (SystemContext.Instance.RuntimeTaskManager != null)
                     {
-                        usageUploadWorker.StopAsync().GetAwaiter().GetResult();
+                        SystemContext.Instance.RuntimeTaskManager.StopAllAsync().GetAwaiter().GetResult();
                     }
                 }
                 catch
@@ -134,28 +131,5 @@ namespace AMControlWinF
             }
         }
 
-        /// <summary>
-        /// 启动使用信息上传工作单元。
-        /// 该工作单元不加入 AppBootstrap 与 PLC 后台任务编排，避免影响已有稳定启动链路。
-        /// </summary>
-        private static UsageUploadWorker TryStartUsageUploadWorker()
-        {
-            try
-            {
-                if (!ConfigContext.Instance.Config.Setting.EnableUsageReport)
-                    return null;
-
-                var worker = new UsageUploadWorker(SystemContext.Instance.Reporter);
-                var result = worker.Start();
-                if (!result.Success)
-                    return null;
-
-                return worker;
-            }
-            catch
-            {
-                return null;
-            }
-        }
     }
 }

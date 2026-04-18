@@ -22,6 +22,9 @@ namespace AM.DBService.Services.System
     {
         private readonly ClientIdentityService _clientIdentityService;
         private readonly HardwareInfoCollector _hardwareInfoCollector;
+        private readonly LicenseFileService _licenseFileService;
+        private readonly LicenseRuntimeLoader _licenseRuntimeLoader;
+        private readonly DeviceReportBufferService _deviceReportBufferService;
         private readonly HttpClient _httpClient;
         private readonly string _serviceUrl;
 
@@ -36,20 +39,41 @@ namespace AM.DBService.Services.System
         }
 
         public DeviceLicenseApplyClient()
-            : this(new ClientIdentityService(), new HardwareInfoCollector(), SystemContext.Instance.Reporter)
+            : this(
+                new ClientIdentityService(),
+                new HardwareInfoCollector(),
+                new LicenseFileService(),
+                new LicenseRuntimeLoader(),
+                new DeviceReportBufferService(),
+                SystemContext.Instance.Reporter)
         {
         }
 
         public DeviceLicenseApplyClient(IAppReporter reporter)
-            : this(new ClientIdentityService(reporter), new HardwareInfoCollector(reporter), reporter)
+            : this(
+                new ClientIdentityService(reporter),
+                new HardwareInfoCollector(reporter),
+                new LicenseFileService(reporter),
+                new LicenseRuntimeLoader(reporter),
+                new DeviceReportBufferService(reporter),
+                reporter)
         {
         }
 
-        public DeviceLicenseApplyClient(ClientIdentityService clientIdentityService, HardwareInfoCollector hardwareInfoCollector, IAppReporter reporter)
+        public DeviceLicenseApplyClient(
+            ClientIdentityService clientIdentityService,
+            HardwareInfoCollector hardwareInfoCollector,
+            LicenseFileService licenseFileService,
+            LicenseRuntimeLoader licenseRuntimeLoader,
+            DeviceReportBufferService deviceReportBufferService,
+            IAppReporter reporter)
             : base(reporter)
         {
             _clientIdentityService = clientIdentityService;
             _hardwareInfoCollector = hardwareInfoCollector;
+            _licenseFileService = licenseFileService;
+            _licenseRuntimeLoader = licenseRuntimeLoader;
+            _deviceReportBufferService = deviceReportBufferService;
             _serviceUrl = GetLicenseServiceUrlFromConfig();
             _httpClient = new HttpClient();
             _httpClient.Timeout = TimeSpan.FromSeconds(15);
@@ -112,7 +136,19 @@ namespace AM.DBService.Services.System
                                 ReportChannels.Log);
                         }
 
-                        return OkLogOnly(apiResponse.Data, "授权申请成功");
+                        Result persistResult = PersistLicenseAndReload(apiResponse.Data);
+                        if (!persistResult.Success)
+                        {
+                            return Fail<LicenseApplyResponse>(persistResult.Code, persistResult.Message);
+                        }
+
+                        Result queueResult = _deviceReportBufferService.EnqueueLicenseApplied(apiResponse.Data);
+                        if (!queueResult.Success)
+                        {
+                            WarnLogOnly(queueResult.Code, "授权申请成功，但写入设备 report 缓冲失败: " + queueResult.Message);
+                        }
+
+                        return OkLogOnly(apiResponse.Data, "授权申请成功并已写入本地授权文件");
                     }
                 }
             }
@@ -241,14 +277,39 @@ namespace AM.DBService.Services.System
 
         private static string GetLicenseServiceUrlFromConfig()
         {
-            try
+            return BackendServiceConfigHelper.GetBackendServiceUrl();
+        }
+
+        private Result PersistLicenseAndReload(LicenseApplyResponse response)
+        {
+            if (response == null)
             {
-                return ConfigContext.Instance.Config.Setting.LicenseServiceUrl ?? string.Empty;
+                return Fail(-1, "授权申请结果不能为空");
             }
-            catch
+
+            if (string.IsNullOrWhiteSpace(response.LicenseText))
             {
-                return string.Empty;
+                return Fail(-2, "授权申请成功但未返回 licenseText");
             }
+
+            Result writeResult = _licenseFileService.WriteLicenseText(response.LicenseText);
+            if (!writeResult.Success)
+            {
+                return Fail(writeResult.Code, "授权申请成功，但写入 license.lic 失败: " + writeResult.Message);
+            }
+
+            Result<DeviceLicenseState> loadResult = _licenseRuntimeLoader.Load();
+            if (!loadResult.Success || loadResult.Item == null)
+            {
+                return Fail(loadResult.Code == 0 ? -1 : loadResult.Code, "授权文件已写入，但重新装载授权运行时失败: " + loadResult.Message);
+            }
+
+            if (!loadResult.Item.IsValid)
+            {
+                return Fail(-3, "授权文件已写入，但本地授权校验未通过: " + (loadResult.Item.Message ?? string.Empty));
+            }
+
+            return OkSilent("授权文件落盘并重载成功");
         }
     }
 }

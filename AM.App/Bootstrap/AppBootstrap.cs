@@ -154,6 +154,14 @@ namespace AM.App.Bootstrap
                 "PLC 扫描工作单元",
                 AlarmCode.PlcScanWorkerStartFailed);
 
+            // 8.3 注册统一后台上报工作单元。
+            // 非关键后台任务：只做静默启动，不影响 PLC / Motion 等主后台链路。
+            RegisterOptionalRuntimeWorker(
+                runtimeTaskManager,
+                new UsageUploadWorker(reporter),
+                true,
+                "后台上报工作单元");
+
             reporter.Info("AppBootstrap", "应用启动完成");
         }
 
@@ -295,6 +303,34 @@ namespace AM.App.Bootstrap
         private static int AlarmCodeToInt(AlarmCode code)
         {
             return (int)code;
+        }
+
+        private static void RegisterOptionalRuntimeWorker(
+            IRuntimeTaskManager runtimeTaskManager,
+            IRuntimeWorker worker,
+            bool autoStart,
+            string displayName)
+        {
+            var reporter = SystemContext.Instance.Reporter;
+            var registerResult = runtimeTaskManager.Register(worker, autoStart);
+
+            if (!registerResult.Success)
+            {
+                reporter.Warn("AppBootstrap", string.Format("{0}注册失败，将忽略该后台任务: {1}", displayName, registerResult.Message), registerResult.Code);
+                return;
+            }
+
+            if (autoStart && !worker.IsRunning)
+            {
+                string detail = string.IsNullOrWhiteSpace(worker.LastError)
+                    ? "自动启动后未进入运行状态"
+                    : worker.LastError;
+
+                reporter.Warn("AppBootstrap", string.Format("{0}未启动，将以静默模式跳过: {1}", displayName, detail), -1);
+                return;
+            }
+
+            reporter.Info("AppBootstrap", string.Format("{0}已注册{1}", displayName, autoStart ? "并尝试自动启动" : ""));
         }
 
         /// <summary>
