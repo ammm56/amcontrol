@@ -5,6 +5,7 @@ using AM.Model.Common;
 using AM.Model.Device;
 using AM.Model.Entity.System;
 using AM.Model.Interfaces.Runtime;
+using AM.Model.License;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -34,6 +35,7 @@ namespace AM.DBService.Services.System
         private const int MinHeartbeatIntervalMs = 5000;
         private const int DeviceReportBatchSize = 20;
         private const int BackgroundLogThrottleIntervalMs = 30000;
+        private const int BackendFailureLogThrottleIntervalMs = 300000;
 
         private readonly object _stateSyncRoot;
         private readonly UsageEventBufferService _usageEventBufferService;
@@ -337,7 +339,7 @@ namespace AM.DBService.Services.System
                     "UsageUploadWorker.UploadBatchAsync",
                     uploadResult.Code,
                     "使用事件上报失败: " + uploadResult.Message,
-                    BackgroundLogThrottleIntervalMs);
+                    BackendFailureLogThrottleIntervalMs);
 
                 return;
             }
@@ -358,7 +360,7 @@ namespace AM.DBService.Services.System
                     "UsageUploadWorker.EnsureDeviceSessionAsync",
                     ensureResult.Code,
                     "设备注册或 token 刷新失败: " + ensureResult.Message,
-                    BackgroundLogThrottleIntervalMs);
+                    BackendFailureLogThrottleIntervalMs);
                 return;
             }
 
@@ -375,7 +377,7 @@ namespace AM.DBService.Services.System
                     "UsageUploadWorker.SendHeartbeatAsync",
                     heartbeatResult.Code,
                     "设备心跳失败: " + heartbeatResult.Message,
-                    BackgroundLogThrottleIntervalMs);
+                    BackendFailureLogThrottleIntervalMs);
             }
 
             Result flushResult = await FlushDeviceReportsAsync().ConfigureAwait(false);
@@ -391,7 +393,7 @@ namespace AM.DBService.Services.System
                     "UsageUploadWorker.FlushDeviceReportsAsync",
                     flushResult.Code,
                     "设备 report 上传失败: " + flushResult.Message,
-                    BackgroundLogThrottleIntervalMs);
+                    BackendFailureLogThrottleIntervalMs);
                 return;
             }
 
@@ -474,7 +476,7 @@ namespace AM.DBService.Services.System
             Result<DeviceRegisterResponse> registerResult = await _deviceRegisterClient.RegisterCurrentDeviceAsync().ConfigureAwait(false);
             if (!registerResult.Success)
             {
-                return Fail(registerResult.Code, registerResult.Message);
+                return FailSilent(registerResult.Code, registerResult.Message);
             }
 
             _deviceSessionReady = true;
@@ -496,7 +498,7 @@ namespace AM.DBService.Services.System
             Result<DeviceReportRequest> batchResult = _deviceReportBufferService.DequeueBatch(DeviceReportBatchSize);
             if (!batchResult.Success)
             {
-                return Fail(batchResult.Code, batchResult.Message);
+                return FailSilent(batchResult.Code, batchResult.Message);
             }
 
             List<DeviceReportRequest> list = batchResult.Items == null
@@ -514,7 +516,7 @@ namespace AM.DBService.Services.System
                 if (!reportResult.Success)
                 {
                     _deviceReportBufferService.EnqueueMany(list.Skip(index).ToList());
-                    return Fail(reportResult.Code, reportResult.Message);
+                    return FailSilent(reportResult.Code, reportResult.Message);
                 }
             }
 
@@ -540,7 +542,7 @@ namespace AM.DBService.Services.System
 
             var status = new
             {
-                appCode = "AMControlWinF",
+                appCode = LicenseConstants.DesktopAppCode,
                 appVersion = AM.Tools.Tools.GetAppVersionText(),
                 clientId = setting.ClientId ?? string.Empty,
                 deviceId = setting.DeviceId ?? string.Empty,

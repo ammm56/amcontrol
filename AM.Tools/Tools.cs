@@ -125,7 +125,8 @@ namespace AM.Tools
 
         public static string GetAppVersionText()
         {
-            var version = Assembly.GetExecutingAssembly().GetName().Version;
+            Assembly entryAssembly = Assembly.GetEntryAssembly();
+            var version = (entryAssembly ?? Assembly.GetExecutingAssembly()).GetName().Version;
             if (version == null)
                 return "0.0.1";
 

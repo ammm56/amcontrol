@@ -130,6 +130,7 @@
     <Compile Include="Services\Runtime\MotionAxisScanWorker.cs" />
     <Compile Include="Services\Runtime\RuntimeTaskManager.cs" />
     <Compile Include="Services\System\BackendServiceConfigHelper.cs" />
+    <Compile Include="Services\System\BackendRequestFailureHelper.cs" />
     <Compile Include="Services\System\ClientIdentityService.cs" />
     <Compile Include="Services\System\DeviceHeartbeatClient.cs" />
     <Compile Include="Services\System\DeviceLicenseApplyClient.cs" />

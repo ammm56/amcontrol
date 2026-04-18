@@ -76,7 +76,7 @@ namespace AM.DBService.Services.System
             {
                 if (string.IsNullOrWhiteSpace(_serviceUrl))
                 {
-                    return Fail<DeviceRegisterResponse>(-1, "未配置设备服务地址", ReportChannels.Log);
+                    return FailSilent<DeviceRegisterResponse>(-1, "未配置后端服务地址");
                 }
 
                 if (request == null)
@@ -115,10 +115,9 @@ namespace AM.DBService.Services.System
                         DeviceApiResponse<DeviceRegisterResponse> apiResponse = DeserializeApiResponse<DeviceRegisterResponse>(responseText);
                         if (!httpResponse.IsSuccessStatusCode || apiResponse == null || !apiResponse.Success || apiResponse.Data == null)
                         {
-                            return Fail<DeviceRegisterResponse>(
+                            return FailSilent<DeviceRegisterResponse>(
                                 (int)httpResponse.StatusCode,
-                                BuildApiFailureMessage("设备注册失败", httpResponse.StatusCode, apiResponse, responseText),
-                                ReportChannels.Log);
+                                BackendRequestFailureHelper.BuildApiFailureMessage("设备注册", httpResponse.StatusCode, apiResponse));
                         }
 
                         Result saveResult = SaveDeviceRegistrationToConfig(apiResponse.Data.DeviceId, apiResponse.Data.DeviceToken);
@@ -127,13 +126,13 @@ namespace AM.DBService.Services.System
                             return Fail<DeviceRegisterResponse>(saveResult.Code, saveResult.Message);
                         }
 
-                        return OkLogOnly(apiResponse.Data, string.Format("设备注册成功，Action={0}", apiResponse.Data.RegistrationAction));
+                        return OkSilent(apiResponse.Data, string.Format("设备注册成功，Action={0}", apiResponse.Data.RegistrationAction));
                     }
                 }
             }
             catch (Exception ex)
             {
-                return Fail<DeviceRegisterResponse>(-1, "设备注册异常", ReportChannels.Log, ex);
+                return FailSilent<DeviceRegisterResponse>(-1, BackendRequestFailureHelper.BuildExceptionMessage("设备注册", ex));
             }
         }
 
@@ -143,7 +142,7 @@ namespace AM.DBService.Services.System
             {
                 if (string.IsNullOrWhiteSpace(_serviceUrl))
                 {
-                    return Fail<DeviceTokenRefreshResponse>(-1, "未配置设备服务地址", ReportChannels.Log);
+                    return FailSilent<DeviceTokenRefreshResponse>(-1, "未配置后端服务地址");
                 }
 
                 Setting setting = ConfigContext.Instance.Config.Setting;
@@ -175,10 +174,9 @@ namespace AM.DBService.Services.System
                         DeviceApiResponse<DeviceTokenRefreshResponse> apiResponse = DeserializeApiResponse<DeviceTokenRefreshResponse>(responseText);
                         if (!httpResponse.IsSuccessStatusCode || apiResponse == null || !apiResponse.Success || apiResponse.Data == null)
                         {
-                            return Fail<DeviceTokenRefreshResponse>(
+                            return FailSilent<DeviceTokenRefreshResponse>(
                                 (int)httpResponse.StatusCode,
-                                BuildApiFailureMessage("刷新设备 token 失败", httpResponse.StatusCode, apiResponse, responseText),
-                                ReportChannels.Log);
+                                BackendRequestFailureHelper.BuildApiFailureMessage("刷新设备 token", httpResponse.StatusCode, apiResponse));
                         }
 
                         Result saveResult = SaveDeviceRegistrationToConfig(apiResponse.Data.DeviceId, apiResponse.Data.DeviceToken);
@@ -187,13 +185,13 @@ namespace AM.DBService.Services.System
                             return Fail<DeviceTokenRefreshResponse>(saveResult.Code, saveResult.Message);
                         }
 
-                        return OkLogOnly(apiResponse.Data, "刷新设备 token 成功");
+                        return OkSilent(apiResponse.Data, "刷新设备 token 成功");
                     }
                 }
             }
             catch (Exception ex)
             {
-                return Fail<DeviceTokenRefreshResponse>(-1, "刷新设备 token 异常", ReportChannels.Log, ex);
+                return FailSilent<DeviceTokenRefreshResponse>(-1, BackendRequestFailureHelper.BuildExceptionMessage("刷新设备 token", ex));
             }
         }
 
@@ -270,22 +268,6 @@ namespace AM.DBService.Services.System
             {
                 return Fail(-1, "保存设备注册配置异常", ReportChannels.Log, ex);
             }
-        }
-
-        private static string BuildApiFailureMessage<T>(string title, HttpStatusCode statusCode, DeviceApiResponse<T> apiResponse, string responseText)
-        {
-            string businessCode = apiResponse == null ? string.Empty : apiResponse.ErrorCode ?? string.Empty;
-            string message = apiResponse == null ? string.Empty : apiResponse.Message ?? string.Empty;
-            string traceId = apiResponse == null ? string.Empty : apiResponse.TraceId ?? string.Empty;
-
-            return string.Format(
-                "{0}，HTTP {1}，ErrorCode={2}，Message={3}，TraceId={4}，Body={5}",
-                title,
-                (int)statusCode,
-                businessCode,
-                message,
-                traceId,
-                responseText ?? string.Empty);
         }
 
         private static DeviceApiResponse<T> DeserializeApiResponse<T>(string responseText)

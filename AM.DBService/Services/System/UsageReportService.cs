@@ -8,9 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Net.NetworkInformation;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace AM.DBService.Services.System
@@ -25,14 +23,6 @@ namespace AM.DBService.Services.System
     /// </summary>
     public class UsageReportService : ServiceBase
     {
-        private const int InternetCheckCacheMs = 30000;
-        private const int InternetPingTimeoutMs = 1000;
-        private const int InternetRequestTimeoutSeconds = 3;
-
-        private static readonly object InternetStateSyncRoot = new object();
-        private static DateTime _lastInternetCheckTime = DateTime.MinValue;
-        private static bool _lastInternetAvailable;
-
         private readonly string _serviceUrl;
         private readonly HttpClient _httpClient;
 
@@ -84,13 +74,7 @@ namespace AM.DBService.Services.System
             {
                 if (string.IsNullOrWhiteSpace(_serviceUrl))
                 {
-                    return Fail(-1, "未配置使用信息上报服务地址", ReportChannels.Log);
-                }
-
-                bool canAccessInternet = await CanAccessInternetAsync().ConfigureAwait(false);
-                if (!canAccessInternet)
-                {
-                    return Fail(-2, "当前无互联网连接，暂不执行使用信息上报", ReportChannels.Log);
+                    return FailSilent(-1, "未配置后端服务地址");
                 }
 
                 List<SysUsageEventBufferEntity> list = events == null
@@ -140,27 +124,23 @@ namespace AM.DBService.Services.System
                     {
                         if (!response.IsSuccessStatusCode)
                         {
-                            string responseText = response.Content == null
-                                ? string.Empty
-                                : await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-
-                            return Fail(
+                            return FailSilent(
                                 -1,
-                                string.Format(
-                                    "使用事件上报失败，HTTP {0} {1} {2}",
-                                    (int)response.StatusCode,
-                                    response.ReasonPhrase ?? string.Empty,
-                                    responseText ?? string.Empty),
-                                ReportChannels.Log);
+                                BackendRequestFailureHelper.BuildHttpFailureMessage(
+                                    "使用事件上报",
+                                    response.StatusCode,
+                                    response.ReasonPhrase,
+                                    null,
+                                    null));
                         }
                     }
                 }
 
-                return OkLogOnly("使用事件上报成功，数量: " + list.Count);
+                return OkSilent("使用事件上报成功，数量: " + list.Count);
             }
             catch (Exception ex)
             {
-                return Fail(-1, "使用事件上报异常", ReportChannels.Log, ex);
+                return FailSilent(-1, BackendRequestFailureHelper.BuildExceptionMessage("使用事件上报", ex));
             }
         }
 
@@ -178,71 +158,6 @@ namespace AM.DBService.Services.System
         private static string GetServiceUrlFromConfig()
         {
             return BackendServiceConfigHelper.GetBackendServiceUrl();
-        }
-
-        /// <summary>
-        /// 轻量检测互联网可达性。
-        /// 优先使用 Ping，失败后再尝试访问公共网址。
-        /// 检测结果做短时缓存，避免高频网络探测影响性能。
-        /// </summary>
-        private async Task<bool> CanAccessInternetAsync()
-        {
-            DateTime now = DateTime.Now;
-
-            lock (InternetStateSyncRoot)
-            {
-                if ((now - _lastInternetCheckTime).TotalMilliseconds < InternetCheckCacheMs)
-                {
-                    return _lastInternetAvailable;
-                }
-            }
-
-            bool isAvailable = await ProbeInternetAsync().ConfigureAwait(false);
-
-            lock (InternetStateSyncRoot)
-            {
-                _lastInternetCheckTime = DateTime.Now;
-                _lastInternetAvailable = isAvailable;
-            }
-
-            return isAvailable;
-        }
-
-        private async Task<bool> ProbeInternetAsync()
-        {
-            try
-            {
-                using (var ping = new Ping())
-                {
-                    PingReply reply = await ping.SendPingAsync("www.bing.com", InternetPingTimeoutMs).ConfigureAwait(false);
-                    if (reply != null && reply.Status == IPStatus.Success)
-                    {
-                        return true;
-                    }
-                }
-            }
-            catch
-            {
-            }
-
-            try
-            {
-                using (var request = new HttpRequestMessage(HttpMethod.Get, "https://www.bing.com"))
-                {
-                    using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(InternetRequestTimeoutSeconds)))
-                    {
-                        using (HttpResponseMessage response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cts.Token).ConfigureAwait(false))
-                        {
-                            return response.IsSuccessStatusCode;
-                        }
-                    }
-                }
-            }
-            catch
-            {
-            }
-
-            return false;
         }
     }
 }

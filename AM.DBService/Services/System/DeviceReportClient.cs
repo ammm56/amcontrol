@@ -50,7 +50,7 @@ namespace AM.DBService.Services.System
                 Setting setting = ConfigContext.Instance.Config.Setting;
                 if (string.IsNullOrWhiteSpace(_serviceUrl))
                 {
-                    return Fail(-1, "未配置设备服务地址", ReportChannels.Log);
+                    return FailSilent(-1, "未配置后端服务地址");
                 }
 
                 if (string.IsNullOrWhiteSpace(setting.DeviceId))
@@ -97,19 +97,18 @@ namespace AM.DBService.Services.System
                         DeviceApiResponse<object> apiResponse = DeserializeApiResponse<object>(responseText);
                         if (!httpResponse.IsSuccessStatusCode || apiResponse == null || !apiResponse.Success)
                         {
-                            return Fail(
+                            return FailSilent(
                                 (int)httpResponse.StatusCode,
-                                BuildApiFailureMessage("设备结构化上报失败", httpResponse.StatusCode, apiResponse, responseText),
-                                ReportChannels.Log);
+                                BackendRequestFailureHelper.BuildApiFailureMessage("设备结构化上报", httpResponse.StatusCode, apiResponse));
                         }
 
-                        return OkLogOnly("设备结构化上报成功: " + (request.EventId ?? string.Empty));
+                        return OkSilent("设备结构化上报成功: " + (request.EventId ?? string.Empty));
                     }
                 }
             }
             catch (Exception ex)
             {
-                return Fail(-1, "设备结构化上报异常", ReportChannels.Log, ex);
+                return FailSilent(-1, BackendRequestFailureHelper.BuildExceptionMessage("设备结构化上报", ex));
             }
         }
 
@@ -128,18 +127,6 @@ namespace AM.DBService.Services.System
             {
                 return null;
             }
-        }
-
-        private static string BuildApiFailureMessage<T>(string title, HttpStatusCode statusCode, DeviceApiResponse<T> apiResponse, string responseText)
-        {
-            return string.Format(
-                "{0}，HTTP {1}，ErrorCode={2}，Message={3}，TraceId={4}，Body={5}",
-                title,
-                (int)statusCode,
-                apiResponse == null ? string.Empty : apiResponse.ErrorCode ?? string.Empty,
-                apiResponse == null ? string.Empty : apiResponse.Message ?? string.Empty,
-                apiResponse == null ? string.Empty : apiResponse.TraceId ?? string.Empty,
-                responseText ?? string.Empty);
         }
 
         private static string GetDeviceServiceUrlFromConfig()

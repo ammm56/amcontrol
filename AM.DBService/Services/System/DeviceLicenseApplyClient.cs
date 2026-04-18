@@ -101,7 +101,7 @@ namespace AM.DBService.Services.System
             {
                 if (string.IsNullOrWhiteSpace(_serviceUrl))
                 {
-                    return Fail<LicenseApplyResponse>(-1, "未配置授权服务地址", ReportChannels.Log);
+                    return FailLogOnly<LicenseApplyResponse>(-1, "未配置后端服务地址");
                 }
 
                 if (request == null)
@@ -125,36 +125,35 @@ namespace AM.DBService.Services.System
                         DeviceApiResponse<LicenseApplyResponse> apiResponse = DeserializeApiResponse<LicenseApplyResponse>(responseText);
                         if (apiResponse != null && !apiResponse.Success && string.Equals(apiResponse.ErrorCode, "LicensePending", StringComparison.OrdinalIgnoreCase))
                         {
-                            return Warn<LicenseApplyResponse>(-3, BuildApiFailureMessage("授权模板未命中，等待管理员处理", httpResponse.StatusCode, apiResponse, responseText), ReportChannels.Log);
+                            return WarnLogOnly<LicenseApplyResponse>(-3, BackendRequestFailureHelper.BuildApiFailureMessage("授权模板未命中，等待管理员处理", httpResponse.StatusCode, apiResponse));
                         }
 
                         if (!httpResponse.IsSuccessStatusCode || apiResponse == null || !apiResponse.Success || apiResponse.Data == null)
                         {
-                            return Fail<LicenseApplyResponse>(
+                            return FailLogOnly<LicenseApplyResponse>(
                                 (int)httpResponse.StatusCode,
-                                BuildApiFailureMessage("授权申请失败", httpResponse.StatusCode, apiResponse, responseText),
-                                ReportChannels.Log);
+                                BackendRequestFailureHelper.BuildApiFailureMessage("授权申请", httpResponse.StatusCode, apiResponse));
                         }
 
                         Result persistResult = PersistLicenseAndReload(apiResponse.Data);
                         if (!persistResult.Success)
                         {
-                            return Fail<LicenseApplyResponse>(persistResult.Code, persistResult.Message);
+                            return FailLogOnly<LicenseApplyResponse>(persistResult.Code, persistResult.Message);
                         }
 
                         Result queueResult = _deviceReportBufferService.EnqueueLicenseApplied(apiResponse.Data);
                         if (!queueResult.Success)
                         {
-                            WarnLogOnly(queueResult.Code, "授权申请成功，但写入设备 report 缓冲失败: " + queueResult.Message);
+                            WarnLogOnly(queueResult.Code, "授权申请成功，但设备 report 入队失败");
                         }
 
-                        return OkLogOnly(apiResponse.Data, "授权申请成功并已写入本地授权文件");
+                        return OkSilent(apiResponse.Data, "授权申请成功并已写入本地授权文件");
                     }
                 }
             }
             catch (Exception ex)
             {
-                return Fail<LicenseApplyResponse>(-1, "授权申请异常", ReportChannels.Log, ex);
+                return FailLogOnly<LicenseApplyResponse>(-1, BackendRequestFailureHelper.BuildExceptionMessage("授权申请", ex));
             }
         }
 
@@ -182,8 +181,8 @@ namespace AM.DBService.Services.System
                     Software = new LicenseApplySoftware
                     {
                         AppCategory = "MotionControl",
-                        AppCode = identityResult.Item.AppCode ?? "AMControlWinF",
-                        AppName = "AM Motion Control",
+                        AppCode = identityResult.Item.AppCode ?? LicenseConstants.DesktopAppCode,
+                        AppName = LicenseConstants.DesktopAppName,
                         AppEdition = string.Empty,
                         AppVersion = AM.Tools.Tools.GetAppVersionText(),
                         TargetFramework = ".NET Framework 4.6.1",
@@ -263,18 +262,6 @@ namespace AM.DBService.Services.System
             }
         }
 
-        private static string BuildApiFailureMessage<T>(string title, HttpStatusCode statusCode, DeviceApiResponse<T> apiResponse, string responseText)
-        {
-            return string.Format(
-                "{0}，HTTP {1}，ErrorCode={2}，Message={3}，TraceId={4}，Body={5}",
-                title,
-                (int)statusCode,
-                apiResponse == null ? string.Empty : apiResponse.ErrorCode ?? string.Empty,
-                apiResponse == null ? string.Empty : apiResponse.Message ?? string.Empty,
-                apiResponse == null ? string.Empty : apiResponse.TraceId ?? string.Empty,
-                responseText ?? string.Empty);
-        }
-
         private static string GetLicenseServiceUrlFromConfig()
         {
             return BackendServiceConfigHelper.GetBackendServiceUrl();
@@ -284,29 +271,29 @@ namespace AM.DBService.Services.System
         {
             if (response == null)
             {
-                return Fail(-1, "授权申请结果不能为空");
+                return FailLogOnly(-1, "授权申请失败，本地授权结果为空");
             }
 
             if (string.IsNullOrWhiteSpace(response.LicenseText))
             {
-                return Fail(-2, "授权申请成功但未返回 licenseText");
+                return FailLogOnly(-2, "授权申请失败，未返回 licenseText");
             }
 
             Result writeResult = _licenseFileService.WriteLicenseText(response.LicenseText);
             if (!writeResult.Success)
             {
-                return Fail(writeResult.Code, "授权申请成功，但写入 license.lic 失败: " + writeResult.Message);
+                return FailLogOnly(writeResult.Code, "授权申请成功，但本地授权文件写入失败");
             }
 
             Result<DeviceLicenseState> loadResult = _licenseRuntimeLoader.Load();
             if (!loadResult.Success || loadResult.Item == null)
             {
-                return Fail(loadResult.Code == 0 ? -1 : loadResult.Code, "授权文件已写入，但重新装载授权运行时失败: " + loadResult.Message);
+                return FailLogOnly(loadResult.Code == 0 ? -1 : loadResult.Code, "授权申请成功，但本地授权重载失败");
             }
 
             if (!loadResult.Item.IsValid)
             {
-                return Fail(-3, "授权文件已写入，但本地授权校验未通过: " + (loadResult.Item.Message ?? string.Empty));
+                return FailLogOnly(-3, "授权申请成功，但本地授权校验未通过");
             }
 
             return OkSilent("授权文件落盘并重载成功");
