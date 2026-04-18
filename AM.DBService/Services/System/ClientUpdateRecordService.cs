@@ -186,7 +186,7 @@ namespace AM.DBService.Services.System
                 SysClientUpdateRecordEntity entity = new SysClientUpdateRecordEntity
                 {
                     ClientId = identity.ClientId ?? string.Empty,
-                    AppCode = identity.AppCode ?? string.Empty,
+                    AppCode = string.IsNullOrWhiteSpace(identity.AppCode) ? BackendServiceConfigHelper.GetDesktopAppCode() : identity.AppCode,
                     MachineCode = identity.MachineCode ?? string.Empty,
                     MachineName = identity.MachineName ?? string.Empty,
                     CurrentVersion = currentVersion ?? string.Empty,

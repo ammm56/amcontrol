@@ -143,7 +143,7 @@ namespace AM.DBService.Services.System
         {
             DeviceLicenseState state = LicenseRuntimeContext.Instance.Current;
             Result<DeviceReportRequest> buildResult = BuildRequest(
-                "Status",
+                ResolveSystemEventReportType("AppStart"),
                 new
                 {
                     eventName = "AppStart",
@@ -174,7 +174,7 @@ namespace AM.DBService.Services.System
             }
 
             Result<DeviceReportRequest> buildResult = BuildRequest(
-                "Status",
+                ResolveSystemEventReportType("LicenseApplied"),
                 new
                 {
                     eventName = "LicenseApplied",
@@ -220,7 +220,7 @@ namespace AM.DBService.Services.System
                 {
                     EventId = BuildEventId(),
                     ReportType = reportType ?? string.Empty,
-                    AppCode = identity.AppCode ?? string.Empty,
+                    AppCode = string.IsNullOrWhiteSpace(identity.AppCode) ? BackendServiceConfigHelper.GetDesktopAppCode() : identity.AppCode,
                     AppVersion = AM.Tools.Tools.GetAppVersionText(),
                     ClientId = identity.ClientId ?? string.Empty,
                     MachineCode = identity.MachineCode ?? string.Empty,
@@ -239,6 +239,24 @@ namespace AM.DBService.Services.System
             catch (Exception ex)
             {
                 return Fail<DeviceReportRequest>(-1, "生成设备上报请求异常", ReportChannels.Log, ex);
+            }
+        }
+
+        private static string ResolveSystemEventReportType(string eventName)
+        {
+            if (string.IsNullOrWhiteSpace(eventName))
+            {
+                return "Info";
+            }
+
+            switch (eventName.Trim())
+            {
+                case "LicenseApplied":
+                    return "Status";
+
+                case "AppStart":
+                default:
+                    return "Info";
             }
         }
 

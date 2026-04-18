@@ -204,7 +204,7 @@ namespace AM.DBService.Services.System
                 {
                     EventId = AM.Tools.Tools.Guid(32),
                     EventType = eventType ?? string.Empty,
-                    AppCode = identity.AppCode ?? string.Empty,
+                    AppCode = string.IsNullOrWhiteSpace(identity.AppCode) ? BackendServiceConfigHelper.GetDesktopAppCode() : identity.AppCode,
                     AppVersion = AM.Tools.Tools.GetAppVersionText(),
                     ClientId = identity.ClientId ?? string.Empty,
                     MachineCode = identity.MachineCode ?? string.Empty,

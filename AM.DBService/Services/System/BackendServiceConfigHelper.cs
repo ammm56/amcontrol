@@ -9,6 +9,8 @@ namespace AM.DBService.Services.System
     /// </summary>
     internal static class BackendServiceConfigHelper
     {
+        private static readonly Setting DefaultSetting = new Setting();
+
         private static Setting GetSetting()
         {
             try
@@ -41,7 +43,7 @@ namespace AM.DBService.Services.System
         public static string GetDesktopAppCode()
         {
             string value = GetSetting().DesktopAppCode;
-            return string.IsNullOrWhiteSpace(value) ? "AMControlWinF" : value.Trim();
+            return string.IsNullOrWhiteSpace(value) ? DefaultSetting.DesktopAppCode : value.Trim();
         }
 
         public static string GetDesktopAppName()
@@ -53,7 +55,7 @@ namespace AM.DBService.Services.System
         public static string GetDesktopAppCategory()
         {
             string value = GetSetting().DesktopAppCategory;
-            return string.IsNullOrWhiteSpace(value) ? "MotionControl" : value.Trim();
+            return string.IsNullOrWhiteSpace(value) ? DefaultSetting.DesktopAppCategory : value.Trim();
         }
 
         public static string GetDesktopAppEdition()
@@ -64,19 +66,19 @@ namespace AM.DBService.Services.System
         public static string GetDesktopAppVendor()
         {
             string value = GetSetting().DesktopAppVendor;
-            return string.IsNullOrWhiteSpace(value) ? "AM" : value.Trim();
+            return string.IsNullOrWhiteSpace(value) ? DefaultSetting.DesktopAppVendor : value.Trim();
         }
 
         public static string GetDesktopAppTargetFramework()
         {
             string value = GetSetting().DesktopAppTargetFramework;
-            return string.IsNullOrWhiteSpace(value) ? ".NET Framework 4.6.1" : value.Trim();
+            return string.IsNullOrWhiteSpace(value) ? DefaultSetting.DesktopAppTargetFramework : value.Trim();
         }
 
         public static string GetDesktopAppUiPlatform()
         {
             string value = GetSetting().DesktopAppUiPlatform;
-            return string.IsNullOrWhiteSpace(value) ? "WinForms" : value.Trim();
+            return string.IsNullOrWhiteSpace(value) ? DefaultSetting.DesktopAppUiPlatform : value.Trim();
         }
     }
 }

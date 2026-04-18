@@ -220,7 +220,7 @@ namespace AM.DBService.Services.System
                         { "clientId", identity.ClientId ?? string.Empty },
                         { "machineCode", identity.MachineCode ?? string.Empty },
                         { "machineName", machineName },
-                        { "appCode", identity.AppCode ?? string.Empty }
+                        { "appCode", string.IsNullOrWhiteSpace(identity.AppCode) ? BackendServiceConfigHelper.GetDesktopAppCode() : identity.AppCode }
                     }
                 };
 
