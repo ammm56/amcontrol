@@ -27,16 +27,8 @@ namespace AMControlWinF.Views.Other
             this.panelActionButtons = new AntdUI.Panel();
             this.flowActionButtons = new AntdUI.FlowPanel();
             this.buttonApplyLicense = new AntdUI.Button();
-            this.buttonRefresh = new AntdUI.Button();
-            this.panelRowNetworkMode = new AntdUI.Panel();
-            this.selectNetworkMode = new AntdUI.Select();
-            this.labelNetworkMode = new AntdUI.Label();
-            this.panelRowCustomerCode = new AntdUI.Panel();
-            this.inputCustomerCode = new AntdUI.Input();
-            this.labelCustomerCode = new AntdUI.Label();
-            this.panelRowSiteCode = new AntdUI.Panel();
-            this.inputSiteCode = new AntdUI.Input();
-            this.labelSiteCode = new AntdUI.Label();
+            this.buttonExportRequest = new AntdUI.Button();
+            this.labelEnvironmentValue = new AntdUI.Label();
             this.labelEnvironmentTitle = new AntdUI.Label();
             this.labelHardwareValue = new AntdUI.Label();
             this.labelHardwareTitle = new AntdUI.Label();
@@ -49,9 +41,6 @@ namespace AMControlWinF.Views.Other
             this.panelLeftCard.SuspendLayout();
             this.panelActionButtons.SuspendLayout();
             this.flowActionButtons.SuspendLayout();
-            this.panelRowNetworkMode.SuspendLayout();
-            this.panelRowCustomerCode.SuspendLayout();
-            this.panelRowSiteCode.SuspendLayout();
             this.SuspendLayout();
             // 
             // panelRoot
@@ -163,9 +152,7 @@ namespace AMControlWinF.Views.Other
             // panelLeftCard
             // 
             this.panelLeftCard.Controls.Add(this.panelActionButtons);
-            this.panelLeftCard.Controls.Add(this.panelRowNetworkMode);
-            this.panelLeftCard.Controls.Add(this.panelRowCustomerCode);
-            this.panelLeftCard.Controls.Add(this.panelRowSiteCode);
+            this.panelLeftCard.Controls.Add(this.labelEnvironmentValue);
             this.panelLeftCard.Controls.Add(this.labelEnvironmentTitle);
             this.panelLeftCard.Controls.Add(this.labelHardwareValue);
             this.panelLeftCard.Controls.Add(this.labelHardwareTitle);
@@ -194,124 +181,47 @@ namespace AMControlWinF.Views.Other
             // 
             // flowActionButtons
             // 
+            this.flowActionButtons.Align = AntdUI.TAlignFlow.Right;
             this.flowActionButtons.Controls.Add(this.buttonApplyLicense);
-            this.flowActionButtons.Controls.Add(this.buttonRefresh);
+            this.flowActionButtons.Controls.Add(this.buttonExportRequest);
             this.flowActionButtons.Dock = System.Windows.Forms.DockStyle.Right;
             this.flowActionButtons.Gap = 10;
-            this.flowActionButtons.Location = new System.Drawing.Point(139, 0);
+            this.flowActionButtons.Location = new System.Drawing.Point(0, 0);
             this.flowActionButtons.Name = "flowActionButtons";
-            this.flowActionButtons.Size = new System.Drawing.Size(274, 46);
+            this.flowActionButtons.Size = new System.Drawing.Size(413, 46);
             this.flowActionButtons.TabIndex = 0;
             // 
             // buttonApplyLicense
             // 
-            this.buttonApplyLicense.Location = new System.Drawing.Point(73, 57);
+            this.buttonApplyLicense.Location = new System.Drawing.Point(274, 3);
             this.buttonApplyLicense.Name = "buttonApplyLicense";
             this.buttonApplyLicense.Radius = 8;
             this.buttonApplyLicense.Size = new System.Drawing.Size(136, 38);
             this.buttonApplyLicense.TabIndex = 0;
-            this.buttonApplyLicense.Text = "申请授权";
+            this.buttonApplyLicense.Text = "在线激活";
             this.buttonApplyLicense.Type = AntdUI.TTypeMini.Primary;
             this.buttonApplyLicense.WaveSize = 0;
             // 
-            // buttonRefresh
+            // buttonExportRequest
             // 
-            this.buttonRefresh.Location = new System.Drawing.Point(73, 3);
-            this.buttonRefresh.Name = "buttonRefresh";
-            this.buttonRefresh.Radius = 8;
-            this.buttonRefresh.Size = new System.Drawing.Size(128, 38);
-            this.buttonRefresh.TabIndex = 1;
-            this.buttonRefresh.Text = "刷新";
-            this.buttonRefresh.WaveSize = 0;
+            this.buttonExportRequest.Location = new System.Drawing.Point(110, 3);
+            this.buttonExportRequest.Name = "buttonExportRequest";
+            this.buttonExportRequest.Radius = 8;
+            this.buttonExportRequest.Size = new System.Drawing.Size(148, 38);
+            this.buttonExportRequest.TabIndex = 1;
+            this.buttonExportRequest.Text = "导出申请信息";
+            this.buttonExportRequest.WaveSize = 0;
             // 
-            // panelRowNetworkMode
+            // labelEnvironmentValue
             // 
-            this.panelRowNetworkMode.Controls.Add(this.selectNetworkMode);
-            this.panelRowNetworkMode.Controls.Add(this.labelNetworkMode);
-            this.panelRowNetworkMode.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panelRowNetworkMode.Location = new System.Drawing.Point(20, 395);
-            this.panelRowNetworkMode.Name = "panelRowNetworkMode";
-            this.panelRowNetworkMode.Radius = 0;
-            this.panelRowNetworkMode.Size = new System.Drawing.Size(413, 44);
-            this.panelRowNetworkMode.TabIndex = 9;
-            // 
-            // selectNetworkMode
-            // 
-            this.selectNetworkMode.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.selectNetworkMode.Location = new System.Drawing.Point(96, 0);
-            this.selectNetworkMode.Name = "selectNetworkMode";
-            this.selectNetworkMode.Size = new System.Drawing.Size(317, 44);
-            this.selectNetworkMode.TabIndex = 1;
-            this.selectNetworkMode.WaveSize = 0;
-            // 
-            // labelNetworkMode
-            // 
-            this.labelNetworkMode.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labelNetworkMode.Location = new System.Drawing.Point(0, 0);
-            this.labelNetworkMode.Name = "labelNetworkMode";
-            this.labelNetworkMode.Size = new System.Drawing.Size(96, 44);
-            this.labelNetworkMode.TabIndex = 0;
-            this.labelNetworkMode.Text = "联网模式";
-            // 
-            // panelRowCustomerCode
-            // 
-            this.panelRowCustomerCode.Controls.Add(this.inputCustomerCode);
-            this.panelRowCustomerCode.Controls.Add(this.labelCustomerCode);
-            this.panelRowCustomerCode.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panelRowCustomerCode.Location = new System.Drawing.Point(20, 351);
-            this.panelRowCustomerCode.Name = "panelRowCustomerCode";
-            this.panelRowCustomerCode.Radius = 0;
-            this.panelRowCustomerCode.Size = new System.Drawing.Size(413, 44);
-            this.panelRowCustomerCode.TabIndex = 8;
-            // 
-            // inputCustomerCode
-            // 
-            this.inputCustomerCode.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.inputCustomerCode.Location = new System.Drawing.Point(96, 0);
-            this.inputCustomerCode.Name = "inputCustomerCode";
-            this.inputCustomerCode.PlaceholderText = "可选客户编码";
-            this.inputCustomerCode.Size = new System.Drawing.Size(317, 44);
-            this.inputCustomerCode.TabIndex = 1;
-            this.inputCustomerCode.WaveSize = 0;
-            // 
-            // labelCustomerCode
-            // 
-            this.labelCustomerCode.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labelCustomerCode.Location = new System.Drawing.Point(0, 0);
-            this.labelCustomerCode.Name = "labelCustomerCode";
-            this.labelCustomerCode.Size = new System.Drawing.Size(96, 44);
-            this.labelCustomerCode.TabIndex = 0;
-            this.labelCustomerCode.Text = "客户编码";
-            // 
-            // panelRowSiteCode
-            // 
-            this.panelRowSiteCode.Controls.Add(this.inputSiteCode);
-            this.panelRowSiteCode.Controls.Add(this.labelSiteCode);
-            this.panelRowSiteCode.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panelRowSiteCode.Location = new System.Drawing.Point(20, 307);
-            this.panelRowSiteCode.Name = "panelRowSiteCode";
-            this.panelRowSiteCode.Radius = 0;
-            this.panelRowSiteCode.Size = new System.Drawing.Size(413, 44);
-            this.panelRowSiteCode.TabIndex = 7;
-            // 
-            // inputSiteCode
-            // 
-            this.inputSiteCode.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.inputSiteCode.Location = new System.Drawing.Point(96, 0);
-            this.inputSiteCode.Name = "inputSiteCode";
-            this.inputSiteCode.PlaceholderText = "可选站点编码";
-            this.inputSiteCode.Size = new System.Drawing.Size(317, 44);
-            this.inputSiteCode.TabIndex = 1;
-            this.inputSiteCode.WaveSize = 0;
-            // 
-            // labelSiteCode
-            // 
-            this.labelSiteCode.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labelSiteCode.Location = new System.Drawing.Point(0, 0);
-            this.labelSiteCode.Name = "labelSiteCode";
-            this.labelSiteCode.Size = new System.Drawing.Size(96, 44);
-            this.labelSiteCode.TabIndex = 0;
-            this.labelSiteCode.Text = "站点编码";
+            this.labelEnvironmentValue.BackColor = System.Drawing.Color.Transparent;
+            this.labelEnvironmentValue.Dock = System.Windows.Forms.DockStyle.Top;
+            this.labelEnvironmentValue.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
+            this.labelEnvironmentValue.Location = new System.Drawing.Point(20, 307);
+            this.labelEnvironmentValue.Name = "labelEnvironmentValue";
+            this.labelEnvironmentValue.Size = new System.Drawing.Size(413, 132);
+            this.labelEnvironmentValue.TabIndex = 7;
+            this.labelEnvironmentValue.Text = "-";
             // 
             // labelEnvironmentTitle
             // 
@@ -322,7 +232,7 @@ namespace AMControlWinF.Views.Other
             this.labelEnvironmentTitle.Name = "labelEnvironmentTitle";
             this.labelEnvironmentTitle.Size = new System.Drawing.Size(413, 24);
             this.labelEnvironmentTitle.TabIndex = 6;
-            this.labelEnvironmentTitle.Text = "申请环境";
+            this.labelEnvironmentTitle.Text = "授权方式";
             // 
             // labelHardwareValue
             // 
@@ -391,9 +301,6 @@ namespace AMControlWinF.Views.Other
             this.panelLeftCard.ResumeLayout(false);
             this.panelActionButtons.ResumeLayout(false);
             this.flowActionButtons.ResumeLayout(false);
-            this.panelRowNetworkMode.ResumeLayout(false);
-            this.panelRowCustomerCode.ResumeLayout(false);
-            this.panelRowSiteCode.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -411,17 +318,9 @@ namespace AMControlWinF.Views.Other
         private AntdUI.Panel panelActionButtons;
         private AntdUI.FlowPanel flowActionButtons;
         private AntdUI.Button buttonApplyLicense;
-        private AntdUI.Button buttonRefresh;
-        private AntdUI.Panel panelRowNetworkMode;
-        private AntdUI.Select selectNetworkMode;
-        private AntdUI.Label labelNetworkMode;
-        private AntdUI.Panel panelRowCustomerCode;
-        private AntdUI.Input inputCustomerCode;
-        private AntdUI.Label labelCustomerCode;
-        private AntdUI.Panel panelRowSiteCode;
-        private AntdUI.Input inputSiteCode;
-        private AntdUI.Label labelSiteCode;
+        private AntdUI.Button buttonExportRequest;
         private AntdUI.Label labelEnvironmentTitle;
+        private AntdUI.Label labelEnvironmentValue;
         private AntdUI.Label labelHardwareValue;
         private AntdUI.Label labelHardwareTitle;
         private AntdUI.Label labelSoftwareValue;

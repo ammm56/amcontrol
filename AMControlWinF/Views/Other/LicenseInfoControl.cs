@@ -2,6 +2,7 @@ using AM.Core.Context;
 using AM.DBService.Services.System;
 using AM.Model.Common;
 using AM.Model.License;
+using AMControlWinF.Tools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +19,7 @@ namespace AMControlWinF.Views.Other
         private readonly HardwareInfoCollector _hardwareInfoCollector;
         private readonly DeviceLicenseApplyClient _deviceLicenseApplyClient;
 
-        private string _lastApplyMessage;
+        private string _lastActionMessage;
 
         public LicenseInfoControl()
         {
@@ -26,20 +27,17 @@ namespace AMControlWinF.Views.Other
 
             _hardwareInfoCollector = new HardwareInfoCollector();
             _deviceLicenseApplyClient = new DeviceLicenseApplyClient();
-            _lastApplyMessage = string.Empty;
+            _lastActionMessage = string.Empty;
 
-            InitializeEnvironmentInputs();
+            InitializeActions();
             ApplyLanguage();
             RefreshLicenseView();
         }
 
-        private void InitializeEnvironmentInputs()
+        private void InitializeActions()
         {
-            selectNetworkMode.Items.AddRange(new object[] { "Online", "Offline" });
-            selectNetworkMode.SelectedValue = "Online";
-
             buttonApplyLicense.Click += ButtonApplyLicense_Click;
-            buttonRefresh.Click += ButtonRefresh_Click;
+            buttonExportRequest.Click += ButtonExportRequest_Click;
         }
 
         private async void ButtonApplyLicense_Click(object sender, EventArgs e)
@@ -48,17 +46,22 @@ namespace AMControlWinF.Views.Other
             try
             {
                 Result<LicenseApplyResponse> result = await _deviceLicenseApplyClient
-                    .ApplyCurrentDeviceAsync(
-                        inputSiteCode.Text,
-                        inputCustomerCode.Text,
-                        GetSelectedNetworkMode())
+                    .ApplyCurrentDeviceAsync()
                     .ConfigureAwait(true);
 
-                _lastApplyMessage = string.IsNullOrWhiteSpace(result.Message)
+                _lastActionMessage = string.IsNullOrWhiteSpace(result.Message)
                     ? (IsEnglishLanguage() ? "Completed." : "已完成。")
                     : result.Message;
 
                 RefreshLicenseView();
+
+                if (!result.Success)
+                {
+                    PageDialogHelper.ShowWarn(
+                        this,
+                        IsEnglishLanguage() ? "License" : "许可证",
+                        _lastActionMessage);
+                }
             }
             finally
             {
@@ -66,15 +69,46 @@ namespace AMControlWinF.Views.Other
             }
         }
 
-        private void ButtonRefresh_Click(object sender, EventArgs e)
+        private void ButtonExportRequest_Click(object sender, EventArgs e)
         {
-            RefreshLicenseView();
+            using (var saveDialog = new SaveFileDialog())
+            {
+                saveDialog.Title = IsEnglishLanguage() ? "Export License Request" : "导出授权申请信息";
+                saveDialog.Filter = "JSON Files (*.json)|*.json|All Files (*.*)|*.*";
+                saveDialog.FileName = string.Format("license_request_{0}.json", DateTime.Now.ToString("yyyyMMddHHmmss"));
+                saveDialog.RestoreDirectory = true;
+
+                if (saveDialog.ShowDialog(this) != DialogResult.OK)
+                    return;
+
+                Result<string> exportResult = _deviceLicenseApplyClient.ExportCurrentRequestToFile(saveDialog.FileName, "Offline");
+                _lastActionMessage = string.IsNullOrWhiteSpace(exportResult.Message)
+                    ? (IsEnglishLanguage() ? "Export completed." : "导出完成。")
+                    : exportResult.Message;
+
+                RefreshLicenseView();
+
+                if (exportResult.Success)
+                {
+                    PageDialogHelper.ShowInfo(
+                        this,
+                        IsEnglishLanguage() ? "License" : "许可证",
+                        (IsEnglishLanguage() ? "Request info exported to:" : "申请信息已导出到：") + Environment.NewLine + saveDialog.FileName);
+                }
+                else
+                {
+                    PageDialogHelper.ShowWarn(
+                        this,
+                        IsEnglishLanguage() ? "License" : "许可证",
+                        _lastActionMessage);
+                }
+            }
         }
 
         private void SetButtonsEnabled(bool enabled)
         {
             buttonApplyLicense.Enabled = enabled;
-            buttonRefresh.Enabled = enabled;
+            buttonExportRequest.Enabled = enabled;
         }
 
         private void RefreshLicenseView()
@@ -82,6 +116,7 @@ namespace AMControlWinF.Views.Other
             bool isEn = IsEnglishLanguage();
             labelSoftwareValue.Text = BuildSoftwareInfoText(isEn);
             labelHardwareValue.Text = BuildHardwareInfoText(isEn);
+            labelEnvironmentValue.Text = BuildEnvironmentInfoText(isEn);
             labelResultValue.Text = BuildResultText(isEn);
             labelTimeValue.Text = BuildTimeText(isEn);
             labelScopeValue.Text = BuildScopeText(isEn);
@@ -94,17 +129,24 @@ namespace AMControlWinF.Views.Other
             labelLeftTitle.Text = isEn ? "License Request" : "授权申请";
             labelSoftwareTitle.Text = isEn ? "Software identity" : "软件身份";
             labelHardwareTitle.Text = isEn ? "Device binding" : "设备绑定";
-            labelEnvironmentTitle.Text = isEn ? "Apply environment" : "申请环境";
-            labelSiteCode.Text = isEn ? "Site code" : "站点编码";
-            labelCustomerCode.Text = isEn ? "Customer code" : "客户编码";
-            labelNetworkMode.Text = isEn ? "Network mode" : "联网模式";
-            inputSiteCode.PlaceholderText = isEn ? "Optional site code" : "可选站点编码";
-            inputCustomerCode.PlaceholderText = isEn ? "Optional customer code" : "可选客户编码";
-            buttonRefresh.Text = isEn ? "Refresh" : "刷新";
-            buttonApplyLicense.Text = isEn ? "Apply License" : "申请授权";
+            labelEnvironmentTitle.Text = isEn ? "Activation mode" : "授权方式";
+            buttonExportRequest.Text = isEn ? "Export Request" : "导出申请信息";
+            buttonApplyLicense.Text = isEn ? "Activate Online" : "在线激活";
             labelRightTitle.Text = isEn ? "License Result" : "授权结果";
             labelTimeTitle.Text = isEn ? "Validity window" : "时间期限";
             labelScopeTitle.Text = isEn ? "Authorized scope" : "授权范围";
+        }
+
+        private string BuildEnvironmentInfoText(bool isEn)
+        {
+            string backendUrl = BackendServiceConfigHelper.GetBackendServiceUrl();
+            return string.Join(Environment.NewLine, new[]
+            {
+                (isEn ? "Online activation: " : "在线激活：") + (BackendServiceConfigHelper.IsConfigured() ? (isEn ? "Use backend API directly" : "直接调用后端授权接口") : (isEn ? "Backend URL is missing" : "未配置后端地址")),
+                (isEn ? "Offline apply: " : "离线申请：") + (isEn ? "Export current request info to file" : "将当前申请信息导出到文件"),
+                (isEn ? "Backend URL: " : "后端地址：") + SafeValue(backendUrl, isEn),
+                (isEn ? "Network mode: " : "网络模式：") + (isEn ? "Online activation / Offline export" : "在线激活 / 离线导出")
+            });
         }
 
         private string BuildSoftwareInfoText(bool isEn)
@@ -160,9 +202,9 @@ namespace AMControlWinF.Views.Other
             else
                 statusText = isEn ? "Invalid" : "无效";
 
-            string lastApply = string.IsNullOrWhiteSpace(_lastApplyMessage)
+            string lastApply = string.IsNullOrWhiteSpace(_lastActionMessage)
                 ? (isEn ? "N/A" : "暂无")
-                : _lastApplyMessage;
+                : _lastActionMessage;
 
             return string.Join(Environment.NewLine, new[]
             {
@@ -204,13 +246,6 @@ namespace AMControlWinF.Views.Other
             lines.Add(isEn ? "Pages:" : "授权页面：");
             lines.Add(JoinLines(state == null ? null : state.PageKeys, isEn));
             return string.Join(Environment.NewLine, lines);
-        }
-
-        private string GetSelectedNetworkMode()
-        {
-            return selectNetworkMode.SelectedValue == null
-                ? "Online"
-                : selectNetworkMode.SelectedValue.ToString();
         }
 
         private bool IsEnglishLanguage()

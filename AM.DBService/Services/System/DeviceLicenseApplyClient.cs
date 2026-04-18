@@ -7,6 +7,7 @@ using AM.Model.Entity.System;
 using AM.Model.License;
 using Newtonsoft.Json;
 using System;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography;
@@ -93,6 +94,42 @@ namespace AM.DBService.Services.System
             }
 
             return await ApplyAsync(requestResult.Item).ConfigureAwait(false);
+        }
+
+        public Result<LicenseApplyRequest> BuildCurrentRequest(string networkMode = "Online")
+        {
+            return CreateCurrentRequest(null, null, networkMode);
+        }
+
+        public Result<string> ExportCurrentRequestToFile(string filePath, string networkMode = "Offline")
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(filePath))
+                {
+                    return Fail<string>(-1, "导出文件路径不能为空");
+                }
+
+                Result<LicenseApplyRequest> requestResult = CreateCurrentRequest(null, null, networkMode);
+                if (!requestResult.Success || requestResult.Item == null)
+                {
+                    return Fail<string>(requestResult.Code == 0 ? -1 : requestResult.Code, requestResult.Message);
+                }
+
+                string directory = Path.GetDirectoryName(filePath);
+                if (!string.IsNullOrWhiteSpace(directory) && !Directory.Exists(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+
+                string requestJson = JsonConvert.SerializeObject(requestResult.Item, Formatting.Indented);
+                File.WriteAllText(filePath, requestJson, Encoding.UTF8);
+                return OkSilent(filePath, "授权申请信息导出成功");
+            }
+            catch (Exception ex)
+            {
+                return FailLogOnly<string>(-1, "授权申请信息导出失败", ex);
+            }
         }
 
         public async Task<Result<LicenseApplyResponse>> ApplyAsync(LicenseApplyRequest request)
