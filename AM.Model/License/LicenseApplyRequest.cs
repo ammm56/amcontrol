@@ -1,4 +1,5 @@
 using System;
+using Newtonsoft.Json;
 
 namespace AM.Model.License
 {
@@ -12,36 +13,43 @@ namespace AM.Model.License
         /// 本次授权申请唯一标识。
         /// 同一次重试应保持不变。
         /// </summary>
+        [JsonProperty("requestId")]
         public string RequestId { get; set; } = string.Empty;
 
         /// <summary>
         /// 请求时间。
         /// </summary>
+        [JsonProperty("requestTime")]
         public DateTime RequestTime { get; set; }
 
         /// <summary>
         /// 授权协议版本。
         /// </summary>
+        [JsonProperty("licenseProtocolVersion")]
         public string LicenseProtocolVersion { get; set; } = string.Empty;
 
         /// <summary>
         /// 软件信息。
         /// </summary>
+        [JsonProperty("software")]
         public LicenseApplySoftware Software { get; set; } = new LicenseApplySoftware();
 
         /// <summary>
         /// 当前设备硬件信息。
         /// </summary>
+        [JsonProperty("device")]
         public DeviceHardwareInfo Device { get; set; } = new DeviceHardwareInfo();
 
         /// <summary>
         /// 环境信息。
         /// </summary>
+        [JsonProperty("environment")]
         public LicenseApplyEnvironment Environment { get; set; } = new LicenseApplyEnvironment();
 
         /// <summary>
         /// 请求签名摘要信息。
         /// </summary>
+        [JsonProperty("signature")]
         public LicenseApplyRequestSignature Signature { get; set; } = new LicenseApplyRequestSignature();
     }
 
@@ -50,20 +58,28 @@ namespace AM.Model.License
     /// </summary>
     public class LicenseApplySoftware
     {
+        [JsonProperty("appCategory")]
         public string AppCategory { get; set; } = string.Empty;
 
+        [JsonProperty("appCode")]
         public string AppCode { get; set; } = string.Empty;
 
+        [JsonProperty("appName")]
         public string AppName { get; set; } = string.Empty;
 
+        [JsonProperty("appEdition")]
         public string AppEdition { get; set; } = string.Empty;
 
+        [JsonProperty("appVersion")]
         public string AppVersion { get; set; } = string.Empty;
 
+        [JsonProperty("targetFramework")]
         public string TargetFramework { get; set; } = string.Empty;
 
+        [JsonProperty("uiPlatform")]
         public string UiPlatform { get; set; } = string.Empty;
 
+        [JsonProperty("vendor")]
         public string Vendor { get; set; } = string.Empty;
     }
 
@@ -72,10 +88,13 @@ namespace AM.Model.License
     /// </summary>
     public class LicenseApplyEnvironment
     {
+        [JsonProperty("siteCode")]
         public string SiteCode { get; set; } = string.Empty;
 
+        [JsonProperty("customerCode")]
         public string CustomerCode { get; set; } = string.Empty;
 
+        [JsonProperty("networkMode")]
         public string NetworkMode { get; set; } = string.Empty;
     }
 
@@ -84,8 +103,10 @@ namespace AM.Model.License
     /// </summary>
     public class LicenseApplyRequestSignature
     {
+        [JsonProperty("algorithm")]
         public string Algorithm { get; set; } = string.Empty;
 
+        [JsonProperty("contentSha256")]
         public string ContentSha256 { get; set; } = string.Empty;
     }
 }

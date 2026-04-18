@@ -165,6 +165,12 @@ namespace AM.Model.Common
         public int DeviceHeartbeatIntervalMs { get; set; } = 60000;
 
         /// <summary>
+        /// 设备平台注册标识。
+        /// 注册成功后由设备注册客户端回写并持久化。
+        /// </summary>
+        public string DeviceId { get; set; } = string.Empty;
+
+        /// <summary>
         /// 最近一次注册或刷新后保存的设备 token。
         /// 当前阶段先持久化到 config.json，后续如有需要再调整存储位置。
         /// </summary>

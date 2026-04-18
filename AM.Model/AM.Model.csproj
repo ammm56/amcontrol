@@ -97,6 +97,9 @@
     <Compile Include="Interfaces\Plc\IPlcClientFactory.cs" />
     <Compile Include="Interfaces\Plc\Runtime\IPlcRuntimeService.cs" />
     <Compile Include="Interfaces\Plc\Runtime\IPlcScanWorker.cs" />
+    <Compile Include="Device\DeviceApiResponse.cs" />
+    <Compile Include="Device\DeviceRegistrationModels.cs" />
+    <Compile Include="Device\DeviceRuntimeRequestModels.cs" />
     <Compile Include="License\DeviceHardwareInfo.cs" />
     <Compile Include="License\DeviceLicense.cs" />
     <Compile Include="License\DeviceLicenseState.cs" />
