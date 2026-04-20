@@ -154,13 +154,18 @@ namespace AMControlWinF.Views.Other
         private string BuildSoftwareInfoText(bool isEn)
         {
             var setting = ConfigContext.Instance.Config.Setting;
+            DeviceLicenseState state = LicenseRuntimeContext.Instance.Current;
+            DeviceLicense license = state == null ? null : state.License;
+            string edition = license != null && license.Software != null && !string.IsNullOrWhiteSpace(license.Software.AppEdition)
+                ? license.Software.AppEdition
+                : BackendServiceConfigHelper.GetDesktopAppEdition();
 
             return string.Join(Environment.NewLine, new[]
             {
                 (isEn ? "App Name: " : "应用名称：") + BackendServiceConfigHelper.GetDesktopAppName(),
                 (isEn ? "App Code: " : "应用编码：") + BackendServiceConfigHelper.GetDesktopAppCode(),
                 (isEn ? "Category: " : "应用分类：") + BackendServiceConfigHelper.GetDesktopAppCategory(),
-                (isEn ? "Edition: " : "版本版型：") + SafeValue(BackendServiceConfigHelper.GetDesktopAppEdition(), isEn),
+                (isEn ? "Edition: " : "版本类型：") + SafeValue(edition, isEn),
                 (isEn ? "Version: " : "程序集版本：") + AM.Tools.Tools.GetAppVersionText(),
                 (isEn ? "UI Platform: " : "界面平台：") + BackendServiceConfigHelper.GetDesktopAppUiPlatform(),
                 (isEn ? "Framework: " : "目标框架：") + BackendServiceConfigHelper.GetDesktopAppTargetFramework(),
