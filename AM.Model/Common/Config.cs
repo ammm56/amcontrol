@@ -130,9 +130,28 @@ namespace AM.Model.Common
 
         /// <summary>
         /// 桌面应用版本版型。
-        /// 当前为空时表示不额外指定 Edition。
+        /// 当前用于授权申请中的 software.appEdition。
+        /// 为空时表示不额外指定 Edition。
         /// </summary>
         public string DesktopAppEdition { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 授权申请默认客户编码。
+        /// 当前用于 environment.customerCode；调用方未显式传入时回退到此配置。
+        /// </summary>
+        public string LicenseCustomerCode { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 授权申请默认站点编码。
+        /// 当前用于 environment.siteCode；调用方未显式传入时回退到此配置。
+        /// </summary>
+        public string LicenseSiteCode { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 授权申请默认设备型号。
+        /// 当前用于 device.machineModel；为空时回退到运行时采集值。
+        /// </summary>
+        public string LicenseMachineModel { get; set; } = string.Empty;
 
         /// <summary>
         /// 桌面应用供应商标识。

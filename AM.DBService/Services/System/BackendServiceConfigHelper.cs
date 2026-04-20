@@ -17,6 +17,7 @@ namespace AM.DBService.Services.System
 
         private static Setting GetSetting()
         {
+            
             try
             {
                 return ConfigContext.Instance.Config.Setting ?? new Setting();
@@ -26,7 +27,6 @@ namespace AM.DBService.Services.System
                 return new Setting();
             }
         }
-
         public static string GetBackendServiceUrl()
         {
             try
@@ -65,6 +65,21 @@ namespace AM.DBService.Services.System
         public static string GetDesktopAppEdition()
         {
             return (GetSetting().DesktopAppEdition ?? string.Empty).Trim();
+        }
+
+        public static string GetLicenseCustomerCode()
+        {
+            return (GetSetting().LicenseCustomerCode ?? string.Empty).Trim();
+        }
+
+        public static string GetLicenseSiteCode()
+        {
+            return (GetSetting().LicenseSiteCode ?? string.Empty).Trim();
+        }
+
+        public static string GetLicenseMachineModel()
+        {
+            return (GetSetting().LicenseMachineModel ?? string.Empty).Trim();
         }
 
         public static string GetDesktopAppVendor()

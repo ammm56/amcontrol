@@ -12,7 +12,10 @@
 		"DesktopAppCode": "AMControlWinF",
 		"DesktopAppName": "AMControlWinF",
 		"DesktopAppCategory": "MotionControl",
-		"DesktopAppEdition": "",
+		"DesktopAppEdition": "Developer",
+		"LicenseCustomerCode": "dev",
+		"LicenseSiteCode": "default",
+		"LicenseMachineModel": "default",
 		"DesktopAppVendor": "AM",
 		"DesktopAppTargetFramework": ".NET Framework 4.6.1",
 		"DesktopAppUiPlatform": "WinForms"

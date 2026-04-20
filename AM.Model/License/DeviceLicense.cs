@@ -34,6 +34,12 @@ namespace AM.Model.License
         public DeviceLicenseSoftware Software { get; set; } = new DeviceLicenseSoftware();
 
         /// <summary>
+        /// 开发版等按范围匹配的授权范围信息。
+        /// 当前用于 customerCode、siteCode、machineModel 的本地匹配。
+        /// </summary>
+        public DeviceLicenseGrantScope GrantScope { get; set; } = new DeviceLicenseGrantScope();
+
+        /// <summary>
         /// 设备绑定信息。
         /// </summary>
         public DeviceLicenseBinding DeviceBinding { get; set; } = new DeviceLicenseBinding();
@@ -68,6 +74,19 @@ namespace AM.Model.License
         public string AppEdition { get; set; } = string.Empty;
 
         public string AppVersion { get; set; } = string.Empty;
+    }
+
+    /// <summary>
+    /// License 中按业务范围控制的授权范围。
+    /// 开发版当前不再按硬件强绑定校验，而是匹配这里的客户、站点和设备型号。
+    /// </summary>
+    public class DeviceLicenseGrantScope
+    {
+        public string CustomerCode { get; set; } = string.Empty;
+
+        public string SiteCode { get; set; } = string.Empty;
+
+        public string MachineModel { get; set; } = string.Empty;
     }
 
     /// <summary>

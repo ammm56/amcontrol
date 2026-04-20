@@ -18,6 +18,12 @@ namespace AM.Model.License
         public const string LicenseProtocolVersion = "1.0";
 
         /// <summary>
+        /// 开发版设备软件的 Edition 标识。
+        /// 当授权中的 software.appEdition 为该值时，设备侧按开发版范围匹配规则校验，不走常规硬件强绑定。
+        /// </summary>
+        public const string DeveloperAppEdition = "Developer";
+
+        /// <summary>
         /// 授权申请请求前缀。
         /// </summary>
         public const string ApplyRequestIdPrefix = "apply";

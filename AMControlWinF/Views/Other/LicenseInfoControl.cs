@@ -246,7 +246,13 @@ namespace AMControlWinF.Views.Other
         private string BuildScopeText(bool isEn)
         {
             DeviceLicenseState state = LicenseRuntimeContext.Instance.Current;
+            DeviceLicense license = state == null ? null : state.License;
+            DeviceLicenseGrantScope grantScope = license == null ? null : license.GrantScope;
             List<string> lines = new List<string>();
+            lines.Add((isEn ? "CustomerCode: " : "客户编码：") + SafeValue(grantScope == null ? string.Empty : grantScope.CustomerCode, isEn));
+            lines.Add((isEn ? "SiteCode: " : "站点编码：") + SafeValue(grantScope == null ? string.Empty : grantScope.SiteCode, isEn));
+            lines.Add((isEn ? "MachineModel: " : "设备型号：") + SafeValue(grantScope == null ? string.Empty : grantScope.MachineModel, isEn));
+            lines.Add(string.Empty);
             lines.Add(isEn ? "Modules:" : "授权模块：");
             lines.Add(JoinLines(state == null ? null : state.ModuleKeys, isEn));
             lines.Add(string.Empty);
@@ -266,7 +272,8 @@ namespace AMControlWinF.Views.Other
                 return isEn ? "None" : "无";
 
             string[] items = values.Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
-            return items.Length <= 0 ? (isEn ? "None" : "无") : string.Join(Environment.NewLine, items);
+            //return items.Length <= 0 ? (isEn ? "None" : "无") : string.Join(Environment.NewLine, items);
+            return items.Length <= 0 ? (isEn ? "None" : "无") : string.Join(",", items);
         }
 
         private static string BoolText(bool value, bool isEn)

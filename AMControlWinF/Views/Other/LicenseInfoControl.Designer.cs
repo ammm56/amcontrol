@@ -90,9 +90,11 @@ namespace AMControlWinF.Views.Other
             this.labelScopeValue.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
             this.labelScopeValue.Location = new System.Drawing.Point(20, 354);
             this.labelScopeValue.Name = "labelScopeValue";
+            this.labelScopeValue.Padding = new System.Windows.Forms.Padding(0, 8, 0, 0);
             this.labelScopeValue.Size = new System.Drawing.Size(471, 190);
             this.labelScopeValue.TabIndex = 6;
             this.labelScopeValue.Text = "-";
+            this.labelScopeValue.TextAlign = System.Drawing.ContentAlignment.TopLeft;
             // 
             // labelScopeTitle
             // 
@@ -112,9 +114,11 @@ namespace AMControlWinF.Views.Other
             this.labelTimeValue.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
             this.labelTimeValue.Location = new System.Drawing.Point(20, 220);
             this.labelTimeValue.Name = "labelTimeValue";
+            this.labelTimeValue.Padding = new System.Windows.Forms.Padding(0, 8, 0, 0);
             this.labelTimeValue.Size = new System.Drawing.Size(471, 110);
             this.labelTimeValue.TabIndex = 4;
             this.labelTimeValue.Text = "-";
+            this.labelTimeValue.TextAlign = System.Drawing.ContentAlignment.TopLeft;
             // 
             // labelTimeTitle
             // 
@@ -134,9 +138,11 @@ namespace AMControlWinF.Views.Other
             this.labelResultValue.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
             this.labelResultValue.Location = new System.Drawing.Point(20, 44);
             this.labelResultValue.Name = "labelResultValue";
+            this.labelResultValue.Padding = new System.Windows.Forms.Padding(0, 8, 0, 0);
             this.labelResultValue.Size = new System.Drawing.Size(471, 152);
             this.labelResultValue.TabIndex = 2;
             this.labelResultValue.Text = "-";
+            this.labelResultValue.TextAlign = System.Drawing.ContentAlignment.TopLeft;
             // 
             // labelRightTitle
             // 
@@ -219,9 +225,11 @@ namespace AMControlWinF.Views.Other
             this.labelEnvironmentValue.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
             this.labelEnvironmentValue.Location = new System.Drawing.Point(20, 307);
             this.labelEnvironmentValue.Name = "labelEnvironmentValue";
+            this.labelEnvironmentValue.Padding = new System.Windows.Forms.Padding(0, 8, 0, 0);
             this.labelEnvironmentValue.Size = new System.Drawing.Size(413, 132);
             this.labelEnvironmentValue.TabIndex = 7;
             this.labelEnvironmentValue.Text = "-";
+            this.labelEnvironmentValue.TextAlign = System.Drawing.ContentAlignment.TopLeft;
             // 
             // labelEnvironmentTitle
             // 
@@ -241,9 +249,11 @@ namespace AMControlWinF.Views.Other
             this.labelHardwareValue.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
             this.labelHardwareValue.Location = new System.Drawing.Point(20, 174);
             this.labelHardwareValue.Name = "labelHardwareValue";
+            this.labelHardwareValue.Padding = new System.Windows.Forms.Padding(0, 8, 0, 0);
             this.labelHardwareValue.Size = new System.Drawing.Size(413, 109);
             this.labelHardwareValue.TabIndex = 5;
             this.labelHardwareValue.Text = "-";
+            this.labelHardwareValue.TextAlign = System.Drawing.ContentAlignment.TopLeft;
             // 
             // labelHardwareTitle
             // 
@@ -263,9 +273,11 @@ namespace AMControlWinF.Views.Other
             this.labelSoftwareValue.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
             this.labelSoftwareValue.Location = new System.Drawing.Point(20, 68);
             this.labelSoftwareValue.Name = "labelSoftwareValue";
+            this.labelSoftwareValue.Padding = new System.Windows.Forms.Padding(0, 8, 0, 0);
             this.labelSoftwareValue.Size = new System.Drawing.Size(413, 82);
             this.labelSoftwareValue.TabIndex = 3;
             this.labelSoftwareValue.Text = "-";
+            this.labelSoftwareValue.TextAlign = System.Drawing.ContentAlignment.TopLeft;
             // 
             // labelSoftwareTitle
             // 

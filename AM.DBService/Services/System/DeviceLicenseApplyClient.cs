@@ -223,14 +223,27 @@ namespace AM.DBService.Services.System
                     return Fail<LicenseApplyRequest>(hardwareResult.Code == 0 ? -1 : hardwareResult.Code, "采集硬件信息失败，无法生成授权申请请求");
                 }
 
+                string normalizedSiteCode = string.IsNullOrWhiteSpace(siteCode)
+                    ? BackendServiceConfigHelper.GetLicenseSiteCode()
+                    : siteCode.Trim();
+                string normalizedCustomerCode = string.IsNullOrWhiteSpace(customerCode)
+                    ? BackendServiceConfigHelper.GetLicenseCustomerCode()
+                    : customerCode.Trim();
                 string normalizedNetworkMode = string.IsNullOrWhiteSpace(networkMode) ? "Online" : networkMode.Trim();
-                string requestKey = BuildRequestCacheKey(identityResult.Item, hardwareResult.Item, siteCode, customerCode, normalizedNetworkMode);
+                string requestKey = BuildRequestCacheKey(identityResult.Item, hardwareResult.Item, normalizedSiteCode, normalizedCustomerCode, normalizedNetworkMode);
                 string requestId = requestKey == _cachedRequestKey && !string.IsNullOrWhiteSpace(_cachedRequestId)
                     ? _cachedRequestId
                     : BuildRequestId();
                 string requestTime = requestKey == _cachedRequestKey && !string.IsNullOrWhiteSpace(_cachedRequestTime)
                     ? _cachedRequestTime
                     : BuildRequestTime();
+
+                DeviceHardwareInfo deviceInfo = hardwareResult.Item;
+                string configuredMachineModel = BackendServiceConfigHelper.GetLicenseMachineModel();
+                if (!string.IsNullOrWhiteSpace(configuredMachineModel))
+                {
+                    deviceInfo.MachineModel = configuredMachineModel;
+                }
 
                 var request = new LicenseApplyRequest
                 {
@@ -248,11 +261,11 @@ namespace AM.DBService.Services.System
                         UiPlatform = BackendServiceConfigHelper.GetDesktopAppUiPlatform(),
                         Vendor = BackendServiceConfigHelper.GetDesktopAppVendor()
                     },
-                    Device = hardwareResult.Item,
+                    Device = deviceInfo,
                     Environment = new LicenseApplyEnvironment
                     {
-                        SiteCode = siteCode ?? string.Empty,
-                        CustomerCode = customerCode ?? string.Empty,
+                        SiteCode = normalizedSiteCode,
+                        CustomerCode = normalizedCustomerCode,
                         NetworkMode = normalizedNetworkMode
                     }
                 };

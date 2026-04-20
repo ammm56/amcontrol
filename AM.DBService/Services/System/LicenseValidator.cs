@@ -86,22 +86,37 @@ namespace AM.DBService.Services.System
                     return OkLogOnly(validation, validation.Message);
                 }
 
-                Result<DeviceHardwareInfo> hardwareResult = _hardwareInfoCollector.CollectCurrent();
-                if (!hardwareResult.Success || hardwareResult.Item == null)
+                bool isDeveloperLicense = IsDeveloperEdition(license);
+                if (isDeveloperLicense)
                 {
-                    validation.Success = false;
-                    validation.ErrorCode = "LICENSE_HARDWARE_READ_FAILED";
-                    validation.Message = "采集本机硬件信息失败";
-                    return OkLogOnly(validation, validation.Message);
+                    validation.IsHardwareMatched = ValidateDeveloperGrantScope(license, out string developerMessage);
+                    if (!validation.IsHardwareMatched)
+                    {
+                        validation.Success = false;
+                        validation.ErrorCode = "LICENSE_DEVELOPER_SCOPE_MISMATCH";
+                        validation.Message = developerMessage;
+                        return OkLogOnly(validation, validation.Message);
+                    }
                 }
-
-                validation.IsHardwareMatched = ValidateStrongBindings(license.DeviceBinding, hardwareResult.Item, out string hardwareMessage);
-                if (!validation.IsHardwareMatched)
+                else
                 {
-                    validation.Success = false;
-                    validation.ErrorCode = "LICENSE_HARDWARE_MISMATCH";
-                    validation.Message = hardwareMessage;
-                    return OkLogOnly(validation, validation.Message);
+                    Result<DeviceHardwareInfo> hardwareResult = _hardwareInfoCollector.CollectCurrent();
+                    if (!hardwareResult.Success || hardwareResult.Item == null)
+                    {
+                        validation.Success = false;
+                        validation.ErrorCode = "LICENSE_HARDWARE_READ_FAILED";
+                        validation.Message = "采集本机硬件信息失败";
+                        return OkLogOnly(validation, validation.Message);
+                    }
+
+                    validation.IsHardwareMatched = ValidateStrongBindings(license.DeviceBinding, hardwareResult.Item, out string hardwareMessage);
+                    if (!validation.IsHardwareMatched)
+                    {
+                        validation.Success = false;
+                        validation.ErrorCode = "LICENSE_HARDWARE_MISMATCH";
+                        validation.Message = hardwareMessage;
+                        return OkLogOnly(validation, validation.Message);
+                    }
                 }
 
                 DateTime nowUtc = DateTime.UtcNow;
@@ -139,13 +154,135 @@ namespace AM.DBService.Services.System
                 }
 
                 validation.Success = true;
-                validation.Message = "授权校验通过";
+                validation.Message = isDeveloperLicense ? "开发版授权范围校验通过" : "授权校验通过";
                 return OkLogOnly(validation, validation.Message);
             }
             catch (Exception ex)
             {
                 return Fail<LicenseValidationResult>(-1, "授权校验异常", ReportChannels.Log, ex);
             }
+        }
+
+        /// <summary>
+        /// 判断当前授权是否为开发版授权。
+        /// 开发版设备软件不按常规硬件强绑定校验，而是按软件版本与业务范围字段匹配。
+        /// </summary>
+        private static bool IsDeveloperEdition(DeviceLicense license)
+        {
+            string licenseEdition = license == null || license.Software == null
+                ? string.Empty
+                : license.Software.AppEdition;
+
+            return string.Equals(
+                NormalizeText(licenseEdition),
+                NormalizeText(LicenseConstants.DeveloperAppEdition),
+                StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// 校验开发版授权范围。
+        /// 开发版当前不检查 deviceBinding，而是校验运行时版本、Edition 与 grantScope 中的 customer/site/machineModel。
+        /// 其中 machineModel 优先取 config 中统一配置，未配置时回退到本机实时采集值。
+        /// </summary>
+        private bool ValidateDeveloperGrantScope(DeviceLicense license, out string message)
+        {
+            DeviceLicenseSoftware software = license == null ? null : license.Software;
+            DeviceLicenseGrantScope grantScope = license == null ? null : license.GrantScope;
+
+            string runtimeAppVersion = NormalizeText(AM.Tools.Tools.GetAppVersionText());
+            string configuredAppEdition = NormalizeText(BackendServiceConfigHelper.GetDesktopAppEdition());
+            string configuredCustomerCode = NormalizeText(BackendServiceConfigHelper.GetLicenseCustomerCode());
+            string configuredSiteCode = NormalizeText(BackendServiceConfigHelper.GetLicenseSiteCode());
+
+            if (!ValidateDeveloperField("AppVersion", software == null ? string.Empty : software.AppVersion, runtimeAppVersion, out message))
+            {
+                return false;
+            }
+
+            if (!ValidateDeveloperField("AppEdition", software == null ? string.Empty : software.AppEdition, configuredAppEdition, out message))
+            {
+                return false;
+            }
+
+            if (!ValidateDeveloperField("CustomerCode", grantScope == null ? string.Empty : grantScope.CustomerCode, configuredCustomerCode, out message))
+            {
+                return false;
+            }
+
+            if (!ValidateDeveloperField("SiteCode", grantScope == null ? string.Empty : grantScope.SiteCode, configuredSiteCode, out message))
+            {
+                return false;
+            }
+
+            string currentMachineModel = ResolveCurrentDeveloperMachineModel(out string machineModelError);
+            if (!string.IsNullOrWhiteSpace(machineModelError))
+            {
+                message = machineModelError;
+                return false;
+            }
+
+            if (!ValidateDeveloperField("MachineModel", grantScope == null ? string.Empty : grantScope.MachineModel, currentMachineModel, out message))
+            {
+                return false;
+            }
+
+            message = "开发版授权范围匹配通过";
+            return true;
+        }
+
+        /// <summary>
+        /// 获取开发版授权当前用于匹配的设备型号。
+        /// 优先取 config 统一配置；未配置时才回退到硬件采集值，保持与授权申请提交时的 machineModel 口径一致。
+        /// </summary>
+        private string ResolveCurrentDeveloperMachineModel(out string errorMessage)
+        {
+            string configuredMachineModel = NormalizeText(BackendServiceConfigHelper.GetLicenseMachineModel());
+            if (!string.IsNullOrWhiteSpace(configuredMachineModel))
+            {
+                errorMessage = string.Empty;
+                return configuredMachineModel;
+            }
+
+            Result<DeviceHardwareInfo> hardwareResult = _hardwareInfoCollector.CollectCurrent();
+            if (!hardwareResult.Success || hardwareResult.Item == null)
+            {
+                errorMessage = "读取开发版授权匹配所需的设备型号失败";
+                return string.Empty;
+            }
+
+            errorMessage = string.Empty;
+            return NormalizeText(hardwareResult.Item.MachineModel);
+        }
+
+        /// <summary>
+        /// 校验开发版授权单个业务字段。
+        /// Developer 版要求授权中下发值与本机当前运行值逐项一致。
+        /// </summary>
+        private static bool ValidateDeveloperField(string fieldName, string licenseValue, string currentValue, out string message)
+        {
+            string normalizedLicense = NormalizeText(licenseValue);
+            string normalizedCurrent = NormalizeText(currentValue);
+
+            if (string.IsNullOrWhiteSpace(normalizedLicense))
+            {
+                message = "开发版授权缺少匹配字段: " + fieldName;
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(normalizedCurrent))
+            {
+                message = "程序当前缺少匹配字段: " + fieldName;
+                return false;
+            }
+
+            if (!string.Equals(normalizedLicense, normalizedCurrent, StringComparison.OrdinalIgnoreCase))
+            {
+                message = "开发版授权字段不匹配: " + fieldName;
+                return false;
+            }
+
+            message = string.Empty;
+            return true;
         }
 
         /// <summary>
@@ -221,6 +358,17 @@ namespace AM.DBService.Services.System
             }
 
             return ValidateRequiredBinding(fieldName, licenseValue, currentValue, out message);
+        }
+
+        /// <summary>
+        /// 归一化开发版授权中的普通业务字段。
+        /// 这里不移除中划线等字符，只做去空白，避免 customer/site/model 等字段语义被本地额外篡改。
+        /// </summary>
+        private static string NormalizeText(string value)
+        {
+            return string.IsNullOrWhiteSpace(value)
+                ? string.Empty
+                : value.Trim();
         }
 
         /// <summary>
