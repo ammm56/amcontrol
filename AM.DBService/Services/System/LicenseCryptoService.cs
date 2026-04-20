@@ -7,7 +7,6 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -16,9 +15,10 @@ namespace AM.DBService.Services.System
     /// <summary>
     /// 授权加解密与验签服务。
     /// 首版实现以下能力：
-    /// 1. 从嵌入式资源读取 PEM 公钥；
+    /// 1. 从 AM.Tools/Configuration 目录读取“授权许可验签公钥”；
     /// 2. 兼容明文 JSON 和 Base64 文本两种 licenseText 载荷；
     /// 3. 按固定 KeyId 和 RSA-SHA256 规则校验签名。
+    /// 注意：这里读取的公钥只服务于本地 license.lic 验签链路，不与授权申请签名私钥构成一对。
     /// </summary>
     public class LicenseCryptoService : ServiceBase
     {
@@ -87,10 +87,11 @@ namespace AM.DBService.Services.System
         /// <summary>
         /// 验证授权明文 JSON 与签名信息是否一致。
         /// 固定规则：
-        /// 1. 使用嵌入式 PEM 公钥；
+        /// 1. 使用 Configuration 目录中的“授权许可验签公钥”；
         /// 2. 校验 KeyId；
         /// 3. 校验 contentSha256；
         /// 4. 对去除 signature.signText 后的最小化 JSON 执行 RSA-SHA256 验签。
+        /// 注意：此处不读取也不依赖“授权申请签名私钥”，两把 key 分属不同业务链路。
         /// </summary>
         public virtual Result VerifyLicenseSignature(string licenseJson, DeviceLicense license)
         {
@@ -127,10 +128,10 @@ namespace AM.DBService.Services.System
                     return Fail(-5, "授权摘要校验失败");
                 }
 
-                Result<string> publicKeyResult = LoadEmbeddedPublicKeyPem();
+                Result<string> publicKeyResult = LoadLicenseValidationPublicKeyPem();
                 if (!publicKeyResult.Success || string.IsNullOrWhiteSpace(publicKeyResult.Item))
                 {
-                    return Fail(publicKeyResult.Code == 0 ? -6 : publicKeyResult.Code, "读取内置公钥失败");
+                    return Fail(publicKeyResult.Code == 0 ? -6 : publicKeyResult.Code, "读取授权公钥失败");
                 }
 
                 byte[] signatureBytes;
@@ -162,44 +163,35 @@ namespace AM.DBService.Services.System
         }
 
         /// <summary>
-        /// 从嵌入式资源读取 PEM 公钥文本。
+        /// 从 AM.Tools/Configuration 目录读取授权许可验签公钥文本。
+        /// 该公钥仅用于本地 license.lic 验签，不用于设备侧授权申请签名。
         /// </summary>
-        public virtual Result<string> LoadEmbeddedPublicKeyPem()
+        public virtual Result<string> LoadLicenseValidationPublicKeyPem()
         {
             try
             {
-                Assembly assembly = GetType().Assembly;
-                string resourceName = assembly
-                    .GetManifestResourceNames()
-                    .FirstOrDefault(x => x.EndsWith(LicenseConstants.EmbeddedPublicKeyResourceName, StringComparison.OrdinalIgnoreCase));
-
-                if (string.IsNullOrWhiteSpace(resourceName))
+                string publicKeyFilePath = BackendServiceConfigHelper.GetLicenseValidationPublicKeyFilePath();
+                if (string.IsNullOrWhiteSpace(publicKeyFilePath))
                 {
-                    return Fail<string>(-1, "未找到嵌入式公钥资源");
+                    return Fail<string>(-1, "授权公钥文件路径为空");
                 }
 
-                using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+                if (!File.Exists(publicKeyFilePath))
                 {
-                    if (stream == null)
-                    {
-                        return Fail<string>(-2, "打开嵌入式公钥资源失败");
-                    }
-
-                    using (var reader = new StreamReader(stream, Encoding.UTF8))
-                    {
-                        string pem = reader.ReadToEnd();
-                        if (string.IsNullOrWhiteSpace(pem))
-                        {
-                            return Fail<string>(-3, "嵌入式公钥资源内容为空");
-                        }
-
-                        return OkSilent(pem.Trim(), "读取嵌入式公钥成功");
-                    }
+                    return Fail<string>(-2, "授权公钥文件不存在: " + publicKeyFilePath);
                 }
+
+                string pem = File.ReadAllText(publicKeyFilePath, Encoding.UTF8);
+                if (string.IsNullOrWhiteSpace(pem))
+                {
+                    return Fail<string>(-3, "授权公钥文件内容为空");
+                }
+
+                return OkSilent(pem.Trim(), "读取授权公钥文件成功");
             }
             catch (Exception ex)
             {
-                return Fail<string>(-1, "读取嵌入式公钥异常", ReportChannels.Log, ex);
+                return Fail<string>(-1, "读取授权公钥文件异常", ReportChannels.Log, ex);
             }
         }
 

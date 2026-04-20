@@ -145,6 +145,8 @@ namespace AMControlWinF.Views.Other
                 (isEn ? "Online activation: " : "在线激活：") + (BackendServiceConfigHelper.IsConfigured() ? (isEn ? "Use backend API directly" : "直接调用后端授权接口") : (isEn ? "Backend URL is missing" : "未配置后端地址")),
                 (isEn ? "Offline apply: " : "离线申请：") + (isEn ? "Export current request info to file" : "将当前申请信息导出到文件"),
                 (isEn ? "Backend URL: " : "后端地址：") + SafeValue(backendUrl, isEn),
+                (isEn ? "Request-signing private key: " : "申请签名私钥：") + (BackendServiceConfigHelper.HasLicenseRequestSigningPrivateKeyConfigured() ? (isEn ? "Configured" : "已配置") : (isEn ? "Missing" : "缺失")),
+                (isEn ? "License-validation public key: " : "许可验签公钥：") + (BackendServiceConfigHelper.HasLicenseValidationPublicKeyConfigured() ? (isEn ? "Configured" : "已配置") : (isEn ? "Missing" : "缺失")),
                 (isEn ? "Network mode: " : "网络模式：") + (isEn ? "Online activation / Offline export" : "在线激活 / 离线导出")
             });
         }

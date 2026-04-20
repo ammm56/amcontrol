@@ -25,7 +25,7 @@ namespace AM.Model.License
         /// <summary>
         /// 授权申请请求摘要算法。
         /// </summary>
-        public const string RequestSignatureAlgorithm = "SHA256";
+        public const string RequestSignatureAlgorithm = "RSA-SHA256";
 
         /// <summary>
         /// 授权明文验签算法。
@@ -33,15 +33,24 @@ namespace AM.Model.License
         public const string LicenseSignatureAlgorithm = "RSA-SHA256";
 
         /// <summary>
-        /// 首版固定内置公钥 KeyId。
+        /// 授权许可签名中使用的固定 KeyId。
+        /// 该 KeyId 只对应“许可验签公钥”这条链路，不对应授权申请签名私钥。
         /// </summary>
         public const string BuiltInPublicKeyKeyId = "AMCONTROL_RSA_V1";
 
         /// <summary>
-        /// 内置公钥资源名。
-        /// 具体资源内容在后续 Phase B 接入。
+        /// 授权许可验签公钥文件名。
+        /// 该公钥仅用于验证本地 license.lic 的签名。
+        /// 它不与“授权申请签名私钥”构成一对，两者分别属于不同业务链路。
         /// </summary>
-        public const string EmbeddedPublicKeyResourceName = "LicensePublicKey.pem";
+        public const string LicenseValidationPublicKeyFileName = "license-validation-public-key.pem";
+
+        /// <summary>
+        /// 授权申请签名私钥文件名。
+        /// 该私钥仅用于签名设备侧授权申请消息。
+        /// 它不与“授权许可验签公钥”构成一对，两者分别属于不同业务链路。
+        /// </summary>
+        public const string LicenseRequestSigningPrivateKeyFileName = "license-request-signing-private-key.pem";
 
         /// <summary>
         /// 首版强校验硬件字段。

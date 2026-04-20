@@ -1,4 +1,3 @@
-using System;
 using Newtonsoft.Json;
 
 namespace AM.Model.License
@@ -20,7 +19,7 @@ namespace AM.Model.License
         /// 请求时间。
         /// </summary>
         [JsonProperty("requestTime")]
-        public DateTime RequestTime { get; set; }
+        public string RequestTime { get; set; } = string.Empty;
 
         /// <summary>
         /// 授权协议版本。
@@ -108,5 +107,8 @@ namespace AM.Model.License
 
         [JsonProperty("contentSha256")]
         public string ContentSha256 { get; set; } = string.Empty;
+
+        [JsonProperty("signText")]
+        public string SignText { get; set; } = string.Empty;
     }
 }

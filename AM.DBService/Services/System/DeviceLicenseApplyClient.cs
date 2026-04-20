@@ -28,6 +28,9 @@ namespace AM.DBService.Services.System
         private readonly DeviceReportBufferService _deviceReportBufferService;
         private readonly HttpClient _httpClient;
         private readonly string _serviceUrl;
+        private string _cachedRequestKey;
+        private string _cachedRequestId;
+        private string _cachedRequestTime;
 
         protected override string MessageSourceName
         {
@@ -78,6 +81,9 @@ namespace AM.DBService.Services.System
             _serviceUrl = GetLicenseServiceUrlFromConfig();
             _httpClient = new HttpClient();
             _httpClient.Timeout = TimeSpan.FromSeconds(15);
+            _cachedRequestKey = string.Empty;
+            _cachedRequestId = string.Empty;
+            _cachedRequestTime = string.Empty;
         }
 
         public bool IsConfigured()
@@ -160,9 +166,14 @@ namespace AM.DBService.Services.System
                             : await httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
 
                         DeviceApiResponse<LicenseApplyResponse> apiResponse = DeserializeApiResponse<LicenseApplyResponse>(responseText);
-                        if (apiResponse != null && !apiResponse.Success && string.Equals(apiResponse.ErrorCode, "LicensePending", StringComparison.OrdinalIgnoreCase))
+                        if (IsPendingResponse(apiResponse))
                         {
-                            return WarnLogOnly<LicenseApplyResponse>(-3, BackendRequestFailureHelper.BuildApiFailureMessage("授权模板未命中，等待管理员处理", httpResponse.StatusCode, apiResponse));
+                            return WarnLogOnly<LicenseApplyResponse>(-3, BuildPendingMessage(request, httpResponse.StatusCode, apiResponse));
+                        }
+
+                        if (IsPendingPayload(apiResponse == null ? null : apiResponse.Data))
+                        {
+                            return WarnLogOnly<LicenseApplyResponse>(-3, BuildPendingPayloadMessage(request, apiResponse.Data, apiResponse));
                         }
 
                         if (!httpResponse.IsSuccessStatusCode || apiResponse == null || !apiResponse.Success || apiResponse.Data == null)
@@ -183,6 +194,8 @@ namespace AM.DBService.Services.System
                         {
                             WarnLogOnly(queueResult.Code, "授权申请成功，但设备 report 入队失败");
                         }
+
+                        ClearCachedRequest();
 
                         return OkSilent(apiResponse.Data, "授权申请成功并已写入本地授权文件");
                     }
@@ -210,10 +223,19 @@ namespace AM.DBService.Services.System
                     return Fail<LicenseApplyRequest>(hardwareResult.Code == 0 ? -1 : hardwareResult.Code, "采集硬件信息失败，无法生成授权申请请求");
                 }
 
+                string normalizedNetworkMode = string.IsNullOrWhiteSpace(networkMode) ? "Online" : networkMode.Trim();
+                string requestKey = BuildRequestCacheKey(identityResult.Item, hardwareResult.Item, siteCode, customerCode, normalizedNetworkMode);
+                string requestId = requestKey == _cachedRequestKey && !string.IsNullOrWhiteSpace(_cachedRequestId)
+                    ? _cachedRequestId
+                    : BuildRequestId();
+                string requestTime = requestKey == _cachedRequestKey && !string.IsNullOrWhiteSpace(_cachedRequestTime)
+                    ? _cachedRequestTime
+                    : BuildRequestTime();
+
                 var request = new LicenseApplyRequest
                 {
-                    RequestId = BuildRequestId(),
-                    RequestTime = DateTime.UtcNow,
+                    RequestId = requestId,
+                    RequestTime = requestTime,
                     LicenseProtocolVersion = LicenseConstants.LicenseProtocolVersion,
                     Software = new LicenseApplySoftware
                     {
@@ -231,7 +253,7 @@ namespace AM.DBService.Services.System
                     {
                         SiteCode = siteCode ?? string.Empty,
                         CustomerCode = customerCode ?? string.Empty,
-                        NetworkMode = string.IsNullOrWhiteSpace(networkMode) ? "Online" : networkMode.Trim()
+                        NetworkMode = normalizedNetworkMode
                     }
                 };
 
@@ -240,6 +262,15 @@ namespace AM.DBService.Services.System
                     Algorithm = LicenseConstants.RequestSignatureAlgorithm,
                     ContentSha256 = ComputeRequestSha256(request)
                 };
+
+                Result<string> signResult = CreateRequestSigningSignatureText(request);
+                if (!signResult.Success || string.IsNullOrWhiteSpace(signResult.Item))
+                {
+                    return Fail<LicenseApplyRequest>(signResult.Code == 0 ? -1 : signResult.Code, signResult.Message);
+                }
+
+                request.Signature.SignText = signResult.Item;
+                CacheRequestForRetry(requestKey, request.RequestId, request.RequestTime);
 
                 return OkSilent(request, "生成授权申请请求成功");
             }
@@ -258,20 +289,101 @@ namespace AM.DBService.Services.System
                 AM.Tools.Tools.Guid(8).ToLowerInvariant());
         }
 
+        private static string BuildRequestTime()
+        {
+            return DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+        }
+
         private static string ComputeRequestSha256(LicenseApplyRequest request)
         {
-            var signSource = new
+            string signingPayloadJson = BuildRequestSigningPayloadJson(request);
+            return ComputeSha256Hex(signingPayloadJson);
+        }
+
+        /// <summary>
+        /// 生成授权申请消息的签名文本。
+        /// 命名显式使用 RequestSigning 口径，避免与 license.lic 的本地验签链路混淆。
+        /// </summary>
+        private Result<string> CreateRequestSigningSignatureText(LicenseApplyRequest request)
+        {
+            try
             {
-                request.LicenseProtocolVersion,
-                request.Software,
-                request.Device,
-                request.Environment
+                Result<string> privateKeyResult = LoadRequestSigningPrivateKeyText();
+                if (!privateKeyResult.Success || string.IsNullOrWhiteSpace(privateKeyResult.Item))
+                {
+                    return Fail<string>(privateKeyResult.Code == 0 ? -1 : privateKeyResult.Code, privateKeyResult.Message);
+                }
+
+                string signingPayloadJson = BuildRequestSigningPayloadJson(request);
+                byte[] dataBytes = Encoding.UTF8.GetBytes(signingPayloadJson);
+
+                using (RSACryptoServiceProvider rsa = CreateRsaFromRequestSigningPrivateKeyText(privateKeyResult.Item))
+                {
+                    byte[] signatureBytes = rsa.SignData(dataBytes, CryptoConfig.MapNameToOID("SHA256"));
+                    return OkSilent(Convert.ToBase64String(signatureBytes), "授权申请签名生成成功");
+                }
+            }
+            catch (Exception ex)
+            {
+                return Fail<string>(-1, "生成授权申请签名失败", ReportChannels.Log, ex);
+            }
+        }
+
+        /// <summary>
+        /// 读取授权申请签名私钥文本。
+        /// 该私钥仅用于设备侧授权申请消息签名，不参与本地 license.lic 验签。
+        /// 它与“授权许可验签公钥”不是一对，两者分别属于不同业务链路。
+        /// </summary>
+        private Result<string> LoadRequestSigningPrivateKeyText()
+        {
+            try
+            {
+                string privateKeyFilePath = BackendServiceConfigHelper.GetLicenseRequestSigningPrivateKeyFilePath();
+                if (string.IsNullOrWhiteSpace(privateKeyFilePath))
+                {
+                    return Fail<string>(-1, "授权请求私钥文件路径为空，无法生成签名请求");
+                }
+
+                if (!File.Exists(privateKeyFilePath))
+                {
+                    return Fail<string>(-2, "授权请求私钥文件不存在: " + privateKeyFilePath);
+                }
+
+                string fileText = File.ReadAllText(privateKeyFilePath, Encoding.UTF8);
+                if (string.IsNullOrWhiteSpace(fileText))
+                {
+                    return Fail<string>(-3, "授权请求私钥文件内容为空");
+                }
+
+                return OkSilent(fileText.Trim(), "已读取授权请求私钥文件");
+            }
+            catch (Exception ex)
+            {
+                return Fail<string>(-1, "读取授权请求私钥失败", ReportChannels.Log, ex);
+            }
+        }
+
+        private static string BuildRequestSigningPayloadJson(LicenseApplyRequest request)
+        {
+            LicenseApplyRequest normalizedRequest = request ?? new LicenseApplyRequest();
+            var signingPayload = new
+            {
+                requestId = (normalizedRequest.RequestId ?? string.Empty).Trim(),
+                requestTime = (normalizedRequest.RequestTime ?? string.Empty).Trim(),
+                licenseProtocolVersion = (normalizedRequest.LicenseProtocolVersion ?? string.Empty).Trim(),
+                software = normalizedRequest.Software ?? new LicenseApplySoftware(),
+                device = normalizedRequest.Device ?? new DeviceHardwareInfo(),
+                environment = normalizedRequest.Environment ?? new LicenseApplyEnvironment()
             };
 
-            string json = JsonConvert.SerializeObject(signSource, Formatting.None);
+            return JsonConvert.SerializeObject(signingPayload, Formatting.None);
+        }
+
+        private static string ComputeSha256Hex(string text)
+        {
             using (SHA256 sha256 = SHA256.Create())
             {
-                byte[] hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(json));
+                byte[] hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(text ?? string.Empty));
                 var builder = new StringBuilder(hash.Length * 2);
                 for (int index = 0; index < hash.Length; index++)
                 {
@@ -302,6 +414,243 @@ namespace AM.DBService.Services.System
         private static string GetLicenseServiceUrlFromConfig()
         {
             return BackendServiceConfigHelper.GetBackendServiceUrl();
+        }
+
+        private static bool IsPendingResponse(DeviceApiResponse<LicenseApplyResponse> apiResponse)
+        {
+            return apiResponse != null &&
+                   !apiResponse.Success &&
+                   string.Equals(apiResponse.ErrorCode, "LicensePending", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool IsPendingPayload(LicenseApplyResponse response)
+        {
+            if (response == null)
+            {
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(response.LicenseText) &&
+                (string.Equals(response.Status, "Pending", StringComparison.OrdinalIgnoreCase) ||
+                 string.Equals(response.Status, "PendingReview", StringComparison.OrdinalIgnoreCase)))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private static string BuildPendingMessage(LicenseApplyRequest request, HttpStatusCode statusCode, DeviceApiResponse<LicenseApplyResponse> apiResponse)
+        {
+            string baseMessage = BackendRequestFailureHelper.BuildApiFailureMessage("授权模板未命中，等待管理员处理", statusCode, apiResponse);
+            return string.Format(
+                "{0} requestId={1}; traceId={2}",
+                baseMessage,
+                request == null ? string.Empty : request.RequestId ?? string.Empty,
+                apiResponse == null ? string.Empty : apiResponse.TraceId ?? string.Empty);
+        }
+
+        private static string BuildPendingPayloadMessage(LicenseApplyRequest request, LicenseApplyResponse response, DeviceApiResponse<LicenseApplyResponse> apiResponse)
+        {
+            string message = apiResponse == null || string.IsNullOrWhiteSpace(apiResponse.Message)
+                ? "授权申请已受理，等待管理员处理"
+                : apiResponse.Message;
+
+            return string.Format(
+                "{0} requestId={1}; status={2}; traceId={3}",
+                message,
+                request == null ? string.Empty : request.RequestId ?? string.Empty,
+                response == null ? string.Empty : response.Status ?? string.Empty,
+                apiResponse == null ? string.Empty : apiResponse.TraceId ?? string.Empty);
+        }
+
+        private void CacheRequestForRetry(string requestKey, string requestId, string requestTime)
+        {
+            _cachedRequestKey = requestKey ?? string.Empty;
+            _cachedRequestId = requestId ?? string.Empty;
+            _cachedRequestTime = requestTime ?? string.Empty;
+        }
+
+        private void ClearCachedRequest()
+        {
+            _cachedRequestKey = string.Empty;
+            _cachedRequestId = string.Empty;
+            _cachedRequestTime = string.Empty;
+        }
+
+        private static string BuildRequestCacheKey(SysClientIdentityEntity identity, DeviceHardwareInfo hardware, string siteCode, string customerCode, string networkMode)
+        {
+            return string.Join("|", new[]
+            {
+                identity == null ? string.Empty : identity.ClientId ?? string.Empty,
+                identity == null ? string.Empty : identity.MachineCode ?? string.Empty,
+                identity == null ? string.Empty : identity.AppCode ?? string.Empty,
+                hardware == null ? string.Empty : hardware.CpuId ?? string.Empty,
+                hardware == null ? string.Empty : hardware.MainboardSerialNumber ?? string.Empty,
+                siteCode ?? string.Empty,
+                customerCode ?? string.Empty,
+                networkMode ?? string.Empty
+            });
+        }
+
+        /// <summary>
+        /// 从授权申请签名私钥文本创建 RSA 提供程序。
+        /// 命名显式使用 RequestSigning 口径，避免与本地 license.lic 验签使用的公钥链路混淆。
+        /// </summary>
+        private static RSACryptoServiceProvider CreateRsaFromRequestSigningPrivateKeyText(string privateKeyText)
+        {
+            string trimmed = (privateKeyText ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(trimmed))
+            {
+                throw new CryptographicException("授权请求私钥内容为空。");
+            }
+
+            var rsa = new RSACryptoServiceProvider();
+            if (trimmed.StartsWith("<RSAKeyValue>", StringComparison.OrdinalIgnoreCase))
+            {
+                rsa.FromXmlString(trimmed);
+                return rsa;
+            }
+
+            if (trimmed.Contains("BEGIN PRIVATE KEY"))
+            {
+                rsa.ImportParameters(DecodePkcs8PrivateKey(GetPemBytes(trimmed, "PRIVATE KEY")));
+                return rsa;
+            }
+
+            if (trimmed.Contains("BEGIN RSA PRIVATE KEY"))
+            {
+                rsa.ImportParameters(DecodeRsaPrivateKey(GetPemBytes(trimmed, "RSA PRIVATE KEY")));
+                return rsa;
+            }
+
+            throw new CryptographicException("授权请求私钥格式不受支持。");
+        }
+
+        private static byte[] GetPemBytes(string pemText, string sectionName)
+        {
+            string normalized = (pemText ?? string.Empty)
+                .Replace("-----BEGIN " + sectionName + "-----", string.Empty)
+                .Replace("-----END " + sectionName + "-----", string.Empty)
+                .Replace("\r", string.Empty)
+                .Replace("\n", string.Empty)
+                .Trim();
+
+            return Convert.FromBase64String(normalized);
+        }
+
+        private static RSAParameters DecodePkcs8PrivateKey(byte[] privateKey)
+        {
+            using (var memoryStream = new MemoryStream(privateKey))
+            using (var reader = new BinaryReader(memoryStream))
+            {
+                ReadAsnSequence(reader);
+                ReadAsnInteger(reader);
+                ReadAsnSequence(reader);
+                reader.ReadBytes(9);
+                ReadAsnNull(reader);
+
+                if (reader.ReadByte() != 0x04)
+                {
+                    throw new CryptographicException("无效的 PKCS#8 私钥格式。");
+                }
+
+                int privateKeyLength = ReadAsnLength(reader);
+                byte[] rsaPrivateKey = reader.ReadBytes(privateKeyLength);
+                return DecodeRsaPrivateKey(rsaPrivateKey);
+            }
+        }
+
+        private static RSAParameters DecodeRsaPrivateKey(byte[] privateKey)
+        {
+            using (var memoryStream = new MemoryStream(privateKey))
+            using (var reader = new BinaryReader(memoryStream))
+            {
+                ReadAsnSequence(reader);
+                ReadAsnInteger(reader);
+
+                return new RSAParameters
+                {
+                    Modulus = ReadAsnInteger(reader),
+                    Exponent = ReadAsnInteger(reader),
+                    D = ReadAsnInteger(reader),
+                    P = ReadAsnInteger(reader),
+                    Q = ReadAsnInteger(reader),
+                    DP = ReadAsnInteger(reader),
+                    DQ = ReadAsnInteger(reader),
+                    InverseQ = ReadAsnInteger(reader)
+                };
+            }
+        }
+
+        private static void ReadAsnSequence(BinaryReader reader)
+        {
+            byte tag = reader.ReadByte();
+            if (tag != 0x30)
+            {
+                throw new CryptographicException("无效的 ASN.1 SEQUENCE 标签。");
+            }
+
+            ReadAsnLength(reader);
+        }
+
+        private static byte[] ReadAsnInteger(BinaryReader reader)
+        {
+            byte tag = reader.ReadByte();
+            if (tag != 0x02)
+            {
+                throw new CryptographicException("无效的 ASN.1 INTEGER 标签。");
+            }
+
+            int length = ReadAsnLength(reader);
+            byte[] value = reader.ReadBytes(length);
+            if (value.Length > 1 && value[0] == 0x00)
+            {
+                byte[] trimmed = new byte[value.Length - 1];
+                Buffer.BlockCopy(value, 1, trimmed, 0, trimmed.Length);
+                return trimmed;
+            }
+
+            return value;
+        }
+
+        private static int ReadAsnLength(BinaryReader reader)
+        {
+            int length = reader.ReadByte();
+            if ((length & 0x80) == 0)
+            {
+                return length;
+            }
+
+            int bytesCount = length & 0x7F;
+            if (bytesCount == 0 || bytesCount > 4)
+            {
+                throw new CryptographicException("无效的 ASN.1 长度编码。");
+            }
+
+            byte[] bytes = reader.ReadBytes(bytesCount);
+            int result = 0;
+            for (int index = 0; index < bytes.Length; index++)
+            {
+                result = (result << 8) | bytes[index];
+            }
+
+            return result;
+        }
+
+        private static void ReadAsnNull(BinaryReader reader)
+        {
+            byte tag = reader.ReadByte();
+            if (tag != 0x05)
+            {
+                throw new CryptographicException("无效的 ASN.1 NULL 标签。");
+            }
+
+            int length = ReadAsnLength(reader);
+            if (length > 0)
+            {
+                reader.ReadBytes(length);
+            }
         }
 
         private Result PersistLicenseAndReload(LicenseApplyResponse response)

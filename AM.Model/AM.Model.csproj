@@ -106,6 +106,7 @@
     <Compile Include="License\LicenseApplyRequest.cs" />
     <Compile Include="License\LicenseApplyResponse.cs" />
     <Compile Include="License\LicenseConstants.cs" />
+    <Compile Include="License\LicenseStatusQueryResponse.cs" />
     <Compile Include="License\LicenseValidationResult.cs" />
     <Compile Include="Model\LogModel.cs" />
     <Compile Include="Entity\Auth\SysLoginLogEntity.cs" />

@@ -134,6 +134,7 @@
     <Compile Include="Services\System\ClientIdentityService.cs" />
     <Compile Include="Services\System\DeviceHeartbeatClient.cs" />
     <Compile Include="Services\System\DeviceLicenseApplyClient.cs" />
+    <Compile Include="Services\System\DeviceLicenseStatusClient.cs" />
     <Compile Include="Services\System\DeviceReportBufferService.cs" />
     <Compile Include="Services\System\DeviceRegisterClient.cs" />
     <Compile Include="Services\System\DeviceReportClient.cs" />
@@ -175,7 +176,6 @@
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\License\LicensePublicKey.pem" />
     <Content Include="logo.ico" />
     <Content Include="SQLite.Interop.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
