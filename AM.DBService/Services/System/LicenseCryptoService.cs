@@ -90,7 +90,7 @@ namespace AM.DBService.Services.System
         /// 1. 使用 Configuration 目录中的“授权许可验签公钥”；
         /// 2. 校验 KeyId；
         /// 3. 校验 contentSha256；
-        /// 4. 对去除 signature.signText 后的最小化 JSON 执行 RSA-SHA256 验签。
+        /// 4. 对去除整个 signature 对象后的最小化 JSON 执行 RSA-SHA256 验签。
         /// 注意：此处不读取也不依赖“授权申请签名私钥”，两把 key 分属不同业务链路。
         /// </summary>
         public virtual Result VerifyLicenseSignature(string licenseJson, DeviceLicense license)
@@ -197,20 +197,16 @@ namespace AM.DBService.Services.System
 
         /// <summary>
         /// 构建用于摘要和验签的规范化授权 JSON。
-        /// 当前固定移除 signature.signText，再输出为单行最小化 JSON。
+        /// 当前固定移除整个 signature 对象，再输出为单行最小化 JSON。
+        /// 这样与服务端签发 license 时写入 contentSha256 和 signText 的规则保持一致。
         /// </summary>
         private static string BuildCanonicalLicenseJson(string licenseJson)
         {
             JObject root = JObject.Parse(licenseJson);
-            JToken signatureToken = root["signature"];
-            JObject signatureObject = signatureToken as JObject;
-            if (signatureObject != null)
+            JProperty signatureProperty = root.Property("signature", StringComparison.OrdinalIgnoreCase);
+            if (signatureProperty != null)
             {
-                JProperty signTextProperty = signatureObject.Property("signText", StringComparison.OrdinalIgnoreCase);
-                if (signTextProperty != null)
-                {
-                    signTextProperty.Remove();
-                }
+                signatureProperty.Remove();
             }
 
             return root.ToString(Formatting.None);
@@ -246,23 +242,50 @@ namespace AM.DBService.Services.System
 
         /// <summary>
         /// 从 PEM 公钥创建 RSA 提供程序。
-        /// .NET Framework 4.6.1 不支持直接导入 PEM，因此这里手动解析 SubjectPublicKeyInfo。
+        /// .NET Framework 4.6.1 不支持直接导入 PEM，因此这里手动解析 SubjectPublicKeyInfo 或 PKCS#1 RSA PUBLIC KEY。
         /// </summary>
         private static RSACryptoServiceProvider CreateRsaFromPem(string pem)
         {
-            string normalized = (pem ?? string.Empty)
-                .Replace("-----BEGIN PUBLIC KEY-----", string.Empty)
-                .Replace("-----END PUBLIC KEY-----", string.Empty)
-                .Replace("\r", string.Empty)
-                .Replace("\n", string.Empty)
-                .Trim();
+            string normalizedPem = (pem ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(normalizedPem))
+            {
+                throw new CryptographicException("授权公钥内容为空。");
+            }
 
-            byte[] keyData = Convert.FromBase64String(normalized);
-            RSAParameters parameters = DecodeSubjectPublicKeyInfo(keyData);
+            RSAParameters parameters;
+            if (normalizedPem.Contains("BEGIN RSA PUBLIC KEY"))
+            {
+                byte[] keyData = GetPemBytes(normalizedPem, "RSA PUBLIC KEY");
+                parameters = DecodeRsaPublicKey(keyData);
+            }
+            else if (normalizedPem.Contains("BEGIN PUBLIC KEY"))
+            {
+                byte[] keyData = GetPemBytes(normalizedPem, "PUBLIC KEY");
+                parameters = DecodeSubjectPublicKeyInfo(keyData);
+            }
+            else
+            {
+                throw new CryptographicException("授权公钥 PEM 格式不受支持。");
+            }
 
             var rsa = new RSACryptoServiceProvider();
             rsa.ImportParameters(parameters);
             return rsa;
+        }
+
+        /// <summary>
+        /// 从 PEM 段中提取 Base64 正文。
+        /// </summary>
+        private static byte[] GetPemBytes(string pemText, string sectionName)
+        {
+            string normalized = (pemText ?? string.Empty)
+                .Replace("-----BEGIN " + sectionName + "-----", string.Empty)
+                .Replace("-----END " + sectionName + "-----", string.Empty)
+                .Replace("\r", string.Empty)
+                .Replace("\n", string.Empty)
+                .Trim();
+
+            return Convert.FromBase64String(normalized);
         }
 
         /// <summary>
@@ -308,6 +331,26 @@ namespace AM.DBService.Services.System
                         Exponent = exponent
                     };
                 }
+            }
+        }
+
+        /// <summary>
+        /// 解码 PKCS#1 RSA PUBLIC KEY 结构中的公钥参数。
+        /// </summary>
+        private static RSAParameters DecodeRsaPublicKey(byte[] rsaKey)
+        {
+            using (var memoryStream = new MemoryStream(rsaKey))
+            using (var reader = new BinaryReader(memoryStream))
+            {
+                ReadAsnSequence(reader);
+                byte[] modulus = ReadAsnInteger(reader);
+                byte[] exponent = ReadAsnInteger(reader);
+
+                return new RSAParameters
+                {
+                    Modulus = modulus,
+                    Exponent = exponent
+                };
             }
         }
 

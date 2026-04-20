@@ -59,6 +59,7 @@ namespace AM.DBService.Services.System
 
         /// <summary>
         /// 校验授权明文与当前设备环境。
+        /// 有效期比较统一按 UTC 口径执行，避免本地时间与 Z 时间混用时出现歧义。
         /// </summary>
         public virtual Result<LicenseValidationResult> Validate(DeviceLicense license, string licenseJson)
         {
@@ -72,7 +73,7 @@ namespace AM.DBService.Services.System
                 var validation = new LicenseValidationResult
                 {
                     HasLicenseFile = true,
-                    ValidatedAt = DateTime.Now
+                    ValidatedAt = DateTime.UtcNow
                 };
 
                 Result signatureResult = _licenseCryptoService.VerifyLicenseSignature(licenseJson, license);
@@ -103,14 +104,14 @@ namespace AM.DBService.Services.System
                     return OkLogOnly(validation, validation.Message);
                 }
 
-                DateTime now = DateTime.Now;
-                DateTime? notBefore = license.Validity == null ? null : license.Validity.NotBefore;
-                DateTime? expiresAt = license.Validity == null ? null : license.Validity.ExpiresAt;
+                DateTime nowUtc = DateTime.UtcNow;
+                DateTime? notBeforeUtc = license.Validity == null ? null : NormalizeToUtc(license.Validity.NotBefore);
+                DateTime? expiresAtUtc = license.Validity == null ? null : NormalizeToUtc(license.Validity.ExpiresAt);
                 int graceDays = license.Validity == null ? 0 : license.Validity.GraceDays;
 
-                validation.ExpiresAt = expiresAt;
+                validation.ExpiresAt = expiresAtUtc;
 
-                if (notBefore.HasValue && now < notBefore.Value)
+                if (notBeforeUtc.HasValue && nowUtc < notBeforeUtc.Value)
                 {
                     validation.Success = false;
                     validation.ErrorCode = "LICENSE_NOT_EFFECTIVE";
@@ -118,12 +119,12 @@ namespace AM.DBService.Services.System
                     return OkLogOnly(validation, validation.Message);
                 }
 
-                if (expiresAt.HasValue && now > expiresAt.Value)
+                if (expiresAtUtc.HasValue && nowUtc > expiresAtUtc.Value)
                 {
                     validation.IsExpired = true;
 
-                    DateTime graceDeadline = expiresAt.Value.AddDays(graceDays < 0 ? 0 : graceDays);
-                    if (now <= graceDeadline)
+                    DateTime graceDeadlineUtc = expiresAtUtc.Value.AddDays(graceDays < 0 ? 0 : graceDays);
+                    if (nowUtc <= graceDeadlineUtc)
                     {
                         validation.IsInGracePeriod = true;
                         validation.Success = true;
@@ -149,6 +150,8 @@ namespace AM.DBService.Services.System
 
         /// <summary>
         /// 校验首版强绑定字段。
+        /// 当前口径下 ClientId 作为设备授权主键必须匹配；
+        /// 其他绑定字段仅在授权中实际下发了非空值时才参与强校验，避免服务端未下发该字段时被本地误判失败。
         /// </summary>
         private static bool ValidateStrongBindings(DeviceLicenseBinding binding, DeviceHardwareInfo hardware, out string message)
         {
@@ -160,12 +163,12 @@ namespace AM.DBService.Services.System
                 return false;
             }
 
-            if (!ValidateRequiredBinding("MachineCode", binding.MachineCode, hardware.MachineCode, out message))
+            if (!ValidateIssuedBinding("MachineCode", binding.MachineCode, hardware.MachineCode, out message))
             {
                 return false;
             }
 
-            if (!ValidateRequiredBinding("CpuId", binding.CpuId, hardware.CpuId, out message))
+            if (!ValidateIssuedBinding("CpuId", binding.CpuId, hardware.CpuId, out message))
             {
                 return false;
             }
@@ -202,6 +205,47 @@ namespace AM.DBService.Services.System
 
             message = string.Empty;
             return true;
+        }
+
+        /// <summary>
+        /// 校验授权中已实际下发的绑定字段。
+        /// 若授权未下发该字段，则视为当前授权链路未启用该字段做强绑定，不在本地额外判失败。
+        /// </summary>
+        private static bool ValidateIssuedBinding(string fieldName, string licenseValue, string currentValue, out string message)
+        {
+            string normalizedLicense = HardwareInfoCollector.NormalizeBindingValue(licenseValue);
+            if (string.IsNullOrWhiteSpace(normalizedLicense))
+            {
+                message = string.Empty;
+                return true;
+            }
+
+            return ValidateRequiredBinding(fieldName, licenseValue, currentValue, out message);
+        }
+
+        /// <summary>
+        /// 将授权时间统一归一到 UTC。
+        /// 设备侧当前既可能收到带 Z 的 UTC 时间，也可能遇到未显式标注 Kind 的时间值，这里统一转换后再比较。
+        /// </summary>
+        private static DateTime? NormalizeToUtc(DateTime? value)
+        {
+            if (!value.HasValue)
+            {
+                return null;
+            }
+
+            DateTime time = value.Value;
+            if (time.Kind == DateTimeKind.Utc)
+            {
+                return time;
+            }
+
+            if (time.Kind == DateTimeKind.Local)
+            {
+                return time.ToUniversalTime();
+            }
+
+            return DateTime.SpecifyKind(time, DateTimeKind.Local).ToUniversalTime();
         }
     }
 }
