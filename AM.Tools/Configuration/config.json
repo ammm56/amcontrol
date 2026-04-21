@@ -19,7 +19,6 @@
 		"DesktopAppVendor": "AM",
 		"DesktopAppTargetFramework": ".NET Framework 4.6.1",
 		"DesktopAppUiPlatform": "WinForms",
-		"DeviceAppSecret": "amcontrolwinf-device-root-secret",
 		"DeviceKeyVersion": 1
 	},
 	"Sqlite": {

@@ -356,24 +356,13 @@ namespace AM.DBService.Services.System
         {
             try
             {
-                string privateKeyFilePath = BackendServiceConfigHelper.GetLicenseRequestSigningPrivateKeyFilePath();
-                if (string.IsNullOrWhiteSpace(privateKeyFilePath))
+                string privateKeyText = BackendServiceConfigHelper.GetLicenseRequestSigningPrivateKeyPem();
+                if (string.IsNullOrWhiteSpace(privateKeyText))
                 {
-                    return Fail<string>(-1, "授权请求私钥文件路径为空，无法生成签名请求");
+                    return Fail<string>(-1, "授权请求私钥为空，无法生成签名请求");
                 }
 
-                if (!File.Exists(privateKeyFilePath))
-                {
-                    return Fail<string>(-2, "授权请求私钥文件不存在: " + privateKeyFilePath);
-                }
-
-                string fileText = File.ReadAllText(privateKeyFilePath, Encoding.UTF8);
-                if (string.IsNullOrWhiteSpace(fileText))
-                {
-                    return Fail<string>(-3, "授权请求私钥文件内容为空");
-                }
-
-                return OkSilent(fileText.Trim(), "已读取授权请求私钥文件");
+                return OkSilent(privateKeyText.Trim(), "已读取授权请求私钥");
             }
             catch (Exception ex)
             {

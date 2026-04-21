@@ -22,7 +22,7 @@
 - 每条链路的入口类、入口方法和触发时机；
 - 请求体中各字段的来源；
 - 成功与失败返回如何被本地处理；
-- 本地如何缓存 `DeviceId`、长期 `DeviceToken`、`DeviceAppSecret` 和待上传数据；
+- 本地如何缓存 `DeviceId`、长期 `DeviceToken` 与待上传数据，以及 `DeviceAppSecret` 的代码内置来源；
 - 后续排查问题时应优先看哪些类和方法。
 
 当前实现已经按最新后端协议切换为：
@@ -266,7 +266,7 @@ sequenceDiagram
 
 注册加密上下文来源：
 
-1. `appSecret`：`BackendServiceConfigHelper.GetDeviceAppSecret()`；
+1. `appSecret`：`BackendServiceConfigHelper.GetDeviceAppSecret()`，其值当前来自 `AM.Model/Common/Config.Secrets.cs` 中 `Setting` 的代码内置默认值；
 2. `keyVersion`：`BackendServiceConfigHelper.GetDeviceKeyVersion()`；
 3. `nonce`：每次请求随机生成 12 字节；
 4. `AAD`：`appCode + "\n" + deviceId + "\n" + nonce + "\n" + alg + "\n" + keyVersion`；
@@ -287,7 +287,8 @@ sequenceDiagram
 
 1. 调用 `SaveDeviceRegistrationToConfig()`；
 2. 将 `DeviceId` 和 `DeviceToken` 写回 `ConfigContext.Instance.Config.Setting`；
-3. 立即调用 `AM.Tools.Tools.SaveConfig("config.json", ConfigContext.Instance.Config)` 落盘。
+3. 立即调用 `AM.Tools.Tools.SaveConfig("config.json", ConfigContext.Instance.Config)` 落盘；
+4. `DeviceAppSecret` 不参与此处落盘，因为它当前由代码内置并通过 `JsonIgnore` 排除序列化。
 
 失败后的处理：
 
@@ -303,7 +304,8 @@ sequenceDiagram
 2. Header：`X-Device-Token`
 3. 返回模型：`DeviceApiResponse<DeviceTokenRefreshResponse>`
 4. 首版 refresh-token 不走 AES-GCM；
-5. 成功后同样把新的长期 `DeviceToken` 回写 config.json。
+5. 成功后同样把新的长期 `DeviceToken` 回写 config.json；
+6. `DeviceAppSecret` 仍保持代码内置，不通过 refresh-token 链路回写配置文件。
 
 ---
 
@@ -527,12 +529,13 @@ sequenceDiagram
 
 ### 8.4 DeviceAppSecret / DeviceKeyVersion
 
-设备写接口的加密配置当前同样保存在 `ConfigContext.Instance.Config.Setting` 中：
+设备写接口的加密配置当前通过 `ConfigContext.Instance.Config.Setting` 暴露，但持久化方式已区分：
 
-1. `DeviceAppSecret`：设备端与后端共享的应用密钥明文；
-2. `DeviceKeyVersion`：当前应用密钥版本；
-3. 两者由 `BackendServiceConfigHelper` 统一读取；
-4. register、heartbeat、report 的 AES-GCM 请求封装都依赖这两个值。
+1. `DeviceAppSecret`：设备端与后端共享的应用密钥明文，当前固定为 `Setting` 的代码内置默认值；
+2. `DeviceAppSecret` 使用 `JsonIgnore`，不从 `config.json` 读取，也不回写到 `config.json`；
+3. `DeviceKeyVersion`：当前应用密钥版本，仍按普通配置字段管理；
+4. 两者由 `BackendServiceConfigHelper` 统一读取；
+5. register、heartbeat、report 的 AES-GCM 请求封装都依赖这两个值。
 
 ### 8.5 _deviceSessionReady
 

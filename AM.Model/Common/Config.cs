@@ -55,7 +55,7 @@ namespace AM.Model.Common
     /// <summary>
     /// 一般设置
     /// </summary>
-    public class Setting
+    public partial class Setting
     {
         /// <summary>
         /// 当前语言
@@ -224,12 +224,6 @@ namespace AM.Model.Common
         /// 当前阶段先持久化到 config.json，后续如有需要再调整存储位置。
         /// </summary>
         public string DeviceToken { get; set; } = string.Empty;
-
-        /// <summary>
-        /// 设备接入共享应用密钥。
-        /// 当前用于按 `HKDF-SHA256(appSecret, appCode, deviceId)` 派生设备请求密钥，再对 register、heartbeat、report 做 AES-GCM 加密。
-        /// </summary>
-        public string DeviceAppSecret { get; set; } = string.Empty;
 
         /// <summary>
         /// 设备接入密钥版本。

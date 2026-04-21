@@ -1,7 +1,7 @@
 # 本地 Native 安全模块设计与落地规划
 
 **文档编号**：FEAT-DEVICE-003  
-**版本**：1.0.0  
+**版本**：1.1.0  
 **状态**：规划中  
 **最后更新**：2026-04-21  
 **维护人**：Am
@@ -11,6 +11,13 @@
 ## 1. 文档目标
 
 本文档用于整理当前设备授权申请、设备注册、设备心跳、设备信息上报相关敏感材料的本地保护改造方案，并将前期讨论形成一套可落地的仓库规划。
+
+当前状态说明：
+
+1. `C++ Native` 安全模块方案暂时暂停；
+2. 当前仓库已先将 `DeviceAppSecret`、授权验签公钥和授权申请签名私钥改为 `AM.Model/Common/Config.Secrets.cs` 中 `Setting` 的代码内置默认值；
+3. 当前实现不再从 `config.json`、外部 PEM 文件读取上述三个敏感值；
+4. 本文档保留，作为后续恢复 native 安全模块方案时的规划基线。
 
 本文档重点回答以下问题：
 
@@ -33,17 +40,17 @@
 
 ## 2. 当前问题与改造边界
 
-当前实现中，以下敏感材料仍由 `C#` 直接读取：
+当前实现中，以下敏感材料已经从外部文件和 `config.json` 收口到 `C#` 代码内置默认值：
 
-1. `DeviceAppSecret`：由 `BackendServiceConfigHelper.GetDeviceAppSecret()` 从运行期配置明文读取；
-2. 授权申请签名私钥：由 `DeviceLicenseApplyClient` 读取本地私钥文件文本；
-3. license 验签公钥：由 `LicenseCryptoService` 读取本地公钥文件文本。
+1. `DeviceAppSecret`：由 `BackendServiceConfigHelper.GetDeviceAppSecret()` 从 `Setting` 代码默认值读取；
+2. 授权申请签名私钥：由 `DeviceLicenseApplyClient` 读取 `Setting` 中的代码内置私钥文本；
+3. license 验签公钥：由 `LicenseCryptoService` 读取 `Setting` 中的代码内置公钥文本。
 
 当前方案的问题不是“无法运行”，而是以下三个方面：
 
-1. 敏感材料直接出现在 `config.json` 或本地 PEM 文件中，提取门槛过低；
-2. 敏感材料进入 `C#` 托管字符串后，暴露面较大；
-3. 后续若转向 `.NET Core / .NET 10` 和前端壳，现有做法无法形成统一的本地安全边界。
+1. 当前虽然已移除 `config.json` 与本地 PEM 文件暴露面，但敏感材料仍直接存在于托管代码中；
+2. 敏感材料进入 `C#` 托管字符串后，暴露面仍然较大；
+3. 后续若转向 `.NET Core / .NET 10` 和前端壳，现有做法仍无法形成统一的本地安全边界。
 
 本次规划不追求“客户端绝对不可提取秘密”，因为只要客户端本机必须完成签名或加密运算，就不可能做到绝对隐藏。
 

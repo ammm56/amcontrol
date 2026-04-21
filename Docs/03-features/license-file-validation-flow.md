@@ -137,7 +137,7 @@ license.lic = response.data.licenseText
 首版定稿规则如下：
 
 1. 首版即启用正式 `RSA-SHA256` 验签，不采用“仅明文解析不验签”的过渡方案；
-2. 验签公钥固定为随程序编译发布的内置 PEM 文本资源，由 `LicenseCryptoService` 读取使用；
+2. 验签公钥固定为 `AM.Model/Common/Config.Secrets.cs` 中 `Setting` 的代码内置 PEM 文本，由 `LicenseCryptoService` 读取使用；
 3. 首版不从 `config.json`、数据库或外部 Key 文件加载公钥，避免现场配置漂移导致授权失效；
 4. 首版不实现多公钥轮换路由；
 5. 若 `licenseText.signature.keyId` 存在，则其值必须等于固定内置 KeyId；不一致直接判定验签失败；

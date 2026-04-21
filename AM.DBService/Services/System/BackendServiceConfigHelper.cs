@@ -1,15 +1,13 @@
 using AM.Core.Context;
 using AM.Model.Common;
-using AM.Model.License;
 using System;
-using System.IO;
 
 namespace AM.DBService.Services.System
 {
     /// <summary>
     /// 统一后端服务配置与授权密钥文件路径读取帮助类。
     /// 授权申请、设备注册、心跳、结构化上报和使用信息上报统一走同一个后端地址。
-    /// 授权相关密钥固定从 AM.Tools/Configuration 目录读取，且“许可验签公钥”和“申请签名私钥”属于不同链路，不按一对公私钥理解。
+    /// 授权相关密钥与设备密钥当前固定直接从代码内置默认值读取，且“许可验签公钥”和“申请签名私钥”属于不同链路，不按一对公私钥理解。
     ///
     /// 当前这条“配置来源”链路刻意做得很收敛：
     /// 1. 运行期业务配置统一从 ConfigContext.Instance.Config.Setting 读取；
@@ -168,6 +166,24 @@ namespace AM.DBService.Services.System
         }
 
         /// <summary>
+        /// 获取本地 license 验签公钥 PEM 文本。
+        /// 该公钥只服务于本地 license.lic 验签，不参与任何设备管理接口请求。
+        /// </summary>
+        public static string GetLicenseValidationPublicKeyPem()
+        {
+            return (GetSetting().LicenseValidationPublicKeyPem ?? string.Empty).Trim();
+        }
+
+        /// <summary>
+        /// 获取授权申请签名私钥 PEM 文本。
+        /// 该私钥只用于设备向后端发送授权申请时做请求签名，不参与本地 license.lic 验签。
+        /// </summary>
+        public static string GetLicenseRequestSigningPrivateKeyPem()
+        {
+            return (GetSetting().LicenseRequestSigningPrivateKeyPem ?? string.Empty).Trim();
+        }
+
+        /// <summary>
         /// 获取设备接入密钥版本。
         /// 当前会写入 `X-Device-KeyVersion` 请求头，并参与 AAD 拼接。
         /// </summary>
@@ -178,29 +194,11 @@ namespace AM.DBService.Services.System
         }
 
         /// <summary>
-        /// 获取本地 license 验签公钥文件路径。
-        /// 该路径只服务于本地 license.lic 验签，不参与任何设备管理接口请求。
-        /// </summary>
-        public static string GetLicenseValidationPublicKeyFilePath()
-        {
-            return ResolveConfigurationFilePath(LicenseConstants.LicenseValidationPublicKeyFileName);
-        }
-
-        /// <summary>
-        /// 获取授权申请签名私钥文件路径。
-        /// 该私钥只用于设备向后端发送授权申请时做请求签名，不参与本地 license.lic 验签。
-        /// </summary>
-        public static string GetLicenseRequestSigningPrivateKeyFilePath()
-        {
-            return ResolveConfigurationFilePath(LicenseConstants.LicenseRequestSigningPrivateKeyFileName);
-        }
-
-        /// <summary>
         /// 判断授权申请签名私钥是否已配置。
         /// </summary>
         public static bool HasLicenseRequestSigningPrivateKeyConfigured()
         {
-            return File.Exists(GetLicenseRequestSigningPrivateKeyFilePath());
+            return !string.IsNullOrWhiteSpace(GetLicenseRequestSigningPrivateKeyPem());
         }
 
         /// <summary>
@@ -209,23 +207,7 @@ namespace AM.DBService.Services.System
         /// </summary>
         public static bool HasLicenseValidationPublicKeyConfigured()
         {
-            return File.Exists(GetLicenseValidationPublicKeyFilePath());
-        }
-
-        /// <summary>
-        /// 解析 Configuration 目录下的配置文件绝对路径。
-        /// 运行目录存在 Configuration 子目录时优先使用；否则回退到程序根目录同名文件。
-        /// </summary>
-        private static string ResolveConfigurationFilePath(string fileName)
-        {
-            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory ?? string.Empty;
-            string configurationPath = Path.Combine(baseDirectory, "Configuration", fileName ?? string.Empty);
-            if (File.Exists(configurationPath))
-            {
-                return configurationPath;
-            }
-
-            return Path.Combine(baseDirectory, fileName ?? string.Empty);
+            return !string.IsNullOrWhiteSpace(GetLicenseValidationPublicKeyPem());
         }
     }
 }

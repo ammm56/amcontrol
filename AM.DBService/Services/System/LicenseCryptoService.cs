@@ -170,28 +170,17 @@ namespace AM.DBService.Services.System
         {
             try
             {
-                string publicKeyFilePath = BackendServiceConfigHelper.GetLicenseValidationPublicKeyFilePath();
-                if (string.IsNullOrWhiteSpace(publicKeyFilePath))
-                {
-                    return Fail<string>(-1, "授权公钥文件路径为空");
-                }
-
-                if (!File.Exists(publicKeyFilePath))
-                {
-                    return Fail<string>(-2, "授权公钥文件不存在: " + publicKeyFilePath);
-                }
-
-                string pem = File.ReadAllText(publicKeyFilePath, Encoding.UTF8);
+                string pem = BackendServiceConfigHelper.GetLicenseValidationPublicKeyPem();
                 if (string.IsNullOrWhiteSpace(pem))
                 {
-                    return Fail<string>(-3, "授权公钥文件内容为空");
+                    return Fail<string>(-1, "授权公钥为空");
                 }
 
-                return OkSilent(pem.Trim(), "读取授权公钥文件成功");
+                return OkSilent(pem.Trim(), "读取授权公钥成功");
             }
             catch (Exception ex)
             {
-                return Fail<string>(-1, "读取授权公钥文件异常", ReportChannels.Log, ex);
+                return Fail<string>(-1, "读取授权公钥异常", ReportChannels.Log, ex);
             }
         }
 
