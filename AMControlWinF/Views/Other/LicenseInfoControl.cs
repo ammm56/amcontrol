@@ -248,10 +248,19 @@ namespace AMControlWinF.Views.Other
             DeviceLicenseState state = LicenseRuntimeContext.Instance.Current;
             DeviceLicense license = state == null ? null : state.License;
             DeviceLicenseGrantScope grantScope = license == null ? null : license.GrantScope;
+            string customerCode = grantScope == null
+                ? BackendServiceConfigHelper.GetLicenseCustomerCode()
+                : grantScope.CustomerCode;
+            string siteCode = grantScope == null
+                ? BackendServiceConfigHelper.GetLicenseSiteCode()
+                : grantScope.SiteCode;
+            string machineModel = grantScope == null
+                ? BackendServiceConfigHelper.GetLicenseMachineModel()
+                : grantScope.MachineModel;
             List<string> lines = new List<string>();
-            lines.Add((isEn ? "CustomerCode: " : "客户编码：") + SafeValue(grantScope == null ? string.Empty : grantScope.CustomerCode, isEn));
-            lines.Add((isEn ? "SiteCode: " : "站点编码：") + SafeValue(grantScope == null ? string.Empty : grantScope.SiteCode, isEn));
-            lines.Add((isEn ? "MachineModel: " : "设备型号：") + SafeValue(grantScope == null ? string.Empty : grantScope.MachineModel, isEn));
+            lines.Add((isEn ? "CustomerCode: " : "客户编码：") + SafeValue(customerCode, isEn));
+            lines.Add((isEn ? "SiteCode: " : "站点编码：") + SafeValue(siteCode, isEn));
+            lines.Add((isEn ? "MachineModel: " : "设备型号：") + SafeValue(machineModel, isEn));
             lines.Add(string.Empty);
             lines.Add(isEn ? "Modules:" : "授权模块：");
             lines.Add(JoinLines(state == null ? null : state.ModuleKeys, isEn));
