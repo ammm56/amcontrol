@@ -21,7 +21,16 @@ namespace AM.DBService.Services.System
     /// </summary>
     public class UsageReportService : ServiceBase
     {
+        /// <summary>
+        /// 后端统一服务地址。
+        /// 当前仅用于判断是否允许执行使用事件上报。
+        /// </summary>
         private readonly string _serviceUrl;
+
+        /// <summary>
+        /// 设备 report 客户端。
+        /// 使用事件上报当前统一映射为设备 report 请求后发送。
+        /// </summary>
         private readonly DeviceReportClient _deviceReportClient;
 
         protected override string MessageSourceName
@@ -55,6 +64,7 @@ namespace AM.DBService.Services.System
 
         /// <summary>
         /// 当前是否已完成服务地址配置。
+        /// 只有配置了统一后端地址，使用事件上报链路才允许执行。
         /// </summary>
         public bool IsConfigured()
         {
@@ -63,7 +73,7 @@ namespace AM.DBService.Services.System
 
         /// <summary>
         /// 批量上报使用事件。
-        /// 当前后端真实写入口为设备 report，因此这里将每条使用事件映射为一条设备 Info report。
+        /// 当前实现按“逐条转换为 DeviceReportRequest 并逐条调用 report 接口”的方式工作。
         /// </summary>
         public async Task<Result> UploadBatchAsync(IList<SysUsageEventBufferEntity> events)
         {
@@ -108,6 +118,7 @@ namespace AM.DBService.Services.System
 
         /// <summary>
         /// 将本地使用事件映射为设备 report 请求。
+        /// 该方法同时决定 reportType、payload 结构以及各字段值从本地缓冲实体的映射关系。
         /// </summary>
         private Result<DeviceReportRequest> BuildDeviceReportRequest(SysUsageEventBufferEntity entity)
         {
@@ -150,6 +161,7 @@ namespace AM.DBService.Services.System
 
         /// <summary>
         /// 根据本地使用事件类型映射后端设备 reportType。
+        /// 当前仅区分 Info 与 Status 两类。
         /// </summary>
         private static string ResolveReportType(string eventType)
         {
@@ -173,7 +185,7 @@ namespace AM.DBService.Services.System
         }
 
         /// <summary>
-        /// 从配置读取服务地址。
+        /// 从配置读取后端服务地址。
         /// </summary>
         private static string GetServiceUrlFromConfig()
         {

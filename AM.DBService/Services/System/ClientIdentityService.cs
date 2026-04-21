@@ -21,8 +21,16 @@ namespace AM.DBService.Services.System
     /// </summary>
     public class ClientIdentityService : ServiceBase
     {
+        /// <summary>
+        /// 客户端身份表访问入口。
+        /// 当前仅维护 sys_client_identity 表中的首条记录作为设备软件实例身份。
+        /// </summary>
         private readonly DBCommon<SysClientIdentityEntity> _identityDb;
 
+        /// <summary>
+        /// 当前进程内缓存的客户端身份。
+        /// 用于减少频繁查询 config.json 和数据库。
+        /// </summary>
         private SysClientIdentityEntity _cachedIdentity;
 
         protected override string MessageSourceName
@@ -107,6 +115,7 @@ namespace AM.DBService.Services.System
 
         /// <summary>
         /// 保存设备信息。
+        /// 当前主要用于把 machineCode、machineName 同步写回数据库与 config.json。
         /// </summary>
         public Result SaveMachineInfo(string machineCode, string machineName)
         {
@@ -148,6 +157,7 @@ namespace AM.DBService.Services.System
 
         /// <summary>
         /// 从 config.json 构建客户端身份对象。
+        /// 若 config 中已有 ClientId，则当前进程会优先信任该身份并尝试同步数据库。
         /// </summary>
         private SysClientIdentityEntity BuildIdentityFromConfig()
         {
@@ -168,6 +178,7 @@ namespace AM.DBService.Services.System
 
         /// <summary>
         /// 查询本地表中的首条客户端身份。
+        /// 当前实现把首条记录视为唯一有效身份，不支持多实例身份并存。
         /// </summary>
         private Result<SysClientIdentityEntity> QueryFirstFromDatabase()
         {
@@ -198,6 +209,7 @@ namespace AM.DBService.Services.System
 
         /// <summary>
         /// 创建默认客户端身份。
+        /// 当 config.json 和本地表都没有有效身份时，会自动生成新的 ClientId 并回写数据库与 config.json。
         /// </summary>
         private Result<SysClientIdentityEntity> CreateDefaultIdentity()
         {
@@ -236,8 +248,7 @@ namespace AM.DBService.Services.System
 
         /// <summary>
         /// 保证数据库中的客户端身份与配置一致。
-        /// config.json 已有 ClientId 时，若本地表为空则补写；
-        /// 若本地表存在首条记录则更新其设备信息。
+        /// 当前以 config.json 为优先来源：若 config 已有 ClientId，则数据库首条记录会被补写或更新到相同口径。
         /// </summary>
         private void EnsureDbIdentityUpToDate(SysClientIdentityEntity configIdentity)
         {
@@ -266,7 +277,7 @@ namespace AM.DBService.Services.System
 
         /// <summary>
         /// 保存身份到本地数据库。
-        /// 当前仅维护首条记录。
+        /// 当前仅维护首条记录，若已存在则更新，不存在则新增。
         /// </summary>
         private Result SaveIdentityToDatabase(SysClientIdentityEntity entity)
         {
@@ -312,6 +323,7 @@ namespace AM.DBService.Services.System
 
         /// <summary>
         /// 将身份回写到 config.json。
+        /// 当前仅同步 ClientId、MachineCode、MachineName，不额外写入数据库专用字段。
         /// </summary>
         private Result SaveIdentityToConfig(SysClientIdentityEntity entity)
         {

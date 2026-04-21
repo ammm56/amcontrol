@@ -17,7 +17,16 @@ namespace AM.DBService.Services.System
     /// </summary>
     public class DeviceHeartbeatClient : ServiceBase
     {
+        /// <summary>
+        /// 心跳发送专用 HTTP 客户端。
+        /// 每个实例固定复用，避免频繁创建连接对象。
+        /// </summary>
         private readonly HttpClient _httpClient;
+
+        /// <summary>
+        /// 后端统一服务地址。
+        /// 心跳接口路径在此基础上拼接 `/api/devices/{id}/heartbeat`。
+        /// </summary>
         private readonly string _serviceUrl;
 
         protected override string MessageSourceName
@@ -43,10 +52,16 @@ namespace AM.DBService.Services.System
             _httpClient.Timeout = TimeSpan.FromSeconds(15);
         }
 
+        /// <summary>
+        /// 发送设备心跳。
+        /// 当前要求本地已存在 DeviceId、DeviceToken，且请求体中必须带有 statusJson。
+        /// </summary>
         public async Task<Result> SendHeartbeatAsync(DeviceHeartbeatRequest request)
         {
             try
             {
+                // 本地前置条件失败时，消息直接在当前方法内生成，
+                // 避免把“未配置 DeviceId / DeviceToken”等本地问题错误包装成后端异常。
                 Setting setting = ConfigContext.Instance.Config.Setting;
                 if (string.IsNullOrWhiteSpace(_serviceUrl))
                 {
@@ -89,6 +104,8 @@ namespace AM.DBService.Services.System
                             ? string.Empty
                             : await httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
 
+                        // 心跳接口的失败消息统一收敛到 BackendRequestFailureHelper，
+                        // 这样 UsageUploadWorker 只需要消费一条 Result.Message 并按是否 token 相关做后续处理。
                         DeviceApiResponse<object> apiResponse = DeserializeApiResponse<object>(responseText);
                         if (!httpResponse.IsSuccessStatusCode || apiResponse == null || !apiResponse.Success)
                         {
@@ -103,10 +120,14 @@ namespace AM.DBService.Services.System
             }
             catch (Exception ex)
             {
+                // 心跳异常最终也被压缩成一行消息，供后台节流日志和 token 失效判断复用。
                 return FailSilent(-1, BackendRequestFailureHelper.BuildExceptionMessage("发送设备心跳", ex));
             }
         }
 
+        /// <summary>
+        /// 反序列化设备心跳接口的统一响应包装。
+        /// </summary>
         private static DeviceApiResponse<T> DeserializeApiResponse<T>(string responseText)
         {
             if (string.IsNullOrWhiteSpace(responseText))
@@ -124,6 +145,9 @@ namespace AM.DBService.Services.System
             }
         }
 
+        /// <summary>
+        /// 从统一配置中获取设备管理接口根地址。
+        /// </summary>
         private static string GetDeviceServiceUrlFromConfig()
         {
             return BackendServiceConfigHelper.GetBackendServiceUrl();

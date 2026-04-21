@@ -69,6 +69,8 @@ namespace AM.DBService.Services.System
         {
             try
             {
+                // 本地校验失败时直接返回本地消息；
+                // 若真正发起 HTTP 请求后失败，则统一交给 BackendRequestFailureHelper 生成消息。
                 if (string.IsNullOrWhiteSpace(_serviceUrl))
                 {
                     return FailSilent<LicenseStatusQueryResponse>(-1, "未配置后端服务地址");
@@ -106,6 +108,8 @@ namespace AM.DBService.Services.System
                             ? string.Empty
                             : await httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
 
+                        // 当前查询接口把 HTTP 失败、包装解析失败和业务失败统一折叠为一条消息，
+                        // 便于调用方只关注 Result.Success / Result.Message。
                         DeviceApiResponse<LicenseStatusQueryResponse> apiResponse = DeserializeApiResponse<LicenseStatusQueryResponse>(responseText);
                         if (!httpResponse.IsSuccessStatusCode || apiResponse == null || !apiResponse.Success || apiResponse.Data == null)
                         {
@@ -119,6 +123,8 @@ namespace AM.DBService.Services.System
                         if (string.Equals(status, "Pending", StringComparison.OrdinalIgnoreCase) ||
                             string.Equals(status, "PendingReview", StringComparison.OrdinalIgnoreCase))
                         {
+                            // Pending 不视为系统异常，而是业务待处理结果。
+                            // 当前链路保留 requestId/licenseId/traceId，便于后续管理员处理和联调追踪。
                             return OkLogOnly(
                                 response,
                                 string.Format(
@@ -134,6 +140,7 @@ namespace AM.DBService.Services.System
             }
             catch (Exception ex)
             {
+                // 查询异常统一按后端异常消息格式输出，供日志链和 UI 层直接消费。
                 return FailSilent<LicenseStatusQueryResponse>(-1, BackendRequestFailureHelper.BuildExceptionMessage("查询设备授权状态", ex));
             }
         }

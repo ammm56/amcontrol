@@ -19,9 +19,22 @@ namespace AM.DBService.Services.System
     /// </summary>
     public class DeviceReportBufferService : ServiceBase
     {
+        /// <summary>
+        /// 结构化 report 队列访问锁。
+        /// 当前阶段队列驻留在进程内，需要显式串行化入队和出队操作。
+        /// </summary>
         private static readonly object QueueSyncRoot = new object();
+
+        /// <summary>
+        /// 待上传结构化设备 report 队列。
+        /// 当前不落数据库，应用退出后未发送数据不会保留。
+        /// </summary>
         private static readonly Queue<DeviceReportRequest> PendingQueue = new Queue<DeviceReportRequest>();
 
+        /// <summary>
+        /// 客户端身份服务。
+        /// 用于为 report 自动填充 clientId、machineCode、machineName 和 appCode。
+        /// </summary>
         private readonly ClientIdentityService _clientIdentityService;
 
         protected override string MessageSourceName
@@ -52,6 +65,7 @@ namespace AM.DBService.Services.System
 
         /// <summary>
         /// 写入通用上报请求。
+        /// 入队前会补齐 eventId、traceId 和 occurredAt 等最小运行字段。
         /// </summary>
         public Result Enqueue(DeviceReportRequest request)
         {
@@ -87,7 +101,7 @@ namespace AM.DBService.Services.System
 
         /// <summary>
         /// 批量重新入队。
-        /// 用于上传失败后的重试。
+        /// 用于 report flush 中途失败时把剩余未上传项重新压回队列。
         /// </summary>
         public Result EnqueueMany(IEnumerable<DeviceReportRequest> requests)
         {
@@ -115,6 +129,7 @@ namespace AM.DBService.Services.System
 
         /// <summary>
         /// 取出一批待上报请求。
+        /// 该方法为“出队”语义，成功返回后对应元素已从内存队列移除。
         /// </summary>
         public Result<DeviceReportRequest> DequeueBatch(int takeCount)
         {
@@ -138,6 +153,7 @@ namespace AM.DBService.Services.System
 
         /// <summary>
         /// 写入应用启动上报请求。
+        /// 当前 payload 会带上授权状态摘要，供后端记录设备启动时的授权快照。
         /// </summary>
         public Result EnqueueAppStart()
         {
@@ -165,6 +181,7 @@ namespace AM.DBService.Services.System
 
         /// <summary>
         /// 写入授权申请成功后的上报请求。
+        /// 当前用于把 licenseId、状态、签发时间和到期时间同步到设备 report 历史中。
         /// </summary>
         public Result EnqueueLicenseApplied(LicenseApplyResponse response)
         {
@@ -195,6 +212,10 @@ namespace AM.DBService.Services.System
             return Enqueue(buildResult.Item);
         }
 
+        /// <summary>
+        /// 构造一条结构化设备 report 请求。
+        /// 该方法统一补齐身份、当前用户、应用版本、traceId 和发生时间等公共字段。
+        /// </summary>
         private Result<DeviceReportRequest> BuildRequest(string reportType, object payload, string pageKey, bool? isSuccess)
         {
             try
@@ -242,6 +263,10 @@ namespace AM.DBService.Services.System
             }
         }
 
+        /// <summary>
+        /// 根据系统事件名称映射 reportType。
+        /// 当前仅对 LicenseApplied 使用 Status，其余系统事件默认走 Info。
+        /// </summary>
         private static string ResolveSystemEventReportType(string eventName)
         {
             if (string.IsNullOrWhiteSpace(eventName))
@@ -260,6 +285,10 @@ namespace AM.DBService.Services.System
             }
         }
 
+        /// <summary>
+        /// 生成本地结构化 report 的事件 ID。
+        /// 当前格式为 `evt-{时间戳}-{随机短码}`。
+        /// </summary>
         private static string BuildEventId()
         {
             return string.Format("evt-{0}-{1}", DateTime.Now.ToString("yyyyMMddHHmmss"), AM.Tools.Tools.Guid(8).ToLowerInvariant());

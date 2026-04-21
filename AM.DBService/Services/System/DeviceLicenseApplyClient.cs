@@ -142,6 +142,8 @@ namespace AM.DBService.Services.System
         {
             try
             {
+                // 授权申请链路和设备管理链路共用 BackendRequestFailureHelper，
+                // 但这里选择 FailLogOnly 而不是 FailSilent，因为授权申请更接近用户主动操作，需要保留明确日志痕迹。
                 if (string.IsNullOrWhiteSpace(_serviceUrl))
                 {
                     return FailLogOnly<LicenseApplyResponse>(-1, "未配置后端服务地址");
@@ -176,6 +178,8 @@ namespace AM.DBService.Services.System
                             return WarnLogOnly<LicenseApplyResponse>(-3, BuildPendingPayloadMessage(request, apiResponse.Data, apiResponse));
                         }
 
+                        // 真正的 HTTP/业务失败消息统一交给 BackendRequestFailureHelper 生成，
+                        // 这样授权申请页、日志和后台排查拿到的是同一格式的失败描述。
                         if (!httpResponse.IsSuccessStatusCode || apiResponse == null || !apiResponse.Success || apiResponse.Data == null)
                         {
                             return FailLogOnly<LicenseApplyResponse>(
@@ -203,6 +207,7 @@ namespace AM.DBService.Services.System
             }
             catch (Exception ex)
             {
+                // 异常失败继续复用统一消息格式，但这里保留 LogOnly 语义，避免用户主动点击后完全静默。
                 return FailLogOnly<LicenseApplyResponse>(-1, BackendRequestFailureHelper.BuildExceptionMessage("授权申请", ex));
             }
         }

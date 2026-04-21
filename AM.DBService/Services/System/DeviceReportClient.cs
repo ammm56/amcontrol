@@ -17,7 +17,16 @@ namespace AM.DBService.Services.System
     /// </summary>
     public class DeviceReportClient : ServiceBase
     {
+        /// <summary>
+        /// report 发送专用 HTTP 客户端。
+        /// 使用事件上报和结构化 report 上报都复用该客户端。
+        /// </summary>
         private readonly HttpClient _httpClient;
+
+        /// <summary>
+        /// 后端统一服务地址。
+        /// report 接口路径在此基础上拼接 `/api/devices/{id}/report`。
+        /// </summary>
         private readonly string _serviceUrl;
 
         protected override string MessageSourceName
@@ -43,10 +52,16 @@ namespace AM.DBService.Services.System
             _httpClient.Timeout = TimeSpan.FromSeconds(15);
         }
 
+        /// <summary>
+        /// 发送一条设备 report。
+        /// 调用方需保证 reportType 与 payload 已准备完整，当前方法只负责鉴权、序列化和结果解析。
+        /// </summary>
         public async Task<Result> ReportAsync(DeviceReportRequest request)
         {
             try
             {
+                // report 的错误处理与 heartbeat 保持一致：
+                // 本地参数校验、本地配置缺失和后端失败分别在不同层处理，最终统一回到 Result.Message。
                 Setting setting = ConfigContext.Instance.Config.Setting;
                 if (string.IsNullOrWhiteSpace(_serviceUrl))
                 {
@@ -94,6 +109,8 @@ namespace AM.DBService.Services.System
                             ? string.Empty
                             : await httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
 
+                        // 一旦后端返回 HTTP 非成功、统一包装解析失败，或 success=false，
+                        // 都统一压成单行失败描述，供 UsageUploadWorker 直接记录与回滚队列。
                         DeviceApiResponse<object> apiResponse = DeserializeApiResponse<object>(responseText);
                         if (!httpResponse.IsSuccessStatusCode || apiResponse == null || !apiResponse.Success)
                         {
@@ -108,10 +125,14 @@ namespace AM.DBService.Services.System
             }
             catch (Exception ex)
             {
+                // 异常消息链与注册/心跳保持一致，便于后台统一分析网络、超时和通用异常。
                 return FailSilent(-1, BackendRequestFailureHelper.BuildExceptionMessage("设备结构化上报", ex));
             }
         }
 
+        /// <summary>
+        /// 反序列化设备 report 接口的统一响应包装。
+        /// </summary>
         private static DeviceApiResponse<T> DeserializeApiResponse<T>(string responseText)
         {
             if (string.IsNullOrWhiteSpace(responseText))
@@ -129,6 +150,9 @@ namespace AM.DBService.Services.System
             }
         }
 
+        /// <summary>
+        /// 从统一配置中获取设备管理接口根地址。
+        /// </summary>
         private static string GetDeviceServiceUrlFromConfig()
         {
             return BackendServiceConfigHelper.GetBackendServiceUrl();

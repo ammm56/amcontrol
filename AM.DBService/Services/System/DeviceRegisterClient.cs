@@ -21,8 +21,22 @@ namespace AM.DBService.Services.System
     /// </summary>
     public class DeviceRegisterClient : ServiceBase
     {
+        /// <summary>
+        /// 客户端身份服务。
+        /// 用于生成设备注册请求中的 clientId、machineCode、machineName 和 appCode。
+        /// </summary>
         private readonly ClientIdentityService _clientIdentityService;
+
+        /// <summary>
+        /// 注册与 token 刷新共用的 HTTP 客户端。
+        /// 当前为每个 DeviceRegisterClient 实例持有一个固定 HttpClient。
+        /// </summary>
         private readonly HttpClient _httpClient;
+
+        /// <summary>
+        /// 后端统一服务地址。
+        /// 由 config 中的 BackendServiceUrl 解析得到。
+        /// </summary>
         private readonly string _serviceUrl;
 
         protected override string MessageSourceName
@@ -54,11 +68,19 @@ namespace AM.DBService.Services.System
             _httpClient.Timeout = TimeSpan.FromSeconds(15);
         }
 
+        /// <summary>
+        /// 当前是否已配置设备管理服务地址。
+        /// 仅用于判断是否允许发起注册与 token 刷新请求。
+        /// </summary>
         public bool IsConfigured()
         {
             return !string.IsNullOrWhiteSpace(_serviceUrl);
         }
 
+        /// <summary>
+        /// 为当前设备构造注册请求并发起注册。
+        /// 这是后台工作单元建立设备会话时最常用的入口。
+        /// </summary>
         public async Task<Result<DeviceRegisterResponse>> RegisterCurrentDeviceAsync()
         {
             Result<DeviceRegisterRequest> requestResult = CreateCurrentRegisterRequest();
@@ -70,10 +92,16 @@ namespace AM.DBService.Services.System
             return await RegisterAsync(requestResult.Item).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// 发送设备注册请求。
+        /// 成功后会把返回的 DeviceId 和 DeviceToken 回写到 config.json。
+        /// </summary>
         public async Task<Result<DeviceRegisterResponse>> RegisterAsync(DeviceRegisterRequest request)
         {
             try
             {
+                // 第一层失败消息：本地前置条件校验失败，直接返回本地 Fail/FailSilent，
+                // 不进入 HTTP 调用，也不会经过 BackendRequestFailureHelper。
                 if (string.IsNullOrWhiteSpace(_serviceUrl))
                 {
                     return FailSilent<DeviceRegisterResponse>(-1, "未配置后端服务地址");
@@ -112,6 +140,8 @@ namespace AM.DBService.Services.System
                             ? string.Empty
                             : await httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
 
+                        // 第二层失败消息：HTTP 已返回，但状态码/统一包装/data 不符合预期。
+                        // 此时统一由 BackendRequestFailureHelper 拼出一行标准描述，最终成为 Result.Message。
                         DeviceApiResponse<DeviceRegisterResponse> apiResponse = DeserializeApiResponse<DeviceRegisterResponse>(responseText);
                         if (!httpResponse.IsSuccessStatusCode || apiResponse == null || !apiResponse.Success || apiResponse.Data == null)
                         {
@@ -132,14 +162,24 @@ namespace AM.DBService.Services.System
             }
             catch (Exception ex)
             {
+                // 第三层失败消息：请求过程中抛出异常。
+                // 统一归类为超时、后端不可用或通用异常，再返回给上层 worker 做节流日志处理。
                 return FailSilent<DeviceRegisterResponse>(-1, BackendRequestFailureHelper.BuildExceptionMessage("设备注册", ex));
             }
         }
 
+        /// <summary>
+        /// 使用本地已保存的 DeviceId 与 DeviceToken 向后端刷新 token。
+        /// 刷新成功后同样回写最新 token 到 config.json。
+        /// </summary>
         public async Task<Result<DeviceTokenRefreshResponse>> RefreshTokenAsync()
         {
             try
             {
+                // token 刷新与注册共用同一条消息链：
+                // 本地校验失败 -> 直接 Fail；
+                // HTTP/业务失败 -> BackendRequestFailureHelper；
+                // 异常失败 -> BackendRequestFailureHelper.BuildExceptionMessage。
                 if (string.IsNullOrWhiteSpace(_serviceUrl))
                 {
                     return FailSilent<DeviceTokenRefreshResponse>(-1, "未配置后端服务地址");
@@ -195,6 +235,10 @@ namespace AM.DBService.Services.System
             }
         }
 
+        /// <summary>
+        /// 根据当前客户端身份构建设备注册请求。
+        /// DeviceId 的优先级为 config 中现有值，其次 MachineCode，最后回退到 ClientId。
+        /// </summary>
         private Result<DeviceRegisterRequest> CreateCurrentRegisterRequest()
         {
             try
@@ -232,6 +276,10 @@ namespace AM.DBService.Services.System
             }
         }
 
+        /// <summary>
+        /// 解析本次设备注册应使用的 DeviceId。
+        /// 该值一旦注册成功，会成为后续 heartbeat、report、refresh-token 的路径标识。
+        /// </summary>
         private static string ResolveDeviceId(SysClientIdentityEntity identity)
         {
             Setting setting = ConfigContext.Instance.Config.Setting;
@@ -248,6 +296,10 @@ namespace AM.DBService.Services.System
             return identity.ClientId ?? string.Empty;
         }
 
+        /// <summary>
+        /// 将设备注册结果保存到当前配置与 config.json。
+        /// 这是设备管理链路持久化 DeviceId / DeviceToken 的唯一收口点。
+        /// </summary>
         private Result SaveDeviceRegistrationToConfig(string deviceId, string deviceToken)
         {
             try
@@ -270,6 +322,9 @@ namespace AM.DBService.Services.System
             }
         }
 
+        /// <summary>
+        /// 反序列化设备管理接口的统一响应包装。
+        /// </summary>
         private static DeviceApiResponse<T> DeserializeApiResponse<T>(string responseText)
         {
             if (string.IsNullOrWhiteSpace(responseText))
@@ -287,11 +342,18 @@ namespace AM.DBService.Services.System
             }
         }
 
+        /// <summary>
+        /// 从统一配置中获取设备管理接口根地址。
+        /// </summary>
         private static string GetDeviceServiceUrlFromConfig()
         {
             return BackendServiceConfigHelper.GetBackendServiceUrl();
         }
 
+        /// <summary>
+        /// 获取当前机器首个可用 IPv4 地址。
+        /// 注册接口仅用于诊断展示，因此采集失败时回退为空字符串。
+        /// </summary>
         private static string GetLocalIpv4Address()
         {
             try

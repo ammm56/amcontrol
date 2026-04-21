@@ -21,9 +21,22 @@ namespace AM.DBService.Services.System
     /// </summary>
     public class UsageEventBufferService : ServiceBase
     {
+        /// <summary>
+        /// 本地使用事件缓冲允许保留的最大记录数。
+        /// 当前达到上限后直接清空旧数据，优先保证新事件能够继续写入。
+        /// </summary>
         private const int MaxBufferCount = 100;
 
+        /// <summary>
+        /// 使用事件缓冲表访问入口。
+        /// 底层对应本地数据库表 sys_usage_event_buffer。
+        /// </summary>
         private readonly DBCommon<SysUsageEventBufferEntity> _bufferDb;
+
+        /// <summary>
+        /// 客户端身份服务。
+        /// 写入使用事件时需要补齐 clientId、machineCode、machineName 和 appCode。
+        /// </summary>
         private readonly ClientIdentityService _clientIdentityService;
 
         protected override string MessageSourceName
@@ -70,6 +83,7 @@ namespace AM.DBService.Services.System
 
         /// <summary>
         /// 记录应用启动事件。
+        /// 该事件后续会被 UsageUploadWorker 周期性读取，并映射为一条设备 report。
         /// </summary>
         public Result SaveAppStart()
         {
@@ -78,6 +92,7 @@ namespace AM.DBService.Services.System
 
         /// <summary>
         /// 记录应用退出事件。
+        /// 当前仅写入本地缓冲，不在调用点同步直接上传。
         /// </summary>
         public Result SaveAppExit()
         {
@@ -86,6 +101,7 @@ namespace AM.DBService.Services.System
 
         /// <summary>
         /// 记录登录成功事件。
+        /// 会保留 userId 和 loginName，供后端追踪当前设备上的账号行为。
         /// </summary>
         public Result SaveLoginSuccess(int? userId, string loginName)
         {
@@ -94,6 +110,7 @@ namespace AM.DBService.Services.System
 
         /// <summary>
         /// 记录登录失败事件。
+        /// 失败原因码会写入 FailReasonCode，后续上报到设备 report 的 failReasonCode 字段。
         /// </summary>
         public Result SaveLoginFailed(string loginName, string failReasonCode)
         {
@@ -102,7 +119,7 @@ namespace AM.DBService.Services.System
 
         /// <summary>
         /// 记录页面访问事件。
-        /// 页面键应来自 NavigationCatalog 的 PageKey。
+        /// pageKey 应来自 NavigationCatalog 中定义的统一页面键，避免后端统计口径分裂。
         /// </summary>
         public Result SavePageVisit(string pageKey)
         {
@@ -132,6 +149,7 @@ namespace AM.DBService.Services.System
 
         /// <summary>
         /// 查询待上传事件。
+        /// 当前会返回 UploadStatus 为 Pending 或 Failed 的记录，并按发生时间升序取前 N 条。
         /// </summary>
         public Result<SysUsageEventBufferEntity> QueryPending(int takeCount)
         {
@@ -159,6 +177,7 @@ namespace AM.DBService.Services.System
 
         /// <summary>
         /// 批量标记为已上传。
+        /// 对应后台成功调用设备 report 接口后的状态回写。
         /// </summary>
         public Result MarkUploaded(IEnumerable<int> ids)
         {
@@ -167,6 +186,7 @@ namespace AM.DBService.Services.System
 
         /// <summary>
         /// 批量标记为上传失败。
+        /// 对应后台 report 上传失败后的状态回写，message 会记录最近一次失败摘要。
         /// </summary>
         public Result MarkUploadFailed(IEnumerable<int> ids, string message)
         {
@@ -175,6 +195,7 @@ namespace AM.DBService.Services.System
 
         /// <summary>
         /// 保存通用事件。
+        /// 这是所有使用事件落本地缓冲的统一收口点，负责补齐身份信息、应用版本、traceId 和默认上传状态。
         /// </summary>
         private Result SaveEvent(
             string eventType,
@@ -239,7 +260,7 @@ namespace AM.DBService.Services.System
 
         /// <summary>
         /// 确保缓冲表总量不超过上限。
-        /// 达到上限时直接清空旧数据，再重新开始暂存。
+        /// 当前策略是达到上限后直接清空旧数据，以保证程序运行期间新事件仍然能写入，不做更复杂的淘汰策略。
         /// </summary>
         private Result EnsureBufferCapacity()
         {
@@ -267,7 +288,8 @@ namespace AM.DBService.Services.System
         }
 
         /// <summary>
-        /// 更新上传状态。
+        /// 批量更新上传状态。
+        /// 当前会统一更新 UploadStatus、UploadTime、UploadMessage，并把 UploadRetryCount 加一。
         /// </summary>
         private Result UpdateUploadStatus(IEnumerable<int> ids, string status, string message)
         {
