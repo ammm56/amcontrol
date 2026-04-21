@@ -196,6 +196,12 @@ license.lic = response.data.licenseText
 - 当前时间 > `ExpiresAt` 且在宽限期内：宽限有效；
 - 超过宽限期：无效。
 
+时间展示与校验口径补充：
+
+1. `license.lic` 中的 `IssueTime`、`NotBefore`、`ExpiresAt` 按 UTC 语义参与内部校验；
+2. WinForms 许可证显示页面中，签发时间、生效时间、到期时间、校验时间统一转换为设备本地时间显示；
+3. 页面展示使用本地时间仅用于界面可读性，不改变内部授权有效期判断结果。
+
 ---
 
 ## 8. 校验失败时的处理策略

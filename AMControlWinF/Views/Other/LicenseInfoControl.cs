@@ -297,7 +297,23 @@ namespace AMControlWinF.Views.Other
 
         private static string FormatDateTime(DateTime? value, bool isEn)
         {
-            return value.HasValue ? value.Value.ToString("yyyy-MM-dd HH:mm:ss") : (isEn ? "N/A" : "未提供");
+            if (!value.HasValue)
+                return isEn ? "N/A" : "未提供";
+
+            DateTime displayTime = ToDisplayLocalTime(value.Value);
+            return displayTime.ToString("yyyy-MM-dd HH:mm:ss");
+        }
+
+        /// <summary>
+        /// 页面显示统一按本地时间输出。
+        /// 对 license 中带 Z 的 UTC 时间转成本地时间；本地生成的时间保持原样。
+        /// </summary>
+        private static DateTime ToDisplayLocalTime(DateTime value)
+        {
+            if (value.Kind == DateTimeKind.Utc)
+                return value.ToLocalTime();
+
+            return value;
         }
     }
 }
