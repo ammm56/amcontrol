@@ -43,16 +43,20 @@ namespace AM.DBService.Services.System
         /// </summary>
         public static string BuildHttpFailureMessage(string action, HttpStatusCode statusCode, string reasonPhrase, string errorCode, string message)
         {
-            string businessCode = string.IsNullOrWhiteSpace(errorCode) ? string.Empty : string.Format("，ErrorCode={0}", errorCode.Trim());
+            string normalizedErrorCode = string.IsNullOrWhiteSpace(errorCode) ? string.Empty : errorCode.Trim();
+            string businessCode = string.IsNullOrWhiteSpace(normalizedErrorCode) ? string.Empty : string.Format("，ErrorCode={0}", normalizedErrorCode);
             string businessMessage = string.IsNullOrWhiteSpace(message) ? string.Empty : string.Format("，Message={0}", message.Trim());
+            string localHint = ResolveLocalHint(normalizedErrorCode);
+            string localHintMessage = string.IsNullOrWhiteSpace(localHint) ? string.Empty : string.Format("，Hint={0}", localHint);
 
             return string.Format(
-                "{0}失败，HTTP {1} {2}{3}{4}",
+                "{0}失败，HTTP {1} {2}{3}{4}{5}",
                 action ?? "后端请求",
                 (int)statusCode,
                 string.IsNullOrWhiteSpace(reasonPhrase) ? string.Empty : reasonPhrase.Trim(),
                 businessCode,
-                businessMessage);
+                businessMessage,
+                localHintMessage);
         }
 
         /// <summary>
@@ -124,6 +128,33 @@ namespace AM.DBService.Services.System
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// 按后端错误码补充更细的本地联调提示。
+        /// 当前主要覆盖设备 AES-GCM 接入后最常见的三类对接错误。
+        /// </summary>
+        private static string ResolveLocalHint(string errorCode)
+        {
+            if (string.IsNullOrWhiteSpace(errorCode))
+            {
+                return string.Empty;
+            }
+
+            switch (errorCode.Trim().ToUpperInvariant())
+            {
+                case "DEVICE_ENVELOPE_DECRYPT_FAILED":
+                    return "设备密文信封解密失败，请优先核对 DeviceAppSecret、DeviceKeyVersion、AAD(appCode/deviceId/nonce/alg/keyVersion) 和 Base64Url 编码是否与后端完全一致";
+
+                case "DEVICE_NONCE_REPLAYED":
+                    return "设备请求 nonce 被判定重复，请确保每次 register、heartbeat、report 都重新生成 12 字节随机 nonce，不要重发旧密文信封";
+
+                case "DEVICE_APP_CODE_MISMATCH":
+                    return "设备请求 appCode 不一致，请统一 X-Device-AppCode、注册上下文和明文业务 DTO 中的 appCode 来源";
+
+                default:
+                    return string.Empty;
+            }
         }
     }
 }

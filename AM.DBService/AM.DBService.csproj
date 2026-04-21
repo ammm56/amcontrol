@@ -54,6 +54,9 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="BouncyCastle.Cryptography">
+      <HintPath>..\Libs\bouncycastle\461\BouncyCastle.Cryptography.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Libs\Newtonsoft.Json.dll</HintPath>
@@ -135,6 +138,7 @@
     <Compile Include="Services\System\DeviceHeartbeatClient.cs" />
     <Compile Include="Services\System\DeviceLicenseApplyClient.cs" />
     <Compile Include="Services\System\DeviceLicenseStatusClient.cs" />
+    <Compile Include="Services\System\DeviceRequestCryptoService.cs" />
     <Compile Include="Services\System\DeviceReportBufferService.cs" />
     <Compile Include="Services\System\DeviceRegisterClient.cs" />
     <Compile Include="Services\System\DeviceReportClient.cs" />

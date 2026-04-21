@@ -32,6 +32,20 @@ namespace AM.Model.Device
         public string DeviceType { get; set; } = string.Empty;
 
         /// <summary>
+        /// 设备应用编码。
+        /// 当前作为设备接入安全上下文的 appCode，同时会参与 AES-GCM 请求密钥派生与请求头 `X-Device-AppCode`。
+        /// </summary>
+        [JsonProperty("appCode")]
+        public string AppCode { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 设备编码。
+        /// 当前通常来自客户端身份中的 MachineCode，便于后端注册时直接结构化保存。
+        /// </summary>
+        [JsonProperty("machineCode")]
+        public string MachineCode { get; set; } = string.Empty;
+
+        /// <summary>
         /// 设备当前 IPv4 地址。
         /// 主要用于诊断与平台侧展示，采集失败时允许为空。
         /// </summary>

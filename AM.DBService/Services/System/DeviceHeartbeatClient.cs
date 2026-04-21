@@ -24,6 +24,12 @@ namespace AM.DBService.Services.System
         private readonly HttpClient _httpClient;
 
         /// <summary>
+        /// 设备请求加密服务。
+        /// 负责把明文心跳 DTO 封装成 AES-GCM 信封。
+        /// </summary>
+        private readonly DeviceRequestCryptoService _deviceRequestCryptoService;
+
+        /// <summary>
         /// 后端统一服务地址。
         /// 心跳接口路径在此基础上拼接 `/api/devices/{id}/heartbeat`。
         /// </summary>
@@ -50,6 +56,7 @@ namespace AM.DBService.Services.System
             _serviceUrl = GetDeviceServiceUrlFromConfig();
             _httpClient = new HttpClient();
             _httpClient.Timeout = TimeSpan.FromSeconds(15);
+            _deviceRequestCryptoService = new DeviceRequestCryptoService(reporter);
         }
 
         /// <summary>
@@ -93,10 +100,23 @@ namespace AM.DBService.Services.System
                     _serviceUrl.TrimEnd('/'),
                     Uri.EscapeDataString(setting.DeviceId));
 
+                Result<DeviceEncryptedRequestPackage> encryptedResult = _deviceRequestCryptoService.BuildHeartbeatPackage(setting.DeviceId, request);
+                if (!encryptedResult.Success || encryptedResult.Item == null)
+                {
+                    return Fail(encryptedResult.Code == 0 ? -1 : encryptedResult.Code, encryptedResult.Message);
+                }
+
+                DeviceEncryptedRequestPackage encryptedPackage = encryptedResult.Item;
+
                 using (var httpRequest = new HttpRequestMessage(HttpMethod.Post, requestUrl))
                 {
                     httpRequest.Headers.Add("X-Device-Token", setting.DeviceToken);
-                    httpRequest.Content = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
+                    httpRequest.Headers.Add("X-Device-AppCode", encryptedPackage.AppCode);
+                    httpRequest.Headers.Add("X-Device-Id", encryptedPackage.DeviceId);
+                    httpRequest.Headers.Add("X-Device-Nonce", encryptedPackage.Nonce);
+                    httpRequest.Headers.Add("X-Device-Alg", encryptedPackage.Algorithm);
+                    httpRequest.Headers.Add("X-Device-KeyVersion", encryptedPackage.KeyVersion);
+                    httpRequest.Content = new StringContent(JsonConvert.SerializeObject(encryptedPackage.Envelope), Encoding.UTF8, "application/json");
 
                     using (HttpResponseMessage httpResponse = await _httpClient.SendAsync(httpRequest).ConfigureAwait(false))
                     {

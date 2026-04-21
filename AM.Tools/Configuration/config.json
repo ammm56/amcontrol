@@ -18,7 +18,9 @@
 		"LicenseMachineModel": "default",
 		"DesktopAppVendor": "AM",
 		"DesktopAppTargetFramework": ".NET Framework 4.6.1",
-		"DesktopAppUiPlatform": "WinForms"
+		"DesktopAppUiPlatform": "WinForms",
+		"DeviceAppSecret": "amcontrolwinf-device-root-secret",
+		"DeviceKeyVersion": 1
 	},
 	"Sqlite": {
 		"Connection": "DataSource=./DB/Sqlite/amctl",

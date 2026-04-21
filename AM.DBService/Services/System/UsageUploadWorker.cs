@@ -513,7 +513,8 @@ namespace AM.DBService.Services.System
             if (!heartbeatResult.Success)
             {
                 LastError = heartbeatResult.Message;
-                if (IsTokenRelatedFailure(heartbeatResult.Message))
+                bool heartbeatNeedsSessionReset = IsTokenRelatedFailure(heartbeatResult.Message);
+                if (heartbeatNeedsSessionReset)
                 {
                     _deviceSessionReady = false;
                 }
@@ -521,7 +522,7 @@ namespace AM.DBService.Services.System
                 WarnLogOnlyIfRepeated(
                     "UsageUploadWorker.SendHeartbeatAsync",
                     heartbeatResult.Code,
-                    "设备心跳失败: " + heartbeatResult.Message,
+                    BuildRuntimeFailureLogMessage("设备心跳失败", heartbeatResult.Message, heartbeatNeedsSessionReset),
                     BackendFailureLogThrottleIntervalMs);
             }
 
@@ -529,7 +530,8 @@ namespace AM.DBService.Services.System
             if (!flushResult.Success)
             {
                 LastError = flushResult.Message;
-                if (IsTokenRelatedFailure(flushResult.Message))
+                bool reportNeedsSessionReset = IsTokenRelatedFailure(flushResult.Message);
+                if (reportNeedsSessionReset)
                 {
                     _deviceSessionReady = false;
                 }
@@ -537,7 +539,7 @@ namespace AM.DBService.Services.System
                 WarnLogOnlyIfRepeated(
                     "UsageUploadWorker.FlushDeviceReportsAsync",
                     flushResult.Code,
-                    "设备 report 上传失败: " + flushResult.Message,
+                    BuildRuntimeFailureLogMessage("设备 report 上传失败", flushResult.Message, reportNeedsSessionReset),
                     BackendFailureLogThrottleIntervalMs);
                 return;
             }
@@ -704,7 +706,8 @@ namespace AM.DBService.Services.System
         /// 这里本质上连接了“错误传播”与“会话恢复”两条线：
         /// 1. DeviceHeartbeatClient / DeviceReportClient / DeviceRegisterClient 在 HTTP 失败时，会把后端 errorCode 拼进 Result.Message；
         /// 2. UsageUploadWorker 不再关心底层响应对象，只基于这条统一消息判断是否属于 token/设备身份问题；
-        /// 3. 一旦命中，当前轮把 _deviceSessionReady 置为 false，下一轮重新走 EnsureDeviceSessionAsync 完成 refresh-token 或重新注册。
+        /// 3. 当前重点关注 `DEVICE_TOKEN_EXPIRED`、`DEVICE_TOKEN_REVOKED`、`DEVICE_TOKEN_INVALID` 三类明确令牌失效错误，以及其它 `DEVICE_TOKEN_*` 扩展错误；
+        /// 4. 一旦命中，当前轮把 _deviceSessionReady 置为 false，下一轮重新走 EnsureDeviceSessionAsync 完成 refresh-token 或重新注册。
         /// </summary>
         private static bool IsTokenRelatedFailure(string message)
         {
@@ -715,6 +718,21 @@ namespace AM.DBService.Services.System
 
             string text = message.ToUpperInvariant();
             return text.Contains("DEVICE_TOKEN_") || text.Contains("DEVICE_ID_MISMATCH");
+        }
+
+        /// <summary>
+        /// 构造设备运行态失败日志消息。
+        /// 当失败已明确属于 token 或设备身份失效时，额外补充“下轮重建设备会话”的语义，避免联调时只看到原始错误码却不知道本地恢复动作。
+        /// </summary>
+        private static string BuildRuntimeFailureLogMessage(string prefix, string message, bool needsSessionReset)
+        {
+            string baseMessage = string.Format("{0}: {1}", prefix ?? "后台设备链路失败", message ?? string.Empty);
+            if (!needsSessionReset)
+            {
+                return baseMessage;
+            }
+
+            return baseMessage + "；检测到设备 token 或设备身份已失效，当前已标记下轮重建设备会话";
         }
 
         /// <summary>

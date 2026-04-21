@@ -159,6 +159,25 @@ namespace AM.DBService.Services.System
         }
 
         /// <summary>
+        /// 获取设备接入共享应用密钥。
+        /// 当前用于 register、heartbeat、report 三个设备写接口的 HKDF 输入材料。
+        /// </summary>
+        public static string GetDeviceAppSecret()
+        {
+            return (GetSetting().DeviceAppSecret ?? string.Empty).Trim();
+        }
+
+        /// <summary>
+        /// 获取设备接入密钥版本。
+        /// 当前会写入 `X-Device-KeyVersion` 请求头，并参与 AAD 拼接。
+        /// </summary>
+        public static int GetDeviceKeyVersion()
+        {
+            int value = GetSetting().DeviceKeyVersion;
+            return value <= 0 ? 1 : value;
+        }
+
+        /// <summary>
         /// 获取本地 license 验签公钥文件路径。
         /// 该路径只服务于本地 license.lic 验签，不参与任何设备管理接口请求。
         /// </summary>

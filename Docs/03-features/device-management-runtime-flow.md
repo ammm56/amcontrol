@@ -1,7 +1,7 @@
 # 设备管理后台链路实现说明
 
 **文档编号**：FEAT-DEVICE-002  
-**版本**：1.0.0  
+**版本**：1.1.0  
 **状态**：已实现  
 **最后更新**：2026-04-21  
 **维护人**：Am
@@ -22,8 +22,15 @@
 - 每条链路的入口类、入口方法和触发时机；
 - 请求体中各字段的来源；
 - 成功与失败返回如何被本地处理；
-- 本地如何缓存 `DeviceId`、`DeviceToken` 和待上传数据；
+- 本地如何缓存 `DeviceId`、长期 `DeviceToken`、`DeviceAppSecret` 和待上传数据；
 - 后续排查问题时应优先看哪些类和方法。
+
+当前实现已经按最新后端协议切换为：
+
+1. `register`：`AES-GCM envelope`，不携带 `X-Device-Token`；
+2. `heartbeat`：`X-Device-Token + AES-GCM envelope`；
+3. `report`：`X-Device-Token + AES-GCM envelope`；
+4. `refresh-token`：继续只带 `X-Device-Token`，不走 AES-GCM。
 
 ---
 
@@ -36,6 +43,7 @@
 - `AM.DBService/Services/System/DeviceRegisterClient.cs`
 - `AM.DBService/Services/System/DeviceHeartbeatClient.cs`
 - `AM.DBService/Services/System/DeviceReportClient.cs`
+- `AM.DBService/Services/System/DeviceRequestCryptoService.cs`
 - `AM.DBService/Services/System/UsageReportService.cs`
 - `AM.DBService/Services/System/UsageEventBufferService.cs`
 - `AM.DBService/Services/System/DeviceReportBufferService.cs`
@@ -54,7 +62,7 @@
 
 ## 3. 启动到上报的总时序
 
-当前三条链路统一由 `UsageUploadWorker` 调度。
+当前三条链路统一由 `UsageUploadWorker` 调度，设备写请求的加密封装统一由 `DeviceRequestCryptoService` 处理。
 
 启动总入口：
 
@@ -72,6 +80,7 @@ sequenceDiagram
     participant Identity as ClientIdentityService
     participant Register as DeviceRegisterClient
     participant Heartbeat as DeviceHeartbeatClient
+    participant Crypto as DeviceRequestCryptoService
     participant Usage as UsageReportService
     participant UsageBuf as UsageEventBufferService
     participant ReportBuf as DeviceReportBufferService
@@ -97,6 +106,8 @@ sequenceDiagram
                 Worker->>UsageBuf: QueryPending(BatchSize)
                 Worker->>Usage: UploadBatchAsync(events)
                 Usage->>Report: ReportAsync(DeviceReportRequest)
+                Report->>Crypto: BuildReportPackage(request)
+                Crypto->>Backend: 生成 AES-GCM envelope + 安全头
                 Report->>Backend: POST /api/devices/{id}/report
                 alt 全部成功
                     Worker->>UsageBuf: MarkUploaded(ids)
@@ -112,10 +123,14 @@ sequenceDiagram
             Worker->>Worker: EnsureDeviceSessionAsync()
             alt 当前会话可用
                 Worker->>Heartbeat: SendHeartbeatAsync(statusJson)
+                Heartbeat->>Crypto: BuildHeartbeatPackage(request)
+                Crypto->>Backend: 生成 AES-GCM envelope + 安全头
                 Heartbeat->>Backend: POST /api/devices/{id}/heartbeat
                 Worker->>ReportBuf: DequeueBatch(20)
                 loop 逐条发送结构化 report
                     Worker->>Report: ReportAsync(DeviceReportRequest)
+                    Report->>Crypto: BuildReportPackage(request)
+                    Crypto->>Backend: 生成 AES-GCM envelope + 安全头
                     Report->>Backend: POST /api/devices/{id}/report
                     alt 某条失败
                         Worker->>ReportBuf: EnqueueMany(剩余未发送项)
@@ -169,6 +184,29 @@ sequenceDiagram
 2. 若已到使用事件上传时间，则执行 `ExecuteUsageUploadOnceAsync()`；
 3. 若已到设备心跳时间，则执行 `ExecuteDeviceRuntimeOnceAsync()`。
 
+### 4.5 当前密码学实现口径
+
+当前客户端实现已经明确切换到 BouncyCastle 版 `HKDF + AES-GCM`，不再使用此前的自实现或平台专有加密路径。
+
+当前实现位置：
+
+1. `AM.DBService/Services/System/DeviceRequestCryptoService.cs`
+2. `AM.DBService/AM.DBService.csproj` 中引用 `Libs/bouncycastle/461/BouncyCastle.Cryptography.dll`
+
+当前关键实现口径：
+
+1. HKDF：使用 `HkdfBytesGenerator(new Sha256Digest())`
+2. AES-GCM：使用 `GcmBlockCipher(new AesEngine())`
+3. 随机数：使用 `SecureRandom`
+4. tag 长度：固定 16 字节，即 128 bit
+5. nonce 长度：固定 12 字节
+
+这样文档和当前客户端代码保持一致：
+
+1. 协议口径仍然是后端文档定义的 `HKDF-SHA256 + AES-256-GCM`
+2. 具体实现库则明确为 BouncyCastle
+3. 后续如果联调出现 `DEVICE_ENVELOPE_DECRYPT_FAILED`，优先排查 AAD、Base64Url、appSecret、keyVersion 和 appCode/deviceId 是否一致，而不是先怀疑客户端使用了不同算法族
+
 ---
 
 ## 5. 设备注册链路
@@ -196,11 +234,19 @@ sequenceDiagram
 
 客户端实现类：`DeviceRegisterClient`
 
+加密封装实现类：`DeviceRequestCryptoService`
+
 请求信息：
 
 1. URL：`POST /api/devices/register`
-2. Header：仅 `Content-Type: application/json`
+2. Header：
+    - `X-Device-AppCode`
+    - `X-Device-Id`
+    - `X-Device-Nonce`
+    - `X-Device-Alg=A256GCM`
+    - `X-Device-KeyVersion`
 3. 超时：15 秒
+4. Body：`DeviceEncryptedEnvelope { ciphertext, tag }`
 
 请求体模型：`DeviceRegisterRequest`
 
@@ -209,11 +255,22 @@ sequenceDiagram
 | `deviceId` | `Setting.DeviceId` > `identity.MachineCode` > `identity.ClientId` | 后续设备管理接口路径标识 |
 | `name` | `identity.MachineName` 或 `Environment.MachineName` | 设备或软件实例名称 |
 | `deviceType` | 固定值 `amcontrol` | 当前客户端类型标识 |
+| `appCode` | `identity.AppCode` 或 `DesktopAppCode` | 设备接入安全上下文 |
+| `machineCode` | `SysClientIdentityEntity.MachineCode` | 设备编码 |
 | `ipAddress` | 本机首个可用 IPv4 | 仅用于诊断与展示 |
 | `extra.clientId` | `SysClientIdentityEntity.ClientId` | 客户端实例标识 |
 | `extra.machineCode` | `SysClientIdentityEntity.MachineCode` | 设备编码 |
 | `extra.machineName` | 当前设备名称 | 与 `name` 一致 |
 | `extra.appCode` | `identity.AppCode` 或 `DesktopAppCode` | 应用编码 |
+| `extra.siteCode` | `LicenseSiteCode` | 站点辅助定位 |
+
+注册加密上下文来源：
+
+1. `appSecret`：`BackendServiceConfigHelper.GetDeviceAppSecret()`；
+2. `keyVersion`：`BackendServiceConfigHelper.GetDeviceKeyVersion()`；
+3. `nonce`：每次请求随机生成 12 字节；
+4. `AAD`：`appCode + "\n" + deviceId + "\n" + nonce + "\n" + alg + "\n" + keyVersion`；
+5. `requestKey`：`HKDF-SHA256(appSecret, appCode, "autoinboomgate:device-request:v1:{deviceId}")`。
 
 ### 5.4 注册返回与本地处理
 
@@ -245,7 +302,8 @@ sequenceDiagram
 1. URL：`POST /api/devices/{id}/refresh-token`
 2. Header：`X-Device-Token`
 3. 返回模型：`DeviceApiResponse<DeviceTokenRefreshResponse>`
-4. 成功后同样把新的 `DeviceToken` 回写 config.json。
+4. 首版 refresh-token 不走 AES-GCM；
+5. 成功后同样把新的长期 `DeviceToken` 回写 config.json。
 
 ---
 
@@ -268,9 +326,16 @@ sequenceDiagram
 请求信息：
 
 1. URL：`POST /api/devices/{id}/heartbeat`
-2. Header：`X-Device-Token`
+2. Header：
+    - `X-Device-Token`
+    - `X-Device-AppCode`
+    - `X-Device-Id`
+    - `X-Device-Nonce`
+    - `X-Device-Alg=A256GCM`
+    - `X-Device-KeyVersion`
 3. 请求体模型：`DeviceHeartbeatRequest`
 4. 请求体唯一字段：`statusJson`
+5. 实际 HTTP body：先将 `DeviceHeartbeatRequest` 序列化为明文 JSON，再封装成 `DeviceEncryptedEnvelope`
 
 ### 6.3 statusJson 组成
 
@@ -303,9 +368,10 @@ sequenceDiagram
 
 失败后的特殊处理：
 
-1. 若失败消息中包含 `DEVICE_TOKEN_` 或 `DEVICE_ID_MISMATCH`；
+1. 若失败消息中包含 `DEVICE_TOKEN_EXPIRED`、`DEVICE_TOKEN_REVOKED`、`DEVICE_TOKEN_INVALID`、其它 `DEVICE_TOKEN_*` 或 `DEVICE_ID_MISMATCH`；
 2. `UsageUploadWorker` 会把 `_deviceSessionReady` 重新置为 `false`；
-3. 下一轮再走 token 刷新或重新注册。
+3. 节流日志会明确标记“当前设备 token 已失效，将在下轮重建设备会话”；
+4. 下一轮再走 token 刷新或重新注册。
 
 ---
 
@@ -323,6 +389,10 @@ sequenceDiagram
 统一客户端实现：
 
 - `DeviceReportClient.ReportAsync(DeviceReportRequest request)`
+
+加密封装实现：
+
+- `DeviceRequestCryptoService.BuildReportPackage()`
 
 ### 7.1 使用事件上报
 
@@ -427,7 +497,8 @@ sequenceDiagram
 1. HTTP 状态非成功，判定失败；
 2. 返回 JSON 无法解析，判定失败；
 3. `DeviceApiResponse.success == false`，判定失败；
-4. 成功时不再额外处理返回 `data`，只记成功消息。
+4. 成功时不再额外处理返回 `data`，只记成功消息；
+5. 实际发送前统一先做 AES-GCM envelope 封装，再附加安全头与长期 `DeviceToken`。
 
 ---
 
@@ -451,10 +522,19 @@ sequenceDiagram
 当前两者都保存在 `ConfigContext.Instance.Config.Setting` 中：
 
 1. `DeviceId`：设备管理接口中的设备路径标识；
-2. `DeviceToken`：设备管理接口中的鉴权 token；
+2. `DeviceToken`：设备管理接口中的长期鉴权 token；
 3. 注册与刷新 token 成功后都会重新写回 `config.json`。
 
-### 8.4 _deviceSessionReady
+### 8.4 DeviceAppSecret / DeviceKeyVersion
+
+设备写接口的加密配置当前同样保存在 `ConfigContext.Instance.Config.Setting` 中：
+
+1. `DeviceAppSecret`：设备端与后端共享的应用密钥明文；
+2. `DeviceKeyVersion`：当前应用密钥版本；
+3. 两者由 `BackendServiceConfigHelper` 统一读取；
+4. register、heartbeat、report 的 AES-GCM 请求封装都依赖这两个值。
+
+### 8.5 _deviceSessionReady
 
 `_deviceSessionReady` 是 `UsageUploadWorker` 的内存态标记，不会持久化。它的含义是：
 
@@ -481,7 +561,8 @@ sequenceDiagram
 
 1. 刷新失败时，当前实现会回退到重新注册；
 2. 注册失败时，由下一轮周期再尝试；
-3. 不做本轮多次立即重试。
+3. 对明确的 `DEVICE_TOKEN_EXPIRED`、`DEVICE_TOKEN_REVOKED`、`DEVICE_TOKEN_INVALID` 会在日志中标记为“令牌已失效，需要重建设备会话”；
+4. 不做本轮多次立即重试。
 
 ### 9.3 使用事件上报
 
@@ -543,6 +624,7 @@ sequenceDiagram
 |------|------|----------|
 | 后台工作单元注册 | `AM.App/Bootstrap/AppBootstrap.cs` | `Initialize()` |
 | 后台统一调度 | `AM.DBService/Services/System/UsageUploadWorker.cs` | `Start` / `ExecuteCycleAsync` / `EnsureDeviceSessionAsync` |
+| 设备写请求加密封装 | `AM.DBService/Services/System/DeviceRequestCryptoService.cs` | `BuildRegisterPackage` / `BuildHeartbeatPackage` / `BuildReportPackage` |
 | 设备注册 | `AM.DBService/Services/System/DeviceRegisterClient.cs` | `RegisterCurrentDeviceAsync` / `RegisterAsync` / `RefreshTokenAsync` |
 | 设备心跳 | `AM.DBService/Services/System/DeviceHeartbeatClient.cs` | `SendHeartbeatAsync` |
 | report HTTP 上报 | `AM.DBService/Services/System/DeviceReportClient.cs` | `ReportAsync` |
