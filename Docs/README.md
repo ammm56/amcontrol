@@ -49,6 +49,7 @@
 - **license.lic 读取与校验流程** → [03-features/license-file-validation-flow.md](03-features/license-file-validation-flow.md)
 - **运行时上下文与页面过滤接入** → [03-features/license-runtime-integration.md](03-features/license-runtime-integration.md)
 - **设备软件授权申请与设备上报** → [03-features/device-license-and-reporting.md](03-features/device-license-and-reporting.md)
+- **本地 Native 安全模块规划** → [03-features/native-secure-runtime-design.md](03-features/native-secure-runtime-design.md)
 - **开发进展记录** → [07-release-notes/winf-development-progress.md](07-release-notes/winf-development-progress.md)
 - **WinForms 页面操作手册** → [06-user-manual/winf-page-operation-manual.md](06-user-manual/winf-page-operation-manual.md)
 
