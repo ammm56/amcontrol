@@ -214,8 +214,7 @@ namespace AM.PageModel.Plc
 
             try
             {
-                return Task.Run(async () =>
-                    await SystemContext.Instance.RuntimeTaskManager.StopAsync("PlcScanWorker"))
+                return SystemContext.Instance.RuntimeTaskManager.StopAsync("PlcScanWorker")
                     .GetAwaiter()
                     .GetResult();
             }
