@@ -17,7 +17,7 @@ namespace AM.Tests.License
                 Setting = new Setting
                 {
                     DesktopAppEdition = LicenseConstants.DeveloperAppEdition,
-                    LicenseCustomerCode = "CUS-10001",
+                    LicenseCustomerCode = "AM-10001",
                     LicenseSiteCode = "SZ01",
                     LicenseMachineModel = "AM-STD-01"
                 }
@@ -43,11 +43,12 @@ namespace AM.Tests.License
                 Software = new DeviceLicenseSoftware
                 {
                     AppEdition = LicenseConstants.DeveloperAppEdition,
-                    AppVersion = AM.Tools.Tools.GetAppVersionText()
+                    MinAppVersion = "0.0.1",
+                    MaxAppVersion = "0.0.1"
                 },
                 GrantScope = new DeviceLicenseGrantScope
                 {
-                    CustomerCode = "CUS-10001",
+                    CustomerCode = "AM-10001",
                     SiteCode = "SZ01",
                     MachineModel = "AM-STD-01"
                 },
@@ -70,6 +71,42 @@ namespace AM.Tests.License
         }
 
         [Test]
+        public void Validate_WhenDeveloperLicenseVersionFallsWithinConfiguredRange_ShouldPass()
+        {
+            var validator = new LicenseValidator(
+                new StubHardwareInfoCollector(new DeviceHardwareInfo
+                {
+                    MachineModel = "WRONG-MODEL"
+                }),
+                new StubLicenseCryptoService(),
+                null);
+
+            var license = new DeviceLicense
+            {
+                Software = new DeviceLicenseSoftware
+                {
+                    AppEdition = LicenseConstants.DeveloperAppEdition,
+                    MinAppVersion = "0.0.1",
+                    MaxAppVersion = "0.0.1"
+                },
+                GrantScope = new DeviceLicenseGrantScope
+                {
+                    CustomerCode = "AM-10001",
+                    SiteCode = "SZ01",
+                    MachineModel = "AM-STD-01"
+                },
+                Validity = new DeviceLicenseValidity()
+            };
+
+            Result<LicenseValidationResult> result = validator.Validate(license, "{}");
+
+            Assert.That(result.Success, Is.True);
+            Assert.That(result.Item, Is.Not.Null);
+            Assert.That(result.Item.Success, Is.True);
+            Assert.That(result.Item.ErrorCode, Is.Empty);
+        }
+
+        [Test]
         public void Validate_WhenDeveloperLicenseScopeMismatches_ShouldFailWithDeveloperScopeCode()
         {
             var validator = new LicenseValidator(
@@ -85,7 +122,45 @@ namespace AM.Tests.License
                 Software = new DeviceLicenseSoftware
                 {
                     AppEdition = LicenseConstants.DeveloperAppEdition,
-                    AppVersion = "9.9.9"
+                    MinAppVersion = "9.9.9",
+                    MaxAppVersion = "10.0.0"
+                },
+                GrantScope = new DeviceLicenseGrantScope
+                {
+                    CustomerCode = "AM-10001",
+                    SiteCode = "SZ01",
+                    MachineModel = "AM-STD-01"
+                },
+                Validity = new DeviceLicenseValidity()
+            };
+
+            Result<LicenseValidationResult> result = validator.Validate(license, "{}");
+
+            Assert.That(result.Success, Is.True);
+            Assert.That(result.Item, Is.Not.Null);
+            Assert.That(result.Item.Success, Is.False);
+            Assert.That(result.Item.ErrorCode, Is.EqualTo("LICENSE_APP_VERSION_OUT_OF_RANGE"));
+            Assert.That(result.Item.Message, Is.EqualTo("授权版本不在许可范围内: AppVersion"));
+        }
+
+        [Test]
+        public void Validate_WhenDeveloperLicenseVersionFallsOutsideConfiguredRange_ShouldFailWithDeveloperScopeCode()
+        {
+            var validator = new LicenseValidator(
+                new StubHardwareInfoCollector(new DeviceHardwareInfo
+                {
+                    MachineModel = "AM-STD-01"
+                }),
+                new StubLicenseCryptoService(),
+                null);
+
+            var license = new DeviceLicense
+            {
+                Software = new DeviceLicenseSoftware
+                {
+                    AppEdition = LicenseConstants.DeveloperAppEdition,
+                    MinAppVersion = "0.0.3",
+                    MaxAppVersion = "0.0.5"
                 },
                 GrantScope = new DeviceLicenseGrantScope
                 {
@@ -101,19 +176,19 @@ namespace AM.Tests.License
             Assert.That(result.Success, Is.True);
             Assert.That(result.Item, Is.Not.Null);
             Assert.That(result.Item.Success, Is.False);
-            Assert.That(result.Item.ErrorCode, Is.EqualTo("LICENSE_DEVELOPER_SCOPE_MISMATCH"));
-            Assert.That(result.Item.Message, Is.EqualTo("开发版授权字段不匹配: AppVersion"));
+            Assert.That(result.Item.ErrorCode, Is.EqualTo("LICENSE_APP_VERSION_OUT_OF_RANGE"));
+            Assert.That(result.Item.Message, Is.EqualTo("授权版本不在许可范围内: AppVersion"));
         }
 
         [Test]
-        public void Validate_WhenNonDeveloperLicenseHardwareMismatches_ShouldKeepOriginalHardwareValidation()
+        public void Validate_WhenNonDeveloperLicenseVersionFallsOutsideConfiguredRange_ShouldFailBeforeHardwareValidation()
         {
             ConfigContext.Instance.Initialize(new Config
             {
                 Setting = new Setting
                 {
                     DesktopAppEdition = "Professional",
-                    LicenseCustomerCode = "CUS-10001",
+                    LicenseCustomerCode = "AM-10001",
                     LicenseSiteCode = "SZ01",
                     LicenseMachineModel = "AM-STD-01"
                 }
@@ -134,7 +209,58 @@ namespace AM.Tests.License
                 Software = new DeviceLicenseSoftware
                 {
                     AppEdition = "Professional",
-                    AppVersion = AM.Tools.Tools.GetAppVersionText()
+                    MinAppVersion = "9.9.9",
+                    MaxAppVersion = "10.0.0"
+                },
+                DeviceBinding = new DeviceLicenseBinding
+                {
+                    ClientId = "client-001",
+                    MachineCode = "machine-001",
+                    CpuId = "cpu-001"
+                },
+                Validity = new DeviceLicenseValidity()
+            };
+
+            Result<LicenseValidationResult> result = validator.Validate(license, "{}");
+
+            Assert.That(result.Success, Is.True);
+            Assert.That(result.Item, Is.Not.Null);
+            Assert.That(result.Item.Success, Is.False);
+            Assert.That(result.Item.ErrorCode, Is.EqualTo("LICENSE_APP_VERSION_OUT_OF_RANGE"));
+            Assert.That(result.Item.Message, Is.EqualTo("授权版本不在许可范围内: AppVersion"));
+        }
+
+        [Test]
+        public void Validate_WhenNonDeveloperLicenseHardwareMismatches_ShouldKeepOriginalHardwareValidationAfterVersionPasses()
+        {
+            ConfigContext.Instance.Initialize(new Config
+            {
+                Setting = new Setting
+                {
+                    DesktopAppEdition = "Professional",
+                    LicenseCustomerCode = "AM-10001",
+                    LicenseSiteCode = "SZ01",
+                    LicenseMachineModel = "AM-STD-01"
+                }
+            });
+
+            var validator = new LicenseValidator(
+                new StubHardwareInfoCollector(new DeviceHardwareInfo
+                {
+                    ClientId = "client-002",
+                    MachineCode = "machine-002",
+                    CpuId = "cpu-002"
+                }),
+                new StubLicenseCryptoService(),
+                null);
+
+            var license = new DeviceLicense
+            {
+                Software = new DeviceLicenseSoftware
+                {
+                    AppEdition = "Professional",
+                    MinAppVersion = "0.0.1",
+                    MaxAppVersion = "0.0.5"
                 },
                 DeviceBinding = new DeviceLicenseBinding
                 {

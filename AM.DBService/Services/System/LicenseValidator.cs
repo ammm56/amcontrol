@@ -86,6 +86,15 @@ namespace AM.DBService.Services.System
                     return OkLogOnly(validation, validation.Message);
                 }
 
+                string runtimeAppVersion = NormalizeText(AM.Tools.Tools.GetAppVersionText());
+                if (!ValidateLicenseAppVersion(license == null ? null : license.Software, runtimeAppVersion, out string versionMessage))
+                {
+                    validation.Success = false;
+                    validation.ErrorCode = "LICENSE_APP_VERSION_OUT_OF_RANGE";
+                    validation.Message = versionMessage;
+                    return OkLogOnly(validation, validation.Message);
+                }
+
                 bool isDeveloperLicense = IsDeveloperEdition(license);
                 if (isDeveloperLicense)
                 {
@@ -189,15 +198,9 @@ namespace AM.DBService.Services.System
             DeviceLicenseSoftware software = license == null ? null : license.Software;
             DeviceLicenseGrantScope grantScope = license == null ? null : license.GrantScope;
 
-            string runtimeAppVersion = NormalizeText(AM.Tools.Tools.GetAppVersionText());
             string configuredAppEdition = NormalizeText(BackendServiceConfigHelper.GetDesktopAppEdition());
             string configuredCustomerCode = NormalizeText(BackendServiceConfigHelper.GetLicenseCustomerCode());
             string configuredSiteCode = NormalizeText(BackendServiceConfigHelper.GetLicenseSiteCode());
-
-            if (!ValidateDeveloperField("AppVersion", software == null ? string.Empty : software.AppVersion, runtimeAppVersion, out message))
-            {
-                return false;
-            }
 
             if (!ValidateDeveloperField("AppEdition", software == null ? string.Empty : software.AppEdition, configuredAppEdition, out message))
             {
@@ -227,6 +230,70 @@ namespace AM.DBService.Services.System
             }
 
             message = "开发版授权范围匹配通过";
+            return true;
+        }
+
+        /// <summary>
+        /// 校验授权的软件版本范围。
+        /// 当前所有授权版型统一要求 license 下发 min/max 版本范围，本地不再回退旧的 AppVersion 单值匹配。
+        /// </summary>
+        private static bool ValidateLicenseAppVersion(DeviceLicenseSoftware software, string runtimeAppVersion, out string message)
+        {
+            string minAppVersion = NormalizeText(software == null ? string.Empty : software.MinAppVersion);
+            string maxAppVersion = NormalizeText(software == null ? string.Empty : software.MaxAppVersion);
+
+            if (string.IsNullOrWhiteSpace(runtimeAppVersion))
+            {
+                message = "程序当前缺少匹配字段: AppVersion";
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(minAppVersion))
+            {
+                message = "授权缺少版本范围字段: MinAppVersion";
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(maxAppVersion))
+            {
+                message = "授权缺少版本范围字段: MaxAppVersion";
+                return false;
+            }
+
+            Version runtimeVersion;
+            if (!Version.TryParse(runtimeAppVersion, out runtimeVersion))
+            {
+                message = "程序当前版本格式无效: AppVersion";
+                return false;
+            }
+
+            Version minVersion = new Version(0, 0);
+            if (!Version.TryParse(minAppVersion, out minVersion))
+            {
+                message = "授权版本范围字段格式无效: MinAppVersion";
+                return false;
+            }
+
+            Version maxVersion = new Version(int.MaxValue, int.MaxValue);
+            if (!Version.TryParse(maxAppVersion, out maxVersion))
+            {
+                message = "授权版本范围字段格式无效: MaxAppVersion";
+                return false;
+            }
+
+            if (runtimeVersion.CompareTo(minVersion) < 0)
+            {
+                message = "授权版本不在许可范围内: AppVersion";
+                return false;
+            }
+
+            if (runtimeVersion.CompareTo(maxVersion) > 0)
+            {
+                message = "授权版本不在许可范围内: AppVersion";
+                return false;
+            }
+
+            message = string.Empty;
             return true;
         }
 

@@ -103,10 +103,12 @@ license.lic = response.data.licenseText
 职责：
 
 1. 校验 JSON 是否完整；
-2. 校验硬件绑定信息是否与当前设备一致；
-3. 校验当前时间是否在有效期内；
-4. 判断是否进入宽限期；
-5. 输出最终许可状态。
+2. 对所有授权版型统一按 `software.minAppVersion` / `software.maxAppVersion` 做当前程序版本区间校验；
+3. license 未下发任一版本范围字段时，直接判定授权无效；
+4. 校验硬件绑定信息是否与当前设备一致；
+5. 校验当前时间是否在有效期内；
+6. 判断是否进入宽限期；
+7. 输出最终许可状态。
 
 ### 4.4 HardwareInfoCollector
 

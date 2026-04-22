@@ -142,11 +142,19 @@
 1. `requestId`：必填，设备重试时必须保持不变；
 2. `software.appCode`：必填，是模板匹配主键之一；
 3. `software.appEdition`：建议传，用于匹配默认模板；
-4. `software.appVersion`：建议稳定传递，避免格式混乱；
+4. `software.appVersion`：建议稳定传递，作为后端判断模板 `minAppVersion` / `maxAppVersion` 是否命中的当前运行版本；
 5. `device.clientId`：必填，是设备软件实例唯一标识；
 6. `device.machineModel`：建议传，用于模板匹配；
 7. `environment.customerCode` / `siteCode`：建议传，用于模板匹配；
 8. `signature.contentSha256`：当前阶段可先按最小闭环透传摘要值。
+
+授权版本口径补充：
+
+1. license 明文中的 `software.minAppVersion` / `software.maxAppVersion` 用于描述允许的软件版本区间；
+2. 设备侧运行时版本取自 `AM.Tools.Tools.GetAppVersionText()`，当前格式为 `major.minor.build`；
+3. 所有授权版型统一按 `[minAppVersion, maxAppVersion]` 闭区间判断当前程序版本是否命中；
+4. 后端签发的 `licenseText.software` 应只下发 `minAppVersion` / `maxAppVersion` 作为授权版本约束，不再下发用于授权判定的单值 `appVersion`；
+5. 设备侧不再回退旧的 `software.appVersion` 精确匹配；缺失 `minAppVersion` 或 `maxAppVersion` 时直接判定授权无效。
 
 ### requestId 规则
 
@@ -198,6 +206,12 @@
 - `success = true`
 - 含 `licenseText`
 - 授权记录状态为 `Issued`
+
+模板命中后的签发口径：
+
+1. 后端用设备申请中的 `software.appVersion` 与模板 `minAppVersion` / `maxAppVersion` 做范围匹配；
+2. 命中后写入 `licenseText.software.minAppVersion` / `licenseText.software.maxAppVersion`；
+3. 签发结果不再写入用于授权判定的单值 `licenseText.software.appVersion`。
 
 ### 模板未命中时
 

@@ -48,7 +48,7 @@
 2. 预配置程序对应的全部页面目录；
 3. 预配置默认授权模板；
 4. 处理授权申请；
-5. 按程序分类 / 程序编码 / 程序名称 / 版本匹配授权模板；
+5. 按程序分类 / 程序编码 / 程序名称 / 当前运行版本是否命中模板 `minAppVersion` / `maxAppVersion` 范围匹配授权模板；
 6. 生成授权数据；
 7. 返回授权数据给设备侧。
 
@@ -125,7 +125,7 @@
 | `appCode` | 是 | 程序编码，如 `AMControlWinF` |
 | `appName` | 是 | 程序名称 |
 | `appEdition` | 否 | 版型，如 `Standard` / `Professional` / `Enterprise` |
-| `appVersion` | 是 | 程序版本 |
+| `appVersion` | 是 | 当前设备运行版本，供后端判断是否命中模板版本范围 |
 | `targetFramework` | 否 | 目标框架 |
 | `uiPlatform` | 否 | UI 类型，如 `WinForms` |
 | `vendor` | 否 | 软件厂商 |
@@ -177,7 +177,8 @@
     "appCode": "AMControlWinF",
     "appName": "AM Motion Control",
     "appEdition": "Professional",
-    "appVersion": "1.2.3"
+    "minAppVersion": "1.2.0",
+    "maxAppVersion": "1.2.9"
   },
   "deviceBinding": {
     "clientId": "A1B2C3D4E5F60718293A4B5C",
@@ -246,6 +247,38 @@
 5. `authorization.pageKeys`
 6. `deviceBinding.*`
 
+授权版本补充规则：
+
+1. 所有授权版型统一要求 license 下发 `software.minAppVersion` / `software.maxAppVersion`，设备侧按当前程序版本是否落在该闭区间内判断授权是否有效；
+2. 设备侧不再回退为 `software.appVersion` 精确匹配；任一范围字段缺失都视为授权数据不完整；
+3. 当前版本比较使用标准 `Version` 语义，适配 `0.0.2` 这类 `major.minor.build` 格式。
+
+### 4.3 默认授权模板版本范围示例
+
+后端默认授权模板数据应直接保存版本范围，不再保存用于授权判定的单值 `appVersion`。建议模板至少表达如下口径：
+
+```json
+{
+  "appCode": "AMControlWinF",
+  "appEdition": "Professional",
+  "customerCode": "CUS-10001",
+  "siteCode": "SZ01",
+  "machineModel": "AM-STD-01",
+  "minAppVersion": "1.2.0",
+  "maxAppVersion": "1.2.9",
+  "licenseType": "TimeLimited",
+  "graceDays": 7,
+  "moduleKeys": ["Home", "Motion", "PLC"],
+  "pageKeys": ["Home.Overview", "Motion.DI", "Motion.Monitor", "PLC.Monitor"]
+}
+```
+
+模板版本匹配规则：
+
+1. 后端使用设备申请中的 `software.appVersion` 判断当前请求是否落在模板 `[minAppVersion, maxAppVersion]` 闭区间内；
+2. 模板命中后，签发到 `licenseText.software` 的版本字段也应为 `minAppVersion` / `maxAppVersion`；
+3. 模板与签发结果都不再使用单值 `appVersion` 作为授权有效性的判断依据。
+
 ---
 
 ## 5. 后端授权服务处理流程
@@ -260,10 +293,10 @@
 2. 提取软件信息：`appCategory`、`appCode`、`appName`、`appVersion`；
 3. 根据 `appCode` 查询程序主数据；
 4. 根据程序主数据查询该程序全部页面目录；
-5. 根据程序分类、程序名称、版本、客户、站点等信息匹配默认授权模板；
+5. 根据程序分类、程序名称、客户、站点等信息筛选模板，再用当前 `appVersion` 判断是否命中模板 `minAppVersion` / `maxAppVersion` 范围；
 6. 若查不到默认授权模板，则返回“待授权”；
 7. 若查到默认授权模板，则生成许可明文 JSON；
-8. 将有效期、设备绑定信息、授权模块、授权页面写入许可明文 JSON；
+8. 将模板中的 `minAppVersion` / `maxAppVersion`、有效期、设备绑定信息、授权模块、授权页面写入许可明文 JSON；
 9. 对许可明文 JSON 执行 RSA 签名；
 10. 对签名后的授权数据执行加密；
 11. 返回加密授权数据给设备侧。

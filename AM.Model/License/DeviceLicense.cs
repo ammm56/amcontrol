@@ -74,9 +74,23 @@ namespace AM.Model.License
         public string AppEdition { get; set; } = string.Empty;
 
         public string AppVersion { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 允许的最小软件版本。
+        /// Developer 版授权当前优先按 [MinAppVersion, MaxAppVersion] 范围校验；为空时再回退旧的 AppVersion 单值匹配。
+        /// </summary>
+        public string MinAppVersion { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 允许的最大软件版本。
+        /// 许可允许的最小软件版本。
+        /// 当前所有授权版型统一按 [MinAppVersion, MaxAppVersion] 闭区间校验运行时版本。
+        /// </summary>
+        public string MaxAppVersion { get; set; } = string.Empty;
     }
 
-    /// <summary>
+        /// 许可允许的最大软件版本。
+        /// 当前所有授权版型统一按 [MinAppVersion, MaxAppVersion] 闭区间校验运行时版本。
     /// License 中按业务范围控制的授权范围。
     /// 开发版当前不再按硬件强绑定校验，而是匹配这里的客户、站点和设备型号。
     /// </summary>
