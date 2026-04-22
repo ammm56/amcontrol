@@ -105,7 +105,7 @@ namespace ProtocolLib.CommonLib.Common
             return BitConverter.ToDouble(ByteTransDataFormat8(tmp), 0);
         }
 
-        public virtual string bytes2String(byte[] buffer, int index, int length, Encoding encoding)
+        public override string bytes2String(byte[] buffer, int index, int length, Encoding encoding)
         {
             byte[] tmp = bytes2Byte(buffer, index, length);
             if (IsStringReverseByteWord)
@@ -114,7 +114,7 @@ namespace ProtocolLib.CommonLib.Common
                 return encoding.GetString(tmp);
         }
 
-        public virtual string bytes2String(byte[] buffer, Encoding encoding) => encoding.GetString(buffer);
+        public override string bytes2String(byte[] buffer, Encoding encoding) => encoding.GetString(buffer);
 
 
         #endregion

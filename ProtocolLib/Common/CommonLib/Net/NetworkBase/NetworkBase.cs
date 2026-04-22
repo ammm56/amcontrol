@@ -42,11 +42,6 @@ namespace ProtocolLib.CommonLib.Net.NetworkBase
         /// </summary>
         protected int FileCacheSize = 1024 * 100;
 
-        /// <summary>
-        /// 连接错误次数
-        /// </summary>
-        private int connerrorcount = 0;
-
         #endregion
         #region 连接
         /// <summary>

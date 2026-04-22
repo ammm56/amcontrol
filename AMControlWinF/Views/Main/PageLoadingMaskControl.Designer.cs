@@ -2,9 +2,6 @@
 {
     partial class PageLoadingMaskControl
     {
-        private System.ComponentModel.IContainer components = null;
-
-
         #region 组件设计器生成的代码
 
         private void InitializeComponent()

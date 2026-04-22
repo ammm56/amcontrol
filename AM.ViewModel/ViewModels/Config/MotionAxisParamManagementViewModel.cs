@@ -6,8 +6,10 @@ using AM.Model.Interfaces.DB;
 using AM.Model.Interfaces.DB.Motion.Topology;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -85,7 +87,7 @@ namespace AM.ViewModel.ViewModels.Config
                     SelectedParam = null;
                     SaveCurrentAxisCommand.NotifyCanExecuteChanged();
                     ResetToDefaultCommand.NotifyCanExecuteChanged();
-                    _ = LoadParamsForAxisAsync();
+                    _ = LoadParamsForAxisAsyncSafe();
                 }
             }
         }
@@ -211,6 +213,18 @@ namespace AM.ViewModel.ViewModels.Config
         }
 
         // ── 加载选中轴的参数 ──
+
+        private async Task LoadParamsForAxisAsyncSafe()
+        {
+            try
+            {
+                await LoadParamsForAxisAsync();
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError("MotionAxisParamManagementViewModel.LoadParamsForAxisAsync failed: " + ex);
+            }
+        }
 
         private async Task LoadParamsForAxisAsync()
         {

@@ -119,7 +119,7 @@ namespace AMControlWinF.Views.AlarmLog
             };
         }
 
-        private async void RunLogPage_Load(object sender, EventArgs e)
+        private void RunLogPage_Load(object sender, EventArgs e)
         {
             if (_isFirstLoad)
             {
@@ -127,9 +127,9 @@ namespace AMControlWinF.Views.AlarmLog
             }
 
             _isFirstLoad = true;
-            BeginInvoke(new Action(async () =>
+            BeginInvoke(new Action(() =>
             {
-                await InitializePageAsync();
+                _ = InitializePageAsync();
             }));
         }
 

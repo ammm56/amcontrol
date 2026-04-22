@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace AM.ViewModel.ViewModels.Am
@@ -93,7 +94,7 @@ namespace AM.ViewModel.ViewModels.Am
                 if (SetProperty(ref _startDate, value))
                 {
                     PageIndex = 1;
-                    _ = LoadAsync();
+                    _ = LoadAsyncSafe();
                 }
             }
         }
@@ -106,7 +107,7 @@ namespace AM.ViewModel.ViewModels.Am
                 if (SetProperty(ref _endDate, value))
                 {
                     PageIndex = 1;
-                    _ = LoadAsync();
+                    _ = LoadAsyncSafe();
                 }
             }
         }
@@ -119,7 +120,7 @@ namespace AM.ViewModel.ViewModels.Am
                 if (SetProperty(ref _selectedFilter, value))
                 {
                     PageIndex = 1;
-                    _ = LoadAsync();
+                    _ = LoadAsyncSafe();
                 }
             }
         }
@@ -181,7 +182,7 @@ namespace AM.ViewModel.ViewModels.Am
                 if (SetProperty(ref _selectedPageSize, value))
                 {
                     PageIndex = 1;
-                    _ = LoadAsync();
+                    _ = LoadAsyncSafe();
                 }
             }
         }
@@ -190,6 +191,18 @@ namespace AM.ViewModel.ViewModels.Am
         {
             get { return _jumpPageText; }
             set { SetProperty(ref _jumpPageText, value); }
+        }
+
+        private async Task LoadAsyncSafe()
+        {
+            try
+            {
+                await LoadAsync();
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError("LoginLogViewModel.LoadAsync failed: " + ex);
+            }
         }
 
         public async Task LoadAsync()

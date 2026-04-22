@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -84,7 +85,7 @@ namespace AM.ViewModel.ViewModels.Alarm
                 if (SetProperty(ref _selectedLogFile, value) && value != null)
                 {
                     PageIndex = 1;
-                    _ = LoadFileAsync();
+                    _ = LoadFileAsyncSafe();
                 }
             }
         }
@@ -185,6 +186,18 @@ namespace AM.ViewModel.ViewModels.Alarm
             if (LogFiles.Count > 0 && SelectedLogFile == null)
             {
                 SelectedLogFile = LogFiles[0];
+            }
+        }
+
+        private async Task LoadFileAsyncSafe()
+        {
+            try
+            {
+                await LoadFileAsync();
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError("RunLogViewModel.LoadFileAsync failed: " + ex);
             }
         }
 
