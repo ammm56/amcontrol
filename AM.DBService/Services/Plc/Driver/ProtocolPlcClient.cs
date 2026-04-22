@@ -4,6 +4,7 @@ using AM.Model.Plc;
 using ProtocolLib.CommonLib.Interface;
 using ProtocolLib.CommonLib.Model;
 using System;
+using System.Net.Sockets;
 
 namespace AM.DBService.Services.Plc.Driver
 {
@@ -16,6 +17,8 @@ namespace AM.DBService.Services.Plc.Driver
     /// </summary>
     internal class ProtocolPlcClient : IPlcClient
     {
+        private const string ProtocolSocketErrorPrefix = "[ProtocolSocketError] ";
+
         /// <summary>
         /// PLC 站配置。
         /// </summary>
@@ -88,7 +91,7 @@ namespace AM.DBService.Services.Plc.Driver
                 }
 
                 M_Return<bool> configureResult = _protocol.Configure(options);
-                return ToResult(configureResult, "PLC 客户端配置成功", -3602, "PLC 客户端配置失败");
+                return ToProtocolResult(configureResult, "PLC 客户端配置成功", -3602, "PLC 客户端配置失败");
             }
             catch (Exception ex)
             {
@@ -107,11 +110,11 @@ namespace AM.DBService.Services.Plc.Driver
                 }
 
                 M_Return<bool> result = _protocol.Connect();
-                return ToResult(result, "PLC 连接成功", -3604, "PLC 连接失败");
+                return ToProtocolResult(result, "PLC 连接成功", -3604, "PLC 连接失败");
             }
             catch (Exception ex)
             {
-                return Result.Fail(-3605, "PLC 连接异常: " + ex.Message, ResultSource.Plc);
+                return Result.Fail(-3605, BuildProtocolSocketErrorMessage("PLC 连接异常: " + ex.Message, ex), ResultSource.Plc);
             }
         }
 
@@ -126,11 +129,11 @@ namespace AM.DBService.Services.Plc.Driver
                 }
 
                 M_Return<bool> result = _protocol.Disconnect();
-                return ToResult(result, "PLC 断开成功", -3606, "PLC 断开失败");
+                return ToProtocolResult(result, "PLC 断开成功", -3606, "PLC 断开失败");
             }
             catch (Exception ex)
             {
-                return Result.Fail(-3607, "PLC 断开异常: " + ex.Message, ResultSource.Plc);
+                return Result.Fail(-3607, BuildProtocolSocketErrorMessage("PLC 断开异常: " + ex.Message, ex), ResultSource.Plc);
             }
         }
 
@@ -145,11 +148,11 @@ namespace AM.DBService.Services.Plc.Driver
                 }
 
                 M_Return<bool> result = _protocol.Reconnect();
-                return ToResult(result, "PLC 重连成功", -3608, "PLC 重连失败");
+                return ToProtocolResult(result, "PLC 重连成功", -3608, "PLC 重连失败");
             }
             catch (Exception ex)
             {
-                return Result.Fail(-3609, "PLC 重连异常: " + ex.Message, ResultSource.Plc);
+                return Result.Fail(-3609, BuildProtocolSocketErrorMessage("PLC 重连异常: " + ex.Message, ex), ResultSource.Plc);
             }
         }
 
@@ -168,7 +171,7 @@ namespace AM.DBService.Services.Plc.Driver
                 {
                     return Result<bool>.Fail(
                         -3610,
-                        result == null || string.IsNullOrWhiteSpace(result.DescMsg) ? "PLC 连接状态查询失败" : result.DescMsg,
+                        BuildProtocolSocketErrorMessage(result == null || string.IsNullOrWhiteSpace(result.DescMsg) ? "PLC 连接状态查询失败" : result.DescMsg),
                         ResultSource.Plc);
                 }
 
@@ -177,7 +180,7 @@ namespace AM.DBService.Services.Plc.Driver
             }
             catch (Exception ex)
             {
-                return Result<bool>.Fail(-3611, "PLC 连接状态查询异常: " + ex.Message, ResultSource.Plc);
+                return Result<bool>.Fail(-3611, BuildProtocolSocketErrorMessage("PLC 连接状态查询异常: " + ex.Message, ex), ResultSource.Plc);
             }
         }
 
@@ -201,7 +204,7 @@ namespace AM.DBService.Services.Plc.Driver
                 {
                     return Result<M_PointData>.Fail(
                         -3613,
-                        result == null || string.IsNullOrWhiteSpace(result.DescMsg) ? "PLC 点位读取失败" : result.DescMsg,
+                        BuildProtocolSocketErrorMessage(result == null || string.IsNullOrWhiteSpace(result.DescMsg) ? "PLC 点位读取失败" : result.DescMsg),
                         ResultSource.Plc);
                 }
 
@@ -210,7 +213,7 @@ namespace AM.DBService.Services.Plc.Driver
             }
             catch (Exception ex)
             {
-                return Result<M_PointData>.Fail(-3614, "PLC 点位读取异常: " + ex.Message, ResultSource.Plc);
+                return Result<M_PointData>.Fail(-3614, BuildProtocolSocketErrorMessage("PLC 点位读取异常: " + ex.Message, ex), ResultSource.Plc);
             }
         }
 
@@ -234,7 +237,7 @@ namespace AM.DBService.Services.Plc.Driver
                 {
                     return Result<M_PointData>.Fail(
                         -3616,
-                        result == null || string.IsNullOrWhiteSpace(result.DescMsg) ? "PLC 点位写入失败" : result.DescMsg,
+                        BuildProtocolSocketErrorMessage(result == null || string.IsNullOrWhiteSpace(result.DescMsg) ? "PLC 点位写入失败" : result.DescMsg),
                         ResultSource.Plc);
                 }
 
@@ -243,7 +246,7 @@ namespace AM.DBService.Services.Plc.Driver
             }
             catch (Exception ex)
             {
-                return Result<M_PointData>.Fail(-3617, "PLC 点位写入异常: " + ex.Message, ResultSource.Plc);
+                return Result<M_PointData>.Fail(-3617, BuildProtocolSocketErrorMessage("PLC 点位写入异常: " + ex.Message, ex), ResultSource.Plc);
             }
         }
 
@@ -321,7 +324,7 @@ namespace AM.DBService.Services.Plc.Driver
             return string.IsNullOrWhiteSpace(value) ? string.Empty : value.Trim();
         }
 
-        private static Result ToResult(M_Return<bool> result, string successMessage, int failCode, string failMessage)
+        private static Result ToProtocolResult(M_Return<bool> result, string successMessage, int failCode, string failMessage)
         {
             if (result != null && result.Status)
             {
@@ -331,8 +334,38 @@ namespace AM.DBService.Services.Plc.Driver
 
             return Result.Fail(
                 failCode,
-                result == null || string.IsNullOrWhiteSpace(result.DescMsg) ? failMessage : result.DescMsg,
+                BuildProtocolSocketErrorMessage(result == null || string.IsNullOrWhiteSpace(result.DescMsg) ? failMessage : result.DescMsg),
                 ResultSource.Plc);
+        }
+
+        private static string BuildProtocolSocketErrorMessage(string message, Exception ex = null)
+        {
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                message = "PLC 协议通信失败";
+            }
+
+            if (HasSocketException(ex) || !message.StartsWith(ProtocolSocketErrorPrefix, StringComparison.Ordinal))
+            {
+                return ProtocolSocketErrorPrefix + message;
+            }
+
+            return message;
+        }
+
+        private static bool HasSocketException(Exception ex)
+        {
+            while (ex != null)
+            {
+                if (ex is SocketException)
+                {
+                    return true;
+                }
+
+                ex = ex.InnerException;
+            }
+
+            return false;
         }
     }
 }

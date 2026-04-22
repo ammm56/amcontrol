@@ -19,13 +19,16 @@ namespace AM.DBService.Services.System
     /// </summary>
     internal static class BackendRequestFailureHelper
     {
+        private const string BackendTimeoutPrefix = "[BackendTimeout] ";
+        private const string BackendUnavailablePrefix = "[BackendUnavailable] ";
+
         /// <summary>
         /// 构造“后端不可用”消息。
         /// 用于连接失败、域名不可解析、服务未启动等不可达场景。
         /// </summary>
         public static string BuildUnavailableMessage(string action)
         {
-            return string.Format("{0}失败，后端服务不可用", action ?? "后端请求");
+            return BackendUnavailablePrefix + string.Format("{0}失败，后端服务不可用", action ?? "后端请求");
         }
 
         /// <summary>
@@ -34,7 +37,7 @@ namespace AM.DBService.Services.System
         /// </summary>
         public static string BuildTimeoutMessage(string action)
         {
-            return string.Format("{0}失败，后端请求超时", action ?? "后端请求");
+            return BackendTimeoutPrefix + string.Format("{0}失败，后端请求超时", action ?? "后端请求");
         }
 
         /// <summary>

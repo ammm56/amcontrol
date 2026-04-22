@@ -27,6 +27,7 @@ namespace AM.DBService.Services.Plc.Runtime
         private const string QualityGood = "Good";
         private const string QualityDisconnected = "Disconnected";
         private const string QualityError = "Error";
+        private const string PlcDisconnectedPrefix = "[PlcDisconnected] ";
         private const int DefaultScanIntervalMs = 100;
         private const int MinScanIntervalMs = 20;
         private const int DefaultReconnectIntervalMs = 2000;
@@ -751,7 +752,7 @@ namespace AM.DBService.Services.Plc.Runtime
                 ref _lastDisconnectMessage,
                 "PLC-DISCONNECT-" + PlcName,
                 code,
-                "PLC 站离线: " + displayName + "，" + finalMessage,
+                PlcDisconnectedPrefix + "PLC 站离线: " + displayName + "，" + finalMessage,
                 DisconnectSteadyLogIntervalMs,
                 AlarmCode.PLCDisconnect,
                 AlarmLevel.Alarm);
