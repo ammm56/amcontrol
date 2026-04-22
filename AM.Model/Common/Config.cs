@@ -108,7 +108,8 @@ namespace AM.Model.Common
         /// 统一后端服务根地址。
         /// 授权申请、设备注册、心跳、结构化上报和使用信息上报统一走此地址。
         /// </summary>
-        public string BackendServiceUrl { get; set; } = "http://localhost:5095";
+        //public string BackendServiceUrl { get; set; } = "http://localhost:5095";
+        public string BackendServiceUrl { get; set; } = "https://aigate-api.amvar.io";
 
         /// <summary>
         /// 桌面应用编码。
