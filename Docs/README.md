@@ -28,6 +28,7 @@
 - **新成员入门** → [02-development](02-development/README.md)
 - **架构理解** → [01-architecture](01-architecture/README.md)
 - **功能模块说明** → [03-features](03-features/README.md)
+- **VS2019 兼容说明** → [02-development/winf-vs2019-compatibility.md](02-development/winf-vs2019-compatibility.md)
 - **3D 仿真集成概览** → [10-simulation](10-simulation/README.md)
 - **3D 仿真接入设计文档** → [net-integration-plan.md](10-simulation/backend/net-integration-plan.md)
 - **数据库表结构** → [09-database-config](09-database-config/README.md)
@@ -37,6 +38,7 @@
 ### AMControlWinF 分支
 
 - **WinForms 项目总览** → [02-development/winf-project-overview.md](02-development/winf-project-overview.md)
+- **WinForms VS2019 兼容说明** → [02-development/winf-vs2019-compatibility.md](02-development/winf-vs2019-compatibility.md)
 - **WinForms 解决方案架构** → [01-architecture/winf-solution-architecture.md](01-architecture/winf-solution-architecture.md)
 - **应用生命周期与登录流程** → [01-architecture/winf-application-lifecycle.md](01-architecture/winf-application-lifecycle.md)
 - **主题系统设计** → [01-architecture/winf-theme-system.md](01-architecture/winf-theme-system.md)
@@ -49,6 +51,7 @@
 - **license.lic 读取与校验流程** → [03-features/license-file-validation-flow.md](03-features/license-file-validation-flow.md)
 - **运行时上下文与页面过滤接入** → [03-features/license-runtime-integration.md](03-features/license-runtime-integration.md)
 - **设备软件授权申请与设备上报** → [03-features/device-license-and-reporting.md](03-features/device-license-and-reporting.md)
+- **设备后台链路实现** → [03-features/device-management-runtime-flow.md](03-features/device-management-runtime-flow.md)
 - **本地 Native 安全模块规划** → [03-features/native-secure-runtime-design.md](03-features/native-secure-runtime-design.md)
 - **开发进展记录** → [07-release-notes/winf-development-progress.md](07-release-notes/winf-development-progress.md)
 - **WinForms 页面操作手册** → [06-user-manual/winf-page-operation-manual.md](06-user-manual/winf-page-operation-manual.md)

@@ -1,9 +1,9 @@
 ﻿# AMControlWinF 开发进展
 
 **文档编号**：REL-W001  
-**版本**：2.0.0  
+**版本**：2.1.0  
 **状态**：有效  
-**最后更新**：2026-04-14  
+**最后更新**：2026-04-23  
 **维护人**：Am
 
 ---
@@ -17,6 +17,8 @@
 - **后端基础设施已成型**：可以稳定支撑后续页面开发；
 - **WinForms 壳层已成型**：导航、页面缓存、主题、语言、状态栏、报警抽屉链路已完成；
 - **核心页面已铺开**：System / Motion / MotionConfig / PLC / AlarmLog 已有首版页面；
+- **设备授权与上报链路已成型**：license 校验、设备注册、心跳、report、长期 token 机制已落地；
+- **后台异常语义已收敛**：后端超时、后端不可用、PLC 站离线、协议层 socket 错误已有统一日志前缀；
 - **剩余工作重点**：统一 UI 规范、收口核心页面、补齐首页和远期业务页。
 
 ---
@@ -82,14 +84,27 @@
 | PLC CRUD | ✅ | 站与点位 CRUD 已完成 |
 | PLC 配置应用服务 | ✅ | `PlcConfigAppService.ReloadFromDatabase()` 已完成 |
 | PLC 协议插件机制 | ✅ | `ProtocolAssemblyRegistry` + `ProtocolPlcClient` + `NullPlcClient` |
-| PLC 扫描与运行时查询 | ✅ | `PlcScanWorker` + `PlcRuntimeQueryService` |
+| PLC 扫描与运行时查询 | ✅ | `PlcScanWorker` + `PlcStationScanRunner` + `PlcRuntimeQueryService` |
 | PLC 调试服务 | ✅ | `PlcOperationService` |
 | `PLC.Status` | ✅ 首版 | 站状态页已实现 |
 | `PLC.Monitor` | ✅ 首版 | 点位监视页已实现 |
 | `PLC.Debug` | ✅ 首版 | 调试页三行结构已落地 |
 | `SysConfig.Plc` | ✅ 首版 | 站 / 点位配置与重载页已实现 |
 
-### 2.7 Alarm / Log 模块
+### 2.7 授权与设备后台链路
+
+| 模块 / 功能 | 状态 | 说明 |
+|------|------|------|
+| 本地 `license.lic` 校验 | ✅ | 读取、解密、RSA 验签、硬件绑定、页面授权交集已落地 |
+| 版本范围校验 | ✅ | 所有授权版型统一使用 `minAppVersion/maxAppVersion` |
+| 设备授权申请 | ✅ | 设备侧申请签名与后端返回处理已落地 |
+| 设备注册 / token 刷新 | ✅ | `DeviceRegisterClient` + 长期 `DeviceToken` 已落地 |
+| 设备心跳 / 结构化 report | ✅ | `UsageUploadWorker` 周期调度已落地 |
+| AES-GCM 请求封装 | ✅ | `DeviceRequestCryptoService` 已使用 BouncyCastle 实现 |
+| 后端异常分类前缀 | ✅ | `[BackendTimeout]`、`[BackendUnavailable]` 已落地 |
+| PLC / 协议错误前缀 | ✅ | `[PlcDisconnected]`、`[ProtocolSocketError]` 已落地 |
+
+### 2.8 Alarm / Log 模块
 
 | 页面 | 状态 | 说明 |
 |------|------|------|
@@ -141,6 +156,7 @@ MainWindow
 | 多数核心页面仍属首版 | 已知 | 需要持续收口交互细节与字段完整性 |
 | 修改密码仍为占位 | 已知 | 后续补独立轻量弹窗 |
 | 首页与远期业务页尚未实现 | 已知 | 仍为占位页 |
+| VS2019 设计器兼容性有限 | 已知 | 可通过本地 `global.json` 解决 SDK-style 项目加载，但 WinForms 设计器仍受平台目标与 `AntdUI` 设计时链路影响 |
 
 ---
 

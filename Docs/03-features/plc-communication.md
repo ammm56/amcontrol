@@ -1,9 +1,9 @@
 # PLC 通信模块实现说明
 
 **文档编号**：FEAT-PLC-002  
-**版本**：2.0.0  
+**版本**：2.1.0  
 **状态**：已实现  
-**最后更新**：2026-04-14  
+**最后更新**：2026-04-23  
 **维护人**：Am
 
 ---
@@ -20,6 +20,13 @@ PLC 通信模块当前已经覆盖以下完整能力：
 - WinForms 运行页、调试页、配置页首版 UI。
 
 在当前解决方案中，PLC 模块已经从“规划中”进入“可持续收口与扩展”的状态。
+
+当前实现还补充了两层更明确的异常语义：
+
+1. 站级连接离线统一前缀：`[PlcDisconnected]`
+2. 协议层 socket 失败统一前缀：`[ProtocolSocketError]`
+
+这样可以把“PLC 站不可用”和“底层协议通信异常”从运行日志中直接区分出来。
 
 ---
 
@@ -190,13 +197,24 @@ PlcConfigAppService.ReloadFromDatabase()
 
 ```text
 PlcScanWorker
-  → 按站遍历
-  → 获取客户端
-  → 自动连接 / 重连
-  → 按点位读取
-  → 写入 RuntimeContext.Instance.Plc
-  → NotifySnapshotChanged()
+    → 为每个启用站创建或维护 PlcStationScanRunner
+    → Runner 独立执行连接检查与扫描循环
+    → 自动连接 / 重连
+    → 按点位读取
+    → 写入 RuntimeContext.Instance.Plc
+    → NotifySnapshotChanged()
 ```
+
+当前实现意图是把扫描责任拆成两层：
+
+1. `PlcScanWorker` 负责顶层调度、启动、停止与站集合管理；
+2. `PlcStationScanRunner` 负责单站的连接维护、离线判断、重连与点位扫描。
+
+这样做的直接收益是：
+
+1. 单站离线不会让其它站跟着阻塞；
+2. 断线日志可以按站节流；
+3. UI 与运行时查询可以继续消费其他在线站的快照。
 
 ### 5.3 查询链路
 
@@ -222,6 +240,30 @@ PlcOperationService
   ├── TestReadAddress(plcName, address, dataType, length)
   └── WriteAddress(plcName, address, dataType, value, length, confirmed)
 ```
+
+---
+
+## 5.5 当前异常前缀语义
+
+### 站级运行态异常
+
+`PlcStationScanRunner` 在站连接失败、站掉线、重连等待等场景下，统一通过 `ReportDisconnectIfNeeded()` 输出带 `[PlcDisconnected]` 前缀的消息。
+
+该类消息表示：
+
+1. 当前 PLC 站不可用；
+2. 问题发生在“站级连接 / 可达性”层；
+3. 运行时通常会继续尝试重连，而不是立即终止整个扫描系统。
+
+### 协议层异常
+
+`ProtocolPlcClient` 在 `Connect`、`Disconnect`、`Reconnect`、`IsConnected`、`ReadPoint`、`WritePoint` 等调用中，若识别到 `SocketException` 或其内层异常，会统一输出带 `[ProtocolSocketError]` 前缀的失败消息。
+
+该类消息表示：
+
+1. 当前异常来自协议库或 socket 通信层；
+2. 它比站级离线更接近底层网络实现；
+3. 排查时应优先查看 `ProtocolLib`、网络参数、端口、防火墙与设备可达性。
 
 ---
 

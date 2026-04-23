@@ -1,9 +1,9 @@
 # 设备管理后台链路实现说明
 
 **文档编号**：FEAT-DEVICE-002  
-**版本**：1.1.0  
+**版本**：1.2.0  
 **状态**：已实现  
-**最后更新**：2026-04-21  
+**最后更新**：2026-04-23  
 **维护人**：Am
 
 ---
@@ -31,6 +31,13 @@
 2. `heartbeat`：`X-Device-Token + AES-GCM envelope`；
 3. `report`：`X-Device-Token + AES-GCM envelope`；
 4. `refresh-token`：继续只带 `X-Device-Token`，不走 AES-GCM。
+
+同时，后台失败语义当前已经统一补充可检索前缀：
+
+1. 后端超时：`[BackendTimeout]`
+2. 后端不可用：`[BackendUnavailable]`
+
+这些前缀由 `BackendRequestFailureHelper` 统一输出，供 `UsageUploadWorker`、UI 和运行日志快速区分失败来源。
 
 ---
 
@@ -375,6 +382,24 @@ sequenceDiagram
 3. 节流日志会明确标记“当前设备 token 已失效，将在下轮重建设备会话”；
 4. 下一轮再走 token 刷新或重新注册。
 
+### 6.5 心跳链路失败消息口径
+
+当前 `DeviceHeartbeatClient`、`DeviceRegisterClient`、`DeviceReportClient`、`DeviceLicenseApplyClient`、`DeviceLicenseStatusClient` 在异常出口统一走 `BackendRequestFailureHelper.BuildExceptionMessage(...)`。
+
+当前分类口径如下：
+
+| 前缀 | 语义 | 典型异常 |
+|------|------|----------|
+| `[BackendTimeout]` | 后端请求超时 | `TaskCanceledException`、`TimeoutException` |
+| `[BackendUnavailable]` | 后端连接层不可达 | `HttpRequestException`、`WebException`、`SocketException` |
+| 无统一前缀 | 其它后端异常 | 未命中上述归类的异常链 |
+
+因此当前日志定位建议是：
+
+1. 先看是否出现 `[BackendTimeout]`；
+2. 再看是否出现 `[BackendUnavailable]`；
+3. 若无前缀，则继续看 HTTP 状态码、后端错误码和本地 Hint。
+
 ---
 
 ## 7. 设备信息上报链路
@@ -501,6 +526,12 @@ sequenceDiagram
 3. `DeviceApiResponse.success == false`，判定失败；
 4. 成功时不再额外处理返回 `data`，只记成功消息；
 5. 实际发送前统一先做 AES-GCM envelope 封装，再附加安全头与长期 `DeviceToken`。
+
+当前 report / heartbeat / register 的公共特点：
+
+1. `HttpClient.Timeout` 固定为 15 秒；
+2. 失败消息格式由 `BackendRequestFailureHelper` 统一；
+3. `UsageUploadWorker` 只消费压缩后的 `Result.Message`，再决定是否重建设备会话或等待下一轮重试。
 
 ---
 

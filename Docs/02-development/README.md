@@ -25,6 +25,7 @@
 |------|------|
 | [winf-project-overview.md](winf-project-overview.md) | AMControlWinF WinForms 分支项目总览（技术栈、解决方案结构、文件布局、核心架构约束） |
 | [winf-page-development-template.md](winf-page-development-template.md) | WinForms 页面开发模板（UserControl + PageModel + Service 的标准分工、代码骨架、交付清单） |
+| [winf-vs2019-compatibility.md](winf-vs2019-compatibility.md) | VS2019 兼容说明（SDK-style 项目加载、global.json、设计器限制与适用边界） |
 
 ---
 

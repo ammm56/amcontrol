@@ -1,9 +1,9 @@
 # AMControlWinF 项目总览
 
 **文档编号**：DEV-W001  
-**版本**：2.0.0  
+**版本**：2.1.0  
 **状态**：有效  
-**最后更新**：2026-04-14  
+**最后更新**：2026-04-23  
 **维护人**：Am
 
 ---
@@ -35,6 +35,20 @@
 | 消息 | `IMessageBus` / `MessageBus` | 主窗体状态栏与全局消息提示统一来源 |
 | 报警 | `AlarmManager` + `DevAlarmRecordService` | 活动报警、历史报警、启动恢复 |
 | 运行时任务 | `IRuntimeTaskManager` | 管理 IO / Axis / PLC 扫描工作单元 |
+
+---
+
+## 2.1 当前开发环境补充说明
+
+当前仓库在开发环境上存在以下事实：
+
+1. 解决方案采用“旧式 .NET Framework 项目 + SDK-style 项目”混合结构；
+2. `ProtocolLib`、`AntdUI`、`AM.Tests` 属于 SDK-style 项目；
+3. VS2019 若命中过新的 .NET SDK，可能在加载 SDK-style 项目时失败；
+4. VS2019 兼容主要通过本地 `global.json` 约束 SDK 版本解决；
+5. 对 `AntdUI.Window` 驱动的复杂 WinForms 页面，VS2019 设计器不作为主推荐环境。
+
+详见：[VS2019 兼容说明](winf-vs2019-compatibility.md)。
 
 ---
 
@@ -239,8 +253,16 @@ AMControlWinF/
 
 - PLC 配置模型、实体、CRUD、上下文重载、客户端工厂、协议插件注册、运行时扫描、查询服务、调试操作服务均已落地；
 - `ProtocolLib.ModbusTcp.Protocol` 与 `ProtocolLib.S7Tcp.Protocol` 已实现；
+- PLC 扫描当前已重构为“顶层 Worker + 站级独立 Runner”模式，单站离线不再拖慢其他站；
+- PLC 与后端异常日志已经补充统一前缀，便于直接从运行日志区分超时、不可达、站离线与协议层 socket 失败；
 - `PLC.Status`、`PLC.Monitor`、`PLC.Debug`、`SysConfig.Plc` 已完成首版 UI；
 - 当前优先工作为 PLC 页面收口与使用手册完善。
+
+### 9.5 当前已知兼容边界
+
+- `Debug|AnyCPU` 配置在部分旧式项目中仍实际输出 `x64`；
+- 这对运行时主链是可接受的，但会放大 VS2019 WinForms 设计器的设计时加载风险；
+- 当前推荐开发方式仍是：VS2022 用于 UI 设计器与主界面维护，VS2019 作为兼容构建 / 普通代码编辑环境。
 
 ### 9.4 Alarm / Log
 
