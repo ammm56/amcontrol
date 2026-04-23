@@ -10,13 +10,10 @@
     <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
-    <OutputPath>..\..\..\AMControlWinF\bin\x64\Debug\Protocols\</OutputPath>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
-    <OutputPath>..\..\..\AMControlWinF\bin\x64\Release\Protocols\</OutputPath>
+  <PropertyGroup>
+    <ProtocolHostOutputSubdir Condition="'$(Platform)' == 'x64'">x64\$(Configuration)\</ProtocolHostOutputSubdir>
+    <ProtocolHostOutputSubdir Condition="'$(Platform)' != 'x64'">$(Configuration)\</ProtocolHostOutputSubdir>
+    <OutputPath>..\..\..\AMControlWinF\bin\$(ProtocolHostOutputSubdir)Protocols\</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 

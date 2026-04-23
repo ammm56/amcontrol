@@ -797,6 +797,16 @@
       <Project>{b71d90fd-488d-7c5b-9629-b2a95469f3f0}</Project>
       <Name>AntdUI</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ProtocolLib\Modbus\ModbusTcp\ModbusTcp.csproj">
+      <Project>{b214d482-19d9-f1ba-37a5-4126a3bb6732}</Project>
+      <Name>ModbusTcp</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\ProtocolLib\Siemens\S7Tcp\S7Tcp.csproj">
+      <Project>{3db3c110-d05e-6231-7221-40dbfc2ba049}</Project>
+      <Name>S7Tcp</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="logo.ico" />
