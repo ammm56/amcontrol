@@ -2,6 +2,12 @@
 
 本目录存放 `ammm56/amcontrol` 的**用户手册**，面向设备现场的操作员（Operator）和工程师（Engineer），提供界面操作、设备参数配置和报警处理的完整指引。
 
+使用边界说明：
+
+1. 本目录面向现场操作与培训使用，重点回答“页面怎么用”“现场怎么操作”；
+2. 本目录不作为当前实现事实、页面开发状态或后台架构的优先来源；
+3. 若手册内容与当前实现细节冲突，应优先参考代码、[02-development/README.md](../02-development/README.md)、[03-features/README.md](../03-features/README.md) 和 [07-release-notes/README.md](../07-release-notes/README.md)。
+
 ---
 
 ## 内容范围
@@ -35,4 +41,5 @@
 
 ## 相关文档
 
+- [文档维护规则](../00-governance/document-maintenance-rules.md)
 - [功能模块文档](../03-features/README.md)

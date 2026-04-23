@@ -8,17 +8,17 @@
 
 | 目录 | 说明 |
 |------|------|
-| [00-governance](00-governance/README.md) | 文档治理与命名规范，定义全项目文档的目录命名、文件命名、元数据规范和资产管理规则 |
-| [01-architecture](01-architecture/README.md) | 架构设计文档，包含系统整体架构图、分层设计、核心模块说明、接口契约和关键技术决策记录（ADR） |
-| [02-development](02-development/README.md) | 开发指南，包含环境搭建、项目结构说明、编码规范、分支策略、代码审查流程和常见开发问题 |
-| [03-features](03-features/README.md) | 功能模块文档，按业务功能组织，覆盖运动控制、IO 管理、视觉、PLC 通信、权限管理等功能模块的设计与说明 |
+| [00-governance](00-governance/README.md) | 文档治理目录，定义命名规范、长期维护规则、事实来源优先级和索引使用方式 |
+| [01-architecture](01-architecture/README.md) | 架构设计文档，偏长期稳定的分层边界、核心约束、接口契约和 ADR |
+| [02-development](02-development/README.md) | 开发指南，偏当前活跃分支的开发基线、工程环境与协作方式 |
+| [03-features](03-features/README.md) | 功能模块文档，按业务功能组织，区分当前实现说明与历史规划/接口说明 |
 | [04-testing](04-testing/README.md) | 测试文档，包含测试策略、测试用例模板、虚拟卡调试指引、集成测试说明 |
-| [05-operations](05-operations/README.md) | 运维与部署文档，包含安装包制作、部署说明、数据库迁移、配置管理、日志排查指引 |
-| [06-user-manual](06-user-manual/README.md) | 用户手册，面向操作员和工程师，包含界面操作指引、设备参数配置、报警处理流程 |
-| [07-release-notes](07-release-notes/README.md) | 版本发布记录，按版本号归档变更日志、升级说明和已知问题 |
+| [05-operations](05-operations/README.md) | 运维与部署文档，面向安装、升级、排障与现场维护操作，不作为当前实现事实总览 |
+| [06-user-manual](06-user-manual/README.md) | 用户手册，面向操作使用与培训，不作为当前实现事实或开发状态的优先来源 |
+| [07-release-notes](07-release-notes/README.md) | 版本发布与开发进展目录，区分正式发布记录与当前活跃分支进展 |
 | [08-third-party](08-third-party/README.md) | 第三方依赖说明，记录引入的第三方库、运动控制卡 SDK、协议和许可证信息 |
-| [09-database-config](09-database-config/README.md) | 数据库与配置文档，包含表结构说明、字段定义、ConfigContext 配置项说明、数据库切换指引 |
-| [10-simulation](10-simulation/README.md) | 3D 仿真集成文档，包含虚拟设备集成方案、WebSocket 协议、前端仿真规划和网络接入设计 |
+| [09-database-config](09-database-config/README.md) | 数据库与配置文档，优先记录当前表结构事实、表名映射和配置来源，历史设计说明仅作对照 |
+| [10-simulation](10-simulation/README.md) | 3D 仿真集成文档，当前以历史规划和长期设计资料为主 |
 | [assets](assets/README.md) | 共享资产目录，存放文档中引用的图片、截图、附件和导出文件 |
 
 ---
@@ -27,19 +27,22 @@
 
 - **新成员入门** → [02-development](02-development/README.md)
 - **架构理解** → [01-architecture](01-architecture/README.md)
+- **多前端/跨平台演进说明** → [01-architecture/multi-frontend-cross-platform-evolution.md](01-architecture/multi-frontend-cross-platform-evolution.md)
 - **功能模块说明** → [03-features](03-features/README.md)
 - **VS2019 兼容说明** → [02-development/winf-vs2019-compatibility.md](02-development/winf-vs2019-compatibility.md)
 - **3D 仿真集成概览** → [10-simulation](10-simulation/README.md)
-- **3D 仿真接入设计文档** → [net-integration-plan.md](10-simulation/backend/net-integration-plan.md)
+- **3D 仿真接入历史规划** → [net-integration-plan.md](10-simulation/backend/net-integration-plan.md)
 - **数据库表结构** → [09-database-config](09-database-config/README.md)
 - **文档命名规范** → [00-governance/document-naming-conventions.md](00-governance/document-naming-conventions.md)
-- **版本记录** → [07-release-notes](07-release-notes/README.md)
+- **文档维护规则** → [00-governance/document-maintenance-rules.md](00-governance/document-maintenance-rules.md)
+- **发布与进展** → [07-release-notes](07-release-notes/README.md)
 
 ### AMControlWinF 分支
 
 - **WinForms 项目总览** → [02-development/winf-project-overview.md](02-development/winf-project-overview.md)
 - **WinForms VS2019 兼容说明** → [02-development/winf-vs2019-compatibility.md](02-development/winf-vs2019-compatibility.md)
 - **WinForms 解决方案架构** → [01-architecture/winf-solution-architecture.md](01-architecture/winf-solution-architecture.md)
+- **多前端与跨平台演进说明** → [01-architecture/multi-frontend-cross-platform-evolution.md](01-architecture/multi-frontend-cross-platform-evolution.md)
 - **应用生命周期与登录流程** → [01-architecture/winf-application-lifecycle.md](01-architecture/winf-application-lifecycle.md)
 - **主题系统设计** → [01-architecture/winf-theme-system.md](01-architecture/winf-theme-system.md)
 - **导航系统与页面缓存** → [01-architecture/winf-navigation-system.md](01-architecture/winf-navigation-system.md)
@@ -52,7 +55,7 @@
 - **运行时上下文与页面过滤接入** → [03-features/license-runtime-integration.md](03-features/license-runtime-integration.md)
 - **设备软件授权申请与设备上报** → [03-features/device-license-and-reporting.md](03-features/device-license-and-reporting.md)
 - **设备后台链路实现** → [03-features/device-management-runtime-flow.md](03-features/device-management-runtime-flow.md)
-- **本地 Native 安全模块规划** → [03-features/native-secure-runtime-design.md](03-features/native-secure-runtime-design.md)
+- **本地 Native 安全模块历史规划** → [03-features/native-secure-runtime-design.md](03-features/native-secure-runtime-design.md)
 - **开发进展记录** → [07-release-notes/winf-development-progress.md](07-release-notes/winf-development-progress.md)
 - **WinForms 页面操作手册** → [06-user-manual/winf-page-operation-manual.md](06-user-manual/winf-page-operation-manual.md)
 
@@ -60,7 +63,7 @@
 
 - **PLC 协议库架构设计** → [01-architecture/plc-protocol-integration-design.md](01-architecture/plc-protocol-integration-design.md)
 - **PLC 功能文档（实现）** → [03-features/plc-communication.md](03-features/plc-communication.md)
-- **PLC 功能文档（规划→已落地）** → [03-features/plc-communication-planning.md](03-features/plc-communication-planning.md)
+- **PLC 功能文档（历史规划归档）** → [03-features/plc-communication-planning.md](03-features/plc-communication-planning.md)
 
 ---
 
@@ -68,5 +71,10 @@
 
 - 所有文档均使用 **中文** 编写，技术术语保留英文原名。
 - 文档命名与目录规范请遵循 [00-governance/document-naming-conventions.md](00-governance/document-naming-conventions.md)。
+- 文档的长期维护规则、事实来源优先级和实现/规划文档的并存方式，请遵循 [00-governance/document-maintenance-rules.md](00-governance/document-maintenance-rules.md)。
+- 当实现文档与规划文档并存时，默认优先读取“当前实现说明”类文档；规划文档仅用于背景和历史对照。
+- 当前事实优先参考代码、[02-development](02-development/README.md)、[07-release-notes](07-release-notes/README.md) 和对应专题的“实现说明”文档。
+- 长期设计、架构意图和历史规划优先参考 [01-architecture](01-architecture/README.md) 及已明确标记为“历史规划/归档”的文档。
+- 若未来新增 UI 主线、后端形态、宿主方案或整体迁移到 `.NET 10`，请优先参考 [01-architecture/multi-frontend-cross-platform-evolution.md](01-architecture/multi-frontend-cross-platform-evolution.md) 判断文档边界与新增文档方式。
 - 图片和附件统一放置在 [assets/](assets/) 目录下对应子目录中。
 - 本文档中心为**仓库级资产**，不隶属于任何单一 .NET 解决方案或项目目录。

@@ -2,6 +2,12 @@
 
 本目录按**业务功能模块**组织文档，覆盖 `ammm56/amcontrol` 项目各核心功能的设计说明、实现逻辑和使用注意事项。
 
+当同一主题同时存在“实现文档”和“规划文档”时，默认按以下方式使用：
+
+1. 优先阅读标记为“实现说明”“运行时流程”“当前实现”的文档；
+2. 规划文档仅用于背景对照、历史设计取舍和未落地部分补充；
+3. 若实现与规划描述冲突，以当前代码和实现说明文档为准。
+
 ---
 
 ## 内容范围
@@ -40,14 +46,14 @@
 |------|------|
 | [winf-auth-login.md](winf-auth-login.md) | WinForms 用户认证与登录（角色体系、LoginForm、切换用户/退出登录流程、PopoverCard 安全关闭） |
 | [winf-mainwindow-shell.md](winf-mainwindow-shell.md) | WinForms 主窗体壳层（布局结构、主题/语言切换、系统消息、用户菜单交互） |
-| [software-license-design.md](software-license-design.md) | 设备软件授权设计（license.lic 文件方案、设备侧请求 JSON、授权数据、页面授权清单、运行时接入规则） |
-| [license-file-validation-flow.md](license-file-validation-flow.md) | 设备侧 license.lic 读取、解密、RSA 验签、硬件绑定校验与最小功能回退流程 |
-| [license-runtime-integration.md](license-runtime-integration.md) | 设备侧运行时授权上下文、pageKeys 与当前用户页面权限交集、导航过滤接入说明 |
-| [device-license-and-reporting.md](device-license-and-reporting.md) | 设备软件授权申请与设备信息上报说明（apply、register、heartbeat、report、返回语义、联调顺序） |
-| [device-management-runtime-flow.md](device-management-runtime-flow.md) | 设备注册、token 刷新、设备心跳、使用事件上报与结构化 report 的后台实现说明（UsageUploadWorker、Client、Buffer、返回处理、重试与定位） |
-| [native-secure-runtime-design.md](native-secure-runtime-design.md) | 本地 Native 安全模块设计与落地规划（C++ 项目目录、sln 接入、运行目录、C# 托管桥与最小实施顺序） |
-| [plc-communication.md](plc-communication.md) | PLC 通信模块实现说明（配置模型、服务接口、协议库、扫描链路、UI 页面映射、调用示例） |
-| [plc-communication-planning.md](plc-communication-planning.md) | PLC 通信模块功能文档（配置模型、数据库实体、服务职责边界、页面规划与实现状态） |
+| [software-license-design.md](software-license-design.md) | 设备软件授权设计说明，偏授权模型与许可文件结构约束 |
+| [license-file-validation-flow.md](license-file-validation-flow.md) | 设备侧 license.lic 读取、解密、RSA 验签、硬件绑定校验与最小功能回退流程（当前实现） |
+| [license-runtime-integration.md](license-runtime-integration.md) | 设备侧运行时授权上下文、pageKeys 与当前用户页面权限交集、导航过滤接入说明（当前实现） |
+| [device-license-and-reporting.md](device-license-and-reporting.md) | 设备软件授权申请与设备信息上报说明，偏接口联调口径与返回语义 |
+| [device-management-runtime-flow.md](device-management-runtime-flow.md) | 设备注册、token 刷新、设备心跳、使用事件上报与结构化 report 的后台实现说明（当前实现） |
+| [native-secure-runtime-design.md](native-secure-runtime-design.md) | 本地 Native 安全模块历史规划归档说明（当前仓库未落地，现阶段仅供对照） |
+| [plc-communication.md](plc-communication.md) | PLC 通信模块实现说明（当前实现，优先于规划文档） |
+| [plc-communication-planning.md](plc-communication-planning.md) | PLC 通信模块历史规划归档说明，仅用于对照早期方案，当前实现以 [plc-communication.md](plc-communication.md) 为准 |
 
 ---
 

@@ -115,7 +115,7 @@ AMControlWinF (WinForms + AntdUI)
 
 ## 5. 应用启动顺序
 
-当前 `AppBootstrap.Initialize()` 已固定为以下顺序：
+当前 `AppBootstrap.Initialize()` 在 WinForms 主线中采用以下顺序：
 
 ```text
 1. 读取 config.json
@@ -132,7 +132,7 @@ AMControlWinF (WinForms + AntdUI)
 12. 进入 Program while 主循环
 ```
 
-该顺序已被代码验证可用，后续不建议随意改动。
+该顺序已被当前代码验证可用，属于现阶段 WinForms 主线的稳定实现链路。若后续出现新的宿主程序、启动模型或跨平台重构，应在对应架构文档中定义新的启动顺序，而不是把本页视为所有未来实现的固定约束。
 
 ---
 

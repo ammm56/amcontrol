@@ -10,10 +10,12 @@
 
 ## 1. 设计目标
 
-- 明/暗主题一键切换，所有页面与控件自动跟随；
-- 不引入 per-page 主题接口（如 `IPageTheme`），减少后续页面实现负担；
-- 卡片面板具有悬浮感（阴影 + 圆角 + 深度），与 LoginForm 风格统一；
-- 代码量最少——利用 AntdUI 原生主题机制，避免手动逐控件改色。
+当前 WinForms 分支的主题系统当前以以下目标为主：
+
+- 明/暗主题一键切换，当前页面与控件尽量自动跟随；
+- 当前 WinForms 主线默认不引入 per-page 主题接口（如 `IPageTheme`），减少页面实现负担；
+- 卡片面板保持悬浮感（阴影 + 圆角 + 深度），与 LoginForm 风格协调；
+- 在当前实现里尽量复用 AntdUI 原生主题机制，避免手动逐控件改色。
 
 ---
 
@@ -44,7 +46,7 @@ AntdUI.Config.IsLight = true;   // 切换到亮色
 
 ### 3.1 AppThemeHelper
 
-位于 `AMControlWinF\Tools\AppThemeHelper.cs`，是全局主题的唯一入口：
+位于 `AMControlWinF\Tools\AppThemeHelper.cs`，是当前 WinForms 主线的全局主题主入口：
 
 ```csharp
 public static class AppThemeHelper
@@ -71,7 +73,7 @@ public static class AppThemeHelper
 }
 ```
 
-**职责边界**：仅负责 AntdUI 全局开关 + Window 基础色。不负责卡片面板、纹理背景等自定义控件。
+**职责边界**：在当前实现中仅负责 AntdUI 全局开关 + Window 基础色。不负责卡片面板、纹理背景等自定义控件。
 
 ### 3.2 调用链路
 
@@ -94,7 +96,7 @@ LoginForm.ApplyThemeFromConfig()
 
 ---
 
-## 4. 卡片面板实现规范
+## 4. 当前 WinForms 卡片面板实现基线
 
 ### 4.1 Designer 中的正确设置
 
@@ -117,11 +119,11 @@ LoginForm.ApplyThemeFromConfig()
 | `panelLeftCard` | 8 | 16 | 0 | 左侧一级导航 |
 | `panelStatusCard` | 4 | 12 | 0 | 底部状态栏 |
 
-### 4.3 禁止操作
+### 4.3 当前不建议的做法
 
-- ❌ 不要在 Designer 中设置 `Back` 属性（无论 `Transparent` 还是具体色值）
-- ❌ 不要在代码中调用 `panel.Back = xxx` 覆盖原生渲染
-- ❌ 不要在内部子 Panel 上设置 `Back = Transparent`（多余且可能干扰继承链）
+- ❌ 当前 WinForms 主线中，不建议在 Designer 中设置 `Back` 属性（无论 `Transparent` 还是具体色值）
+- ❌ 当前实现中，不建议在代码中调用 `panel.Back = xxx` 覆盖原生渲染
+- ❌ 当前主线中，通常不需要在内部子 Panel 上设置 `Back = Transparent`（多余且可能干扰继承链）
 
 ---
 
@@ -137,7 +139,7 @@ LoginForm.ApplyThemeFromConfig()
 
 ## 6. 设计决策记录
 
-### 6.1 为什么移除 IPageTheme 接口
+### 6.1 为什么当前未采用 IPageTheme 接口
 
 早期考虑为每个页面实现 `IPageTheme` 接口以支持主题切换。问题：
 
@@ -145,9 +147,9 @@ LoginForm.ApplyThemeFromConfig()
 - 大部分页面使用 AntdUI 原生控件，本身已自动跟随主题；
 - 只有 `TextureBackgroundControl` 和状态栏语义色需要手动处理。
 
-**结论**：移除 `IPageTheme`，由 `AppThemeHelper` + AntdUI 原生机制覆盖全部场景。
+**当前结论**：当前 WinForms 主线未采用 `IPageTheme`，而是由 `AppThemeHelper` + AntdUI 原生机制覆盖当前场景。若后续出现新的 UI 主线或更复杂的主题层级，可在新方案中重新评估是否引入页面级主题接口。
 
-### 6.2 为什么移除 ApplyCardPanel 方法
+### 6.2 为什么当前未保留 ApplyCardPanel 方法
 
 早期 `AppThemeHelper.ApplyCardPanel()` 会显式设置 `panel.Back` 和 `panel.BackColor`。问题：
 
@@ -155,7 +157,7 @@ LoginForm.ApplyThemeFromConfig()
 - 导致卡片面板扁平、无深度感，与 LoginForm 的悬浮卡片效果不一致；
 - LoginForm 的 `panelShell` 从未设置 `Back`，效果反而最好。
 
-**结论**：移除 `ApplyCardPanel()`、`DarkCardBack`、`LightCardBack`、`CurrentCardBack`，完全交由 AntdUI 原生渲染。
+**当前结论**：当前 WinForms 主线未保留 `ApplyCardPanel()`、`DarkCardBack`、`LightCardBack`、`CurrentCardBack`，默认交由 AntdUI 原生渲染。若后续新的主题系统或跨平台宿主不再适用这一做法，应在对应文档中重新定义主题策略。
 
 ---
 

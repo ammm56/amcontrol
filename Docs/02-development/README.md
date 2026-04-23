@@ -2,11 +2,13 @@
 
 本目录存放 `ammm56/amcontrol` 项目的**开发指南**，帮助开发者快速理解项目结构、搭建开发环境、遵循编码规范并参与日常开发流程。
 
+说明：本文档中涉及 `.NET Framework 4.6.1 / 4.7.2`、VS2019 兼容和旧式项目结构的内容，默认仅描述当前实现事实，不构成未来整体迁移到 `.NET 10` 的限制。
+
 ---
 
 ## 内容范围
 
-- **环境搭建**：开发环境要求（.NET Framework 4.7.2、Visual Studio 版本、依赖 SDK）、首次克隆后的配置步骤。
+- **环境搭建**：开发环境要求（.NET Framework 4.6.1 / 4.7.2、Visual Studio 版本、SDK 兼容边界）、首次克隆后的配置步骤。
 - **项目结构说明**：解决方案各项目的职责说明与依赖关系。
 - **编码规范**：
   - ViewModel 属性采用手动字段 + 属性方式，不使用 `[ObservableProperty]` 源生成器特性；
@@ -32,5 +34,6 @@
 ## 相关文档
 
 - [架构设计](../01-architecture/README.md)
+- [文档维护规则](../00-governance/document-maintenance-rules.md)
 - [第三方依赖说明](../08-third-party/README.md)
 - [3D 仿真集成开发](../10-simulation/README.md)
