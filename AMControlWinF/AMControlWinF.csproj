@@ -840,22 +840,6 @@
       <Link>Config\%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\Libs\opencvsharp4\netstandard20\OpenCvSharp.dll">
-      <Link>OpenCvSharp.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\Libs\opencvsharp4\netstandard20\OpenCvSharp.Extensions.dll">
-      <Link>OpenCvSharp.Extensions.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\Libs\opencvsharp4\netstandard20\OpenCvSharpExtern.dll">
-      <Link>OpenCvSharpExtern.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\Libs\opencvsharp4\netstandard20\opencv_videoio_ffmpeg4130_64.dll">
-      <Link>opencv_videoio_ffmpeg4130_64.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">

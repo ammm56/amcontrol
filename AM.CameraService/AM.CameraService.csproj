@@ -27,13 +27,20 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\Libs\opencvsharp4\netstandard20\OpenCvSharpExtern.dll">
-      <Link>OpenCvSharpExtern.dll</Link>
+    <None Include="..\Libs\opencvsharp4\netstandard20\OpenCvSharp.Extensions.dll">
+      <Link>Runtime\OpenCvSharp.Extensions.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>OpenCvSharp.Extensions.dll</TargetPath>
+    </None>
+    <None Include="..\Libs\opencvsharp4\netstandard20\OpenCvSharpExtern.dll">
+      <Link>Runtime\OpenCvSharpExtern.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>OpenCvSharpExtern.dll</TargetPath>
     </None>
     <None Include="..\Libs\opencvsharp4\netstandard20\opencv_videoio_ffmpeg4130_64.dll">
-      <Link>opencv_videoio_ffmpeg4130_64.dll</Link>
+      <Link>Runtime\opencv_videoio_ffmpeg4130_64.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>opencv_videoio_ffmpeg4130_64.dll</TargetPath>
     </None>
   </ItemGroup>
 </Project>
