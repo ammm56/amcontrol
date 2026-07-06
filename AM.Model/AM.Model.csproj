@@ -81,12 +81,15 @@
     <Compile Include="Common\ErrorDescriptor.cs" />
     <Compile Include="Common\IoScanState.cs" />
     <Compile Include="Common\ResultSource.cs" />
+    <Compile Include="Entity\Device\CameraConfigEntity.cs" />
     <Compile Include="Entity\Motion\Topology\MotionIoWiringEntity.cs" />
     <Compile Include="Entity\Plc\PlcPointConfigEntity.cs" />
     <Compile Include="Entity\Plc\PlcStationConfigEntity.cs" />
     <Compile Include="Entity\System\SysClientIdentityEntity.cs" />
     <Compile Include="Entity\System\SysClientUpdateRecordEntity.cs" />
     <Compile Include="Entity\System\SysUsageEventBufferEntity.cs" />
+    <Compile Include="Entity\Vision\VisionCallRecordEntity.cs" />
+    <Compile Include="Interfaces\Camera\ICameraConfigCrudService.cs" />
     <Compile Include="Interfaces\DB\Motion\Topology\IMotionIoWiringCrudService.cs" />
     <Compile Include="Interfaces\Motion\Assembly\IAssemblyWiringDebugService.cs" />
     <Compile Include="Interfaces\Motion\Assembly\IAssemblyWiringQueryService.cs" />
@@ -97,6 +100,9 @@
     <Compile Include="Interfaces\Plc\IPlcClientFactory.cs" />
     <Compile Include="Interfaces\Plc\Runtime\IPlcRuntimeService.cs" />
     <Compile Include="Interfaces\Plc\Runtime\IPlcScanWorker.cs" />
+    <Compile Include="Interfaces\Vision\IVisionInvokeService.cs" />
+    <Compile Include="Interfaces\Vision\IVisionCallRecordService.cs" />
+    <Compile Include="Interfaces\Vision\IVisionWorkflowRunnerProvider.cs" />
     <Compile Include="Device\DeviceApiResponse.cs" />
     <Compile Include="Device\DeviceEncryptedEnvelopeModels.cs" />
     <Compile Include="Device\DeviceRegistrationModels.cs" />
@@ -191,9 +197,10 @@
     <Compile Include="Usage\ClientIdentity.cs" />
     <Compile Include="Usage\UsageEvent.cs" />
     <Compile Include="Usage\UsageEventBatchUpload.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Entity\Vision\" />
+    <Compile Include="Vision\CameraDriverType.cs" />
+    <Compile Include="Vision\CameraImageFormat.cs" />
+    <Compile Include="Vision\VisionInvokeResult.cs" />
+    <Compile Include="Vision\VisionCallMode.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ProtocolLib\Common\CommonLib\CommonLib.csproj">

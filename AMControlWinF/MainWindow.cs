@@ -377,9 +377,9 @@ namespace AMControlWinF
                 { "Production.Data",        "BarChartOutlined" },
                 { "Production.Report",      "LineChartOutlined" },
 
-                { "Vision.Monitor",         "EyeOutlined" },
-                { "Vision.Result",          "CheckCircleOutlined" },
-                { "Vision.Calibrate",       "AimOutlined" },
+                { "Vision.Workbench",       "BranchesOutlined" },
+                { "Vision.Debug",           "BugOutlined" },
+                { "Vision.Record",          "FileSearchOutlined" },
 
                 { "PLC.Monitor",            "ApiOutlined" },
                 { "PLC.Status",             "WifiOutlined" },

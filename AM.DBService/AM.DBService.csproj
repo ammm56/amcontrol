@@ -88,6 +88,8 @@
     <Compile Include="Services\Auth\AuthPermissionCatalog.cs" />
     <Compile Include="Services\Auth\AuthSeedService.cs" />
     <Compile Include="Services\Auth\AuthService.cs" />
+    <Compile Include="Services\Camera\CameraConfigCrudService.cs" />
+    <Compile Include="Services\Camera\CameraConfigSeedService.cs" />
     <Compile Include="Services\Dev\DevAlarmRecordService.cs" />
     <Compile Include="Services\Dev\RunLogService.cs" />
     <Compile Include="Services\MachineConfigRepository.cs" />
@@ -152,6 +154,7 @@
     <Compile Include="Services\System\UsageEventBufferService.cs" />
     <Compile Include="Services\System\UsageReportService.cs" />
     <Compile Include="Services\System\UsageUploadWorker.cs" />
+    <Compile Include="Services\Vision\VisionCallRecordService.cs" />
     <Compile Include="Tables\DBTableT.cs" />
   </ItemGroup>
   <ItemGroup>

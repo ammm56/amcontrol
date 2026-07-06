@@ -6,6 +6,7 @@ using AM.Core.Reporter;
 using AM.DBService.Services;
 using AM.DBService.Services.Auth;
 using AM.DBService.Services.Dev;
+using AM.DBService.Services.Camera;
 using AM.DBService.Services.Motion.App;
 using AM.DBService.Services.Plc.App;
 using AM.DBService.Services.Plc.Driver;
@@ -87,7 +88,15 @@ namespace AM.App.Bootstrap
                 return;
             }
 
-            // 5.2 加载协议实现程序集
+            // 5.2 初始化相机配置种子数据
+            var cameraConfigSeedService = new CameraConfigSeedService(reporter);
+            var cameraSeedResult = cameraConfigSeedService.EnsureSeedData();
+            if (!cameraSeedResult.Success)
+            {
+                reporter.Warn("AppBootstrap", "默认相机配置种子初始化失败，后续相机页面可能不可用: " + cameraSeedResult.Message, cameraSeedResult.Code);
+            }
+
+            // 5.3 加载协议实现程序集
             ProtocolAssemblyRegistry.Reload();
 
             // 6. 从数据库加载完整设备配置并重建 MachineContext

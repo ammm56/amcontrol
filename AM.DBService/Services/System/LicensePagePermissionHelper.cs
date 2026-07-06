@@ -15,6 +15,14 @@ namespace AM.DBService.Services.System
     /// </summary>
     public class LicensePagePermissionHelper : ServiceBase
     {
+        private static readonly Dictionary<string, string[]> PageKeyAliases =
+            new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "Vision.Monitor", new[] { "Vision.Workbench" } },
+                { "Vision.Result", new[] { "Vision.Record" } },
+                { "Vision.Calibrate", new[] { "Vision.Debug" } }
+            };
+
         protected override string MessageSourceName
         {
             get { return "LicensePagePermissionHelper"; }
@@ -49,7 +57,10 @@ namespace AM.DBService.Services.System
 
                 if (licenseState != null && licenseState.IsValid)
                 {
-                    List<string> effectivePageKeys = IntersectKeys(normalizedUserPageKeys, licenseState.PageKeys);
+                    List<string> effectivePageKeys = IntersectKeys(
+                        normalizedUserPageKeys,
+                        ExpandAuthorizedPageKeys(licenseState.PageKeys));
+
                     return OkListLogOnly(effectivePageKeys, "已按有效授权页面收口用户页面权限");
                 }
 
@@ -86,6 +97,35 @@ namespace AM.DBService.Services.System
             return NormalizeKeys(left)
                 .Where(rightSet.Contains)
                 .ToList();
+        }
+
+        /// <summary>
+        /// 兼容历史授权模板中的页面重命名。
+        /// 当前只覆盖旧视觉导航迁移到 Workbench/Debug/Record 的同模块重命名，不扩展任何新模块授权。
+        /// </summary>
+        private static List<string> ExpandAuthorizedPageKeys(IEnumerable<string> pageKeys)
+        {
+            var result = NormalizeKeys(pageKeys);
+            var set = new HashSet<string>(result, StringComparer.OrdinalIgnoreCase);
+
+            foreach (var pageKey in result.ToList())
+            {
+                string[] aliases;
+                if (!PageKeyAliases.TryGetValue(pageKey, out aliases) || aliases == null)
+                {
+                    continue;
+                }
+
+                foreach (var alias in aliases)
+                {
+                    if (!string.IsNullOrWhiteSpace(alias) && set.Add(alias))
+                    {
+                        result.Add(alias);
+                    }
+                }
+            }
+
+            return result;
         }
     }
 }
