@@ -71,6 +71,32 @@
 | `sys_client_update_record` | `SysClientUpdateRecordEntity` | 客户端版本/更新记录与后台交互留痕 |
 | `sys_usage_event_buffer` | `SysUsageEventBufferEntity` | 使用事件与上报缓冲数据 |
 
+### 规划中表结构（尚未落地）
+
+以下表结构为下一阶段视觉与相机功能规划，尚未在当前实体中落地。实现时应以对应实体 `[SugarTable]` 映射为最终事实。
+
+#### 相机配置表
+
+| 规划表名 | 说明 |
+|----------|------|
+| `device_camera_config` | 本项目相机配置。第一阶段默认通用 USB/UVC 相机，海康、康耐视、大恒等厂商 SDK 相机仅预留驱动类型 |
+
+该表只保存 amcontrol 相机配置和取图参数，不保存 amvision workflow runtime、TriggerSource、token、endpoint 或 project 配置。
+
+#### 视觉调用记录表
+
+| 规划表名 | 说明 |
+|----------|------|
+| `vision_call_record` | 本项目通过 amvision .NET SDK 发起的视觉调用历史，记录相机、调用方式、runtime/TriggerSource key、耗时、结果 JSON 和异常信息 |
+
+该表记录的是 amcontrol 的调用审计，不承担 amvision 调用配置职责。
+
+明确不规划的表：
+
+- `vision_sdk_profile`；
+- `camera_workflow_binding`；
+- 任何相机到 workflow runtime / TriggerSource 的绑定表。
+
 ### 历史设计说明与旧口径对照
 
 以下内容在旧文档、旧讨论或早期规划里可能仍会出现，但不代表当前事实：
@@ -95,6 +121,12 @@
 | PlcConfig | （JsonIgnore）从 DB 装配后注入，不写入 json |
 
 说明：与数据库表结构类似，`config.json` 只描述当前需要持久化的轻量配置；运行期由数据库装配进 `ConfigContext` 的对象不应被误解为 json 固有字段。
+
+视觉模块规划约束：
+
+1. `config.json` 不新增 `DefaultAccessToken`、`DefaultZeroMqEndpoint`、runtime id、TriggerSource id 等 amvision 调用字段；
+2. amvision 调用配置由 `Libsrc/amvision/apps/Amvision.Workflows.Net461Console/Config/config_*.json` 管理；
+3. WinForms 视觉工作台默认嵌入 `http://127.0.0.1:5601`，该地址如需现场可配置，应作为 UI 宿主地址单独处理，不与 SDK 调用配置混用。
 
 ### 配置管理服务
 
@@ -131,3 +163,4 @@
 - [架构设计](../01-architecture/README.md)
 - [功能模块 · 运动控制](../03-features/README.md)
 - [运维与部署](../05-operations/README.md)
+- [视觉、相机与 amvision SDK 集成规划](../03-features/vision-camera-sdk-integration-planning.md)

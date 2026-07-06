@@ -24,6 +24,16 @@
 | 固高（GT）SDK | 固高科技 | `gts.dll`、`gt_rn.dll`，用于固高运动控制卡接入 |
 | 雷赛（LA/PI）SDK | 雷赛智能 | `LAFunc.dll`、`PIFunc.dll`、`VFunc.dll`、`MachineBuilding.dll` |
 
+### 本地视觉 SDK / amvision 调用封装
+
+| 目录 | 说明 |
+|------|------|
+| `Libsrc/amvision/src/Amvision.Workflows` | amvision .NET SDK 源码，包含 Workflow 管理 HTTP client 与 ZeroMQ TriggerSource 调用能力 |
+| `Libsrc/amvision/apps/Amvision.Workflows.Net461Console` | 面向 `.NET Framework 4.6.1` 的现场调用封装和 console 参考实现 |
+| `Libsrc/amvision/apps/Amvision.Workflows.Net461Console/Config` | 实际视觉调用配置来源，包含 backend、runtime、TriggerSource、ZeroMQ endpoint 等调用参数 |
+
+amcontrol 后续视觉调用应优先通过 `WorkflowOperationRunner` 使用上述封装。`amcontrol` 的 `config.json` 不重复保存 `DefaultAccessToken`、`DefaultZeroMqEndpoint`、runtime id 或 TriggerSource id。
+
 ---
 
 ## 使用说明
@@ -31,6 +41,7 @@
 - 运动控制卡 SDK 的 DLL 文件直接放置在 `AM.MotionService/` 项目目录下，项目构建时自动复制到输出目录。
 - 所有第三方 NuGet 包通过各 `.csproj` 的 `packages.config` 管理（.NET Framework 风格）。
 - 如需查看具体版本号，请参阅各项目的 `packages.config` 文件。
+- amvision SDK 与 Console 封装当前以源码形式放在 `Libsrc/amvision`，后续接入主解决方案时需确认 SDK-style 项目引用、依赖复制和 `Config/config_*.json` 输出目录策略。
 
 ---
 
@@ -38,3 +49,4 @@
 
 - [开发指南](../02-development/README.md)
 - [运维与部署](../05-operations/README.md)
+- [视觉、相机与 amvision SDK 集成规划](../03-features/vision-camera-sdk-integration-planning.md)

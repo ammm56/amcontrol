@@ -1,9 +1,9 @@
 ﻿# AMControlWinF 开发进展
 
-**文档编号**：REL-W001  
-**版本**：2.1.0  
-**状态**：有效  
-**最后更新**：2026-04-23  
+**文档编号**：REL-W001
+**版本**：2.2.0
+**状态**：有效
+**最后更新**：2026-07-06
 **维护人**：Am
 
 ---
@@ -19,6 +19,7 @@
 - **核心页面已铺开**：System / Motion / MotionConfig / PLC / AlarmLog 已有首版页面；
 - **设备授权与上报链路已成型**：license 校验、设备注册、心跳、report、长期 token 机制已落地；
 - **后台异常语义已收敛**：后端超时、后端不可用、PLC 站离线、协议层 socket 错误已有统一日志前缀；
+- **视觉/相机边界已完成规划**：amcontrol 负责相机配置和取图，amvision 负责 workflow/runtime/TriggerSource 与视觉前端，双方通过本地 .NET SDK 调用衔接；
 - **剩余工作重点**：统一 UI 规范、收口核心页面、补齐首页和远期业务页。
 
 ---
@@ -112,6 +113,23 @@
 | `AlarmLog.History` | ✅ 首版 | 报警历史筛选、统计、分页 |
 | `AlarmLog.RunLog` | ✅ 首版 | NLog 日志文件查询、筛选、分页 |
 
+### 2.9 Vision / Camera 规划
+
+| 模块 / 页面 | 状态 | 说明 |
+|------|------|------|
+| `Libsrc/amvision` | ✅ 已加入 | 已包含 amvision .NET SDK、Net461 Console 调用封装、示例 Config 和测试工程 |
+| `SysConfig.Camera` | 规划中 | 后续作为 amcontrol 相机配置页，第一阶段默认通用 USB/UVC 相机 |
+| `Vision.Workbench` | 规划中 | 嵌入 `http://127.0.0.1:5601` 的 amvision 前端工作台 |
+| `Vision.Debug` | 规划中 | 从本项目相机取图，经 `WorkflowOperationRunner` 调用 amvision SDK 并展示结果 |
+| `Vision.Record` | 规划中 | 查询本项目发起的视觉 SDK 调用记录 |
+
+规划约束：
+
+1. `SysConfig.Camera` 不绑定 workflow runtime 或 TriggerSource；
+2. amvision 调用配置以 `Libsrc/amvision/apps/Amvision.Workflows.Net461Console/Config/config_*.json` 为准；
+3. `amcontrol` 的 `config.json` 不重复保存 token、ZeroMQ endpoint、runtime id 或 TriggerSource id；
+4. 当前 `Vision.Monitor / Vision.Result / Vision.Calibrate` 属于过时规划口径，后续应按 `Vision.Workbench / Vision.Debug / Vision.Record` 重排。
+
 ---
 
 ## 3. 当前 WinForms 分支已形成的实现基线
@@ -181,12 +199,15 @@ MainWindow
 
 ### 5.3 第三优先级：远期模块
 
-12. `Peripheral.*`
-13. `Vision.*`
-14. `Production.Recipe`
-15. `Production.Data`
-16. `Production.Report`
-17. 其余 `SysConfig.*`
+12. `SysConfig.Camera`
+13. `Vision.Workbench`
+14. `Vision.Debug`
+15. `Vision.Record`
+16. `Peripheral.*`
+17. `Production.Recipe`
+18. `Production.Data`
+19. `Production.Report`
+20. 其余 `SysConfig.*`
 
 ---
 
@@ -238,5 +259,6 @@ AlarmLog
 - [统一 UI 规范与开发模板](../01-architecture/winf-ui-standards.md)
 - [页面开发模板与实施基线](../02-development/winf-page-development-template.md)
 - [PLC 协议库与 AM 上层分层架构](../01-architecture/plc-protocol-integration-design.md)
+- [视觉、相机与 amvision SDK 集成规划](../03-features/vision-camera-sdk-integration-planning.md)
 - [WinForms 页面操作手册](../06-user-manual/winf-page-operation-manual.md)
 

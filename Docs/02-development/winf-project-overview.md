@@ -1,9 +1,9 @@
 # AMControlWinF 项目总览
 
-**文档编号**：DEV-W001  
-**版本**：2.1.0  
-**状态**：有效  
-**最后更新**：2026-04-23  
+**文档编号**：DEV-W001
+**版本**：2.2.0
+**状态**：有效
+**最后更新**：2026-07-06
 **维护人**：Am
 
 ---
@@ -65,6 +65,7 @@ amcontrol_winform.sln
 ├── AM.MotionService/       运动控制卡驱动实现、工厂与 Hub 路由
 ├── AM.Tools/               配置读写、日志适配、辅助工具
 ├── ProtocolLib/            PLC 协议库（Common / ModbusTcp / S7Tcp）
+├── Libsrc/amvision/        amvision .NET SDK 与 Net461 Console 调用封装（尚未接入主解决方案）
 └── AM.Tests/               协议与关键模块测试
 ```
 
@@ -195,7 +196,7 @@ AMControlWinF/
 
 - `Home.*`
 - `Production.*`
-- `Vision.*`
+- `Vision.*`（当前 key 仍为早期规划口径，后续应调整为 `Vision.Workbench / Vision.Debug / Vision.Record`）
 - `Peripheral.*`
 - `SysConfig.Camera / Sensor / Scanner / Mes / Runtime`
 
@@ -258,17 +259,26 @@ AMControlWinF/
 - `PLC.Status`、`PLC.Monitor`、`PLC.Debug`、`SysConfig.Plc` 已完成首版 UI；
 - 当前优先工作为 PLC 页面收口与使用手册完善。
 
-### 9.5 当前已知兼容边界
+### 9.4 Vision / Camera
 
-- `Debug|AnyCPU` 配置在部分旧式项目中仍实际输出 `x64`；
-- 这对运行时主链是可接受的，但会放大 VS2019 WinForms 设计器的设计时加载风险；
-- 当前推荐开发方式仍是：VS2022 用于 UI 设计器与主界面维护，VS2019 作为兼容构建 / 普通代码编辑环境。
+- `Libsrc/amvision` 已加入本仓库，包含 amvision .NET SDK、Net461 Console 调用封装、`Config/config_*.json` 调用配置和测试工程；
+- 视觉功能的实现边界已明确：相机配置和取图属于 amcontrol，workflow app、runtime、TriggerSource 和视觉前端属于 amvision；
+- `amcontrol` 不在 `config.json` 中重复保存 amvision token、ZeroMQ endpoint、runtime id 或 TriggerSource id；
+- 后续相机第一阶段默认实现通用 USB/UVC 相机，海康、康耐视、大恒等厂商 SDK 相机仅预留驱动类型；
+- 当前 `Vision.Monitor / Vision.Result / Vision.Calibrate` 是过时规划口径，后续应调整为 `Vision.Workbench / Vision.Debug / Vision.Record`；
+- 详细规划见 [视觉、相机与 amvision SDK 集成规划](../03-features/vision-camera-sdk-integration-planning.md)。
 
-### 9.4 Alarm / Log
+### 9.5 Alarm / Log
 
 - `AlarmManager` + `DevAlarmRecordService` + 启动恢复 已成型；
 - 当前报警页、报警历史页、运行日志页已完成；
 - 主窗体底部报警按钮与抽屉联动已具备。
+
+### 9.6 当前已知兼容边界
+
+- `Debug|AnyCPU` 配置在部分旧式项目中仍实际输出 `x64`；
+- 这对运行时主链是可接受的，但会放大 VS2019 WinForms 设计器的设计时加载风险；
+- 当前推荐开发方式仍是：VS2022 用于 UI 设计器与主界面维护，VS2019 作为兼容构建 / 普通代码编辑环境。
 
 ---
 
@@ -305,11 +315,14 @@ AMControlWinF/
 
 ### 第三优先级：补齐远期业务页
 
-12. `Peripheral.*`
-13. `Vision.*`
-14. `Production.*`
-15. `Engineer.*`
-16. 其余 `SysConfig.*`
+12. `SysConfig.Camera`
+13. `Vision.Workbench`
+14. `Vision.Debug`
+15. `Vision.Record`
+16. `Peripheral.*`
+17. `Production.*`
+18. `Engineer.*`
+19. 其余 `SysConfig.*`
 
 ---
 
@@ -319,5 +332,6 @@ AMControlWinF/
 - [导航系统与页面缓存](../01-architecture/winf-navigation-system.md)
 - [统一 UI 规范与开发模板](../01-architecture/winf-ui-standards.md)
 - [页面开发模板与实施基线](winf-page-development-template.md)
+- [视觉、相机与 amvision SDK 集成规划](../03-features/vision-camera-sdk-integration-planning.md)
 - [开发进展记录](../07-release-notes/winf-development-progress.md)
 - [WinForms 页面操作手册](../06-user-manual/winf-page-operation-manual.md)

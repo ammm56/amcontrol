@@ -1,9 +1,9 @@
 # AMControlWinF 导航系统与页面缓存
 
-**文档编号**：ARCH-W003  
-**版本**：2.0.0  
-**状态**：有效  
-**最后更新**：2026-04-14  
+**文档编号**：ARCH-W003
+**版本**：2.1.0
+**状态**：有效
+**最后更新**：2026-07-06
 **维护人**：Am
 
 ---
@@ -149,6 +149,38 @@ System
 - `SysConfig.Camera / Sensor / Scanner / Mes / Runtime`
 
 当前壳层中的占位页默认由 `CreatePlaceholderPage(...)` 生成。
+
+### 4.3 视觉导航调整规划（待实现）
+
+当前 `NavigationCatalog` 中的 `Vision.Monitor`、`Vision.Result`、`Vision.Calibrate` 来自早期视觉模块规划，已不再作为后续实现目标。后续进入相机与视觉功能开发前，应将视觉导航调整为以下结构：
+
+```text
+SysConfig
+└── SysConfig.Camera      相机配置
+
+Vision
+├── Vision.Workbench      视觉工作台
+├── Vision.Debug          视觉调试
+└── Vision.Record         视觉记录
+```
+
+职责边界：
+
+| 页面 | 职责 |
+|------|------|
+| `SysConfig.Camera` | 管理 amcontrol 本项目相机配置，第一阶段默认 USB/UVC 相机；海康、康耐视等厂商 SDK 相机仅预留驱动类型 |
+| `Vision.Workbench` | 嵌入 `http://127.0.0.1:5601` 的 amvision 前端，作为独立视觉工作台入口 |
+| `Vision.Debug` | 从本项目相机取图，经 `WorkflowOperationRunner` 调用 amvision .NET SDK，展示调用结果 |
+| `Vision.Record` | 查询本项目发起的视觉 SDK 调用记录 |
+
+约束：
+
+1. `SysConfig.Camera` 不绑定 workflow runtime 或 TriggerSource；
+2. `amcontrol` 的 `config.json` 不保存 amvision token、ZeroMQ endpoint、runtime id 或 TriggerSource id；
+3. amvision 调用配置以 `Libsrc/amvision/apps/Amvision.Workflows.Net461Console/Config/config_*.json` 为准；
+4. 视觉工作流、节点编辑、模型、部署、标定和推理页面由 amvision 前端负责，WinForms 仅嵌入工作台入口。
+
+详细规划见：[视觉、相机与 amvision SDK 集成规划](../03-features/vision-camera-sdk-integration-planning.md)。
 
 ---
 

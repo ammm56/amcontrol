@@ -17,7 +17,7 @@
 | 运动控制 | 固高/雷赛运动控制卡接入、轴配置、回零流程、速度规划、急停/平停联动 |
 | IO 管理 | DI/DO 扫描缓存机制、IO 映射配置、IO 监视页面 |
 | 气缸与执行器 | `Cylinder`/`Actuator` 层设计、状态机、DI/DO 绑定 |
-| 视觉功能 | 工业相机接入、视觉触发与结果回写 |
+| 视觉功能 | USB/UVC 相机配置、相机取图、amvision SDK 调用、视觉工作台嵌入与调用记录；海康、康耐视等厂商 SDK 相机仅预留 |
 | PLC 通信 | 支持的 PLC 类型、通信协议配置、信号映射 |
 | 权限管理 | 用户角色体系（Operator/Engineer/Am）、页面级权限、用户管理 |
 | 报警系统 | 报警持久化（`IAlarmRecord`/`AlarmRecordService`）、报警抽屉面板、消息链路 |
@@ -51,6 +51,7 @@
 | [license-runtime-integration.md](license-runtime-integration.md) | 设备侧运行时授权上下文、pageKeys 与当前用户页面权限交集、导航过滤接入说明（当前实现） |
 | [device-license-and-reporting.md](device-license-and-reporting.md) | 设备软件授权申请与设备信息上报说明，偏接口联调口径与返回语义 |
 | [device-management-runtime-flow.md](device-management-runtime-flow.md) | 设备注册、token 刷新、设备心跳、使用事件上报与结构化 report 的后台实现说明（当前实现） |
+| [vision-camera-sdk-integration-planning.md](vision-camera-sdk-integration-planning.md) | 视觉、相机与 amvision SDK 集成规划（当前实现基线规划，明确相机归 amcontrol、workflow/TriggerSource 配置归 amvision） |
 | [native-secure-runtime-design.md](native-secure-runtime-design.md) | 本地 Native 安全模块历史规划归档说明（当前仓库未落地，现阶段仅供对照） |
 | [plc-communication.md](plc-communication.md) | PLC 通信模块实现说明（当前实现，优先于规划文档） |
 | [plc-communication-planning.md](plc-communication-planning.md) | PLC 通信模块历史规划归档说明，仅用于对照早期方案，当前实现以 [plc-communication.md](plc-communication.md) 为准 |

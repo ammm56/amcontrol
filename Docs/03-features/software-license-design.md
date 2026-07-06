@@ -1,9 +1,9 @@
 # 设备软件授权设计说明
 
-**文档编号**：FEAT-LICENSE-001  
-**版本**：1.0.0  
-**状态**：实现前最终版  
-**最后更新**：2026-04-17  
+**文档编号**：FEAT-LICENSE-001
+**版本**：1.0.1
+**状态**：实现前最终版
+**最后更新**：2026-07-06
 **维护人**：Am
 
 ---
@@ -555,6 +555,8 @@
 
 ### 9.2 建议纳入授权限制的页面
 
+说明：以下清单保留了当前 `NavigationCatalog` 中的早期视觉页面 key。后续落地视觉与相机模块前，应按 [视觉、相机与 amvision SDK 集成规划](vision-camera-sdk-integration-planning.md) 将 `Vision.Monitor / Vision.Result / Vision.Calibrate` 替换为 `Vision.Workbench / Vision.Debug / Vision.Record`，并同步授权库中的页面目录。
+
 ```json
 {
   "licensedPages": [
@@ -590,6 +592,8 @@
 ### 9.3 当前 NavigationCatalog 对应页面目录
 
 当前 WinForms 分支页面目录来自 `AM.PageModel.Navigation.NavigationCatalog`，后端应预先将该程序的页面目录维护到授权库中。当前页面包括：
+
+视觉模块说明：`Vision.Monitor`、`Vision.Result`、`Vision.Calibrate` 属于早期规划口径。进入视觉实现阶段时，导航与授权目录应同步调整为 `Vision.Workbench`、`Vision.Debug`、`Vision.Record`，`SysConfig.Camera` 继续作为本项目相机配置页。
 
 - `Home.Overview`
 - `Home.SysStatus`
