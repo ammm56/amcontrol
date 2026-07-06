@@ -264,7 +264,7 @@ AMControlWinF/
 - `Libsrc/amvision` 已加入本仓库，包含 amvision .NET SDK、Net461 Console 调用封装、`Config/config_*.json` 调用配置和测试工程；
 - 视觉功能的实现边界已明确：相机配置和取图属于 amcontrol，workflow app、runtime、TriggerSource 和视觉前端属于 amvision；
 - `amcontrol` 不在 `config.json` 中重复保存 amvision token、ZeroMQ endpoint、runtime id 或 TriggerSource id；
-- 后续相机第一阶段默认实现通用 USB/UVC 相机，海康、康耐视、大恒等厂商 SDK 相机仅预留驱动类型；
+- 相机第一阶段使用 OpenCvSharp + DSHOW 实现通用 USB 相机，默认 MJPG / 30fps / JPEG 编码；Amvar、海康、康耐视、大恒等厂商 SDK 相机仅预留驱动类型；
 - 当前 `Vision.Monitor / Vision.Result / Vision.Calibrate` 是过时规划口径，后续应调整为 `Vision.Workbench / Vision.Debug / Vision.Record`；
 - 详细规划见 [视觉、相机与 amvision SDK 集成规划](../03-features/vision-camera-sdk-integration-planning.md)。
 

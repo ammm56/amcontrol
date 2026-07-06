@@ -473,9 +473,25 @@ namespace AMControlWinF
 
                 await _pageLoadingMaskControl.CompleteAndHideAsync(navigateVersion);
             }
-            catch
+            catch (Exception ex)
             {
                 _pageLoadingMaskControl.HideImmediately();
+
+                try
+                {
+                    SystemContext.Instance.Reporter?.Error("MainWindow", ex, "页面加载失败: " + (page == null ? string.Empty : page.PageKey));
+                }
+                catch
+                {
+                }
+
+                if (!_isClosing && !IsDisposed && navigateVersion == _navigateVersion)
+                {
+                    ShowPage(CreatePlaceholderPage(
+                        IsEnglishLanguage(GetCurrentLanguage())
+                            ? "Page load failed:\r\n\r\n" + (page == null ? string.Empty : page.PageKey) + "\r\n\r\n" + ex.Message
+                            : "页面加载失败：\r\n\r\n" + (page == null ? string.Empty : page.PageKey) + "\r\n\r\n" + ex.Message), true);
+                }
             }
         }
 
@@ -566,6 +582,7 @@ namespace AMControlWinF
                 { "PLC.Debug",              () => new PlcDebugPage() },
 
                 { "SysConfig.Plc",          () => new PlcConfigManagementPage() },
+                { "SysConfig.Camera",       () => new CameraConfigManagementPage() },
 
                 { "AlarmLog.Current",       () => new CurrentAlarmPage() },
                 { "AlarmLog.History",       () => new AlarmHistoryPage() },

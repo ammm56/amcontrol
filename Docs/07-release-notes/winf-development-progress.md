@@ -118,7 +118,7 @@
 | 模块 / 页面 | 状态 | 说明 |
 |------|------|------|
 | `Libsrc/amvision` | ✅ 已加入 | 已包含 amvision .NET SDK、Net461 Console 调用封装、示例 Config 和测试工程 |
-| `SysConfig.Camera` | 规划中 | 后续作为 amcontrol 相机配置页，第一阶段默认通用 USB/UVC 相机 |
+| `SysConfig.Camera` | 开发中 | 已接入 OpenCvSharp + DSHOW 通用 USB 相机配置、枚举、打开、设置页、单帧取图和测试图保存入口 |
 | `Vision.Workbench` | 规划中 | 嵌入 `http://127.0.0.1:5601` 的 amvision 前端工作台 |
 | `Vision.Debug` | 规划中 | 从本项目相机取图，经 `WorkflowOperationRunner` 调用 amvision SDK 并展示结果 |
 | `Vision.Record` | 规划中 | 查询本项目发起的视觉 SDK 调用记录 |

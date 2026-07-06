@@ -45,7 +45,7 @@ namespace AM.DBService.Services.Auth
                 D("MotionConfig", "运控配置", "MotionConfig.Actuator", "执行器配置", "维护气缸、真空、灯塔、夹爪等执行器对象配置。", "Engineer,Am", "高", 50),
 
                 D("SysConfig", "系统配置", "SysConfig.Plc", "PLC 配置", "维护 PLC 通讯协议与业务地址映射。", "Engineer,Am", "高", 20),
-                D("SysConfig", "系统配置", "SysConfig.Camera", "相机配置", "维护本项目相机配置、USB/UVC 取图参数与厂商 SDK 相机预留类型。", "Engineer,Am", "高", 10),
+                D("SysConfig", "系统配置", "SysConfig.Camera", "相机配置", "维护本项目相机配置、OpenCvSharp DSHOW 取图参数与厂商 SDK 相机预留类型。", "Engineer,Am", "高", 10),
                 D("SysConfig", "系统配置", "SysConfig.Sensor", "传感器配置", "维护 Modbus/RS232/USB 传感器连接参数。", "Engineer,Am", "高", 30),
                 D("SysConfig", "系统配置", "SysConfig.Scanner", "扫码器配置", "维护扫码器型号、接口与触发参数。", "Engineer,Am", "高", 40),
                 D("SysConfig", "系统配置", "SysConfig.Mes", "MES 配置", "维护 MES 服务地址、认证与上传策略。", "Engineer,Am", "高", 50),

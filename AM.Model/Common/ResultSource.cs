@@ -11,6 +11,7 @@ namespace AM.Model.Common
         Plc = 3,
         Vision = 4,
         System = 5,
-        UI = 6
+        UI = 6,
+        Camera = 7
     }
 }

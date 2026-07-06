@@ -17,7 +17,7 @@
 | 运动控制 | 固高/雷赛运动控制卡接入、轴配置、回零流程、速度规划、急停/平停联动 |
 | IO 管理 | DI/DO 扫描缓存机制、IO 映射配置、IO 监视页面 |
 | 气缸与执行器 | `Cylinder`/`Actuator` 层设计、状态机、DI/DO 绑定 |
-| 视觉功能 | USB/UVC 相机配置、相机取图、amvision SDK 调用、视觉工作台嵌入与调用记录；海康、康耐视等厂商 SDK 相机仅预留 |
+| 视觉功能 | OpenCvSharp + DSHOW 通用 USB 相机配置、相机取图、amvision SDK 调用、视觉工作台嵌入与调用记录；Amvar、海康、康耐视等厂商 SDK 相机仅预留 |
 | PLC 通信 | 支持的 PLC 类型、通信协议配置、信号映射 |
 | 权限管理 | 用户角色体系（Operator/Engineer/Am）、页面级权限、用户管理 |
 | 报警系统 | 报警持久化（`IAlarmRecord`/`AlarmRecordService`）、报警抽屉面板、消息链路 |

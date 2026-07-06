@@ -543,6 +543,24 @@
     <Compile Include="Views\SysConfig\PlcConfigManagementPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="Views\SysConfig\CameraConfigManagementPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\SysConfig\CameraConfigManagementPage.Designer.cs">
+      <DependentUpon>CameraConfigManagementPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SysConfig\CameraConfigEditControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\SysConfig\CameraConfigEditControl.Designer.cs">
+      <DependentUpon>CameraConfigEditControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SysConfig\CameraConfigEditDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\SysConfig\CameraConfigEditDialog.Designer.cs">
+      <DependentUpon>CameraConfigEditDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Views\SysConfig\PlcConfigManagementPage.Designer.cs">
       <DependentUpon>PlcConfigManagementPage.cs</DependentUpon>
     </Compile>
@@ -747,6 +765,15 @@
     <EmbeddedResource Include="Views\SysConfig\PlcConfigManagementPage.resx">
       <DependentUpon>PlcConfigManagementPage.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\SysConfig\CameraConfigManagementPage.resx">
+      <DependentUpon>CameraConfigManagementPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\SysConfig\CameraConfigEditControl.resx">
+      <DependentUpon>CameraConfigEditControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\SysConfig\CameraConfigEditDialog.resx">
+      <DependentUpon>CameraConfigEditDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="app.manifest" />
     <None Include="license.lic">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -768,6 +795,10 @@
     <ProjectReference Include="..\AM.App\AM.App.csproj">
       <Project>{58d771b4-94d2-4fbb-9960-962dd599bd05}</Project>
       <Name>AM.App</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AM.CameraService\AM.CameraService.csproj">
+      <Project>{37e0b74b-50c0-4e62-980e-c49343c8e1ee}</Project>
+      <Name>AM.CameraService</Name>
     </ProjectReference>
     <ProjectReference Include="..\AM.Core\AM.Core.csproj">
       <Project>{7b305eb1-7403-4c0c-82d4-c871b4c2d877}</Project>
@@ -807,6 +838,22 @@
     <Content Include="Resources\Img\logo.ico" />
     <Content Include="..\Libsrc\amvision\apps\Amvision.Workflows.Net461Console\Config\config_*.json">
       <Link>Config\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\Libs\opencvsharp4\netstandard20\OpenCvSharp.dll">
+      <Link>OpenCvSharp.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\Libs\opencvsharp4\netstandard20\OpenCvSharp.Extensions.dll">
+      <Link>OpenCvSharp.Extensions.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\Libs\opencvsharp4\netstandard20\OpenCvSharpExtern.dll">
+      <Link>OpenCvSharpExtern.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\Libs\opencvsharp4\netstandard20\opencv_videoio_ffmpeg4130_64.dll">
+      <Link>opencv_videoio_ffmpeg4130_64.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

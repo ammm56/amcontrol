@@ -2,7 +2,7 @@ namespace AM.Model.Vision
 {
     /// <summary>
     /// 相机驱动类型。
-    /// 第一阶段仅实现通用 USB/UVC，相机厂商 SDK 先保留类型边界。
+    /// 第一阶段以 OpenCvSharp + DSHOW 实现通用 USB 相机，厂商 SDK 相机先保留类型边界。
     /// </summary>
     public enum CameraDriverType
     {

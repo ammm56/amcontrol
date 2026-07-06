@@ -5,7 +5,7 @@ namespace AM.Model.Entity.Device
 {
     /// <summary>
     /// 本项目相机配置表。
-    /// 第一阶段默认通用 USB/UVC 相机，不保存任何 amvision workflow/runtime/TriggerSource 配置。
+    /// 第一阶段默认通用 USB 相机，不保存任何 amvision workflow/runtime/TriggerSource 配置。
     /// </summary>
     [SugarTable("device_camera_config")]
     public class CameraConfigEntity
@@ -31,12 +31,12 @@ namespace AM.Model.Entity.Device
         public bool IsEnabled { get; set; }
 
         /// <summary>
-        /// USB/UVC 设备索引。
+        /// USB 相机设备索引，OpenCV DSHOW 后端按索引打开。
         /// </summary>
         public int DeviceIndex { get; set; }
 
         /// <summary>
-        /// USB/UVC 设备路径或 moniker。
+        /// USB 相机设备路径或 moniker，OpenCV 第一阶段可为空。
         /// </summary>
         [SugarColumn(IsNullable = true)]
         public string DevicePath { get; set; }

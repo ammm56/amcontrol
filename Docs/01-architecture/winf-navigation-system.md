@@ -168,7 +168,7 @@ Vision
 
 | 页面 | 职责 |
 |------|------|
-| `SysConfig.Camera` | 管理 amcontrol 本项目相机配置，第一阶段默认 USB/UVC 相机；海康、康耐视等厂商 SDK 相机仅预留驱动类型 |
+| `SysConfig.Camera` | 管理 amcontrol 本项目相机配置，第一阶段使用 OpenCvSharp + DSHOW 实现通用 USB 相机；Amvar、海康、康耐视等厂商 SDK 相机仅预留驱动类型 |
 | `Vision.Workbench` | 嵌入 `http://127.0.0.1:5601` 的 amvision 前端，作为独立视觉工作台入口 |
 | `Vision.Debug` | 从本项目相机取图，经 `WorkflowOperationRunner` 调用 amvision .NET SDK，展示调用结果 |
 | `Vision.Record` | 查询本项目发起的视觉 SDK 调用记录 |

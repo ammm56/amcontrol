@@ -79,7 +79,7 @@
 
 | 规划表名 | 说明 |
 |----------|------|
-| `device_camera_config` | 本项目相机配置。第一阶段默认通用 USB/UVC 相机，海康、康耐视、大恒等厂商 SDK 相机仅预留驱动类型 |
+| `device_camera_config` | 本项目相机配置。第一阶段使用 OpenCvSharp + DSHOW 实现通用 USB 相机，Amvar、海康、康耐视、大恒等厂商 SDK 相机仅预留驱动类型 |
 
 该表只保存 amcontrol 相机配置和取图参数，不保存 amvision workflow runtime、TriggerSource、token、endpoint 或 project 配置。
 

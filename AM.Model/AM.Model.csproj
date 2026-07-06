@@ -81,6 +81,8 @@
     <Compile Include="Common\ErrorDescriptor.cs" />
     <Compile Include="Common\IoScanState.cs" />
     <Compile Include="Common\ResultSource.cs" />
+    <Compile Include="Camera\CameraDeviceInfo.cs" />
+    <Compile Include="Camera\CameraFrame.cs" />
     <Compile Include="Entity\Device\CameraConfigEntity.cs" />
     <Compile Include="Entity\Motion\Topology\MotionIoWiringEntity.cs" />
     <Compile Include="Entity\Plc\PlcPointConfigEntity.cs" />
@@ -90,6 +92,7 @@
     <Compile Include="Entity\System\SysUsageEventBufferEntity.cs" />
     <Compile Include="Entity\Vision\VisionCallRecordEntity.cs" />
     <Compile Include="Interfaces\Camera\ICameraConfigCrudService.cs" />
+    <Compile Include="Interfaces\Camera\ICameraRuntimeService.cs" />
     <Compile Include="Interfaces\DB\Motion\Topology\IMotionIoWiringCrudService.cs" />
     <Compile Include="Interfaces\Motion\Assembly\IAssemblyWiringDebugService.cs" />
     <Compile Include="Interfaces\Motion\Assembly\IAssemblyWiringQueryService.cs" />

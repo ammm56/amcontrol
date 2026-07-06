@@ -17,7 +17,8 @@
 - `Libsrc/amvision/src/Amvision.Workflows` 已放入本仓库，作为 amvision .NET SDK 源码；
 - `Libsrc/amvision/apps/Amvision.Workflows.Net461Console` 已放入本仓库，作为 .NET Framework 4.6.1 现场调用封装参考；
 - `Libsrc/amvision/apps/Amvision.Workflows.Net461Console/Config` 是实际视觉调用配置来源；
-- `SysConfig.Camera`、`Vision.*` 当前在导航中仍属于占位或早期规划口径，尚未按本文档落地。
+- `SysConfig.Camera` 已开始按本文档落地，当前已接入 OpenCvSharp + DSHOW 通用 USB 相机配置、枚举、打开、设置页、单帧取图和测试图保存入口；
+- `Vision.Workbench / Vision.Debug / Vision.Record` 已完成导航规划，具体页面仍按后续阶段推进。
 
 本文档描述的是下一阶段实现目标，不等同当前已完成实现。当前事实仍以代码和 [开发进展记录](../07-release-notes/winf-development-progress.md) 为准。
 
@@ -166,7 +167,7 @@ InvokeRuntimeAppResultWithImageBytesAsync(runtimeName, imageBytes, "image/jpeg")
 - `file -> bytes/base64/data URL`
 - `base64/data URL -> Bitmap`
 
-`amcontrol` 相机驱动层只需要稳定输出 `Bitmap` 或编码后的 `byte[]`，再由统一的图片编码服务转换为 SDK 入参。
+`amcontrol` 相机驱动层只需要稳定输出编码后的 `byte[]`，再由视觉调用服务转换为 SDK 入参。第一阶段 USB 相机取图已确定使用 OpenCvSharp `VideoCapture` + `DSHOW` 后端，参数设置顺序贴近现场验证过的 Python OpenCV 脚本：先设置 `MJPG`，再设置 FPS、分辨率，最后重复设置一次 `MJPG`。
 
 ---
 
@@ -174,12 +175,13 @@ InvokeRuntimeAppResultWithImageBytesAsync(runtimeName, imageBytes, "image/jpeg")
 
 ### 5.1 类型命名
 
-第一阶段默认实现通用 USB/UVC 相机。
+第一阶段默认实现通用 USB 相机，运行实现为 OpenCvSharp + DSHOW，不把 UVC 高分辨率/高帧率能力作为默认假设。
 
 后续厂商 SDK 相机按驱动类型预留，不使用笼统“工业相机”命名：
 
 ```text
 UsbUvc
+AmvarReserved
 HikvisionMvsReserved
 CognexReserved
 DahengReserved
@@ -204,8 +206,8 @@ device_camera_config
 | `CameraName` | 相机名称 |
 | `DriverType` | 驱动类型，第一阶段默认 `UsbUvc` |
 | `IsEnabled` | 是否启用 |
-| `DeviceIndex` | USB/UVC 设备索引 |
-| `DevicePath` | USB/UVC 设备路径或 moniker |
+| `DeviceIndex` | OpenCV DSHOW 设备索引 |
+| `DevicePath` | USB 相机设备路径或 moniker，OpenCV 第一阶段可为空 |
 | `FriendlyName` | 系统枚举名称 |
 | `Width` | 采集宽度 |
 | `Height` | 采集高度 |
@@ -234,22 +236,21 @@ device_camera_config
 
 ### 5.3 相机运行抽象
 
-建议新增相机运行抽象：
+已新增相机运行抽象：
 
 ```text
-ICameraDriver
-ICameraDevice
-CameraFrame
-CameraRuntimeService
-CameraImageEncoder
-UsbUvcCameraDriver
+AM.Model/Camera/CameraDeviceInfo.cs
+AM.Model/Camera/CameraFrame.cs
+AM.Model/Interfaces/Camera/ICameraRuntimeService.cs
+AM.CameraService/OpenCv/OpenCvCameraRuntimeService.cs
 ```
 
 第一阶段目标：
 
-- 可枚举 USB/UVC 相机；
+- 可枚举 OpenCV DSHOW 可打开的 USB 相机索引；
 - 可保存相机基础参数；
 - 可打开/关闭指定相机；
+- 可打开相机驱动设置页，用于现场确认 MJPG、分辨率和帧率；
 - 可单帧取图；
 - 可将图像编码为 `image/jpeg` + `byte[]`；
 - 可在页面预览和测试保存图片。
@@ -282,7 +283,7 @@ Vision
 
 职责：
 
-- USB/UVC 相机配置；
+- OpenCvSharp + DSHOW 通用 USB 相机配置；
 - 相机枚举；
 - 打开/关闭；
 - 单帧取图；
@@ -374,15 +375,15 @@ vision_call_record
 
 ### 8.1 Model 层
 
-建议新增：
+已新增或规划使用：
 
 ```text
 AM.Model/Entity/Device/CameraConfigEntity.cs
 AM.Model/Entity/Vision/VisionCallRecordEntity.cs
-AM.Model/Enums/CameraDriverType.cs
-AM.Model/Enums/VisionCallMode.cs
-AM.Model/Runtime/CameraFrame.cs
-AM.Model/Runtime/VisionInvokeResult.cs
+AM.Model/Vision/CameraDriverType.cs
+AM.Model/Vision/VisionCallMode.cs
+AM.Model/Camera/CameraFrame.cs
+AM.Model/Vision/VisionInvokeResult.cs
 ```
 
 ### 8.2 Service 层
@@ -394,22 +395,24 @@ AM.DBService/Services/Camera/CameraConfigCrudService.cs
 AM.DBService/Services/Vision/VisionCallRecordService.cs
 ```
 
-相机驱动和视觉 SDK 调用建议独立成服务层，优先考虑新增：
+相机驱动和视觉 SDK 调用独立成服务层：
 
 ```text
+AM.CameraService
 AM.VisionService
 ```
 
-该项目用于承接：
+`AM.CameraService` 用于承接：
 
 - 相机驱动抽象；
-- USB/UVC 相机实现；
+- OpenCvSharp + DSHOW 通用 USB 相机实现；
+- 单帧取图和图像编码。
+
+`AM.VisionService` 用于承接：
+
 - `WorkflowOperationRunner` 生命周期；
-- 图片编码；
 - SDK 调用；
 - 结果转换。
-
-若第一阶段暂不新增项目，也应至少在 `AM.DBService/Services/Vision` 下保持清晰子目录，避免 WinForms 页面直接调用 SDK。
 
 ### 8.3 UI 层
 
@@ -440,7 +443,7 @@ UserControl Page
 1. 新增 `device_camera_config` 实体和表初始化；
 2. 新增相机配置 CRUD；
 3. 实现 `SysConfig.Camera` 页面；
-4. 支持 USB/UVC 枚举、保存、打开、预览、单帧取图。
+4. 支持 OpenCV DSHOW 枚举、保存、打开、设置页、预览、单帧取图。
 
 ### 9.3 第三阶段：SDK 调用封装
 

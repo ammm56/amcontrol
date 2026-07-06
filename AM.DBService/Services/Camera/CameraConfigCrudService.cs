@@ -217,14 +217,23 @@ namespace AM.DBService.Services.Camera
                 entity.ImageFormat = CameraImageFormat.Jpeg.ToString();
             }
 
+            if (string.IsNullOrWhiteSpace(entity.PixelFormat))
+            {
+                entity.PixelFormat = "MJPG";
+            }
+            else if (string.Equals(entity.PixelFormat, "MJPEG", StringComparison.OrdinalIgnoreCase))
+            {
+                entity.PixelFormat = "MJPG";
+            }
+
             if (entity.Width <= 0)
             {
-                entity.Width = 1280;
+                entity.Width = 1920;
             }
 
             if (entity.Height <= 0)
             {
-                entity.Height = 720;
+                entity.Height = 1080;
             }
 
             if (entity.Fps <= 0)

@@ -12,7 +12,7 @@ namespace AM.DBService.Services.Camera
 {
     /// <summary>
     /// 相机配置种子服务。
-    /// 仅负责初始化本项目相机表和默认 USB/UVC 相机参数。
+    /// 仅负责初始化本项目相机表和默认 USB 相机参数。
     /// </summary>
     public class CameraConfigSeedService
     {
@@ -68,10 +68,10 @@ namespace AM.DBService.Services.Camera
                 DeviceIndex = 0,
                 DevicePath = null,
                 FriendlyName = "USB Camera 0",
-                Width = 1280,
-                Height = 720,
+                Width = 1920,
+                Height = 1080,
                 Fps = 30,
-                PixelFormat = "MJPEG",
+                PixelFormat = "MJPG",
                 Exposure = null,
                 Gain = null,
                 GrabTimeoutMs = 3000,
@@ -80,7 +80,7 @@ namespace AM.DBService.Services.Camera
                 PreviewFps = 10,
                 SaveImageEnabled = false,
                 SaveImageDirectory = "Images\\Camera",
-                Remark = "系统初始化默认 USB/UVC 相机配置",
+                Remark = "系统初始化默认 OpenCV DSHOW USB 相机配置",
                 CreateTime = now,
                 UpdateTime = now
             };
