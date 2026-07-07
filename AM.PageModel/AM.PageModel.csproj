@@ -108,11 +108,16 @@
     <Compile Include="SysConfig\PlcConfigManagementPageModel.cs" />
     <Compile Include="SysConfig\PlcPointEditorModel.cs" />
     <Compile Include="SysConfig\PlcStationEditorModel.cs" />
+    <Compile Include="Vision\VisionDebugPageModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="logo.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AM.CameraService\AM.CameraService.csproj">
+      <Project>{37e0b74b-50c0-4e62-980e-c49343c8e1ee}</Project>
+      <Name>AM.CameraService</Name>
+    </ProjectReference>
     <ProjectReference Include="..\AM.Core\AM.Core.csproj">
       <Project>{7b305eb1-7403-4c0c-82d4-c871b4c2d877}</Project>
       <Name>AM.Core</Name>
@@ -124,6 +129,10 @@
     <ProjectReference Include="..\AM.Model\AM.Model.csproj">
       <Project>{22cf4793-f392-4421-98fd-0f2e07200689}</Project>
       <Name>AM.Model</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AM.VisionService\AM.VisionService.csproj">
+      <Project>{41afc0e6-cbc7-4d45-8236-6e587b1ef0c4}</Project>
+      <Name>AM.VisionService</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

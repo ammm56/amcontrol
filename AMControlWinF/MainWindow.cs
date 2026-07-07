@@ -24,6 +24,7 @@ using AMControlWinF.Views.MotionConfig;
 using AMControlWinF.Views.Other;
 using AMControlWinF.Views.Plc;
 using AMControlWinF.Views.SysConfig;
+using AMControlWinF.Views.Vision;
 using AntdUI;
 using System;
 using System.Collections.Generic;
@@ -580,6 +581,10 @@ namespace AMControlWinF
                 { "PLC.Status",             () => new PlcStatusPage() },
                 { "PLC.Monitor",            () => new PlcMonitorPage() },
                 { "PLC.Debug",              () => new PlcDebugPage() },
+
+                { "Vision.Workbench",       () => new VisionWorkbenchPage() },
+                { "Vision.Debug",           () => new VisionDebugPage() },
+                { "Vision.Record",          () => CreatePlaceholderPage("视觉 / 视觉记录") },
 
                 { "SysConfig.Plc",          () => new PlcConfigManagementPage() },
                 { "SysConfig.Camera",       () => new CameraConfigManagementPage() },

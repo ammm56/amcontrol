@@ -78,6 +78,14 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Web.WebView2.Core">
+      <HintPath>..\Libs\webview2\472\Microsoft.Web.WebView2.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Web.WebView2.WinForms">
+      <HintPath>..\Libs\webview2\472\Microsoft.Web.WebView2.WinForms.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
@@ -186,6 +194,12 @@
     </Compile>
     <Compile Include="Views\Home\HomeOverviewPage.Designer.cs">
       <DependentUpon>HomeOverviewPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Common\CameraImagePreviewControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Common\CameraImagePreviewControl.Designer.cs">
+      <DependentUpon>CameraImagePreviewControl.cs</DependentUpon>
     </Compile>
     <Compile Include="Views\Main\ActiveAlarmDrawerControl.cs">
       <SubType>UserControl</SubType>
@@ -577,6 +591,18 @@
     <Compile Include="Views\SysConfig\PlcStationEditDialog.Designer.cs">
       <DependentUpon>PlcStationEditDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\Vision\VisionWorkbenchPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Vision\VisionWorkbenchPage.Designer.cs">
+      <DependentUpon>VisionWorkbenchPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Vision\VisionDebugPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Vision\VisionDebugPage.Designer.cs">
+      <DependentUpon>VisionDebugPage.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </EmbeddedResource>
@@ -628,6 +654,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Views\Home\HomeOverviewPage.resx">
       <DependentUpon>HomeOverviewPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\Common\CameraImagePreviewControl.resx">
+      <DependentUpon>CameraImagePreviewControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\Main\ActiveAlarmDrawerControl.resx">
       <DependentUpon>ActiveAlarmDrawerControl.cs</DependentUpon>
@@ -776,6 +805,12 @@
     <EmbeddedResource Include="Views\SysConfig\CameraConfigEditDialog.resx">
       <DependentUpon>CameraConfigEditDialog.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\Vision\VisionWorkbenchPage.resx">
+      <DependentUpon>VisionWorkbenchPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\Vision\VisionDebugPage.resx">
+      <DependentUpon>VisionDebugPage.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="app.manifest" />
     <None Include="license.lic">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -838,6 +873,10 @@
   <ItemGroup>
     <Content Include="logo.ico" />
     <Content Include="Resources\Img\logo.ico" />
+    <Content Include="..\Libs\webview2\472\WebView2Loader.dll">
+      <Link>WebView2Loader.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="..\Libsrc\amvision\apps\Amvision.Workflows.Console\Config\config_*.json">
       <Link>Config\%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

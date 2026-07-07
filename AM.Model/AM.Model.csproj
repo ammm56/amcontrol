@@ -203,6 +203,11 @@
     <Compile Include="Usage\UsageEventBatchUpload.cs" />
     <Compile Include="Vision\CameraDriverType.cs" />
     <Compile Include="Vision\CameraImageFormat.cs" />
+    <Compile Include="Vision\VisionSdkDebugExecutionMode.cs" />
+    <Compile Include="Vision\VisionSdkDebugOperationInfo.cs" />
+    <Compile Include="Vision\VisionSdkDebugOperationKey.cs" />
+    <Compile Include="Vision\VisionSdkDebugRequest.cs" />
+    <Compile Include="Vision\VisionSdkDebugResult.cs" />
     <Compile Include="Vision\VisionInvokeResult.cs" />
     <Compile Include="Vision\VisionCallMode.cs" />
   </ItemGroup>

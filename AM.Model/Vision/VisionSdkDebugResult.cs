@@ -1,0 +1,34 @@
+using System;
+
+namespace AM.Model.Vision
+{
+    /// <summary>
+    /// 视觉 SDK 调试结果。
+    /// </summary>
+    public class VisionSdkDebugResult
+    {
+        public VisionSdkDebugOperationKey OperationKey { get; set; }
+
+        public string OperationName { get; set; }
+
+        public string RuntimeName { get; set; }
+
+        public string TriggerSourceName { get; set; }
+
+        public DateTime RequestTime { get; set; }
+
+        public int ElapsedMs { get; set; }
+
+        public bool IsSuccess { get; set; }
+
+        public string State { get; set; }
+
+        public string WorkflowRunId { get; set; }
+
+        public string ResponseJson { get; set; }
+
+        public string ErrorMessage { get; set; }
+
+        public bool ShouldSaveCallRecord { get; set; }
+    }
+}
