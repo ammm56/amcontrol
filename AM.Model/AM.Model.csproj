@@ -83,6 +83,7 @@
     <Compile Include="Common\ResultSource.cs" />
     <Compile Include="Camera\CameraDeviceInfo.cs" />
     <Compile Include="Camera\CameraFrame.cs" />
+    <Compile Include="Camera\CameraPreviewFrame.cs" />
     <Compile Include="Entity\Device\CameraConfigEntity.cs" />
     <Compile Include="Entity\Motion\Topology\MotionIoWiringEntity.cs" />
     <Compile Include="Entity\Plc\PlcPointConfigEntity.cs" />

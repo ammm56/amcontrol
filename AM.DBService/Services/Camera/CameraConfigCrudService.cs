@@ -198,7 +198,7 @@ namespace AM.DBService.Services.Camera
             entity.DevicePath = NormalizeNullableText(entity.DevicePath);
             entity.FriendlyName = NormalizeNullableText(entity.FriendlyName);
             entity.PixelFormat = NormalizeNullableText(entity.PixelFormat);
-            entity.ImageFormat = NormalizeNullableText(entity.ImageFormat);
+            entity.ImageFormat = NormalizeImageFormat(entity.ImageFormat);
             entity.SaveImageDirectory = NormalizeNullableText(entity.SaveImageDirectory);
             entity.Remark = NormalizeNullableText(entity.Remark);
 
@@ -209,12 +209,12 @@ namespace AM.DBService.Services.Camera
 
             if (string.IsNullOrWhiteSpace(entity.DriverType))
             {
-                entity.DriverType = CameraDriverType.UsbUvc.ToString();
+                entity.DriverType = CameraDriverType.Usb.ToString();
             }
 
             if (string.IsNullOrWhiteSpace(entity.ImageFormat))
             {
-                entity.ImageFormat = CameraImageFormat.Jpeg.ToString();
+                entity.ImageFormat = CameraImageFormat.JPEG.ToString();
             }
 
             if (string.IsNullOrWhiteSpace(entity.PixelFormat))
@@ -253,7 +253,17 @@ namespace AM.DBService.Services.Camera
 
             if (entity.PreviewFps <= 0)
             {
-                entity.PreviewFps = 10;
+                entity.PreviewFps = entity.Fps <= 0 ? 30 : entity.Fps;
+            }
+
+            if (entity.Fps > 0 && entity.PreviewFps > entity.Fps)
+            {
+                entity.PreviewFps = entity.Fps;
+            }
+
+            if (string.IsNullOrWhiteSpace(entity.SaveImageDirectory))
+            {
+                entity.SaveImageDirectory = "Images\\Camera";
             }
         }
 
@@ -300,6 +310,17 @@ namespace AM.DBService.Services.Camera
         private static string NormalizeNullableText(string value)
         {
             return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+        }
+
+        private static string NormalizeImageFormat(string value)
+        {
+            var text = NormalizeNullableText(value);
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return null;
+            }
+
+            return text.ToUpperInvariant();
         }
     }
 }

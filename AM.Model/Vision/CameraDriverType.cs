@@ -6,12 +6,12 @@ namespace AM.Model.Vision
     /// </summary>
     public enum CameraDriverType
     {
-        UsbUvc = 0,
-        AmvarReserved = 10,
-        HikvisionMvsReserved = 20,
-        CognexReserved = 30,
-        DahengReserved = 40,
-        VendorSdkReserved = 90,
-        VirtualReserved = 100
+        Usb = 0,
+        Amvar = 10,
+        HikvisionMvs = 20,
+        Cognex = 30,
+        Daheng = 40,
+        VendorSdk = 90,
+        Virtual = 100
     }
 }

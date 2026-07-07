@@ -45,15 +45,15 @@ namespace AMControlWinF.Views.SysConfig
             this.labelPixelFormat = new AntdUI.Label();
             this.inputFps = new AntdUI.Input();
             this.labelFps = new AntdUI.Label();
-            this.inputHeight = new AntdUI.Input();
+            this.selectHeight = new AntdUI.Select();
             this.labelHeight = new AntdUI.Label();
-            this.inputWidth = new AntdUI.Input();
+            this.selectWidth = new AntdUI.Select();
             this.labelWidth = new AntdUI.Label();
             this.labelSectionCapture = new AntdUI.Label();
             this.stackSectionBasic = new AntdUI.StackPanel();
             this.inputFriendlyName = new AntdUI.Input();
             this.labelFriendlyName = new AntdUI.Label();
-            this.inputDeviceIndex = new AntdUI.Input();
+            this.inputDeviceIndex = new AntdUI.InputNumber();
             this.labelDeviceIndex = new AntdUI.Label();
             this.checkEnabled = new AntdUI.Checkbox();
             this.labelEnabled = new AntdUI.Label();
@@ -145,7 +145,7 @@ namespace AMControlWinF.Views.SysConfig
             this.labelSaveImageDirectory.Name = "labelSaveImageDirectory";
             this.labelSaveImageDirectory.Size = new System.Drawing.Size(246, 22);
             this.labelSaveImageDirectory.TabIndex = 3;
-            this.labelSaveImageDirectory.Text = "保存目录";
+            this.labelSaveImageDirectory.Text = "图片保存目录";
             //
             // checkSaveImageEnabled
             //
@@ -153,9 +153,9 @@ namespace AMControlWinF.Views.SysConfig
             this.checkSaveImageEnabled.Location = new System.Drawing.Point(4, 64);
             this.checkSaveImageEnabled.Margin = new System.Windows.Forms.Padding(0);
             this.checkSaveImageEnabled.Name = "checkSaveImageEnabled";
-            this.checkSaveImageEnabled.Size = new System.Drawing.Size(98, 34);
+            this.checkSaveImageEnabled.Size = new System.Drawing.Size(86, 34);
             this.checkSaveImageEnabled.TabIndex = 2;
-            this.checkSaveImageEnabled.Text = "保存测试图";
+            this.checkSaveImageEnabled.Text = "取图保存";
             //
             // labelSaveImageEnabled
             //
@@ -164,7 +164,7 @@ namespace AMControlWinF.Views.SysConfig
             this.labelSaveImageEnabled.Name = "labelSaveImageEnabled";
             this.labelSaveImageEnabled.Size = new System.Drawing.Size(246, 22);
             this.labelSaveImageEnabled.TabIndex = 1;
-            this.labelSaveImageEnabled.Text = "保存测试图";
+            this.labelSaveImageEnabled.Text = "取图保存";
             //
             // labelSectionRemark
             //
@@ -304,9 +304,9 @@ namespace AMControlWinF.Views.SysConfig
             this.stackSectionCapture.Controls.Add(this.labelPixelFormat);
             this.stackSectionCapture.Controls.Add(this.inputFps);
             this.stackSectionCapture.Controls.Add(this.labelFps);
-            this.stackSectionCapture.Controls.Add(this.inputHeight);
+            this.stackSectionCapture.Controls.Add(this.selectHeight);
             this.stackSectionCapture.Controls.Add(this.labelHeight);
-            this.stackSectionCapture.Controls.Add(this.inputWidth);
+            this.stackSectionCapture.Controls.Add(this.selectWidth);
             this.stackSectionCapture.Controls.Add(this.labelWidth);
             this.stackSectionCapture.Controls.Add(this.labelSectionCapture);
             this.stackSectionCapture.Gap = 4;
@@ -395,15 +395,15 @@ namespace AMControlWinF.Views.SysConfig
             this.labelFps.TabIndex = 5;
             this.labelFps.Text = "FPS";
             //
-            // inputHeight
+            // selectHeight
             //
-            this.inputHeight.Location = new System.Drawing.Point(4, 104);
-            this.inputHeight.Margin = new System.Windows.Forms.Padding(0);
-            this.inputHeight.Name = "inputHeight";
-            this.inputHeight.PlaceholderText = "请输入高度";
-            this.inputHeight.Size = new System.Drawing.Size(246, 32);
-            this.inputHeight.TabIndex = 4;
-            this.inputHeight.WaveSize = 0;
+            this.selectHeight.Location = new System.Drawing.Point(4, 104);
+            this.selectHeight.Margin = new System.Windows.Forms.Padding(0);
+            this.selectHeight.Name = "selectHeight";
+            this.selectHeight.PlaceholderText = "请选择高度";
+            this.selectHeight.Size = new System.Drawing.Size(246, 32);
+            this.selectHeight.TabIndex = 4;
+            this.selectHeight.WaveSize = 0;
             //
             // labelHeight
             //
@@ -414,15 +414,15 @@ namespace AMControlWinF.Views.SysConfig
             this.labelHeight.TabIndex = 3;
             this.labelHeight.Text = "高度";
             //
-            // inputWidth
+            // selectWidth
             //
-            this.inputWidth.Location = new System.Drawing.Point(4, 42);
-            this.inputWidth.Margin = new System.Windows.Forms.Padding(0);
-            this.inputWidth.Name = "inputWidth";
-            this.inputWidth.PlaceholderText = "请输入宽度";
-            this.inputWidth.Size = new System.Drawing.Size(246, 32);
-            this.inputWidth.TabIndex = 2;
-            this.inputWidth.WaveSize = 0;
+            this.selectWidth.Location = new System.Drawing.Point(4, 42);
+            this.selectWidth.Margin = new System.Windows.Forms.Padding(0);
+            this.selectWidth.Name = "selectWidth";
+            this.selectWidth.PlaceholderText = "请选择宽度";
+            this.selectWidth.Size = new System.Drawing.Size(246, 32);
+            this.selectWidth.TabIndex = 2;
+            this.selectWidth.WaveSize = 0;
             //
             // labelWidth
             //
@@ -491,7 +491,12 @@ namespace AMControlWinF.Views.SysConfig
             this.inputDeviceIndex.Location = new System.Drawing.Point(4, 220);
             this.inputDeviceIndex.Margin = new System.Windows.Forms.Padding(0);
             this.inputDeviceIndex.Name = "inputDeviceIndex";
-            this.inputDeviceIndex.PlaceholderText = "请输入设备索引";
+            this.inputDeviceIndex.Minimum = new decimal(new int[] {
+            0,
+            0,
+            0,
+            0});
+            this.inputDeviceIndex.PlaceholderText = "设备索引从 0 开始";
             this.inputDeviceIndex.Size = new System.Drawing.Size(246, 32);
             this.inputDeviceIndex.TabIndex = 9;
             this.inputDeviceIndex.WaveSize = 0;
@@ -555,7 +560,7 @@ namespace AMControlWinF.Views.SysConfig
             this.labelDriverType.Name = "labelDriverType";
             this.labelDriverType.Size = new System.Drawing.Size(246, 22);
             this.labelDriverType.TabIndex = 0;
-            this.labelDriverType.Text = "驱动类型";
+            this.labelDriverType.Text = "驱动名称";
             //
             // inputCameraName
             //
@@ -635,15 +640,15 @@ namespace AMControlWinF.Views.SysConfig
         private AntdUI.Label labelEnabled;
         private AntdUI.Checkbox checkEnabled;
         private AntdUI.Label labelDeviceIndex;
-        private AntdUI.Input inputDeviceIndex;
+        private AntdUI.InputNumber inputDeviceIndex;
         private AntdUI.Label labelFriendlyName;
         private AntdUI.Input inputFriendlyName;
         private AntdUI.StackPanel stackSectionCapture;
         private AntdUI.Label labelSectionCapture;
         private AntdUI.Label labelWidth;
-        private AntdUI.Input inputWidth;
+        private AntdUI.Select selectWidth;
         private AntdUI.Label labelHeight;
-        private AntdUI.Input inputHeight;
+        private AntdUI.Select selectHeight;
         private AntdUI.Label labelFps;
         private AntdUI.Input inputFps;
         private AntdUI.Label labelPixelFormat;

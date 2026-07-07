@@ -3,6 +3,7 @@ using AM.Model.Entity.Device;
 using AM.Model.Vision;
 using OpenCvSharp;
 using System;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace AM.CameraService.OpenCv
@@ -81,7 +82,7 @@ namespace AM.CameraService.OpenCv
                     var extension = ResolveExtension(imageFormat);
                     byte[] encodedBytes;
 
-                    var encodingParams = imageFormat == CameraImageFormat.Jpeg
+                    var encodingParams = imageFormat == CameraImageFormat.JPEG
                         ? new[] { (int)ImwriteFlags.JpegQuality, NormalizeJpegQuality(_config.JpegQuality) }
                         : new int[0];
                     var encoded = Cv2.ImEncode(extension, frame, out encodedBytes, encodingParams);
@@ -102,6 +103,38 @@ namespace AM.CameraService.OpenCv
                         MediaType = ResolveMediaType(imageFormat),
                         EncodedBytes = encodedBytes
                     };
+                }
+            }
+        }
+
+        public CameraPreviewFrame GrabPreviewFrame(int maxWidth, int maxHeight)
+        {
+            lock (_syncRoot)
+            {
+                EnsureOpen();
+
+                using (var frame = ReadFrame())
+                {
+                    Mat bgr = null;
+                    Mat preview = null;
+                    try
+                    {
+                        var source = EnsureBgr24(frame, out bgr);
+                        source = ResizeForPreview(source, maxWidth, maxHeight, out preview);
+                        return BuildPreviewFrame(source);
+                    }
+                    finally
+                    {
+                        if (preview != null)
+                        {
+                            preview.Dispose();
+                        }
+
+                        if (bgr != null)
+                        {
+                            bgr.Dispose();
+                        }
+                    }
                 }
             }
         }
@@ -155,6 +188,7 @@ namespace AM.CameraService.OpenCv
 
         private static void ApplyRequestedProperties(VideoCapture capture, CameraConfigEntity config)
         {
+            capture.Set(VideoCaptureProperties.BufferSize, 1);
             SetFourCc(capture, config.PixelFormat);
 
             if (config.Fps > 0)
@@ -246,19 +280,89 @@ namespace AM.CameraService.OpenCv
             return new string(chars);
         }
 
+        private static Mat EnsureBgr24(Mat frame, out Mat converted)
+        {
+            converted = null;
+            var channels = frame.Channels();
+
+            if (channels == 3)
+            {
+                return frame;
+            }
+
+            converted = new Mat();
+            if (channels == 4)
+            {
+                Cv2.CvtColor(frame, converted, ColorConversionCodes.BGRA2BGR);
+            }
+            else if (channels == 1)
+            {
+                Cv2.CvtColor(frame, converted, ColorConversionCodes.GRAY2BGR);
+            }
+            else
+            {
+                throw new InvalidOperationException("不支持的预览像素通道数: " + channels);
+            }
+
+            return converted;
+        }
+
+        private static Mat ResizeForPreview(Mat frame, int maxWidth, int maxHeight, out Mat resized)
+        {
+            resized = null;
+            if (maxWidth <= 0 || maxHeight <= 0 || frame.Width <= maxWidth && frame.Height <= maxHeight)
+            {
+                return frame;
+            }
+
+            var scaleX = (double)maxWidth / frame.Width;
+            var scaleY = (double)maxHeight / frame.Height;
+            var scale = Math.Min(scaleX, scaleY);
+            var width = Math.Max(1, (int)Math.Round(frame.Width * scale));
+            var height = Math.Max(1, (int)Math.Round(frame.Height * scale));
+
+            resized = new Mat();
+            Cv2.Resize(frame, resized, new Size(width, height), 0, 0, InterpolationFlags.Area);
+            return resized;
+        }
+
+        private CameraPreviewFrame BuildPreviewFrame(Mat frame)
+        {
+            var stride = checked((int)frame.Step());
+            var height = frame.Rows;
+            var bytes = new byte[checked(stride * height)];
+
+            for (var row = 0; row < height; row++)
+            {
+                Marshal.Copy(IntPtr.Add(frame.Data, row * stride), bytes, row * stride, stride);
+            }
+
+            return new CameraPreviewFrame
+            {
+                CameraCode = _config.CameraCode,
+                FrameId = Guid.NewGuid().ToString("N"),
+                Timestamp = DateTime.Now,
+                Width = frame.Width,
+                Height = frame.Height,
+                Stride = stride,
+                PixelFormat = "BGR24",
+                BgrBytes = bytes
+            };
+        }
+
         private static CameraImageFormat ResolveImageFormat(string value)
         {
             CameraImageFormat format;
-            return Enum.TryParse(value, true, out format) ? format : CameraImageFormat.Jpeg;
+            return Enum.TryParse(value, true, out format) ? format : CameraImageFormat.JPEG;
         }
 
         private static string ResolveExtension(CameraImageFormat imageFormat)
         {
             switch (imageFormat)
             {
-                case CameraImageFormat.Png:
+                case CameraImageFormat.PNG:
                     return ".png";
-                case CameraImageFormat.Bmp:
+                case CameraImageFormat.BMP:
                     return ".bmp";
                 default:
                     return ".jpg";
@@ -269,9 +373,9 @@ namespace AM.CameraService.OpenCv
         {
             switch (imageFormat)
             {
-                case CameraImageFormat.Png:
+                case CameraImageFormat.PNG:
                     return "image/png";
-                case CameraImageFormat.Bmp:
+                case CameraImageFormat.BMP:
                     return "image/bmp";
                 default:
                     return "image/jpeg";

@@ -10,8 +10,10 @@ using AntdUI;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -23,6 +25,8 @@ namespace AMControlWinF.Views.SysConfig
     /// </summary>
     public partial class CameraConfigManagementPage : UserControl
     {
+        private const string DefaultSaveImageDirectory = "Images\\Camera";
+
         private readonly CameraConfigCrudService _crudService;
         private readonly ICameraRuntimeService _cameraRuntime;
         private readonly Timer _previewTimer;
@@ -33,6 +37,8 @@ namespace AMControlWinF.Views.SysConfig
         private List<CameraConfigEntity> _filteredConfigs;
         private CameraConfigEntity _selectedCamera;
         private CameraFrame _lastFrame;
+        private CameraPreviewFrame _lastPreviewFrame;
+        private Bitmap _previewBitmap;
         private bool _isFirstLoad;
         private bool _isBusy;
         private bool _isPreviewRunning;
@@ -69,15 +75,8 @@ namespace AMControlWinF.Views.SysConfig
                 _cameraRuntime.Dispose();
             }
 
-            if (picturePreview != null)
-            {
-                var image = picturePreview.Image;
-                picturePreview.Image = null;
-                if (image != null)
-                {
-                    image.Dispose();
-                }
-            }
+            DisposePictureImage();
+            DisposePreviewBitmap();
         }
 
         private void InitializeTable()
@@ -116,6 +115,8 @@ namespace AMControlWinF.Views.SysConfig
         {
             Load += CameraConfigManagementPage_Load;
             inputSearch.TextChanged += InputSearch_TextChanged;
+            inputSearch.KeyUp += InputSearch_KeyUp;
+            inputSearch.Leave += InputSearch_Leave;
             tableCameras.CellClick += TableCameras_CellClick;
 
             buttonRefresh.Click += async (s, e) => await ReloadAsync(GetSelectedCameraCode());
@@ -143,7 +144,23 @@ namespace AMControlWinF.Views.SysConfig
 
         private void InputSearch_TextChanged(object sender, EventArgs e)
         {
+            RefreshSearchFilter();
+        }
+
+        private void InputSearch_KeyUp(object sender, KeyEventArgs e)
+        {
+            RefreshSearchFilter();
+        }
+
+        private void InputSearch_Leave(object sender, EventArgs e)
+        {
+            RefreshSearchFilter();
+        }
+
+        private void RefreshSearchFilter()
+        {
             ApplyFilter();
+            SyncSelectedCameraWithFilter();
             RebindTable();
             RefreshPageState();
         }
@@ -219,9 +236,21 @@ namespace AMControlWinF.Views.SysConfig
                 .Where(x =>
                     ContainsText(x.CameraName, keyword) ||
                     ContainsText(x.CameraCode, keyword) ||
-                    ContainsText(x.FriendlyName, keyword))
+                    ContainsText(x.FriendlyName, keyword) ||
+                    ContainsText(x.DriverType, keyword))
                 .OrderBy(x => x.Id)
                 .ToList();
+        }
+
+        private void SyncSelectedCameraWithFilter()
+        {
+            if (_selectedCamera != null &&
+                _filteredConfigs.Any(x => string.Equals(x.CameraCode, _selectedCamera.CameraCode, StringComparison.OrdinalIgnoreCase)))
+            {
+                return;
+            }
+
+            _selectedCamera = _filteredConfigs.FirstOrDefault();
         }
 
         private void RebindTable()
@@ -440,8 +469,9 @@ namespace AMControlWinF.Views.SysConfig
                     return;
                 }
 
-                var previewFps = _selectedCamera.PreviewFps <= 0 ? 10 : _selectedCamera.PreviewFps;
-                _previewTimer.Interval = Math.Max(50, 1000 / previewFps);
+                var cameraFps = _selectedCamera.Fps <= 0 ? 30 : _selectedCamera.Fps;
+                var previewFps = _selectedCamera.PreviewFps <= 0 ? cameraFps : Math.Min(_selectedCamera.PreviewFps, cameraFps);
+                _previewTimer.Interval = Math.Max(15, 1000 / previewFps);
                 _isPreviewRunning = true;
                 _previewTimer.Start();
                 labelRuntimeSummary.Text = "相机预览已开始：" + GetCameraTitle(_selectedCamera);
@@ -463,11 +493,49 @@ namespace AMControlWinF.Views.SysConfig
             _isPreviewTickBusy = true;
             try
             {
-                await GrabFrameAsync(true);
+                await GrabPreviewFrameAsync();
             }
             finally
             {
                 _isPreviewTickBusy = false;
+            }
+        }
+
+        private async Task GrabPreviewFrameAsync()
+        {
+            if (_selectedCamera == null)
+            {
+                return;
+            }
+
+            try
+            {
+                if (!IsCameraOpened(_selectedCamera.CameraCode))
+                {
+                    var openResult = await EnsureSelectedCameraOpenAsync();
+                    if (!openResult.Success)
+                    {
+                        labelRuntimeSummary.Text = openResult.Message;
+                        return;
+                    }
+                }
+
+                var previewSize = picturePreview.ClientSize;
+                var maxWidth = Math.Max(1, previewSize.Width);
+                var maxHeight = Math.Max(1, previewSize.Height);
+                var result = await Task.Run(() => _cameraRuntime.GrabPreviewFrame(_selectedCamera.CameraCode, maxWidth, maxHeight));
+                if (!result.Success || result.Item == null)
+                {
+                    labelRuntimeSummary.Text = result.Message;
+                    return;
+                }
+
+                _lastPreviewFrame = result.Item;
+                ShowPreviewFrame(_lastPreviewFrame);
+            }
+            catch (Exception ex)
+            {
+                labelRuntimeSummary.Text = "相机预览失败：" + ex.Message;
             }
         }
 
@@ -520,7 +588,22 @@ namespace AMControlWinF.Views.SysConfig
 
                 _lastFrame = result.Item;
                 ShowFrame(_lastFrame);
-                labelRuntimeSummary.Text = result.Message;
+
+                var message = result.Message;
+                if (!silent)
+                {
+                    var saveResult = SaveGrabFrame(_selectedCamera, _lastFrame);
+                    if (!saveResult.Success)
+                    {
+                        PageDialogHelper.ShowWarn(this, "保存取图", saveResult.Message);
+                    }
+                    else if (!string.IsNullOrWhiteSpace(saveResult.Item))
+                    {
+                        message = message + "，已保存：" + saveResult.Item;
+                    }
+                }
+
+                labelRuntimeSummary.Text = message;
             }
             finally
             {
@@ -565,6 +648,7 @@ namespace AMControlWinF.Views.SysConfig
             using (var image = Image.FromStream(stream))
             {
                 var cloned = new Bitmap(image);
+                DisposePreviewBitmap();
                 var old = picturePreview.Image;
                 picturePreview.Image = cloned;
                 if (old != null)
@@ -582,17 +666,114 @@ namespace AMControlWinF.Views.SysConfig
                 frame.Timestamp);
         }
 
+        private void ShowPreviewFrame(CameraPreviewFrame frame)
+        {
+            if (frame == null || frame.BgrBytes == null || frame.BgrBytes.Length == 0)
+            {
+                return;
+            }
+
+            EnsurePreviewBitmap(frame.Width, frame.Height);
+            CopyBgr24ToBitmap(frame, _previewBitmap);
+
+            if (!ReferenceEquals(picturePreview.Image, _previewBitmap))
+            {
+                var old = picturePreview.Image;
+                picturePreview.Image = _previewBitmap;
+                if (old != null)
+                {
+                    old.Dispose();
+                }
+            }
+
+            picturePreview.Invalidate();
+
+            labelPreviewSummary.Text = string.Format(
+                "{0}x{1}  {2}  {3:N0} bytes  {4:HH:mm:ss.fff}",
+                frame.Width,
+                frame.Height,
+                frame.PixelFormat,
+                frame.BytesLength,
+                frame.Timestamp);
+        }
+
+        private void EnsurePreviewBitmap(int width, int height)
+        {
+            if (_previewBitmap != null &&
+                _previewBitmap.Width == width &&
+                _previewBitmap.Height == height)
+            {
+                return;
+            }
+
+            DisposePreviewBitmap();
+            _previewBitmap = new Bitmap(width, height, PixelFormat.Format24bppRgb);
+        }
+
+        private static void CopyBgr24ToBitmap(CameraPreviewFrame frame, Bitmap bitmap)
+        {
+            var rect = new Rectangle(0, 0, frame.Width, frame.Height);
+            var data = bitmap.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
+            try
+            {
+                var sourceStride = frame.Stride;
+                var targetStride = Math.Abs(data.Stride);
+                var rowBytes = Math.Min(frame.Width * 3, Math.Min(sourceStride, targetStride));
+
+                for (var row = 0; row < frame.Height; row++)
+                {
+                    var sourceOffset = row * sourceStride;
+                    var targetOffset = data.Stride >= 0
+                        ? row * data.Stride
+                        : (frame.Height - 1 - row) * targetStride;
+                    Marshal.Copy(frame.BgrBytes, sourceOffset, IntPtr.Add(data.Scan0, targetOffset), rowBytes);
+                }
+            }
+            finally
+            {
+                bitmap.UnlockBits(data);
+            }
+        }
+
         private void ClearPreviewImage()
         {
+            DisposePictureImage();
+            DisposePreviewBitmap();
+
+            _lastFrame = null;
+            _lastPreviewFrame = null;
+            labelPreviewSummary.Text = "暂无图像";
+        }
+
+        private void DisposePictureImage()
+        {
+            if (picturePreview == null)
+            {
+                return;
+            }
+
             var old = picturePreview.Image;
             picturePreview.Image = null;
-            if (old != null)
+            if (old != null && !ReferenceEquals(old, _previewBitmap))
             {
                 old.Dispose();
             }
+        }
 
-            _lastFrame = null;
-            labelPreviewSummary.Text = "暂无图像";
+        private void DisposePreviewBitmap()
+        {
+            if (_previewBitmap == null)
+            {
+                return;
+            }
+
+            if (picturePreview != null && ReferenceEquals(picturePreview.Image, _previewBitmap))
+            {
+                picturePreview.Image = null;
+            }
+
+            _previewBitmap.Dispose();
+            _previewBitmap = null;
         }
 
         private void StopPreview()
@@ -600,6 +781,40 @@ namespace AMControlWinF.Views.SysConfig
             _previewTimer.Stop();
             _isPreviewRunning = false;
             _isPreviewTickBusy = false;
+        }
+
+        private Result<string> SaveGrabFrame(CameraConfigEntity camera, CameraFrame frame)
+        {
+            if (camera == null || !camera.SaveImageEnabled)
+            {
+                return Result<string>.OkItem(null, "未启用取图保存", ResultSource.UI);
+            }
+
+            if (frame == null || frame.EncodedBytes == null || frame.EncodedBytes.Length == 0)
+            {
+                return Result<string>.Fail(1, "没有可保存的取图数据", ResultSource.UI);
+            }
+
+            try
+            {
+                var directory = ResolveSaveDirectory(camera.SaveImageDirectory);
+                Directory.CreateDirectory(directory);
+
+                var fileName = string.Format(
+                    "{0}_{1:yyyyMMdd_HHmmss_fff}_{2}{3}",
+                    SanitizeFileName(camera.CameraCode),
+                    frame.Timestamp,
+                    string.IsNullOrWhiteSpace(frame.FrameId) ? Guid.NewGuid().ToString("N") : frame.FrameId,
+                    ResolveImageExtension(frame.MediaType, camera.ImageFormat));
+
+                var path = Path.Combine(directory, fileName);
+                File.WriteAllBytes(path, frame.EncodedBytes);
+                return Result<string>.OkItem(path, "取图已保存", ResultSource.UI);
+            }
+            catch (Exception ex)
+            {
+                return Result<string>.Fail(2, "取图保存失败：" + ex.Message, ResultSource.UI);
+            }
         }
 
         private void RefreshPageState()
@@ -658,7 +873,7 @@ namespace AMControlWinF.Views.SysConfig
             {
                 CameraCode = "USB_CAMERA_" + index,
                 CameraName = "USB相机" + index,
-                DriverType = CameraDriverType.UsbUvc.ToString(),
+                DriverType = CameraDriverType.Usb.ToString(),
                 IsEnabled = true,
                 DeviceIndex = index,
                 FriendlyName = "OpenCV Camera " + index,
@@ -667,11 +882,11 @@ namespace AMControlWinF.Views.SysConfig
                 Fps = 30,
                 PixelFormat = "MJPG",
                 GrabTimeoutMs = 3000,
-                ImageFormat = CameraImageFormat.Jpeg.ToString(),
+                ImageFormat = CameraImageFormat.JPEG.ToString(),
                 JpegQuality = 80,
-                PreviewFps = 10,
-                SaveImageEnabled = false,
-                SaveImageDirectory = "Images\\Camera",
+                PreviewFps = 30,
+                SaveImageEnabled = true,
+                SaveImageDirectory = DefaultSaveImageDirectory,
                 Remark = "OpenCV DSHOW USB 相机",
                 CreateTime = now,
                 UpdateTime = now
@@ -697,6 +912,51 @@ namespace AMControlWinF.Views.SysConfig
         private bool IsCameraOpened(string cameraCode)
         {
             return !string.IsNullOrWhiteSpace(cameraCode) && _openedCameraCodes.Contains(cameraCode);
+        }
+
+        private static string ResolveSaveDirectory(string saveDirectory)
+        {
+            var directory = NormalizeText(saveDirectory);
+            if (string.IsNullOrWhiteSpace(directory))
+            {
+                directory = DefaultSaveImageDirectory;
+            }
+
+            return Path.IsPathRooted(directory)
+                ? directory
+                : Path.Combine(AppDomain.CurrentDomain.BaseDirectory, directory);
+        }
+
+        private static string ResolveImageExtension(string mediaType, string imageFormat)
+        {
+            var format = NormalizeText(imageFormat).ToUpperInvariant();
+            if (string.Equals(mediaType, "image/png", StringComparison.OrdinalIgnoreCase) || format == "PNG")
+            {
+                return ".png";
+            }
+
+            if (string.Equals(mediaType, "image/bmp", StringComparison.OrdinalIgnoreCase) || format == "BMP")
+            {
+                return ".bmp";
+            }
+
+            return ".jpg";
+        }
+
+        private static string SanitizeFileName(string value)
+        {
+            var text = NormalizeText(value);
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                text = "CAMERA";
+            }
+
+            foreach (var invalid in Path.GetInvalidFileNameChars())
+            {
+                text = text.Replace(invalid, '_');
+            }
+
+            return text;
         }
 
         private static bool ContainsText(string source, string keyword)

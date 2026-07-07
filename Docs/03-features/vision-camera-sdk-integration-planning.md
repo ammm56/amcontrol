@@ -65,9 +65,11 @@
 ```mermaid
 flowchart LR
     A["amcontrol 相机配置"] --> B["相机驱动打开设备"]
-    B --> C["取图 CameraFrame"]
-    C --> D["编码 JPEG / PNG / BMP"]
-    D --> E["WorkflowOperationRunner"]
+    B --> C1["实时预览 CameraPreviewFrame / BGR24"]
+    C1 --> C2["WinForms Bitmap LockBits 显示"]
+    B --> D1["业务取图 CameraFrame"]
+    D1 --> D2["仅在保存/视觉调用边界编码 JPEG / PNG / BMP"]
+    D2 --> E["WorkflowOperationRunner"]
     E --> F["amvision .NET SDK"]
     F --> G["amvision backend-service"]
     G --> H["视觉结果"]
@@ -83,6 +85,15 @@ flowchart LR
 - workflow app、runtime、TriggerSource 和视觉配置完全属于 `amvision`；
 - 两者只通过 SDK 调用参数和返回结果发生关系；
 - 前端嵌入只是操作便利性，不改变业务边界。
+
+### 3.1 图像性能边界
+
+- 实时预览必须从 `JPEG/PNG/BMP` 编码链路中拆出，使用 `CameraPreviewFrame` 保存 BGR24 像素数据，WinForms 端通过 `Bitmap.LockBits` 写入并显示；
+- `CameraFrame` 只用于手动取图保存、视觉 SDK 调用和后续业务调用，避免预览每帧都做 `Cv2.ImEncode`、`Image.FromStream` 和 GDI+ 解码；
+- 当前 `Libsrc/amvision` SDK 的调用边界是 `byte[] imageBytes + mediaType`，本项目不能直接把 C# `Bitmap` 传给视觉后端；
+- 内部相机运行层可以保留 OpenCV `Mat` / BGR24 原始帧，但进入 SDK 前仍需要编码一次；
+- OpenCV `Cv2.ImEncode` 直接从 `Mat` 编码通常比 `Mat -> Bitmap -> GDI+ Save` 更适合本项目链路；
+- `PNG` 压缩开销最大，适合需要无损且低频的调试场景；`JPEG` 有压缩开销但传输体积小，默认适合高分辨率视觉调用；`BMP` 编码开销低但体积大，只有在本机传输、后端明确支持 `image/bmp` 且实测总耗时更低时才作为性能选项。
 
 ---
 
@@ -180,13 +191,13 @@ InvokeRuntimeAppResultWithImageBytesAsync(runtimeName, imageBytes, "image/jpeg")
 后续厂商 SDK 相机按驱动类型预留，不使用笼统“工业相机”命名：
 
 ```text
-UsbUvc
-AmvarReserved
-HikvisionMvsReserved
-CognexReserved
-DahengReserved
-VendorSdkReserved
-VirtualReserved
+Usb
+Amvar
+HikvisionMvs
+Cognex
+Daheng
+VendorSdk
+Virtual
 ```
 
 ### 5.2 相机表规划
@@ -204,7 +215,7 @@ device_camera_config
 | `Id` | 主键 |
 | `CameraCode` | 相机编码，业务侧唯一标识 |
 | `CameraName` | 相机名称 |
-| `DriverType` | 驱动类型，第一阶段默认 `UsbUvc` |
+| `DriverType` | 驱动名称，第一阶段默认 `Usb`；当前实现为 OpenCvSharp DSHOW |
 | `IsEnabled` | 是否启用 |
 | `DeviceIndex` | OpenCV DSHOW 设备索引 |
 | `DevicePath` | USB 相机设备路径或 moniker，OpenCV 第一阶段可为空 |
@@ -218,9 +229,9 @@ device_camera_config
 | `GrabTimeoutMs` | 取图超时 |
 | `ImageFormat` | SDK 调用前的编码格式，默认 JPEG |
 | `JpegQuality` | JPEG 质量 |
-| `PreviewFps` | 页面预览帧率 |
-| `SaveImageEnabled` | 是否保存测试图或调用图 |
-| `SaveImageDirectory` | 图片保存目录 |
+| `PreviewFps` | 页面预览帧率，默认等于相机 FPS，不能高于相机 FPS |
+| `SaveImageEnabled` | 是否在手动点击“取图”时保存当前帧；定时预览不自动落盘 |
+| `SaveImageDirectory` | 手动取图保存目录，支持相对主程序输出目录的路径 |
 | `Remark` | 备注 |
 | `CreateTime` | 创建时间 |
 | `UpdateTime` | 更新时间 |
@@ -241,6 +252,7 @@ device_camera_config
 ```text
 AM.Model/Camera/CameraDeviceInfo.cs
 AM.Model/Camera/CameraFrame.cs
+AM.Model/Camera/CameraPreviewFrame.cs
 AM.Model/Interfaces/Camera/ICameraRuntimeService.cs
 AM.CameraService/OpenCv/OpenCvCameraRuntimeService.cs
 ```
@@ -252,8 +264,9 @@ AM.CameraService/OpenCv/OpenCvCameraRuntimeService.cs
 - 可打开/关闭指定相机；
 - 可打开相机驱动设置页，用于现场确认 MJPG、分辨率和帧率；
 - 可单帧取图；
-- 可将图像编码为 `image/jpeg` + `byte[]`；
-- 可在页面预览和测试保存图片。
+- 可将业务取图编码为 `image/jpeg` / `image/png` / `image/bmp` + `byte[]`；
+- 可使用 BGR24 预览帧进行页面实时预览；
+- 可在手动取图时测试保存图片。
 
 ---
 

@@ -6,8 +6,8 @@ namespace AM.Model.Vision
     /// </summary>
     public enum CameraImageFormat
     {
-        Jpeg = 0,
-        Png = 1,
-        Bmp = 2
+        JPEG = 0,
+        PNG = 1,
+        BMP = 2
     }
 }

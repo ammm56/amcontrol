@@ -54,7 +54,7 @@ namespace AM.CameraService.OpenCv
                                 DeviceIndex = index,
                                 DevicePath = null,
                                 FriendlyName = "OpenCV Camera " + index,
-                                DriverType = CameraDriverType.UsbUvc.ToString(),
+                                DriverType = CameraDriverType.Usb.ToString(),
                                 BackendName = BackendName,
                                 IsAvailable = true,
                                 Description = description
@@ -80,7 +80,7 @@ namespace AM.CameraService.OpenCv
 
                 var cameraCode = NormalizeCameraCode(config.CameraCode);
                 var driverType = NormalizeText(config.DriverType);
-                if (!string.Equals(driverType, CameraDriverType.UsbUvc.ToString(), StringComparison.OrdinalIgnoreCase))
+                if (!string.Equals(driverType, CameraDriverType.Usb.ToString(), StringComparison.OrdinalIgnoreCase))
                 {
                     return Result.Fail(2, "当前仅实现通用 USB 相机，驱动类型=" + driverType, ResultSource.Camera);
                 }
@@ -159,6 +159,21 @@ namespace AM.CameraService.OpenCv
             catch (Exception ex)
             {
                 return Result<CameraFrame>.Fail(6, "相机取图失败: " + ex.Message, ResultSource.Camera);
+            }
+        }
+
+        public Result<CameraPreviewFrame> GrabPreviewFrame(string cameraCode, int maxWidth, int maxHeight)
+        {
+            try
+            {
+                ThrowIfDisposed();
+                var device = GetOpenedDevice(cameraCode);
+                var frame = device.GrabPreviewFrame(maxWidth, maxHeight);
+                return Result<CameraPreviewFrame>.OkItem(frame, "相机预览帧获取成功", ResultSource.Camera);
+            }
+            catch (Exception ex)
+            {
+                return Result<CameraPreviewFrame>.Fail(8, "相机预览帧获取失败: " + ex.Message, ResultSource.Camera);
             }
         }
 

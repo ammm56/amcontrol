@@ -19,6 +19,8 @@ namespace AM.Model.Interfaces.Camera
 
         Result ShowSettings(string cameraCode);
 
+        Result<CameraPreviewFrame> GrabPreviewFrame(string cameraCode, int maxWidth, int maxHeight);
+
         Result<CameraFrame> GrabFrame(string cameraCode);
 
         Result<bool> IsOpen(string cameraCode);
