@@ -220,7 +220,7 @@ namespace AMControlWinF.Views.SysConfig
             this.inputJpegQuality.Location = new System.Drawing.Point(4, 160);
             this.inputJpegQuality.Margin = new System.Windows.Forms.Padding(0);
             this.inputJpegQuality.Name = "inputJpegQuality";
-            this.inputJpegQuality.PlaceholderText = "请输入 JPEG 质量";
+            this.inputJpegQuality.PlaceholderText = "请输入保存/调用 JPEG 质量";
             this.inputJpegQuality.Size = new System.Drawing.Size(246, 32);
             this.inputJpegQuality.TabIndex = 5;
             this.inputJpegQuality.WaveSize = 0;
@@ -232,7 +232,7 @@ namespace AMControlWinF.Views.SysConfig
             this.labelJpegQuality.Name = "labelJpegQuality";
             this.labelJpegQuality.Size = new System.Drawing.Size(246, 22);
             this.labelJpegQuality.TabIndex = 4;
-            this.labelJpegQuality.Text = "JPEG质量";
+            this.labelJpegQuality.Text = "保存/调用 JPEG 质量";
             //
             // panelRowImageFormat
             //
@@ -263,7 +263,7 @@ namespace AMControlWinF.Views.SysConfig
             this.labelImageFormat.Name = "labelImageFormat";
             this.labelImageFormat.Size = new System.Drawing.Size(246, 22);
             this.labelImageFormat.TabIndex = 0;
-            this.labelImageFormat.Text = "图片格式";
+            this.labelImageFormat.Text = "保存/调用图片格式";
             //
             // inputGrabTimeoutMs
             //
@@ -292,7 +292,7 @@ namespace AMControlWinF.Views.SysConfig
             this.labelSectionEncode.Name = "labelSectionEncode";
             this.labelSectionEncode.Size = new System.Drawing.Size(246, 26);
             this.labelSectionEncode.TabIndex = 0;
-            this.labelSectionEncode.Text = "编码预览";
+            this.labelSectionEncode.Text = "保存/视觉调用编码";
             //
             // stackSectionCapture
             //

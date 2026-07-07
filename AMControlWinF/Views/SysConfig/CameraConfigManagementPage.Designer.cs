@@ -25,6 +25,10 @@ namespace AMControlWinF.Views.SysConfig
             this.panelContentCard = new AntdUI.Panel();
             this.gridContent = new AntdUI.GridPanel();
             this.panelPreviewCard = new AntdUI.Panel();
+            this.panelPreviewViewport = new System.Windows.Forms.Panel();
+            this.flowPreviewZoom = new AntdUI.FlowPanel();
+            this.buttonPreviewZoomOut = new AntdUI.Button();
+            this.buttonPreviewZoomIn = new AntdUI.Button();
             this.picturePreview = new System.Windows.Forms.PictureBox();
             this.panelPreviewFooter = new AntdUI.Panel();
             this.flowPreviewButtons = new AntdUI.FlowPanel();
@@ -62,6 +66,8 @@ namespace AMControlWinF.Views.SysConfig
             this.panelContentCard.SuspendLayout();
             this.gridContent.SuspendLayout();
             this.panelPreviewCard.SuspendLayout();
+            this.panelPreviewViewport.SuspendLayout();
+            this.flowPreviewZoom.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picturePreview)).BeginInit();
             this.panelPreviewFooter.SuspendLayout();
             this.flowPreviewButtons.SuspendLayout();
@@ -121,7 +127,7 @@ namespace AMControlWinF.Views.SysConfig
             // panelPreviewCard
             //
             this.panelPreviewCard.BackColor = System.Drawing.Color.Transparent;
-            this.panelPreviewCard.Controls.Add(this.picturePreview);
+            this.panelPreviewCard.Controls.Add(this.panelPreviewViewport);
             this.panelPreviewCard.Controls.Add(this.panelPreviewFooter);
             this.panelPreviewCard.Controls.Add(this.panelPreviewHeader);
             this.panelPreviewCard.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -135,16 +141,62 @@ namespace AMControlWinF.Views.SysConfig
             this.panelPreviewCard.Size = new System.Drawing.Size(680, 532);
             this.panelPreviewCard.TabIndex = 1;
             //
+            // panelPreviewViewport
+            //
+            this.panelPreviewViewport.BackColor = System.Drawing.Color.FromArgb(22, 25, 32);
+            this.panelPreviewViewport.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panelPreviewViewport.Controls.Add(this.flowPreviewZoom);
+            this.panelPreviewViewport.Controls.Add(this.picturePreview);
+            this.panelPreviewViewport.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelPreviewViewport.Location = new System.Drawing.Point(12, 56);
+            this.panelPreviewViewport.Margin = new System.Windows.Forms.Padding(0);
+            this.panelPreviewViewport.Name = "panelPreviewViewport";
+            this.panelPreviewViewport.Size = new System.Drawing.Size(656, 412);
+            this.panelPreviewViewport.TabIndex = 1;
+            //
+            // flowPreviewZoom
+            //
+            this.flowPreviewZoom.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Right | System.Windows.Forms.AnchorStyles.Bottom)));
+            this.flowPreviewZoom.Controls.Add(this.buttonPreviewZoomOut);
+            this.flowPreviewZoom.Controls.Add(this.buttonPreviewZoomIn);
+            this.flowPreviewZoom.Gap = 4;
+            this.flowPreviewZoom.Location = new System.Drawing.Point(578, 366);
+            this.flowPreviewZoom.Margin = new System.Windows.Forms.Padding(0);
+            this.flowPreviewZoom.Name = "flowPreviewZoom";
+            this.flowPreviewZoom.Size = new System.Drawing.Size(70, 36);
+            this.flowPreviewZoom.TabIndex = 2;
+            //
+            // buttonPreviewZoomOut
+            //
+            this.buttonPreviewZoomOut.IconSvg = "MinusOutlined";
+            this.buttonPreviewZoomOut.Location = new System.Drawing.Point(4, 0);
+            this.buttonPreviewZoomOut.Margin = new System.Windows.Forms.Padding(0);
+            this.buttonPreviewZoomOut.Name = "buttonPreviewZoomOut";
+            this.buttonPreviewZoomOut.Radius = 8;
+            this.buttonPreviewZoomOut.Size = new System.Drawing.Size(30, 30);
+            this.buttonPreviewZoomOut.TabIndex = 0;
+            this.buttonPreviewZoomOut.WaveSize = 0;
+            //
+            // buttonPreviewZoomIn
+            //
+            this.buttonPreviewZoomIn.IconSvg = "PlusOutlined";
+            this.buttonPreviewZoomIn.Location = new System.Drawing.Point(38, 0);
+            this.buttonPreviewZoomIn.Margin = new System.Windows.Forms.Padding(0);
+            this.buttonPreviewZoomIn.Name = "buttonPreviewZoomIn";
+            this.buttonPreviewZoomIn.Radius = 8;
+            this.buttonPreviewZoomIn.Size = new System.Drawing.Size(30, 30);
+            this.buttonPreviewZoomIn.TabIndex = 1;
+            this.buttonPreviewZoomIn.WaveSize = 0;
+            //
             // picturePreview
             //
             this.picturePreview.BackColor = System.Drawing.Color.FromArgb(22, 25, 32);
-            this.picturePreview.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.picturePreview.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.picturePreview.Location = new System.Drawing.Point(12, 56);
+            this.picturePreview.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.picturePreview.Location = new System.Drawing.Point(0, 0);
             this.picturePreview.Margin = new System.Windows.Forms.Padding(0);
             this.picturePreview.Name = "picturePreview";
-            this.picturePreview.Size = new System.Drawing.Size(656, 412);
-            this.picturePreview.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.picturePreview.Size = new System.Drawing.Size(640, 360);
+            this.picturePreview.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.picturePreview.TabIndex = 1;
             this.picturePreview.TabStop = false;
             //
@@ -552,6 +604,8 @@ namespace AMControlWinF.Views.SysConfig
             this.panelContentCard.ResumeLayout(false);
             this.gridContent.ResumeLayout(false);
             this.panelPreviewCard.ResumeLayout(false);
+            this.flowPreviewZoom.ResumeLayout(false);
+            this.panelPreviewViewport.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.picturePreview)).EndInit();
             this.panelPreviewFooter.ResumeLayout(false);
             this.flowPreviewButtons.ResumeLayout(false);
@@ -573,6 +627,10 @@ namespace AMControlWinF.Views.SysConfig
         private AntdUI.Panel panelContentCard;
         private AntdUI.GridPanel gridContent;
         private AntdUI.Panel panelPreviewCard;
+        private System.Windows.Forms.Panel panelPreviewViewport;
+        private AntdUI.FlowPanel flowPreviewZoom;
+        private AntdUI.Button buttonPreviewZoomOut;
+        private AntdUI.Button buttonPreviewZoomIn;
         private System.Windows.Forms.PictureBox picturePreview;
         private AntdUI.Panel panelPreviewFooter;
         private AntdUI.FlowPanel flowPreviewButtons;

@@ -19,7 +19,7 @@ namespace AM.Model.Interfaces.Camera
 
         Result ShowSettings(string cameraCode);
 
-        Result<CameraPreviewFrame> GrabPreviewFrame(string cameraCode, int maxWidth, int maxHeight);
+        Result<CameraPreviewFrame> GrabPreviewFrame(string cameraCode);
 
         Result<CameraFrame> GrabFrame(string cameraCode);
 

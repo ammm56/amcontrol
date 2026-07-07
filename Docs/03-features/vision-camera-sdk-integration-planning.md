@@ -66,7 +66,7 @@
 flowchart LR
     A["amcontrol 相机配置"] --> B["相机驱动打开设备"]
     B --> C1["实时预览 CameraPreviewFrame / BGR24"]
-    C1 --> C2["WinForms Bitmap LockBits 显示"]
+    C1 --> C2["WinForms Bitmap LockBits + 显示缩放"]
     B --> D1["业务取图 CameraFrame"]
     D1 --> D2["仅在保存/视觉调用边界编码 JPEG / PNG / BMP"]
     D2 --> E["WorkflowOperationRunner"]
@@ -88,7 +88,9 @@ flowchart LR
 
 ### 3.1 图像性能边界
 
-- 实时预览必须从 `JPEG/PNG/BMP` 编码链路中拆出，使用 `CameraPreviewFrame` 保存 BGR24 像素数据，WinForms 端通过 `Bitmap.LockBits` 写入并显示；
+- 实时预览必须从 `JPEG/PNG/BMP` 编码链路中拆出，使用 `CameraPreviewFrame` 保存相机实际分辨率的 BGR24 像素数据，WinForms 端通过 `Bitmap.LockBits` 写入；
+- 工业应用中实时预览不得为了适配窗口先缩放采集帧，避免对分辨率、视野和细节判断造成偏差；
+- 预览窗口只做显示层缩放：默认将原始分辨率图像等比 Fit 到窗口，右下角提供放大/缩小按钮，并支持鼠标滚轮按指针位置缩放；
 - `CameraFrame` 只用于手动取图保存、视觉 SDK 调用和后续业务调用，避免预览每帧都做 `Cv2.ImEncode`、`Image.FromStream` 和 GDI+ 解码；
 - 当前 `Libsrc/amvision` SDK 的调用边界是 `byte[] imageBytes + mediaType`，本项目不能直接把 C# `Bitmap` 传给视觉后端；
 - 内部相机运行层可以保留 OpenCV `Mat` / BGR24 原始帧，但进入 SDK 前仍需要编码一次；

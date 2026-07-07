@@ -162,13 +162,13 @@ namespace AM.CameraService.OpenCv
             }
         }
 
-        public Result<CameraPreviewFrame> GrabPreviewFrame(string cameraCode, int maxWidth, int maxHeight)
+        public Result<CameraPreviewFrame> GrabPreviewFrame(string cameraCode)
         {
             try
             {
                 ThrowIfDisposed();
                 var device = GetOpenedDevice(cameraCode);
-                var frame = device.GrabPreviewFrame(maxWidth, maxHeight);
+                var frame = device.GrabPreviewFrame();
                 return Result<CameraPreviewFrame>.OkItem(frame, "相机预览帧获取成功", ResultSource.Camera);
             }
             catch (Exception ex)

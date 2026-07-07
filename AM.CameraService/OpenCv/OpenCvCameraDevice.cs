@@ -107,7 +107,7 @@ namespace AM.CameraService.OpenCv
             }
         }
 
-        public CameraPreviewFrame GrabPreviewFrame(int maxWidth, int maxHeight)
+        public CameraPreviewFrame GrabPreviewFrame()
         {
             lock (_syncRoot)
             {
@@ -116,20 +116,13 @@ namespace AM.CameraService.OpenCv
                 using (var frame = ReadFrame())
                 {
                     Mat bgr = null;
-                    Mat preview = null;
                     try
                     {
                         var source = EnsureBgr24(frame, out bgr);
-                        source = ResizeForPreview(source, maxWidth, maxHeight, out preview);
                         return BuildPreviewFrame(source);
                     }
                     finally
                     {
-                        if (preview != null)
-                        {
-                            preview.Dispose();
-                        }
-
                         if (bgr != null)
                         {
                             bgr.Dispose();
@@ -305,25 +298,6 @@ namespace AM.CameraService.OpenCv
             }
 
             return converted;
-        }
-
-        private static Mat ResizeForPreview(Mat frame, int maxWidth, int maxHeight, out Mat resized)
-        {
-            resized = null;
-            if (maxWidth <= 0 || maxHeight <= 0 || frame.Width <= maxWidth && frame.Height <= maxHeight)
-            {
-                return frame;
-            }
-
-            var scaleX = (double)maxWidth / frame.Width;
-            var scaleY = (double)maxHeight / frame.Height;
-            var scale = Math.Min(scaleX, scaleY);
-            var width = Math.Max(1, (int)Math.Round(frame.Width * scale));
-            var height = Math.Max(1, (int)Math.Round(frame.Height * scale));
-
-            resized = new Mat();
-            Cv2.Resize(frame, resized, new Size(width, height), 0, 0, InterpolationFlags.Area);
-            return resized;
         }
 
         private CameraPreviewFrame BuildPreviewFrame(Mat frame)

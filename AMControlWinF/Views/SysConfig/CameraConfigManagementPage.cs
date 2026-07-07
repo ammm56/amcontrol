@@ -26,6 +26,9 @@ namespace AMControlWinF.Views.SysConfig
     public partial class CameraConfigManagementPage : UserControl
     {
         private const string DefaultSaveImageDirectory = "Images\\Camera";
+        private const double MinPreviewZoom = 0.05D;
+        private const double MaxPreviewZoom = 16D;
+        private const double PreviewZoomStep = 1.2D;
 
         private readonly CameraConfigCrudService _crudService;
         private readonly ICameraRuntimeService _cameraRuntime;
@@ -39,6 +42,11 @@ namespace AMControlWinF.Views.SysConfig
         private CameraFrame _lastFrame;
         private CameraPreviewFrame _lastPreviewFrame;
         private Bitmap _previewBitmap;
+        private Size _previewSourceSize;
+        private double _previewZoom;
+        private double _previewImageLeft;
+        private double _previewImageTop;
+        private bool _isPreviewFitMode;
         private bool _isFirstLoad;
         private bool _isBusy;
         private bool _isPreviewRunning;
@@ -56,6 +64,9 @@ namespace AMControlWinF.Views.SysConfig
             _tableRows = new AntList<CameraTableRow>();
             _allConfigs = new List<CameraConfigEntity>();
             _filteredConfigs = new List<CameraConfigEntity>();
+            _previewSourceSize = Size.Empty;
+            _previewZoom = 1D;
+            _isPreviewFitMode = true;
 
             InitializeTable();
             BindEvents();
@@ -127,8 +138,18 @@ namespace AMControlWinF.Views.SysConfig
             buttonCameraSettings.Click += async (s, e) => await ShowCameraSettingsAsync();
             buttonTogglePreview.Click += async (s, e) => await TogglePreviewAsync();
             buttonGrabFrame.Click += async (s, e) => await GrabFrameAsync(false);
+            buttonPreviewZoomIn.Click += (s, e) => ZoomPreviewAtCenter(PreviewZoomStep);
+            buttonPreviewZoomOut.Click += (s, e) => ZoomPreviewAtCenter(1D / PreviewZoomStep);
 
+            panelPreviewViewport.TabStop = true;
+            panelPreviewViewport.MouseEnter += (s, e) => panelPreviewViewport.Focus();
+            panelPreviewViewport.MouseWheel += PreviewViewport_MouseWheel;
+            panelPreviewViewport.Resize += (s, e) => RefreshPreviewViewportLayout();
+            picturePreview.MouseEnter += (s, e) => panelPreviewViewport.Focus();
+            picturePreview.MouseWheel += PreviewViewport_MouseWheel;
             _previewTimer.Tick += async (s, e) => await PreviewTimerTickAsync();
+            PositionPreviewZoomButtons();
+            flowPreviewZoom.BringToFront();
         }
 
         private async void CameraConfigManagementPage_Load(object sender, EventArgs e)
@@ -520,10 +541,7 @@ namespace AMControlWinF.Views.SysConfig
                     }
                 }
 
-                var previewSize = picturePreview.ClientSize;
-                var maxWidth = Math.Max(1, previewSize.Width);
-                var maxHeight = Math.Max(1, previewSize.Height);
-                var result = await Task.Run(() => _cameraRuntime.GrabPreviewFrame(_selectedCamera.CameraCode, maxWidth, maxHeight));
+                var result = await Task.Run(() => _cameraRuntime.GrabPreviewFrame(_selectedCamera.CameraCode));
                 if (!result.Success || result.Item == null)
                 {
                     labelRuntimeSummary.Text = result.Message;
@@ -649,12 +667,16 @@ namespace AMControlWinF.Views.SysConfig
             {
                 var cloned = new Bitmap(image);
                 DisposePreviewBitmap();
+                var sourceChanged = _previewSourceSize != cloned.Size;
+                _previewSourceSize = cloned.Size;
                 var old = picturePreview.Image;
                 picturePreview.Image = cloned;
                 if (old != null)
                 {
                     old.Dispose();
                 }
+
+                RefreshPreviewImageLayout(sourceChanged);
             }
 
             labelPreviewSummary.Text = string.Format(
@@ -675,6 +697,9 @@ namespace AMControlWinF.Views.SysConfig
 
             EnsurePreviewBitmap(frame.Width, frame.Height);
             CopyBgr24ToBitmap(frame, _previewBitmap);
+            var sourceSize = new Size(frame.Width, frame.Height);
+            var sourceChanged = _previewSourceSize != sourceSize;
+            _previewSourceSize = sourceSize;
 
             if (!ReferenceEquals(picturePreview.Image, _previewBitmap))
             {
@@ -686,7 +711,7 @@ namespace AMControlWinF.Views.SysConfig
                 }
             }
 
-            picturePreview.Invalidate();
+            RefreshPreviewImageLayout(sourceChanged);
 
             labelPreviewSummary.Text = string.Format(
                 "{0}x{1}  {2}  {3:N0} bytes  {4:HH:mm:ss.fff}",
@@ -735,6 +760,174 @@ namespace AMControlWinF.Views.SysConfig
             }
         }
 
+        private void PreviewViewport_MouseWheel(object sender, MouseEventArgs e)
+        {
+            if (picturePreview.Image == null || e == null)
+            {
+                return;
+            }
+
+            var anchor = ReferenceEquals(sender, picturePreview)
+                ? panelPreviewViewport.PointToClient(picturePreview.PointToScreen(e.Location))
+                : e.Location;
+            ZoomPreviewAtPoint(e.Delta > 0 ? PreviewZoomStep : 1D / PreviewZoomStep, anchor);
+        }
+
+        private void ZoomPreviewAtCenter(double factor)
+        {
+            var clientSize = panelPreviewViewport.ClientSize;
+            ZoomPreviewAtPoint(factor, new Point(clientSize.Width / 2, clientSize.Height / 2));
+        }
+
+        private void ZoomPreviewAtPoint(double factor, Point anchor)
+        {
+            if (picturePreview.Image == null || factor <= 0D)
+            {
+                return;
+            }
+
+            var oldZoom = _previewZoom <= 0D ? CalculateFitPreviewZoom() : _previewZoom;
+            var imageX = (anchor.X - _previewImageLeft) / oldZoom;
+            var imageY = (anchor.Y - _previewImageTop) / oldZoom;
+
+            _previewZoom = ClampPreviewZoom(oldZoom * factor);
+            _previewImageLeft = anchor.X - imageX * _previewZoom;
+            _previewImageTop = anchor.Y - imageY * _previewZoom;
+            _isPreviewFitMode = false;
+            ApplyPreviewImageLayout();
+        }
+
+        private void RefreshPreviewViewportLayout()
+        {
+            PositionPreviewZoomButtons();
+            if (picturePreview.Image == null)
+            {
+                return;
+            }
+
+            if (_isPreviewFitMode)
+            {
+                FitPreviewToViewport();
+            }
+            else
+            {
+                ApplyPreviewImageLayout();
+            }
+        }
+
+        private void RefreshPreviewImageLayout(bool sourceChanged)
+        {
+            if (picturePreview.Image == null)
+            {
+                return;
+            }
+
+            if (_isPreviewFitMode || sourceChanged)
+            {
+                FitPreviewToViewport();
+            }
+            else
+            {
+                ApplyPreviewImageLayout();
+            }
+        }
+
+        private void FitPreviewToViewport()
+        {
+            if (picturePreview.Image == null)
+            {
+                return;
+            }
+
+            _previewZoom = CalculateFitPreviewZoom();
+            _isPreviewFitMode = true;
+            var clientSize = panelPreviewViewport.ClientSize;
+            var width = Math.Max(1, (int)Math.Round(picturePreview.Image.Width * _previewZoom));
+            var height = Math.Max(1, (int)Math.Round(picturePreview.Image.Height * _previewZoom));
+            _previewImageLeft = (clientSize.Width - width) / 2D;
+            _previewImageTop = (clientSize.Height - height) / 2D;
+            ApplyPreviewImageLayout();
+        }
+
+        private double CalculateFitPreviewZoom()
+        {
+            if (picturePreview.Image == null)
+            {
+                return 1D;
+            }
+
+            var clientSize = panelPreviewViewport.ClientSize;
+            var widthRatio = (double)Math.Max(1, clientSize.Width) / picturePreview.Image.Width;
+            var heightRatio = (double)Math.Max(1, clientSize.Height) / picturePreview.Image.Height;
+            return ClampPreviewZoom(Math.Min(widthRatio, heightRatio));
+        }
+
+        private void ApplyPreviewImageLayout()
+        {
+            if (picturePreview.Image == null)
+            {
+                return;
+            }
+
+            var width = Math.Max(1, (int)Math.Round(picturePreview.Image.Width * _previewZoom));
+            var height = Math.Max(1, (int)Math.Round(picturePreview.Image.Height * _previewZoom));
+            ClampPreviewImageOffset(width, height);
+
+            picturePreview.Bounds = new Rectangle(
+                (int)Math.Round(_previewImageLeft),
+                (int)Math.Round(_previewImageTop),
+                width,
+                height);
+            picturePreview.Invalidate();
+            PositionPreviewZoomButtons();
+            flowPreviewZoom.BringToFront();
+        }
+
+        private void ClampPreviewImageOffset(int width, int height)
+        {
+            var clientSize = panelPreviewViewport.ClientSize;
+            if (width <= clientSize.Width)
+            {
+                _previewImageLeft = (clientSize.Width - width) / 2D;
+            }
+            else
+            {
+                _previewImageLeft = Math.Min(0D, Math.Max(clientSize.Width - width, _previewImageLeft));
+            }
+
+            if (height <= clientSize.Height)
+            {
+                _previewImageTop = (clientSize.Height - height) / 2D;
+            }
+            else
+            {
+                _previewImageTop = Math.Min(0D, Math.Max(clientSize.Height - height, _previewImageTop));
+            }
+        }
+
+        private void PositionPreviewZoomButtons()
+        {
+            if (flowPreviewZoom == null || panelPreviewViewport == null)
+            {
+                return;
+            }
+
+            var clientSize = panelPreviewViewport.ClientSize;
+            flowPreviewZoom.Location = new Point(
+                Math.Max(4, clientSize.Width - flowPreviewZoom.Width - 8),
+                Math.Max(4, clientSize.Height - flowPreviewZoom.Height - 8));
+        }
+
+        private static double ClampPreviewZoom(double zoom)
+        {
+            if (zoom < MinPreviewZoom)
+            {
+                return MinPreviewZoom;
+            }
+
+            return zoom > MaxPreviewZoom ? MaxPreviewZoom : zoom;
+        }
+
         private void ClearPreviewImage()
         {
             DisposePictureImage();
@@ -742,6 +935,11 @@ namespace AMControlWinF.Views.SysConfig
 
             _lastFrame = null;
             _lastPreviewFrame = null;
+            _previewSourceSize = Size.Empty;
+            _previewZoom = 1D;
+            _previewImageLeft = 0D;
+            _previewImageTop = 0D;
+            _isPreviewFitMode = true;
             labelPreviewSummary.Text = "暂无图像";
         }
 
