@@ -10,7 +10,7 @@
 
 ## 1. 项目定位
 
-`AMControlWinF` 是 `ammm56/amcontrol` 仓库当前活跃的 WinForms 工业设备控制软件分支，目标运行环境为 `.NET Framework 4.6.1`，UI 基于 `AntdUI`，后端与 `AMControlWPF` 共享 `AM.Core`、`AM.Model`、`AM.DBService`、`AM.MotionService`、`AM.App`、`AM.Tools`、`AM.PageModel` 等项目。
+`AMControlWinF` 是 `ammm56/amcontrol` 仓库当前活跃的 WinForms 工业设备控制软件分支，目标运行环境为 `.NET Framework 4.7.2`，UI 基于 `AntdUI`，后端与 `AMControlWPF` 共享 `AM.Core`、`AM.Model`、`AM.DBService`、`AM.MotionService`、`AM.App`、`AM.Tools`、`AM.PageModel` 等项目。
 
 当前阶段的重点已从“搭建壳层”进入“在既有架构上持续补齐页面与功能闭环”：
 
@@ -26,7 +26,7 @@
 | 层级 | 技术 / 框架 | 说明 |
 |------|------------|------|
 | UI 框架 | AntdUI (WinForms) | 使用 `Panel`、`GridPanel`、`FlowPanel`、`Menu`、`Table`、`Popover` 等控件实现现代化 WinForms 页面 |
-| 目标框架 | .NET Framework 4.6.1 | 当前分支运行框架 |
+| 目标框架 | .NET Framework 4.7.2 | 当前分支运行框架 |
 | 语言版本 | C# 7.3 | 页面实现与共享项目均需兼容 |
 | 页面模型 | `AM.PageModel` | WinForms / WPF 共用的无 UI 依赖中间层 |
 | ORM | SqlSugar | 支持 SQLite / Access / MySQL |
@@ -65,7 +65,7 @@ amcontrol_winform.sln
 ├── AM.MotionService/       运动控制卡驱动实现、工厂与 Hub 路由
 ├── AM.Tools/               配置读写、日志适配、辅助工具
 ├── ProtocolLib/            PLC 协议库（Common / ModbusTcp / S7Tcp）
-├── Libsrc/amvision/        amvision .NET SDK 与 Net461 Console 调用封装（尚未接入主解决方案）
+├── Libsrc/amvision/        amvision .NET SDK 与 Workflows Console 调用封装
 └── AM.Tests/               协议与关键模块测试
 ```
 
@@ -261,7 +261,7 @@ AMControlWinF/
 
 ### 9.4 Vision / Camera
 
-- `Libsrc/amvision` 已加入本仓库，包含 amvision .NET SDK、Net461 Console 调用封装、`Config/config_*.json` 调用配置和测试工程；
+- `Libsrc/amvision` 已加入本仓库，包含 amvision .NET SDK、Workflows Console 调用封装、`Config/config_*.json` 调用配置和测试工程；
 - 视觉功能的实现边界已明确：相机配置和取图属于 amcontrol，workflow app、runtime、TriggerSource 和视觉前端属于 amvision；
 - `amcontrol` 不在 `config.json` 中重复保存 amvision token、ZeroMQ endpoint、runtime id 或 TriggerSource id；
 - 相机第一阶段使用 OpenCvSharp + DSHOW 实现通用 USB 相机，默认 MJPG / 30fps / JPEG 编码；Amvar、海康、康耐视、大恒等厂商 SDK 相机仅预留驱动类型；

@@ -177,7 +177,7 @@ Vision
 
 1. `SysConfig.Camera` 不绑定 workflow runtime 或 TriggerSource；
 2. `amcontrol` 的 `config.json` 不保存 amvision token、ZeroMQ endpoint、runtime id 或 TriggerSource id；
-3. amvision 调用配置以 `Libsrc/amvision/apps/Amvision.Workflows.Net461Console/Config/config_*.json` 为准；
+3. amvision 调用配置以 `Libsrc/amvision/apps/Amvision.Workflows.Console/Config/config_*.json` 为准；
 4. 视觉工作流、节点编辑、模型、部署、标定和推理页面由 amvision 前端负责，WinForms 仅嵌入工作台入口。
 
 详细规划见：[视觉、相机与 amvision SDK 集成规划](../03-features/vision-camera-sdk-integration-planning.md)。

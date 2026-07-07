@@ -29,8 +29,8 @@
 | 目录 | 说明 |
 |------|------|
 | `Libsrc/amvision/src/Amvision.Workflows` | amvision .NET SDK 源码，包含 Workflow 管理 HTTP client 与 ZeroMQ TriggerSource 调用能力 |
-| `Libsrc/amvision/apps/Amvision.Workflows.Net461Console` | 面向 `.NET Framework 4.6.1` 的现场调用封装和 console 参考实现 |
-| `Libsrc/amvision/apps/Amvision.Workflows.Net461Console/Config` | 实际视觉调用配置来源，包含 backend、runtime、TriggerSource、ZeroMQ endpoint 等调用参数 |
+| `Libsrc/amvision/apps/Amvision.Workflows.Console` | 面向 `net461;net472;net10.0` 的现场调用封装和 console 参考实现 |
+| `Libsrc/amvision/apps/Amvision.Workflows.Console/Config` | 实际视觉调用配置来源，包含 backend、runtime、TriggerSource、ZeroMQ endpoint 等调用参数 |
 
 amcontrol 后续视觉调用应优先通过 `WorkflowOperationRunner` 使用上述封装。`amcontrol` 的 `config.json` 不重复保存 `DefaultAccessToken`、`DefaultZeroMqEndpoint`、runtime id 或 TriggerSource id。
 

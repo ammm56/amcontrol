@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net461</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
 
     <IsPackable>false</IsPackable>
 
@@ -22,20 +22,32 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="Microsoft.VisualStudio.CodeCoverage.Shim">
-      <HintPath>..\Libs\nunit\461\Microsoft.VisualStudio.CodeCoverage.Shim.dll</HintPath>
-    </Reference>
     <Reference Include="nunit.engine">
-      <HintPath>..\Libs\nunit\461\nunit.engine.dll</HintPath>
+      <HintPath>..\Libs\nunit\472\nunit.engine.dll</HintPath>
     </Reference>
     <Reference Include="nunit.engine.api">
-      <HintPath>..\Libs\nunit\461\nunit.engine.api.dll</HintPath>
+      <HintPath>..\Libs\nunit\472\nunit.engine.api.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.engine.core">
+      <HintPath>..\Libs\nunit\472\nunit.engine.core.dll</HintPath>
     </Reference>
     <Reference Include="nunit.framework">
-      <HintPath>..\Libs\nunit\461\nunit.framework.dll</HintPath>
+      <HintPath>..\Libs\nunit\472\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework.legacy">
+      <HintPath>..\Libs\nunit\472\nunit.framework.legacy.dll</HintPath>
     </Reference>
     <Reference Include="NUnit3.TestAdapter">
-      <HintPath>..\Libs\nunit\461\NUnit3.TestAdapter.dll</HintPath>
+      <HintPath>..\Libs\nunit\472\NUnit3.TestAdapter.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe">
+      <HintPath>..\Libs\nunit\472\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Threading.Tasks.Extensions">
+      <HintPath>..\Libs\nunit\472\System.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ValueTuple">
+      <HintPath>..\Libs\nunit\472\System.ValueTuple.dll</HintPath>
     </Reference>
   </ItemGroup>
 

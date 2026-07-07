@@ -17,7 +17,7 @@
 		"LicenseSiteCode": "default",
 		"LicenseMachineModel": "default",
 		"DesktopAppVendor": "AM",
-		"DesktopAppTargetFramework": ".NET Framework 4.6.1",
+		"DesktopAppTargetFramework": ".NET Framework 4.7.2",
 		"DesktopAppUiPlatform": "WinForms",
 		"DeviceKeyVersion": 1
 	},

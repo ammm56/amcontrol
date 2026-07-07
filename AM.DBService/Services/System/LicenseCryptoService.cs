@@ -231,7 +231,7 @@ namespace AM.DBService.Services.System
 
         /// <summary>
         /// 从 PEM 公钥创建 RSA 提供程序。
-        /// .NET Framework 4.6.1 不支持直接导入 PEM，因此这里手动解析 SubjectPublicKeyInfo 或 PKCS#1 RSA PUBLIC KEY。
+        /// .NET Framework 4.x 不支持直接导入 PEM，因此这里手动解析 SubjectPublicKeyInfo 或 PKCS#1 RSA PUBLIC KEY。
         /// </summary>
         private static RSACryptoServiceProvider CreateRsaFromPem(string pem)
         {

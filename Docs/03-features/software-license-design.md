@@ -79,7 +79,7 @@
     "appName": "AM Motion Control",
     "appEdition": "Professional",
     "appVersion": "1.2.3",
-    "targetFramework": ".NET Framework 4.6.1",
+    "targetFramework": ".NET Framework 4.7.2",
     "uiPlatform": "WinForms",
     "vendor": "AM"
   },

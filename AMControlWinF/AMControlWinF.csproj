@@ -8,7 +8,7 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>AMControlWinF</RootNamespace>
     <AssemblyName>AMControlWinF</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
@@ -27,6 +27,7 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>x64</PlatformTarget>
@@ -587,6 +588,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <EmbeddedResource Include="Views\AlarmLog\ActiveAlarmContentControl.resx">
       <DependentUpon>ActiveAlarmContentControl.cs</DependentUpon>
@@ -836,7 +838,7 @@
   <ItemGroup>
     <Content Include="logo.ico" />
     <Content Include="Resources\Img\logo.ico" />
-    <Content Include="..\Libsrc\amvision\apps\Amvision.Workflows.Net461Console\Config\config_*.json">
+    <Content Include="..\Libsrc\amvision\apps\Amvision.Workflows.Console\Config\config_*.json">
       <Link>Config\%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

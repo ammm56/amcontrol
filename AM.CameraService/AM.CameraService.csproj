@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net461</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
     <ProjectGuid>{37E0B74B-50C0-4E62-980E-C49343C8E1EE}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AssemblyName>AM.CameraService</AssemblyName>

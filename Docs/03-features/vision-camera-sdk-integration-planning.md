@@ -15,8 +15,8 @@
 当前代码状态：
 
 - `Libsrc/amvision/src/Amvision.Workflows` 已放入本仓库，作为 amvision .NET SDK 源码；
-- `Libsrc/amvision/apps/Amvision.Workflows.Net461Console` 已放入本仓库，作为 .NET Framework 4.6.1 现场调用封装参考；
-- `Libsrc/amvision/apps/Amvision.Workflows.Net461Console/Config` 是实际视觉调用配置来源；
+- `Libsrc/amvision/apps/Amvision.Workflows.Console` 已放入本仓库，作为现场调用封装参考；
+- `Libsrc/amvision/apps/Amvision.Workflows.Console/Config` 是实际视觉调用配置来源；
 - `SysConfig.Camera` 已开始按本文档落地，当前已接入 OpenCvSharp + DSHOW 通用 USB 相机配置、枚举、打开、设置页、单帧取图和测试图保存入口；
 - `Vision.Workbench / Vision.Debug / Vision.Record` 已完成导航规划，具体页面仍按后续阶段推进。
 
@@ -106,7 +106,7 @@ flowchart LR
 后续 `amcontrol` 不应直接从页面调用底层 HTTP 或 ZeroMQ SDK，而应优先使用：
 
 ```text
-Amvision.Workflows.Net461Console.WorkflowOperationRunner
+Amvision.Workflows.Console.WorkflowOperationRunner
 ```
 
 该类已经封装：
@@ -133,7 +133,7 @@ InvokeRuntimeAppResultWithImageBytesAsync(runtimeName, imageBytes, mediaType)
 amvision 调用配置只来自：
 
 ```text
-Libsrc/amvision/apps/Amvision.Workflows.Net461Console/Config/config_*.json
+Libsrc/amvision/apps/Amvision.Workflows.Console/Config/config_*.json
 ```
 
 后续构建或发布时，应保证这些 `config_*.json` 被复制到主程序输出目录的 `Config` 目录，使 `WorkflowConfigLoader` 能按默认查找规则读取。
@@ -173,7 +173,7 @@ InvokeRuntimeAppResultWithImageBytesAsync(runtimeName, imageBytes, "image/jpeg")
 
 ### 4.4 图片转换
 
-`Libsrc/amvision/apps/Amvision.Workflows.Net461Console/Tools/ImageConversionTools.cs` 已提供以下能力：
+`Libsrc/amvision/apps/Amvision.Workflows.Console/Tools/ImageConversionTools.cs` 已提供以下能力：
 
 - `Bitmap -> JPEG/PNG/BMP bytes`
 - `Bitmap -> base64 / data URL`
@@ -485,7 +485,7 @@ UserControl Page
 
 ## 10. 构建与兼容注意事项
 
-当前主项目是旧式 `.NET Framework 4.6.1` 项目，主要代码使用 C# 7.3。`Libsrc/amvision` 中 SDK 和 Console 封装是 SDK-style 项目，并使用较新的语言版本设置。
+当前主项目是旧式 `.NET Framework 4.7.2` 项目，主要代码使用 C# 7.3。`Libsrc/amvision` 中 SDK 和 Console 封装是 SDK-style 项目，并使用较新的语言版本设置。
 
 后续落地引用方式前需要确认：
 
@@ -495,7 +495,7 @@ UserControl Page
 - `Config/config_*.json` 如何复制到 `AMControlWinF` 输出目录；
 - Web 前端嵌入采用 WebView2、CefSharp 还是外部浏览器兜底。
 
-若 WebView2 与 `.NET Framework 4.6.1` 不兼容，应优先评估升级到 `.NET Framework 4.6.2 / 4.7.2` 或使用 CefSharp。旧 WinForms `WebBrowser` 控件不适合作为 Vue/Vite 现代前端的正式宿主。
+当前 WinForms 主线已迁移到 `.NET Framework 4.7.2`。视觉工作台嵌入优先评估 WebView2；如现场环境限制导致 WebView2 不合适，再使用 CefSharp 或外部浏览器兜底。旧 WinForms `WebBrowser` 控件不适合作为 Vue/Vite 现代前端的正式宿主。
 
 ---
 

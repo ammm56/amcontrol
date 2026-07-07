@@ -117,7 +117,7 @@
 
 | 模块 / 页面 | 状态 | 说明 |
 |------|------|------|
-| `Libsrc/amvision` | ✅ 已加入 | 已包含 amvision .NET SDK、Net461 Console 调用封装、示例 Config 和测试工程 |
+| `Libsrc/amvision` | ✅ 已加入 | 已包含 amvision .NET SDK、Workflows Console 调用封装、示例 Config 和测试工程 |
 | `SysConfig.Camera` | 开发中 | 已接入 OpenCvSharp + DSHOW 通用 USB 相机配置、枚举、打开、设置页、单帧取图和测试图保存入口 |
 | `Vision.Workbench` | 规划中 | 嵌入 `http://127.0.0.1:5601` 的 amvision 前端工作台 |
 | `Vision.Debug` | 规划中 | 从本项目相机取图，经 `WorkflowOperationRunner` 调用 amvision SDK 并展示结果 |
@@ -126,7 +126,7 @@
 规划约束：
 
 1. `SysConfig.Camera` 不绑定 workflow runtime 或 TriggerSource；
-2. amvision 调用配置以 `Libsrc/amvision/apps/Amvision.Workflows.Net461Console/Config/config_*.json` 为准；
+2. amvision 调用配置以 `Libsrc/amvision/apps/Amvision.Workflows.Console/Config/config_*.json` 为准；
 3. `amcontrol` 的 `config.json` 不重复保存 token、ZeroMQ endpoint、runtime id 或 TriggerSource id；
 4. 当前 `Vision.Monitor / Vision.Result / Vision.Calibrate` 属于过时规划口径，后续应按 `Vision.Workbench / Vision.Debug / Vision.Record` 重排。
 

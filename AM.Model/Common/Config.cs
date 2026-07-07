@@ -164,7 +164,7 @@ namespace AM.Model.Common
         /// 桌面应用目标框架。
         /// 当前用于授权申请中的 software.targetFramework。
         /// </summary>
-        public string DesktopAppTargetFramework { get; set; } = ".NET Framework 4.6.1";
+        public string DesktopAppTargetFramework { get; set; } = ".NET Framework 4.7.2";
 
         /// <summary>
         /// 桌面应用 UI 平台。

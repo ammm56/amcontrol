@@ -1,6 +1,6 @@
 using AM.Model.Common;
 using AM.Model.Interfaces.Vision;
-using Amvision.Workflows.Net461Console;
+using Amvision.Workflows.Console;
 using System;
 using System.Collections.Generic;
 using System.Linq;

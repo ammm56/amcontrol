@@ -125,7 +125,7 @@
 视觉模块规划约束：
 
 1. `config.json` 不新增 `DefaultAccessToken`、`DefaultZeroMqEndpoint`、runtime id、TriggerSource id 等 amvision 调用字段；
-2. amvision 调用配置由 `Libsrc/amvision/apps/Amvision.Workflows.Net461Console/Config/config_*.json` 管理；
+2. amvision 调用配置由 `Libsrc/amvision/apps/Amvision.Workflows.Console/Config/config_*.json` 管理；
 3. WinForms 视觉工作台默认嵌入 `http://127.0.0.1:5601`，该地址如需现场可配置，应作为 UI 宿主地址单独处理，不与 SDK 调用配置混用。
 
 ### 配置管理服务

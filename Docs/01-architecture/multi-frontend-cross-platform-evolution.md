@@ -24,7 +24,7 @@
 截至本文更新时，仓库中的主要现状为：
 
 1. 当前活跃桌面 UI 主线为 `AMControlWinF`；
-2. 当前运行框架以 `.NET Framework 4.6.1` 为主；
+2. 当前运行框架以 `.NET Framework 4.7.2` 为主；
 3. 当前文档中存在大量围绕 WinForms、AntdUI、`MainWindow`、`PageModel`、`RuntimeContext`、`AppBootstrap` 的实现说明；
 4. WPF 分支当前主要作为历史实现和对照资料保留。
 
@@ -82,7 +82,7 @@
 
 关于运行时框架，本文明确声明：
 
-1. 当前文档中涉及 `.NET Framework 4.6.1`、`.NET Framework 4.7.2`、`App.config`、旧式项目文件、`packages.config`、WinForms 设计器等内容，均属于当前实现线事实；
+1. 当前文档中涉及 `.NET Framework 4.7.2`、`App.config`、旧式项目文件、`packages.config`、WinForms 设计器等内容，均属于当前实现线事实；
 2. 未来版本允许对当前 `.NET Framework` 主线进行部分迁移，也允许进行**整体迁移**；
 3. 若业务、部署、性能、跨平台或生态原因需要，未来版本允许将当前 `.NET Framework` 相关实现**全部替换为 `.NET 10`**；
 4. 发生此类迁移时，不要求继续维持 `.NET Framework` 与 `.NET 10` 的长期双轨并存；

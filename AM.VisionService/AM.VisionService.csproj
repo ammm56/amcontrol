@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net461</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
     <ProjectGuid>{41AFC0E6-CBC7-4D45-8236-6E587B1EF0C4}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AssemblyName>AM.VisionService</AssemblyName>
@@ -8,19 +8,17 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <LangVersion>7.3</LangVersion>
+    <PlatformTarget>x64</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\AM.Model\AM.Model.csproj" />
-    <ProjectReference Include="..\Libsrc\amvision\apps\Amvision.Workflows.Net461Console\Amvision.Workflows.Net461Console.csproj" />
+    <ProjectReference Include="..\Libsrc\amvision\apps\Amvision.Workflows.Console\Amvision.Workflows.Console.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Text.Json" Version="6.0.10" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="..\Libsrc\amvision\apps\Amvision.Workflows.Net461Console\Config\config_*.json">
+    <None Include="..\Libsrc\amvision\apps\Amvision.Workflows.Console\Config\config_*.json">
       <Link>Config\%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
