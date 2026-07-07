@@ -90,7 +90,7 @@ flowchart LR
 
 - 实时预览必须从 `JPEG/PNG/BMP` 编码链路中拆出，使用 `CameraPreviewFrame` 保存相机实际分辨率的 BGR24 像素数据，WinForms 端通过 `Bitmap.LockBits` 写入；
 - 工业应用中实时预览不得为了适配窗口先缩放采集帧，避免对分辨率、视野和细节判断造成偏差；
-- 预览窗口只做显示层缩放：默认将原始分辨率图像等比 Fit 到窗口，右下角提供放大/缩小按钮，并支持鼠标滚轮按指针位置缩放；
+- 预览窗口只做显示层缩放：默认将原始分辨率图像等比 Fit 到窗口，支持鼠标滚轮按指针位置缩放，并支持鼠标右键拖动平移图像；
 - `CameraFrame` 只用于手动取图保存、视觉 SDK 调用和后续业务调用，避免预览每帧都做 `Cv2.ImEncode`、`Image.FromStream` 和 GDI+ 解码；
 - 当前 `Libsrc/amvision` SDK 的调用边界是 `byte[] imageBytes + mediaType`，本项目不能直接把 C# `Bitmap` 传给视觉后端；
 - 内部相机运行层可以保留 OpenCV `Mat` / BGR24 原始帧，但进入 SDK 前仍需要编码一次；

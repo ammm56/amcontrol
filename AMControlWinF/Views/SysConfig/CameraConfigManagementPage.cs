@@ -47,6 +47,8 @@ namespace AMControlWinF.Views.SysConfig
         private double _previewImageLeft;
         private double _previewImageTop;
         private bool _isPreviewFitMode;
+        private bool _isPreviewPanning;
+        private Point _previewPanLastPoint;
         private bool _isFirstLoad;
         private bool _isBusy;
         private bool _isPreviewRunning;
@@ -138,18 +140,22 @@ namespace AMControlWinF.Views.SysConfig
             buttonCameraSettings.Click += async (s, e) => await ShowCameraSettingsAsync();
             buttonTogglePreview.Click += async (s, e) => await TogglePreviewAsync();
             buttonGrabFrame.Click += async (s, e) => await GrabFrameAsync(false);
-            buttonPreviewZoomIn.Click += (s, e) => ZoomPreviewAtCenter(PreviewZoomStep);
-            buttonPreviewZoomOut.Click += (s, e) => ZoomPreviewAtCenter(1D / PreviewZoomStep);
 
             panelPreviewViewport.TabStop = true;
             panelPreviewViewport.MouseEnter += (s, e) => panelPreviewViewport.Focus();
             panelPreviewViewport.MouseWheel += PreviewViewport_MouseWheel;
+            panelPreviewViewport.MouseDown += PreviewViewport_MouseDown;
+            panelPreviewViewport.MouseMove += PreviewViewport_MouseMove;
+            panelPreviewViewport.MouseUp += PreviewViewport_MouseUp;
+            panelPreviewViewport.MouseLeave += PreviewViewport_MouseLeave;
             panelPreviewViewport.Resize += (s, e) => RefreshPreviewViewportLayout();
             picturePreview.MouseEnter += (s, e) => panelPreviewViewport.Focus();
             picturePreview.MouseWheel += PreviewViewport_MouseWheel;
+            picturePreview.MouseDown += PreviewViewport_MouseDown;
+            picturePreview.MouseMove += PreviewViewport_MouseMove;
+            picturePreview.MouseUp += PreviewViewport_MouseUp;
+            picturePreview.MouseLeave += PreviewViewport_MouseLeave;
             _previewTimer.Tick += async (s, e) => await PreviewTimerTickAsync();
-            PositionPreviewZoomButtons();
-            flowPreviewZoom.BringToFront();
         }
 
         private async void CameraConfigManagementPage_Load(object sender, EventArgs e)
@@ -773,10 +779,88 @@ namespace AMControlWinF.Views.SysConfig
             ZoomPreviewAtPoint(e.Delta > 0 ? PreviewZoomStep : 1D / PreviewZoomStep, anchor);
         }
 
-        private void ZoomPreviewAtCenter(double factor)
+        private void PreviewViewport_MouseDown(object sender, MouseEventArgs e)
         {
-            var clientSize = panelPreviewViewport.ClientSize;
-            ZoomPreviewAtPoint(factor, new Point(clientSize.Width / 2, clientSize.Height / 2));
+            if (e == null || e.Button != MouseButtons.Right || picturePreview.Image == null)
+            {
+                return;
+            }
+
+            _isPreviewPanning = true;
+            _isPreviewFitMode = false;
+            _previewPanLastPoint = ToPreviewViewportPoint(sender, e.Location);
+            panelPreviewViewport.Cursor = Cursors.SizeAll;
+            picturePreview.Cursor = Cursors.SizeAll;
+
+            var source = sender as Control;
+            if (source != null)
+            {
+                source.Capture = true;
+            }
+        }
+
+        private void PreviewViewport_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (!_isPreviewPanning || e == null || picturePreview.Image == null)
+            {
+                return;
+            }
+
+            var current = ToPreviewViewportPoint(sender, e.Location);
+            _previewImageLeft += current.X - _previewPanLastPoint.X;
+            _previewImageTop += current.Y - _previewPanLastPoint.Y;
+            _previewPanLastPoint = current;
+            ApplyPreviewImageLayout();
+        }
+
+        private void PreviewViewport_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e != null && e.Button != MouseButtons.Right)
+            {
+                return;
+            }
+
+            StopPreviewPan(sender as Control);
+        }
+
+        private void PreviewViewport_MouseLeave(object sender, EventArgs e)
+        {
+            var source = sender as Control;
+            if (source != null && source.Capture)
+            {
+                return;
+            }
+
+            if ((Control.MouseButtons & MouseButtons.Right) != MouseButtons.Right)
+            {
+                StopPreviewPan(source);
+            }
+        }
+
+        private void StopPreviewPan(Control capturedControl)
+        {
+            if (!_isPreviewPanning)
+            {
+                return;
+            }
+
+            _isPreviewPanning = false;
+            if (capturedControl != null)
+            {
+                capturedControl.Capture = false;
+            }
+
+            panelPreviewViewport.Capture = false;
+            picturePreview.Capture = false;
+            panelPreviewViewport.Cursor = Cursors.Default;
+            picturePreview.Cursor = Cursors.Default;
+        }
+
+        private Point ToPreviewViewportPoint(object sender, Point location)
+        {
+            return ReferenceEquals(sender, picturePreview)
+                ? panelPreviewViewport.PointToClient(picturePreview.PointToScreen(location))
+                : location;
         }
 
         private void ZoomPreviewAtPoint(double factor, Point anchor)
@@ -799,7 +883,6 @@ namespace AMControlWinF.Views.SysConfig
 
         private void RefreshPreviewViewportLayout()
         {
-            PositionPreviewZoomButtons();
             if (picturePreview.Image == null)
             {
                 return;
@@ -879,8 +962,6 @@ namespace AMControlWinF.Views.SysConfig
                 width,
                 height);
             picturePreview.Invalidate();
-            PositionPreviewZoomButtons();
-            flowPreviewZoom.BringToFront();
         }
 
         private void ClampPreviewImageOffset(int width, int height)
@@ -905,19 +986,6 @@ namespace AMControlWinF.Views.SysConfig
             }
         }
 
-        private void PositionPreviewZoomButtons()
-        {
-            if (flowPreviewZoom == null || panelPreviewViewport == null)
-            {
-                return;
-            }
-
-            var clientSize = panelPreviewViewport.ClientSize;
-            flowPreviewZoom.Location = new Point(
-                Math.Max(4, clientSize.Width - flowPreviewZoom.Width - 8),
-                Math.Max(4, clientSize.Height - flowPreviewZoom.Height - 8));
-        }
-
         private static double ClampPreviewZoom(double zoom)
         {
             if (zoom < MinPreviewZoom)
@@ -940,6 +1008,9 @@ namespace AMControlWinF.Views.SysConfig
             _previewImageLeft = 0D;
             _previewImageTop = 0D;
             _isPreviewFitMode = true;
+            _isPreviewPanning = false;
+            panelPreviewViewport.Cursor = Cursors.Default;
+            picturePreview.Cursor = Cursors.Default;
             labelPreviewSummary.Text = "暂无图像";
         }
 
