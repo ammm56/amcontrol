@@ -12,6 +12,7 @@ using AM.Model.Vision;
 using AM.VisionService.Runtime;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -345,12 +346,16 @@ namespace AM.PageModel.Vision
                 TriggerSourceName = SelectedTriggerSourceName
             };
 
+            long cameraCaptureEncodeMs = 0L;
             if (info.UsesCameraImage)
             {
+                var cameraStopwatch = Stopwatch.StartNew();
                 var imageResult = await PrepareCameraImageAsync(info, request, cancellationToken).ConfigureAwait(false);
+                cameraStopwatch.Stop();
+                cameraCaptureEncodeMs = cameraStopwatch.ElapsedMilliseconds;
                 if (!imageResult.Success)
                 {
-                    var failed = BuildLocalFailureResult(info, imageResult.Message);
+                    var failed = BuildLocalFailureResult(info, imageResult.Message, cameraCaptureEncodeMs);
                     LastResult = failed;
                     await SaveCallRecordAsync(failed).ConfigureAwait(false);
                     return new Result<VisionSdkDebugResult>(
@@ -369,7 +374,12 @@ namespace AM.PageModel.Vision
 
             if (LastResult != null && LastResult.ShouldSaveCallRecord)
             {
+                ApplyTotalTiming(LastResult, cameraCaptureEncodeMs);
                 await SaveCallRecordAsync(LastResult).ConfigureAwait(false);
+            }
+            else if (LastResult != null)
+            {
+                ApplyTotalTiming(LastResult, cameraCaptureEncodeMs);
             }
 
             return result;
@@ -480,8 +490,10 @@ namespace AM.PageModel.Vision
 
         private VisionSdkDebugResult BuildLocalFailureResult(
             VisionSdkDebugOperationInfo info,
-            string message)
+            string message,
+            long cameraCaptureEncodeMs)
         {
+            var cameraMs = ToIntElapsed(cameraCaptureEncodeMs);
             return new VisionSdkDebugResult
             {
                 OperationKey = info.Key,
@@ -489,7 +501,11 @@ namespace AM.PageModel.Vision
                 RuntimeName = SelectedRuntimeName,
                 TriggerSourceName = SelectedTriggerSourceName,
                 RequestTime = DateTime.Now,
-                ElapsedMs = 0,
+                ElapsedMs = cameraMs,
+                CameraCaptureEncodeMs = cameraMs,
+                SdkInvokeMs = 0,
+                ResponseProcessMs = 0,
+                TotalElapsedMs = cameraMs,
                 IsSuccess = false,
                 ErrorMessage = message,
                 ResponseJson = "{\"error\":\"" + EscapeJson(message) + "\"}",
@@ -519,6 +535,21 @@ namespace AM.PageModel.Vision
             return key == VisionSdkDebugOperationKey.InvokeRuntimeAppResultWithImageBase64 ||
                    key == VisionSdkDebugOperationKey.RunRuntimeWithImageBase64 ||
                    key == VisionSdkDebugOperationKey.InvokeZeroMqImageBase64;
+        }
+
+        private static void ApplyTotalTiming(VisionSdkDebugResult result, long cameraCaptureEncodeMs)
+        {
+            if (result == null)
+            {
+                return;
+            }
+
+            result.CameraCaptureEncodeMs = ToIntElapsed(cameraCaptureEncodeMs);
+            result.TotalElapsedMs = ToIntElapsed(
+                (long)result.CameraCaptureEncodeMs +
+                result.SdkInvokeMs +
+                result.ResponseProcessMs);
+            result.ElapsedMs = result.TotalElapsedMs;
         }
 
         private static string ResolveVisionImageDirectory()
@@ -557,6 +588,16 @@ namespace AM.PageModel.Vision
             return string.IsNullOrEmpty(value)
                 ? string.Empty
                 : value.Replace("\\", "\\\\").Replace("\"", "\\\"");
+        }
+
+        private static int ToIntElapsed(long elapsedMs)
+        {
+            if (elapsedMs <= 0)
+            {
+                return 0;
+            }
+
+            return elapsedMs > int.MaxValue ? int.MaxValue : (int)elapsedMs;
         }
 
         private async Task<TResult> WithCameraLockAsync<TResult>(

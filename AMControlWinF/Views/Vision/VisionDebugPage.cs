@@ -142,9 +142,9 @@ namespace AMControlWinF.Views.Vision
                     Size = new Size(140, 34),
                     Margin = new Padding(0, 0, 8, 8),
                     Radius = 8,
+                    Ghost = true,
                     WaveSize = 0,
-                    IconSvg = ResolveOperationIcon(operation),
-                    Type = operation.ShouldSaveCallRecord ? TTypeMini.Primary : TTypeMini.Default
+                    Type = TTypeMini.Default
                 };
 
                 button.Click += async (s, e) => await ExecuteOperationFromButtonAsync((Button)s);
@@ -154,26 +154,6 @@ namespace AMControlWinF.Views.Vision
 
             panel.Controls.Add(buttons);
             return panel;
-        }
-
-        private static string ResolveOperationIcon(VisionSdkDebugOperationInfo operation)
-        {
-            if (operation.UsesCameraImage)
-            {
-                return "PictureOutlined";
-            }
-
-            if (operation.RequiresConfirm)
-            {
-                return "ControlOutlined";
-            }
-
-            if (operation.GroupName.IndexOf("ZeroMQ", StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                return "ThunderboltOutlined";
-            }
-
-            return "ApiOutlined";
         }
 
         private void BindEvents()
@@ -584,7 +564,7 @@ namespace AMControlWinF.Views.Vision
             }
 
             var info = VisionSdkDebugOperationCatalog.Get(operationKey);
-            SetBusyState(true);
+            _isBusy = true;
             try
             {
                 labelStatus.Text = "正在调用：" + info.DisplayName;
@@ -600,11 +580,11 @@ namespace AMControlWinF.Views.Vision
                 }
 
                 ShowOperationResult(result);
-                RefreshStats();
+                RefreshStats(false);
             }
             finally
             {
-                SetBusyState(false);
+                _isBusy = false;
             }
         }
 
@@ -623,16 +603,17 @@ namespace AMControlWinF.Views.Vision
                 ? BuildDebugResultText(item)
                 : item.ResponseJson;
 
-            labelLastElapsedValue.Text = item.ElapsedMs + "ms";
-            labelResultSummary.Text = string.Format(
-                "{0}  {1}  {2}ms",
-                item.OperationName,
-                item.IsSuccess ? "成功" : "失败",
-                item.ElapsedMs);
+            labelLastElapsedValue.Text = FormatTotalElapsed(item);
+            labelResultSummary.Text = FormatTimingSummary(item);
             labelStatus.Text = result.Success ? result.Message : item.ErrorMessage ?? result.Message;
         }
 
         private void RefreshStats()
+        {
+            RefreshStats(true);
+        }
+
+        private void RefreshStats(bool refreshActions)
         {
             labelCameraCount.Text = _model.Cameras.Count.ToString();
             labelOpenedCameraCount.Text = _model.OpenedCameraCount.ToString();
@@ -641,14 +622,17 @@ namespace AMControlWinF.Views.Vision
 
             if (_model.LastResult != null)
             {
-                labelLastElapsedValue.Text = _model.LastResult.ElapsedMs + "ms";
+                labelLastElapsedValue.Text = FormatTotalElapsed(_model.LastResult);
             }
             else
             {
                 labelLastElapsedValue.Text = "--";
             }
 
-            RefreshActionState();
+            if (refreshActions)
+            {
+                RefreshActionState();
+            }
         }
 
         private void SetBusyState(bool isBusy)
@@ -735,12 +719,44 @@ namespace AMControlWinF.Views.Vision
             builder.AppendLine("{");
             builder.AppendLine("  \"operation\": \"" + EscapeJson(result.OperationName) + "\",");
             builder.AppendLine("  \"success\": " + (result.IsSuccess ? "true" : "false") + ",");
-            builder.AppendLine("  \"elapsed_ms\": " + result.ElapsedMs + ",");
+            builder.AppendLine("  \"total_elapsed_ms\": " + result.TotalElapsedMs + ",");
+            builder.AppendLine("  \"camera_capture_encode_ms\": " + result.CameraCaptureEncodeMs + ",");
+            builder.AppendLine("  \"sdk_invoke_ms\": " + result.SdkInvokeMs + ",");
+            builder.AppendLine("  \"response_process_ms\": " + result.ResponseProcessMs + ",");
             builder.AppendLine("  \"state\": \"" + EscapeJson(result.State) + "\",");
             builder.AppendLine("  \"workflow_run_id\": \"" + EscapeJson(result.WorkflowRunId) + "\",");
             builder.AppendLine("  \"error\": \"" + EscapeJson(result.ErrorMessage) + "\"");
             builder.AppendLine("}");
             return builder.ToString();
+        }
+
+        private static string FormatTotalElapsed(VisionSdkDebugResult item)
+        {
+            if (item == null)
+            {
+                return "--";
+            }
+
+            var total = item.TotalElapsedMs > 0 ? item.TotalElapsedMs : item.ElapsedMs;
+            return total + "ms";
+        }
+
+        private static string FormatTimingSummary(VisionSdkDebugResult item)
+        {
+            if (item == null)
+            {
+                return "等待调用";
+            }
+
+            var total = item.TotalElapsedMs > 0 ? item.TotalElapsedMs : item.ElapsedMs;
+            return string.Format(
+                "{0}  {1}  总 {2}ms  取图编码 {3}ms  SDK {4}ms  处理 {5}ms",
+                item.OperationName,
+                item.IsSuccess ? "成功" : "失败",
+                total,
+                item.CameraCaptureEncodeMs,
+                item.SdkInvokeMs,
+                item.ResponseProcessMs);
         }
 
         private static string EscapeJson(string value)

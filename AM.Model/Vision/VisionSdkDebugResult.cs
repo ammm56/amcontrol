@@ -17,7 +17,18 @@ namespace AM.Model.Vision
 
         public DateTime RequestTime { get; set; }
 
+        /// <summary>
+        /// 总用时。包含相机取图编码、SDK 调用到返回、返回结果处理。
+        /// </summary>
         public int ElapsedMs { get; set; }
+
+        public int CameraCaptureEncodeMs { get; set; }
+
+        public int SdkInvokeMs { get; set; }
+
+        public int ResponseProcessMs { get; set; }
+
+        public int TotalElapsedMs { get; set; }
 
         public bool IsSuccess { get; set; }
 

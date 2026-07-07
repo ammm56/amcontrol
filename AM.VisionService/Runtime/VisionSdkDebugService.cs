@@ -39,17 +39,28 @@ namespace AM.VisionService.Runtime
         {
             var requestTime = DateTime.Now;
             var stopwatch = Stopwatch.StartNew();
+            var invokeStopwatch = new Stopwatch();
+            var processStopwatch = new Stopwatch();
+            long sdkInvokeMs = 0L;
+            long responseProcessMs = 0L;
 
             try
             {
                 ValidateRequest(request);
 
                 var runner = _runnerProvider.GetRunner();
+                invokeStopwatch.Start();
                 object response = await ExecuteCoreAsync(runner, request, cancellationToken).ConfigureAwait(false);
+                invokeStopwatch.Stop();
+                sdkInvokeMs = invokeStopwatch.ElapsedMilliseconds;
 
+                processStopwatch.Start();
+                var result = BuildResult(request, response, requestTime);
+                processStopwatch.Stop();
+                responseProcessMs = processStopwatch.ElapsedMilliseconds;
                 stopwatch.Stop();
 
-                var result = BuildResult(request, response, requestTime, stopwatch.ElapsedMilliseconds);
+                ApplyTiming(result, 0L, sdkInvokeMs, responseProcessMs);
                 return Result<VisionSdkDebugResult>.OkItem(
                     result,
                     result.OperationName + " 调用完成",
@@ -57,9 +68,28 @@ namespace AM.VisionService.Runtime
             }
             catch (Exception ex)
             {
-                stopwatch.Stop();
+                if (invokeStopwatch.IsRunning)
+                {
+                    invokeStopwatch.Stop();
+                }
 
-                var failed = BuildFailedResult(request, ex, requestTime, stopwatch.ElapsedMilliseconds);
+                if (processStopwatch.IsRunning)
+                {
+                    processStopwatch.Stop();
+                }
+
+                stopwatch.Stop();
+                sdkInvokeMs = invokeStopwatch.ElapsedMilliseconds;
+                responseProcessMs = processStopwatch.ElapsedMilliseconds;
+
+                var failed = BuildFailedResult(request, ex, requestTime);
+                ApplyTiming(failed, 0L, sdkInvokeMs, responseProcessMs);
+                if (failed.ElapsedMs <= 0)
+                {
+                    failed.ElapsedMs = ToIntElapsed(stopwatch.ElapsedMilliseconds);
+                    failed.TotalElapsedMs = failed.ElapsedMs;
+                }
+
                 return new Result<VisionSdkDebugResult>(
                     false,
                     -1,
@@ -223,8 +253,7 @@ namespace AM.VisionService.Runtime
         private static VisionSdkDebugResult BuildResult(
             VisionSdkDebugRequest request,
             object response,
-            DateTime requestTime,
-            long elapsedMs)
+            DateTime requestTime)
         {
             var info = VisionSdkDebugOperationCatalog.Get(request.OperationKey);
             var result = new VisionSdkDebugResult
@@ -234,7 +263,6 @@ namespace AM.VisionService.Runtime
                 RuntimeName = request.RuntimeName,
                 TriggerSourceName = request.TriggerSourceName,
                 RequestTime = requestTime,
-                ElapsedMs = ToIntElapsed(elapsedMs),
                 IsSuccess = true,
                 ResponseJson = SerializeResponse(response),
                 ShouldSaveCallRecord = info.ShouldSaveCallRecord
@@ -252,8 +280,7 @@ namespace AM.VisionService.Runtime
         private static VisionSdkDebugResult BuildFailedResult(
             VisionSdkDebugRequest request,
             Exception ex,
-            DateTime requestTime,
-            long elapsedMs)
+            DateTime requestTime)
         {
             var operationKey = request == null
                 ? VisionSdkDebugOperationKey.GetRuntimeHealth
@@ -267,7 +294,6 @@ namespace AM.VisionService.Runtime
                 RuntimeName = request == null ? null : request.RuntimeName,
                 TriggerSourceName = request == null ? null : request.TriggerSourceName,
                 RequestTime = requestTime,
-                ElapsedMs = ToIntElapsed(elapsedMs),
                 IsSuccess = false,
                 ErrorMessage = ex == null ? null : ex.Message,
                 ResponseJson = ex == null ? null : SerializeException(ex),
@@ -320,6 +346,24 @@ namespace AM.VisionService.Runtime
                     ? triggerHealth.DesiredState
                     : triggerHealth.ObservedState;
             }
+        }
+
+        private static void ApplyTiming(
+            VisionSdkDebugResult result,
+            long cameraCaptureEncodeMs,
+            long sdkInvokeMs,
+            long responseProcessMs)
+        {
+            if (result == null)
+            {
+                return;
+            }
+
+            result.CameraCaptureEncodeMs = ToIntElapsed(cameraCaptureEncodeMs);
+            result.SdkInvokeMs = ToIntElapsed(sdkInvokeMs);
+            result.ResponseProcessMs = ToIntElapsed(responseProcessMs);
+            result.TotalElapsedMs = ToIntElapsed(cameraCaptureEncodeMs + sdkInvokeMs + responseProcessMs);
+            result.ElapsedMs = result.TotalElapsedMs;
         }
 
         private static string SerializeResponse(object response)
