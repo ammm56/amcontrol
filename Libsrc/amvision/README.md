@@ -13,8 +13,16 @@ C# / .NET SDK 用于设备上位机、MES、采集程序和调试工具管理 Wo
 - 支持 Workflow 管理 API HTTP client：WorkflowAppRuntime create/list/get/events/start/stop/restart/health/instances/delete，WorkflowRun create/invoke/upload/get/events/cancel，TriggerSource list/get/create/enable/disable/delete/health，SystemConfig get
 - HTTP client 保留 raw `AmvisionWorkflowApiResponse` API，同时提供 runtime、run、app-result、trigger-source、system config 的 typed response 方法
 - `invoke app runtime` 和 `get workflow run` 默认按平台页面使用 `response_mode=run`；现场同步调用只取公开结果时使用 `InvokeWorkflowAppRuntimeAppResultResponseAsync`、`InvokeWorkflowAppRuntimeAppResultAsync<T>`、`GetWorkflowRunAppResultResponseAsync` 或 `GetWorkflowRunAppResultAsync<T>`
+- 支持已有模型 DeploymentInstance 的 `sync/async` runtime start、warmup、reset、stop、status、health，以及同步推理和异步 inference task 调用
+- 模型推理支持 JSON `input_file_id/input_uri/image_base64`、multipart 图片 bytes/file 上传，并提供 raw API 和 typed response 方法
 
 SDK 只负责第三方程序对已有 WorkflowAppRuntime、WorkflowRun 和 TriggerSource 的使用与控制；`Save Template`、`Save Application` 仍属于平台准备动作。
+
+模型 DeploymentInstance 的 SDK 调用按 [docs/api/model-deployment-sdks.md](../../docs/api/model-deployment-sdks.md) 的边界实现：不提供 DeploymentInstance 的 list/create/get/delete 管理操作，只使用已有 deployment 的运行控制和推理调用接口。
+
+`apps/Amvision.Workflows.Console` 的模型部署调用沿用 `Config/config_*.json + key + 方法` 的模式。每个 `config_*.json` 可以包含多个 `model_deployments`，启动时统一合并为 `ModelDeployments` catalog；重复 key 不允许静默覆盖，应在配置加载阶段排除并报错。
+
+现场使用的 `Config/config_*.json` 可由后端统一生成，前端只在“项目工作台”右上角提供“生成 SDK 配置包”入口。配置包生成规则、zip 结构和不做事项见 [docs/api/sdk-config-packages.md](../../docs/api/sdk-config-packages.md)。
 
 `net461` 和 `net472` 用于 .NET Framework 上位机程序，`netstandard2.1` 用于 .NET Core 3.0+，`net10.0` 用于现代运行时。仓库根目录 `global.json` 固定 .NET SDK 基线为 10.0，语言版本固定为 C# 14。`net461` 目标使用 NetMQ 4.0.1.10 和 System.Text.Json 6.0.10，其余目标使用当前较新的 NetMQ/System.Text.Json 组合。
 

@@ -42,7 +42,7 @@ internal sealed class InvokeConfig
     /// 写入 execution_metadata 的调用来源标识。
     /// </summary>
     [JsonPropertyName("source")]
-    public string Source { get; set; } = "amvision-workflows-console";
+    public string Source { get; set; } = "amvision-net461-console";
 
     /// <summary>
     /// 同步 invoke 场景名，写入 execution_metadata。

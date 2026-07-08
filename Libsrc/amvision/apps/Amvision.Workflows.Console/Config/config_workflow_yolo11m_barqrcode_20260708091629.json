@@ -6,7 +6,7 @@
     "http_timeout_seconds": 60
   },
   "runtime": {
-    "name": "yolo11m_barqrcode_runtime",
+    "name": "yolo11m_barqrcode",
     "workflow_runtime_id": "workflow-runtime-cd61f3638b664d2fae6834d6f51e3dd8"
   },
   "invoke": {
@@ -22,13 +22,14 @@
   },
   "trigger_sources": [
     {
-      "name": "yolo11m_barqrcode_zeromq",
+      "name": "zeromq_yolo11m_barqrcode",
       "trigger_source_id": "zeromq-workflow-runtime-cd61f3638b664d2fae6834d6f51e3dd8",
       "zero_mq": {
         "bind_endpoint": "tcp://127.0.0.1:5555",
         "default_input_binding": "request_image_ref",
-        "timeout_seconds": 5
+        "timeout_seconds": 30
       }
     }
-  ]
+  ],
+  "model_deployments": []
 }
