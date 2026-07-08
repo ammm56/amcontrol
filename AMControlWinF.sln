@@ -49,6 +49,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AMVisionSDK", "AMVisionSDK"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Amvision.Workflows.Console", "Libsrc\amvision\apps\Amvision.Workflows.Console\Amvision.Workflows.Console.csproj", "{8491B25E-13D5-5BCB-3367-ABD0AEE5524A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Amvision.Workflows", "Libsrc\amvision\src\Amvision.Workflows\Amvision.Workflows.csproj", "{729AB188-B448-4AFB-99F7-8D59399C7778}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -185,6 +187,14 @@ Global
 		{8491B25E-13D5-5BCB-3367-ABD0AEE5524A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8491B25E-13D5-5BCB-3367-ABD0AEE5524A}.Release|x64.ActiveCfg = Release|Any CPU
 		{8491B25E-13D5-5BCB-3367-ABD0AEE5524A}.Release|x64.Build.0 = Release|Any CPU
+		{729AB188-B448-4AFB-99F7-8D59399C7778}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{729AB188-B448-4AFB-99F7-8D59399C7778}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{729AB188-B448-4AFB-99F7-8D59399C7778}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{729AB188-B448-4AFB-99F7-8D59399C7778}.Debug|x64.Build.0 = Debug|Any CPU
+		{729AB188-B448-4AFB-99F7-8D59399C7778}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{729AB188-B448-4AFB-99F7-8D59399C7778}.Release|Any CPU.Build.0 = Release|Any CPU
+		{729AB188-B448-4AFB-99F7-8D59399C7778}.Release|x64.ActiveCfg = Release|Any CPU
+		{729AB188-B448-4AFB-99F7-8D59399C7778}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -200,6 +210,7 @@ Global
 		{3DB3C110-D05E-6231-7221-40DBFC2BA049} = {8D8FB92B-2632-4613-866E-6BDE7C834A74}
 		{AECA6186-71FE-4128-B0D1-5C8078DF46F3} = {38B153B2-2B20-4F8C-A56C-197E6690DCBE}
 		{8491B25E-13D5-5BCB-3367-ABD0AEE5524A} = {AECA6186-71FE-4128-B0D1-5C8078DF46F3}
+		{729AB188-B448-4AFB-99F7-8D59399C7778} = {AECA6186-71FE-4128-B0D1-5C8078DF46F3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C883A67B-CAA1-4715-A64C-2A2FCEFE6818}

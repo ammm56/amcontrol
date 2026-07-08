@@ -13,6 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.6" />
     <ProjectReference Include="..\AM.Model\AM.Model.csproj" />
     <ProjectReference Include="..\Libsrc\amvision\apps\Amvision.Workflows.Console\Amvision.Workflows.Console.csproj" />
   </ItemGroup>
