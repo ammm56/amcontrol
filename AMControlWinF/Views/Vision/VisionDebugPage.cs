@@ -197,6 +197,7 @@ namespace AMControlWinF.Views.Vision
             try
             {
                 labelStatus.Text = "正在加载视觉调试配置...";
+                await CloseSelectedCameraBeforeReloadAsync();
                 var result = await _model.LoadAsync();
                 BindSelections();
                 RefreshStats();
@@ -211,6 +212,17 @@ namespace AMControlWinF.Views.Vision
             {
                 SetBusyState(false);
             }
+        }
+
+        private async Task CloseSelectedCameraBeforeReloadAsync()
+        {
+            if (_model.SelectedCamera == null)
+            {
+                return;
+            }
+
+            await _model.CloseSelectedCameraAsync();
+            cameraLivePreview.ClearImage("未打开相机");
         }
 
         private void BindSelections()
