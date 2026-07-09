@@ -13,8 +13,11 @@ using AM.VisionService.Runtime;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -37,6 +40,7 @@ namespace AM.PageModel.Vision
         private readonly HashSet<string> _openedCameraCodes =
             new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
+        private string _temporaryInputImagePath;
         private List<CameraConfigEntity> _cameras = new List<CameraConfigEntity>();
         private List<string> _runtimeNames = new List<string>();
         private List<string> _triggerSourceNames = new List<string>();
@@ -388,53 +392,61 @@ namespace AM.PageModel.Vision
 
             LastInputFrame = null;
             LastInputImagePath = null;
+            ClearTemporaryInputImage();
 
-            var info = VisionSdkDebugOperationCatalog.Get(operationKey);
-            var request = new VisionSdkDebugRequest
+            try
             {
-                OperationKey = operationKey,
-                RuntimeName = SelectedRuntimeName,
-                TriggerSourceName = SelectedTriggerSourceName,
-                ModelDeploymentName = SelectedModelDeploymentName
-            };
-
-            long cameraCaptureEncodeMs = 0L;
-            if (info.UsesCameraImage)
-            {
-                var cameraStopwatch = Stopwatch.StartNew();
-                var imageResult = await PrepareCameraImageAsync(info, request, cancellationToken).ConfigureAwait(false);
-                cameraStopwatch.Stop();
-                cameraCaptureEncodeMs = cameraStopwatch.ElapsedMilliseconds;
-                if (!imageResult.Success)
+                var info = VisionSdkDebugOperationCatalog.Get(operationKey);
+                var request = new VisionSdkDebugRequest
                 {
-                    var failed = BuildLocalFailureResult(info, imageResult.Message, cameraCaptureEncodeMs);
-                    LastResult = failed;
-                    await SaveCallRecordAsync(failed).ConfigureAwait(false);
-                    return new Result<VisionSdkDebugResult>(
-                        false,
-                        imageResult.Code,
-                        imageResult.Message,
-                        imageResult.Source)
+                    OperationKey = operationKey,
+                    RuntimeName = SelectedRuntimeName,
+                    TriggerSourceName = SelectedTriggerSourceName,
+                    ModelDeploymentName = SelectedModelDeploymentName
+                };
+
+                long cameraCaptureEncodeMs = 0L;
+                if (info.UsesCameraImage)
+                {
+                    var cameraStopwatch = Stopwatch.StartNew();
+                    var imageResult = await PrepareCameraImageAsync(info, request, cancellationToken).ConfigureAwait(false);
+                    cameraStopwatch.Stop();
+                    cameraCaptureEncodeMs = cameraStopwatch.ElapsedMilliseconds;
+                    if (!imageResult.Success)
                     {
-                        Item = failed
-                    };
+                        var failed = BuildLocalFailureResult(info, imageResult.Message, cameraCaptureEncodeMs);
+                        LastResult = failed;
+                        await SaveCallRecordAsync(failed).ConfigureAwait(false);
+                        return new Result<VisionSdkDebugResult>(
+                            false,
+                            imageResult.Code,
+                            imageResult.Message,
+                            imageResult.Source)
+                        {
+                            Item = failed
+                        };
+                    }
                 }
+
+                var result = await _debugService.ExecuteAsync(request, cancellationToken).ConfigureAwait(false);
+                LastResult = result.Item;
+
+                if (LastResult != null && LastResult.ShouldSaveCallRecord)
+                {
+                    ApplyTotalTiming(LastResult, cameraCaptureEncodeMs);
+                    await SaveCallRecordAsync(LastResult).ConfigureAwait(false);
+                }
+                else if (LastResult != null)
+                {
+                    ApplyTotalTiming(LastResult, cameraCaptureEncodeMs);
+                }
+
+                return result;
             }
-
-            var result = await _debugService.ExecuteAsync(request, cancellationToken).ConfigureAwait(false);
-            LastResult = result.Item;
-
-            if (LastResult != null && LastResult.ShouldSaveCallRecord)
+            finally
             {
-                ApplyTotalTiming(LastResult, cameraCaptureEncodeMs);
-                await SaveCallRecordAsync(LastResult).ConfigureAwait(false);
+                ClearTemporaryInputImage();
             }
-            else if (LastResult != null)
-            {
-                ApplyTotalTiming(LastResult, cameraCaptureEncodeMs);
-            }
-
-            return result;
         }
 
         public int ResolvePreviewIntervalMs()
@@ -471,12 +483,37 @@ namespace AM.PageModel.Vision
             }
 
             LastInputFrame = frame;
-            LastInputImagePath = await Task.Run(() => SaveVisionInputImage(frame), cancellationToken).ConfigureAwait(false);
             request.MediaType = string.IsNullOrWhiteSpace(frame.MediaType) ? "image/jpeg" : frame.MediaType;
+
+            var saveInputImage = ShouldSaveVisionDebugInputImage();
+            if (info.UsesTemporaryImageFile || saveInputImage)
+            {
+                var useTemporaryFile = info.UsesTemporaryImageFile && !saveInputImage;
+                var imagePath = await Task.Run(
+                    () => SaveVisionInputImage(frame, useTemporaryFile),
+                    cancellationToken).ConfigureAwait(false);
+
+                if (useTemporaryFile)
+                {
+                    _temporaryInputImagePath = imagePath;
+                }
+                else
+                {
+                    LastInputImagePath = imagePath;
+                }
+
+                if (info.UsesTemporaryImageFile)
+                {
+                    request.ImagePath = imagePath;
+                }
+            }
 
             if (info.UsesTemporaryImageFile)
             {
-                request.ImagePath = LastInputImagePath;
+                if (string.IsNullOrWhiteSpace(request.ImagePath))
+                {
+                    return Result.Fail(3, "视觉调试文件输入图准备失败", ResultSource.UI);
+                }
             }
             else if (operationUsesBase64(info.Key))
             {
@@ -508,6 +545,13 @@ namespace AM.PageModel.Vision
 
             LastInputFrame = frame;
             LastInputImagePath = null;
+            if (ShouldSaveVisionDebugInputImage())
+            {
+                LastInputImagePath = await Task.Run(
+                    () => SaveVisionBgr24InputImage(frame),
+                    cancellationToken).ConfigureAwait(false);
+            }
+
             request.MediaType = "image/raw";
             request.Bgr24Bytes = frame.Bgr24Bytes;
             request.Bgr24Width = frame.Width;
@@ -598,9 +642,9 @@ namespace AM.PageModel.Vision
             };
         }
 
-        private string SaveVisionInputImage(CameraFrame frame)
+        private string SaveVisionInputImage(CameraFrame frame, bool useTemporaryDirectory)
         {
-            var directory = ResolveVisionImageDirectory();
+            var directory = ResolveVisionImageDirectory(useTemporaryDirectory);
             Directory.CreateDirectory(directory);
 
             var fileName = string.Format(
@@ -612,6 +656,22 @@ namespace AM.PageModel.Vision
 
             var path = Path.Combine(directory, fileName);
             File.WriteAllBytes(path, frame.EncodedBytes);
+            return path;
+        }
+
+        private string SaveVisionBgr24InputImage(CameraFrame frame)
+        {
+            var directory = ResolveVisionImageDirectory(false);
+            Directory.CreateDirectory(directory);
+
+            var fileName = string.Format(
+                "{0}_{1:yyyyMMdd_HHmmss_fff}_{2}.bmp",
+                SanitizeFileName(frame.CameraCode),
+                frame.Timestamp == default(DateTime) ? DateTime.Now : frame.Timestamp,
+                string.IsNullOrWhiteSpace(frame.FrameId) ? Guid.NewGuid().ToString("N") : frame.FrameId);
+
+            var path = Path.Combine(directory, fileName);
+            SaveTightBgr24BytesAsBmp(frame, path);
             return path;
         }
 
@@ -645,7 +705,6 @@ namespace AM.PageModel.Vision
         private static bool operationUsesBase64(VisionSdkDebugOperationKey key)
         {
             return key == VisionSdkDebugOperationKey.InvokeRuntimeAppResultWithImageBase64 ||
-                   key == VisionSdkDebugOperationKey.RunRuntimeWithImageBase64 ||
                    key == VisionSdkDebugOperationKey.InvokeZeroMqImageBase64 ||
                    key == VisionSdkDebugOperationKey.InvokeModelDeploymentWithImageBase64;
         }
@@ -665,9 +724,23 @@ namespace AM.PageModel.Vision
             result.ElapsedMs = result.TotalElapsedMs;
         }
 
-        private static string ResolveVisionImageDirectory()
+        private static string ResolveVisionImageDirectory(bool useTemporaryDirectory)
         {
-            return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, DefaultVisionImageDirectory);
+            if (useTemporaryDirectory)
+            {
+                return Path.Combine(Path.GetTempPath(), "AMControl", "VisionDebug");
+            }
+
+            var config = ResolveVisionDebugConfig();
+            var directory = NormalizeText(config.InputImageDirectory);
+            if (string.IsNullOrWhiteSpace(directory))
+            {
+                directory = DefaultVisionImageDirectory;
+            }
+
+            return Path.IsPathRooted(directory)
+                ? directory
+                : Path.Combine(AppDomain.CurrentDomain.BaseDirectory, directory);
         }
 
         private static string ResolveImageExtension(string mediaType)
@@ -694,6 +767,96 @@ namespace AM.PageModel.Vision
             }
 
             return text;
+        }
+
+        private static bool ShouldSaveVisionDebugInputImage()
+        {
+            return ResolveVisionDebugConfig().SaveInputImageEnabled;
+        }
+
+        private static VisionDebugConfig ResolveVisionDebugConfig()
+        {
+            var appConfig = ConfigContext.Instance.Config;
+            if (appConfig == null)
+            {
+                return new VisionDebugConfig();
+            }
+
+            if (appConfig.VisionDebugConfig == null)
+            {
+                appConfig.VisionDebugConfig = new VisionDebugConfig();
+            }
+
+            return appConfig.VisionDebugConfig;
+        }
+
+        private static string NormalizeText(string value)
+        {
+            return string.IsNullOrWhiteSpace(value) ? string.Empty : value.Trim();
+        }
+
+        private static void SaveTightBgr24BytesAsBmp(CameraFrame frame, string path)
+        {
+            if (frame == null ||
+                frame.Bgr24Bytes == null ||
+                frame.Bgr24Bytes.Length == 0 ||
+                frame.Width <= 0 ||
+                frame.Height <= 0)
+            {
+                throw new InvalidOperationException("BGR24 输入图为空，无法保存。");
+            }
+
+            var rowBytes = checked(frame.Width * 3);
+            var requiredLength = checked(rowBytes * frame.Height);
+            if (frame.Bgr24Bytes.Length < requiredLength)
+            {
+                throw new InvalidOperationException("BGR24 输入图字节长度不足，无法保存。");
+            }
+
+            using (var bitmap = new Bitmap(frame.Width, frame.Height, PixelFormat.Format24bppRgb))
+            {
+                var rect = new Rectangle(0, 0, frame.Width, frame.Height);
+                var data = bitmap.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
+                try
+                {
+                    var targetStride = Math.Abs(data.Stride);
+                    for (var row = 0; row < frame.Height; row++)
+                    {
+                        var sourceOffset = row * rowBytes;
+                        var targetOffset = data.Stride >= 0
+                            ? row * data.Stride
+                            : (frame.Height - 1 - row) * targetStride;
+                        Marshal.Copy(frame.Bgr24Bytes, sourceOffset, IntPtr.Add(data.Scan0, targetOffset), rowBytes);
+                    }
+                }
+                finally
+                {
+                    bitmap.UnlockBits(data);
+                }
+
+                bitmap.Save(path, ImageFormat.Bmp);
+            }
+        }
+
+        private void ClearTemporaryInputImage()
+        {
+            var path = _temporaryInputImagePath;
+            _temporaryInputImagePath = null;
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                return;
+            }
+
+            try
+            {
+                if (File.Exists(path))
+                {
+                    File.Delete(path);
+                }
+            }
+            catch
+            {
+            }
         }
 
         private static string EscapeJson(string value)

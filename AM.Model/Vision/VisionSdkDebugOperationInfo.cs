@@ -79,20 +79,15 @@ namespace AM.Model.Vision
                 D(VisionSdkDebugOperationKey.ListProjectRuntimes, "List Project Runtimes", "Workflow App Runtime 查询", true, false, false, false, false, false),
                 D(VisionSdkDebugOperationKey.ListRuntimeInstances, "List Instances", "Workflow App Runtime 查询", true, false, false, false, false, false),
                 D(VisionSdkDebugOperationKey.GetRuntimeEvents, "Runtime Events", "Workflow App Runtime 查询", true, false, false, false, false, false),
-                D(VisionSdkDebugOperationKey.CheckRuntimeFlow, "Check Flow", "Workflow App Runtime 查询", true, false, false, false, false, false),
 
                 D(VisionSdkDebugOperationKey.StartRuntime, "Start Runtime", "Workflow App Runtime 控制", true, false, false, false, false, true),
                 D(VisionSdkDebugOperationKey.StopRuntime, "Stop Runtime", "Workflow App Runtime 控制", true, false, false, false, false, true),
                 D(VisionSdkDebugOperationKey.RestartRuntime, "Restart Runtime", "Workflow App Runtime 控制", true, false, false, false, false, true),
 
                 D(VisionSdkDebugOperationKey.InvokeRuntimeAppResult, "Invoke AppResult", "Workflow App Runtime 调用", true, false, false, false, false, false),
-                D(VisionSdkDebugOperationKey.RunRuntime, "Run Runtime", "Workflow App Runtime 调用", true, false, false, false, false, false),
                 D(VisionSdkDebugOperationKey.InvokeRuntimeAppResultWithImageBytes, "Invoke Image Bytes", "Workflow App Runtime 调用", true, false, true, false, true, false),
                 D(VisionSdkDebugOperationKey.InvokeRuntimeAppResultWithImageBase64, "Invoke Image Base64", "Workflow App Runtime 调用", true, false, true, false, true, false),
                 D(VisionSdkDebugOperationKey.InvokeRuntimeAppResultWithImageFromFile, "Invoke Image File", "Workflow App Runtime 调用", true, false, true, true, true, false),
-                D(VisionSdkDebugOperationKey.RunRuntimeWithImageBytes, "Run Image Bytes", "Workflow App Runtime 调用", true, false, true, false, true, false),
-                D(VisionSdkDebugOperationKey.RunRuntimeWithImageBase64, "Run Image Base64", "Workflow App Runtime 调用", true, false, true, false, true, false),
-                D(VisionSdkDebugOperationKey.RunRuntimeWithImageFromFile, "Run Image File", "Workflow App Runtime 调用", true, false, true, true, true, false),
 
                 D(VisionSdkDebugOperationKey.ListTriggerSources, "List TriggerSources", "Trigger 查询/控制", true, false, false, false, false, false),
                 D(VisionSdkDebugOperationKey.GetTriggerSource, "Get TriggerSource", "Trigger 查询/控制", false, true, false, false, false, false),

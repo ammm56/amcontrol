@@ -30,6 +30,12 @@ namespace AM.Model.Common
         public IoScanConfig IoScanConfig { get; set; } = new IoScanConfig();
 
         /// <summary>
+        /// 视觉调试页面配置。
+        /// 持久化到 config.json，只控制本项目 Vision.Debug 页面行为。
+        /// </summary>
+        public VisionDebugConfig VisionDebugConfig { get; set; } = new VisionDebugConfig();
+
+        /// <summary>
         /// 第三层对象运行时配置聚合。
         /// 运行时由数据库装载，不再写入 config.json。
         /// </summary>
@@ -261,6 +267,25 @@ namespace AM.Model.Common
         /// 最小值为 10ms，默认 50ms。
         /// </summary>
         public int ScanIntervalMs { get; set; } = 50;
+    }
+
+    /// <summary>
+    /// 视觉调试页面配置。
+    /// 与相机配置中的手动取图保存分离，避免连续高频视觉调试默认产生磁盘 IO。
+    /// </summary>
+    public class VisionDebugConfig
+    {
+        /// <summary>
+        /// 是否保存 Vision.Debug 调用输入图。
+        /// 默认 false，BGR24 / Bytes / Base64 / 连续调用均不自动落盘。
+        /// </summary>
+        public bool SaveInputImageEnabled { get; set; } = false;
+
+        /// <summary>
+        /// Vision.Debug 输入图保存目录。
+        /// 支持绝对路径；相对路径以主程序输出目录为根。
+        /// </summary>
+        public string InputImageDirectory { get; set; } = "Images\\VisionDebug";
     }
 
     /// <summary>

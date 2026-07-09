@@ -118,8 +118,6 @@ namespace AM.VisionService.Runtime
                     return await runner.ListRuntimeInstancesAsync(request.RuntimeName, cancellationToken).ConfigureAwait(false);
                 case VisionSdkDebugOperationKey.GetRuntimeEvents:
                     return await runner.GetRuntimeEventsAsync(request.RuntimeName, cancellationToken).ConfigureAwait(false);
-                case VisionSdkDebugOperationKey.CheckRuntimeFlow:
-                    return await runner.CheckRuntimeFlowAsync(request.RuntimeName, cancellationToken).ConfigureAwait(false);
 
                 case VisionSdkDebugOperationKey.StartRuntime:
                     return await runner.StartRuntimeAsync(request.RuntimeName, cancellationToken).ConfigureAwait(false);
@@ -130,8 +128,6 @@ namespace AM.VisionService.Runtime
 
                 case VisionSdkDebugOperationKey.InvokeRuntimeAppResult:
                     return await runner.InvokeRuntimeAppResultAsync(request.RuntimeName, cancellationToken).ConfigureAwait(false);
-                case VisionSdkDebugOperationKey.RunRuntime:
-                    return await runner.RunRuntimeAsync(request.RuntimeName, cancellationToken).ConfigureAwait(false);
                 case VisionSdkDebugOperationKey.InvokeRuntimeAppResultWithImageBytes:
                     return await runner.InvokeRuntimeAppResultWithImageBytesAsync(
                         request.RuntimeName,
@@ -146,24 +142,6 @@ namespace AM.VisionService.Runtime
                         cancellationToken).ConfigureAwait(false);
                 case VisionSdkDebugOperationKey.InvokeRuntimeAppResultWithImageFromFile:
                     return await runner.InvokeRuntimeAppResultWithImageFromFileAsync(
-                        request.RuntimeName,
-                        request.ImagePath,
-                        NormalizeMediaType(request.MediaType),
-                        cancellationToken).ConfigureAwait(false);
-                case VisionSdkDebugOperationKey.RunRuntimeWithImageBytes:
-                    return await runner.RunRuntimeWithImageBytesAsync(
-                        request.RuntimeName,
-                        request.ImageBytes,
-                        NormalizeMediaType(request.MediaType),
-                        cancellationToken).ConfigureAwait(false);
-                case VisionSdkDebugOperationKey.RunRuntimeWithImageBase64:
-                    return await runner.RunRuntimeWithImageBase64Async(
-                        request.RuntimeName,
-                        request.ImageBase64,
-                        NormalizeMediaType(request.MediaType),
-                        cancellationToken).ConfigureAwait(false);
-                case VisionSdkDebugOperationKey.RunRuntimeWithImageFromFile:
-                    return await runner.RunRuntimeWithImageFromFileAsync(
                         request.RuntimeName,
                         request.ImagePath,
                         NormalizeMediaType(request.MediaType),
@@ -497,7 +475,6 @@ namespace AM.VisionService.Runtime
         private static bool UsesBase64Image(VisionSdkDebugOperationKey key)
         {
             return key == VisionSdkDebugOperationKey.InvokeRuntimeAppResultWithImageBase64 ||
-                   key == VisionSdkDebugOperationKey.RunRuntimeWithImageBase64 ||
                    key == VisionSdkDebugOperationKey.InvokeZeroMqImageBase64 ||
                    key == VisionSdkDebugOperationKey.InvokeModelDeploymentWithImageBase64;
         }

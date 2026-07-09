@@ -97,6 +97,14 @@ flowchart LR
 - OpenCV `Cv2.ImEncode` 直接从 `Mat` 编码通常比 `Mat -> Bitmap -> GDI+ Save` 更适合本项目链路；
 - `PNG` 压缩开销最大，适合需要无损且低频的调试场景；`JPEG` 有压缩开销但传输体积小，默认适合高分辨率视觉调用；`BMP` 编码开销低但体积大，只有在本机传输、后端明确支持 `image/bmp` 且实测总耗时更低时才作为性能选项。
 
+### 3.2 图像保存边界
+
+- `SysConfig.Camera` 中的 `SaveImageEnabled` / `SaveImageDirectory` 只控制相机配置页手动点击“取图”时是否保存测试图；
+- `Vision.Debug` 调用后的输入图留存使用 `config.json` 中独立的 `VisionDebugConfig.SaveInputImageEnabled` / `VisionDebugConfig.InputImageDirectory`；
+- `VisionDebugConfig.SaveInputImageEnabled` 默认关闭，避免 BGR24 调用、Bytes/Base64 调用和连续高频调试默认产生磁盘 IO；
+- `Vision.Debug` 的文件类 SDK 调用需要向 SDK 提供图片文件路径，保存开关关闭时只生成本次调用临时文件，调用结束后清理，不作为调用记录图片路径；
+- 视觉调用记录表仍保存调用结果、耗时、media type 和字节长度；只有视觉调试输入图保存开关打开时，记录中的 `ImagePath` 才指向持久化输入图。
+
 ---
 
 ## 4. SDK 集成方式

@@ -29,6 +29,10 @@
 		"AutoStart": true,
 		"ScanIntervalMs": 50
 	},
+	"VisionDebugConfig": {
+		"SaveInputImageEnabled": false,
+		"InputImageDirectory": "Images\\VisionDebug"
+	},
 	"MotionCardsConfig": [
 		{
 			"CardType": 10,
