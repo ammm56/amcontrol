@@ -108,6 +108,9 @@ namespace AM.VisionService.Runtime
         {
             switch (request.OperationKey)
             {
+                case VisionSdkDebugOperationKey.GetSystemConfig:
+                    return await runner.GetSystemConfigAsync(cancellationToken).ConfigureAwait(false);
+
                 case VisionSdkDebugOperationKey.GetRuntimeHealth:
                     return await runner.GetRuntimeHealthAsync(request.RuntimeName, cancellationToken).ConfigureAwait(false);
                 case VisionSdkDebugOperationKey.GetRuntime:
@@ -202,6 +205,92 @@ namespace AM.VisionService.Runtime
                         request.ImagePath,
                         NormalizeMediaType(request.MediaType),
                         cancellationToken).ConfigureAwait(false);
+
+                case VisionSdkDebugOperationKey.StartModelDeploymentRuntime:
+                    return await runner.StartModelDeploymentRuntimeAsync(request.ModelDeploymentName, cancellationToken).ConfigureAwait(false);
+                case VisionSdkDebugOperationKey.StopModelDeploymentRuntime:
+                    return await runner.StopModelDeploymentRuntimeAsync(request.ModelDeploymentName, cancellationToken).ConfigureAwait(false);
+                case VisionSdkDebugOperationKey.ResetModelDeploymentRuntime:
+                    return await runner.ResetModelDeploymentRuntimeAsync(request.ModelDeploymentName, cancellationToken).ConfigureAwait(false);
+                case VisionSdkDebugOperationKey.WarmupModelDeploymentRuntime:
+                    return await runner.WarmupModelDeploymentRuntimeAsync(request.ModelDeploymentName, cancellationToken).ConfigureAwait(false);
+                case VisionSdkDebugOperationKey.GetModelDeploymentRuntimeStatus:
+                    return await runner.GetModelDeploymentRuntimeStatusAsync(request.ModelDeploymentName, cancellationToken).ConfigureAwait(false);
+                case VisionSdkDebugOperationKey.GetModelDeploymentRuntimeHealth:
+                    return await runner.GetModelDeploymentRuntimeHealthAsync(request.ModelDeploymentName, cancellationToken).ConfigureAwait(false);
+
+                case VisionSdkDebugOperationKey.InvokeConfiguredModelDeployment:
+                    return await runner.InvokeConfiguredModelDeploymentAsync(request.ModelDeploymentName, cancellationToken).ConfigureAwait(false);
+                case VisionSdkDebugOperationKey.InvokeModelDeploymentWithImageBytes:
+                    return await runner.InvokeModelDeploymentWithImageBytesAsync(
+                        request.ModelDeploymentName,
+                        request.ImageBytes,
+                        null,
+                        NormalizeMediaType(request.MediaType),
+                        cancellationToken).ConfigureAwait(false);
+                case VisionSdkDebugOperationKey.InvokeModelDeploymentWithImageBase64:
+                    return await runner.InvokeModelDeploymentWithImageBase64Async(
+                        request.ModelDeploymentName,
+                        request.ImageBase64,
+                        cancellationToken).ConfigureAwait(false);
+                case VisionSdkDebugOperationKey.InvokeModelDeploymentWithImageFromFile:
+                    return await runner.InvokeModelDeploymentWithImageFromFileAsync(
+                        request.ModelDeploymentName,
+                        request.ImagePath,
+                        NormalizeMediaType(request.MediaType),
+                        cancellationToken).ConfigureAwait(false);
+                case VisionSdkDebugOperationKey.InvokeModelDeploymentWithInputUri:
+                    return await runner.InvokeModelDeploymentWithInputUriAsync(
+                        request.ModelDeploymentName,
+                        request.ModelInputUri,
+                        cancellationToken).ConfigureAwait(false);
+                case VisionSdkDebugOperationKey.InvokeModelDeploymentWithInputFileId:
+                    return await runner.InvokeModelDeploymentWithInputFileIdAsync(
+                        request.ModelDeploymentName,
+                        request.ModelInputFileId,
+                        cancellationToken).ConfigureAwait(false);
+
+                case VisionSdkDebugOperationKey.RunConfiguredModelDeployment:
+                    return await runner.RunConfiguredModelDeploymentAsync(request.ModelDeploymentName, cancellationToken).ConfigureAwait(false);
+                case VisionSdkDebugOperationKey.RunModelDeploymentWithImageBytes:
+                    return await runner.RunModelDeploymentWithImageBytesAsync(
+                        request.ModelDeploymentName,
+                        request.ImageBytes,
+                        null,
+                        NormalizeMediaType(request.MediaType),
+                        cancellationToken).ConfigureAwait(false);
+                case VisionSdkDebugOperationKey.RunModelDeploymentWithImageBase64:
+                    return await runner.RunModelDeploymentWithImageBase64Async(
+                        request.ModelDeploymentName,
+                        request.ImageBase64,
+                        cancellationToken).ConfigureAwait(false);
+                case VisionSdkDebugOperationKey.RunModelDeploymentWithImageFromFile:
+                    return await runner.RunModelDeploymentWithImageFromFileAsync(
+                        request.ModelDeploymentName,
+                        request.ImagePath,
+                        NormalizeMediaType(request.MediaType),
+                        cancellationToken).ConfigureAwait(false);
+                case VisionSdkDebugOperationKey.RunModelDeploymentWithInputUri:
+                    return await runner.RunModelDeploymentWithInputUriAsync(
+                        request.ModelDeploymentName,
+                        request.ModelInputUri,
+                        cancellationToken).ConfigureAwait(false);
+                case VisionSdkDebugOperationKey.RunModelDeploymentWithInputFileId:
+                    return await runner.RunModelDeploymentWithInputFileIdAsync(
+                        request.ModelDeploymentName,
+                        request.ModelInputFileId,
+                        cancellationToken).ConfigureAwait(false);
+                case VisionSdkDebugOperationKey.GetModelInferenceTask:
+                    return await runner.GetModelInferenceTaskAsync(
+                        request.ModelDeploymentName,
+                        request.ModelInferenceTaskId,
+                        true,
+                        cancellationToken).ConfigureAwait(false);
+                case VisionSdkDebugOperationKey.GetModelInferenceTaskResult:
+                    return await runner.GetModelInferenceTaskResultAsync(
+                        request.ModelDeploymentName,
+                        request.ModelInferenceTaskId,
+                        cancellationToken).ConfigureAwait(false);
                 default:
                     throw new ArgumentOutOfRangeException("OperationKey", request.OperationKey, "未知视觉 SDK 调试操作。");
             }
@@ -225,11 +314,29 @@ namespace AM.VisionService.Runtime
                 throw new ArgumentException("Trigger Key 不能为空", "TriggerSourceName");
             }
 
+            if (info.RequiresModelDeployment && string.IsNullOrWhiteSpace(request.ModelDeploymentName))
+            {
+                throw new ArgumentException("Model Deployment Key 不能为空", "ModelDeploymentName");
+            }
+
+            if (info.RequiresInputUri && string.IsNullOrWhiteSpace(request.ModelInputUri))
+            {
+                throw new ArgumentException("Model input_uri 不能为空", "ModelInputUri");
+            }
+
+            if (info.RequiresInputFileId && string.IsNullOrWhiteSpace(request.ModelInputFileId))
+            {
+                throw new ArgumentException("Model input_file_id 不能为空", "ModelInputFileId");
+            }
+
+            if (info.RequiresInferenceTaskId && string.IsNullOrWhiteSpace(request.ModelInferenceTaskId))
+            {
+                throw new ArgumentException("Model inference_task_id 不能为空", "ModelInferenceTaskId");
+            }
+
             if (info.UsesCameraImage)
             {
-                if (request.OperationKey == VisionSdkDebugOperationKey.InvokeRuntimeAppResultWithImageBase64 ||
-                    request.OperationKey == VisionSdkDebugOperationKey.RunRuntimeWithImageBase64 ||
-                    request.OperationKey == VisionSdkDebugOperationKey.InvokeZeroMqImageBase64)
+                if (UsesBase64Image(request.OperationKey))
                 {
                     if (string.IsNullOrWhiteSpace(request.ImageBase64))
                     {
@@ -262,6 +369,7 @@ namespace AM.VisionService.Runtime
                 OperationName = info.DisplayName,
                 RuntimeName = request.RuntimeName,
                 TriggerSourceName = request.TriggerSourceName,
+                ModelDeploymentName = request.ModelDeploymentName,
                 RequestTime = requestTime,
                 IsSuccess = true,
                 ResponseJson = SerializeResponse(response),
@@ -293,6 +401,7 @@ namespace AM.VisionService.Runtime
                 OperationName = info.DisplayName,
                 RuntimeName = request == null ? null : request.RuntimeName,
                 TriggerSourceName = request == null ? null : request.TriggerSourceName,
+                ModelDeploymentName = request == null ? null : request.ModelDeploymentName,
                 RequestTime = requestTime,
                 IsSuccess = false,
                 ErrorMessage = ex == null ? null : ex.Message,
@@ -345,6 +454,66 @@ namespace AM.VisionService.Runtime
                 result.State = string.IsNullOrWhiteSpace(triggerHealth.ObservedState)
                     ? triggerHealth.DesiredState
                     : triggerHealth.ObservedState;
+                return;
+            }
+
+            var modelStatus = response as ModelDeploymentRuntimeStatusResponse;
+            if (modelStatus != null)
+            {
+                result.State = string.IsNullOrWhiteSpace(modelStatus.ProcessState)
+                    ? modelStatus.DesiredState
+                    : modelStatus.ProcessState;
+                result.WorkflowRunId = modelStatus.DeploymentInstanceId;
+                result.ErrorMessage = modelStatus.LastError;
+                return;
+            }
+
+            var modelWarmup = response as ModelDeploymentRuntimeWarmupResponse;
+            if (modelWarmup != null)
+            {
+                result.State = modelWarmup.Status;
+                result.WorkflowRunId = modelWarmup.DeploymentInstanceId;
+                return;
+            }
+
+            var modelInference = response as ModelDeploymentInferenceResponse;
+            if (modelInference != null)
+            {
+                result.State = "succeeded";
+                result.WorkflowRunId = string.IsNullOrWhiteSpace(modelInference.InferenceTaskId)
+                    ? modelInference.RequestId
+                    : modelInference.InferenceTaskId;
+                result.InferenceTaskId = modelInference.InferenceTaskId;
+                return;
+            }
+
+            var modelTask = response as ModelInferenceTaskSubmissionResponse;
+            if (modelTask != null)
+            {
+                result.State = modelTask.Status;
+                result.WorkflowRunId = modelTask.InferenceTaskId;
+                result.InferenceTaskId = modelTask.InferenceTaskId;
+                return;
+            }
+
+            var modelTaskDetail = response as ModelInferenceTaskDetailResponse;
+            if (modelTaskDetail != null)
+            {
+                result.State = modelTaskDetail.Status;
+                result.WorkflowRunId = modelTaskDetail.InferenceTaskId;
+                result.InferenceTaskId = modelTaskDetail.InferenceTaskId;
+                result.ErrorMessage = modelTaskDetail.ErrorMessage;
+                return;
+            }
+
+            var modelTaskResult = response as ModelInferenceTaskResultResponse;
+            if (modelTaskResult != null)
+            {
+                result.State = string.IsNullOrWhiteSpace(modelTaskResult.TaskState)
+                    ? modelTaskResult.FileStatus
+                    : modelTaskResult.TaskState;
+                result.WorkflowRunId = modelTaskResult.InferenceTaskId;
+                result.InferenceTaskId = modelTaskResult.InferenceTaskId;
             }
         }
 
@@ -395,6 +564,15 @@ namespace AM.VisionService.Runtime
         private static string NormalizeMediaType(string mediaType)
         {
             return string.IsNullOrWhiteSpace(mediaType) ? "image/jpeg" : mediaType.Trim();
+        }
+
+        private static bool UsesBase64Image(VisionSdkDebugOperationKey key)
+        {
+            return key == VisionSdkDebugOperationKey.InvokeRuntimeAppResultWithImageBase64 ||
+                   key == VisionSdkDebugOperationKey.RunRuntimeWithImageBase64 ||
+                   key == VisionSdkDebugOperationKey.InvokeZeroMqImageBase64 ||
+                   key == VisionSdkDebugOperationKey.InvokeModelDeploymentWithImageBase64 ||
+                   key == VisionSdkDebugOperationKey.RunModelDeploymentWithImageBase64;
         }
 
         private static int ToIntElapsed(long elapsedMs)

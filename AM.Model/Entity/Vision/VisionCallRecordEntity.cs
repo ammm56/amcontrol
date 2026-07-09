@@ -31,6 +31,9 @@ namespace AM.Model.Entity.Vision
         public string TriggerSourceName { get; set; }
 
         [SugarColumn(IsNullable = true)]
+        public string ModelDeploymentName { get; set; }
+
+        [SugarColumn(IsNullable = true)]
         public string ImagePath { get; set; }
 
         [SugarColumn(IsNullable = true)]

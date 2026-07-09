@@ -13,6 +13,8 @@ namespace AM.Model.Interfaces.Vision
 
         IEnumerable<string> TriggerSourceNames { get; }
 
+        IEnumerable<string> ModelDeploymentNames { get; }
+
         Result EnsureInitialized();
     }
 }

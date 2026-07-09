@@ -162,6 +162,7 @@ namespace AMControlWinF.Views.Vision
             selectCamera.SelectedValueChanged += (s, e) => SelectCameraChanged();
             selectRuntime.SelectedValueChanged += (s, e) => SelectRuntimeChanged();
             selectTrigger.SelectedValueChanged += (s, e) => SelectTriggerChanged();
+            selectModelDeployment.SelectedValueChanged += (s, e) => SelectModelDeploymentChanged();
             selectExecutionMode.SelectedValueChanged += (s, e) => SelectExecutionModeChanged();
 
             buttonRefreshConfig.Click += async (s, e) => await ReloadAsync();
@@ -233,7 +234,11 @@ namespace AMControlWinF.Views.Vision
                 BindCameraSelect();
                 BindTextSelect(selectRuntime, _model.RuntimeNames, _model.SelectedRuntimeName);
                 BindTextSelect(selectTrigger, _model.TriggerSourceNames, _model.SelectedTriggerSourceName);
+                BindTextSelect(selectModelDeployment, _model.ModelDeploymentNames, _model.SelectedModelDeploymentName);
                 SetSelectValue(selectExecutionMode, _model.ExecutionMode == VisionSdkDebugExecutionMode.Continuous ? "连续" : "单次");
+                inputModelInputUri.Text = _model.ModelInputUri ?? string.Empty;
+                inputModelInputFileId.Text = _model.ModelInputFileId ?? string.Empty;
+                inputModelInferenceTaskId.Text = _model.ModelInferenceTaskId ?? string.Empty;
             }
             finally
             {
@@ -314,6 +319,16 @@ namespace AMControlWinF.Views.Vision
             }
 
             _model.SelectTriggerSource(GetSelectedText(selectTrigger));
+        }
+
+        private void SelectModelDeploymentChanged()
+        {
+            if (_isBinding)
+            {
+                return;
+            }
+
+            _model.SelectModelDeployment(GetSelectedText(selectModelDeployment));
         }
 
         private void SelectExecutionModeChanged()
@@ -580,6 +595,7 @@ namespace AMControlWinF.Views.Vision
             try
             {
                 labelStatus.Text = "正在调用：" + info.DisplayName;
+                SyncModelDebugArguments();
                 var result = await _model.ExecuteOperationAsync(operationKey, cancellationToken);
 
                 if (_model.LastInputFrame != null)
@@ -592,6 +608,7 @@ namespace AMControlWinF.Views.Vision
                 }
 
                 ShowOperationResult(result);
+                FillInferenceTaskIdIfNeeded(result == null ? null : result.Item);
                 RefreshStats(false);
             }
             finally
@@ -631,6 +648,7 @@ namespace AMControlWinF.Views.Vision
             labelOpenedCameraCount.Text = _model.OpenedCameraCount.ToString();
             labelRuntimeCount.Text = _model.RuntimeNames.Count.ToString();
             labelTriggerCount.Text = _model.TriggerSourceNames.Count.ToString();
+            labelModelDeploymentCount.Text = _model.ModelDeploymentNames.Count.ToString();
 
             if (_model.LastResult != null)
             {
@@ -661,7 +679,11 @@ namespace AMControlWinF.Views.Vision
             selectCamera.Enabled = !_isBusy && !inContinuous;
             selectRuntime.Enabled = !_isBusy && !inContinuous;
             selectTrigger.Enabled = !_isBusy && !inContinuous;
+            selectModelDeployment.Enabled = !_isBusy && !inContinuous;
             selectExecutionMode.Enabled = !_isBusy && !inContinuous;
+            inputModelInputUri.Enabled = !_isBusy && !inContinuous;
+            inputModelInputFileId.Enabled = !_isBusy && !inContinuous;
+            inputModelInferenceTaskId.Enabled = !_isBusy && !inContinuous;
             buttonRefreshConfig.Enabled = !_isBusy && !inContinuous;
 
             buttonOpenCamera.Enabled = !_isBusy && !inContinuous && hasCamera;
@@ -731,6 +753,8 @@ namespace AMControlWinF.Views.Vision
             builder.AppendLine("{");
             builder.AppendLine("  \"operation\": \"" + EscapeJson(result.OperationName) + "\",");
             builder.AppendLine("  \"success\": " + (result.IsSuccess ? "true" : "false") + ",");
+            builder.AppendLine("  \"model_deployment_name\": \"" + EscapeJson(result.ModelDeploymentName) + "\",");
+            builder.AppendLine("  \"inference_task_id\": \"" + EscapeJson(result.InferenceTaskId) + "\",");
             builder.AppendLine("  \"total_elapsed_ms\": " + result.TotalElapsedMs + ",");
             builder.AppendLine("  \"camera_capture_encode_ms\": " + result.CameraCaptureEncodeMs + ",");
             builder.AppendLine("  \"sdk_invoke_ms\": " + result.SdkInvokeMs + ",");
@@ -769,6 +793,28 @@ namespace AMControlWinF.Views.Vision
                 item.CameraCaptureEncodeMs,
                 item.SdkInvokeMs,
                 item.ResponseProcessMs);
+        }
+
+        private void SyncModelDebugArguments()
+        {
+            _model.SetModelDebugArguments(
+                inputModelInputUri.Text,
+                inputModelInputFileId.Text,
+                inputModelInferenceTaskId.Text);
+        }
+
+        private void FillInferenceTaskIdIfNeeded(VisionSdkDebugResult item)
+        {
+            if (item == null || string.IsNullOrWhiteSpace(item.InferenceTaskId))
+            {
+                return;
+            }
+
+            inputModelInferenceTaskId.Text = item.InferenceTaskId;
+            _model.SetModelDebugArguments(
+                inputModelInputUri.Text,
+                inputModelInputFileId.Text,
+                inputModelInferenceTaskId.Text);
         }
 
         private static string EscapeJson(string value)

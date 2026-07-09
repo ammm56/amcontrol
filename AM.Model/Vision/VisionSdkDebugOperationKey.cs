@@ -6,6 +6,8 @@ namespace AM.Model.Vision
     /// </summary>
     public enum VisionSdkDebugOperationKey
     {
+        GetSystemConfig = -10,
+
         GetRuntimeHealth = 0,
         GetRuntime = 1,
         ListProjectRuntimes = 2,
@@ -32,6 +34,29 @@ namespace AM.Model.Vision
         InvokeZeroMqConfiguredImage = 61,
         InvokeZeroMqImageBytes = 62,
         InvokeZeroMqImageBase64 = 63,
-        InvokeZeroMqImageFromFile = 64
+        InvokeZeroMqImageFromFile = 64,
+
+        StartModelDeploymentRuntime = 100,
+        StopModelDeploymentRuntime = 101,
+        ResetModelDeploymentRuntime = 102,
+        WarmupModelDeploymentRuntime = 103,
+        GetModelDeploymentRuntimeStatus = 104,
+        GetModelDeploymentRuntimeHealth = 105,
+
+        InvokeConfiguredModelDeployment = 120,
+        InvokeModelDeploymentWithImageBytes = 121,
+        InvokeModelDeploymentWithImageBase64 = 122,
+        InvokeModelDeploymentWithImageFromFile = 123,
+        InvokeModelDeploymentWithInputUri = 124,
+        InvokeModelDeploymentWithInputFileId = 125,
+
+        RunConfiguredModelDeployment = 140,
+        RunModelDeploymentWithImageBytes = 141,
+        RunModelDeploymentWithImageBase64 = 142,
+        RunModelDeploymentWithImageFromFile = 143,
+        RunModelDeploymentWithInputUri = 144,
+        RunModelDeploymentWithInputFileId = 145,
+        GetModelInferenceTask = 146,
+        GetModelInferenceTaskResult = 147
     }
 }

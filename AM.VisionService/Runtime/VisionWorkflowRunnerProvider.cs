@@ -34,6 +34,11 @@ namespace AM.VisionService.Runtime
             get { return GetRunner().TriggerSourceNames.ToList(); }
         }
 
+        public IEnumerable<string> ModelDeploymentNames
+        {
+            get { return GetRunner().ModelDeploymentNames.ToList(); }
+        }
+
         public Result EnsureInitialized()
         {
             try

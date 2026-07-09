@@ -43,6 +43,10 @@ namespace AMControlWinF.Views.Vision
             this.panelOperationsCard = new AntdUI.Panel();
             this.panelOperationScroll = new System.Windows.Forms.Panel();
             this.flowOperations = new System.Windows.Forms.FlowLayoutPanel();
+            this.panelModelArgs = new AntdUI.Panel();
+            this.inputModelInferenceTaskId = new AntdUI.Input();
+            this.inputModelInputFileId = new AntdUI.Input();
+            this.inputModelInputUri = new AntdUI.Input();
             this.panelOperationsHeader = new AntdUI.Panel();
             this.buttonStopContinuous = new AntdUI.Button();
             this.labelOperationsTitle = new AntdUI.Label();
@@ -50,6 +54,9 @@ namespace AMControlWinF.Views.Vision
             this.panelLastElapsedCard = new AntdUI.Panel();
             this.labelLastElapsedValue = new AntdUI.Label();
             this.labelLastElapsedTitle = new AntdUI.Label();
+            this.panelModelDeploymentCard = new AntdUI.Panel();
+            this.labelModelDeploymentCount = new AntdUI.Label();
+            this.labelModelDeploymentTitle = new AntdUI.Label();
             this.panelTriggerCard = new AntdUI.Panel();
             this.labelTriggerCount = new AntdUI.Label();
             this.labelTriggerTitle = new AntdUI.Label();
@@ -68,6 +75,7 @@ namespace AMControlWinF.Views.Vision
             this.flowToolbarLeft = new AntdUI.FlowPanel();
             this.labelStatus = new AntdUI.Label();
             this.selectExecutionMode = new AntdUI.Select();
+            this.selectModelDeployment = new AntdUI.Select();
             this.selectTrigger = new AntdUI.Select();
             this.selectRuntime = new AntdUI.Select();
             this.selectCamera = new AntdUI.Select();
@@ -88,9 +96,11 @@ namespace AMControlWinF.Views.Vision
             this.flowCameraButtons.SuspendLayout();
             this.panelOperationsCard.SuspendLayout();
             this.panelOperationScroll.SuspendLayout();
+            this.panelModelArgs.SuspendLayout();
             this.panelOperationsHeader.SuspendLayout();
             this.flowStats.SuspendLayout();
             this.panelLastElapsedCard.SuspendLayout();
+            this.panelModelDeploymentCard.SuspendLayout();
             this.panelTriggerCard.SuspendLayout();
             this.panelRuntimeCard.SuspendLayout();
             this.panelOpenedCameraCard.SuspendLayout();
@@ -359,6 +369,7 @@ namespace AMControlWinF.Views.Vision
             // 
             this.panelOperationsCard.BackColor = System.Drawing.Color.Transparent;
             this.panelOperationsCard.Controls.Add(this.panelOperationScroll);
+            this.panelOperationsCard.Controls.Add(this.panelModelArgs);
             this.panelOperationsCard.Controls.Add(this.panelOperationsHeader);
             this.panelOperationsCard.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelOperationsCard.Location = new System.Drawing.Point(0, 0);
@@ -376,10 +387,10 @@ namespace AMControlWinF.Views.Vision
             this.panelOperationScroll.AutoScroll = true;
             this.panelOperationScroll.Controls.Add(this.flowOperations);
             this.panelOperationScroll.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelOperationScroll.Location = new System.Drawing.Point(12, 56);
+            this.panelOperationScroll.Location = new System.Drawing.Point(12, 146);
             this.panelOperationScroll.Margin = new System.Windows.Forms.Padding(0);
             this.panelOperationScroll.Name = "panelOperationScroll";
-            this.panelOperationScroll.Size = new System.Drawing.Size(316, 470);
+            this.panelOperationScroll.Size = new System.Drawing.Size(316, 380);
             this.panelOperationScroll.TabIndex = 1;
             // 
             // flowOperations
@@ -394,7 +405,51 @@ namespace AMControlWinF.Views.Vision
             this.flowOperations.Size = new System.Drawing.Size(316, 0);
             this.flowOperations.TabIndex = 0;
             this.flowOperations.WrapContents = false;
-            // 
+            //
+            // panelModelArgs
+            //
+            this.panelModelArgs.Controls.Add(this.inputModelInferenceTaskId);
+            this.panelModelArgs.Controls.Add(this.inputModelInputFileId);
+            this.panelModelArgs.Controls.Add(this.inputModelInputUri);
+            this.panelModelArgs.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panelModelArgs.Location = new System.Drawing.Point(12, 56);
+            this.panelModelArgs.Margin = new System.Windows.Forms.Padding(0);
+            this.panelModelArgs.Name = "panelModelArgs";
+            this.panelModelArgs.Padding = new System.Windows.Forms.Padding(0, 0, 0, 8);
+            this.panelModelArgs.Radius = 0;
+            this.panelModelArgs.Size = new System.Drawing.Size(316, 90);
+            this.panelModelArgs.TabIndex = 2;
+            //
+            // inputModelInferenceTaskId
+            //
+            this.inputModelInferenceTaskId.Location = new System.Drawing.Point(0, 60);
+            this.inputModelInferenceTaskId.Margin = new System.Windows.Forms.Padding(0);
+            this.inputModelInferenceTaskId.Name = "inputModelInferenceTaskId";
+            this.inputModelInferenceTaskId.PlaceholderText = "Model inference_task_id";
+            this.inputModelInferenceTaskId.Size = new System.Drawing.Size(316, 28);
+            this.inputModelInferenceTaskId.TabIndex = 2;
+            this.inputModelInferenceTaskId.WaveSize = 0;
+            //
+            // inputModelInputFileId
+            //
+            this.inputModelInputFileId.Location = new System.Drawing.Point(0, 30);
+            this.inputModelInputFileId.Margin = new System.Windows.Forms.Padding(0);
+            this.inputModelInputFileId.Name = "inputModelInputFileId";
+            this.inputModelInputFileId.PlaceholderText = "Model input_file_id";
+            this.inputModelInputFileId.Size = new System.Drawing.Size(316, 28);
+            this.inputModelInputFileId.TabIndex = 1;
+            this.inputModelInputFileId.WaveSize = 0;
+            //
+            // inputModelInputUri
+            //
+            this.inputModelInputUri.Location = new System.Drawing.Point(0, 0);
+            this.inputModelInputUri.Margin = new System.Windows.Forms.Padding(0);
+            this.inputModelInputUri.Name = "inputModelInputUri";
+            this.inputModelInputUri.PlaceholderText = "Model input_uri";
+            this.inputModelInputUri.Size = new System.Drawing.Size(316, 28);
+            this.inputModelInputUri.TabIndex = 0;
+            this.inputModelInputUri.WaveSize = 0;
+            //
             // panelOperationsHeader
             // 
             this.panelOperationsHeader.Controls.Add(this.buttonStopContinuous);
@@ -435,6 +490,7 @@ namespace AMControlWinF.Views.Vision
             // flowStats
             // 
             this.flowStats.Controls.Add(this.panelLastElapsedCard);
+            this.flowStats.Controls.Add(this.panelModelDeploymentCard);
             this.flowStats.Controls.Add(this.panelTriggerCard);
             this.flowStats.Controls.Add(this.panelRuntimeCard);
             this.flowStats.Controls.Add(this.panelOpenedCameraCard);
@@ -452,7 +508,7 @@ namespace AMControlWinF.Views.Vision
             // 
             this.panelLastElapsedCard.Controls.Add(this.labelLastElapsedValue);
             this.panelLastElapsedCard.Controls.Add(this.labelLastElapsedTitle);
-            this.panelLastElapsedCard.Location = new System.Drawing.Point(628, 6);
+            this.panelLastElapsedCard.Location = new System.Drawing.Point(724, 6);
             this.panelLastElapsedCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelLastElapsedCard.Name = "panelLastElapsedCard";
             this.panelLastElapsedCard.Padding = new System.Windows.Forms.Padding(12);
@@ -460,18 +516,18 @@ namespace AMControlWinF.Views.Vision
             this.panelLastElapsedCard.Shadow = 4;
             this.panelLastElapsedCard.ShadowOpacity = 0.12F;
             this.panelLastElapsedCard.ShadowOpacityAnimation = true;
-            this.panelLastElapsedCard.Size = new System.Drawing.Size(150, 66);
-            this.panelLastElapsedCard.TabIndex = 4;
+            this.panelLastElapsedCard.Size = new System.Drawing.Size(140, 66);
+            this.panelLastElapsedCard.TabIndex = 5;
             // 
             // labelLastElapsedValue
             // 
             this.labelLastElapsedValue.BackColor = System.Drawing.Color.Transparent;
             this.labelLastElapsedValue.Dock = System.Windows.Forms.DockStyle.Right;
             this.labelLastElapsedValue.Font = new System.Drawing.Font("Microsoft YaHei UI", 16F, System.Drawing.FontStyle.Bold);
-            this.labelLastElapsedValue.Location = new System.Drawing.Point(54, 16);
+            this.labelLastElapsedValue.Location = new System.Drawing.Point(58, 16);
             this.labelLastElapsedValue.Margin = new System.Windows.Forms.Padding(0);
             this.labelLastElapsedValue.Name = "labelLastElapsedValue";
-            this.labelLastElapsedValue.Size = new System.Drawing.Size(80, 34);
+            this.labelLastElapsedValue.Size = new System.Drawing.Size(66, 34);
             this.labelLastElapsedValue.TabIndex = 1;
             this.labelLastElapsedValue.Text = "--";
             this.labelLastElapsedValue.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -487,12 +543,53 @@ namespace AMControlWinF.Views.Vision
             this.labelLastElapsedTitle.Size = new System.Drawing.Size(37, 34);
             this.labelLastElapsedTitle.TabIndex = 0;
             this.labelLastElapsedTitle.Text = "用时";
-            // 
+            //
+            // panelModelDeploymentCard
+            //
+            this.panelModelDeploymentCard.Controls.Add(this.labelModelDeploymentCount);
+            this.panelModelDeploymentCard.Controls.Add(this.labelModelDeploymentTitle);
+            this.panelModelDeploymentCard.Location = new System.Drawing.Point(580, 6);
+            this.panelModelDeploymentCard.Margin = new System.Windows.Forms.Padding(0);
+            this.panelModelDeploymentCard.Name = "panelModelDeploymentCard";
+            this.panelModelDeploymentCard.Padding = new System.Windows.Forms.Padding(12);
+            this.panelModelDeploymentCard.Radius = 10;
+            this.panelModelDeploymentCard.Shadow = 4;
+            this.panelModelDeploymentCard.ShadowOpacity = 0.12F;
+            this.panelModelDeploymentCard.ShadowOpacityAnimation = true;
+            this.panelModelDeploymentCard.Size = new System.Drawing.Size(140, 66);
+            this.panelModelDeploymentCard.TabIndex = 4;
+            //
+            // labelModelDeploymentCount
+            //
+            this.labelModelDeploymentCount.BackColor = System.Drawing.Color.Transparent;
+            this.labelModelDeploymentCount.Dock = System.Windows.Forms.DockStyle.Right;
+            this.labelModelDeploymentCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 16F, System.Drawing.FontStyle.Bold);
+            this.labelModelDeploymentCount.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(135)))), ((int)(((byte)(85)))), ((int)(((byte)(255)))));
+            this.labelModelDeploymentCount.Location = new System.Drawing.Point(74, 16);
+            this.labelModelDeploymentCount.Margin = new System.Windows.Forms.Padding(0);
+            this.labelModelDeploymentCount.Name = "labelModelDeploymentCount";
+            this.labelModelDeploymentCount.Size = new System.Drawing.Size(50, 34);
+            this.labelModelDeploymentCount.TabIndex = 1;
+            this.labelModelDeploymentCount.Text = "0";
+            this.labelModelDeploymentCount.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            //
+            // labelModelDeploymentTitle
+            //
+            this.labelModelDeploymentTitle.BackColor = System.Drawing.Color.Transparent;
+            this.labelModelDeploymentTitle.Dock = System.Windows.Forms.DockStyle.Left;
+            this.labelModelDeploymentTitle.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
+            this.labelModelDeploymentTitle.Location = new System.Drawing.Point(16, 16);
+            this.labelModelDeploymentTitle.Margin = new System.Windows.Forms.Padding(0);
+            this.labelModelDeploymentTitle.Name = "labelModelDeploymentTitle";
+            this.labelModelDeploymentTitle.Size = new System.Drawing.Size(58, 34);
+            this.labelModelDeploymentTitle.TabIndex = 0;
+            this.labelModelDeploymentTitle.Text = "模型数";
+            //
             // panelTriggerCard
             // 
             this.panelTriggerCard.Controls.Add(this.labelTriggerCount);
             this.panelTriggerCard.Controls.Add(this.labelTriggerTitle);
-            this.panelTriggerCard.Location = new System.Drawing.Point(472, 6);
+            this.panelTriggerCard.Location = new System.Drawing.Point(436, 6);
             this.panelTriggerCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelTriggerCard.Name = "panelTriggerCard";
             this.panelTriggerCard.Padding = new System.Windows.Forms.Padding(12);
@@ -500,7 +597,7 @@ namespace AMControlWinF.Views.Vision
             this.panelTriggerCard.Shadow = 4;
             this.panelTriggerCard.ShadowOpacity = 0.12F;
             this.panelTriggerCard.ShadowOpacityAnimation = true;
-            this.panelTriggerCard.Size = new System.Drawing.Size(150, 66);
+            this.panelTriggerCard.Size = new System.Drawing.Size(140, 66);
             this.panelTriggerCard.TabIndex = 3;
             // 
             // labelTriggerCount
@@ -509,7 +606,7 @@ namespace AMControlWinF.Views.Vision
             this.labelTriggerCount.Dock = System.Windows.Forms.DockStyle.Right;
             this.labelTriggerCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 16F, System.Drawing.FontStyle.Bold);
             this.labelTriggerCount.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(180)))), ((int)(((byte)(60)))));
-            this.labelTriggerCount.Location = new System.Drawing.Point(84, 16);
+            this.labelTriggerCount.Location = new System.Drawing.Point(74, 16);
             this.labelTriggerCount.Margin = new System.Windows.Forms.Padding(0);
             this.labelTriggerCount.Name = "labelTriggerCount";
             this.labelTriggerCount.Size = new System.Drawing.Size(50, 34);
@@ -533,7 +630,7 @@ namespace AMControlWinF.Views.Vision
             // 
             this.panelRuntimeCard.Controls.Add(this.labelRuntimeCount);
             this.panelRuntimeCard.Controls.Add(this.labelRuntimeTitle);
-            this.panelRuntimeCard.Location = new System.Drawing.Point(316, 6);
+            this.panelRuntimeCard.Location = new System.Drawing.Point(292, 6);
             this.panelRuntimeCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelRuntimeCard.Name = "panelRuntimeCard";
             this.panelRuntimeCard.Padding = new System.Windows.Forms.Padding(12);
@@ -541,7 +638,7 @@ namespace AMControlWinF.Views.Vision
             this.panelRuntimeCard.Shadow = 4;
             this.panelRuntimeCard.ShadowOpacity = 0.12F;
             this.panelRuntimeCard.ShadowOpacityAnimation = true;
-            this.panelRuntimeCard.Size = new System.Drawing.Size(150, 66);
+            this.panelRuntimeCard.Size = new System.Drawing.Size(140, 66);
             this.panelRuntimeCard.TabIndex = 2;
             // 
             // labelRuntimeCount
@@ -550,7 +647,7 @@ namespace AMControlWinF.Views.Vision
             this.labelRuntimeCount.Dock = System.Windows.Forms.DockStyle.Right;
             this.labelRuntimeCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 16F, System.Drawing.FontStyle.Bold);
             this.labelRuntimeCount.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(24)))), ((int)(((byte)(118)))), ((int)(((byte)(255)))));
-            this.labelRuntimeCount.Location = new System.Drawing.Point(84, 16);
+            this.labelRuntimeCount.Location = new System.Drawing.Point(74, 16);
             this.labelRuntimeCount.Margin = new System.Windows.Forms.Padding(0);
             this.labelRuntimeCount.Name = "labelRuntimeCount";
             this.labelRuntimeCount.Size = new System.Drawing.Size(50, 34);
@@ -574,7 +671,7 @@ namespace AMControlWinF.Views.Vision
             // 
             this.panelOpenedCameraCard.Controls.Add(this.labelOpenedCameraCount);
             this.panelOpenedCameraCard.Controls.Add(this.labelOpenedCameraTitle);
-            this.panelOpenedCameraCard.Location = new System.Drawing.Point(160, 6);
+            this.panelOpenedCameraCard.Location = new System.Drawing.Point(148, 6);
             this.panelOpenedCameraCard.Margin = new System.Windows.Forms.Padding(0);
             this.panelOpenedCameraCard.Name = "panelOpenedCameraCard";
             this.panelOpenedCameraCard.Padding = new System.Windows.Forms.Padding(12);
@@ -582,7 +679,7 @@ namespace AMControlWinF.Views.Vision
             this.panelOpenedCameraCard.Shadow = 4;
             this.panelOpenedCameraCard.ShadowOpacity = 0.12F;
             this.panelOpenedCameraCard.ShadowOpacityAnimation = true;
-            this.panelOpenedCameraCard.Size = new System.Drawing.Size(150, 66);
+            this.panelOpenedCameraCard.Size = new System.Drawing.Size(140, 66);
             this.panelOpenedCameraCard.TabIndex = 1;
             // 
             // labelOpenedCameraCount
@@ -591,7 +688,7 @@ namespace AMControlWinF.Views.Vision
             this.labelOpenedCameraCount.Dock = System.Windows.Forms.DockStyle.Right;
             this.labelOpenedCameraCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 16F, System.Drawing.FontStyle.Bold);
             this.labelOpenedCameraCount.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(180)))), ((int)(((byte)(60)))));
-            this.labelOpenedCameraCount.Location = new System.Drawing.Point(84, 16);
+            this.labelOpenedCameraCount.Location = new System.Drawing.Point(74, 16);
             this.labelOpenedCameraCount.Margin = new System.Windows.Forms.Padding(0);
             this.labelOpenedCameraCount.Name = "labelOpenedCameraCount";
             this.labelOpenedCameraCount.Size = new System.Drawing.Size(50, 34);
@@ -623,7 +720,7 @@ namespace AMControlWinF.Views.Vision
             this.panelCameraCard.Shadow = 4;
             this.panelCameraCard.ShadowOpacity = 0.12F;
             this.panelCameraCard.ShadowOpacityAnimation = true;
-            this.panelCameraCard.Size = new System.Drawing.Size(150, 66);
+            this.panelCameraCard.Size = new System.Drawing.Size(140, 66);
             this.panelCameraCard.TabIndex = 0;
             // 
             // labelCameraCount
@@ -631,7 +728,7 @@ namespace AMControlWinF.Views.Vision
             this.labelCameraCount.BackColor = System.Drawing.Color.Transparent;
             this.labelCameraCount.Dock = System.Windows.Forms.DockStyle.Right;
             this.labelCameraCount.Font = new System.Drawing.Font("Microsoft YaHei UI", 16F, System.Drawing.FontStyle.Bold);
-            this.labelCameraCount.Location = new System.Drawing.Point(84, 16);
+            this.labelCameraCount.Location = new System.Drawing.Point(74, 16);
             this.labelCameraCount.Margin = new System.Windows.Forms.Padding(0);
             this.labelCameraCount.Name = "labelCameraCount";
             this.labelCameraCount.Size = new System.Drawing.Size(50, 34);
@@ -693,6 +790,7 @@ namespace AMControlWinF.Views.Vision
             // 
             this.flowToolbarLeft.Controls.Add(this.labelStatus);
             this.flowToolbarLeft.Controls.Add(this.selectExecutionMode);
+            this.flowToolbarLeft.Controls.Add(this.selectModelDeployment);
             this.flowToolbarLeft.Controls.Add(this.selectTrigger);
             this.flowToolbarLeft.Controls.Add(this.selectRuntime);
             this.flowToolbarLeft.Controls.Add(this.selectCamera);
@@ -707,7 +805,7 @@ namespace AMControlWinF.Views.Vision
             // labelStatus
             // 
             this.labelStatus.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
-            this.labelStatus.Location = new System.Drawing.Point(672, 0);
+            this.labelStatus.Location = new System.Drawing.Point(730, 0);
             this.labelStatus.Margin = new System.Windows.Forms.Padding(0);
             this.labelStatus.Name = "labelStatus";
             this.labelStatus.Size = new System.Drawing.Size(124, 36);
@@ -717,31 +815,41 @@ namespace AMControlWinF.Views.Vision
             // 
             // selectExecutionMode
             // 
-            this.selectExecutionMode.Location = new System.Drawing.Point(554, 0);
+            this.selectExecutionMode.Location = new System.Drawing.Point(632, 0);
             this.selectExecutionMode.Margin = new System.Windows.Forms.Padding(0);
             this.selectExecutionMode.Name = "selectExecutionMode";
             this.selectExecutionMode.PlaceholderText = "调用方式";
-            this.selectExecutionMode.Size = new System.Drawing.Size(110, 36);
+            this.selectExecutionMode.Size = new System.Drawing.Size(90, 36);
             this.selectExecutionMode.TabIndex = 4;
             this.selectExecutionMode.WaveSize = 0;
-            // 
+            //
+            // selectModelDeployment
+            //
+            this.selectModelDeployment.Location = new System.Drawing.Point(454, 0);
+            this.selectModelDeployment.Margin = new System.Windows.Forms.Padding(0);
+            this.selectModelDeployment.Name = "selectModelDeployment";
+            this.selectModelDeployment.PlaceholderText = "Model Deployment";
+            this.selectModelDeployment.Size = new System.Drawing.Size(170, 36);
+            this.selectModelDeployment.TabIndex = 6;
+            this.selectModelDeployment.WaveSize = 0;
+            //
             // selectTrigger
             // 
-            this.selectTrigger.Location = new System.Drawing.Point(356, 0);
+            this.selectTrigger.Location = new System.Drawing.Point(301, 0);
             this.selectTrigger.Margin = new System.Windows.Forms.Padding(0);
             this.selectTrigger.Name = "selectTrigger";
             this.selectTrigger.PlaceholderText = "Trigger Key";
-            this.selectTrigger.Size = new System.Drawing.Size(190, 36);
+            this.selectTrigger.Size = new System.Drawing.Size(145, 36);
             this.selectTrigger.TabIndex = 3;
             this.selectTrigger.WaveSize = 0;
             // 
             // selectRuntime
             // 
-            this.selectRuntime.Location = new System.Drawing.Point(158, 0);
+            this.selectRuntime.Location = new System.Drawing.Point(148, 0);
             this.selectRuntime.Margin = new System.Windows.Forms.Padding(0);
             this.selectRuntime.Name = "selectRuntime";
             this.selectRuntime.PlaceholderText = "Runtime Key";
-            this.selectRuntime.Size = new System.Drawing.Size(190, 36);
+            this.selectRuntime.Size = new System.Drawing.Size(145, 36);
             this.selectRuntime.TabIndex = 2;
             this.selectRuntime.WaveSize = 0;
             // 
@@ -751,7 +859,7 @@ namespace AMControlWinF.Views.Vision
             this.selectCamera.Margin = new System.Windows.Forms.Padding(0);
             this.selectCamera.Name = "selectCamera";
             this.selectCamera.PlaceholderText = "选择相机";
-            this.selectCamera.Size = new System.Drawing.Size(150, 36);
+            this.selectCamera.Size = new System.Drawing.Size(140, 36);
             this.selectCamera.TabIndex = 1;
             this.selectCamera.WaveSize = 0;
             // 
@@ -806,9 +914,11 @@ namespace AMControlWinF.Views.Vision
             this.panelOperationsCard.ResumeLayout(false);
             this.panelOperationScroll.ResumeLayout(false);
             this.panelOperationScroll.PerformLayout();
+            this.panelModelArgs.ResumeLayout(false);
             this.panelOperationsHeader.ResumeLayout(false);
             this.flowStats.ResumeLayout(false);
             this.panelLastElapsedCard.ResumeLayout(false);
+            this.panelModelDeploymentCard.ResumeLayout(false);
             this.panelTriggerCard.ResumeLayout(false);
             this.panelRuntimeCard.ResumeLayout(false);
             this.panelOpenedCameraCard.ResumeLayout(false);
@@ -827,6 +937,10 @@ namespace AMControlWinF.Views.Vision
         private AntdUI.Panel panelOperationsCard;
         private System.Windows.Forms.Panel panelOperationScroll;
         private System.Windows.Forms.FlowLayoutPanel flowOperations;
+        private AntdUI.Panel panelModelArgs;
+        private AntdUI.Input inputModelInferenceTaskId;
+        private AntdUI.Input inputModelInputFileId;
+        private AntdUI.Input inputModelInputUri;
         private AntdUI.Panel panelOperationsHeader;
         private AntdUI.Button buttonStopContinuous;
         private AntdUI.Label labelOperationsTitle;
@@ -851,6 +965,9 @@ namespace AMControlWinF.Views.Vision
         private AntdUI.Panel panelLastElapsedCard;
         private AntdUI.Label labelLastElapsedValue;
         private AntdUI.Label labelLastElapsedTitle;
+        private AntdUI.Panel panelModelDeploymentCard;
+        private AntdUI.Label labelModelDeploymentCount;
+        private AntdUI.Label labelModelDeploymentTitle;
         private AntdUI.Panel panelTriggerCard;
         private AntdUI.Label labelTriggerCount;
         private AntdUI.Label labelTriggerTitle;
@@ -869,6 +986,7 @@ namespace AMControlWinF.Views.Vision
         private AntdUI.FlowPanel flowToolbarLeft;
         private AntdUI.Label labelStatus;
         private AntdUI.Select selectExecutionMode;
+        private AntdUI.Select selectModelDeployment;
         private AntdUI.Select selectTrigger;
         private AntdUI.Select selectRuntime;
         private AntdUI.Select selectCamera;

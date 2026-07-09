@@ -40,6 +40,7 @@ namespace AM.PageModel.Vision
         private List<CameraConfigEntity> _cameras = new List<CameraConfigEntity>();
         private List<string> _runtimeNames = new List<string>();
         private List<string> _triggerSourceNames = new List<string>();
+        private List<string> _modelDeploymentNames = new List<string>();
         private bool _disposed;
 
         public VisionDebugPageModel()
@@ -82,11 +83,24 @@ namespace AM.PageModel.Vision
             get { return _triggerSourceNames; }
         }
 
+        public IReadOnlyList<string> ModelDeploymentNames
+        {
+            get { return _modelDeploymentNames; }
+        }
+
         public CameraConfigEntity SelectedCamera { get; private set; }
 
         public string SelectedRuntimeName { get; private set; }
 
         public string SelectedTriggerSourceName { get; private set; }
+
+        public string SelectedModelDeploymentName { get; private set; }
+
+        public string ModelInputUri { get; private set; }
+
+        public string ModelInputFileId { get; private set; }
+
+        public string ModelInferenceTaskId { get; private set; }
 
         public VisionSdkDebugExecutionMode ExecutionMode { get; set; }
 
@@ -157,8 +171,10 @@ namespace AM.PageModel.Vision
                 {
                     _runtimeNames = new List<string>();
                     _triggerSourceNames = new List<string>();
+                    _modelDeploymentNames = new List<string>();
                     SelectedRuntimeName = null;
                     SelectedTriggerSourceName = null;
+                    SelectedModelDeploymentName = null;
                     return init;
                 }
 
@@ -169,6 +185,12 @@ namespace AM.PageModel.Vision
                     .ToList();
 
                 _triggerSourceNames = _runnerProvider.TriggerSourceNames
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .OrderBy(x => x)
+                    .ToList();
+
+                _modelDeploymentNames = _runnerProvider.ModelDeploymentNames
                     .Where(x => !string.IsNullOrWhiteSpace(x))
                     .Distinct(StringComparer.OrdinalIgnoreCase)
                     .OrderBy(x => x)
@@ -186,14 +208,22 @@ namespace AM.PageModel.Vision
                     SelectedTriggerSourceName = _triggerSourceNames.FirstOrDefault();
                 }
 
+                if (string.IsNullOrWhiteSpace(SelectedModelDeploymentName) ||
+                    !_modelDeploymentNames.Any(x => string.Equals(x, SelectedModelDeploymentName, StringComparison.OrdinalIgnoreCase)))
+                {
+                    SelectedModelDeploymentName = _modelDeploymentNames.FirstOrDefault();
+                }
+
                 return Result.Ok("视觉 SDK 配置刷新完成", ResultSource.Unknown);
             }
             catch (Exception ex)
             {
                 _runtimeNames = new List<string>();
                 _triggerSourceNames = new List<string>();
+                _modelDeploymentNames = new List<string>();
                 SelectedRuntimeName = null;
                 SelectedTriggerSourceName = null;
+                SelectedModelDeploymentName = null;
                 return Result.Fail(-1, "视觉 SDK 配置刷新失败: " + ex.Message, ResultSource.Unknown);
             }
         }
@@ -213,6 +243,21 @@ namespace AM.PageModel.Vision
         public void SelectTriggerSource(string triggerSourceName)
         {
             SelectedTriggerSourceName = string.IsNullOrWhiteSpace(triggerSourceName) ? null : triggerSourceName.Trim();
+        }
+
+        public void SelectModelDeployment(string modelDeploymentName)
+        {
+            SelectedModelDeploymentName = string.IsNullOrWhiteSpace(modelDeploymentName) ? null : modelDeploymentName.Trim();
+        }
+
+        public void SetModelDebugArguments(
+            string inputUri,
+            string inputFileId,
+            string inferenceTaskId)
+        {
+            ModelInputUri = NormalizeOptional(inputUri);
+            ModelInputFileId = NormalizeOptional(inputFileId);
+            ModelInferenceTaskId = NormalizeOptional(inferenceTaskId);
         }
 
         public async Task<Result> OpenSelectedCameraAsync(CancellationToken cancellationToken = default(CancellationToken))
@@ -343,7 +388,11 @@ namespace AM.PageModel.Vision
             {
                 OperationKey = operationKey,
                 RuntimeName = SelectedRuntimeName,
-                TriggerSourceName = SelectedTriggerSourceName
+                TriggerSourceName = SelectedTriggerSourceName,
+                ModelDeploymentName = SelectedModelDeploymentName,
+                ModelInputUri = ModelInputUri,
+                ModelInputFileId = ModelInputFileId,
+                ModelInferenceTaskId = ModelInferenceTaskId
             };
 
             long cameraCaptureEncodeMs = 0L;
@@ -469,6 +518,7 @@ namespace AM.PageModel.Vision
                 CallMode = result.OperationKey.ToString(),
                 RuntimeName = result.RuntimeName,
                 TriggerSourceName = result.TriggerSourceName,
+                ModelDeploymentName = result.ModelDeploymentName,
                 ImagePath = LastInputImagePath,
                 MediaType = frame == null ? null : frame.MediaType,
                 ImageBytesLength = frame == null ? 0 : frame.EncodedBytesLength,
@@ -500,6 +550,7 @@ namespace AM.PageModel.Vision
                 OperationName = info.DisplayName,
                 RuntimeName = SelectedRuntimeName,
                 TriggerSourceName = SelectedTriggerSourceName,
+                ModelDeploymentName = SelectedModelDeploymentName,
                 RequestTime = DateTime.Now,
                 ElapsedMs = cameraMs,
                 CameraCaptureEncodeMs = cameraMs,
@@ -534,7 +585,9 @@ namespace AM.PageModel.Vision
         {
             return key == VisionSdkDebugOperationKey.InvokeRuntimeAppResultWithImageBase64 ||
                    key == VisionSdkDebugOperationKey.RunRuntimeWithImageBase64 ||
-                   key == VisionSdkDebugOperationKey.InvokeZeroMqImageBase64;
+                   key == VisionSdkDebugOperationKey.InvokeZeroMqImageBase64 ||
+                   key == VisionSdkDebugOperationKey.InvokeModelDeploymentWithImageBase64 ||
+                   key == VisionSdkDebugOperationKey.RunModelDeploymentWithImageBase64;
         }
 
         private static void ApplyTotalTiming(VisionSdkDebugResult result, long cameraCaptureEncodeMs)
@@ -588,6 +641,11 @@ namespace AM.PageModel.Vision
             return string.IsNullOrEmpty(value)
                 ? string.Empty
                 : value.Replace("\\", "\\\\").Replace("\"", "\\\"");
+        }
+
+        private static string NormalizeOptional(string value)
+        {
+            return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
         }
 
         private static int ToIntElapsed(long elapsedMs)

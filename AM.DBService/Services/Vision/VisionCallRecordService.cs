@@ -150,6 +150,7 @@ namespace AM.DBService.Services.Vision
             entity.CallMode = NormalizeText(entity.CallMode);
             entity.RuntimeName = NormalizeText(entity.RuntimeName);
             entity.TriggerSourceName = NormalizeText(entity.TriggerSourceName);
+            entity.ModelDeploymentName = NormalizeText(entity.ModelDeploymentName);
             entity.ImagePath = NormalizeText(entity.ImagePath);
             entity.MediaType = NormalizeText(entity.MediaType);
             entity.State = NormalizeText(entity.State);
