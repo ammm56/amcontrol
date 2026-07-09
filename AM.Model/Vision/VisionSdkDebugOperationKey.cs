@@ -33,6 +33,7 @@ namespace AM.Model.Vision
         InvokeZeroMqImageBytes = 62,
         InvokeZeroMqImageBase64 = 63,
         InvokeZeroMqImageFromFile = 64,
+        InvokeZeroMqBgr24 = 65,
 
         StartModelDeploymentRuntime = 100,
         StopModelDeploymentRuntime = 101,

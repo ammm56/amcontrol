@@ -15,6 +15,12 @@ namespace AM.Model.Vision
 
         public byte[] ImageBytes { get; set; }
 
+        public byte[] Bgr24Bytes { get; set; }
+
+        public int Bgr24Width { get; set; }
+
+        public int Bgr24Height { get; set; }
+
         public string ImageBase64 { get; set; }
 
         public string ImagePath { get; set; }

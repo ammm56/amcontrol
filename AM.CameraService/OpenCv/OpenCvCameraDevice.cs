@@ -107,6 +107,42 @@ namespace AM.CameraService.OpenCv
             }
         }
 
+        public CameraFrame GrabBgr24Frame()
+        {
+            lock (_syncRoot)
+            {
+                EnsureOpen();
+
+                using (var frame = ReadFrame())
+                {
+                    Mat bgr = null;
+                    try
+                    {
+                        var source = EnsureBgr24(frame, out bgr);
+                        var bgr24Bytes = CopyTightBgr24Bytes(source);
+                        return new CameraFrame
+                        {
+                            CameraCode = _config.CameraCode,
+                            FrameId = Guid.NewGuid().ToString("N"),
+                            Timestamp = DateTime.Now,
+                            Width = source.Width,
+                            Height = source.Height,
+                            PixelFormat = "BGR24",
+                            MediaType = "image/raw",
+                            Bgr24Bytes = bgr24Bytes
+                        };
+                    }
+                    finally
+                    {
+                        if (bgr != null)
+                        {
+                            bgr.Dispose();
+                        }
+                    }
+                }
+            }
+        }
+
         public CameraPreviewFrame GrabPreviewFrame()
         {
             lock (_syncRoot)
@@ -298,6 +334,25 @@ namespace AM.CameraService.OpenCv
             }
 
             return converted;
+        }
+
+        private static byte[] CopyTightBgr24Bytes(Mat frame)
+        {
+            var rowBytes = checked(frame.Width * 3);
+            var height = frame.Rows;
+            var stride = checked((int)frame.Step());
+            var bytes = new byte[checked(rowBytes * height)];
+
+            for (var row = 0; row < height; row++)
+            {
+                Marshal.Copy(
+                    IntPtr.Add(frame.Data, row * stride),
+                    bytes,
+                    row * rowBytes,
+                    rowBytes);
+            }
+
+            return bytes;
         }
 
         private CameraPreviewFrame BuildPreviewFrame(Mat frame)

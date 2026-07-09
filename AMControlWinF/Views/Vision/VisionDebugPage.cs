@@ -776,7 +776,7 @@ namespace AMControlWinF.Views.Vision
 
             var total = item.TotalElapsedMs > 0 ? item.TotalElapsedMs : item.ElapsedMs;
             return string.Format(
-                "{0}  {1}  总 {2}ms  取图编码 {3}ms  SDK {4}ms  处理 {5}ms",
+                "{0}  {1}  总 {2}ms  取图准备 {3}ms  SDK {4}ms  处理 {5}ms",
                 item.OperationName,
                 item.IsSuccess ? "成功" : "失败",
                 total,

@@ -358,6 +358,28 @@ namespace AM.PageModel.Vision
             return result;
         }
 
+        public async Task<Result<CameraFrame>> GrabInputBgr24FrameAsync(CancellationToken cancellationToken = default(CancellationToken))
+        {
+            ThrowIfDisposed();
+            var openResult = await EnsureSelectedCameraOpenAsync(cancellationToken).ConfigureAwait(false);
+            if (!openResult.Success)
+            {
+                return Result<CameraFrame>.Fail(openResult.Code, openResult.Message, openResult.Source);
+            }
+
+            var camera = SelectedCamera;
+            var result = await WithCameraLockAsync(
+                () => _cameraRuntime.GrabBgr24Frame(camera.CameraCode),
+                cancellationToken).ConfigureAwait(false);
+
+            if (result.Success)
+            {
+                LastInputFrame = result.Item;
+            }
+
+            return result;
+        }
+
         public async Task<Result<VisionSdkDebugResult>> ExecuteOperationAsync(
             VisionSdkDebugOperationKey operationKey,
             CancellationToken cancellationToken = default(CancellationToken))
@@ -431,6 +453,11 @@ namespace AM.PageModel.Vision
             VisionSdkDebugRequest request,
             CancellationToken cancellationToken)
         {
+            if (operationUsesBgr24(info.Key))
+            {
+                return await PrepareCameraBgr24ImageAsync(request, cancellationToken).ConfigureAwait(false);
+            }
+
             var grabResult = await GrabInputFrameAsync(cancellationToken).ConfigureAwait(false);
             if (!grabResult.Success || grabResult.Item == null)
             {
@@ -461,6 +488,32 @@ namespace AM.PageModel.Vision
             }
 
             return Result.Ok("相机取图已准备", ResultSource.Camera);
+        }
+
+        private async Task<Result> PrepareCameraBgr24ImageAsync(
+            VisionSdkDebugRequest request,
+            CancellationToken cancellationToken)
+        {
+            var grabResult = await GrabInputBgr24FrameAsync(cancellationToken).ConfigureAwait(false);
+            if (!grabResult.Success || grabResult.Item == null)
+            {
+                return Result.Fail(grabResult.Code, grabResult.Message, grabResult.Source);
+            }
+
+            var frame = grabResult.Item;
+            if (frame.Bgr24Bytes == null || frame.Bgr24Bytes.Length == 0)
+            {
+                return Result.Fail(2, "相机 BGR24 取图结果为空", ResultSource.Camera);
+            }
+
+            LastInputFrame = frame;
+            LastInputImagePath = null;
+            request.MediaType = "image/raw";
+            request.Bgr24Bytes = frame.Bgr24Bytes;
+            request.Bgr24Width = frame.Width;
+            request.Bgr24Height = frame.Height;
+
+            return Result.Ok("相机 BGR24 取图已准备", ResultSource.Camera);
         }
 
         private async Task<Result> EnsureSelectedCameraOpenAsync(CancellationToken cancellationToken)
@@ -501,8 +554,8 @@ namespace AM.PageModel.Vision
                 TriggerSourceName = result.TriggerSourceName,
                 ModelDeploymentName = result.ModelDeploymentName,
                 ImagePath = LastInputImagePath,
-                MediaType = frame == null ? null : frame.MediaType,
-                ImageBytesLength = frame == null ? 0 : frame.EncodedBytesLength,
+                MediaType = ResolveRecordMediaType(result, frame),
+                ImageBytesLength = ResolveRecordImageBytesLength(result, frame),
                 RequestTime = result.RequestTime == default(DateTime) ? DateTime.Now : result.RequestTime,
                 ElapsedMs = result.ElapsedMs,
                 IsSuccess = result.IsSuccess,
@@ -560,6 +613,33 @@ namespace AM.PageModel.Vision
             var path = Path.Combine(directory, fileName);
             File.WriteAllBytes(path, frame.EncodedBytes);
             return path;
+        }
+
+        private static string ResolveRecordMediaType(VisionSdkDebugResult result, CameraFrame frame)
+        {
+            if (result != null && operationUsesBgr24(result.OperationKey))
+            {
+                return "image/raw";
+            }
+
+            return frame == null ? null : frame.MediaType;
+        }
+
+        private static long ResolveRecordImageBytesLength(VisionSdkDebugResult result, CameraFrame frame)
+        {
+            if (frame == null)
+            {
+                return 0L;
+            }
+
+            return result != null && operationUsesBgr24(result.OperationKey)
+                ? frame.Bgr24BytesLength
+                : frame.EncodedBytesLength;
+        }
+
+        private static bool operationUsesBgr24(VisionSdkDebugOperationKey key)
+        {
+            return key == VisionSdkDebugOperationKey.InvokeZeroMqBgr24;
         }
 
         private static bool operationUsesBase64(VisionSdkDebugOperationKey key)

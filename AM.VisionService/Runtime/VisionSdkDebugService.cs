@@ -184,6 +184,13 @@ namespace AM.VisionService.Runtime
                     return await runner.InvokeZeroMqEventAsync(request.TriggerSourceName, null, cancellationToken).ConfigureAwait(false);
                 case VisionSdkDebugOperationKey.InvokeZeroMqConfiguredImage:
                     return await runner.InvokeZeroMqConfiguredImageAsync(request.TriggerSourceName, cancellationToken).ConfigureAwait(false);
+                case VisionSdkDebugOperationKey.InvokeZeroMqBgr24:
+                    return await runner.InvokeZeroMqBgr24Async(
+                        request.TriggerSourceName,
+                        request.Bgr24Bytes,
+                        request.Bgr24Width,
+                        request.Bgr24Height,
+                        cancellationToken).ConfigureAwait(false);
                 case VisionSdkDebugOperationKey.InvokeZeroMqImageBytes:
                     return await runner.InvokeZeroMqImageBytesAsync(
                         request.TriggerSourceName,
@@ -266,7 +273,24 @@ namespace AM.VisionService.Runtime
 
             if (info.UsesCameraImage)
             {
-                if (UsesBase64Image(request.OperationKey))
+                if (UsesBgr24Image(request.OperationKey))
+                {
+                    if (request.Bgr24Bytes == null || request.Bgr24Bytes.Length == 0)
+                    {
+                        throw new ArgumentException("BGR24 bytes 不能为空", "Bgr24Bytes");
+                    }
+
+                    if (request.Bgr24Width <= 0)
+                    {
+                        throw new ArgumentException("BGR24 宽度必须大于 0", "Bgr24Width");
+                    }
+
+                    if (request.Bgr24Height <= 0)
+                    {
+                        throw new ArgumentException("BGR24 高度必须大于 0", "Bgr24Height");
+                    }
+                }
+                else if (UsesBase64Image(request.OperationKey))
                 {
                     if (string.IsNullOrWhiteSpace(request.ImageBase64))
                     {
@@ -463,6 +487,11 @@ namespace AM.VisionService.Runtime
         private static string NormalizeMediaType(string mediaType)
         {
             return string.IsNullOrWhiteSpace(mediaType) ? "image/jpeg" : mediaType.Trim();
+        }
+
+        private static bool UsesBgr24Image(VisionSdkDebugOperationKey key)
+        {
+            return key == VisionSdkDebugOperationKey.InvokeZeroMqBgr24;
         }
 
         private static bool UsesBase64Image(VisionSdkDebugOperationKey key)

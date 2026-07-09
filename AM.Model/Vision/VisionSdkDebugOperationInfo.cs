@@ -102,6 +102,7 @@ namespace AM.Model.Vision
 
                 D(VisionSdkDebugOperationKey.InvokeZeroMqEvent, "ZeroMQ Event", "Trigger 调用", false, true, false, false, false, false),
                 D(VisionSdkDebugOperationKey.InvokeZeroMqConfiguredImage, "ZeroMQ Config Image", "Trigger 调用", false, true, false, false, true, false),
+                D(VisionSdkDebugOperationKey.InvokeZeroMqBgr24, "ZeroMQ BGR24", "Trigger 调用", false, true, true, false, true, false),
                 D(VisionSdkDebugOperationKey.InvokeZeroMqImageBytes, "ZeroMQ Image Bytes", "Trigger 调用", false, true, true, false, true, false),
                 D(VisionSdkDebugOperationKey.InvokeZeroMqImageBase64, "ZeroMQ Image Base64", "Trigger 调用", false, true, true, false, true, false),
                 D(VisionSdkDebugOperationKey.InvokeZeroMqImageFromFile, "ZeroMQ Image File", "Trigger 调用", false, true, true, true, true, false)

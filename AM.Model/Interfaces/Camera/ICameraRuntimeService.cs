@@ -23,6 +23,8 @@ namespace AM.Model.Interfaces.Camera
 
         Result<CameraFrame> GrabFrame(string cameraCode);
 
+        Result<CameraFrame> GrabBgr24Frame(string cameraCode);
+
         Result<bool> IsOpen(string cameraCode);
     }
 }

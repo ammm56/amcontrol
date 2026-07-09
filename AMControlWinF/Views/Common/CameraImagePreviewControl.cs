@@ -50,8 +50,28 @@ namespace AMControlWinF.Views.Common
 
         public void ShowFrame(CameraFrame frame)
         {
-            if (frame == null || frame.EncodedBytes == null || frame.EncodedBytes.Length == 0)
+            if (frame == null)
             {
+                return;
+            }
+
+            if (!frame.HasEncodedImage)
+            {
+                if (frame.HasBgr24Image)
+                {
+                    ShowPreviewFrame(new CameraPreviewFrame
+                    {
+                        CameraCode = frame.CameraCode,
+                        FrameId = frame.FrameId,
+                        Timestamp = frame.Timestamp,
+                        Width = frame.Width,
+                        Height = frame.Height,
+                        Stride = checked(frame.Width * 3),
+                        PixelFormat = "BGR24",
+                        BgrBytes = frame.Bgr24Bytes
+                    });
+                }
+
                 return;
             }
 

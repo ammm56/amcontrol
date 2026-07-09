@@ -162,6 +162,21 @@ namespace AM.CameraService.OpenCv
             }
         }
 
+        public Result<CameraFrame> GrabBgr24Frame(string cameraCode)
+        {
+            try
+            {
+                ThrowIfDisposed();
+                var device = GetOpenedDevice(cameraCode);
+                var frame = device.GrabBgr24Frame();
+                return Result<CameraFrame>.OkItem(frame, "相机 BGR24 取图成功", ResultSource.Camera);
+            }
+            catch (Exception ex)
+            {
+                return Result<CameraFrame>.Fail(9, "相机 BGR24 取图失败: " + ex.Message, ResultSource.Camera);
+            }
+        }
+
         public Result<CameraPreviewFrame> GrabPreviewFrame(string cameraCode)
         {
             try
