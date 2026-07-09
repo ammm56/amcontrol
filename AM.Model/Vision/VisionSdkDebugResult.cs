@@ -17,8 +17,6 @@ namespace AM.Model.Vision
 
         public string ModelDeploymentName { get; set; }
 
-        public string InferenceTaskId { get; set; }
-
         public DateTime RequestTime { get; set; }
 
         /// <summary>

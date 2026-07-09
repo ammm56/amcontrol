@@ -19,10 +19,7 @@ namespace AM.Model.Vision
             bool usesCameraImage,
             bool usesTemporaryImageFile,
             bool shouldSaveCallRecord,
-            bool requiresConfirm,
-            bool requiresInputUri,
-            bool requiresInputFileId,
-            bool requiresInferenceTaskId)
+            bool requiresConfirm)
         {
             Key = key;
             DisplayName = displayName;
@@ -34,9 +31,6 @@ namespace AM.Model.Vision
             UsesTemporaryImageFile = usesTemporaryImageFile;
             ShouldSaveCallRecord = shouldSaveCallRecord;
             RequiresConfirm = requiresConfirm;
-            RequiresInputUri = requiresInputUri;
-            RequiresInputFileId = requiresInputFileId;
-            RequiresInferenceTaskId = requiresInferenceTaskId;
         }
 
         public VisionSdkDebugOperationKey Key { get; private set; }
@@ -58,12 +52,6 @@ namespace AM.Model.Vision
         public bool ShouldSaveCallRecord { get; private set; }
 
         public bool RequiresConfirm { get; private set; }
-
-        public bool RequiresInputUri { get; private set; }
-
-        public bool RequiresInputFileId { get; private set; }
-
-        public bool RequiresInferenceTaskId { get; private set; }
     }
 
     /// <summary>
@@ -74,40 +62,6 @@ namespace AM.Model.Vision
         private static readonly List<VisionSdkDebugOperationInfo> ItemsInternal =
             new List<VisionSdkDebugOperationInfo>
             {
-                D(VisionSdkDebugOperationKey.GetSystemConfig, "System Config", "系统查询", false, false, false, false, false, false),
-
-                D(VisionSdkDebugOperationKey.GetRuntimeHealth, "Runtime Health", "Runtime 查询", true, false, false, false, false, false),
-                D(VisionSdkDebugOperationKey.GetRuntime, "Get Runtime", "Runtime 查询", true, false, false, false, false, false),
-                D(VisionSdkDebugOperationKey.ListProjectRuntimes, "List Project Runtimes", "Runtime 查询", true, false, false, false, false, false),
-                D(VisionSdkDebugOperationKey.ListRuntimeInstances, "List Instances", "Runtime 查询", true, false, false, false, false, false),
-                D(VisionSdkDebugOperationKey.GetRuntimeEvents, "Runtime Events", "Runtime 查询", true, false, false, false, false, false),
-                D(VisionSdkDebugOperationKey.CheckRuntimeFlow, "Check Flow", "Runtime 查询", true, false, false, false, false, false),
-
-                D(VisionSdkDebugOperationKey.StartRuntime, "Start Runtime", "Runtime 控制", true, false, false, false, false, true),
-                D(VisionSdkDebugOperationKey.StopRuntime, "Stop Runtime", "Runtime 控制", true, false, false, false, false, true),
-                D(VisionSdkDebugOperationKey.RestartRuntime, "Restart Runtime", "Runtime 控制", true, false, false, false, false, true),
-
-                D(VisionSdkDebugOperationKey.InvokeRuntimeAppResult, "Invoke AppResult", "Runtime 调用", true, false, false, false, false, false),
-                D(VisionSdkDebugOperationKey.RunRuntime, "Run Runtime", "Runtime 调用", true, false, false, false, false, false),
-                D(VisionSdkDebugOperationKey.InvokeRuntimeAppResultWithImageBytes, "Invoke Image Bytes", "Runtime 调用", true, false, true, false, true, false),
-                D(VisionSdkDebugOperationKey.InvokeRuntimeAppResultWithImageBase64, "Invoke Image Base64", "Runtime 调用", true, false, true, false, true, false),
-                D(VisionSdkDebugOperationKey.InvokeRuntimeAppResultWithImageFromFile, "Invoke Image File", "Runtime 调用", true, false, true, true, true, false),
-                D(VisionSdkDebugOperationKey.RunRuntimeWithImageBytes, "Run Image Bytes", "Runtime 调用", true, false, true, false, true, false),
-                D(VisionSdkDebugOperationKey.RunRuntimeWithImageBase64, "Run Image Base64", "Runtime 调用", true, false, true, false, true, false),
-                D(VisionSdkDebugOperationKey.RunRuntimeWithImageFromFile, "Run Image File", "Runtime 调用", true, false, true, true, true, false),
-
-                D(VisionSdkDebugOperationKey.ListTriggerSources, "List TriggerSources", "Trigger 查询/控制", true, false, false, false, false, false),
-                D(VisionSdkDebugOperationKey.GetTriggerSource, "Get TriggerSource", "Trigger 查询/控制", false, true, false, false, false, false),
-                D(VisionSdkDebugOperationKey.GetTriggerSourceHealth, "Trigger Health", "Trigger 查询/控制", false, true, false, false, false, false),
-                D(VisionSdkDebugOperationKey.EnableTriggerSource, "Enable Trigger", "Trigger 查询/控制", false, true, false, false, false, true),
-                D(VisionSdkDebugOperationKey.DisableTriggerSource, "Disable Trigger", "Trigger 查询/控制", false, true, false, false, false, true),
-
-                D(VisionSdkDebugOperationKey.InvokeZeroMqEvent, "ZeroMQ Event", "ZeroMQ 调用", false, true, false, false, false, false),
-                D(VisionSdkDebugOperationKey.InvokeZeroMqConfiguredImage, "ZeroMQ Config Image", "ZeroMQ 调用", false, true, false, false, true, false),
-                D(VisionSdkDebugOperationKey.InvokeZeroMqImageBytes, "ZeroMQ Image Bytes", "ZeroMQ 调用", false, true, true, false, true, false),
-                D(VisionSdkDebugOperationKey.InvokeZeroMqImageBase64, "ZeroMQ Image Base64", "ZeroMQ 调用", false, true, true, false, true, false),
-                D(VisionSdkDebugOperationKey.InvokeZeroMqImageFromFile, "ZeroMQ Image File", "ZeroMQ 调用", false, true, true, true, true, false),
-
                 M(VisionSdkDebugOperationKey.GetModelDeploymentRuntimeStatus, "Model Runtime Status", "模型部署 Runtime", false, false, false, false, false, false),
                 M(VisionSdkDebugOperationKey.GetModelDeploymentRuntimeHealth, "Model Runtime Health", "模型部署 Runtime", false, false, false, false, false, false),
                 M(VisionSdkDebugOperationKey.StartModelDeploymentRuntime, "Start Model Runtime", "模型部署 Runtime", false, false, false, false, false, true),
@@ -115,21 +69,42 @@ namespace AM.Model.Vision
                 M(VisionSdkDebugOperationKey.ResetModelDeploymentRuntime, "Reset Model Runtime", "模型部署 Runtime", false, false, false, false, false, true),
                 M(VisionSdkDebugOperationKey.WarmupModelDeploymentRuntime, "Warmup Model Runtime", "模型部署 Runtime", false, false, false, false, false, true),
 
-                M(VisionSdkDebugOperationKey.InvokeConfiguredModelDeployment, "Invoke Model Config", "模型同步推理", false, false, false, false, true, false),
-                M(VisionSdkDebugOperationKey.InvokeModelDeploymentWithImageBytes, "Invoke Model Bytes", "模型同步推理", false, false, true, false, true, false),
-                M(VisionSdkDebugOperationKey.InvokeModelDeploymentWithImageBase64, "Invoke Model Base64", "模型同步推理", false, false, true, false, true, false),
-                M(VisionSdkDebugOperationKey.InvokeModelDeploymentWithImageFromFile, "Invoke Model File", "模型同步推理", false, false, true, true, true, false),
-                M(VisionSdkDebugOperationKey.InvokeModelDeploymentWithInputUri, "Invoke Model URI", "模型同步推理", false, false, false, false, true, false, true, false, false),
-                M(VisionSdkDebugOperationKey.InvokeModelDeploymentWithInputFileId, "Invoke Model FileId", "模型同步推理", false, false, false, false, true, false, false, true, false),
+                M(VisionSdkDebugOperationKey.InvokeConfiguredModelDeployment, "Invoke Model Config", "模型部署同步调用", false, false, false, false, true, false),
+                M(VisionSdkDebugOperationKey.InvokeModelDeploymentWithImageBytes, "Invoke Model Bytes", "模型部署同步调用", false, false, true, false, true, false),
+                M(VisionSdkDebugOperationKey.InvokeModelDeploymentWithImageBase64, "Invoke Model Base64", "模型部署同步调用", false, false, true, false, true, false),
+                M(VisionSdkDebugOperationKey.InvokeModelDeploymentWithImageFromFile, "Invoke Model File", "模型部署同步调用", false, false, true, true, true, false),
 
-                M(VisionSdkDebugOperationKey.RunConfiguredModelDeployment, "Run Model Config", "模型异步任务", false, false, false, false, true, false),
-                M(VisionSdkDebugOperationKey.RunModelDeploymentWithImageBytes, "Run Model Bytes", "模型异步任务", false, false, true, false, true, false),
-                M(VisionSdkDebugOperationKey.RunModelDeploymentWithImageBase64, "Run Model Base64", "模型异步任务", false, false, true, false, true, false),
-                M(VisionSdkDebugOperationKey.RunModelDeploymentWithImageFromFile, "Run Model File", "模型异步任务", false, false, true, true, true, false),
-                M(VisionSdkDebugOperationKey.RunModelDeploymentWithInputUri, "Run Model URI", "模型异步任务", false, false, false, false, true, false, true, false, false),
-                M(VisionSdkDebugOperationKey.RunModelDeploymentWithInputFileId, "Run Model FileId", "模型异步任务", false, false, false, false, true, false, false, true, false),
-                M(VisionSdkDebugOperationKey.GetModelInferenceTask, "Get Model Task", "模型异步任务", false, false, false, false, false, false, false, false, true),
-                M(VisionSdkDebugOperationKey.GetModelInferenceTaskResult, "Model Task Result", "模型异步任务", false, false, false, false, false, false, false, false, true)
+                D(VisionSdkDebugOperationKey.GetRuntimeHealth, "Runtime Health", "Workflow App Runtime 查询", true, false, false, false, false, false),
+                D(VisionSdkDebugOperationKey.GetRuntime, "Get Runtime", "Workflow App Runtime 查询", true, false, false, false, false, false),
+                D(VisionSdkDebugOperationKey.ListProjectRuntimes, "List Project Runtimes", "Workflow App Runtime 查询", true, false, false, false, false, false),
+                D(VisionSdkDebugOperationKey.ListRuntimeInstances, "List Instances", "Workflow App Runtime 查询", true, false, false, false, false, false),
+                D(VisionSdkDebugOperationKey.GetRuntimeEvents, "Runtime Events", "Workflow App Runtime 查询", true, false, false, false, false, false),
+                D(VisionSdkDebugOperationKey.CheckRuntimeFlow, "Check Flow", "Workflow App Runtime 查询", true, false, false, false, false, false),
+
+                D(VisionSdkDebugOperationKey.StartRuntime, "Start Runtime", "Workflow App Runtime 控制", true, false, false, false, false, true),
+                D(VisionSdkDebugOperationKey.StopRuntime, "Stop Runtime", "Workflow App Runtime 控制", true, false, false, false, false, true),
+                D(VisionSdkDebugOperationKey.RestartRuntime, "Restart Runtime", "Workflow App Runtime 控制", true, false, false, false, false, true),
+
+                D(VisionSdkDebugOperationKey.InvokeRuntimeAppResult, "Invoke AppResult", "Workflow App Runtime 调用", true, false, false, false, false, false),
+                D(VisionSdkDebugOperationKey.RunRuntime, "Run Runtime", "Workflow App Runtime 调用", true, false, false, false, false, false),
+                D(VisionSdkDebugOperationKey.InvokeRuntimeAppResultWithImageBytes, "Invoke Image Bytes", "Workflow App Runtime 调用", true, false, true, false, true, false),
+                D(VisionSdkDebugOperationKey.InvokeRuntimeAppResultWithImageBase64, "Invoke Image Base64", "Workflow App Runtime 调用", true, false, true, false, true, false),
+                D(VisionSdkDebugOperationKey.InvokeRuntimeAppResultWithImageFromFile, "Invoke Image File", "Workflow App Runtime 调用", true, false, true, true, true, false),
+                D(VisionSdkDebugOperationKey.RunRuntimeWithImageBytes, "Run Image Bytes", "Workflow App Runtime 调用", true, false, true, false, true, false),
+                D(VisionSdkDebugOperationKey.RunRuntimeWithImageBase64, "Run Image Base64", "Workflow App Runtime 调用", true, false, true, false, true, false),
+                D(VisionSdkDebugOperationKey.RunRuntimeWithImageFromFile, "Run Image File", "Workflow App Runtime 调用", true, false, true, true, true, false),
+
+                D(VisionSdkDebugOperationKey.ListTriggerSources, "List TriggerSources", "Trigger 查询/控制", true, false, false, false, false, false),
+                D(VisionSdkDebugOperationKey.GetTriggerSource, "Get TriggerSource", "Trigger 查询/控制", false, true, false, false, false, false),
+                D(VisionSdkDebugOperationKey.GetTriggerSourceHealth, "Trigger Health", "Trigger 查询/控制", false, true, false, false, false, false),
+                D(VisionSdkDebugOperationKey.EnableTriggerSource, "Enable Trigger", "Trigger 查询/控制", false, true, false, false, false, true),
+                D(VisionSdkDebugOperationKey.DisableTriggerSource, "Disable Trigger", "Trigger 查询/控制", false, true, false, false, false, true),
+
+                D(VisionSdkDebugOperationKey.InvokeZeroMqEvent, "ZeroMQ Event", "Trigger 调用", false, true, false, false, false, false),
+                D(VisionSdkDebugOperationKey.InvokeZeroMqConfiguredImage, "ZeroMQ Config Image", "Trigger 调用", false, true, false, false, true, false),
+                D(VisionSdkDebugOperationKey.InvokeZeroMqImageBytes, "ZeroMQ Image Bytes", "Trigger 调用", false, true, true, false, true, false),
+                D(VisionSdkDebugOperationKey.InvokeZeroMqImageBase64, "ZeroMQ Image Base64", "Trigger 调用", false, true, true, false, true, false),
+                D(VisionSdkDebugOperationKey.InvokeZeroMqImageFromFile, "ZeroMQ Image File", "Trigger 调用", false, true, true, true, true, false)
             };
 
         public static IReadOnlyList<VisionSdkDebugOperationInfo> All
@@ -169,10 +144,7 @@ namespace AM.Model.Vision
                 usesCameraImage,
                 usesTemporaryImageFile,
                 shouldSaveCallRecord,
-                requiresConfirm,
-                false,
-                false,
-                false);
+                requiresConfirm);
         }
 
         private static VisionSdkDebugOperationInfo M(
@@ -184,10 +156,7 @@ namespace AM.Model.Vision
             bool usesCameraImage,
             bool usesTemporaryImageFile,
             bool shouldSaveCallRecord,
-            bool requiresConfirm,
-            bool requiresInputUri = false,
-            bool requiresInputFileId = false,
-            bool requiresInferenceTaskId = false)
+            bool requiresConfirm)
         {
             return new VisionSdkDebugOperationInfo(
                 key,
@@ -199,10 +168,7 @@ namespace AM.Model.Vision
                 usesCameraImage,
                 usesTemporaryImageFile,
                 shouldSaveCallRecord,
-                requiresConfirm,
-                requiresInputUri,
-                requiresInputFileId,
-                requiresInferenceTaskId);
+                requiresConfirm);
         }
     }
 }

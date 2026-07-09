@@ -96,12 +96,6 @@ namespace AM.PageModel.Vision
 
         public string SelectedModelDeploymentName { get; private set; }
 
-        public string ModelInputUri { get; private set; }
-
-        public string ModelInputFileId { get; private set; }
-
-        public string ModelInferenceTaskId { get; private set; }
-
         public VisionSdkDebugExecutionMode ExecutionMode { get; set; }
 
         public CameraFrame LastInputFrame { get; private set; }
@@ -250,16 +244,6 @@ namespace AM.PageModel.Vision
             SelectedModelDeploymentName = string.IsNullOrWhiteSpace(modelDeploymentName) ? null : modelDeploymentName.Trim();
         }
 
-        public void SetModelDebugArguments(
-            string inputUri,
-            string inputFileId,
-            string inferenceTaskId)
-        {
-            ModelInputUri = NormalizeOptional(inputUri);
-            ModelInputFileId = NormalizeOptional(inputFileId);
-            ModelInferenceTaskId = NormalizeOptional(inferenceTaskId);
-        }
-
         public async Task<Result> OpenSelectedCameraAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
             ThrowIfDisposed();
@@ -389,10 +373,7 @@ namespace AM.PageModel.Vision
                 OperationKey = operationKey,
                 RuntimeName = SelectedRuntimeName,
                 TriggerSourceName = SelectedTriggerSourceName,
-                ModelDeploymentName = SelectedModelDeploymentName,
-                ModelInputUri = ModelInputUri,
-                ModelInputFileId = ModelInputFileId,
-                ModelInferenceTaskId = ModelInferenceTaskId
+                ModelDeploymentName = SelectedModelDeploymentName
             };
 
             long cameraCaptureEncodeMs = 0L;
@@ -586,8 +567,7 @@ namespace AM.PageModel.Vision
             return key == VisionSdkDebugOperationKey.InvokeRuntimeAppResultWithImageBase64 ||
                    key == VisionSdkDebugOperationKey.RunRuntimeWithImageBase64 ||
                    key == VisionSdkDebugOperationKey.InvokeZeroMqImageBase64 ||
-                   key == VisionSdkDebugOperationKey.InvokeModelDeploymentWithImageBase64 ||
-                   key == VisionSdkDebugOperationKey.RunModelDeploymentWithImageBase64;
+                   key == VisionSdkDebugOperationKey.InvokeModelDeploymentWithImageBase64;
         }
 
         private static void ApplyTotalTiming(VisionSdkDebugResult result, long cameraCaptureEncodeMs)
@@ -641,11 +621,6 @@ namespace AM.PageModel.Vision
             return string.IsNullOrEmpty(value)
                 ? string.Empty
                 : value.Replace("\\", "\\\\").Replace("\"", "\\\"");
-        }
-
-        private static string NormalizeOptional(string value)
-        {
-            return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
         }
 
         private static int ToIntElapsed(long elapsedMs)

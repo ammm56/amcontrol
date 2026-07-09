@@ -13,12 +13,6 @@ namespace AM.Model.Vision
 
         public string ModelDeploymentName { get; set; }
 
-        public string ModelInputUri { get; set; }
-
-        public string ModelInputFileId { get; set; }
-
-        public string ModelInferenceTaskId { get; set; }
-
         public byte[] ImageBytes { get; set; }
 
         public string ImageBase64 { get; set; }
