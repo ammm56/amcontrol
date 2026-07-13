@@ -15,6 +15,8 @@ namespace AM.CameraService.OpenCv
         private readonly object _syncRoot = new object();
         private readonly CameraConfigEntity _config;
         private VideoCapture _capture;
+        private byte[] _bgr24FrameBuffer;
+        private byte[] _previewFrameBuffer;
         private bool _disposed;
 
         public OpenCvCameraDevice(CameraConfigEntity config)
@@ -119,7 +121,7 @@ namespace AM.CameraService.OpenCv
                     try
                     {
                         var source = EnsureBgr24(frame, out bgr);
-                        var bgr24Bytes = CopyTightBgr24Bytes(source);
+                        var bgr24Bytes = CopyTightBgr24Bytes(source, ref _bgr24FrameBuffer);
                         return new CameraFrame
                         {
                             CameraCode = _config.CameraCode,
@@ -336,12 +338,12 @@ namespace AM.CameraService.OpenCv
             return converted;
         }
 
-        private static byte[] CopyTightBgr24Bytes(Mat frame)
+        private static byte[] CopyTightBgr24Bytes(Mat frame, ref byte[] buffer)
         {
             var rowBytes = checked(frame.Width * 3);
             var height = frame.Rows;
             var stride = checked((int)frame.Step());
-            var bytes = new byte[checked(rowBytes * height)];
+            var bytes = EnsureBuffer(ref buffer, checked(rowBytes * height));
 
             for (var row = 0; row < height; row++)
             {
@@ -359,7 +361,7 @@ namespace AM.CameraService.OpenCv
         {
             var stride = checked((int)frame.Step());
             var height = frame.Rows;
-            var bytes = new byte[checked(stride * height)];
+            var bytes = EnsureBuffer(ref _previewFrameBuffer, checked(stride * height));
 
             for (var row = 0; row < height; row++)
             {
@@ -377,6 +379,16 @@ namespace AM.CameraService.OpenCv
                 PixelFormat = "BGR24",
                 BgrBytes = bytes
             };
+        }
+
+        private static byte[] EnsureBuffer(ref byte[] buffer, int length)
+        {
+            if (buffer == null || buffer.Length != length)
+            {
+                buffer = new byte[length];
+            }
+
+            return buffer;
         }
 
         private static CameraImageFormat ResolveImageFormat(string value)
