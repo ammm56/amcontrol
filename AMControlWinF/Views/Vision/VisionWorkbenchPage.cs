@@ -14,7 +14,7 @@ namespace AMControlWinF.Views.Vision
     /// </summary>
     public partial class VisionWorkbenchPage : UserControl
     {
-        private const string WorkbenchUrl = "http://127.0.0.1:5601/projects";
+        private const string WorkbenchUrl = "http://127.0.0.1:8000/projects";
 
         private bool _isInitializing;
         private bool _isWebViewReady;
