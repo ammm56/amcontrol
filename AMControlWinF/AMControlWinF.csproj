@@ -873,10 +873,6 @@
   <ItemGroup>
     <Content Include="logo.ico" />
     <Content Include="Resources\Img\logo.ico" />
-    <Content Include="..\Libs\webview2\472\WebView2Loader.dll">
-      <Link>WebView2Loader.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">

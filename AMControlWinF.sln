@@ -47,9 +47,29 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AM.Tests", "AM.Tests\AM.Tes
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AMVisionSDK", "AMVisionSDK", "{AECA6186-71FE-4128-B0D1-5C8078DF46F3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Amvision.Workflows", "Libsrc\amvision\src\Amvision.Workflows\Amvision.Workflows.csproj", "{560CDD1C-0F93-15AE-BA22-720593836CA1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Amvision.Workflows.vs2019.net472", "Libsrc\amvision\src\Amvision.Workflows\Amvision.Workflows.vs2019.net472.csproj", "{354610A8-2452-4E52-AF62-0480CDAB5898}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Amvision.Workflows.Console", "Libsrc\amvision\apps\Amvision.Workflows.Console\Amvision.Workflows.Console.csproj", "{8491B25E-13D5-5BCB-3367-ABD0AEE5524A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Amvision.Workflows.Console.vs2019.net472", "Libsrc\amvision\apps\Amvision.Workflows.Console\Amvision.Workflows.Console.vs2019.net472.csproj", "{9CB237BE-E6F5-4915-A6F3-AD573E49ADFF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DLL", "DLL", "{37D242FF-62A0-4C97-9A17-BA9BDE91FC12}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AMVisionSDK", "AMVisionSDK", "{58DD8C03-DFA1-425B-AC69-D81B1D4D937C}"
+	ProjectSection(SolutionItems) = preProject
+		Libs\amvision\net472\Microsoft.Bcl.AsyncInterfaces.dll = Libs\amvision\net472\Microsoft.Bcl.AsyncInterfaces.dll
+		Libs\amvision\net472\System.Buffers.dll = Libs\amvision\net472\System.Buffers.dll
+		Libs\amvision\net472\System.Memory.dll = Libs\amvision\net472\System.Memory.dll
+		Libs\amvision\net472\System.Numerics.Vectors.dll = Libs\amvision\net472\System.Numerics.Vectors.dll
+		Libs\amvision\net472\System.Runtime.CompilerServices.Unsafe.dll = Libs\amvision\net472\System.Runtime.CompilerServices.Unsafe.dll
+		Libs\amvision\net472\System.Text.Encodings.Web.dll = Libs\amvision\net472\System.Text.Encodings.Web.dll
+		Libs\amvision\net472\System.Text.Json.dll = Libs\amvision\net472\System.Text.Json.dll
+		Libs\amvision\net472\System.Threading.Tasks.Extensions.dll = Libs\amvision\net472\System.Threading.Tasks.Extensions.dll
+		Libs\amvision\net472\System.ValueTuple.dll = Libs\amvision\net472\System.ValueTuple.dll
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebView2", "WebView2", "{9733D21F-5393-417F-BA39-540A19118B65}"
+	ProjectSection(SolutionItems) = preProject
+		Libs\webview2\472\WebView2Loader.dll = Libs\webview2\472\WebView2Loader.dll
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -179,22 +199,22 @@ Global
 		{F52D6187-858A-5A7C-FEFD-8314146F60CB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F52D6187-858A-5A7C-FEFD-8314146F60CB}.Release|x64.ActiveCfg = Release|x64
 		{F52D6187-858A-5A7C-FEFD-8314146F60CB}.Release|x64.Build.0 = Release|x64
-		{560CDD1C-0F93-15AE-BA22-720593836CA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{560CDD1C-0F93-15AE-BA22-720593836CA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{560CDD1C-0F93-15AE-BA22-720593836CA1}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{560CDD1C-0F93-15AE-BA22-720593836CA1}.Debug|x64.Build.0 = Debug|Any CPU
-		{560CDD1C-0F93-15AE-BA22-720593836CA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{560CDD1C-0F93-15AE-BA22-720593836CA1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{560CDD1C-0F93-15AE-BA22-720593836CA1}.Release|x64.ActiveCfg = Release|Any CPU
-		{560CDD1C-0F93-15AE-BA22-720593836CA1}.Release|x64.Build.0 = Release|Any CPU
-		{8491B25E-13D5-5BCB-3367-ABD0AEE5524A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8491B25E-13D5-5BCB-3367-ABD0AEE5524A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8491B25E-13D5-5BCB-3367-ABD0AEE5524A}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{8491B25E-13D5-5BCB-3367-ABD0AEE5524A}.Debug|x64.Build.0 = Debug|Any CPU
-		{8491B25E-13D5-5BCB-3367-ABD0AEE5524A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8491B25E-13D5-5BCB-3367-ABD0AEE5524A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8491B25E-13D5-5BCB-3367-ABD0AEE5524A}.Release|x64.ActiveCfg = Release|Any CPU
-		{8491B25E-13D5-5BCB-3367-ABD0AEE5524A}.Release|x64.Build.0 = Release|Any CPU
+		{354610A8-2452-4E52-AF62-0480CDAB5898}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{354610A8-2452-4E52-AF62-0480CDAB5898}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{354610A8-2452-4E52-AF62-0480CDAB5898}.Debug|x64.ActiveCfg = Debug|x64
+		{354610A8-2452-4E52-AF62-0480CDAB5898}.Debug|x64.Build.0 = Debug|x64
+		{354610A8-2452-4E52-AF62-0480CDAB5898}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{354610A8-2452-4E52-AF62-0480CDAB5898}.Release|Any CPU.Build.0 = Release|Any CPU
+		{354610A8-2452-4E52-AF62-0480CDAB5898}.Release|x64.ActiveCfg = Release|x64
+		{354610A8-2452-4E52-AF62-0480CDAB5898}.Release|x64.Build.0 = Release|x64
+		{9CB237BE-E6F5-4915-A6F3-AD573E49ADFF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9CB237BE-E6F5-4915-A6F3-AD573E49ADFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9CB237BE-E6F5-4915-A6F3-AD573E49ADFF}.Debug|x64.ActiveCfg = Debug|x64
+		{9CB237BE-E6F5-4915-A6F3-AD573E49ADFF}.Debug|x64.Build.0 = Debug|x64
+		{9CB237BE-E6F5-4915-A6F3-AD573E49ADFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9CB237BE-E6F5-4915-A6F3-AD573E49ADFF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9CB237BE-E6F5-4915-A6F3-AD573E49ADFF}.Release|x64.ActiveCfg = Release|x64
+		{9CB237BE-E6F5-4915-A6F3-AD573E49ADFF}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -209,8 +229,10 @@ Global
 		{8D8FB92B-2632-4613-866E-6BDE7C834A74} = {DD3BF615-6267-41C9-81B3-C4B1DE0CF29B}
 		{3DB3C110-D05E-6231-7221-40DBFC2BA049} = {8D8FB92B-2632-4613-866E-6BDE7C834A74}
 		{AECA6186-71FE-4128-B0D1-5C8078DF46F3} = {38B153B2-2B20-4F8C-A56C-197E6690DCBE}
-		{560CDD1C-0F93-15AE-BA22-720593836CA1} = {AECA6186-71FE-4128-B0D1-5C8078DF46F3}
-		{8491B25E-13D5-5BCB-3367-ABD0AEE5524A} = {AECA6186-71FE-4128-B0D1-5C8078DF46F3}
+		{354610A8-2452-4E52-AF62-0480CDAB5898} = {AECA6186-71FE-4128-B0D1-5C8078DF46F3}
+		{9CB237BE-E6F5-4915-A6F3-AD573E49ADFF} = {AECA6186-71FE-4128-B0D1-5C8078DF46F3}
+		{58DD8C03-DFA1-425B-AC69-D81B1D4D937C} = {37D242FF-62A0-4C97-9A17-BA9BDE91FC12}
+		{9733D21F-5393-417F-BA39-540A19118B65} = {37D242FF-62A0-4C97-9A17-BA9BDE91FC12}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C883A67B-CAA1-4715-A64C-2A2FCEFE6818}

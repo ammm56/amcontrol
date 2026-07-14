@@ -13,9 +13,53 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.6" />
+    <Reference Include="Microsoft.Bcl.AsyncInterfaces">
+      <HintPath>..\Libs\amvision\net472\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
+      <Private>true</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="System.Buffers">
+      <HintPath>..\Libs\amvision\net472\System.Buffers.dll</HintPath>
+      <Private>true</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="System.Memory">
+      <HintPath>..\Libs\amvision\net472\System.Memory.dll</HintPath>
+      <Private>true</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="System.Numerics.Vectors">
+      <HintPath>..\Libs\amvision\net472\System.Numerics.Vectors.dll</HintPath>
+      <Private>true</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe">
+      <HintPath>..\Libs\amvision\net472\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+      <Private>true</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="System.Text.Encodings.Web">
+      <HintPath>..\Libs\amvision\net472\System.Text.Encodings.Web.dll</HintPath>
+      <Private>true</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="System.Text.Json">
+      <HintPath>..\Libs\amvision\net472\System.Text.Json.dll</HintPath>
+      <Private>true</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="System.Threading.Tasks.Extensions">
+      <HintPath>..\Libs\amvision\net472\System.Threading.Tasks.Extensions.dll</HintPath>
+      <Private>true</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="System.ValueTuple">
+      <HintPath>..\Libs\amvision\net472\System.ValueTuple.dll</HintPath>
+      <Private>true</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
     <ProjectReference Include="..\AM.Model\AM.Model.csproj" />
-    <ProjectReference Include="..\Libsrc\amvision\apps\Amvision.Workflows.Console\Amvision.Workflows.Console.csproj" />
+    <ProjectReference Include="..\Libsrc\amvision\apps\Amvision.Workflows.Console\Amvision.Workflows.Console.vs2019.net472.csproj" />
   </ItemGroup>
 
   <ItemGroup>

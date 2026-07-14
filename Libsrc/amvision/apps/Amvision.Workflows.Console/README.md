@@ -90,6 +90,19 @@ var result = await runner.InvokeModelDeploymentWithImageBytesAsync(
 
 完整说明见 [docs/api/model-deployment-sdks.md](../../../../docs/api/model-deployment-sdks.md)。
 
+## Visual Studio 2019
+
+VS2019 不打开多目标框架 Console 项目。需要 .NET Framework 单框架项目时，直接打开当前目录下的固定框架 solution：
+
+```text
+sdks/dotnet/apps/Amvision.Workflows.Console/Amvision.Workflows.Console.vs2019.net461.sln
+sdks/dotnet/apps/Amvision.Workflows.Console/Amvision.Workflows.Console.vs2019.net472.sln
+```
+
+这两个 solution 会引用对应框架的 `Amvision.Workflows.vs2019.net461` 或 `Amvision.Workflows.vs2019.net472` SDK 项目，适合 VS2019、老上位机项目和只使用 .NET Framework 的现场环境。VS2022/VS2026 可以继续使用多目标框架项目或这些固定框架 solution。
+
+VS2019 单框架项目引用 `sdks/dotnet/libs/{net461|net472}` 中的本地 DLL，不依赖 NuGet restore。开发机仍需要安装 .NET Framework 4.6.1 或 4.7.2 Developer Pack / Targeting Pack；项目不会再通过 `Microsoft.NETFramework.ReferenceAssemblies.*` 包下载 targeting assemblies。
+
 ## 运行和调用
 
 ```powershell
