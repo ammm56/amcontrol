@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -43,6 +44,7 @@ namespace AMControlWinF.Views.Vision
         public VisionDebugPage()
         {
             InitializeComponent();
+            InitializeOptimizedPainting();
 
             if (LicenseManager.UsageMode == LicenseUsageMode.Designtime)
             {
@@ -57,6 +59,26 @@ namespace AMControlWinF.Views.Vision
             InitializeStaticUi();
             BindEvents();
             RefreshActionState();
+        }
+
+        private void InitializeOptimizedPainting()
+        {
+            SetStyle(
+                ControlStyles.AllPaintingInWmPaint |
+                ControlStyles.OptimizedDoubleBuffer,
+                true);
+            UpdateStyles();
+
+            EnableDoubleBuffering(panelOperationScroll);
+            EnableDoubleBuffering(flowOperations);
+        }
+
+        private static void EnableDoubleBuffering(Control control)
+        {
+            var property = typeof(Control).GetProperty(
+                "DoubleBuffered",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            property?.SetValue(control, true, null);
         }
 
         private void InitializePreviewControls()
@@ -511,7 +533,29 @@ namespace AMControlWinF.Views.Vision
                 }
             }
 
-            await ExecuteOnceAsync(operationKey, CancellationToken.None);
+            var scrollPosition = CaptureOperationScrollPosition();
+            try
+            {
+                await ExecuteOnceAsync(operationKey, CancellationToken.None);
+            }
+            finally
+            {
+                RestoreOperationScrollPosition(scrollPosition);
+            }
+        }
+
+        private Point CaptureOperationScrollPosition()
+        {
+            var position = panelOperationScroll.AutoScrollPosition;
+            return new Point(Math.Abs(position.X), Math.Abs(position.Y));
+        }
+
+        private void RestoreOperationScrollPosition(Point position)
+        {
+            if (!panelOperationScroll.IsDisposed)
+            {
+                panelOperationScroll.AutoScrollPosition = position;
+            }
         }
 
         private async Task ExecuteOnceAsync(
@@ -604,25 +648,45 @@ namespace AMControlWinF.Views.Vision
         private void RefreshActionState()
         {
             var hasCamera = _model.SelectedCamera != null;
-            selectCamera.Enabled = !_isBusy;
-            selectRuntime.Enabled = !_isBusy;
-            selectTrigger.Enabled = !_isBusy;
-            selectModelDeployment.Enabled = !_isBusy;
-            buttonRefreshConfig.Enabled = !_isBusy;
+            SetEnabled(selectCamera, !_isBusy);
+            SetEnabled(selectRuntime, !_isBusy);
+            SetEnabled(selectTrigger, !_isBusy);
+            SetEnabled(selectModelDeployment, !_isBusy);
+            SetEnabled(buttonRefreshConfig, !_isBusy);
 
-            buttonOpenCamera.Enabled = !_isBusy && hasCamera;
-            buttonOpenCamera.Text = _model.IsSelectedCameraKnownOpen ? "关闭" : "打开";
-            buttonOpenCamera.IconSvg = _model.IsSelectedCameraKnownOpen ? "CloseCircleOutlined" : "PlayCircleOutlined";
+            SetEnabled(buttonOpenCamera, !_isBusy && hasCamera);
+            SetButtonAppearance(
+                buttonOpenCamera,
+                _model.IsSelectedCameraKnownOpen ? "关闭" : "打开",
+                _model.IsSelectedCameraKnownOpen ? "CloseCircleOutlined" : "PlayCircleOutlined");
 
-            buttonTogglePreview.Enabled = !_isBusy && hasCamera;
-            buttonTogglePreview.Text = _isPreviewRunning ? "暂停" : "开始";
-            buttonTogglePreview.IconSvg = _isPreviewRunning ? "PauseCircleOutlined" : "VideoCameraOutlined";
-            buttonGrabInput.Enabled = !_isBusy && hasCamera;
-            buttonCameraSettings.Enabled = !_isBusy && hasCamera;
+            SetEnabled(buttonTogglePreview, !_isBusy && hasCamera);
+            SetButtonAppearance(
+                buttonTogglePreview,
+                _isPreviewRunning ? "暂停" : "开始",
+                _isPreviewRunning ? "PauseCircleOutlined" : "VideoCameraOutlined");
+            SetEnabled(buttonGrabInput, !_isBusy && hasCamera);
+            SetEnabled(buttonCameraSettings, !_isBusy && hasCamera);
+        }
 
-            foreach (var button in _operationMap.Keys)
+        private static void SetEnabled(Control control, bool enabled)
+        {
+            if (control.Enabled != enabled)
             {
-                button.Enabled = !_isBusy;
+                control.Enabled = enabled;
+            }
+        }
+
+        private static void SetButtonAppearance(Button button, string text, string iconSvg)
+        {
+            if (!string.Equals(button.Text, text, StringComparison.Ordinal))
+            {
+                button.Text = text;
+            }
+
+            if (!string.Equals(button.IconSvg, iconSvg, StringComparison.Ordinal))
+            {
+                button.IconSvg = iconSvg;
             }
         }
 
