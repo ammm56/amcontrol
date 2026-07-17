@@ -10,6 +10,7 @@ using AM.Model.Interfaces.Camera;
 using AM.Model.Interfaces.Vision;
 using AM.Model.Vision;
 using AM.VisionService.Runtime;
+using Amvar.Vision;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -33,7 +34,7 @@ namespace AM.PageModel.Vision
 
         private readonly CameraConfigCrudService _cameraConfigService;
         private readonly ICameraRuntimeService _cameraRuntime;
-        private readonly VisionWorkflowRunnerProvider _runnerProvider;
+        private readonly AMVisionOperationRunner _runner;
         private readonly VisionSdkDebugService _debugService;
         private readonly IVisionCallRecordService _recordService;
         private readonly SemaphoreSlim _cameraSync = new SemaphoreSlim(1, 1);
@@ -51,8 +52,7 @@ namespace AM.PageModel.Vision
             : this(
                 new CameraConfigCrudService(),
                 new OpenCvCameraRuntimeService(),
-                VisionWorkflowRunnerProvider.Shared,
-                new VisionSdkDebugService(VisionWorkflowRunnerProvider.Shared),
+                AMVisionOperationRunner.CreateDefault(),
                 new VisionCallRecordService())
         {
         }
@@ -60,16 +60,14 @@ namespace AM.PageModel.Vision
         public VisionDebugPageModel(
             CameraConfigCrudService cameraConfigService,
             ICameraRuntimeService cameraRuntime,
-            VisionWorkflowRunnerProvider runnerProvider,
-            VisionSdkDebugService debugService,
+            AMVisionOperationRunner runner,
             IVisionCallRecordService recordService)
         {
             _cameraConfigService = cameraConfigService ?? throw new ArgumentNullException("cameraConfigService");
             _cameraRuntime = cameraRuntime ?? throw new ArgumentNullException("cameraRuntime");
-            _runnerProvider = runnerProvider ?? throw new ArgumentNullException("runnerProvider");
-            _debugService = debugService ?? throw new ArgumentNullException("debugService");
+            _runner = runner ?? throw new ArgumentNullException("runner");
+            _debugService = new VisionSdkDebugService(_runner);
             _recordService = recordService ?? throw new ArgumentNullException("recordService");
-            ExecutionMode = VisionSdkDebugExecutionMode.Single;
         }
 
         public IReadOnlyList<CameraConfigEntity> Cameras
@@ -99,8 +97,6 @@ namespace AM.PageModel.Vision
         public string SelectedTriggerSourceName { get; private set; }
 
         public string SelectedModelDeploymentName { get; private set; }
-
-        public VisionSdkDebugExecutionMode ExecutionMode { get; set; }
 
         public CameraFrame LastInputFrame { get; private set; }
 
@@ -158,37 +154,25 @@ namespace AM.PageModel.Vision
             return Result.Ok("视觉调试数据加载完成", ResultSource.UI);
         }
 
-        public async Task<Result> RefreshSdkKeysAsync()
+        public Task<Result> RefreshSdkKeysAsync()
         {
             ThrowIfDisposed();
 
             try
             {
-                var init = await Task.Run(() => _runnerProvider.EnsureInitialized()).ConfigureAwait(false);
-                if (!init.Success)
-                {
-                    _runtimeNames = new List<string>();
-                    _triggerSourceNames = new List<string>();
-                    _modelDeploymentNames = new List<string>();
-                    SelectedRuntimeName = null;
-                    SelectedTriggerSourceName = null;
-                    SelectedModelDeploymentName = null;
-                    return init;
-                }
-
-                _runtimeNames = _runnerProvider.RuntimeNames
+                _runtimeNames = _runner.RuntimeNames
                     .Where(x => !string.IsNullOrWhiteSpace(x))
                     .Distinct(StringComparer.OrdinalIgnoreCase)
                     .OrderBy(x => x)
                     .ToList();
 
-                _triggerSourceNames = _runnerProvider.TriggerSourceNames
+                _triggerSourceNames = _runner.TriggerSourceNames
                     .Where(x => !string.IsNullOrWhiteSpace(x))
                     .Distinct(StringComparer.OrdinalIgnoreCase)
                     .OrderBy(x => x)
                     .ToList();
 
-                _modelDeploymentNames = _runnerProvider.ModelDeploymentNames
+                _modelDeploymentNames = _runner.ModelDeploymentNames
                     .Where(x => !string.IsNullOrWhiteSpace(x))
                     .Distinct(StringComparer.OrdinalIgnoreCase)
                     .OrderBy(x => x)
@@ -212,7 +196,7 @@ namespace AM.PageModel.Vision
                     SelectedModelDeploymentName = _modelDeploymentNames.FirstOrDefault();
                 }
 
-                return Result.Ok("视觉 SDK 配置刷新完成", ResultSource.Unknown);
+                return Task.FromResult(Result.Ok("视觉 SDK 配置刷新完成", ResultSource.Unknown));
             }
             catch (Exception ex)
             {
@@ -222,7 +206,7 @@ namespace AM.PageModel.Vision
                 SelectedRuntimeName = null;
                 SelectedTriggerSourceName = null;
                 SelectedModelDeploymentName = null;
-                return Result.Fail(-1, "视觉 SDK 配置刷新失败: " + ex.Message, ResultSource.Unknown);
+                return Task.FromResult(Result.Fail(-1, "视觉 SDK 配置刷新失败: " + ex.Message, ResultSource.Unknown));
             }
         }
 
@@ -907,6 +891,7 @@ namespace AM.PageModel.Vision
             }
 
             _disposed = true;
+            _runner.Dispose();
             _cameraRuntime.Dispose();
             _cameraSync.Dispose();
         }

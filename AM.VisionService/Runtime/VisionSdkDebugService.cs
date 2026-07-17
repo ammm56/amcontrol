@@ -1,10 +1,9 @@
 using AM.Model.Common;
 using AM.Model.Vision;
-using Amvision.Workflows;
-using Amvision.Workflows.Console;
+using Amvar.Vision;
+using Newtonsoft.Json;
 using System;
 using System.Diagnostics;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,21 +15,11 @@ namespace AM.VisionService.Runtime
     /// </summary>
     public sealed class VisionSdkDebugService
     {
-        private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
-        {
-            WriteIndented = true
-        };
+        private readonly AMVisionOperationRunner _runner;
 
-        private readonly VisionWorkflowRunnerProvider _runnerProvider;
-
-        public VisionSdkDebugService()
-            : this(VisionWorkflowRunnerProvider.Shared)
+        public VisionSdkDebugService(AMVisionOperationRunner runner)
         {
-        }
-
-        public VisionSdkDebugService(VisionWorkflowRunnerProvider runnerProvider)
-        {
-            _runnerProvider = runnerProvider ?? throw new ArgumentNullException("runnerProvider");
+            _runner = runner ?? throw new ArgumentNullException("runner");
         }
 
         public async Task<Result<VisionSdkDebugResult>> ExecuteAsync(
@@ -48,9 +37,8 @@ namespace AM.VisionService.Runtime
             {
                 ValidateRequest(request);
 
-                var runner = _runnerProvider.GetRunner();
                 invokeStopwatch.Start();
-                object response = await ExecuteCoreAsync(runner, request, cancellationToken).ConfigureAwait(false);
+                object response = await ExecuteCoreAsync(_runner, request, cancellationToken).ConfigureAwait(false);
                 invokeStopwatch.Stop();
                 sdkInvokeMs = invokeStopwatch.ElapsedMilliseconds;
 
@@ -61,6 +49,18 @@ namespace AM.VisionService.Runtime
                 stopwatch.Stop();
 
                 ApplyTiming(result, 0L, sdkInvokeMs, responseProcessMs);
+                if (!result.IsSuccess)
+                {
+                    return new Result<VisionSdkDebugResult>(
+                        false,
+                        -1,
+                        result.OperationName + " 调用失败: " + result.ErrorMessage,
+                        ResultSource.Unknown)
+                    {
+                        Item = result
+                    };
+                }
+
                 return Result<VisionSdkDebugResult>.OkItem(
                     result,
                     result.OperationName + " 调用完成",
@@ -102,7 +102,7 @@ namespace AM.VisionService.Runtime
         }
 
         private static async Task<object> ExecuteCoreAsync(
-            WorkflowOperationRunner runner,
+            AMVisionOperationRunner runner,
             VisionSdkDebugRequest request,
             CancellationToken cancellationToken)
         {
@@ -159,33 +159,45 @@ namespace AM.VisionService.Runtime
                     return await runner.DisableTriggerSourceAsync(request.TriggerSourceName, cancellationToken).ConfigureAwait(false);
 
                 case VisionSdkDebugOperationKey.InvokeZeroMqEvent:
-                    return await runner.InvokeZeroMqEventAsync(request.TriggerSourceName, null, cancellationToken).ConfigureAwait(false);
+                    return await Task.Run<object>(
+                        () => runner.InvokeZeroMqEvent(request.TriggerSourceName, null, cancellationToken),
+                        cancellationToken).ConfigureAwait(false);
                 case VisionSdkDebugOperationKey.InvokeZeroMqConfiguredImage:
-                    return await runner.InvokeZeroMqConfiguredImageAsync(request.TriggerSourceName, cancellationToken).ConfigureAwait(false);
+                    return await Task.Run<object>(
+                        () => runner.InvokeConfiguredZeroMqImage(request.TriggerSourceName, cancellationToken),
+                        cancellationToken).ConfigureAwait(false);
                 case VisionSdkDebugOperationKey.InvokeZeroMqBgr24:
-                    return await runner.InvokeZeroMqBgr24Async(
-                        request.TriggerSourceName,
-                        request.Bgr24Bytes,
-                        request.Bgr24Width,
-                        request.Bgr24Height,
+                    return await Task.Run<object>(
+                        () => runner.InvokeZeroMqBgr24(
+                            request.TriggerSourceName,
+                            request.Bgr24Bytes,
+                            request.Bgr24Width,
+                            request.Bgr24Height,
+                            cancellationToken),
                         cancellationToken).ConfigureAwait(false);
                 case VisionSdkDebugOperationKey.InvokeZeroMqImageBytes:
-                    return await runner.InvokeZeroMqImageBytesAsync(
-                        request.TriggerSourceName,
-                        request.ImageBytes,
-                        NormalizeMediaType(request.MediaType),
+                    return await Task.Run<object>(
+                        () => runner.InvokeZeroMqImageBytes(
+                            request.TriggerSourceName,
+                            request.ImageBytes,
+                            NormalizeMediaType(request.MediaType),
+                            cancellationToken),
                         cancellationToken).ConfigureAwait(false);
                 case VisionSdkDebugOperationKey.InvokeZeroMqImageBase64:
-                    return await runner.InvokeZeroMqImageBase64Async(
-                        request.TriggerSourceName,
-                        request.ImageBase64,
-                        NormalizeMediaType(request.MediaType),
+                    return await Task.Run<object>(
+                        () => runner.InvokeZeroMqImageBase64(
+                            request.TriggerSourceName,
+                            request.ImageBase64,
+                            NormalizeMediaType(request.MediaType),
+                            cancellationToken),
                         cancellationToken).ConfigureAwait(false);
                 case VisionSdkDebugOperationKey.InvokeZeroMqImageFromFile:
-                    return await runner.InvokeZeroMqImageFromFileAsync(
-                        request.TriggerSourceName,
-                        request.ImagePath,
-                        NormalizeMediaType(request.MediaType),
+                    return await Task.Run<object>(
+                        () => runner.InvokeZeroMqImageFromFile(
+                            request.TriggerSourceName,
+                            request.ImagePath,
+                            NormalizeMediaType(request.MediaType),
+                            cancellationToken),
                         cancellationToken).ConfigureAwait(false);
 
                 case VisionSdkDebugOperationKey.StartModelDeploymentRuntime:
@@ -400,14 +412,6 @@ namespace AM.VisionService.Runtime
                 return;
             }
 
-            var modelWarmup = response as ModelDeploymentRuntimeWarmupResponse;
-            if (modelWarmup != null)
-            {
-                result.State = modelWarmup.Status;
-                result.WorkflowRunId = modelWarmup.DeploymentInstanceId;
-                return;
-            }
-
             var modelInference = response as ModelDeploymentInferenceResponse;
             if (modelInference != null)
             {
@@ -446,20 +450,20 @@ namespace AM.VisionService.Runtime
             var appResult = response as WorkflowAppResultResponse;
             if (appResult != null)
             {
-                return appResult.BodyJson.GetRawText();
+                return appResult.BodyJson.ToString(Formatting.Indented);
             }
 
-            return JsonSerializer.Serialize(response, response.GetType(), JsonOptions);
+            return JsonConvert.SerializeObject(response, Formatting.Indented);
         }
 
         private static string SerializeException(Exception ex)
         {
-            return JsonSerializer.Serialize(new
+            return JsonConvert.SerializeObject(new
             {
                 error = ex.Message,
                 exception_type = ex.GetType().FullName,
                 stack_trace = ex.StackTrace
-            }, JsonOptions);
+            }, Formatting.Indented);
         }
 
         private static string NormalizeMediaType(string mediaType)

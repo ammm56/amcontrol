@@ -106,7 +106,6 @@
     <Compile Include="Interfaces\Plc\Runtime\IPlcScanWorker.cs" />
     <Compile Include="Interfaces\Vision\IVisionInvokeService.cs" />
     <Compile Include="Interfaces\Vision\IVisionCallRecordService.cs" />
-    <Compile Include="Interfaces\Vision\IVisionWorkflowRunnerProvider.cs" />
     <Compile Include="Device\DeviceApiResponse.cs" />
     <Compile Include="Device\DeviceEncryptedEnvelopeModels.cs" />
     <Compile Include="Device\DeviceRegistrationModels.cs" />
@@ -203,7 +202,6 @@
     <Compile Include="Usage\UsageEventBatchUpload.cs" />
     <Compile Include="Vision\CameraDriverType.cs" />
     <Compile Include="Vision\CameraImageFormat.cs" />
-    <Compile Include="Vision\VisionSdkDebugExecutionMode.cs" />
     <Compile Include="Vision\VisionSdkDebugOperationInfo.cs" />
     <Compile Include="Vision\VisionSdkDebugOperationKey.cs" />
     <Compile Include="Vision\VisionSdkDebugRequest.cs" />

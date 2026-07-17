@@ -1,10 +1,10 @@
 using AM.Model.Common;
 using AM.Model.Interfaces.Vision;
 using AM.Model.Vision;
-using Amvision.Workflows;
+using Amvar.Vision;
+using Newtonsoft.Json;
 using System;
 using System.Diagnostics;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,16 +15,16 @@ namespace AM.VisionService.Runtime
     /// </summary>
     public sealed class VisionInvokeService : IVisionInvokeService
     {
-        private readonly VisionWorkflowRunnerProvider _runnerProvider;
+        private readonly AMVisionOperationRunner _runner;
 
         public VisionInvokeService()
-            : this(VisionWorkflowRunnerProvider.Shared)
+            : this(AMVisionOperationRunner.CreateDefault())
         {
         }
 
-        public VisionInvokeService(VisionWorkflowRunnerProvider runnerProvider)
+        public VisionInvokeService(AMVisionOperationRunner runner)
         {
-            _runnerProvider = runnerProvider ?? throw new ArgumentNullException(nameof(runnerProvider));
+            _runner = runner ?? throw new ArgumentNullException(nameof(runner));
         }
 
         public async Task<Result<VisionInvokeResult>> InvokeZeroMqImageBytesAsync(
@@ -40,15 +40,35 @@ namespace AM.VisionService.Runtime
             {
                 ValidateImageBytes(imageBytes);
 
-                var result = await _runnerProvider
-                    .GetRunner()
-                    .InvokeZeroMqImageBytesAsync(triggerSourceName, imageBytes, NormalizeMediaType(mediaType), cancellationToken)
-                    .ConfigureAwait(false);
+                var result = await Task.Run(
+                    () => _runner.InvokeZeroMqImageBytes(
+                        triggerSourceName,
+                        imageBytes,
+                        NormalizeMediaType(mediaType),
+                        cancellationToken),
+                    cancellationToken).ConfigureAwait(false);
 
                 stopwatch.Stop();
 
+                var invokeResult = BuildZeroMqResult(
+                    triggerSourceName,
+                    result,
+                    requestTime,
+                    stopwatch.ElapsedMilliseconds);
+                if (!invokeResult.IsSuccess)
+                {
+                    return new Result<VisionInvokeResult>(
+                        false,
+                        -1,
+                        "ZeroMQ Trigger 视觉调用失败: " + invokeResult.ErrorMessage,
+                        ResultSource.Unknown)
+                    {
+                        Item = invokeResult
+                    };
+                }
+
                 return Result<VisionInvokeResult>.OkItem(
-                    BuildZeroMqResult(triggerSourceName, result, requestTime, stopwatch.ElapsedMilliseconds),
+                    invokeResult,
                     "ZeroMQ Trigger 视觉调用完成",
                     ResultSource.Unknown);
             }
@@ -75,15 +95,31 @@ namespace AM.VisionService.Runtime
             {
                 ValidateImageBytes(imageBytes);
 
-                var result = await _runnerProvider
-                    .GetRunner()
+                var result = await _runner
                     .InvokeRuntimeAppResultWithImageBytesAsync(runtimeName, imageBytes, NormalizeMediaType(mediaType), cancellationToken)
                     .ConfigureAwait(false);
 
                 stopwatch.Stop();
 
+                var invokeResult = BuildRuntimeResult(
+                    runtimeName,
+                    result,
+                    requestTime,
+                    stopwatch.ElapsedMilliseconds);
+                if (!invokeResult.IsSuccess)
+                {
+                    return new Result<VisionInvokeResult>(
+                        false,
+                        -1,
+                        "HTTP Runtime AppResult 视觉调用失败: " + invokeResult.ErrorMessage,
+                        ResultSource.Unknown)
+                    {
+                        Item = invokeResult
+                    };
+                }
+
                 return Result<VisionInvokeResult>.OkItem(
-                    BuildRuntimeResult(runtimeName, result, requestTime, stopwatch.ElapsedMilliseconds),
+                    invokeResult,
                     "HTTP Runtime AppResult 视觉调用完成",
                     ResultSource.Unknown);
             }
@@ -112,7 +148,7 @@ namespace AM.VisionService.Runtime
                 IsSuccess = result != null && string.IsNullOrWhiteSpace(result.ErrorMessage),
                 State = result == null ? null : result.State,
                 WorkflowRunId = result == null ? null : result.WorkflowRunId,
-                ResponseJson = result == null ? null : JsonSerializer.Serialize(result),
+                ResponseJson = result == null ? null : JsonConvert.SerializeObject(result),
                 ErrorMessage = result == null ? "TriggerResult 为空" : result.ErrorMessage
             };
         }
@@ -129,9 +165,10 @@ namespace AM.VisionService.Runtime
                 RuntimeName = runtimeName,
                 RequestTime = requestTime,
                 ElapsedMs = ToIntElapsed(elapsedMs),
-                IsSuccess = true,
-                State = "Completed",
-                ResponseJson = result == null ? null : result.BodyJson.GetRawText()
+                IsSuccess = result != null,
+                State = result == null ? null : "Completed",
+                ResponseJson = result == null ? null : result.BodyJson.ToString(Formatting.None),
+                ErrorMessage = result == null ? "WorkflowAppResultResponse 为空" : null
             };
         }
 

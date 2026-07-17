@@ -33,9 +33,9 @@ namespace AMControlWinF.Views.Vision
             this.panelPreviewArea = new AntdUI.Panel();
             this.gridPreview = new AntdUI.GridPanel();
             this.panelInputPreviewCard = new AntdUI.Panel();
-            this.inputImagePreview = new AMControlWinF.Views.Common.CameraImagePreviewControl();
+            this.panelInputPreviewHost = new System.Windows.Forms.Panel();
             this.panelLivePreviewCard = new AntdUI.Panel();
-            this.cameraLivePreview = new AMControlWinF.Views.Common.CameraImagePreviewControl();
+            this.panelLivePreviewHost = new System.Windows.Forms.Panel();
             this.panelLivePreviewFooter = new AntdUI.Panel();
             this.flowCameraButtons = new AntdUI.FlowPanel();
             this.buttonCameraSettings = new AntdUI.Button();
@@ -46,7 +46,6 @@ namespace AMControlWinF.Views.Vision
             this.panelOperationScroll = new System.Windows.Forms.Panel();
             this.flowOperations = new System.Windows.Forms.FlowLayoutPanel();
             this.panelOperationsHeader = new AntdUI.Panel();
-            this.buttonStopContinuous = new AntdUI.Button();
             this.labelOperationsTitle = new AntdUI.Label();
             this.flowStats = new AntdUI.FlowPanel();
             this.panelLastElapsedCard = new AntdUI.Panel();
@@ -69,7 +68,6 @@ namespace AMControlWinF.Views.Vision
             this.buttonRefreshConfig = new AntdUI.Button();
             this.flowToolbarLeft = new AntdUI.FlowPanel();
             this.labelStatus = new AntdUI.Label();
-            this.selectExecutionMode = new AntdUI.Select();
             this.selectTrigger = new AntdUI.Select();
             this.selectRuntime = new AntdUI.Select();
             this.selectModelDeployment = new AntdUI.Select();
@@ -252,7 +250,7 @@ namespace AMControlWinF.Views.Vision
             // panelInputPreviewCard
             //
             this.panelInputPreviewCard.BackColor = System.Drawing.Color.Transparent;
-            this.panelInputPreviewCard.Controls.Add(this.inputImagePreview);
+            this.panelInputPreviewCard.Controls.Add(this.panelInputPreviewHost);
             this.panelInputPreviewCard.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelInputPreviewCard.Location = new System.Drawing.Point(272, 0);
             this.panelInputPreviewCard.Margin = new System.Windows.Forms.Padding(0);
@@ -264,19 +262,19 @@ namespace AMControlWinF.Views.Vision
             this.panelInputPreviewCard.Size = new System.Drawing.Size(272, 292);
             this.panelInputPreviewCard.TabIndex = 1;
             //
-            // inputImagePreview
+            // panelInputPreviewHost
             //
-            this.inputImagePreview.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.inputImagePreview.Location = new System.Drawing.Point(12, 12);
-            this.inputImagePreview.Margin = new System.Windows.Forms.Padding(0);
-            this.inputImagePreview.Name = "inputImagePreview";
-            this.inputImagePreview.Size = new System.Drawing.Size(248, 268);
-            this.inputImagePreview.TabIndex = 0;
+            this.panelInputPreviewHost.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelInputPreviewHost.Location = new System.Drawing.Point(12, 12);
+            this.panelInputPreviewHost.Margin = new System.Windows.Forms.Padding(0);
+            this.panelInputPreviewHost.Name = "panelInputPreviewHost";
+            this.panelInputPreviewHost.Size = new System.Drawing.Size(248, 268);
+            this.panelInputPreviewHost.TabIndex = 0;
             //
             // panelLivePreviewCard
             //
             this.panelLivePreviewCard.BackColor = System.Drawing.Color.Transparent;
-            this.panelLivePreviewCard.Controls.Add(this.cameraLivePreview);
+            this.panelLivePreviewCard.Controls.Add(this.panelLivePreviewHost);
             this.panelLivePreviewCard.Controls.Add(this.panelLivePreviewFooter);
             this.panelLivePreviewCard.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelLivePreviewCard.Location = new System.Drawing.Point(0, 0);
@@ -289,14 +287,14 @@ namespace AMControlWinF.Views.Vision
             this.panelLivePreviewCard.Size = new System.Drawing.Size(272, 292);
             this.panelLivePreviewCard.TabIndex = 0;
             //
-            // cameraLivePreview
+            // panelLivePreviewHost
             //
-            this.cameraLivePreview.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.cameraLivePreview.Location = new System.Drawing.Point(12, 12);
-            this.cameraLivePreview.Margin = new System.Windows.Forms.Padding(0);
-            this.cameraLivePreview.Name = "cameraLivePreview";
-            this.cameraLivePreview.Size = new System.Drawing.Size(248, 216);
-            this.cameraLivePreview.TabIndex = 0;
+            this.panelLivePreviewHost.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelLivePreviewHost.Location = new System.Drawing.Point(12, 12);
+            this.panelLivePreviewHost.Margin = new System.Windows.Forms.Padding(0);
+            this.panelLivePreviewHost.Name = "panelLivePreviewHost";
+            this.panelLivePreviewHost.Size = new System.Drawing.Size(248, 216);
+            this.panelLivePreviewHost.TabIndex = 0;
             //
             // panelLivePreviewFooter
             //
@@ -416,7 +414,6 @@ namespace AMControlWinF.Views.Vision
             //
             // panelOperationsHeader
             //
-            this.panelOperationsHeader.Controls.Add(this.buttonStopContinuous);
             this.panelOperationsHeader.Controls.Add(this.labelOperationsTitle);
             this.panelOperationsHeader.Dock = System.Windows.Forms.DockStyle.Top;
             this.panelOperationsHeader.Location = new System.Drawing.Point(12, 12);
@@ -426,19 +423,6 @@ namespace AMControlWinF.Views.Vision
             this.panelOperationsHeader.Radius = 0;
             this.panelOperationsHeader.Size = new System.Drawing.Size(316, 44);
             this.panelOperationsHeader.TabIndex = 0;
-            //
-            // buttonStopContinuous
-            //
-            this.buttonStopContinuous.Dock = System.Windows.Forms.DockStyle.Right;
-            this.buttonStopContinuous.IconSvg = "PauseCircleOutlined";
-            this.buttonStopContinuous.Location = new System.Drawing.Point(214, 0);
-            this.buttonStopContinuous.Margin = new System.Windows.Forms.Padding(0);
-            this.buttonStopContinuous.Name = "buttonStopContinuous";
-            this.buttonStopContinuous.Radius = 8;
-            this.buttonStopContinuous.Size = new System.Drawing.Size(102, 36);
-            this.buttonStopContinuous.TabIndex = 1;
-            this.buttonStopContinuous.Text = "停止连续";
-            this.buttonStopContinuous.WaveSize = 0;
             //
             // labelOperationsTitle
             //
@@ -712,7 +696,6 @@ namespace AMControlWinF.Views.Vision
             // flowToolbarLeft
             //
             this.flowToolbarLeft.Controls.Add(this.labelStatus);
-            this.flowToolbarLeft.Controls.Add(this.selectExecutionMode);
             this.flowToolbarLeft.Controls.Add(this.selectTrigger);
             this.flowToolbarLeft.Controls.Add(this.selectRuntime);
             this.flowToolbarLeft.Controls.Add(this.selectModelDeployment);
@@ -735,16 +718,6 @@ namespace AMControlWinF.Views.Vision
             this.labelStatus.TabIndex = 5;
             this.labelStatus.Text = "等待加载";
             this.labelStatus.Visible = false;
-            //
-            // selectExecutionMode
-            //
-            this.selectExecutionMode.Location = new System.Drawing.Point(632, 0);
-            this.selectExecutionMode.Margin = new System.Windows.Forms.Padding(0);
-            this.selectExecutionMode.Name = "selectExecutionMode";
-            this.selectExecutionMode.PlaceholderText = "调用方式";
-            this.selectExecutionMode.Size = new System.Drawing.Size(90, 36);
-            this.selectExecutionMode.TabIndex = 5;
-            this.selectExecutionMode.WaveSize = 0;
             //
             // selectTrigger
             //
@@ -841,14 +814,13 @@ namespace AMControlWinF.Views.Vision
         private System.Windows.Forms.Panel panelOperationScroll;
         private System.Windows.Forms.FlowLayoutPanel flowOperations;
         private AntdUI.Panel panelOperationsHeader;
-        private AntdUI.Button buttonStopContinuous;
         private AntdUI.Label labelOperationsTitle;
         private AntdUI.Panel panelPreviewArea;
         private AntdUI.GridPanel gridPreview;
         private AntdUI.Panel panelInputPreviewCard;
-        private Common.CameraImagePreviewControl inputImagePreview;
+        private System.Windows.Forms.Panel panelInputPreviewHost;
         private AntdUI.Panel panelLivePreviewCard;
-        private Common.CameraImagePreviewControl cameraLivePreview;
+        private System.Windows.Forms.Panel panelLivePreviewHost;
         private AntdUI.Panel panelLivePreviewFooter;
         private AntdUI.FlowPanel flowCameraButtons;
         private AntdUI.Button buttonCameraSettings;
@@ -881,7 +853,6 @@ namespace AMControlWinF.Views.Vision
         private AntdUI.Button buttonRefreshConfig;
         private AntdUI.FlowPanel flowToolbarLeft;
         private AntdUI.Label labelStatus;
-        private AntdUI.Select selectExecutionMode;
         private AntdUI.Select selectModelDeployment;
         private AntdUI.Select selectTrigger;
         private AntdUI.Select selectRuntime;

@@ -4,9 +4,11 @@ using AM.Model.Entity.Device;
 using AM.Model.Vision;
 using AM.PageModel.Vision;
 using AMControlWinF.Tools;
+using AMControlWinF.Views.Common;
 using AntdUI;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -30,7 +32,8 @@ namespace AMControlWinF.Views.Vision
         private readonly Dictionary<Button, VisionSdkDebugOperationKey> _operationMap =
             new Dictionary<Button, VisionSdkDebugOperationKey>();
 
-        private CancellationTokenSource _continuousTokenSource;
+        private CameraImagePreviewControl _cameraLivePreview;
+        private CameraImagePreviewControl _inputImagePreview;
         private bool _isLoaded;
         private bool _isBinding;
         private bool _isBusy;
@@ -41,6 +44,12 @@ namespace AMControlWinF.Views.Vision
         {
             InitializeComponent();
 
+            if (LicenseManager.UsageMode == LicenseUsageMode.Designtime)
+            {
+                return;
+            }
+
+            InitializePreviewControls();
             _model = new VisionDebugPageModel();
             _previewTimer = new System.Windows.Forms.Timer();
 
@@ -50,19 +59,19 @@ namespace AMControlWinF.Views.Vision
             RefreshActionState();
         }
 
+        private void InitializePreviewControls()
+        {
+            _cameraLivePreview = new CameraImagePreviewControl { Dock = DockStyle.Fill };
+            _inputImagePreview = new CameraImagePreviewControl { Dock = DockStyle.Fill };
+            panelLivePreviewHost.Controls.Add(_cameraLivePreview);
+            panelInputPreviewHost.Controls.Add(_inputImagePreview);
+        }
+
         private void DisposeRuntimeResources()
         {
-            StopPreview();
-
-            if (_continuousTokenSource != null)
-            {
-                _continuousTokenSource.Cancel();
-                _continuousTokenSource.Dispose();
-                _continuousTokenSource = null;
-            }
-
             if (_previewTimer != null)
             {
+                StopPreview();
                 _previewTimer.Dispose();
             }
 
@@ -74,16 +83,12 @@ namespace AMControlWinF.Views.Vision
 
         private void InitializeStaticUi()
         {
-            cameraLivePreview.SetTitle("实时预览");
-            cameraLivePreview.ClearImage("未打开相机");
+            _cameraLivePreview.SetTitle("实时预览");
+            _cameraLivePreview.ClearImage("未打开相机");
 
-            inputImagePreview.SetTitle("调用输入图");
-            inputImagePreview.ClearImage("等待取图");
+            _inputImagePreview.SetTitle("调用输入图");
+            _inputImagePreview.ClearImage("等待取图");
 
-            selectExecutionMode.Items.Clear();
-            selectExecutionMode.Items.Add("单次");
-            selectExecutionMode.Items.Add("连续");
-            selectExecutionMode.SelectedValue = "单次";
         }
 
         private void InitializeOperationButtons()
@@ -163,14 +168,12 @@ namespace AMControlWinF.Views.Vision
             selectRuntime.SelectedValueChanged += (s, e) => SelectRuntimeChanged();
             selectTrigger.SelectedValueChanged += (s, e) => SelectTriggerChanged();
             selectModelDeployment.SelectedValueChanged += (s, e) => SelectModelDeploymentChanged();
-            selectExecutionMode.SelectedValueChanged += (s, e) => SelectExecutionModeChanged();
 
             buttonRefreshConfig.Click += async (s, e) => await ReloadAsync();
             buttonOpenCamera.Click += async (s, e) => await ToggleOpenCameraAsync();
             buttonTogglePreview.Click += async (s, e) => await TogglePreviewAsync();
             buttonGrabInput.Click += async (s, e) => await GrabInputImageAsync();
             buttonCameraSettings.Click += async (s, e) => await ShowCameraSettingsAsync();
-            buttonStopContinuous.Click += (s, e) => StopContinuous();
             _previewTimer.Tick += async (s, e) => await PreviewTimerTickAsync();
         }
 
@@ -192,7 +195,6 @@ namespace AMControlWinF.Views.Vision
                 return;
             }
 
-            StopContinuous();
             StopPreview();
             SetBusyState(true);
             try
@@ -223,7 +225,7 @@ namespace AMControlWinF.Views.Vision
             }
 
             await _model.CloseSelectedCameraAsync();
-            cameraLivePreview.ClearImage("未打开相机");
+            _cameraLivePreview.ClearImage("未打开相机");
         }
 
         private void BindSelections()
@@ -235,7 +237,6 @@ namespace AMControlWinF.Views.Vision
                 BindTextSelect(selectRuntime, _model.RuntimeNames, _model.SelectedRuntimeName);
                 BindTextSelect(selectTrigger, _model.TriggerSourceNames, _model.SelectedTriggerSourceName);
                 BindTextSelect(selectModelDeployment, _model.ModelDeploymentNames, _model.SelectedModelDeploymentName);
-                SetSelectValue(selectExecutionMode, _model.ExecutionMode == VisionSdkDebugExecutionMode.Continuous ? "连续" : "单次");
             }
             finally
             {
@@ -292,8 +293,8 @@ namespace AMControlWinF.Views.Vision
             var text = GetSelectedText(selectCamera);
             string cameraCode;
             _model.SelectCamera(_cameraDisplayMap.TryGetValue(text, out cameraCode) ? cameraCode : null);
-            cameraLivePreview.ClearImage(_model.SelectedCamera == null ? "未选择相机" : "未打开相机");
-            inputImagePreview.ClearImage("等待取图");
+            _cameraLivePreview.ClearImage(_model.SelectedCamera == null ? "未选择相机" : "未打开相机");
+            _inputImagePreview.ClearImage("等待取图");
             RefreshStats();
             RefreshActionState();
         }
@@ -328,19 +329,6 @@ namespace AMControlWinF.Views.Vision
             _model.SelectModelDeployment(GetSelectedText(selectModelDeployment));
         }
 
-        private void SelectExecutionModeChanged()
-        {
-            if (_isBinding)
-            {
-                return;
-            }
-
-            _model.ExecutionMode = string.Equals(GetSelectedText(selectExecutionMode), "连续", StringComparison.OrdinalIgnoreCase)
-                ? VisionSdkDebugExecutionMode.Continuous
-                : VisionSdkDebugExecutionMode.Single;
-            RefreshActionState();
-        }
-
         private async Task ToggleOpenCameraAsync()
         {
             if (_isBusy || _model.SelectedCamera == null)
@@ -356,7 +344,7 @@ namespace AMControlWinF.Views.Vision
                 {
                     StopPreview();
                     result = await _model.CloseSelectedCameraAsync();
-                    cameraLivePreview.ClearImage("未打开相机");
+                    _cameraLivePreview.ClearImage("未打开相机");
                 }
                 else
                 {
@@ -428,7 +416,7 @@ namespace AMControlWinF.Views.Vision
                 var result = await _model.GrabPreviewFrameAsync();
                 if (result.Success && result.Item != null)
                 {
-                    cameraLivePreview.ShowPreviewFrame(result.Item);
+                    _cameraLivePreview.ShowPreviewFrame(result.Item);
                 }
                 else
                 {
@@ -454,7 +442,7 @@ namespace AMControlWinF.Views.Vision
                 var result = await _model.GrabInputFrameAsync();
                 if (result.Success && result.Item != null)
                 {
-                    inputImagePreview.ShowFrame(result.Item);
+                    _inputImagePreview.ShowFrame(result.Item);
                     labelStatus.Text = "调用输入图已取图";
                 }
                 else
@@ -523,59 +511,7 @@ namespace AMControlWinF.Views.Vision
                 }
             }
 
-            if (_model.ExecutionMode == VisionSdkDebugExecutionMode.Continuous)
-            {
-                await StartContinuousAsync(operationKey);
-            }
-            else
-            {
-                await ExecuteOnceAsync(operationKey, CancellationToken.None);
-            }
-        }
-
-        private async Task StartContinuousAsync(VisionSdkDebugOperationKey operationKey)
-        {
-            if (_continuousTokenSource != null)
-            {
-                return;
-            }
-
-            _continuousTokenSource = new CancellationTokenSource();
-            labelStatus.Text = "连续调用已开始：" + VisionSdkDebugOperationCatalog.Get(operationKey).DisplayName;
-            RefreshActionState();
-
-            try
-            {
-                while (!_continuousTokenSource.IsCancellationRequested)
-                {
-                    await ExecuteOnceAsync(operationKey, _continuousTokenSource.Token);
-                    await Task.Delay(1, _continuousTokenSource.Token);
-                }
-            }
-            catch (OperationCanceledException)
-            {
-            }
-            finally
-            {
-                if (_continuousTokenSource != null)
-                {
-                    _continuousTokenSource.Dispose();
-                    _continuousTokenSource = null;
-                }
-
-                labelStatus.Text = "连续调用已停止";
-                RefreshActionState();
-            }
-        }
-
-        private void StopContinuous()
-        {
-            if (_continuousTokenSource == null)
-            {
-                return;
-            }
-
-            _continuousTokenSource.Cancel();
+            await ExecuteOnceAsync(operationKey, CancellationToken.None);
         }
 
         private async Task ExecuteOnceAsync(
@@ -588,7 +524,7 @@ namespace AMControlWinF.Views.Vision
             }
 
             var info = VisionSdkDebugOperationCatalog.Get(operationKey);
-            _isBusy = true;
+            SetBusyState(true);
             try
             {
                 labelStatus.Text = "正在调用：" + info.DisplayName;
@@ -596,11 +532,11 @@ namespace AMControlWinF.Views.Vision
 
                 if (_model.LastInputFrame != null)
                 {
-                    inputImagePreview.ShowFrame(_model.LastInputFrame);
+                    _inputImagePreview.ShowFrame(_model.LastInputFrame);
                 }
                 else if (info.UsesCameraImage)
                 {
-                    inputImagePreview.ClearImage("取图失败");
+                    _inputImagePreview.ClearImage("取图失败");
                 }
 
                 ShowOperationResult(result);
@@ -608,7 +544,7 @@ namespace AMControlWinF.Views.Vision
             }
             finally
             {
-                _isBusy = false;
+                SetBusyState(false);
             }
         }
 
@@ -668,29 +604,25 @@ namespace AMControlWinF.Views.Vision
         private void RefreshActionState()
         {
             var hasCamera = _model.SelectedCamera != null;
-            var inContinuous = _continuousTokenSource != null;
+            selectCamera.Enabled = !_isBusy;
+            selectRuntime.Enabled = !_isBusy;
+            selectTrigger.Enabled = !_isBusy;
+            selectModelDeployment.Enabled = !_isBusy;
+            buttonRefreshConfig.Enabled = !_isBusy;
 
-            selectCamera.Enabled = !_isBusy && !inContinuous;
-            selectRuntime.Enabled = !_isBusy && !inContinuous;
-            selectTrigger.Enabled = !_isBusy && !inContinuous;
-            selectModelDeployment.Enabled = !_isBusy && !inContinuous;
-            selectExecutionMode.Enabled = !_isBusy && !inContinuous;
-            buttonRefreshConfig.Enabled = !_isBusy && !inContinuous;
-
-            buttonOpenCamera.Enabled = !_isBusy && !inContinuous && hasCamera;
+            buttonOpenCamera.Enabled = !_isBusy && hasCamera;
             buttonOpenCamera.Text = _model.IsSelectedCameraKnownOpen ? "关闭" : "打开";
             buttonOpenCamera.IconSvg = _model.IsSelectedCameraKnownOpen ? "CloseCircleOutlined" : "PlayCircleOutlined";
 
-            buttonTogglePreview.Enabled = !_isBusy && !inContinuous && hasCamera;
+            buttonTogglePreview.Enabled = !_isBusy && hasCamera;
             buttonTogglePreview.Text = _isPreviewRunning ? "暂停" : "开始";
             buttonTogglePreview.IconSvg = _isPreviewRunning ? "PauseCircleOutlined" : "VideoCameraOutlined";
-            buttonGrabInput.Enabled = !_isBusy && !inContinuous && hasCamera;
-            buttonCameraSettings.Enabled = !_isBusy && !inContinuous && hasCamera;
+            buttonGrabInput.Enabled = !_isBusy && hasCamera;
+            buttonCameraSettings.Enabled = !_isBusy && hasCamera;
 
-            buttonStopContinuous.Enabled = inContinuous;
             foreach (var button in _operationMap.Keys)
             {
-                button.Enabled = !_isBusy && !inContinuous;
+                button.Enabled = !_isBusy;
             }
         }
 
